@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+    <ToolCommandName>dotnet-aws</ToolCommandName>
+    <IsPackable>true</IsPackable>
+    <PackAsTool>true</PackAsTool>
+    <Description>A tool to help deploy a .NET application to AWS.</Description>
+    <VersionPrefix>0.1.1-beta</VersionPrefix>
+    <Product>AWS Deployment Tooling for .NET</Product>
+    <PackageId>AWS.Deploy.CLI</PackageId>
+    <PackageTags>AWS;Amazon;ElasticBeanstalk;ECS;Deploy</PackageTags>
+    <AssemblyName>AWS.Deploy.CLI</AssemblyName>
+    <RootNamespace>AWS.Deploy.CLI</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AWSSDK.Core" Version="3.5.1.7" />
+    <PackageReference Include="AWSSDK.ECS" Version="3.5.0.9" />
+    <PackageReference Include="AWSSDK.ElasticBeanstalk" Version="3.5.0.9" />
+    <PackageReference Include="AWSSDK.IdentityManagement" Version="3.5.0.9" />
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20427.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AWS.Deploy.Orchestrator\AWS.Deploy.Orchestrator.csproj" />
+  </ItemGroup>
+
+</Project>

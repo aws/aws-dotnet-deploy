@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>AWS.Deploy.Recipes</AssemblyName>
+    <RootNamespace>AWS.Deploy.Recipes</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="RecipeDefinitions\**">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="CdkTemplates\**">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+    <ItemGroup>
+        <Compile Remove="CdkTemplates\**" />
+        <Content Remove="CdkTemplates\.idea\**" />
+        <Content Remove="CdkTemplates\.vs\**" />
+        <EmbeddedResource Remove="CdkTemplates\.idea\**" />
+        <EmbeddedResource Remove="CdkTemplates\.vs\**" />
+        <None Remove="CdkTemplates\.idea\**" />
+        <None Remove="CdkTemplates\.vs\**" />
+    </ItemGroup>
+
+</Project>

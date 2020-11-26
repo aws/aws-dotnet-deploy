@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>AWS.Deploy.DockerEngine</RootNamespace>
+    <AssemblyName>AWS.Deploy.DockerEngine</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Properties\DockerFileConfig.json" />
+    <None Remove="Templates\Dockerfile.template" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\DockerFileConfig.json" />
+    <EmbeddedResource Include="Templates\Dockerfile.template" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AWS.Deploy.Common\AWS.Deploy.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="4.7.2" />
+  </ItemGroup>
+
+</Project>

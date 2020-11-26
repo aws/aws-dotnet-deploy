@@ -1,0 +1,10 @@
+{
+  "Region": "us-west-2",
+  "Deployments": [
+    {
+      "StackName": "ConsoleAppTask",
+      "RecipeId": "ConsoleAppECSFargateTask",
+      "RecipeOverrideSettings": {}
+    }
+  ]
+}

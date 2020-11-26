@@ -1,0 +1,13 @@
+{
+  "Region": "us-west-2",
+  "Deployments": [
+    {
+      "StackName": "Clooff",
+      "RecipeId": "ASPNETCoreElasticBeanstalkLinux",
+      "RecipeOverrideSettings": {
+        "ApplicationName": "TheWebApp1",
+        "EnvironmentName": "TheWebApp1Env"
+      }
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="cdk.out\**" />
+    <EmbeddedResource Remove="cdk.out\**" />
+    <None Remove="cdk.out\**" />
+    <None Include="appsettings.json" CopyToOutputDirectory="Always" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- CDK Construct Library dependencies -->
+    <PackageReference Include="Amazon.CDK" Version="1.61.0" />
+    <PackageReference Include="Amazon.CDK.AWS.ElasticBeanstalk" Version="1.61.0" />
+    <PackageReference Include="Amazon.CDK.AWS.S3.Assets" Version="1.61.0" />
+    <PackageReference Include="AWSSDK.ElasticBeanstalk" Version="3.5.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.7" />
+
+    <!-- jsii Roslyn analyzers (un-comment to obtain compile-time checks for missing required props
+    <PackageReference Include="Amazon.Jsii.Analyzers" Version="*" PrivateAssets="all" />
+    -->
+  </ItemGroup>
+
+</Project>

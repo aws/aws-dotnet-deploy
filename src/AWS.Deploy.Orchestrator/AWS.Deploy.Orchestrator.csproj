@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>Latest</LangVersion>
+    <AssemblyName>AWS.Deploy.Orchestrator</AssemblyName>
+    <RootNamespace>AWS.Deploy.Orchestrator</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AWSSDK.Core" Version="3.5.1.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AWS.Deploy.Recipes\AWS.Deploy.Recipes.csproj" />
+    <ProjectReference Include="..\AWS.Deploy.DockerEngine\AWS.Deploy.DockerEngine.csproj" />
+    <ProjectReference Include="..\AWS.Deploy.RecommendationEngine\AWS.Deploy.RecommendationEngine.csproj" />
+  </ItemGroup>
+
+</Project>
