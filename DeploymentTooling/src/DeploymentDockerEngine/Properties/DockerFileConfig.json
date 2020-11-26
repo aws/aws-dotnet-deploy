@@ -1,0 +1,62 @@
+[
+  {
+    "SdkType": "Microsoft.NET.Sdk.Web",
+    "ImageMapping": [
+      {
+        "TargetFramework": "net5.0",
+        "BaseImage": "mcr.microsoft.com/dotnet/aspnet:5.0",
+        "BuildImage": "mcr.microsoft.com/dotnet/sdk:5.0"
+      },
+      {
+        "TargetFramework": "netcoreapp3.1",
+        "BaseImage": "mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim",
+        "BuildImage": "mcr.microsoft.com/dotnet/core/sdk:3.1-buster"
+      },
+      {
+        "TargetFramework": "netcoreapp3.0",
+        "BaseImage": "mcr.microsoft.com/dotnet/core/aspnet:3.0-buster-slim",
+        "BuildImage": "mcr.microsoft.com/dotnet/core/sdk:3.0-buster"
+      },
+      {
+        "TargetFramework": "netcoreapp2.2",
+        "BaseImage": "mcr.microsoft.com/dotnet/core/aspnet:2.2-stretch-slim",
+        "BuildImage": "mcr.microsoft.com/dotnet/core/sdk:2.2-stretch"
+      },
+      {
+        "TargetFramework": "netcoreapp2.1",
+        "BaseImage": "mcr.microsoft.com/dotnet/core/aspnet:2.1-stretch-slim",
+        "BuildImage": "mcr.microsoft.com/dotnet/core/sdk:2.1-stretch"
+      }
+    ]
+  },
+  {
+    "SdkType": "Microsoft.NET.Sdk",
+    "ImageMapping": [
+      {
+        "TargetFramework": "net5.0",
+        "BaseImage": "mcr.microsoft.com/dotnet/runtime:5.0",
+        "BuildImage": "mcr.microsoft.com/dotnet/sdk:5.0"
+      },
+      {
+        "TargetFramework": "netcoreapp3.1",
+        "BaseImage": "mcr.microsoft.com/dotnet/core/runtime:3.1-buster-slim",
+        "BuildImage": "mcr.microsoft.com/dotnet/core/sdk:3.1-buster"
+      },
+      {
+        "TargetFramework": "netcoreapp3.0",
+        "BaseImage": "mcr.microsoft.com/dotnet/core/runtime:3.0-buster-slim",
+        "BuildImage": "mcr.microsoft.com/dotnet/core/sdk:3.0-buster"
+      },
+      {
+        "TargetFramework": "netcoreapp2.2",
+        "BaseImage": "mcr.microsoft.com/dotnet/core/runtime:2.2-stretch-slim",
+        "BuildImage": "mcr.microsoft.com/dotnet/core/sdk:2.2-stretch"
+      },
+      {
+        "TargetFramework": "netcoreapp2.1",
+        "BaseImage": "mcr.microsoft.com/dotnet/core/runtime:2.1-stretch-slim",
+        "BuildImage": "mcr.microsoft.com/dotnet/core/sdk:2.1-stretch"
+      }
+    ]
+  }
+]

@@ -1,0 +1,81 @@
+{
+  "Id": "ConsoleAppECSFargateService",
+  "Name": "Console Application Deployed as ECS Fargate Service",
+  "DeploymentType": "CdkProject",
+  "CdkProjectTemplate": "../CdkTemplates/ConsoleAppECSFargateService",
+  "Description": "Console application built as a container and deployed as a service in Elastic Container Service. This is meant for console applications that run indefinitely like message processing applications.",
+  "TargetService": "AWS Elastic Container Service",
+
+  "RecommendationRules": {
+    "RequiredRules": [
+      { "SdkType": "Microsoft.NET.Sdk" },
+      {
+        "MSProperty": {
+          "Name": "OutputType",
+          "AllowedValues": [ "Exe" ]
+        }
+      },
+      {
+        "MSProperty": {
+          "Name": "TargetFramework",
+          "AllowedValues": [ "netcoreapp2.1", "netcoreapp3.1", "net5.0" ]
+        }
+      }
+    ],
+    "OptionalRules": [
+      { "HasFiles": [ "Dockerfile" ] }
+    ],
+    "NegativeRules": [
+      { "MSPropertyExists": "AWSProjectType" }
+    ],
+
+    "Priority": 110
+  },
+
+  "DeploymentBundle": "Container",
+
+  "OptionSettings": [
+    {
+      "Id": "ClusterName",
+      "Name": "Cluster Name",
+      "Description": "The name of the ECS cluster.",
+      "Type": "String",
+      "TypeHint": "ECSCluster",
+      "DefaultValue": "{ProjectName}",
+      "AdvancedSetting": false,
+      "Updatable": false
+    },
+    {
+      "Id": "ECSServiceName",
+      "ParentSettingId": "ClusterName",
+      "Name": "ECS Service Name",
+      "Description": "The name of the ECS service running in the cluster.",
+      "Type": "String",
+      "TypeHint" : "ECSService",
+      "DefaultValue": "{ProjectName}-service",
+      "AdvancedSetting": false,
+      "Updatable": false
+    },
+    {
+      "Id": "DesiredCount",
+      "Name": "Desired Task Count",
+      "Description": "The desired number of ECS tasks to run for the service.",
+      "Type": "Int",
+      "DefaultValue": "3",
+      "AdvancedSetting": false,
+      "Updatable": true
+    },
+    {
+      "Id": "ApplicationIAMRole",
+      "Name": "Application IAM Role",
+      "Description": "The Identity and Access Management Role that provides AWS credentials to the application to access AWS services",
+      "Type": "String",
+      "TypeHint": "IAMRole",
+      "DefaultValue": "aws-ecs-role",
+      "AdvancedSetting": false,
+      "Updatable": false,
+      "MinimumPermissions": "...",
+      "AssumeRolePolicy": "..."
+    }
+  ]
+}

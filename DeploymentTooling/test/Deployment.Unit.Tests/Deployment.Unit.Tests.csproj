@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+
+    <AssemblyName>AWS.Deployment.Unit.Tests</AssemblyName>
+
+    <RootNamespace>AWS.Deployment.Unit.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+    <PackageReference Include="xunit" Version="2.4.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
+    <PackageReference Include="coverlet.collector" Version="1.2.0" />
+  </ItemGroup>
+
+    <ItemGroup>
+	    <ProjectReference Include="..\..\src\DefaultDotNETRecipes\DefaultDotNETRecipes.csproj" />
+	    <ProjectReference Include="..\..\src\DeploymentDockerEngine\DeploymentDockerEngine.csproj" />
+	    <ProjectReference Include="..\..\src\DeploymentNETCoreToolApp\DeploymentNETCoreToolApp.csproj" />
+	    <ProjectReference Include="..\..\src\DeploymentRecommendationEngine\DeploymentRecommendationEngine.csproj" />
+    </ItemGroup>
+
+</Project>

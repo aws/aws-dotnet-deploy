@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>Latest</LangVersion>
+    <AssemblyName>AWS.DeploymentRecommendationEngine</AssemblyName>
+    <RootNamespace>AWS.DeploymentRecommendationEngine</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="4.7.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DeploymentCommon\DeploymentCommon.csproj" />
+  </ItemGroup>
+
+</Project>

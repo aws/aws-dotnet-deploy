@@ -1,0 +1,86 @@
+{
+  "Id": "ASPNETCoreElasticBeanstalkLinux",
+  "Name": "ASP.NET Core to Deployed to Elastic Beanstalk Linux",
+  "DeploymentType": "CdkProject",
+  "CdkProjectTemplate": "../CdkTemplates/ASPNETCoreElasticBeanstalkLinux",
+  "Description": "ASP.NET Core applications can be deployed Elastic Beanstalk and have the AWS resources automatically provisioned and managed by the service.",
+  "TargetService": "AWS Elastic Beanstalk",
+
+  "RecommendationRules": {
+    "RequiredRules": [
+      { "SdkType": "Microsoft.NET.Sdk.Web" },
+      {
+        "MSProperty": {
+          "Name": "TargetFramework",
+          "AllowedValues": [ "netcoreapp2.1", "netcoreapp3.1" ]
+        }
+      }
+    ],
+    "NegativeRules": [
+      {"MSPropertyExists": "AWSProjectType"}
+    ],
+
+    "Priority": 100
+  },
+
+  "DeploymentBundle": "DotnetPublishZipFile",
+
+  "OptionSettings": [
+    {
+      "Id": "ApplicationName",
+      "Name": "Application Name",
+      "Description": "The Elastic Beanstalk application name.",
+      "Type": "String",
+      "TypeHint": "BeanstalkApplication",
+      "DefaultValue": "{ProjectName}",
+      "AdvancedSetting": false,
+      "Updatable": false
+    },
+    {
+      "Id": "EnvironmentName",
+      "ParentSettingId": "ApplicationName",
+      "Name": "Environment Name",
+      "Description": "The Elastic Beanstalk environment name.",
+      "Type": "String",
+      "TypeHint": "BeanstalkEnvironment",
+      "DefaultValue": "{ProjectName}-dev",
+      "AdvancedSetting": false,
+      "Updatable": false
+    },
+    {
+      "Id": "InstanceType",
+      "Name": "EC2 Instance Type",
+      "Description": "The EC2 instance type used for the EC2 instances created for the environment.",
+      "Type": "String",
+      "TypeHint": "InstanceType",
+      "DefaultValue": "t2.micro",
+      "AdvancedSetting": true,
+      "Updatable": true
+    },
+    {
+      "Id": "EnvironmentType",
+      "Name": "Environment Type",
+      "Description": "The type of environment to create for example a single instance for development or load balanced for production",
+      "Type": "String",
+      "DefaultValue": "SingleInstance",
+      "AllowedValues": [
+        "SingleInstance",
+        "LoadBalanced"
+      ],
+      "AdvancedSetting": false,
+      "Updatable": true
+    },
+    {
+      "Id": "ApplicationIAMRole",
+      "Name": "Application IAM Role",
+      "Description": "The Identity and Access Management Role that provides AWS credentials to the application to access AWS services",
+      "Type": "String",
+      "TypeHint": "IAMRole",
+      "DefaultValue": "aws-elasticbeanstalk-role",
+      "AdvancedSetting": false,
+      "Updatable": false,
+      "MinimumPermissions": "...",
+      "AssumeRolePolicy": "..."
+    }
+  ]
+}
