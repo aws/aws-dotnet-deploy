@@ -59,7 +59,6 @@ namespace AWS.DeploymentNETCoreToolApp
                 optionNumber++;
             }
 
-
             if (defaultValueIndex != -1)
             {
                 _interactiveService.WriteLine($"Choose option: (default: {defaultValueIndex})");
@@ -68,7 +67,6 @@ namespace AWS.DeploymentNETCoreToolApp
             {
                 _interactiveService.WriteLine($"Choose option:");
             }
-
 
             while (true)
             {

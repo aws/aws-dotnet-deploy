@@ -57,7 +57,6 @@ namespace AWS.Deployment.Unit.Tests
             Assert.Equal(CONSOLE_APP_FARGATE_TASK_RECIPE_ID, recommendations[1].Recipe.Id);
         }
 
-
         private string ResolvePath(string projectName)
         {
             var testsPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);

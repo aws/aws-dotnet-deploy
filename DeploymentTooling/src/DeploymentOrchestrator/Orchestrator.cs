@@ -108,7 +108,6 @@ namespace AWS.DeploymentOrchestrator
             return true;
         }
 
-
         private void PersistDeploymentSettings(string cloudApplicationName, Recommendation recommendation)
         {
             var settings = GetPreviousDeploymentSettings();

@@ -62,12 +62,10 @@ namespace AWS.DeploymentCommon
         /// </summary>
         public RecommendationRulesItem RecommendationRules { get; set; }
 
-
         /// <summary>
         /// The settings that can be configured by the user before deploying.
         /// </summary>
         public IList<OptionSettingItem> OptionSettings { get; set; }
-
 
         public override string ToString()
         {

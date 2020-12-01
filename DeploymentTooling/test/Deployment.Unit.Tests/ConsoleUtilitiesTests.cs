@@ -42,7 +42,6 @@ namespace AWS.Deployment.Unit.Tests
             Assert.Equal("Option1", selectedValue);
         }
 
-
         [Fact]
         public void AskUserToChooseStringsNoTitle()
         {

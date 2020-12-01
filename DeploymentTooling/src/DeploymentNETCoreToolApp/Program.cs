@@ -57,7 +57,6 @@ namespace AWS.DeploymentNETCoreToolApp
             });
             rootCommand.Add(deployCommand);
 
-
             var setupCICDCommand = new Command("setup-cicd", "Configure the project to be deployed to AWS using the AWS Code services")
             {
                 OPTION_PROFILE,
@@ -66,7 +65,6 @@ namespace AWS.DeploymentNETCoreToolApp
             };
             setupCICDCommand.Handler = CommandHandler.Create<string>(SetupCICD);
             rootCommand.Add(setupCICDCommand);
-
 
             var inspectIAMPermissionsCommand = new Command("inspect-permissions", "Inspect the project to see what AWS permissions the application needs to access AWS services the application is using.")
             {

@@ -25,14 +25,12 @@ namespace AWS.DeploymentOrchestrator
             return names.ToArray();
         }
 
-
         public class DeploymentSettings
         {
             public string StackName { get; set; }
             public string RecipeId { get; set; }
             public IDictionary<string, object> RecipeOverrideSettings { get; set; } = new Dictionary<string, object>();
         }
-
 
         public static PreviousDeploymentSettings ReadSettings(string projectPath, string configFile)
         {

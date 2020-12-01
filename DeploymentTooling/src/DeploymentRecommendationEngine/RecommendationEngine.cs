@@ -63,7 +63,6 @@ namespace AWS.DeploymentRecommendationEngine
             return projectDefinition;
         }
 
-
         private void LoadRecipeDefinition(IList<string> recommendationPaths)
         {
             var options = new JsonSerializerOptions();

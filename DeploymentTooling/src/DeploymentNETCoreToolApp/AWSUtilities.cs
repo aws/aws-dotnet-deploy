@@ -66,7 +66,6 @@ namespace AWS.DeploymentNETCoreToolApp
             return credentials;
         }
 
-
         public string ResolveAWSRegion(string region, string lastRegionUsed)
         {
             if(!string.IsNullOrEmpty(region))

@@ -33,7 +33,6 @@ namespace AWS.DeploymentNETCoreToolApp.Commands
             var previousSettings = orchestrator.GetPreviousDeploymentSettings();
             var previousDeploymentNames = previousSettings.GetDeploymentNames();
 
-
             _interactiveService.WriteLine(string.Empty);
 
             string cloudApplicationName;
@@ -151,7 +150,6 @@ namespace AWS.DeploymentNETCoreToolApp.Commands
                 _interactiveService.WriteLine($"{option.Name}: {recommendation.GetOptionSettingValue(option.Id)}");
             }
         }
-
 
         public static string GetDefaultApplicationName(string projectPath)
         {

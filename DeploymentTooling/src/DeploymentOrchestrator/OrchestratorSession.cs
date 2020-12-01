@@ -11,10 +11,8 @@ namespace AWS.DeploymentOrchestrator
             ConfigFile = configFile ?? PreviousDeploymentSettings.DEFAULT_FILE_NAME;
         }
 
-
         public string ProjectPath { get; }
         public string ConfigFile { get; }
-
 
         public string AWSProfileName { get; set; }
         public AWSCredentials AWSCredentials { get; set; }

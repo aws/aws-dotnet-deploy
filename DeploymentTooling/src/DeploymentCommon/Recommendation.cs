@@ -64,7 +64,6 @@ namespace AWS.DeploymentCommon
             return defaultValue;
         }
 
-
         public void SetOverrideOptionSettingValue(string settingId, object value)
         {
             _overrideOptionSettingValues[settingId] = value;
