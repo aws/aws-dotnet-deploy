@@ -11,8 +11,7 @@ namespace AWS.DeploymentCommon
     public class Recommendation : IUserInputOption
     {
         private const string REPLACE_TOKEN_PROJECTNAME = "{ProjectName}";
-
-
+        
         public string ProjectPath { get; }
 
         public ProjectDefinition ProjectDefinition { get; }

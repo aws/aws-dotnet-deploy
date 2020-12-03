@@ -39,6 +39,9 @@ namespace AWS.Deploy.CLI
             };
             deployCommand.Handler = CommandHandler.Create<string, string, string, bool>(async (profile, region, projectPath, saveCdkProject) =>
             {
+                var systemCapabilityEvaluator = new SystemCapabilityEvaluator();
+                var systemCapabilities = await systemCapabilityEvaluator.Evaluate();
+
                 var awsUtilities = new AWSUtilities(_toolInteractiveService);
 
                 var previousSettings = PreviousDeploymentSettings.ReadSettings(projectPath, null);
@@ -52,7 +55,8 @@ namespace AWS.Deploy.CLI
                     AWSCredentials = awsCredentials,
                     AWSRegion = awsRegion,
                     ProjectPath = projectPath,
-                    ProjectDirectory = projectPath
+                    ProjectDirectory = projectPath,
+                    SystemCapabilities = systemCapabilities
                 };
 
                 var deploy = new DeployCommand(new DefaultAWSClientFactory(), _toolInteractiveService, session);

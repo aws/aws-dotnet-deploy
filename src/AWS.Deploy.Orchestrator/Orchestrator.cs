@@ -62,7 +62,7 @@ namespace AWS.Deploy.Orchestrator
             switch (recommendation.Recipe.DeploymentType)
             {
                 case RecipeDefinition.DeploymentTypes.CdkProject:
-                    await _cdkProjectHandler.CreateCdkDeployment(cloudApplicationName, recommendation);
+                    await _cdkProjectHandler.CreateCdkDeployment(_session, cloudApplicationName, recommendation);
                     PersistDeploymentSettings(cloudApplicationName, recommendation);
                     break;
                 default:
