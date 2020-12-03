@@ -14,7 +14,6 @@ namespace AWS.Deploy.Common
         public RecommendationEngine(string recipeDefinitionPath)
             : this(new List<string> { recipeDefinitionPath })
         {
-
         }
 
         public RecommendationEngine(IList<string> recipeDefinitionPaths)
@@ -45,15 +44,15 @@ namespace AWS.Deploy.Common
 
                 // If it doesn't match on the optional rules it means we can most likely get it to work but it is not 
                 // the preferred approach so divide the priority in half.
-                if(!projectDefinition.EvaluateRules(potentialRecipe.RecommendationRules.OptionalRules))
+                if (!projectDefinition.EvaluateRules(potentialRecipe.RecommendationRules.OptionalRules))
                 {
                     priority /= 2;
                 }
 
                 recommendations.Add(new Recommendation(potentialRecipe, projectDefinition.ProjectPath, priority));
             }
-            
-            recommendations = recommendations.OrderByDescending(recommendation => recommendation.ComputedPriority).ToList();         
+
+            recommendations = recommendations.OrderByDescending(recommendation => recommendation.ComputedPriority).ToList();
             return recommendations;
         }
 
@@ -70,7 +69,7 @@ namespace AWS.Deploy.Common
 
             foreach (var recommendationPath in recommendationPaths)
             {
-                foreach(var recipeFile in Directory.GetFiles(recommendationPath, "*.recipe", SearchOption.TopDirectoryOnly))
+                foreach (var recipeFile in Directory.GetFiles(recommendationPath, "*.recipe", SearchOption.TopDirectoryOnly))
                 {
                     var content = File.ReadAllText(recipeFile);
                     var definition = JsonSerializer.Deserialize<RecipeDefinition>(content, options);

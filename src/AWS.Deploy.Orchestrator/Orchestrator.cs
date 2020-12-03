@@ -22,7 +22,6 @@ namespace AWS.Deploy.Orchestrator
         public Orchestrator(OrchestratorSession session, IOrchestratorInteractiveService interactiveService, string recipeDefinitionPath)
             : this(session, interactiveService, new List<string> { recipeDefinitionPath })
         {
-
         }
 
         public Orchestrator(OrchestratorSession session, IOrchestratorInteractiveService interactiveService, IList<string> recipeDefinitionPaths)
@@ -40,11 +39,11 @@ namespace AWS.Deploy.Orchestrator
             {
                 return PreviousDeploymentSettings.ReadSettings(_session.ProjectPath, _session.ConfigFile);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 _interactiveService.LogErrorMessageLine($"Warning: unable to parse config file {_session.ConfigFile ?? PreviousDeploymentSettings.DEFAULT_FILE_NAME}: {e.Message}");
                 return new PreviousDeploymentSettings();
-            }            
+            }
         }
 
         public IList<Recommendation> GenerateDeploymentRecommendations()
@@ -57,7 +56,7 @@ namespace AWS.Deploy.Orchestrator
         {
             _interactiveService.LogMessageLine($"Initiating deployment: {recommendation.Name}");
 
-            if(recommendation.Recipe.DeploymentBundle == RecipeDefinition.DeploymentBundleTypes.Container && 
+            if (recommendation.Recipe.DeploymentBundle == RecipeDefinition.DeploymentBundleTypes.Container &&
                 !recommendation.ProjectDefinition.HasDockerFile)
             {
                 _interactiveService.LogErrorMessageLine($"Generating Dockerfile");
@@ -66,7 +65,7 @@ namespace AWS.Deploy.Orchestrator
             }
 
             bool success;
-            switch(recommendation.Recipe.DeploymentType)
+            switch (recommendation.Recipe.DeploymentType)
             {
                 case RecipeDefinition.DeploymentTypes.CdkProject:
                     success = CdkDeployment(cloudApplicationName, recommendation);
@@ -77,7 +76,7 @@ namespace AWS.Deploy.Orchestrator
                     break;
             }
 
-            if(success)
+            if (success)
             {
                 PersistDeploymentSettings(cloudApplicationName, recommendation);
             }
@@ -88,7 +87,7 @@ namespace AWS.Deploy.Orchestrator
         private bool CdkDeployment(string cloudApplicationName, Recommendation recommendation)
         {
             JsonSerializer.Serialize(recommendation);
-            
+
             var cdkProjectDirectory = Path.Combine(Path.GetDirectoryName(recommendation.Recipe.RecipePath), recommendation.Recipe.CdkProjectTemplate);
 
             // Write required configuration in appsettings.json
@@ -97,10 +96,7 @@ namespace AWS.Deploy.Orchestrator
             recommendationSerializer.Write(appSettingsFilePath);
 
             // Handover to CDK command line tool
-            var commands = new List<string>
-            {
-                "cdk deploy --require-approval never"
-            };
+            var commands = new List<string> { "cdk deploy --require-approval never" };
             _commandLineWrapper.Run(commands, cdkProjectDirectory);
 
             // fake
@@ -114,7 +110,7 @@ namespace AWS.Deploy.Orchestrator
             settings.Region = _session.AWSRegion;
 
             var deployment = settings.Deployments.FirstOrDefault(x => string.Equals(cloudApplicationName, x.StackName));
-            if(deployment == null)
+            if (deployment == null)
             {
                 deployment = new PreviousDeploymentSettings.DeploymentSettings();
                 settings.Deployments.Add(deployment);
@@ -124,24 +120,24 @@ namespace AWS.Deploy.Orchestrator
             deployment.RecipeId = recommendation.Recipe.Id;
 
             deployment.RecipeOverrideSettings.Clear();
-            foreach(var option in recommendation.Recipe.OptionSettings)
+            foreach (var option in recommendation.Recipe.OptionSettings)
             {
                 var value = recommendation.GetOptionSettingValue(option.Id, true);
-                if(value != null)
+                if (value != null)
                 {
                     deployment.RecipeOverrideSettings[option.Id] = value;
                 }
             }
 
-            
+
             try
             {
                 settings.SaveSettings(_session.ProjectPath, _session.ConfigFile);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 _interactiveService.LogErrorMessageLine($"Warning: unable to save deployment settings to config file {_session.ConfigFile ?? PreviousDeploymentSettings.DEFAULT_FILE_NAME}: {e.Message}");
-            }            
+            }
         }
     }
 }

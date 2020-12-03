@@ -13,12 +13,16 @@ namespace AWS.Deploy.CLI
             _interactiveService = interactiveService;
         }
 
-        public enum YesNo { Yes, No };
+        public enum YesNo
+        {
+            Yes,
+            No
+        };
 
         public string AskUserToChoose(IList<string> values, string title, string defaultValue)
         {
             var options = new List<UserInputOption>();
-            foreach(var value in values)
+            foreach (var value in values)
             {
                 options.Add(new UserInputOption(value));
             }
@@ -50,7 +54,7 @@ namespace AWS.Deploy.CLI
             foreach (var option in options)
             {
                 _interactiveService.WriteLine($"{optionNumber.ToString().PadRight(padLength)}: {option.Name}");
-                if(!string.IsNullOrEmpty(option.Description))
+                if (!string.IsNullOrEmpty(option.Description))
                 {
                     _interactiveService.WriteLine($"{option.Description}");
                     _interactiveService.WriteLine(Environment.NewLine);
@@ -95,6 +99,7 @@ namespace AWS.Deploy.CLI
                 {
                     newList.Add(option);
                 }
+
                 newList.Add(CREATE_NEW_LABEL);
 
                 var selected = AskUserToChoose(newList, title, defaultValue);
@@ -103,7 +108,7 @@ namespace AWS.Deploy.CLI
                     return selected;
                 }
             }
-            
+
 
             return AskUserForValue("Enter name:", !options.Contains(defaultValue) ? defaultValue : null);
         }
@@ -114,6 +119,7 @@ namespace AWS.Deploy.CLI
             {
                 message += $" (default: {defaultValue})";
             }
+
             _interactiveService.WriteLine(message);
 
             string userValue = null;
@@ -136,11 +142,12 @@ namespace AWS.Deploy.CLI
         {
             var message = question;
             message += ": y/n";
-            if(defaultValue.HasValue)
+            if (defaultValue.HasValue)
             {
                 var defaultChar = defaultValue == YesNo.Yes ? 'y' : 'n';
                 message += $" (default: {defaultChar})";
             }
+
             _interactiveService.WriteLine(message);
 
             YesNo? selectedValue = null;

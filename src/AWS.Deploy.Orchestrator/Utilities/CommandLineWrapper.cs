@@ -30,12 +30,7 @@ namespace AWS.Deploy.Orchestrator.Utilities
                 RedirectStandardError = true,
                 UseShellExecute = false,
                 WorkingDirectory = workingDirectory,
-                EnvironmentVariables =
-                {
-                    {"AWS_ACCESS_KEY_ID", _awsCredentials.GetCredentials().AccessKey},
-                    {"AWS_SECRET_ACCESS_KEY", _awsCredentials.GetCredentials().SecretKey},
-                    {"AWS_REGION", _awsRegion}
-                }
+                EnvironmentVariables = { { "AWS_ACCESS_KEY_ID", _awsCredentials.GetCredentials().AccessKey }, { "AWS_SECRET_ACCESS_KEY", _awsCredentials.GetCredentials().SecretKey }, { "AWS_REGION", _awsRegion } }
             };
 
             if (_awsCredentials.GetCredentials().UseToken)

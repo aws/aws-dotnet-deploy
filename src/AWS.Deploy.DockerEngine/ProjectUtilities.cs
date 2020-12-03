@@ -18,11 +18,13 @@ namespace AWS.Deploy.DockerEngine
                 {
                     throw new FileNotFoundException($"The resource {resourceName} was not found in the project.");
                 }
+
                 using (StreamReader reader = new StreamReader(resource))
                 {
                     result = reader.ReadToEnd();
                 }
             }
+
             return result;
         }
 

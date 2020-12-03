@@ -7,12 +7,33 @@ namespace AWS.DeploymentCommon
     /// </summary>
     public class RecipeDefinition : IUserInputOption
     {
-        public enum OptionSettingValueType { String, Int};
+        public enum OptionSettingValueType
+        {
+            String,
+            Int
+        };
 
-        public enum OptionSettingTypeHint { BeanstalkApplication, BeanstalkEnvironment, InstanceType, IAMRole, ECSCluster, ECSService, ECSTaskSchedule };
+        public enum OptionSettingTypeHint
+        {
+            BeanstalkApplication,
+            BeanstalkEnvironment,
+            InstanceType,
+            IAMRole,
+            ECSCluster,
+            ECSService,
+            ECSTaskSchedule
+        };
 
-        public enum DeploymentTypes { CdkProject }
-        public enum DeploymentBundleTypes { DotnetPublishZipFile, Container }
+        public enum DeploymentTypes
+        {
+            CdkProject
+        }
+
+        public enum DeploymentBundleTypes
+        {
+            DotnetPublishZipFile,
+            Container
+        }
 
         /// <summary>
         /// The unique id of the recipe. That value will be persisted in other config files so it should never be changed once the recipe definition is released.
@@ -69,7 +90,7 @@ namespace AWS.DeploymentCommon
 
         public override string ToString()
         {
-            return $"{Name} ({Id})" ;
+            return $"{Name} ({Id})";
         }
 
         /// <summary>
@@ -192,7 +213,7 @@ namespace AWS.DeploymentCommon
             /// they need to know about before deploying.
             /// </summary>
             public bool AdvancedSetting { get; set; }
-            
+
             /// <summary>
             /// If true the setting can be changed during a redeployment.
             /// </summary>

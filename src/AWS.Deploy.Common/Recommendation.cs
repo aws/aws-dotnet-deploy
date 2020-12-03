@@ -9,7 +9,7 @@ namespace AWS.DeploymentCommon
     {
         private const string REPLACE_TOKEN_PROJECTNAME = "{ProjectName}";
 
-        
+
         public string ProjectPath { get; }
 
         public ProjectDefinition ProjectDefinition { get; }
@@ -37,9 +37,9 @@ namespace AWS.DeploymentCommon
             if (previousSettings == null)
                 return;
 
-            foreach(var option in Recipe.OptionSettings)
+            foreach (var option in Recipe.OptionSettings)
             {
-                if(previousSettings.TryGetValue(option.Id, out var value))
+                if (previousSettings.TryGetValue(option.Id, out var value))
                 {
                     SetOverrideOptionSettingValue(option.Id, value);
                 }
@@ -48,7 +48,7 @@ namespace AWS.DeploymentCommon
 
         public object GetOptionSettingValue(string settingId, bool ignoreDefaultValue = false)
         {
-            if(_overrideOptionSettingValues.TryGetValue(settingId, out var value))
+            if (_overrideOptionSettingValues.TryGetValue(settingId, out var value))
             {
                 return value;
             }
@@ -57,7 +57,7 @@ namespace AWS.DeploymentCommon
                 return null;
 
             var defaultValue = Recipe.OptionSettings.FirstOrDefault((x) => string.Equals(x.Id, settingId, StringComparison.InvariantCultureIgnoreCase))?.DefaultValue;
-            if(defaultValue == null)
+            if (defaultValue == null)
                 return string.Empty;
 
             defaultValue = ApplyReplacementTokens(defaultValue);

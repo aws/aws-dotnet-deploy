@@ -22,9 +22,9 @@ namespace AWS.Deploy.CLI
             var chain = new CredentialProfileStoreChain();
             AWSCredentials credentials = null;
 
-            if(!string.IsNullOrEmpty(profileName))
+            if (!string.IsNullOrEmpty(profileName))
             {
-                if(chain.TryGetAWSCredentials(profileName, out credentials))
+                if (chain.TryGetAWSCredentials(profileName, out credentials))
                 {
                     _toolInteractiveService.WriteLine($"Configuring AWS Credentials from Profile {profileName}.");
                     return credentials;
@@ -43,7 +43,7 @@ namespace AWS.Deploy.CLI
                 _toolInteractiveService.WriteLine($"Configuring AWS Credentials using AWS SDK credential search.");
                 return credentials;
             }
-            catch(AmazonServiceException)
+            catch (AmazonServiceException)
             {
                 // FallbackCredentialsFactory throws an exception if no credentials are found. Burying exception because if no credentials are found
                 // we want to continue and ask the user to select a profile.
@@ -58,7 +58,7 @@ namespace AWS.Deploy.CLI
             var consoleUtilities = new ConsoleUtilities(_toolInteractiveService);
             var selectedProfileName = consoleUtilities.AskUserToChoose(sharedCredentials.ListProfileNames(), "Select AWS Credentials Profile", null);
 
-            if(!chain.TryGetAWSCredentials(selectedProfileName, out credentials))
+            if (!chain.TryGetAWSCredentials(selectedProfileName, out credentials))
             {
                 throw new NoAWSCredentialsFoundException($"Unable to create AWS credentials for profile {profileName}.");
             }
@@ -68,11 +68,12 @@ namespace AWS.Deploy.CLI
 
         public string ResolveAWSRegion(string region, string lastRegionUsed)
         {
-            if(!string.IsNullOrEmpty(region))
+            if (!string.IsNullOrEmpty(region))
             {
                 _toolInteractiveService.WriteLine($"Configuring AWS region with specified value {region}.");
                 return region;
             }
+
             if (!string.IsNullOrEmpty(lastRegionUsed))
             {
                 _toolInteractiveService.WriteLine($"Configuring AWS region with previous configured value {lastRegionUsed}.");
@@ -80,14 +81,14 @@ namespace AWS.Deploy.CLI
             }
 
             var fallbackRegion = FallbackRegionFactory.GetRegionEndpoint()?.SystemName;
-            if(!string.IsNullOrEmpty(fallbackRegion))
+            if (!string.IsNullOrEmpty(fallbackRegion))
             {
                 _toolInteractiveService.WriteLine($"Configuring AWS region using AWS SDK region search to {region}.");
                 return fallbackRegion;
             }
 
             var availableRegions = new List<string>();
-            foreach(var value in Amazon.RegionEndpoint.EnumerableAllRegions.OrderBy(x => x.SystemName))
+            foreach (var value in Amazon.RegionEndpoint.EnumerableAllRegions.OrderBy(x => x.SystemName))
             {
                 availableRegions.Add($"{value.SystemName} ({value.DisplayName})");
             }
@@ -114,22 +115,23 @@ namespace AWS.Deploy.CLI
             return applicationNames;
         }
 
-        public async Task<IList<string>> GetListOfElasticBeanstalkEnvironments(IAmazonElasticBeanstalk beanstalkClient,
+        public async Task<IList<string>> GetListOfElasticBeanstalkEnvironments(
+            IAmazonElasticBeanstalk beanstalkClient,
             string applicationName)
         {
             var environmentNames = new List<string>();
-            
-            var request = new DescribeEnvironmentsRequest {ApplicationName = applicationName};
+
+            var request = new DescribeEnvironmentsRequest { ApplicationName = applicationName };
             DescribeEnvironmentsResponse response;
             do
             {
                 response = await beanstalkClient.DescribeEnvironmentsAsync();
                 request.NextToken = response.NextToken;
-                
+
                 foreach (var environment in response.Environments)
                 {
                     environmentNames.Add(environment.EnvironmentName);
-                }                
+                }
             } while (!string.IsNullOrEmpty(response.NextToken));
 
             return environmentNames;

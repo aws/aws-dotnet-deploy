@@ -12,12 +12,12 @@ namespace AWS.Deploy.Orchestrator
         public string Region { get; set; }
 
         public IList<DeploymentSettings> Deployments { get; set; } = new List<DeploymentSettings>();
-        
+
         public string[] GetDeploymentNames()
         {
             var names = new List<string>();
 
-            foreach(var deployment in Deployments)
+            foreach (var deployment in Deployments)
             {
                 names.Add(deployment.StackName);
             }
@@ -53,11 +53,7 @@ namespace AWS.Deploy.Orchestrator
 
         public void SaveSettings(string filePath)
         {
-            JsonSerializerOptions jsonOptions = new JsonSerializerOptions
-            {
-                WriteIndented = true,
-                IgnoreNullValues = true
-            };
+            JsonSerializerOptions jsonOptions = new JsonSerializerOptions { WriteIndented = true, IgnoreNullValues = true };
 
             var json = JsonSerializer.Serialize<PreviousDeploymentSettings>(this, jsonOptions);
             File.WriteAllText(filePath, json);
@@ -68,6 +64,5 @@ namespace AWS.Deploy.Orchestrator
             var fullPath = string.IsNullOrEmpty(configFile) ? Path.Combine(projectPath, DEFAULT_FILE_NAME) : Path.Combine(projectPath, configFile);
             return fullPath;
         }
-
     }
 }

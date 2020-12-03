@@ -22,18 +22,9 @@ namespace AWS.Deploy.CLI
             _toolInteractiveService.WriteLine("Project Home: https://github.com/aws/aws-dotnet-suite-tooling");
             _toolInteractiveService.WriteLine(string.Empty);
 
-            var rootCommand = new RootCommand
-            {
-                Description = "The AWS .NET Suite for getting .NET applications running on AWS."
-            };
+            var rootCommand = new RootCommand { Description = "The AWS .NET Suite for getting .NET applications running on AWS." };
 
-            var deployCommand = new Command("deploy", "Inspect the .NET project and deploy the application to AWS to the appropriate AWS service.")
-            {
-                _optionProfile,
-                _optionRegion,
-                _optionProjectPath,
-                new Option<bool>("--save-cdk-project", getDefaultValue: () => false, description: "Save generated CDK project in solution to customize")
-            };
+            var deployCommand = new Command("deploy", "Inspect the .NET project and deploy the application to AWS to the appropriate AWS service.") { _optionProfile, _optionRegion, _optionProjectPath, new Option<bool>("--save-cdk-project", getDefaultValue: () => false, description: "Save generated CDK project in solution to customize") };
             deployCommand.Handler = CommandHandler.Create<string, string, string, bool>(async (profile, region, projectPath, saveCdkProject) =>
             {
                 var awsUtilities = new AWSUtilities(_toolInteractiveService);
@@ -43,31 +34,17 @@ namespace AWS.Deploy.CLI
                 var awsCredentials = awsUtilities.ResolveAWSCredentials(profile, previousSettings.Profile);
                 var awsRegion = awsUtilities.ResolveAWSRegion(region, previousSettings.Region);
 
-                var session = new OrchestratorSession(projectPath, null)
-                {
-                    AWSProfileName = profile,
-                    AWSCredentials = awsCredentials,
-                    AWSRegion = awsRegion,
-                    ProjectDirectory = projectPath
-                };
+                var session = new OrchestratorSession(projectPath, null) { AWSProfileName = profile, AWSCredentials = awsCredentials, AWSRegion = awsRegion, ProjectDirectory = projectPath };
 
                 await new DeployCommand(new DefaultAWSClientFactory(), _toolInteractiveService, session).ExecuteAsync(saveCdkProject);
             });
             rootCommand.Add(deployCommand);
 
-            var setupCICDCommand = new Command("setup-cicd", "Configure the project to be deployed to AWS using the AWS Code services")
-            {
-                _optionProfile,
-                _optionRegion,
-                _optionProjectPath,
-            };
+            var setupCICDCommand = new Command("setup-cicd", "Configure the project to be deployed to AWS using the AWS Code services") { _optionProfile, _optionRegion, _optionProjectPath, };
             setupCICDCommand.Handler = CommandHandler.Create<string>(SetupCICD);
             rootCommand.Add(setupCICDCommand);
 
-            var inspectIAMPermissionsCommand = new Command("inspect-permissions", "Inspect the project to see what AWS permissions the application needs to access AWS services the application is using.")
-            {
-                _optionProjectPath
-            };
+            var inspectIAMPermissionsCommand = new Command("inspect-permissions", "Inspect the project to see what AWS permissions the application needs to access AWS services the application is using.") { _optionProjectPath };
             inspectIAMPermissionsCommand.Handler = CommandHandler.Create<string>(InspectIAMPermissions);
             rootCommand.Add(inspectIAMPermissionsCommand);
 

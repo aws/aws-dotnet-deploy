@@ -21,7 +21,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public void WebAppNoDockerFileTest()
         {
             var projectPath = ResolvePath("WebAppNoDockerFile");
-            
+
             var engine = new RecommendationEngine(RecipeLocator.FindRecipeDefinitionsPath());
 
             var recommendations = engine.ComputeRecommendations(projectPath);
@@ -74,7 +74,7 @@ namespace AWS.Deploy.CLI.UnitTests
         private string ResolvePath(string projectName)
         {
             var testsPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            while(testsPath != null && !string.Equals(new DirectoryInfo(testsPath).Name, "test", StringComparison.OrdinalIgnoreCase))
+            while (testsPath != null && !string.Equals(new DirectoryInfo(testsPath).Name, "test", StringComparison.OrdinalIgnoreCase))
             {
                 testsPath = Directory.GetParent(testsPath).FullName;
             }

@@ -36,7 +36,7 @@ namespace AWS.Deploy.CLI.Commands
             _interactiveService.WriteLine(string.Empty);
 
             string cloudApplicationName;
-            if(previousSettings.Deployments.Count == 0)
+            if (previousSettings.Deployments.Count == 0)
             {
                 cloudApplicationName = _consoleUtilities.AskUserForValue("Enter name for Cloud Application", GetDefaultApplicationName(new ProjectDefinition(_session.ProjectPath).ProjectPath));
             }
@@ -56,10 +56,10 @@ namespace AWS.Deploy.CLI.Commands
             }
 
             // If there was a previous deployment be sure to make that recipe be the top recommendation.
-            if(previousDeployment != null)
+            if (previousDeployment != null)
             {
                 var lastRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, previousDeployment.RecipeId, StringComparison.InvariantCultureIgnoreCase));
-                if(lastRecommendation != null)
+                if (lastRecommendation != null)
                 {
                     recommendations.Remove(lastRecommendation);
                     recommendations.Insert(0, lastRecommendation);
@@ -90,16 +90,16 @@ namespace AWS.Deploy.CLI.Commands
         private async Task ConfigureDeployment(Recommendation recommendation)
         {
             Console.WriteLine(string.Empty);
-            
+
             var awsUtilities = new AWSUtilities(_interactiveService);
-            foreach(var setting in recommendation.Recipe.OptionSettings)
+            foreach (var setting in recommendation.Recipe.OptionSettings)
             {
                 _interactiveService.WriteLine($"{setting.Name}:");
                 _interactiveService.WriteLine(setting.Description);
 
                 var currentValue = recommendation.GetOptionSettingValue(setting.Id);
                 object settingValue = null;
-                if(setting.AllowedValues?.Count > 0)
+                if (setting.AllowedValues?.Count > 0)
                 {
                     settingValue = _consoleUtilities.AskUserToChoose(setting.AllowedValues, null, currentValue?.ToString());
 
@@ -113,15 +113,18 @@ namespace AWS.Deploy.CLI.Commands
                         _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>(_session.AWSCredentials, _session.AWSRegion));
 
                     settingValue = _consoleUtilities.AskUserToChooseOrCreateNew(applications,
-                        "Select Beanstalk application to deploy to:", currentValue?.ToString());
+                        "Select Beanstalk application to deploy to:",
+                        currentValue?.ToString());
                 }
                 else if (setting.TypeHint == RecipeDefinition.OptionSettingTypeHint.BeanstalkEnvironment)
                 {
                     var applicationName = recommendation.GetOptionSettingValue(setting.ParentSettingId) as string;
                     var environments = await awsUtilities.GetListOfElasticBeanstalkEnvironments(
-                        _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>(_session.AWSCredentials, _session.AWSRegion), applicationName);
+                        _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>(_session.AWSCredentials, _session.AWSRegion),
+                        applicationName);
                     settingValue = _consoleUtilities.AskUserToChooseOrCreateNew(environments,
-                        "Select Beanstalk environment to deploy to:", currentValue?.ToString());
+                        "Select Beanstalk environment to deploy to:",
+                        currentValue?.ToString());
                 }
                 else
                 {
