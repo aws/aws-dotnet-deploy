@@ -8,7 +8,7 @@ namespace AWS.Deploy.Orchestrator
 {
     public interface ICdkProjectHandler
     {
-        public Task CreateCdkDeployment(string cloudApplicationName, Recommendation recommendation);
+        public Task CreateCdkDeployment(OrchestratorSession session, string cloudApplicationName, Recommendation recommendation);
     }
 
     public class CdkProjectHandler : ICdkProjectHandler
@@ -24,7 +24,7 @@ namespace AWS.Deploy.Orchestrator
             _appSettingsBuilder = new CdkAppSettingsSerializer();
         }
 
-        public async Task CreateCdkDeployment(string cloudApplicationName, Recommendation recommendation)
+        public async Task CreateCdkDeployment(OrchestratorSession session, string cloudApplicationName, Recommendation recommendation)
         {
             // Create a new temporary CDK project for a new deployment
             _interactiveService.LogMessageLine($"Generating a {recommendation.Recipe.Name} CDK Project");
@@ -37,9 +37,15 @@ namespace AWS.Deploy.Orchestrator
             {
                 await appSettingsFile.WriteAsync(appSettingsBody);
             }
+            
+            if (session.SystemCapabilities.CdkNpmModuleInstalledGlobally)
+            {
+                // install cdk locally
+                _commandLineWrapper.Run(new[] { "npm install aws-cdk" }, cdkProjectPath);
+            }
 
             // Handover to CDK command line tool
-            var commands = new List<string> { "cdk deploy --require-approval never" };
+            var commands = new List<string> { "npm cdk deploy --require-approval never" };
             _commandLineWrapper.Run(commands, cdkProjectPath);
         }
 

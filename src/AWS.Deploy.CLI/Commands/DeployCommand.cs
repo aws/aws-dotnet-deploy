@@ -20,7 +20,10 @@ namespace AWS.Deploy.CLI.Commands
         private readonly ConsoleUtilities _consoleUtilities;
         private readonly OrchestratorSession _session;
 
-        public DeployCommand(IAWSClientFactory awsClientFactory, IToolInteractiveService interactiveService, OrchestratorSession session)
+        public DeployCommand(
+            IAWSClientFactory awsClientFactory,
+            IToolInteractiveService interactiveService,
+            OrchestratorSession session)
         {
             _awsClientFactory = awsClientFactory;
             _interactiveService = interactiveService;
@@ -74,9 +77,16 @@ namespace AWS.Deploy.CLI.Commands
             var selectedRecommendation = _consoleUtilities.AskUserToChoose(recommendations, "Available options to deploy project", recommendations[0]);
             selectedRecommendation.ApplyPreviousSettings(previousDeployment?.RecipeOverrideSettings);
 
+            if (selectedRecommendation.Recipe.DeploymentBundle == RecipeDefinition.DeploymentBundleTypes.Container &&
+                !_session.SystemCapabilities.DockerInstalled)
+            {
+                _interactiveService.WriteErrorLine("The selected Recipe requires docker but docker was not detected.  Please install docker: https://docs.docker.com/engine/install/");
+                return;
+            }
+
             DisplaySettings(selectedRecommendation, false);
 
-            ConsoleUtilities.YesNo configureSettings = _consoleUtilities.AskYesNoQuestion("Do you wish to change the default options before deploying?", ConsoleUtilities.YesNo.No);
+            var configureSettings = _consoleUtilities.AskYesNoQuestion("Do you wish to change the default options before deploying?", ConsoleUtilities.YesNo.No);
 
             while (configureSettings == ConsoleUtilities.YesNo.Yes)
             {
