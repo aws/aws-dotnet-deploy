@@ -19,11 +19,7 @@ namespace AWS.Deploy.Orchestrator
         public void Write(string path)
         {
             // General Settings
-            var settings = new Dictionary<string, object>
-            {
-                { nameof(_recommendation.ProjectPath), _recommendation.ProjectPath },
-                { "StackName", _stackName}
-            };
+            var settings = new Dictionary<string, object> { { nameof(_recommendation.ProjectPath), _recommendation.ProjectPath }, { "StackName", _stackName } };
 
             // Option Settings
             foreach (var optionSetting in _recommendation.Recipe.OptionSettings)

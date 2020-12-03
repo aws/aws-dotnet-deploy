@@ -18,18 +18,21 @@ namespace AWS.Deploy.DockerEngine
 
         public DockerFile(ImageMapping imageMapping, string projectName, string assemblyName)
         {
-            if(imageMapping == null)
+            if (imageMapping == null)
             {
                 throw new ArgumentNullException(nameof(imageMapping), "Cannot instantiate a DockerFile with a null ImageMapping.");
             }
-            if(string.IsNullOrWhiteSpace(projectName))
+
+            if (string.IsNullOrWhiteSpace(projectName))
             {
                 throw new ArgumentNullException(nameof(projectName), "Cannot instantiate a DockerFile with an empty Project Name.");
             }
+
             if (string.IsNullOrWhiteSpace(assemblyName))
             {
                 throw new ArgumentNullException(nameof(assemblyName), "Cannot instantiate a DockerFile with an empty AssemblyName.");
             }
+
             _imageMapping = imageMapping;
             _projectName = projectName;
             _assemblyName = assemblyName;
@@ -52,12 +55,13 @@ namespace AWS.Deploy.DockerEngine
             else
             {
                 projectList = projectList.Select(x => x.Replace("\\", "/")).ToList();
-                for(int i = 0; i < projectList.Count; i++)
+                for (int i = 0; i < projectList.Count; i++)
                 {
-                    projects += $"COPY [\"{projectList[i]}\", \"{projectList[i].Substring(0, projectList[i].LastIndexOf("/") + 1)}\"]" + (i < projectList.Count - 1?Environment.NewLine:"");
+                    projects += $"COPY [\"{projectList[i]}\", \"{projectList[i].Substring(0, projectList[i].LastIndexOf("/") + 1)}\"]" + (i < projectList.Count - 1 ? Environment.NewLine : "");
                 }
+
                 projectPath = projectList.Where(x => x.EndsWith(_projectName)).FirstOrDefault();
-                if(projectPath.LastIndexOf("/") > -1)
+                if (projectPath.LastIndexOf("/") > -1)
                 {
                     projectFolder = projectPath.Substring(0, projectPath.LastIndexOf("/"));
                 }

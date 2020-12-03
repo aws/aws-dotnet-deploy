@@ -8,11 +8,7 @@ namespace AWS.DeploymentCommon
     {
         public T GetAWSClient<T>(AWSCredentials credentials, string region) where T : IAmazonService
         {
-            var awsOptions = new AWSOptions
-            {
-                Credentials = credentials,
-                Region = RegionEndpoint.GetBySystemName(region)
-            };
+            var awsOptions = new AWSOptions { Credentials = credentials, Region = RegionEndpoint.GetBySystemName(region) };
 
             return awsOptions.CreateServiceClient<T>();
         }

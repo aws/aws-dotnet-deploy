@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -18,7 +18,6 @@ namespace AWS.Deploy.DockerEngine
 
         public DockerEngine(string projectPath) : this(new ProjectDefinition(projectPath))
         {
-            
         }
 
         public DockerEngine(ProjectDefinition project)
@@ -43,6 +42,7 @@ namespace AWS.Deploy.DockerEngine
             {
                 throw new UnknownDockerImageException($"Unable to determine a valid docker base and build image for project of type {_project.SdkType} and Target Framework {_project.TargetFramework}");
             }
+
             var dockerFile = new DockerFile(imageMapping, projectFileName, _project.AssemblyName);
             var projectDirectory = Path.GetDirectoryName(_projectPath);
             var projectList = GetProjectList();
@@ -60,15 +60,17 @@ namespace AWS.Deploy.DockerEngine
             {
                 return null;
             }
+
             List<string> lines = File.ReadAllLines(solutionFile).ToList();
             var projectLines = lines.Where(x => x.StartsWith("Project"));
             var projectPaths = projectLines.Select(x => x.Split(',')[1].Replace('\"', ' ').Trim()).ToList();
 
             //Validate project exists in solution
-            if (projectPaths.Select(x=>Path.GetFileName(x)).Where(x=>x.Equals(projectFileName)).ToList().Count == 0)
+            if (projectPaths.Select(x => Path.GetFileName(x)).Where(x => x.Equals(projectFileName)).ToList().Count == 0)
             {
                 return null;
             }
+
             return projectPaths;
         }
 
@@ -79,12 +81,12 @@ namespace AWS.Deploy.DockerEngine
         {
             var projectDirectory = Directory.GetParent(_projectPath);
             var solutionExists = false;
-            while(solutionExists == false && projectDirectory != null)
+            while (solutionExists == false && projectDirectory != null)
             {
                 var files = projectDirectory.GetFiles("*.sln");
                 if (files.Length > 0)
                 {
-                    foreach(var solutionFile in files)
+                    foreach (var solutionFile in files)
                     {
                         var projectList = GetProjectsFromSolutionFile(solutionFile.FullName);
                         if (projectList != null)
@@ -94,8 +96,10 @@ namespace AWS.Deploy.DockerEngine
                         }
                     }
                 }
+
                 projectDirectory = projectDirectory.Parent;
             }
+
             return null;
         }
 

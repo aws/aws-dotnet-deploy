@@ -5,7 +5,6 @@ namespace AWS.Deploy.CLI.UnitTests
 {
     public class ConsoleUtilitiesTests
     {
-
         [Fact]
         public void AskUserToChooseStringsPickDefault()
         {
@@ -55,7 +54,7 @@ namespace AWS.Deploy.CLI.UnitTests
         [Fact]
         public void AskYesNoPickDefault()
         {
-            var interactiveServices = new TestToolInteractiveServiceImpl(new List<string> { string.Empty});
+            var interactiveServices = new TestToolInteractiveServiceImpl(new List<string> { string.Empty });
             var consoleUtilities = new ConsoleUtilities(interactiveServices);
             var selectedValue = consoleUtilities.AskYesNoQuestion("Do you want to deploy", ConsoleUtilities.YesNo.Yes);
             Assert.Equal(ConsoleUtilities.YesNo.Yes, selectedValue);

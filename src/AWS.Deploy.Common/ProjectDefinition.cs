@@ -45,7 +45,7 @@ namespace AWS.DeploymentCommon
             SdkType = sdkType.Value;
 
             var targetFramework = _xmlProjectFile.GetElementsByTagName("TargetFramework");
-            if(targetFramework.Count > 0)
+            if (targetFramework.Count > 0)
             {
                 TargetFramework = targetFramework[0].InnerText;
             }
@@ -87,7 +87,7 @@ namespace AWS.DeploymentCommon
             return dir.Length == 1;
         }
 
-        public bool EvaluateRules(IList<RecipeDefinition.AvailableRuleItem>  rules)
+        public bool EvaluateRules(IList<RecipeDefinition.AvailableRuleItem> rules)
         {
             if (rules == null)
                 return true;
@@ -100,21 +100,21 @@ namespace AWS.DeploymentCommon
                 if (rule.HasFiles?.Count > 0)
                 {
                     var directory = Path.GetDirectoryName(ProjectPath);
-                    foreach(var file in rule.HasFiles)
+                    foreach (var file in rule.HasFiles)
                     {
                         if (Directory.GetFiles(directory, file).Length == 0)
                             return false;
                     }
                 }
 
-                if(!string.IsNullOrEmpty(rule.MSPropertyExists))
+                if (!string.IsNullOrEmpty(rule.MSPropertyExists))
                 {
                     var xmlProperty = _xmlProjectFile.SelectSingleNode($"//PropertyGroup/{rule.MSPropertyExists}");
                     if (xmlProperty == null)
                         return false;
                 }
 
-                if(rule.MSProperty != null)
+                if (rule.MSProperty != null)
                 {
                     var propertyValue = _xmlProjectFile.SelectSingleNode($"//PropertyGroup/{rule.MSProperty.Name}")?.InnerText;
                     if (propertyValue == null || !rule.MSProperty.AllowedValues.Contains(propertyValue))

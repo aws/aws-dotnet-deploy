@@ -17,7 +17,7 @@ namespace AWS.Deploy.Orchestrator
         public string AWSProfileName { get; set; }
         public AWSCredentials AWSCredentials { get; set; }
         public string AWSRegion { get; set; }
-        
+
         public string CloudApplicationName { get; set; }
 
         private string _projectDirectory;
