@@ -39,6 +39,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AWS.Deploy.DockerEngine", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AWS.Deploy.Common", "src\AWS.Deploy.Common\AWS.Deploy.Common.csproj", "{3AAC19A6-02E8-45D0-BDD0-CAD0FBE15F64}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ManualLinuxTesting", "ManualLinuxTesting", "{D0172E70-D5BC-4EDE-84E4-9ADB67B5F8FB}"
+	ProjectSection(SolutionItems) = preProject
+		test\ManualLinuxTesting\Dockerfile = test\ManualLinuxTesting\Dockerfile
+		test\ManualLinuxTesting\Readme.md = test\ManualLinuxTesting\Readme.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -110,6 +116,7 @@ Global
 		{F06F9F2B-9018-4357-9ECB-EAF3D9EC335C} = {11C7056E-93C1-408B-BD87-5270595BBE0E}
 		{4C4F07CE-4C88-44C6-864F-C5E563712EE2} = {11C7056E-93C1-408B-BD87-5270595BBE0E}
 		{3AAC19A6-02E8-45D0-BDD0-CAD0FBE15F64} = {11C7056E-93C1-408B-BD87-5270595BBE0E}
+		{D0172E70-D5BC-4EDE-84E4-9ADB67B5F8FB} = {BD466B5C-D8B0-4069-98A9-6DC8F01FA757}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5A4B2863-1763-4496-B122-651A38A4F5D7}
