@@ -1,9 +1,0 @@
-{
-  "profiles": {
-    "DeploymentNETCoreToolApp": {
-      "commandName": "Project",
-      "commandLineArgs": "deploy --region us-west-2",
-      "workingDirectory": "C:\\Temp\\DockerIntegTest"
-    }
-  }
-}
