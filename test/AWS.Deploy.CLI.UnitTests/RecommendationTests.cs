@@ -25,7 +25,7 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var projectPath = ResolvePath("WebAppNoDockerFile");
 
-            var engine = new RecommendationEngine(RecipeLocator.FindRecipeDefinitionsPath());
+            var engine = new RecommendationEngine(new [] {RecipeLocator.FindRecipeDefinitionsPath()});
 
             var recommendations = engine.ComputeRecommendations(projectPath);
 
@@ -43,7 +43,7 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var projectPath = ResolvePath("WebAppWithDockerFile");
 
-            var engine = new RecommendationEngine(RecipeLocator.FindRecipeDefinitionsPath());
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() });
 
             var recommendations = engine.ComputeRecommendations(projectPath);
 
@@ -61,7 +61,7 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var projectPath = ResolvePath("MessageProcessingApp");
 
-            var engine = new RecommendationEngine(RecipeLocator.FindRecipeDefinitionsPath());
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() });
 
             var recommendations = engine.ComputeRecommendations(projectPath);
 

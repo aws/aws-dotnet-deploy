@@ -31,7 +31,8 @@ namespace AWS.Deploy.CLI.Commands
 
         public async Task ExecuteAsync(bool saveCdkProject)
         {
-            var orchestrator = new Orchestrator.Orchestrator(_session, new ConsoleOrchestratorLogger(_interactiveService), RecipeLocator.FindRecipeDefinitionsPath());
+            
+            var orchestrator = new Orchestrator.Orchestrator(_session, new ConsoleOrchestratorLogger(_interactiveService), new []{ RecipeLocator.FindRecipeDefinitionsPath() });
 
             var previousSettings = orchestrator.GetPreviousDeploymentSettings();
             var previousDeploymentNames = previousSettings.GetDeploymentNames();

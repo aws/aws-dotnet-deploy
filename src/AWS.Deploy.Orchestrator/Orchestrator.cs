@@ -22,11 +22,6 @@ namespace AWS.Deploy.Orchestrator
 
         private readonly OrchestratorSession _session;
 
-        public Orchestrator(OrchestratorSession session, IOrchestratorInteractiveService interactiveService, string recipeDefinitionPath)
-            : this(session, interactiveService, new List<string> { recipeDefinitionPath })
-        {
-        }
-
         public Orchestrator(OrchestratorSession session, IOrchestratorInteractiveService interactiveService, IList<string> recipeDefinitionPaths)
         {
             _session = session;
@@ -62,8 +57,10 @@ namespace AWS.Deploy.Orchestrator
             if (recommendation.Recipe.DeploymentBundle == RecipeDefinition.DeploymentBundleTypes.Container &&
                 !recommendation.ProjectDefinition.HasDockerFile)
             {
-                _interactiveService.LogErrorMessageLine($"Generating Dockerfile");
-                var dockerEngine = new DockerEngine.DockerEngine(recommendation.ProjectPath);
+                _interactiveService.LogErrorMessageLine("Generating Dockerfile");
+                var dockerEngine =
+                    new DockerEngine.DockerEngine(
+                        new ProjectDefinition(recommendation.ProjectPath));
                 dockerEngine.GenerateDockerFile();
             }
 
