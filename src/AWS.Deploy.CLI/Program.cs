@@ -69,6 +69,33 @@ namespace AWS.Deploy.CLI
             inspectIAMPermissionsCommand.Handler = CommandHandler.Create<string>(InspectIAMPermissions);
             rootCommand.Add(inspectIAMPermissionsCommand);
 
+            var listCommand = new Command("list-stacks", "List CloudFormation stacks.")
+            {
+                _optionProfile,
+                _optionRegion,
+                _optionProjectPath,
+            };
+            listCommand.Handler = CommandHandler.Create<string, string, string>(async (profile, region, projectPath) =>
+            {
+                var awsUtilities = new AWSUtilities(_toolInteractiveService);
+
+                var previousSettings = PreviousDeploymentSettings.ReadSettings(projectPath, null);
+
+                var awsCredentials = awsUtilities.ResolveAWSCredentials(profile, previousSettings.Profile);
+                var awsRegion = awsUtilities.ResolveAWSRegion(region, previousSettings.Region);
+
+                var session = new OrchestratorSession(projectPath, null)
+                {
+                    AWSProfileName = profile,
+                    AWSCredentials = awsCredentials,
+                    AWSRegion = awsRegion,
+                    ProjectDirectory = projectPath
+                };
+
+                await new ListStacksCommand(new DefaultAWSClientFactory(), _toolInteractiveService, session).ExecuteAsync();
+            });
+            rootCommand.Add(listCommand);
+
             return await rootCommand.InvokeAsync(args);
         }
 
