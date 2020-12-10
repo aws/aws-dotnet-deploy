@@ -13,20 +13,30 @@ namespace AWS.Deploy.Common
     public class RecommendationEngine
     {
         private readonly IList<RecipeDefinition> _availableRecommendations = new List<RecipeDefinition>();
-
-        public RecommendationEngine(string recipeDefinitionPath)
-            : this(new List<string> { recipeDefinitionPath })
+        
+        public RecommendationEngine(IEnumerable<string> recipeDefinitionPaths)
         {
-        }
+            recipeDefinitionPaths ??= new List<string>();
 
-        public RecommendationEngine(IList<string> recipeDefinitionPaths)
-        {
-            LoadRecipeDefinition(recipeDefinitionPaths);
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+
+            foreach (var recommendationPath in recipeDefinitionPaths)
+            {
+                foreach (var recipeFile in Directory.GetFiles(recommendationPath, "*.recipe", SearchOption.TopDirectoryOnly))
+                {
+                    var content = File.ReadAllText(recipeFile);
+                    var definition = JsonSerializer.Deserialize<RecipeDefinition>(content, options);
+                    definition.RecipePath = recipeFile;
+
+                    _availableRecommendations.Add(definition);
+                }
+            }
         }
 
         public IList<Recommendation> ComputeRecommendations(string projectPath)
         {
-            var projectDefinition = ParseTargetProjectPath(projectPath);
+            var projectDefinition = new ProjectDefinition(projectPath);
             var recommendations = new List<Recommendation>();
 
             foreach (var potentialRecipe in _availableRecommendations)
@@ -57,30 +67,6 @@ namespace AWS.Deploy.Common
 
             recommendations = recommendations.OrderByDescending(recommendation => recommendation.ComputedPriority).ToList();
             return recommendations;
-        }
-
-        private ProjectDefinition ParseTargetProjectPath(string projectPath)
-        {
-            var projectDefinition = new ProjectDefinition(projectPath);
-            return projectDefinition;
-        }
-
-        private void LoadRecipeDefinition(IList<string> recommendationPaths)
-        {
-            var options = new JsonSerializerOptions();
-            options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
-
-            foreach (var recommendationPath in recommendationPaths)
-            {
-                foreach (var recipeFile in Directory.GetFiles(recommendationPath, "*.recipe", SearchOption.TopDirectoryOnly))
-                {
-                    var content = File.ReadAllText(recipeFile);
-                    var definition = JsonSerializer.Deserialize<RecipeDefinition>(content, options);
-                    definition.RecipePath = recipeFile;
-
-                    _availableRecommendations.Add(definition);
-                }
-            }
         }
     }
 }

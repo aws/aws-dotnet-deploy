@@ -19,10 +19,6 @@ namespace AWS.Deploy.DockerEngine
         private readonly ProjectDefinition _project;
         private readonly string _projectPath;
 
-        public DockerEngine(string projectPath) : this(new ProjectDefinition(projectPath))
-        {
-        }
-
         public DockerEngine(ProjectDefinition project)
         {
             if (project == null)
@@ -83,8 +79,8 @@ namespace AWS.Deploy.DockerEngine
         private List<string> GetProjectList()
         {
             var projectDirectory = Directory.GetParent(_projectPath);
-            var solutionExists = false;
-            while (solutionExists == false && projectDirectory != null)
+            
+            while (projectDirectory != null)
             {
                 var files = projectDirectory.GetFiles("*.sln");
                 if (files.Length > 0)
@@ -94,7 +90,6 @@ namespace AWS.Deploy.DockerEngine
                         var projectList = GetProjectsFromSolutionFile(solutionFile.FullName);
                         if (projectList != null)
                         {
-                            solutionExists = true;
                             return projectList;
                         }
                     }

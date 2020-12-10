@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using AWS.Deploy.DockerEngine;
+using AWS.DeploymentCommon;
 using Xunit;
 
 namespace AWS.Deploy.CLI.UnitTests
@@ -15,7 +16,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public void DockerGenerateWebAppNoSolution()
         {
             var projectPath = ResolvePath("WebAppNoSolution");
-            DockerEngine.DockerEngine engine = new DockerEngine.DockerEngine(projectPath);
+            var engine = new DockerEngine.DockerEngine(new ProjectDefinition(projectPath));
             engine.GenerateDockerFile();
 
             var dockerfile = File.ReadAllText(Path.Combine(projectPath, "Dockerfile"));
@@ -28,7 +29,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public void DockerGenerateWebAppWithSolutionSameLevel()
         {
             var projectPath = ResolvePath("WebAppWithSolutionSameLevel");
-            DockerEngine.DockerEngine engine = new DockerEngine.DockerEngine(projectPath);
+            var engine = new DockerEngine.DockerEngine(new ProjectDefinition(projectPath));
             engine.GenerateDockerFile();
 
             var dockerfile = File.ReadAllText(Path.Combine(projectPath, "Dockerfile"));
@@ -41,7 +42,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public void DockerGenerateWebAppWithSolutionParentLevel()
         {
             var projectPath = ResolvePath("WebAppWithSolutionParentLevel\\WebAppWithSolutionParentLevel");
-            DockerEngine.DockerEngine engine = new DockerEngine.DockerEngine(projectPath);
+            var engine = new DockerEngine.DockerEngine(new ProjectDefinition(projectPath));
             engine.GenerateDockerFile();
 
             var dockerfile = File.ReadAllText(Path.Combine(projectPath, "Dockerfile"));
@@ -54,7 +55,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public void DockerGenerateWebAppDifferentAssemblyName()
         {
             var projectPath = ResolvePath("WebAppDifferentAssemblyName");
-            DockerEngine.DockerEngine engine = new DockerEngine.DockerEngine(projectPath);
+            var engine = new DockerEngine.DockerEngine(new ProjectDefinition(projectPath));
             engine.GenerateDockerFile();
 
             var dockerfile = File.ReadAllText(Path.Combine(projectPath, "Dockerfile"));
@@ -67,7 +68,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public void DockerGenerateWebAppProjectDependencies()
         {
             var projectPath = ResolvePath("WebAppProjectDependencies\\WebAppProjectDependencies");
-            DockerEngine.DockerEngine engine = new DockerEngine.DockerEngine(projectPath);
+            var engine = new DockerEngine.DockerEngine(new ProjectDefinition(projectPath));
             engine.GenerateDockerFile();
 
             var dockerfile = File.ReadAllText(Path.Combine(projectPath, "Dockerfile"));
@@ -80,7 +81,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public void DockerGenerateWebAppDifferentTargetFramework()
         {
             var projectPath = ResolvePath("WebAppDifferentTargetFramework");
-            DockerEngine.DockerEngine engine = new DockerEngine.DockerEngine(projectPath);
+            var engine = new DockerEngine.DockerEngine(new ProjectDefinition(projectPath));
             engine.GenerateDockerFile();
 
             var dockerfile = File.ReadAllText(Path.Combine(projectPath, "Dockerfile"));
@@ -93,7 +94,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public void DockerGenerateConsoleSdkType()
         {
             var projectPath = ResolvePath("ConsoleSdkType");
-            DockerEngine.DockerEngine engine = new DockerEngine.DockerEngine(projectPath);
+            var engine = new DockerEngine.DockerEngine(new ProjectDefinition(projectPath));
             engine.GenerateDockerFile();
 
             var dockerfile = File.ReadAllText(Path.Combine(projectPath, "Dockerfile"));

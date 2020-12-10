@@ -18,6 +18,7 @@ namespace AWS.Deploy.CLI
         private static readonly Option<string> _optionProfile = new Option<string>("--profile", "AWS credential profile used to make calls to AWS");
         private static readonly Option<string> _optionRegion = new Option<string>("--region", "AWS region to deploy application to. For example us-west-2.");
         private static readonly Option<string> _optionProjectPath = new Option<string>("--project-path", getDefaultValue: () => Directory.GetCurrentDirectory(), description: "Path to the project to deploy");
+        private static readonly Option<bool> _optionSaveCdkProject = new Option<bool>("--save-cdk-project", getDefaultValue: () => false, description: "Save generated CDK project in solution to customize");
 
         private static async Task<int> Main(string[] args)
         {
@@ -27,7 +28,15 @@ namespace AWS.Deploy.CLI
 
             var rootCommand = new RootCommand { Description = "The AWS .NET Suite for getting .NET applications running on AWS." };
 
-            var deployCommand = new Command("deploy", "Inspect the .NET project and deploy the application to AWS to the appropriate AWS service.") { _optionProfile, _optionRegion, _optionProjectPath, new Option<bool>("--save-cdk-project", getDefaultValue: () => false, description: "Save generated CDK project in solution to customize") };
+           var deployCommand = new Command(
+                "deploy",
+                "Inspect the .NET project and deploy the application to AWS to the appropriate AWS service.")
+            {
+                _optionProfile,
+                _optionRegion,
+                _optionProjectPath,
+                _optionSaveCdkProject
+            };
             deployCommand.Handler = CommandHandler.Create<string, string, string, bool>(async (profile, region, projectPath, saveCdkProject) =>
             {
                 var awsUtilities = new AWSUtilities(_toolInteractiveService);
@@ -37,9 +46,18 @@ namespace AWS.Deploy.CLI
                 var awsCredentials = awsUtilities.ResolveAWSCredentials(profile, previousSettings.Profile);
                 var awsRegion = awsUtilities.ResolveAWSRegion(region, previousSettings.Region);
 
-                var session = new OrchestratorSession(projectPath, null) { AWSProfileName = profile, AWSCredentials = awsCredentials, AWSRegion = awsRegion, ProjectDirectory = projectPath };
+                var session = new OrchestratorSession
+                {
+                    AWSProfileName = profile,
+                    AWSCredentials = awsCredentials,
+                    AWSRegion = awsRegion,
+                    ProjectPath = projectPath,
+                    ProjectDirectory = projectPath
+                };
 
-                await new DeployCommand(new DefaultAWSClientFactory(), _toolInteractiveService, session).ExecuteAsync(saveCdkProject);
+                var deploy = new DeployCommand(new DefaultAWSClientFactory(), _toolInteractiveService, session);
+
+                await deploy.ExecuteAsync(saveCdkProject);
             });
             rootCommand.Add(deployCommand);
 
