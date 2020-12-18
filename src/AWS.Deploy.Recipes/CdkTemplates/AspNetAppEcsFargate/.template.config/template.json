@@ -1,0 +1,18 @@
+{
+  "author": "AWS",
+  "classifications": [
+    "AWS",
+    ".NET Deployment Tool"
+  ],
+  "name": "ASP.NET Template CDK Project for ECS Fargate deployment",
+  "identity": "AWS.Deploy.Recipes.AspNetAppEcsFargate",
+  "shortName": "netdeploy.AspNetAppEcsFargate",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "AspNetAppEcsFargate",
+  "preferNameDirectory": true,
+  "symbols": {
+  }
+}

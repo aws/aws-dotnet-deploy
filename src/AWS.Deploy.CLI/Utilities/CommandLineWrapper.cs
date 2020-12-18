@@ -5,10 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Amazon.Runtime;
+using AWS.Deploy.Orchestrator;
+using AWS.Deploy.Orchestrator.Utilities;
 
-namespace AWS.Deploy.Orchestrator.Utilities
+namespace AWS.Deploy.CLI.Utilities
 {
-    public class CommandLineWrapper
+    public class CommandLineWrapper : ICommandLineWrapper
     {
         private readonly IOrchestratorInteractiveService _interactiveService;
         private readonly AWSCredentials _awsCredentials;

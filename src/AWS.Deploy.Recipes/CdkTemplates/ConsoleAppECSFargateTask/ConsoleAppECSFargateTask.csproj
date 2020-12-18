@@ -6,6 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="cdk.out\**" />
+    <EmbeddedResource Remove="cdk.out\**" />
+    <None Remove="cdk.out\**" />
+    <None Include="appsettings.json" CopyToOutputDirectory="Always" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- CDK Construct Library dependencies -->
     <PackageReference Include="Amazon.CDK" Version="1.61.0" />
     <PackageReference Include="Amazon.CDK.AWS.EC2" Version="1.61.0" />
@@ -16,21 +23,6 @@
     <!-- jsii Roslyn analyzers (un-comment to obtain compile-time checks for missing required props
     <PackageReference Include="Amazon.Jsii.Analyzers" Version="*" PrivateAssets="all" />
     -->
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="appsettings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Remove="cdk.out\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="cdk.out\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Remove="cdk.out\**" />
   </ItemGroup>
 
 </Project>

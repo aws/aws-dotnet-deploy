@@ -3,32 +3,27 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text.Json;
+using System.Threading.Tasks;
 using AWS.Deploy.Common;
-using AWS.Deploy.Orchestrator.Utilities;
 using AWS.DeploymentCommon;
 
 namespace AWS.Deploy.Orchestrator
 {
     public class Orchestrator
     {
-        private const string DEPLOYMENT_ENGINE_CDKPROJECT = "CdkProject";
-
+        private readonly ICdkProjectHandler _cdkProjectHandler;
         private readonly IOrchestratorInteractiveService _interactiveService;
         private readonly IList<string> _recipeDefinitionPaths;
-        private readonly CommandLineWrapper _commandLineWrapper;
 
         private readonly OrchestratorSession _session;
 
-        public Orchestrator(OrchestratorSession session, IOrchestratorInteractiveService interactiveService, IList<string> recipeDefinitionPaths)
+        public Orchestrator(OrchestratorSession session, IOrchestratorInteractiveService interactiveService, ICdkProjectHandler cdkProjectHandler, IList<string> recipeDefinitionPaths)
         {
             _session = session;
             _interactiveService = interactiveService;
+            _cdkProjectHandler = cdkProjectHandler;
             _recipeDefinitionPaths = recipeDefinitionPaths;
-
-            _commandLineWrapper = new CommandLineWrapper(_interactiveService, _session.AWSCredentials, _session.AWSRegion);
         }
 
         public PreviousDeploymentSettings GetPreviousDeploymentSettings()
@@ -50,7 +45,7 @@ namespace AWS.Deploy.Orchestrator
             return engine.ComputeRecommendations(_session.ProjectPath);
         }
 
-        public bool DeployRecommendation(string cloudApplicationName, Recommendation recommendation)
+        public async Task DeployRecommendation(string cloudApplicationName, Recommendation recommendation)
         {
             _interactiveService.LogMessageLine($"Initiating deployment: {recommendation.Name}");
 
@@ -64,43 +59,16 @@ namespace AWS.Deploy.Orchestrator
                 dockerEngine.GenerateDockerFile();
             }
 
-            bool success;
             switch (recommendation.Recipe.DeploymentType)
             {
                 case RecipeDefinition.DeploymentTypes.CdkProject:
-                    success = CdkDeployment(cloudApplicationName, recommendation);
+                    await _cdkProjectHandler.CreateCdkDeployment(cloudApplicationName, recommendation);
+                    PersistDeploymentSettings(cloudApplicationName, recommendation);
                     break;
                 default:
                     _interactiveService.LogErrorMessageLine($"Unknown deployment type {recommendation.Recipe.DeploymentType} specified in recipe.");
-                    success = false;
                     break;
             }
-
-            if (success)
-            {
-                PersistDeploymentSettings(cloudApplicationName, recommendation);
-            }
-
-            return success;
-        }
-
-        private bool CdkDeployment(string cloudApplicationName, Recommendation recommendation)
-        {
-            JsonSerializer.Serialize(recommendation);
-
-            var cdkProjectDirectory = Path.Combine(Path.GetDirectoryName(recommendation.Recipe.RecipePath), recommendation.Recipe.CdkProjectTemplate);
-
-            // Write required configuration in appsettings.json
-            var appSettingsFilePath = Path.Combine(cdkProjectDirectory, "appsettings.json");
-            var recommendationSerializer = new CdkAppSettingsSerializer(cloudApplicationName, recommendation);
-            recommendationSerializer.Write(appSettingsFilePath);
-
-            // Handover to CDK command line tool
-            var commands = new List<string> { "cdk deploy --require-approval never" };
-            _commandLineWrapper.Run(commands, cdkProjectDirectory);
-
-            // fake
-            return true;
         }
 
         private void PersistDeploymentSettings(string cloudApplicationName, Recommendation recommendation)
@@ -128,7 +96,6 @@ namespace AWS.Deploy.Orchestrator
                     deployment.RecipeOverrideSettings[option.Id] = value;
                 }
             }
-
 
             try
             {

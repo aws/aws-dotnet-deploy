@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using AWS.DeploymentCommon;
 
@@ -10,31 +11,67 @@ namespace AWS.Deploy.Orchestrator
 {
     public class CdkAppSettingsSerializer
     {
-        private readonly Recommendation _recommendation;
-        private readonly string _stackName;
-
-        public CdkAppSettingsSerializer(string stackName, Recommendation recommendation)
-        {
-            _stackName = stackName;
-            _recommendation = recommendation;
-        }
-
-        public void Write(string path)
+        public string Build(string stackName, Recommendation recommendation)
         {
             // General Settings
             var settings = new Dictionary<string, object>
             {
-                { nameof(_recommendation.ProjectPath), _recommendation.ProjectPath },
-                { "StackName", _stackName }
+                { nameof(recommendation.ProjectPath), recommendation.ProjectPath },
+                { "StackName", stackName},
+                { "DockerfileDirectory",  new FileInfo(recommendation.ProjectPath).Directory.FullName}
             };
 
-            // Option Settings
-            foreach (var optionSetting in _recommendation.Recipe.OptionSettings)
+            string solutionFilePath = GetProjectSolutionFile(recommendation.ProjectPath);
+            if (!string.IsNullOrEmpty(solutionFilePath))
             {
-                settings[optionSetting.Id] = _recommendation.GetOptionSettingValue(optionSetting.Id);
+                settings["ProjectSolutionPath"] = solutionFilePath;
             }
 
-            File.WriteAllText(path, JsonSerializer.Serialize(settings));
+            // Option Settings
+            foreach (var optionSetting in recommendation.Recipe.OptionSettings)
+            {
+                settings[optionSetting.Id] = recommendation.GetOptionSettingValue(optionSetting.Id);
+            }
+
+            return JsonSerializer.Serialize(settings);
+        }
+
+        private string GetProjectSolutionFile(string projectPath)
+        {
+            var projectDirectory = Directory.GetParent(projectPath);
+            var solutionExists = false;
+            while (solutionExists == false && projectDirectory != null)
+            {
+                var files = projectDirectory.GetFiles("*.sln");
+                if (files.Length > 0)
+                {
+                    foreach (var solutionFile in files)
+                    {
+                        if (ValidateProjectInSolution(projectPath, solutionFile.FullName))
+                        {
+                            return solutionFile.FullName;
+                        }
+                    }
+                }
+                projectDirectory = projectDirectory.Parent;
+            }
+            return string.Empty;
+        }
+
+        private bool ValidateProjectInSolution(string projectPath, string solutionFile)
+        {
+            var projectFileName = Path.GetFileName(projectPath);
+            if (string.IsNullOrWhiteSpace(solutionFile) ||
+                string.IsNullOrWhiteSpace(projectFileName))
+            {
+                return false;
+            }
+            List<string> lines = File.ReadAllLines(solutionFile).ToList();
+            var projectLines = lines.Where(x => x.StartsWith("Project"));
+            var projectPaths = projectLines.Select(x => x.Split(',')[1].Replace('\"', ' ').Trim()).ToList();
+
+            //Validate project exists in solution
+            return projectPaths.Select(x => Path.GetFileName(x)).Where(x => x.Equals(projectFileName)).Any();
         }
     }
 }

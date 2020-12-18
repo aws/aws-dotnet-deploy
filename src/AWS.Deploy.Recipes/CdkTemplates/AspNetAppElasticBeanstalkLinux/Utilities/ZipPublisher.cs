@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.IO.Compression;
 
-namespace ASPNETCoreElasticBeanstalkLinux.Utilities
+namespace AspNetAppElasticBeanstalkLinux.Utilities
 {
     /// <summary>
     /// Publishes dotnet project and creates zip of the published artifact

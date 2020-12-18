@@ -1,0 +1,72 @@
+{
+    "Id": "ConsoleAppEcsFargateTask",
+    "Name": "Console Application to ECS Fargate Task",
+    "DeploymentType": "CdkProject",
+    "CdkProjectTemplate": "../CdkTemplates/ConsoleAppEcsFargateTask",
+    "CdkProjectTemplateId": "netdeploy.ConsoleAppEcsFargateTask",
+    "Description": "Console application built as a container and deployed as a task in Elastic Container Service. This is meant for console application that process finite amount of work and exit when complete.",
+    "TargetService": "AWS Elastic Container Service",
+
+    "RecommendationRules": {
+        "RequiredRules": [
+            { "SdkType": "Microsoft.NET.Sdk" },
+            {
+                "MSProperty": {
+                    "Name": "OutputType",
+                    "AllowedValues": [ "Exe" ]
+                }
+            },
+            {
+                "MSProperty": {
+                    "Name": "TargetFramework",
+                    "AllowedValues": [ "netcoreapp2.1", "netcoreapp3.1", "net5.0" ]
+                }
+            }
+        ],
+        "OptionalRules": [
+            { "HasFiles": [ "Dockerfile" ] }
+        ],
+        "NegativeRules": [
+            { "MSPropertyExists": "AWSProjectType" }
+        ],
+
+        "Priority": 100
+    },
+
+    "DeploymentBundle": "Container",
+
+    "OptionSettings": [
+        {
+            "Id": "ClusterName",
+            "Name": "Cluster Name",
+            "Description": "The name of the ECS cluster.",
+            "Type": "String",
+            "TypeHint": "ECSCluster",
+            "DefaultValue": "{ProjectName}",
+            "AdvancedSetting": false,
+            "Updatable": false
+        },
+        {
+            "Id": "ApplicationIAMRole",
+            "Name": "Application IAM Role",
+            "Description": "The Identity and Access Management Role that provides AWS credentials to the application to access AWS services",
+            "Type": "String",
+            "TypeHint": "IAMRole",
+            "DefaultValue": "aws-ecs-role",
+            "AdvancedSetting": false,
+            "Updatable": false,
+            "MinimumPermissions": "...",
+            "AssumeRolePolicy": "..."
+        },
+        {
+            "Id": "Schedule",
+            "Name": "Task Schedule",
+            "Description": "The schedule or rate (frequency) that determines when CloudWatch Events runs the rule.",
+            "Type": "String",
+            "TypeHint": "ECSTaskSchedule",
+            "DefaultValue": "rate(1 hour)",
+            "AdvancedSetting": false,
+            "Updatable": false
+        }
+    ]
+}
