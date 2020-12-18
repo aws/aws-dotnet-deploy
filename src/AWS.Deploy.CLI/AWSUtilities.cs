@@ -55,7 +55,8 @@ namespace AWS.Deploy.CLI
             var sharedCredentials = new SharedCredentialsFile();
             if (sharedCredentials.ListProfileNames().Count == 0)
             {
-                throw new NoAWSCredentialsFoundException(NoAWSCredentialsFoundException.UNABLE_RESOLVE_MESSAGE);
+                _toolInteractiveService.WriteErrorLine("Unable to resolve AWS credentials to access AWS.");
+                throw new NoAWSCredentialsFoundException();
             }
 
             var consoleUtilities = new ConsoleUtilities(_toolInteractiveService);
@@ -63,7 +64,7 @@ namespace AWS.Deploy.CLI
 
             if (!chain.TryGetAWSCredentials(selectedProfileName, out credentials))
             {
-                throw new NoAWSCredentialsFoundException($"Unable to create AWS credentials for profile {profileName}.");
+                _toolInteractiveService.WriteErrorLine($"Unable to create AWS credentials for profile {profileName}.");
             }
 
             return credentials;
