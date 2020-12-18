@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using Amazon.Runtime;
 using AWS.Deploy.Orchestrator;
 using AWS.Deploy.Orchestrator.Utilities;
@@ -16,67 +18,102 @@ namespace AWS.Deploy.CLI.Utilities
         private readonly AWSCredentials _awsCredentials;
         private readonly string _awsRegion;
 
-        public CommandLineWrapper(IOrchestratorInteractiveService interactiveService, AWSCredentials awsCredentials, string awsRegion)
+        public CommandLineWrapper(
+            IOrchestratorInteractiveService interactiveService,
+            AWSCredentials awsCredentials,
+            string awsRegion)
         {
             _interactiveService = interactiveService;
             _awsCredentials = awsCredentials;
             _awsRegion = awsRegion;
         }
 
-        public void Run(IEnumerable<string> commands, string workingDirectory = "")
+        /// <inheritdoc />
+        public async Task Run(
+            string command,
+            string workingDirectory = "",
+            bool streamOutputToInteractiveService = true,
+            Func<Process, Task> onComplete = null,
+            CancellationToken cancelToken = default)
         {
-            var process = new Process();
-            var shell = GetSystemShell();
+            var credentials = await _awsCredentials.GetCredentialsAsync();
+
             var processStartInfo = new ProcessStartInfo
             {
-                FileName = shell,
+                FileName = GetSystemShell(),
+
+                Arguments =
+                    RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                        ? $"/c {command}"
+                        : $"-c \"{command}\"",
+
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
+                CreateNoWindow = true,
                 WorkingDirectory = workingDirectory,
-                EnvironmentVariables = { { "AWS_ACCESS_KEY_ID", _awsCredentials.GetCredentials().AccessKey }, { "AWS_SECRET_ACCESS_KEY", _awsCredentials.GetCredentials().SecretKey }, { "AWS_REGION", _awsRegion } }
+                EnvironmentVariables =
+                {
+                    { "AWS_ACCESS_KEY_ID", credentials.AccessKey },
+                    { "AWS_SECRET_ACCESS_KEY", credentials.SecretKey },
+                    { "AWS_REGION", _awsRegion }
+                }
             };
 
-            if (_awsCredentials.GetCredentials().UseToken)
+            if (credentials.UseToken)
             {
-                processStartInfo.EnvironmentVariables.Add("AWS_SESSION_TOKEN", _awsCredentials.GetCredentials().Token);
+                processStartInfo.EnvironmentVariables.Add("AWS_SESSION_TOKEN", credentials.Token);
             }
 
-            process.StartInfo = processStartInfo;
-            process.Start();
-            process.OutputDataReceived += (sender, e) => { _interactiveService.LogMessageLine(e.Data); };
-            process.ErrorDataReceived += (sender, e) => { _interactiveService.LogMessageLine(e.Data); };
-            process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
-            using (var streamWriter = process.StandardInput)
+            var process = Process.Start(processStartInfo);
+            if (null == process)
+                throw new Exception("Process.Start failed to return a non-null process");
+
+            if (streamOutputToInteractiveService)
             {
-                foreach (var command in commands)
-                {
-                    streamWriter.WriteLine(command);
-                }
+                process.OutputDataReceived += (sender, e) => { _interactiveService.LogMessageLine(e.Data); };
+                process.ErrorDataReceived += (sender, e) => { _interactiveService.LogMessageLine(e.Data); };
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
             }
 
-            process.WaitForExit();
+            // poll for process to prevent blocking the main thread
+            // as opposed to using process.WaitForExit()
+            // in .net5 we can use process.WaitForExitAsync()
+            while (true)
+            {
+                if (process.HasExited)
+                    break;
+
+                await Task.Delay(TimeSpan.FromMilliseconds(50), cancelToken);
+            }
+
+            if (onComplete != null)
+            {
+                await onComplete(process);
+            }
         }
 
         private string GetSystemShell()
         {
-            var comspec = Environment.GetEnvironmentVariable("COMSPEC");
-            if (!string.IsNullOrEmpty(comspec))
-            {
-                _interactiveService.LogMessageLine($"OS Version {Environment.OSVersion}. Using {comspec} as default shell.");
+            if (TryGetEnvironmentVariable("COMSPEC", out var comspec))
                 return comspec;
-            }
 
-            var shell = Environment.GetEnvironmentVariable("SHELL");
-            if (!string.IsNullOrEmpty(shell))
-            {
-                _interactiveService.LogMessageLine($"OS Version {Environment.OSVersion}. Using {shell} as default shell.");
+            if (TryGetEnvironmentVariable("SHELL", out var shell))
                 return shell;
-            }
 
-            throw new NotSupportedException($"{Environment.OSVersion} isn't supported");
+            // fall back to defaults
+            return RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                ? "cmd.exe"
+                : "/bin/sh";
+        }
+
+        private bool TryGetEnvironmentVariable(string variable, out string value)
+        {
+            value = Environment.GetEnvironmentVariable(variable);
+
+            return !string.IsNullOrEmpty(value);
         }
     }
 }

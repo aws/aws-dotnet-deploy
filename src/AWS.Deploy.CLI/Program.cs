@@ -7,7 +7,9 @@ using System.CommandLine.Invocation;
 using System.IO;
 using System.Threading.Tasks;
 using AWS.Deploy.CLI.Commands;
+using AWS.Deploy.CLI.Utilities;
 using AWS.Deploy.Orchestrator;
+using AWS.Deploy.Orchestrator.Utilities;
 using AWS.DeploymentCommon;
 
 namespace AWS.Deploy.CLI
@@ -43,15 +45,22 @@ namespace AWS.Deploy.CLI
             {
                 try
                 {
-                    var systemCapabilityEvaluator = new SystemCapabilityEvaluator();
-                    var systemCapabilities = await systemCapabilityEvaluator.Evaluate();
-
-                    var awsUtilities = new AWSUtilities(_toolInteractiveService);
+                    var orchestratorInteractiveService = new ConsoleOrchestratorLogger(_toolInteractiveService);
 
                     var previousSettings = PreviousDeploymentSettings.ReadSettings(projectPath, null);
 
+                    var awsUtilities = new AWSUtilities(_toolInteractiveService);
                     var awsCredentials = awsUtilities.ResolveAWSCredentials(profile, previousSettings.Profile);
                     var awsRegion = awsUtilities.ResolveAWSRegion(region, previousSettings.Region);
+
+                    var commandLineWrapper =
+                        new CommandLineWrapper(
+                            orchestratorInteractiveService,
+                            awsCredentials,
+                            awsRegion);
+
+                    var systemCapabilityEvaluator = new SystemCapabilityEvaluator(commandLineWrapper);
+                    var systemCapabilities = await systemCapabilityEvaluator.Evaluate();
 
                     var session = new OrchestratorSession
                     {
@@ -63,7 +72,12 @@ namespace AWS.Deploy.CLI
                         SystemCapabilities = systemCapabilities
                     };
 
-                    var deploy = new DeployCommand(new DefaultAWSClientFactory(), _toolInteractiveService, session);
+                    var deploy = new DeployCommand(
+                        new DefaultAWSClientFactory(),
+                        _toolInteractiveService,
+                        orchestratorInteractiveService,
+                        new CdkProjectHandler(orchestratorInteractiveService, commandLineWrapper),
+                        session);
 
                     await deploy.ExecuteAsync(saveCdkProject);
 
