@@ -4,14 +4,15 @@ using Amazon.CDK.AWS.EC2;
 using Amazon.CDK.AWS.ECS;
 using Amazon.CDK.AWS.ECS.Patterns;
 using Amazon.CDK.AWS.IAM;
+using System.IO;
 using Protocol = Amazon.CDK.AWS.ECS.Protocol;
 using Schedule = Amazon.CDK.AWS.ApplicationAutoScaling.Schedule;
 
-namespace ConsoleAppECSFargateTask
+namespace ConsoleAppEcsFargateTask
 {
-    public class ConsoleAppECSFargateTaskStack : Stack
+    public class AppStack : Stack
     {
-        internal ConsoleAppECSFargateTaskStack(Construct scope, string id, Configuration configuration, IStackProps props = null) : base(scope, id, props)
+        internal AppStack(Construct scope, string id, Configuration configuration, IStackProps props = null) : base(scope, id, props)
         {
             var vpc = new Vpc(this, "Vpc", new VpcProps
             {
@@ -44,9 +45,22 @@ namespace ConsoleAppECSFargateTask
                 StreamPrefix = configuration.StackName
             });
 
+            var dockerExecutionDirectory = string.Empty;
+            if (string.IsNullOrEmpty(configuration.ProjectSolutionPath))
+            {
+                dockerExecutionDirectory = new FileInfo(configuration.DockerfileDirectory).FullName;
+            }
+            else
+            {
+                dockerExecutionDirectory = new FileInfo(configuration.ProjectSolutionPath).Directory.FullName;
+            }
+            var relativePath = Path.GetRelativePath(dockerExecutionDirectory, configuration.DockerfileDirectory);
             var container = taskDefinition.AddContainer("Container", new ContainerDefinitionOptions
             {
-                Image = ContainerImage.FromAsset(configuration.DockerfileDirectory),
+                Image = ContainerImage.FromAsset(dockerExecutionDirectory, new AssetImageProps
+                {
+                    File = Path.Combine(relativePath, configuration.DockerfileName)
+                }),
                 Logging = logging
             });
 

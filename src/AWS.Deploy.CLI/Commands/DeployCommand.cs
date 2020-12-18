@@ -9,6 +9,7 @@ using Amazon.ElasticBeanstalk;
 using AWS.Deploy.Orchestrator;
 using AWS.Deploy.Recipes;
 using AWS.DeploymentCommon;
+using AWS.Deploy.CLI.Utilities;
 
 namespace AWS.Deploy.CLI.Commands
 {
@@ -17,7 +18,6 @@ namespace AWS.Deploy.CLI.Commands
         private readonly IAWSClientFactory _awsClientFactory;
         private readonly IToolInteractiveService _interactiveService;
         private readonly ConsoleUtilities _consoleUtilities;
-
         private readonly OrchestratorSession _session;
 
         public DeployCommand(IAWSClientFactory awsClientFactory, IToolInteractiveService interactiveService, OrchestratorSession session)
@@ -25,14 +25,15 @@ namespace AWS.Deploy.CLI.Commands
             _awsClientFactory = awsClientFactory;
             _interactiveService = interactiveService;
             _consoleUtilities = new ConsoleUtilities(interactiveService);
-
             _session = session;
         }
 
         public async Task ExecuteAsync(bool saveCdkProject)
         {
-            
-            var orchestrator = new Orchestrator.Orchestrator(_session, new ConsoleOrchestratorLogger(_interactiveService), new []{ RecipeLocator.FindRecipeDefinitionsPath() });
+            var consoleOrchestratorLogger = new ConsoleOrchestratorLogger(_interactiveService);
+            var commandLineWrapper = new CommandLineWrapper(consoleOrchestratorLogger, _session.AWSCredentials, _session.AWSRegion);
+            var cdkProjectHandler = new CdkProjectHandler(consoleOrchestratorLogger, commandLineWrapper);
+            var orchestrator = new Orchestrator.Orchestrator(_session, consoleOrchestratorLogger, cdkProjectHandler, new []{ RecipeLocator.FindRecipeDefinitionsPath() });
 
             var previousSettings = orchestrator.GetPreviousDeploymentSettings();
             var previousDeploymentNames = previousSettings.GetDeploymentNames();
@@ -88,7 +89,7 @@ namespace AWS.Deploy.CLI.Commands
                 configureSettings = _consoleUtilities.AskYesNoQuestion("Do you wish to change any of these settings?", ConsoleUtilities.YesNo.No);
             }
 
-            orchestrator.DeployRecommendation(cloudApplicationName, selectedRecommendation);
+            await orchestrator.DeployRecommendation(cloudApplicationName, selectedRecommendation);
         }
 
         private async Task ConfigureDeployment(Recommendation recommendation)

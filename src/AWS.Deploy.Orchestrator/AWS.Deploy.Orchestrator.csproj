@@ -9,6 +9,8 @@
 
   <ItemGroup>
     <PackageReference Include="AWSSDK.Core" Version="3.5.1.7" />
+    <PackageReference Include="Microsoft.TemplateEngine.IDE" Version="5.0.1" />
+    <PackageReference Include="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="5.0.1" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,0 +1,18 @@
+{
+  "author": "AWS",
+  "classifications": [
+    "AWS",
+    ".NET Deployment Tool"
+  ],
+  "name": "ASP.NET Template CDK Project for Elastic Beanstalk deployment on Linux",
+  "identity": "AWS.Deploy.Recipes.AspNetAppElasticBeanstalkLinux",
+  "shortName": "netdeploy.AspNetAppElasticBeanstalkLinux",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "AspNetAppElasticBeanstalkLinux",
+  "preferNameDirectory": true,
+  "symbols": {
+  }
+}

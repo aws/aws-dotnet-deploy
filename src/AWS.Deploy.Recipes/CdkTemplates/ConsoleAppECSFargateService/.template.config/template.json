@@ -1,0 +1,18 @@
+{
+  "author": "AWS",
+  "classifications": [
+    "AWS",
+    ".NET Deployment Tool"
+  ],
+  "name": "Console Template CDK Project for ECS Fargate Service deployment",
+  "identity": "AWS.Deploy.Recipes.ConsoleAppEcsFargateService",
+  "shortName": "netdeploy.ConsoleAppEcsFargateService",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "ConsoleAppEcsFargateService",
+  "preferNameDirectory": true,
+  "symbols": {
+  }
+}

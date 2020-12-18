@@ -3,11 +3,11 @@ using Amazon.CDK.AWS.ElasticBeanstalk;
 using Amazon.CDK.AWS.IAM;
 using Amazon.CDK.AWS.S3.Assets;
 
-namespace ASPNETCoreElasticBeanstalkLinux
+namespace AspNetAppElasticBeanstalkLinux
 {
-    public class ASPNETCoreElasticBeanstalkLinuxStack : Stack
+    public class AppStack : Stack
     {
-        internal ASPNETCoreElasticBeanstalkLinuxStack(Construct scope, string id, Configuration configuration, IStackProps props = null) : base(scope, id, props)
+        internal AppStack(Construct scope, string id, Configuration configuration, IStackProps props = null) : base(scope, id, props)
         {
             var asset = new Asset(this, "Asset", new AssetProps
             {

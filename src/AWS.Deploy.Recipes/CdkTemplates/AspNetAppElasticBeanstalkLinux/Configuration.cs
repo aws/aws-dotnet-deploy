@@ -2,7 +2,7 @@ using System.Collections.Specialized;
 using Amazon.CDK.AWS.S3;
 using Microsoft.Extensions.Configuration;
 
-namespace ASPNETCoreElasticBeanstalkLinux
+namespace AspNetAppElasticBeanstalkLinux
 {
     public class Configuration
     {
@@ -47,16 +47,5 @@ namespace ASPNETCoreElasticBeanstalkLinux
         /// Latest 64bit Amazon Linux 2 running .NET Core.
         /// </summary>
         public string SolutionStackName { get; set; }
-
-        public Configuration(IConfiguration root)
-        {
-            StackName = root[nameof(StackName)];
-            ProjectPath = root[nameof(ProjectPath)];
-            ApplicationName = root[nameof(ApplicationName)];
-            EnvironmentName = root[nameof(EnvironmentName)];
-            InstanceType = root[nameof(InstanceType)];
-            EnvironmentType = root[nameof(EnvironmentType)];
-            ApplicationIAMRole = root[nameof(ApplicationIAMRole)];
-        }
     }
 }

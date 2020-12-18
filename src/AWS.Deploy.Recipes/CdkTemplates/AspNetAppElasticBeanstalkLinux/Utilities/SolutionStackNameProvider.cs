@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Amazon.ElasticBeanstalk;
 using Amazon.ElasticBeanstalk.Model;
 
-namespace ASPNETCoreElasticBeanstalkLinux
+namespace AspNetAppElasticBeanstalkLinux
 {
     /// <summary>
     /// Provides name of the latest 64bit Amazon Linux 2 running .NET Core.

@@ -14,11 +14,11 @@ namespace AWS.Deploy.CLI.UnitTests
 {
     public class RecommendationTests
     {
-        private const string ASPNET_CORE_ASPNET_CORE_FARGATE_RECIPE_ID = "ASPNETCoreECSFargate";
-        private const string ASPNET_CORE_BEANSTALK_RECIPE_ID = "ASPNETCoreElasticBeanstalkLinux";
+        private const string ASPNET_CORE_ASPNET_CORE_FARGATE_RECIPE_ID = "AspNetAppEcsFargate";
+        private const string ASPNET_CORE_BEANSTALK_RECIPE_ID = "AspNetAppElasticBeanstalkLinux";
 
-        private const string CONSOLE_APP_FARGATE_SERVICE_RECIPE_ID = "ConsoleAppECSFargateService";
-        private const string CONSOLE_APP_FARGATE_TASK_RECIPE_ID = "ConsoleAppECSFargateTask";
+        private const string CONSOLE_APP_FARGATE_SERVICE_RECIPE_ID = "ConsoleAppEcsFargateService";
+        private const string CONSOLE_APP_FARGATE_TASK_RECIPE_ID = "ConsoleAppEcsFargateTask";
 
         [Fact]
         public void WebAppNoDockerFileTest()

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace ASPNETCoreElasticBeanstalkLinux.Utilities
+namespace AspNetAppElasticBeanstalkLinux.Utilities
 {
     public class CommandLineWrapper
     {
