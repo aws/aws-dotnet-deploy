@@ -37,7 +37,7 @@ namespace AWS.DeploymentCommon
 
             if (!File.Exists(projectPath))
             {
-                throw new ProjectFileNotFoundException($"Project path {projectPath} not found.");
+                throw new ProjectFileNotFoundException(projectPath);
             }
 
             ProjectPath = projectPath;

@@ -1,6 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
@@ -37,31 +38,52 @@ namespace AWS.Deploy.CLI
                 _optionProjectPath,
                 _optionSaveCdkProject
             };
+
             deployCommand.Handler = CommandHandler.Create<string, string, string, bool>(async (profile, region, projectPath, saveCdkProject) =>
             {
-                var systemCapabilityEvaluator = new SystemCapabilityEvaluator();
-                var systemCapabilities = await systemCapabilityEvaluator.Evaluate();
-
-                var awsUtilities = new AWSUtilities(_toolInteractiveService);
-
-                var previousSettings = PreviousDeploymentSettings.ReadSettings(projectPath, null);
-
-                var awsCredentials = awsUtilities.ResolveAWSCredentials(profile, previousSettings.Profile);
-                var awsRegion = awsUtilities.ResolveAWSRegion(region, previousSettings.Region);
-
-                var session = new OrchestratorSession
+                try
                 {
-                    AWSProfileName = profile,
-                    AWSCredentials = awsCredentials,
-                    AWSRegion = awsRegion,
-                    ProjectPath = projectPath,
-                    ProjectDirectory = projectPath,
-                    SystemCapabilities = systemCapabilities
-                };
+                    var systemCapabilityEvaluator = new SystemCapabilityEvaluator();
+                    var systemCapabilities = await systemCapabilityEvaluator.Evaluate();
 
-                var deploy = new DeployCommand(new DefaultAWSClientFactory(), _toolInteractiveService, session);
+                    var awsUtilities = new AWSUtilities(_toolInteractiveService);
 
-                await deploy.ExecuteAsync(saveCdkProject);
+                    var previousSettings = PreviousDeploymentSettings.ReadSettings(projectPath, null);
+
+                    var awsCredentials = awsUtilities.ResolveAWSCredentials(profile, previousSettings.Profile);
+                    var awsRegion = awsUtilities.ResolveAWSRegion(region, previousSettings.Region);
+
+                    var session = new OrchestratorSession
+                    {
+                        AWSProfileName = profile,
+                        AWSCredentials = awsCredentials,
+                        AWSRegion = awsRegion,
+                        ProjectPath = projectPath,
+                        ProjectDirectory = projectPath,
+                        SystemCapabilities = systemCapabilities
+                    };
+
+                    var deploy = new DeployCommand(new DefaultAWSClientFactory(), _toolInteractiveService, session);
+
+                    await deploy.ExecuteAsync(saveCdkProject);
+
+                    return 0;
+                }
+                catch (Exception e) when (e.IsAWSDeploymentExpectedException())
+                {
+                    // helpful error message should have already been presented to the user,
+                    // bail out with an non-zero return code.
+                    return -1;
+                }
+                catch (Exception e)
+                {
+                    // This is a bug
+                    _toolInteractiveService.WriteErrorLine(
+                        "Unhandled exception.  This is a bug.  Please copy the stack trace below and file a bug at https://github.com/aws/aws-dotnet-deploy. " + 
+                        e.PrettyPrint());
+
+                    return -1;
+                }
             });
             rootCommand.Add(deployCommand);
 

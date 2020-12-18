@@ -60,7 +60,7 @@ namespace AWS.Deploy.CLI.Commands
             if (recommendations.Count == 0)
             {
                 _interactiveService.WriteErrorLine($"Unable to determine a method for deploying application: {_session.ProjectPath}");
-                return;
+                throw new FailedToGenerateAnyRecommendations();
             }
 
             // If there was a previous deployment be sure to make that recipe be the top recommendation.
@@ -77,11 +77,18 @@ namespace AWS.Deploy.CLI.Commands
             var selectedRecommendation = _consoleUtilities.AskUserToChoose(recommendations, "Available options to deploy project", recommendations[0]);
             selectedRecommendation.ApplyPreviousSettings(previousDeployment?.RecipeOverrideSettings);
 
+            if (selectedRecommendation.Recipe.DeploymentType == RecipeDefinition.DeploymentTypes.CdkProject &&
+                !_session.SystemCapabilities.NodeJsMinVersionInstalled)
+            {
+                _interactiveService.WriteErrorLine("The selected Recipe requires docker but docker was not detected.  Please install docker: https://docs.docker.com/engine/install/");
+                throw new MissingNodeJsException();
+            }
+
             if (selectedRecommendation.Recipe.DeploymentBundle == RecipeDefinition.DeploymentBundleTypes.Container &&
                 !_session.SystemCapabilities.DockerInstalled)
             {
                 _interactiveService.WriteErrorLine("The selected Recipe requires docker but docker was not detected.  Please install docker: https://docs.docker.com/engine/install/");
-                return;
+                throw new MissingDockerException();
             }
 
             DisplaySettings(selectedRecommendation, false);
