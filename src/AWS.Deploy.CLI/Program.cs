@@ -67,13 +67,13 @@ namespace AWS.Deploy.CLI
 
                     await deploy.ExecuteAsync(saveCdkProject);
 
-                    return 0;
+                    return CommandReturnCodes.SUCCESS;
                 }
                 catch (Exception e) when (e.IsAWSDeploymentExpectedException())
                 {
                     // helpful error message should have already been presented to the user,
                     // bail out with an non-zero return code.
-                    return -1;
+                    return CommandReturnCodes.USER_ERROR;
                 }
                 catch (Exception e)
                 {
@@ -82,7 +82,7 @@ namespace AWS.Deploy.CLI
                         "Unhandled exception.  This is a bug.  Please copy the stack trace below and file a bug at https://github.com/aws/aws-dotnet-deploy. " + 
                         e.PrettyPrint());
 
-                    return -1;
+                    return CommandReturnCodes.UNHANDLED_EXCEPTION;
                 }
             });
             rootCommand.Add(deployCommand);
