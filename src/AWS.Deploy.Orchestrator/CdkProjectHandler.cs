@@ -33,25 +33,31 @@ namespace AWS.Deploy.Orchestrator
             // Write required configuration in appsettings.json
             var appSettingsBody = _appSettingsBuilder.Build(cloudApplicationName, recommendation);
             var appSettingsFilePath = Path.Combine(cdkProjectPath, "appsettings.json");
-            using (StreamWriter appSettingsFile = new StreamWriter(appSettingsFilePath))
+            using (var appSettingsFile = new StreamWriter(appSettingsFilePath))
             {
                 await appSettingsFile.WriteAsync(appSettingsBody);
             }
-            
-            if (session.SystemCapabilities.CdkNpmModuleInstalledGlobally)
+
+            _interactiveService.LogMessageLine("Starting deployment of CDK Project");
+
+            // install cdk locally if needed
+            if (!session.SystemCapabilities.CdkNpmModuleInstalledGlobally)
             {
-                // install cdk locally
-                _commandLineWrapper.Run(new[] { "npm install aws-cdk" }, cdkProjectPath);
+                await _commandLineWrapper.Run("npm install aws-cdk", cdkProjectPath, streamOutputToInteractiveService: false);
             }
 
             // Handover to CDK command line tool
-            var commands = new List<string> { "npm cdk deploy --require-approval never" };
-            _commandLineWrapper.Run(commands, cdkProjectPath);
+            await _commandLineWrapper.Run( "npx cdk deploy --require-approval never", cdkProjectPath);
         }
 
         private async Task<string> CreateCdkProjectForDeployment(Recommendation recommendation)
         {
-            var tempDirectoryPath = Path.Combine(Path.GetTempPath(), "AWS.Deploy", "Projects", Path.GetRandomFileName());
+            var tempDirectoryPath =
+                Path.Combine(
+                    Path.GetTempPath(),
+                    "AWS.Deploy",
+                    "Projects",
+                    Path.GetFileNameWithoutExtension(Path.GetRandomFileName()));
             Directory.CreateDirectory(tempDirectoryPath);
 
             var templateEngine = new TemplateEngine();

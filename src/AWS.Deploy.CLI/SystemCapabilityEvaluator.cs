@@ -2,11 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Threading;
 using System.Threading.Tasks;
 using AWS.Deploy.Orchestrator;
+using AWS.Deploy.Orchestrator.Utilities;
 
 namespace AWS.Deploy.CLI
 {
@@ -17,6 +15,13 @@ namespace AWS.Deploy.CLI
 
     internal class SystemCapabilityEvaluator : ISystemCapabilityEvaluator
     {
+        private readonly ICommandLineWrapper _commandLineWrapper;
+
+        public SystemCapabilityEvaluator(ICommandLineWrapper commandLineWrapper)
+        {
+            _commandLineWrapper = commandLineWrapper;
+        }
+
         public async Task<SystemCapabilities> Evaluate()
         {
             var dockerTask = HasDockerInstalled();
@@ -35,9 +40,9 @@ namespace AWS.Deploy.CLI
 
         private async Task<bool> HasDockerInstalled()
         {
-            var (success, _) = await TryRunShellCommand("docker --version");
+            var result = await _commandLineWrapper.TryRunWithResult("docker --version");
 
-            return success;
+            return result.Success;
         }
 
         /// <summary>
@@ -47,12 +52,14 @@ namespace AWS.Deploy.CLI
         private async Task<bool> HasMinVersionNodeJs()
         {
             // run node --version to get the version
-            var (success, versionString) = await TryRunShellCommand("node --version");
+            var result = await _commandLineWrapper.TryRunWithResult("node --version");
 
+            var versionString = result.StandardOut;
+            
             if (versionString.StartsWith("v", StringComparison.OrdinalIgnoreCase))
                 versionString = versionString.Substring(1, versionString.Length - 1);
 
-            if (!success || !Version.TryParse(versionString, out var version))
+            if (!result.Success || !Version.TryParse(versionString, out var version))
                 return false;
 
             return version.Major > 10 || version.Major == 10 && version.Minor >= 3;
@@ -60,42 +67,9 @@ namespace AWS.Deploy.CLI
 
         private async Task<bool> HasCdkInstalled()
         {
-            var (success, _) = await TryRunShellCommand("cdk --version");
+            var result = await _commandLineWrapper.TryRunWithResult("cdk --version");
 
-            return success;
-        }
-
-        private async Task<(bool success, string output)> TryRunShellCommand(string command)
-        {
-            var startInfo = new ProcessStartInfo
-            {
-                FileName =
-                    RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                        ? "cmd.exe"
-                        : "/bin/sh",
-                Arguments =
-                    RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                    ? $"/c {command}"
-                    : $"-c \"{command}\"",
-
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true
-            };
-
-            var process = Process.Start(startInfo);
-
-            if (null == process)
-                throw new Exception($"Failed to start cmd to execute [{command}]");
-
-            await process.WaitForExitAsync(new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token);
-
-            return
-            (
-                success: (await process.StandardError.ReadToEndAsync()).Length == 0,
-                output: await process.StandardOutput.ReadToEndAsync()
-            );
+            return result.Success;
         }
     }
 }

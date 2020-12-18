@@ -18,7 +18,11 @@ namespace AWS.Deploy.Orchestrator
 
         private readonly OrchestratorSession _session;
 
-        public Orchestrator(OrchestratorSession session, IOrchestratorInteractiveService interactiveService, ICdkProjectHandler cdkProjectHandler, IList<string> recipeDefinitionPaths)
+        public Orchestrator(
+            OrchestratorSession session,
+            IOrchestratorInteractiveService interactiveService,
+            ICdkProjectHandler cdkProjectHandler,
+            IList<string> recipeDefinitionPaths)
         {
             _session = session;
             _interactiveService = interactiveService;
