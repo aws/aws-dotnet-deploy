@@ -84,11 +84,12 @@ namespace AWS.Deploy.CLI
                 var awsCredentials = awsUtilities.ResolveAWSCredentials(profile, previousSettings.Profile);
                 var awsRegion = awsUtilities.ResolveAWSRegion(region, previousSettings.Region);
 
-                var session = new OrchestratorSession(projectPath, null)
+                var session = new OrchestratorSession
                 {
                     AWSProfileName = profile,
                     AWSCredentials = awsCredentials,
                     AWSRegion = awsRegion,
+                    ProjectPath = projectPath,
                     ProjectDirectory = projectPath
                 };
 
