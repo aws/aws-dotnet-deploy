@@ -16,10 +16,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Commands\DeleteStackCommand.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="AWSSDK.Core" Version="3.5.1.47" />
     <PackageReference Include="AWSSDK.ECS" Version="3.5.2.6" />
     <PackageReference Include="AWSSDK.ElasticBeanstalk" Version="3.5.2.5" />
