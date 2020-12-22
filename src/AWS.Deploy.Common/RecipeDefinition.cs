@@ -13,7 +13,8 @@ namespace AWS.DeploymentCommon
         public enum OptionSettingValueType
         {
             String,
-            Int
+            Int,
+            Bool
         };
 
         public enum OptionSettingTypeHint
@@ -174,6 +175,15 @@ namespace AWS.DeploymentCommon
         }
 
         /// <summary>
+        /// Container for property dependencies
+        /// </summary>
+        public class PropertyDependency
+        {
+            public string Id { get; set; }
+            public string Value { get; set; }
+        }
+
+        /// <summary>
         /// Container for the setting values
         /// </summary>
         public class OptionSettingItem
@@ -231,6 +241,11 @@ namespace AWS.DeploymentCommon
             /// The allowed values for the setting.
             /// </summary>
             public IList<string> AllowedValues { get; set; }
+
+            /// <summary>
+            /// Property will be displayed if specified dependencies are true
+            /// </summary>
+            public IList<PropertyDependency> DependsOn { get; set; }
         }
     }
 }

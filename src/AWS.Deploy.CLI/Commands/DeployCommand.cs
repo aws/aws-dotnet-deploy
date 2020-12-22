@@ -125,6 +125,22 @@ namespace AWS.Deploy.CLI.Commands
             var awsUtilities = new AWSUtilities(_toolInteractiveService);
             foreach (var setting in recommendation.Recipe.OptionSettings)
             {
+                var isDisplayed = true;
+                foreach(var dependency in setting.DependsOn ?? Enumerable.Empty<RecipeDefinition.PropertyDependency>())
+                {
+                    var dependsOnValue = recommendation.GetOptionSettingValue(dependency.Id);
+                    if (!dependsOnValue.Equals(dependency.Value))
+                    {
+                        isDisplayed = false;
+                        break;
+                    }
+                }
+                if (!isDisplayed)
+                {
+                    recommendation.SetOverrideOptionSettingValue(setting.Id, setting.DefaultValue);
+                    continue;
+                }
+
                 _toolInteractiveService.WriteLine($"{setting.Name}:");
                 _toolInteractiveService.WriteLine(setting.Description);
 

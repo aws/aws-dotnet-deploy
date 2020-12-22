@@ -14,6 +14,7 @@ namespace AWS.Deploy.Orchestrator
         public AWSCredentials AWSCredentials { get; set; }
         public string AWSRegion { get; set; }
         public SystemCapabilities SystemCapabilities { get; set; }
+        public string AWSAccountId { get; set; }
 
         private string _projectDirectory;
         public string ProjectDirectory

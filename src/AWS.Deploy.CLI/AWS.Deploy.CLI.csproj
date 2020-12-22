@@ -16,11 +16,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.Core" Version="3.5.1.47" />
+    <PackageReference Include="AWSSDK.Core" Version="3.5.1.52" />
     <PackageReference Include="AWSSDK.ECS" Version="3.5.2.6" />
     <PackageReference Include="AWSSDK.ElasticBeanstalk" Version="3.5.2.5" />
     <PackageReference Include="AWSSDK.IdentityManagement" Version="3.5.0.47" />
     <PackageReference Include="AWSSDK.CloudFormation" Version="3.5.2.5" />
+    <PackageReference Include="AWSSDK.SecurityToken" Version="3.5.1.32" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20427.1" />
   </ItemGroup>
 

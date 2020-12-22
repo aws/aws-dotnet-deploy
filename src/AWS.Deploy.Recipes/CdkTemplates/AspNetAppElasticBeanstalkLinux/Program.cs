@@ -1,9 +1,4 @@
 using Amazon.CDK;
-using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using AspNetAppElasticBeanstalkLinux.Utilities;
 using Microsoft.Extensions.Configuration;
@@ -24,7 +19,14 @@ namespace AspNetAppElasticBeanstalkLinux
             configuration.SolutionStackName = await solutionStackNameProvider.GetSolutionStackNameAsync();
 
             var app = new App();
-            new AppStack(app, configuration.StackName, configuration);
+            new AppStack(app, configuration.StackName, configuration, new StackProps
+            {
+                Env = new Environment
+                {
+                    Account = "AWSAccountId",
+                    Region = "AWSRegion"
+                }
+            });
             app.Synth();
         }
     }

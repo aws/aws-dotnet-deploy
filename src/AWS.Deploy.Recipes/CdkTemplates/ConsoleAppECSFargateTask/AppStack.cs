@@ -14,10 +14,21 @@ namespace ConsoleAppEcsFargateTask
     {
         internal AppStack(Construct scope, string id, Configuration configuration, IStackProps props = null) : base(scope, id, props)
         {
+#if (UseExistingVPC)
+            var vpc = Vpc.FromLookup(this, "Vpc", new VpcLookupOptions
+            {
+    #if (UseDefaultVPC)
+                IsDefault = true
+    #else
+                VpcId = "VPC-Placeholder"
+    #endif
+            });
+#else
             var vpc = new Vpc(this, "Vpc", new VpcProps
             {
                 MaxAzs = 2
             });
+#endif
 
             var cluster = new Cluster(this, "Cluster", new ClusterProps
             {
