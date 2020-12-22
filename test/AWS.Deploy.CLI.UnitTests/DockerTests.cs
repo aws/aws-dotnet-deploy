@@ -6,6 +6,7 @@ using System.IO;
 using System.Reflection;
 using AWS.Deploy.DockerEngine;
 using AWS.DeploymentCommon;
+using Should;
 using Xunit;
 
 namespace AWS.Deploy.CLI.UnitTests
@@ -19,10 +20,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var engine = new DockerEngine.DockerEngine(new ProjectDefinition(projectPath));
             engine.GenerateDockerFile();
 
-            var dockerfile = File.ReadAllText(Path.Combine(projectPath, "Dockerfile"));
-            var referenceDockerfile = File.ReadAllText(Path.Combine(projectPath, "referenceDockerfile"));
-
-            Assert.Equal(dockerfile, referenceDockerfile);
+            AssertDockerFilesAreEqual(projectPath);
         }
 
         [Fact]
@@ -32,10 +30,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var engine = new DockerEngine.DockerEngine(new ProjectDefinition(projectPath));
             engine.GenerateDockerFile();
 
-            var dockerfile = File.ReadAllText(Path.Combine(projectPath, "Dockerfile"));
-            var referenceDockerfile = File.ReadAllText(Path.Combine(projectPath, "referenceDockerfile"));
-
-            Assert.Equal(dockerfile, referenceDockerfile);
+            AssertDockerFilesAreEqual(projectPath);
         }
 
         [Fact]
@@ -45,10 +40,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var engine = new DockerEngine.DockerEngine(new ProjectDefinition(projectPath));
             engine.GenerateDockerFile();
 
-            var dockerfile = File.ReadAllText(Path.Combine(projectPath, "Dockerfile"));
-            var referenceDockerfile = File.ReadAllText(Path.Combine(projectPath, "referenceDockerfile"));
-
-            Assert.Equal(dockerfile, referenceDockerfile);
+            AssertDockerFilesAreEqual(projectPath);
         }
 
         [Fact]
@@ -58,23 +50,17 @@ namespace AWS.Deploy.CLI.UnitTests
             var engine = new DockerEngine.DockerEngine(new ProjectDefinition(projectPath));
             engine.GenerateDockerFile();
 
-            var dockerfile = File.ReadAllText(Path.Combine(projectPath, "Dockerfile"));
-            var referenceDockerfile = File.ReadAllText(Path.Combine(projectPath, "referenceDockerfile"));
-
-            Assert.Equal(dockerfile, referenceDockerfile);
+            AssertDockerFilesAreEqual(projectPath);
         }
 
-        [Fact(Skip = "TODO: Fix line endings ")]
+        [Fact]
         public void DockerGenerateWebAppProjectDependencies()
         {
             var projectPath = ResolvePath("WebAppProjectDependencies\\WebAppProjectDependencies");
             var engine = new DockerEngine.DockerEngine(new ProjectDefinition(projectPath));
             engine.GenerateDockerFile();
 
-            var dockerfile = File.ReadAllText(Path.Combine(projectPath, "Dockerfile"));
-            var referenceDockerfile = File.ReadAllText(Path.Combine(projectPath, "referenceDockerfile"));
-
-            Assert.Equal(dockerfile, referenceDockerfile);
+            AssertDockerFilesAreEqual(projectPath);
         }
 
         [Fact]
@@ -84,10 +70,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var engine = new DockerEngine.DockerEngine(new ProjectDefinition(projectPath));
             engine.GenerateDockerFile();
 
-            var dockerfile = File.ReadAllText(Path.Combine(projectPath, "Dockerfile"));
-            var referenceDockerfile = File.ReadAllText(Path.Combine(projectPath, "referenceDockerfile"));
-
-            Assert.Equal(dockerfile, referenceDockerfile);
+            AssertDockerFilesAreEqual(projectPath);
         }
 
         [Fact]
@@ -97,21 +80,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var engine = new DockerEngine.DockerEngine(new ProjectDefinition(projectPath));
             engine.GenerateDockerFile();
 
-            var dockerfile = File.ReadAllText(Path.Combine(projectPath, "Dockerfile"));
-            var referenceDockerfile = File.ReadAllText(Path.Combine(projectPath, "referenceDockerfile"));
-
-            Assert.Equal(dockerfile, referenceDockerfile);
-        }
-
-        private string ResolvePath(string projectName)
-        {
-            var testsPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            while (testsPath != null && !string.Equals(new DirectoryInfo(testsPath).Name, "test", StringComparison.OrdinalIgnoreCase))
-            {
-                testsPath = Directory.GetParent(testsPath).FullName;
-            }
-
-            return Path.Combine(testsPath, "..", "testapps", "docker", projectName);
+            AssertDockerFilesAreEqual(projectPath);
         }
 
         [Fact]
@@ -126,6 +95,29 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var dockerFileTemplate = ProjectUtilities.ReadTemplate();
             Assert.False(string.IsNullOrWhiteSpace(dockerFileTemplate));
+        }
+
+        private string ResolvePath(string projectName)
+        {
+            var testsPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            while (testsPath != null && !string.Equals(new DirectoryInfo(testsPath).Name, "test", StringComparison.OrdinalIgnoreCase))
+            {
+                testsPath = Directory.GetParent(testsPath).FullName;
+            }
+
+            return Path.Combine(testsPath, "..", "testapps", "docker", projectName);
+        }
+
+        private void AssertDockerFilesAreEqual(string path, string generatedFile = "Dockerfile", string referenceFile = "Dockerfile")
+        {
+            var generated = File.ReadAllText(Path.Combine(path, generatedFile));
+            var reference = File.ReadAllText(Path.Combine(path, referenceFile));
+
+            // normalize line endings
+            generated = generated.Replace("\r\n", "\n");
+            reference = reference.Replace("\r\n", "\n");
+
+            generated.ShouldEqual(reference);
         }
     }
 }
