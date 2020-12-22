@@ -27,7 +27,7 @@ namespace AWS.Deploy.Orchestrator
             _bootstrapper = new Bootstrapper(CreateHost(), null, virtualizeConfiguration: true);
         }
 
-        public async Task GenerateCDKProjectFromTemplate(Recommendation recommendation, string outputDirectory)
+        public async Task GenerateCDKProjectFromTemplate(Recommendation recommendation, OrchestratorSession session, string outputDirectory)
         {
             //The location of the base template that will be installed into the templating engine
             var cdkProjectTemplateDirectory = Path.Combine(Path.GetDirectoryName(recommendation.Recipe.RecipePath), recommendation.Recipe.CdkProjectTemplate);
@@ -48,10 +48,22 @@ namespace AWS.Deploy.Orchestrator
             if (template == null)
                 throw new Exception($"Failed to find a Template for [{recommendation.Recipe.CdkProjectTemplateId}]");
 
+            var templateParameters = new Dictionary<string, string> {
+                { "AWSAccountID" , session.AWSAccountId },
+                { "AWSRegion" , session.AWSRegion }
+            };
+
+            foreach(var option in recommendation.Recipe.OptionSettings)
+            {
+                var currentValue = recommendation.GetOptionSettingValue(option.Id);
+                if (currentValue != null)
+                    templateParameters[option.Id] = currentValue.ToString();
+            }
+
             try
             {
                 //Generate the CDK project using the installed template into the output directory
-                await _bootstrapper.CreateAsync(template, recommendation.ProjectDefinition.AssemblyName, outputDirectory, new Dictionary<string, string>(), false, "");
+                await _bootstrapper.CreateAsync(template, recommendation.ProjectDefinition.AssemblyName, outputDirectory, templateParameters, false, "");
             }
             catch
             {

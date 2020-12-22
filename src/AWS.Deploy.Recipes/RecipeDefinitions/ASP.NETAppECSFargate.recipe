@@ -71,6 +71,56 @@
             "Updatable": false,
             "MinimumPermissions": "...",
             "AssumeRolePolicy": "..."
+        },
+        {
+            "Id": "UseExistingVPC",
+            "Name": "Use Existing VPC",
+            "Description": "Do you want to use an existing VPC for the deployment?",
+            "Type": "Bool",
+            "DefaultValue": "false",
+            "AllowedValues": [
+                "false",
+                "true"
+            ],
+            "AdvancedSetting": true,
+            "Updatable": true
+        },
+        {
+            "Id": "ExistingVPC",
+            "Name": "Existing VPC Id",
+            "Description": "The Id of the existing VPC to use.",
+            "Type": "String",
+            "DefaultValue": "",
+            "DependsOn": [
+                {
+                    "Id": "UseExistingVPC",
+                    "Value": "true"
+                }
+            ],
+            "AdvancedSetting": true,
+            "Updatable": true
+        },
+        {
+            "Id": "UseDefaultVPC",
+            "Name": "Use Default VPC",
+            "Description": "Do you want to use the default VPC for the deployment?",
+            "Type": "Bool",
+            "DefaultValue": "false",
+            "AllowedValues": [
+                "true"
+            ],
+            "DependsOn": [
+                {
+                    "Id": "UseExistingVPC",
+                    "Value": "true"
+                },
+                {
+                    "Id": "ExistingVPC",
+                    "Value": ""
+                }
+            ],
+            "AdvancedSetting": true,
+            "Updatable": true
         }
     ]
 }

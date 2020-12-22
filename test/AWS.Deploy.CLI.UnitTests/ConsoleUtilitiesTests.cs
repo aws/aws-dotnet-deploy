@@ -79,7 +79,7 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var interactiveServices = new TestToolInteractiveServiceImpl(new List<string> { "n" });
             var consoleUtilities = new ConsoleUtilities(interactiveServices);
-            var selectedValue = consoleUtilities.AskYesNoQuestion("Do you want to deploy", null);
+            var selectedValue = consoleUtilities.AskYesNoQuestion("Do you want to deploy");
             Assert.Equal(ConsoleUtilities.YesNo.No, selectedValue);
 
             Assert.DoesNotContain("(default:", interactiveServices.OutputMessages[0]);

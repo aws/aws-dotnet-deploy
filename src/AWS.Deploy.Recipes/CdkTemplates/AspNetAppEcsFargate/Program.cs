@@ -11,7 +11,14 @@ namespace AspNetAppEcsFargate
             var configuration = builder.Build().Get<Configuration>();
 
             var app = new App();
-            new AppStack(app, configuration.StackName, configuration);
+            new AppStack(app, configuration.StackName, configuration, new StackProps
+            {
+                Env = new Environment
+                {
+                    Account = "AWSAccountId",
+                    Region = "AWSRegion"
+                }
+            });
             app.Synth();
         }
     }

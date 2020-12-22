@@ -11,6 +11,7 @@ using AWS.Deploy.CLI.Utilities;
 using AWS.Deploy.Orchestrator;
 using AWS.Deploy.Orchestrator.Utilities;
 using AWS.DeploymentCommon;
+using Amazon.SecurityToken;
 
 namespace AWS.Deploy.CLI
 {
@@ -62,11 +63,15 @@ namespace AWS.Deploy.CLI
                     var systemCapabilityEvaluator = new SystemCapabilityEvaluator(commandLineWrapper);
                     var systemCapabilities = await systemCapabilityEvaluator.Evaluate();
 
+                    var stsClient = new AmazonSecurityTokenServiceClient();
+                    var callerIdentity = await stsClient.GetCallerIdentityAsync(new Amazon.SecurityToken.Model.GetCallerIdentityRequest());
+
                     var session = new OrchestratorSession
                     {
                         AWSProfileName = profile,
                         AWSCredentials = awsCredentials,
                         AWSRegion = awsRegion,
+                        AWSAccountId = callerIdentity.Account,
                         ProjectPath = projectPath,
                         ProjectDirectory = projectPath,
                         SystemCapabilities = systemCapabilities
@@ -124,11 +129,15 @@ namespace AWS.Deploy.CLI
                 var awsCredentials = awsUtilities.ResolveAWSCredentials(profile, previousSettings.Profile);
                 var awsRegion = awsUtilities.ResolveAWSRegion(region, previousSettings.Region);
 
+                var stsClient = new AmazonSecurityTokenServiceClient();
+                var callerIdentity = await stsClient.GetCallerIdentityAsync(new Amazon.SecurityToken.Model.GetCallerIdentityRequest());
+
                 var session = new OrchestratorSession
                 {
                     AWSProfileName = profile,
                     AWSCredentials = awsCredentials,
                     AWSRegion = awsRegion,
+                    AWSAccountId = callerIdentity.Account,
                     ProjectPath = projectPath,
                     ProjectDirectory = projectPath
                 };

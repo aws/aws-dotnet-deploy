@@ -28,7 +28,7 @@ namespace AWS.Deploy.Orchestrator
         {
             // Create a new temporary CDK project for a new deployment
             _interactiveService.LogMessageLine($"Generating a {recommendation.Recipe.Name} CDK Project");
-            var cdkProjectPath = await CreateCdkProjectForDeployment(recommendation);
+            var cdkProjectPath = await CreateCdkProjectForDeployment(recommendation, session);
 
             // Write required configuration in appsettings.json
             var appSettingsBody = _appSettingsBuilder.Build(cloudApplicationName, recommendation);
@@ -50,7 +50,7 @@ namespace AWS.Deploy.Orchestrator
             await _commandLineWrapper.Run( "npx cdk deploy --require-approval never", cdkProjectPath);
         }
 
-        private async Task<string> CreateCdkProjectForDeployment(Recommendation recommendation)
+        private async Task<string> CreateCdkProjectForDeployment(Recommendation recommendation, OrchestratorSession session)
         {
             var tempDirectoryPath =
                 Path.Combine(
@@ -61,7 +61,7 @@ namespace AWS.Deploy.Orchestrator
             Directory.CreateDirectory(tempDirectoryPath);
 
             var templateEngine = new TemplateEngine();
-            await templateEngine.GenerateCDKProjectFromTemplate(recommendation, tempDirectoryPath);
+            await templateEngine.GenerateCDKProjectFromTemplate(recommendation, session, tempDirectoryPath);
 
             return tempDirectoryPath;
         }
