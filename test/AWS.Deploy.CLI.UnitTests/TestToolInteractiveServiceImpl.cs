@@ -14,6 +14,9 @@ namespace AWS.Deploy.CLI.UnitTests
 
         private IList<string> InputCommands { get; set; }
 
+        public TestToolInteractiveServiceImpl(): this(new List<string>())
+        {
+        }
 
         public TestToolInteractiveServiceImpl(IList<string> inputCommands)
         {

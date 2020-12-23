@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AWS.DeploymentCommon;
 
 namespace AWS.Deploy.CLI
@@ -99,6 +100,21 @@ namespace AWS.Deploy.CLI
 
                 _interactiveService.WriteLine($"Invalid option. The selected option should be between 1 and {options.Count}.");
             }
+        }
+
+        public void DisplayRow((string, int)[] row)
+        {
+            var blocks = new List<string>();
+            for (var col = 0; col < row.Length; col++)
+            {
+                var (_, width) = row[col];
+                blocks.Add($"{{{col},{-width}}}");
+            }
+
+            var values = row.Select(col => col.Item1).ToArray();
+            var format = string.Join(" | ", blocks);
+
+            _interactiveService.WriteLine(string.Format(format, values));
         }
 
         public string AskUserToChooseOrCreateNew(IList<string> options, string title, string defaultValue)

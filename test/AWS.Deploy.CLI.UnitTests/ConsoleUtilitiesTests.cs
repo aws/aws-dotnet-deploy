@@ -95,5 +95,15 @@ namespace AWS.Deploy.CLI.UnitTests
 
             interactiveServices.OutputContains("Invalid option.");
         }
+
+        [Fact]
+        public void DisplayRow()
+        {
+            var interactiveServices = new TestToolInteractiveServiceImpl();
+            var consoleUtilities = new ConsoleUtilities(interactiveServices);
+            consoleUtilities.DisplayRow(new[] { ("Hello", 10), ("World", 20) });
+
+            Assert.Equal("Hello      | World               ", interactiveServices.OutputMessages[0]);
+        }
     }
 }
