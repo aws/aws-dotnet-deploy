@@ -153,6 +153,40 @@ namespace AWS.Deploy.CLI
             });
             rootCommand.Add(listCommand);
 
+            var deleteCommand = new Command("delete-stack", "Deletes a CloudFormation stack.")
+            {
+                _optionProfile,
+                _optionRegion,
+                _optionProjectPath,
+                new Option<string>("--stack-name", "The name or the unique stack ID that is associated with the stack.")
+                {
+                    IsRequired = true,
+                },
+                _optionDiagnosticLogging
+            };
+            deleteCommand.Handler = CommandHandler.Create<string, string, string, string, bool>(async (profile, region, projectPath, stackName, diagnostics) =>
+            {
+                var toolInteractiveService = new ConsoleInteractiveServiceImpl(diagnostics);
+                var awsUtilities = new AWSUtilities(toolInteractiveService);
+
+                var previousSettings = PreviousDeploymentSettings.ReadSettings(projectPath, null);
+
+                var awsCredentials = await awsUtilities.ResolveAWSCredentials(profile, previousSettings.Profile);
+                var awsRegion = awsUtilities.ResolveAWSRegion(region, previousSettings.Region);
+
+                var session = new OrchestratorSession
+                {
+                    AWSProfileName = profile,
+                    AWSCredentials = awsCredentials,
+                    AWSRegion = awsRegion,
+                };
+
+                await new DeleteStackCommand(new DefaultAWSClientFactory(), toolInteractiveService, session).ExecuteAsync(stackName);
+
+                return CommandReturnCodes.SUCCESS;
+            });
+            rootCommand.Add(deleteCommand);
+
             return await rootCommand.InvokeAsync(args);
         }
 

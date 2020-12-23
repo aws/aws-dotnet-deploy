@@ -8,4 +8,16 @@ namespace AWS.Deploy.CLI
 {
     [AWSDeploymentExpectedException]
     public class NoAWSCredentialsFoundException : Exception { }
+
+    /// <summary>
+    /// Throw if Delete Command is unable to delete
+    /// the specified stack
+    /// </summary>
+    [AWSDeploymentExpectedExceptionAttribute ]
+    public class FailedToDeleteException : Exception
+    {
+        public FailedToDeleteException(string message) : base(message)
+        {
+        }
+    }
 }

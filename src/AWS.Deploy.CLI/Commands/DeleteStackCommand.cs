@@ -1,0 +1,132 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
+using System;
+using System.Threading.Tasks;
+using Amazon.CloudFormation;
+using Amazon.CloudFormation.Model;
+using AWS.Deploy.CLI.CloudFormation;
+using AWS.Deploy.DockerEngine;
+using AWS.Deploy.Orchestrator;
+using AWS.DeploymentCommon;
+
+namespace AWS.Deploy.CLI.Commands
+{
+    /// <summary>
+    /// Represents a Delete command allows to delete a CloudFormation stack
+    /// </summary>
+    public class DeleteStackCommand
+    {
+        private static readonly TimeSpan s_pollingPeriod = TimeSpan.FromSeconds(1);
+
+        private readonly IAWSClientFactory _awsClientFactory;
+        private readonly IToolInteractiveService _interactiveService;
+        private readonly OrchestratorSession _session;
+        private readonly IAmazonCloudFormation _cloudFormationClient;
+        private readonly ConsoleUtilities _consoleUtilities;
+
+        public DeleteStackCommand(IAWSClientFactory awsClientFactory, IToolInteractiveService interactiveService, OrchestratorSession session)
+        {
+            _awsClientFactory = awsClientFactory;
+            _interactiveService = interactiveService;
+            _session = session;
+            _cloudFormationClient = _awsClientFactory.GetAWSClient<IAmazonCloudFormation>(_session.AWSCredentials, _session.AWSRegion);
+            _consoleUtilities = new ConsoleUtilities(interactiveService);
+        }
+
+        /// <summary>
+        /// Deletes given CloudFormation stack
+        /// </summary>
+        /// <param name="stackName">The stack name to be deleted</param>
+        /// <exception cref="FailedToDeleteException">Thrown when deletion fails</exception>
+        public async Task ExecuteAsync(string stackName)
+        {
+            var confirmDelete = _consoleUtilities.AskYesNoQuestion($"Are you sure you want to delete {stackName}?", ConsoleUtilities.YesNo.No);
+            if (confirmDelete == ConsoleUtilities.YesNo.No)
+            {
+                return;
+            }
+
+            _interactiveService.WriteLine($"{stackName}: deleting...");
+            var monitor = new StackEventMonitor(stackName, _awsClientFactory, _interactiveService, _session);
+
+            try
+            {
+                await _cloudFormationClient.DeleteStackAsync(new DeleteStackRequest
+                {
+                    StackName = stackName
+                });
+
+                // Fire and forget the monitor
+                // Monitor updates the stdout with current status of the CloudFormation stack
+                var _ = monitor.StartAsync();
+
+                await WaitForStackDelete(stackName);
+                _interactiveService.WriteLine($"{stackName}: deleted");
+            }
+            catch (AmazonCloudFormationException)
+            {
+                throw new FailedToDeleteException($"Failed to delete {stackName} stack.");
+            }
+            finally
+            {
+                // Stop monitoring CloudFormation stack status once the deletion operation finishes
+                monitor.Stop();
+            }
+        }
+
+        private async Task WaitForStackDelete(string stackName)
+        {
+            var stack = await StabilizeStack(stackName);
+            if (stack == null)
+            {
+                return;
+            }
+
+            if (stack.StackStatus.IsDeleted())
+            {
+                return;
+            }
+
+            if (stack.StackStatus.IsFailed())
+            {
+                throw new FailedToDeleteException($"The stack {stackName} is in failed state. You may need to delete it from the AWS Console.");
+            }
+
+            throw new FailedToDeleteException($"Failed to delete {stackName} stack: {stack.StackStatus}");
+        }
+
+        private async Task<Stack> StabilizeStack(string stackName)
+        {
+            Stack stack;
+            do
+            {
+                stack = await GetStackAsync(stackName);
+                if (stack == null)
+                {
+                    return null;
+                }
+                await Task.Delay(s_pollingPeriod);
+            } while (stack.StackStatus.IsInProgress());
+
+            return stack;
+        }
+
+        private async Task<Stack> GetStackAsync(string stackName)
+        {
+            try
+            {
+                var response = await _cloudFormationClient.DescribeStacksAsync(new DescribeStacksRequest
+                {
+                    StackName = stackName
+                });
+
+                return response.Stacks.Count == 0 ? null : response.Stacks[0];
+            }
+            catch (AmazonCloudFormationException exception) when (exception.ErrorCode.Equals("ValidationError") && exception.Message.Equals($"Stack with id {stackName} does not exist"))
+            {
+                return null;
+            }
+        }
+    }
+}
