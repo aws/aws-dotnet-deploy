@@ -95,7 +95,7 @@ namespace AWS.DeploymentCommon
         /// <summary>
         /// The settings that can be configured by the user before deploying.
         /// </summary>
-        public IList<OptionSettingItem> OptionSettings { get; set; }
+        public IList<OptionSettingItem> OptionSettings { get; set; } = new List<OptionSettingItem>();
 
         public override string ToString()
         {
@@ -115,12 +115,12 @@ namespace AWS.DeploymentCommon
             /// <summary>
             /// If any of these rules evaluate to true then the recipe is excluded.
             /// </summary>
-            public IList<AvailableRuleItem> NegativeRules { get; set; }
+            public IList<AvailableRuleItem> NegativeRules { get; set; } = new List<AvailableRuleItem>();
 
             /// <summary>
             /// If these rules evaluate to false then the recipe can still be compatible but its priority is divided in half.
             /// </summary>
-            public IList<AvailableRuleItem> OptionalRules { get; set; }
+            public IList<AvailableRuleItem> OptionalRules { get; set; } = new List<AvailableRuleItem>();
 
             /// <summary>
             /// The priority of the recipe. The highest priority is the top choice for deploying to.
@@ -143,7 +143,7 @@ namespace AWS.DeploymentCommon
             /// Check to see if the project has certain files.
             /// An example of this is checking to see if a project has a Dockerfile
             /// </summary>
-            public IList<string> HasFiles { get; set; }
+            public IList<string> HasFiles { get; set; } = new List<string>();
 
             /// <summary>
             /// Check to see if an specific property exists in a PropertyGroup of the project file.
@@ -171,7 +171,7 @@ namespace AWS.DeploymentCommon
             /// <summary>
             /// The list of allowed values for the property.
             /// </summary>
-            public IList<string> AllowedValues { get; set; }
+            public IList<string> AllowedValues { get; set; } = new List<string>();
         }
 
         /// <summary>
@@ -240,12 +240,17 @@ namespace AWS.DeploymentCommon
             /// <summary>
             /// The allowed values for the setting.
             /// </summary>
-            public IList<string> AllowedValues { get; set; }
+            public IList<string> AllowedValues { get; set; } = new List<string>();
+
+            /// <summary>
+            /// The value mapping for allowed values.
+            /// </summary>
+            public IDictionary<string, string> ValueMapping { get; set; } = new Dictionary<string, string>();
 
             /// <summary>
             /// Property will be displayed if specified dependencies are true
             /// </summary>
-            public IList<PropertyDependency> DependsOn { get; set; }
+            public IList<PropertyDependency> DependsOn { get; set; } = new List<PropertyDependency>();
         }
     }
 }
