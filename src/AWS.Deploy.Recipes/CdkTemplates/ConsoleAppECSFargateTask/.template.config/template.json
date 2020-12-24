@@ -41,6 +41,17 @@
       "description": "Specifies an existing VPC to use",
       "replaces": "VPC-Placeholder",
       "datatype": "string"
+    },
+    "AddDockerBuildArgs": {
+      "type": "parameter",
+      "dataType": "bool",
+      "defaultValue": "false"
+    },
+    "DockerBuildArgs": {
+      "type": "parameter",
+      "description": "Specifies additional build args to the docker build command",
+      "replaces": "DockerBuildArgs-Placeholder",
+      "datatype": "string"
     }
   }
 }

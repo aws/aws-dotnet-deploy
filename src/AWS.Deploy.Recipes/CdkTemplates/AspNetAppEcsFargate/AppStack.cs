@@ -4,7 +4,9 @@ using Amazon.CDK.AWS.ECS;
 using Amazon.CDK.AWS.ECS.Patterns;
 using Amazon.CDK.AWS.IAM;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Protocol = Amazon.CDK.AWS.ECS.Protocol;
 
 namespace AspNetAppEcsFargate
@@ -64,7 +66,10 @@ namespace AspNetAppEcsFargate
             {
                 Image = ContainerImage.FromAsset(dockerExecutionDirectory, new AssetImageProps 
                 { 
-                    File = Path.Combine(relativePath, configuration.DockerfileName)
+                    File = Path.Combine(relativePath, configuration.DockerfileName),
+#if (AddDockerBuildArgs)
+                    BuildArgs = GetDockerBuildArgs("DockerBuildArgs-Placeholder")
+#endif
                 })
             });
 
@@ -82,5 +87,18 @@ namespace AspNetAppEcsFargate
                 ServiceName = configuration.ECSServiceName
             });
         }
+
+#if (AddDockerBuildArgs)
+        private Dictionary<string, string> GetDockerBuildArgs(string buildArgsString)
+        {
+            return buildArgsString
+                .Split(',')
+                .Where(x => x.Contains("="))
+                .ToDictionary(
+                    k => k.Split('=')[0],
+                    v => v.Split('=')[1]
+                );
+        }
+#endif
     }
 }
