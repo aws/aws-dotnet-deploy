@@ -126,7 +126,7 @@ namespace AWS.Deploy.CLI.Commands
             foreach (var setting in recommendation.Recipe.OptionSettings)
             {
                 var isDisplayed = true;
-                foreach(var dependency in setting.DependsOn ?? Enumerable.Empty<RecipeDefinition.PropertyDependency>())
+                foreach(var dependency in setting.DependsOn)
                 {
                     var dependsOnValue = recommendation.GetOptionSettingValue(dependency.Id);
                     if (!dependsOnValue.Equals(dependency.Value))
@@ -142,20 +142,23 @@ namespace AWS.Deploy.CLI.Commands
                 }
 
                 _toolInteractiveService.WriteLine($"{setting.Name}:");
-                _toolInteractiveService.WriteLine(setting.Description);
 
                 var currentValue = recommendation.GetOptionSettingValue(setting.Id);
                 object settingValue = null;
                 if (setting.AllowedValues?.Count > 0)
                 {
+                    _toolInteractiveService.WriteLine(setting.Description);
                     settingValue = _consoleUtilities.AskUserToChoose(setting.AllowedValues, null, currentValue?.ToString());
+                    if (setting.ValueMapping.ContainsKey(settingValue.ToString()))
+                        settingValue = setting.ValueMapping[settingValue.ToString()];
 
-                    // If they didn't change the value then don't store so we can rely on using the default in the recipe.
-                    if (Equals(settingValue, currentValue))
+                        // If they didn't change the value then don't store so we can rely on using the default in the recipe.
+                        if (Equals(settingValue, currentValue))
                         continue;
                 }
                 else if (setting.TypeHint == RecipeDefinition.OptionSettingTypeHint.BeanstalkApplication)
                 {
+                    _toolInteractiveService.WriteLine(setting.Description);
                     var applications = await awsUtilities.GetListOfElasticBeanstalkApplications(
                         _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>(_session.AWSCredentials, _session.AWSRegion));
 
@@ -165,6 +168,7 @@ namespace AWS.Deploy.CLI.Commands
                 }
                 else if (setting.TypeHint == RecipeDefinition.OptionSettingTypeHint.BeanstalkEnvironment)
                 {
+                    _toolInteractiveService.WriteLine(setting.Description);
                     var applicationName = recommendation.GetOptionSettingValue(setting.ParentSettingId) as string;
                     var environments = await awsUtilities.GetListOfElasticBeanstalkEnvironments(
                         _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>(_session.AWSCredentials, _session.AWSRegion),
@@ -173,8 +177,14 @@ namespace AWS.Deploy.CLI.Commands
                         "Select Beanstalk environment to deploy to:",
                         currentValue?.ToString());
                 }
+                else if (setting.Type == RecipeDefinition.OptionSettingValueType.Bool)
+                {
+                    var answer = _consoleUtilities.AskYesNoQuestion(setting.Description, recommendation.GetOptionSettingValue(setting.Id).ToString());
+                    settingValue = answer == ConsoleUtilities.YesNo.Yes ? "true" : "false";
+                }
                 else
                 {
+                    _toolInteractiveService.WriteLine(setting.Description);
                     _toolInteractiveService.WriteLine($"(default: {recommendation.GetOptionSettingValue(setting.Id)}):");
                     settingValue = _toolInteractiveService.ReadLine();
                 }

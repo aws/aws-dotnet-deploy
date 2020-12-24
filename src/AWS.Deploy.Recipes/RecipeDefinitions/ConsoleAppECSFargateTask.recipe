@@ -74,10 +74,6 @@
             "Description": "Do you want to use an existing VPC for the deployment?",
             "Type": "Bool",
             "DefaultValue": "false",
-            "AllowedValues": [
-                "false",
-                "true"
-            ],
             "AdvancedSetting": true,
             "Updatable": true
         },
@@ -103,8 +99,11 @@
             "Type": "Bool",
             "DefaultValue": "false",
             "AllowedValues": [
-                "true"
+                "yes"
             ],
+            "ValueMapping": {
+                "yes": "true"
+            },
             "DependsOn": [
                 {
                     "Id": "UseExistingVPC",

@@ -18,8 +18,8 @@ namespace AWS.Deploy.CLI
 
         public enum YesNo
         {
-            Yes,
-            No
+            Yes = 1,
+            No = 0
         };
 
         public string AskUserToChoose(IList<string> values, string title, string defaultValue)
@@ -72,7 +72,16 @@ namespace AWS.Deploy.CLI
             }
             else
             {
-                _interactiveService.WriteLine($"Choose option:");
+                if(options.Count == 1)
+                {
+                    _interactiveService.WriteLine($"Choose option: (default: 1)");
+                    defaultValueIndex = 1;
+                    defaultValue = options[0];
+                }
+                else
+                {
+                    _interactiveService.WriteLine($"Choose option:");
+                }
             }
 
             while (true)
@@ -141,7 +150,18 @@ namespace AWS.Deploy.CLI
             return userValue;
         }
 
-        public YesNo AskYesNoQuestion(string question, YesNo? defaultValue)
+        public YesNo AskYesNoQuestion(string question, string defaultValue)
+        {
+            if (bool.TryParse(defaultValue, out var result))
+                return AskYesNoQuestion(question, result ? YesNo.Yes : YesNo.No);
+
+            if (Enum.TryParse<YesNo>(defaultValue, out var result2))
+                return AskYesNoQuestion(question, result2);
+
+            return AskYesNoQuestion(question);
+        }
+
+        public YesNo AskYesNoQuestion(string question, YesNo? defaultValue = default)
         {
             var message = question;
             message += ": y/n";
