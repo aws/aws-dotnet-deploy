@@ -126,6 +126,30 @@
             ],
             "AdvancedSetting": true,
             "Updatable": true
+        },
+        {
+            "Id": "AddDockerBuildArgs",
+            "Name": "Add Docker Build Args",
+            "Description": "Do you want to pass additional Docker build args?",
+            "Type": "Bool",
+            "DefaultValue": "false",
+            "AdvancedSetting": true,
+            "Updatable": true
+        },
+        {
+            "Id": "DockerBuildArgs",
+            "Name": "Docker Build Args",
+            "Description": "The list of additional docker build args.",
+            "Type": "String",
+            "DefaultValue": "",
+            "DependsOn": [
+                {
+                    "Id": "AddDockerBuildArgs",
+                    "Value": "true"
+                }
+            ],
+            "AdvancedSetting": true,
+            "Updatable": true
         }
     ]
 }

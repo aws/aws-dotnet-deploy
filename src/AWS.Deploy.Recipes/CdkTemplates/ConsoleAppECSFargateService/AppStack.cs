@@ -5,6 +5,7 @@ using Amazon.CDK.AWS.ECS;
 using Amazon.CDK.AWS.ECS.Patterns;
 using Amazon.CDK.AWS.IAM;
 using System.IO;
+using System.Collections.Generic;
 using Protocol = Amazon.CDK.AWS.ECS.Protocol;
 
 namespace ConsoleAppEcsFargateService
@@ -69,7 +70,10 @@ namespace ConsoleAppEcsFargateService
             {
                 Image = ContainerImage.FromAsset(dockerExecutionDirectory, new AssetImageProps
                 {
-                    File = Path.Combine(relativePath, configuration.DockerfileName)
+                    File = Path.Combine(relativePath, configuration.DockerfileName),
+#if (AddDockerBuildArgs)
+                    BuildArgs = GetDockerBuildArgs("DockerBuildArgs-Placeholder")
+#endif
                 }),
                 Logging = logging
             });
@@ -80,5 +84,18 @@ namespace ConsoleAppEcsFargateService
                 TaskDefinition = taskDefinition,
             });
         }
+
+#if (AddDockerBuildArgs)
+        private Dictionary<string, string> GetDockerBuildArgs(string buildArgsString)
+        {
+            return buildArgsString
+                .Split(',')
+                .Where(x => x.Contains("="))
+                .ToDictionary(
+                    k => k.Split('=')[0],
+                    v => v.Split('=')[1]
+                );
+        }
+#endif
     }
 }
