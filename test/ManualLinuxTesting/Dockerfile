@@ -17,15 +17,6 @@ RUN apt-get update
 FROM base-updates as base
 RUN apt-get install -y wget unzip
 
-# install dotnet sdk
-RUN wget https://packages.microsoft.com/config/ubuntu/20.10/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
-RUN dpkg -i packages-microsoft-prod.deb
-RUN apt-get update; \
-  apt-get install -y apt-transport-https && \
-  apt-get update && \
-  apt-get install -y dotnet-sdk-3.1
-RUN dotnet --list-sdks
-
 #install aws cli
 RUN wget https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -O "awscliv2.zip"
 RUN unzip awscliv2.zip
@@ -38,6 +29,32 @@ RUN apt-get install -y npm
 
 #install cdk
 RUN npm install -g aws-cdk
+
+# install docker
+RUN apt-get update; \
+    apt-get install -y \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg-agent \
+    software-properties-common
+RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+RUN apt-get update
+RUN add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+   $(lsb_release -cs) \
+   stable"
+RUN apt-get update
+RUN apt-get install -y docker-ce docker-ce-cli containerd.io
+
+# install dotnet sdk
+RUN wget https://packages.microsoft.com/config/ubuntu/20.10/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+RUN dpkg -i packages-microsoft-prod.deb
+RUN apt-get update; \
+  apt-get install -y apt-transport-https && \
+  apt-get update && \
+  apt-get install -y dotnet-sdk-3.1
+RUN dotnet --list-sdks
 
 # manually add dotnet tools path to path variable
 # https://github.com/dotnet/dotnet-docker/issues/520
@@ -80,4 +97,4 @@ RUN dotnet aws --version
 COPY /testapps /testapps
 
 WORKDIR /testapps
-ENTRYPOINT ["echo", "\nMake sure to start in Interactive mode:  docker run -it --entrypoint bash <imagename>'\n\nThen try `dotnet aws --help`"]
+ENTRYPOINT ["echo", "\nMake sure to start in Interactive mode:  docker run --privileged -it --entrypoint bash <imagename>'\n\nThen try `dotnet aws --help`"]
