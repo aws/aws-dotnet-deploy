@@ -51,7 +51,7 @@ namespace AWS.Deploy.CLI
                     var previousSettings = PreviousDeploymentSettings.ReadSettings(projectPath, null);
 
                     var awsUtilities = new AWSUtilities(_toolInteractiveService);
-                    var awsCredentials = awsUtilities.ResolveAWSCredentials(profile, previousSettings.Profile);
+                    var awsCredentials = await awsUtilities.ResolveAWSCredentials(profile, previousSettings.Profile);
                     var awsRegion = awsUtilities.ResolveAWSRegion(region, previousSettings.Region);
 
                     var commandLineWrapper =
@@ -126,7 +126,7 @@ namespace AWS.Deploy.CLI
 
                 var previousSettings = PreviousDeploymentSettings.ReadSettings(projectPath, null);
 
-                var awsCredentials = awsUtilities.ResolveAWSCredentials(profile, previousSettings.Profile);
+                var awsCredentials = await awsUtilities.ResolveAWSCredentials(profile, previousSettings.Profile);
                 var awsRegion = awsUtilities.ResolveAWSRegion(region, previousSettings.Region);
 
                 var stsClient = new AmazonSecurityTokenServiceClient();

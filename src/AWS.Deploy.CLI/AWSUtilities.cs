@@ -20,21 +20,25 @@ namespace AWS.Deploy.CLI
             _toolInteractiveService = toolInteractiveService;
         }
 
-        public AWSCredentials ResolveAWSCredentials(string profileName, string lastUsedProfileName)
+        public async Task<AWSCredentials> ResolveAWSCredentials(string profileName, string lastUsedProfileName)
         {
+            AWSCredentials credentials;
+
             var chain = new CredentialProfileStoreChain();
-            AWSCredentials credentials = null;
 
             if (!string.IsNullOrEmpty(profileName))
             {
-                if (chain.TryGetAWSCredentials(profileName, out credentials))
+                if (chain.TryGetAWSCredentials(profileName, out credentials) &&
+                    await CanLoadCredentials(credentials))
                 {
                     _toolInteractiveService.WriteLine($"Configuring AWS Credentials from Profile {profileName}.");
                     return credentials;
                 }
             }
 
-            if (!string.IsNullOrEmpty(lastUsedProfileName) && chain.TryGetAWSCredentials(lastUsedProfileName, out credentials))
+            if (!string.IsNullOrEmpty(lastUsedProfileName) &&
+                chain.TryGetAWSCredentials(lastUsedProfileName, out credentials) &&
+                await CanLoadCredentials(credentials))
             {
                 _toolInteractiveService.WriteLine($"Configuring AWS Credentials with previous configured profile value {lastUsedProfileName}.");
                 return credentials;
@@ -43,8 +47,12 @@ namespace AWS.Deploy.CLI
             try
             {
                 credentials = FallbackCredentialsFactory.GetCredentials();
-                _toolInteractiveService.WriteLine($"Configuring AWS Credentials using AWS SDK credential search.");
-                return credentials;
+
+                if (await CanLoadCredentials(credentials))
+                {
+                    _toolInteractiveService.WriteLine("Configuring AWS Credentials using AWS SDK credential search.");
+                    return credentials;
+                }
             }
             catch (AmazonServiceException)
             {
@@ -62,13 +70,32 @@ namespace AWS.Deploy.CLI
             var consoleUtilities = new ConsoleUtilities(_toolInteractiveService);
             var selectedProfileName = consoleUtilities.AskUserToChoose(sharedCredentials.ListProfileNames(), "Select AWS Credentials Profile", null);
 
-            if (!chain.TryGetAWSCredentials(selectedProfileName, out credentials))
+            if (!chain.TryGetAWSCredentials(selectedProfileName, out credentials) ||
+                !(await CanLoadCredentials(credentials)))
             {
-                _toolInteractiveService.WriteErrorLine($"Unable to create AWS credentials for profile {profileName}.");
+                _toolInteractiveService.WriteErrorLine($"Unable to create AWS credentials for profile {selectedProfileName}.");
+                throw new NoAWSCredentialsFoundException();
             }
 
             return credentials;
         }
+
+        private async Task<bool> CanLoadCredentials(AWSCredentials credentials)
+        {
+            if (null == credentials)
+                return false;
+            
+            try
+            {
+                await credentials.GetCredentialsAsync();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
 
         public string ResolveAWSRegion(string region, string lastRegionUsed)
         {
