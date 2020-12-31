@@ -46,6 +46,9 @@ namespace AWS.Deploy.Orchestrator
                 await _commandLineWrapper.Run("npm install aws-cdk", cdkProjectPath, streamOutputToInteractiveService: false);
             }
 
+            // Ensure region is bootstrapped
+            await _commandLineWrapper.Run($"npx cdk bootstrap aws://{session.AWSAccountId}/{session.AWSRegion}");
+            
             // Handover to CDK command line tool
             await _commandLineWrapper.Run( "npx cdk deploy --require-approval never", cdkProjectPath);
         }
