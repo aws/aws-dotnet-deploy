@@ -14,6 +14,7 @@ namespace AWS.Deploy.Common
         {
             String,
             Int,
+            Double,
             Bool
         };
 

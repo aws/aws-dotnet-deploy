@@ -61,12 +61,39 @@
         {
             "Id": "Schedule",
             "Name": "Task Schedule",
-            "Description": "The schedule or rate (frequency) that determines when CloudWatch Events runs the rule.",
+            "Description": "The schedule or rate (frequency) that determines when CloudWatch Events runs the rule.  See here for more details https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html",
             "Type": "String",
             "TypeHint": "ECSTaskSchedule",
             "DefaultValue": "rate(1 hour)",
             "AdvancedSetting": false,
-            "Updatable": false
+            "Updatable": true
+        },
+        {
+            "Id": "DesiredTaskCount",
+            "Name": "Desired Task Count",
+            "Description": "The desired number of ECS tasks to run for the service.",
+            "Type": "Int",
+            "DefaultValue": "1",
+            "AdvancedSetting": true,
+            "Updatable": true
+        },
+        {
+            "Id": "CPU",
+            "Name": "vCPU",
+            "Description": "The number of cpu units used by the task.",
+            "Type": "Double",
+            "DefaultValue": "0.25",
+            "AdvancedSetting": true,
+            "Updatable": true
+        },
+        {
+            "Id": "Memory",
+            "Name": "Desired Task Count",
+            "Description": "The amount (in MiB) of memory used by the task.",
+            "Type": "Double",
+            "DefaultValue": "512",
+            "AdvancedSetting": true,
+            "Updatable": true
         },
         {
             "Id": "UseExistingVPC",

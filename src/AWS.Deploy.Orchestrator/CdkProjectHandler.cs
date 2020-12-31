@@ -29,6 +29,7 @@ namespace AWS.Deploy.Orchestrator
             // Create a new temporary CDK project for a new deployment
             _interactiveService.LogMessageLine($"Generating a {recommendation.Recipe.Name} CDK Project");
             var cdkProjectPath = await CreateCdkProjectForDeployment(recommendation, session);
+            _interactiveService.LogDebugLine($"CDK Project location: {cdkProjectPath}");
 
             // Write required configuration in appsettings.json
             var appSettingsBody = _appSettingsBuilder.Build(cloudApplicationName, recommendation);

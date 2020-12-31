@@ -50,6 +50,8 @@ namespace ConsoleAppEcsFargateTask
             var taskDefinition = new FargateTaskDefinition(this, "TaskDefinition", new FargateTaskDefinitionProps
             {
                 ExecutionRole = executionRole,
+                Cpu = configuration.CpuLimit,
+                MemoryLimitMiB = configuration.MemoryLimit
             });
 
             var logging = new AwsLogDriver(new AwsLogDriverProps
@@ -75,8 +77,10 @@ namespace ConsoleAppEcsFargateTask
             new ScheduledFargateTask(this, "FargateService", new ScheduledFargateTaskProps
             {
                 Cluster = cluster,
+                DesiredTaskCount = configuration.DesiredTaskCount,
                 Schedule = Schedule.Expression(configuration.Schedule),
                 Vpc = vpc,
+                
                 ScheduledFargateTaskDefinitionOptions = new ScheduledFargateTaskDefinitionOptions
                 {
                     TaskDefinition = taskDefinition

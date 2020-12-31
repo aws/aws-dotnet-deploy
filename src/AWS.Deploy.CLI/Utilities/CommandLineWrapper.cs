@@ -36,6 +36,8 @@ namespace AWS.Deploy.CLI.Utilities
             Func<Process, Task> onComplete = null,
             CancellationToken cancelToken = default)
         {
+            _interactiveService.LogDebugLine($"Running [{command}] in [{workingDirectory}]");
+
             var credentials = await _awsCredentials.GetCredentialsAsync();
 
             var processStartInfo = new ProcessStartInfo

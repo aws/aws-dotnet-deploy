@@ -1,5 +1,5 @@
-using System.IO;
-using Microsoft.Extensions.Configuration;
+using Amazon.CDK.AWS.ECS;
+using Amazon.CDK.AWS.ECS.Patterns;
 
 namespace ConsoleAppEcsFargateTask
 {
@@ -44,5 +44,14 @@ namespace ConsoleAppEcsFargateTask
         /// The name of the ECS cluster.
         /// </summary>
         public string ClusterName { get; set; }
+        
+        /// <inheritdoc cref="FargateTaskDefinitionProps.Cpu"/>
+        public double? CpuLimit { get; set; }
+        
+        /// <inheritdoc cref="FargateTaskDefinitionProps.MemoryLimitMiB"/>
+        public double? MemoryLimit { get; set; }
+        
+        /// <inheritdoc cref="ScheduledTaskBase.DesiredTaskCount"/>
+        public double? DesiredTaskCount { get; set; }
     }
 }
