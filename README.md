@@ -14,7 +14,7 @@ docker build -f ./test/ManualLinuxTesting/Dockerfile/ . -t 'aws-deploy:local'
 
 3.  Run the docker image in interactive mode: 
 ```
-docker run -it --entrypoint bash aws-deploy:local
+docker run --privileged -it --entrypoint bash aws-deploy:local
  ```
 
 4. Enter your aws profile file using the aws cli and follow the prompts:
@@ -22,6 +22,8 @@ docker run -it --entrypoint bash aws-deploy:local
 ```
 aws configure
 ```
+
+5. Optional: Start docker: `service docker start`.  This is only required to deploy projects via containers.
 
 For more assitance, follow the guide here: https://cdkworkshop.com/15-prerequisites/200-account.html
 
