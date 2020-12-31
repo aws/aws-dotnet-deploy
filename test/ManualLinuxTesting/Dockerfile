@@ -97,4 +97,4 @@ RUN dotnet aws --version
 COPY /testapps /testapps
 
 WORKDIR /testapps
-ENTRYPOINT ["echo", "\nMake sure to start in Interactive mode:  docker run --privileged -it --entrypoint bash <imagename>'\n\nThen try `dotnet aws --help`"]
+ENTRYPOINT ["echo", "\nMake sure to start in Interactive mode:  docker run --privileged -it --entrypoint bash <imagename>'\n\nAdd your AWS creds via `aws configure`\n\nThen try `dotnet aws --help`\n\n"]
