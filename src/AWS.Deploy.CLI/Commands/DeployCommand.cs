@@ -152,8 +152,8 @@ namespace AWS.Deploy.CLI.Commands
                     if (setting.ValueMapping.ContainsKey(settingValue.ToString()))
                         settingValue = setting.ValueMapping[settingValue.ToString()];
 
-                        // If they didn't change the value then don't store so we can rely on using the default in the recipe.
-                        if (Equals(settingValue, currentValue))
+                    // If they didn't change the value then don't store so we can rely on using the default in the recipe.
+                    if (Equals(settingValue, currentValue))
                         continue;
                 }
                 else if (setting.TypeHint == RecipeDefinition.OptionSettingTypeHint.BeanstalkApplication)
