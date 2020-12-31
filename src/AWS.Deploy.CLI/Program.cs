@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 using AWS.Deploy.CLI.Commands;
 using AWS.Deploy.CLI.Utilities;
 using AWS.Deploy.Orchestrator;
-using AWS.Deploy.Orchestrator.Utilities;
 using AWS.DeploymentCommon;
 using Amazon.SecurityToken;
+using Amazon.SecurityToken.Model;
 
 namespace AWS.Deploy.CLI
 {
@@ -63,8 +63,8 @@ namespace AWS.Deploy.CLI
                     var systemCapabilityEvaluator = new SystemCapabilityEvaluator(commandLineWrapper);
                     var systemCapabilities = await systemCapabilityEvaluator.Evaluate();
 
-                    var stsClient = new AmazonSecurityTokenServiceClient();
-                    var callerIdentity = await stsClient.GetCallerIdentityAsync(new Amazon.SecurityToken.Model.GetCallerIdentityRequest());
+                    var stsClient = new AmazonSecurityTokenServiceClient(awsCredentials);
+                    var callerIdentity = await stsClient.GetCallerIdentityAsync(new GetCallerIdentityRequest());
 
                     var session = new OrchestratorSession
                     {
@@ -129,8 +129,8 @@ namespace AWS.Deploy.CLI
                 var awsCredentials = await awsUtilities.ResolveAWSCredentials(profile, previousSettings.Profile);
                 var awsRegion = awsUtilities.ResolveAWSRegion(region, previousSettings.Region);
 
-                var stsClient = new AmazonSecurityTokenServiceClient();
-                var callerIdentity = await stsClient.GetCallerIdentityAsync(new Amazon.SecurityToken.Model.GetCallerIdentityRequest());
+                var stsClient = new AmazonSecurityTokenServiceClient(awsCredentials);
+                var callerIdentity = await stsClient.GetCallerIdentityAsync(new GetCallerIdentityRequest());
 
                 var session = new OrchestratorSession
                 {
