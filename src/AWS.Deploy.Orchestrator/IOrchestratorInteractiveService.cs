@@ -8,5 +8,7 @@ namespace AWS.Deploy.Orchestrator
         void LogErrorMessageLine(string message);
 
         void LogMessageLine(string message);
+
+        void LogDebugLine(string message);
     }
 }
