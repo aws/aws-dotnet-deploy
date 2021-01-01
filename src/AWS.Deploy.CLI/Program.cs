@@ -17,18 +17,19 @@ namespace AWS.Deploy.CLI
 {
     internal class Program
     {
-        private static readonly IToolInteractiveService _toolInteractiveService = new ConsoleInteractiveServiceImpl();
-
         private static readonly Option<string> _optionProfile = new Option<string>("--profile", "AWS credential profile used to make calls to AWS");
         private static readonly Option<string> _optionRegion = new Option<string>("--region", "AWS region to deploy application to. For example us-west-2.");
         private static readonly Option<string> _optionProjectPath = new Option<string>("--project-path", getDefaultValue: () => Directory.GetCurrentDirectory(), description: "Path to the project to deploy");
         private static readonly Option<bool> _optionSaveCdkProject = new Option<bool>("--save-cdk-project", getDefaultValue: () => false, description: "Save generated CDK project in solution to customize");
+        private static readonly Option<bool> _optionDiagnosticLogging = new Option<bool>(new []{"-d", "--diagnostics"}, description: "Enables diagnostic output");
 
         private static async Task<int> Main(string[] args)
         {
-            _toolInteractiveService.WriteLine("AWS .NET Suite for deploying .NET Core applications to AWS");
-            _toolInteractiveService.WriteLine("Project Home: https://github.com/aws/aws-dotnet-suite-tooling");
-            _toolInteractiveService.WriteLine(string.Empty);
+            var preambleWriter = new ConsoleInteractiveServiceImpl(diagnosticLoggingEnabled: false);
+
+            preambleWriter.WriteLine("AWS .NET Suite for deploying .NET Core applications to AWS");
+            preambleWriter.WriteLine("Project Home: https://github.com/aws/aws-dotnet-suite-tooling");
+            preambleWriter.WriteLine(string.Empty);
 
             var rootCommand = new RootCommand { Description = "The AWS .NET Suite for getting .NET applications running on AWS." };
 
@@ -39,18 +40,21 @@ namespace AWS.Deploy.CLI
                 _optionProfile,
                 _optionRegion,
                 _optionProjectPath,
-                _optionSaveCdkProject
+                _optionSaveCdkProject,
+                _optionDiagnosticLogging
             };
 
-            deployCommand.Handler = CommandHandler.Create<string, string, string, bool>(async (profile, region, projectPath, saveCdkProject) =>
+            deployCommand.Handler = CommandHandler.Create<string, string, string, bool, bool>(async (profile, region, projectPath, saveCdkProject, diagnostics) =>
             {
+                var toolInteractiveService = new ConsoleInteractiveServiceImpl(diagnostics);
+
                 try
                 {
-                    var orchestratorInteractiveService = new ConsoleOrchestratorLogger(_toolInteractiveService);
+                    var orchestratorInteractiveService = new ConsoleOrchestratorLogger(toolInteractiveService);
 
                     var previousSettings = PreviousDeploymentSettings.ReadSettings(projectPath, null);
 
-                    var awsUtilities = new AWSUtilities(_toolInteractiveService);
+                    var awsUtilities = new AWSUtilities(toolInteractiveService);
                     var awsCredentials = await awsUtilities.ResolveAWSCredentials(profile, previousSettings.Profile);
                     var awsRegion = awsUtilities.ResolveAWSRegion(region, previousSettings.Region);
 
@@ -79,7 +83,7 @@ namespace AWS.Deploy.CLI
 
                     var deploy = new DeployCommand(
                         new DefaultAWSClientFactory(),
-                        _toolInteractiveService,
+                        toolInteractiveService,
                         orchestratorInteractiveService,
                         new CdkProjectHandler(orchestratorInteractiveService, commandLineWrapper),
                         session);
@@ -97,7 +101,7 @@ namespace AWS.Deploy.CLI
                 catch (Exception e)
                 {
                     // This is a bug
-                    _toolInteractiveService.WriteErrorLine(
+                    toolInteractiveService.WriteErrorLine(
                         "Unhandled exception.  This is a bug.  Please copy the stack trace below and file a bug at https://github.com/aws/aws-dotnet-deploy. " + 
                         e.PrettyPrint());
 
@@ -106,12 +110,12 @@ namespace AWS.Deploy.CLI
             });
             rootCommand.Add(deployCommand);
 
-            var setupCICDCommand = new Command("setup-cicd", "Configure the project to be deployed to AWS using the AWS Code services") { _optionProfile, _optionRegion, _optionProjectPath, };
-            setupCICDCommand.Handler = CommandHandler.Create<string>(SetupCICD);
+            var setupCICDCommand = new Command("setup-cicd", "Configure the project to be deployed to AWS using the AWS Code services") { _optionProfile, _optionRegion, _optionProjectPath, _optionDiagnosticLogging };
+            setupCICDCommand.Handler = CommandHandler.Create<string, bool> (SetupCICD);
             rootCommand.Add(setupCICDCommand);
 
-            var inspectIAMPermissionsCommand = new Command("inspect-permissions", "Inspect the project to see what AWS permissions the application needs to access AWS services the application is using.") { _optionProjectPath };
-            inspectIAMPermissionsCommand.Handler = CommandHandler.Create<string>(InspectIAMPermissions);
+            var inspectIAMPermissionsCommand = new Command("inspect-permissions", "Inspect the project to see what AWS permissions the application needs to access AWS services the application is using.") { _optionProjectPath, _optionDiagnosticLogging };
+            inspectIAMPermissionsCommand.Handler = CommandHandler.Create<string, bool>(InspectIAMPermissions);
             rootCommand.Add(inspectIAMPermissionsCommand);
 
             var listCommand = new Command("list-stacks", "List CloudFormation stacks.")
@@ -119,10 +123,13 @@ namespace AWS.Deploy.CLI
                 _optionProfile,
                 _optionRegion,
                 _optionProjectPath,
+                _optionDiagnosticLogging
             };
-            listCommand.Handler = CommandHandler.Create<string, string, string>(async (profile, region, projectPath) =>
+            listCommand.Handler = CommandHandler.Create<string, string, string, bool>(async (profile, region, projectPath, diagnostics) =>
             {
-                var awsUtilities = new AWSUtilities(_toolInteractiveService);
+                var toolInteractiveService = new ConsoleInteractiveServiceImpl(diagnostics);
+
+                var awsUtilities = new AWSUtilities(toolInteractiveService);
 
                 var previousSettings = PreviousDeploymentSettings.ReadSettings(projectPath, null);
 
@@ -142,21 +149,25 @@ namespace AWS.Deploy.CLI
                     ProjectDirectory = projectPath
                 };
 
-                await new ListStacksCommand(new DefaultAWSClientFactory(), _toolInteractiveService, session).ExecuteAsync();
+                await new ListStacksCommand(new DefaultAWSClientFactory(), toolInteractiveService, session).ExecuteAsync();
             });
             rootCommand.Add(listCommand);
 
             return await rootCommand.InvokeAsync(args);
         }
 
-        private static void SetupCICD(string projectPath)
+        private static void SetupCICD(string projectPath, bool diagnostics)
         {
-            _toolInteractiveService.WriteLine("TODO: Make this work");
+            var toolInteractiveService = new ConsoleInteractiveServiceImpl(diagnostics);
+            
+            toolInteractiveService.WriteLine("TODO: Make this work");
         }
 
-        private static void InspectIAMPermissions(string projectPath)
+        private static void InspectIAMPermissions(string projectPath, bool diagnostics)
         {
-            _toolInteractiveService.WriteLine("TODO: Make this work");
+            var toolInteractiveService = new ConsoleInteractiveServiceImpl(diagnostics);
+            
+            toolInteractiveService.WriteLine("TODO: Make this work");
         }
     }
 }
