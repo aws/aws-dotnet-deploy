@@ -23,5 +23,10 @@ namespace AWS.Deploy.CLI
         {
             _interactiveService.WriteLine(message);
         }
+
+        public void LogDebugLine(string message)
+        {
+            _interactiveService.WriteDebugLine(message);
+        }
     }
 }
