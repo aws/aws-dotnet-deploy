@@ -57,16 +57,9 @@ namespace ConsoleAppEcsFargateTask
                 StreamPrefix = configuration.StackName
             });
 
-            var dockerExecutionDirectory = string.Empty;
-            if (string.IsNullOrEmpty(configuration.ProjectSolutionPath))
-            {
-                dockerExecutionDirectory = new FileInfo(configuration.DockerfileDirectory).FullName;
-            }
-            else
-            {
-                dockerExecutionDirectory = new FileInfo(configuration.ProjectSolutionPath).Directory.FullName;
-            }
+            var dockerExecutionDirectory = new FileInfo(configuration.DockerfileDirectory).FullName;
             var relativePath = Path.GetRelativePath(dockerExecutionDirectory, configuration.DockerfileDirectory);
+            
             var container = taskDefinition.AddContainer("Container", new ContainerDefinitionOptions
             {
                 Image = ContainerImage.FromAsset(dockerExecutionDirectory, new AssetImageProps
