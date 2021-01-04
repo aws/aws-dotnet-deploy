@@ -88,7 +88,7 @@ namespace AWS.Deploy.CLI.Commands
             if (selectedRecommendation.Recipe.DeploymentType == RecipeDefinition.DeploymentTypes.CdkProject &&
                 !(await _session.SystemCapabilities).NodeJsMinVersionInstalled)
             {
-                _toolInteractiveService.WriteErrorLine("The selected Recipe requires docker but docker was not detected.  Please install docker: https://docs.docker.com/engine/install/");
+                _toolInteractiveService.WriteErrorLine("The selected Recipe requires NodeJS 10.3 or later.  Please install NodeJS https://nodejs.org/en/download/");
                 throw new MissingNodeJsException();
             }
 
