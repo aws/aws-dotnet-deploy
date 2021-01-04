@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.IO;
+using System.Threading.Tasks;
 using Amazon.Runtime;
 
 namespace AWS.Deploy.Orchestrator
@@ -13,7 +14,13 @@ namespace AWS.Deploy.Orchestrator
         public string AWSProfileName { get; set; }
         public AWSCredentials AWSCredentials { get; set; }
         public string AWSRegion { get; set; }
-        public SystemCapabilities SystemCapabilities { get; set; }
+        /// <remarks>
+        /// Calculating the current <see cref="SystemCapabilities"/> can take several seconds
+        /// and is not needed immediately so it is run as a background Task.
+        /// <para />
+        /// It's safe to repeatedly await this property; evaluation will only be done once.
+        /// </remarks>
+        public Task<SystemCapabilities> SystemCapabilities { get; set; }
         public string AWSAccountId { get; set; }
 
         private string _projectDirectory;

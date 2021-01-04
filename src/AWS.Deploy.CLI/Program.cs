@@ -65,7 +65,7 @@ namespace AWS.Deploy.CLI
                             awsRegion);
 
                     var systemCapabilityEvaluator = new SystemCapabilityEvaluator(commandLineWrapper);
-                    var systemCapabilities = await systemCapabilityEvaluator.Evaluate();
+                    var systemCapabilities = systemCapabilityEvaluator.Evaluate();
 
                     var stsClient = new AmazonSecurityTokenServiceClient(awsCredentials);
                     var callerIdentity = await stsClient.GetCallerIdentityAsync(new GetCallerIdentityRequest());

@@ -9,7 +9,6 @@ using Amazon.ElasticBeanstalk;
 using AWS.Deploy.Orchestrator;
 using AWS.Deploy.Recipes;
 using AWS.DeploymentCommon;
-using AWS.Deploy.CLI.Utilities;
 
 namespace AWS.Deploy.CLI.Commands
 {
@@ -87,14 +86,14 @@ namespace AWS.Deploy.CLI.Commands
             selectedRecommendation.ApplyPreviousSettings(previousDeployment?.RecipeOverrideSettings);
 
             if (selectedRecommendation.Recipe.DeploymentType == RecipeDefinition.DeploymentTypes.CdkProject &&
-                !_session.SystemCapabilities.NodeJsMinVersionInstalled)
+                !(await _session.SystemCapabilities).NodeJsMinVersionInstalled)
             {
                 _toolInteractiveService.WriteErrorLine("The selected Recipe requires docker but docker was not detected.  Please install docker: https://docs.docker.com/engine/install/");
                 throw new MissingNodeJsException();
             }
 
             if (selectedRecommendation.Recipe.DeploymentBundle == RecipeDefinition.DeploymentBundleTypes.Container &&
-                !_session.SystemCapabilities.DockerInstalled)
+                !(await _session.SystemCapabilities).DockerInstalled)
             {
                 _toolInteractiveService.WriteErrorLine("The selected Recipe requires docker but docker was not detected.  Please install docker: https://docs.docker.com/engine/install/");
                 throw new MissingDockerException();

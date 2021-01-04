@@ -41,7 +41,7 @@ namespace AWS.Deploy.Orchestrator
             _interactiveService.LogMessageLine("Starting deployment of CDK Project");
 
             // install cdk locally if needed
-            if (!session.SystemCapabilities.CdkNpmModuleInstalledGlobally)
+            if (!(await session.SystemCapabilities).CdkNpmModuleInstalledGlobally)
             {
                 await _commandLineWrapper.Run("npm install aws-cdk", cdkProjectPath, streamOutputToInteractiveService: false);
             }
