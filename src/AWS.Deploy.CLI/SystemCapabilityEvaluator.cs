@@ -24,7 +24,7 @@ namespace AWS.Deploy.CLI
 
         public async Task<SystemCapabilities> Evaluate()
         {
-            var dockerTask = HasDockerInstalled();
+            var dockerTask = HasDockerInstalledAndRunning();
             var nodeTask = HasMinVersionNodeJs();
             var cdkTask = HasCdkInstalled();
 
@@ -38,11 +38,20 @@ namespace AWS.Deploy.CLI
             return capabilities;
         }
 
-        private async Task<bool> HasDockerInstalled()
+        private async Task<bool> HasDockerInstalledAndRunning()
         {
-            var result = await _commandLineWrapper.TryRunWithResult("docker --version");
+            var processExitCode = -1;
 
-            return result.Success;
+            await _commandLineWrapper.Run(
+                "docker info",
+                streamOutputToInteractiveService: false,
+                onComplete: proc =>
+                {
+                    processExitCode = proc.ExitCode;
+                    return Task.CompletedTask;
+                });
+
+            return processExitCode == 0;
         }
 
         /// <summary>
