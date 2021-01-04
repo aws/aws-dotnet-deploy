@@ -95,7 +95,7 @@ namespace AWS.Deploy.CLI.Commands
             if (selectedRecommendation.Recipe.DeploymentBundle == RecipeDefinition.DeploymentBundleTypes.Container &&
                 !(await _session.SystemCapabilities).DockerInstalled)
             {
-                _toolInteractiveService.WriteErrorLine("The selected Recipe requires docker but docker was not detected.  Please install docker: https://docs.docker.com/engine/install/");
+                _toolInteractiveService.WriteErrorLine("The selected Recipe requires docker but docker was not detected as running.  Please install and start docker: https://docs.docker.com/engine/install/");
                 throw new MissingDockerException();
             }
 
