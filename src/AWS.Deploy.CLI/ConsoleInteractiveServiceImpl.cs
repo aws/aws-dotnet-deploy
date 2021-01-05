@@ -14,7 +14,17 @@ namespace AWS.Deploy.CLI
 
         public void WriteErrorLine(string message)
         {
-            Console.Error.WriteLine(message);
+            var color = Console.ForegroundColor;
+
+            try
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Error.WriteLine(message);
+            }
+            finally
+            {
+                Console.ForegroundColor = color;
+            }
         }
 
         public void WriteLine(string message)
