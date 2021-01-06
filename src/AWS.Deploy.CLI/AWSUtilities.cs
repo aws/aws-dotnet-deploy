@@ -4,8 +4,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Amazon.ElasticBeanstalk;
-using Amazon.ElasticBeanstalk.Model;
 using Amazon.Runtime;
 using Amazon.Runtime.CredentialManagement;
 
@@ -96,7 +94,6 @@ namespace AWS.Deploy.CLI
             }
         }
 
-
         public string ResolveAWSRegion(string region, string lastRegionUsed)
         {
             if (!string.IsNullOrEmpty(region))
@@ -131,41 +128,6 @@ namespace AWS.Deploy.CLI
             selectedRegion = selectedRegion.Substring(0, selectedRegion.IndexOf('(') - 1).Trim();
 
             return selectedRegion;
-        }
-
-        public async Task<IList<string>> GetListOfElasticBeanstalkApplications(IAmazonElasticBeanstalk beanstalkClient)
-        {
-            var response = await beanstalkClient.DescribeApplicationsAsync();
-
-            var applicationNames = new List<string>();
-            foreach (var application in response.Applications)
-            {
-                applicationNames.Add(application.ApplicationName);
-            }
-
-            return applicationNames;
-        }
-
-        public async Task<IList<string>> GetListOfElasticBeanstalkEnvironments(
-            IAmazonElasticBeanstalk beanstalkClient,
-            string applicationName)
-        {
-            var environmentNames = new List<string>();
-
-            var request = new DescribeEnvironmentsRequest { ApplicationName = applicationName };
-            DescribeEnvironmentsResponse response;
-            do
-            {
-                response = await beanstalkClient.DescribeEnvironmentsAsync();
-                request.NextToken = response.NextToken;
-
-                foreach (var environment in response.Environments)
-                {
-                    environmentNames.Add(environment.EnvironmentName);
-                }
-            } while (!string.IsNullOrEmpty(response.NextToken));
-
-            return environmentNames;
         }
     }
 }
