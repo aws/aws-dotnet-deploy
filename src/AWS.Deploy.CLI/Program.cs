@@ -6,12 +6,13 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
 using System.Threading.Tasks;
+using AWS.Deploy.Common;
 using AWS.Deploy.CLI.Commands;
 using AWS.Deploy.CLI.Utilities;
 using AWS.Deploy.Orchestrator;
+using AWS.Deploy.Orchestrator.Data;
 using Amazon.SecurityToken;
 using Amazon.SecurityToken.Model;
-using AWS.Deploy.Common;
 
 namespace AWS.Deploy.CLI
 {
@@ -82,10 +83,10 @@ namespace AWS.Deploy.CLI
                     };
 
                     var deploy = new DeployCommand(
-                        new DefaultAWSClientFactory(),
                         toolInteractiveService,
                         orchestratorInteractiveService,
                         new CdkProjectHandler(orchestratorInteractiveService, commandLineWrapper),
+                        new AWSResourceQueryer(new DefaultAWSClientFactory()),
                         session);
 
                     await deploy.ExecuteAsync(saveCdkProject);
