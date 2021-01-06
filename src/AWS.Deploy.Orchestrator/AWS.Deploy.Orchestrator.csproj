@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="AWSSDK.Core" Version="3.5.1.52" />
+    <PackageReference Include="AWSSDK.ECS" Version="3.5.2.6" />
     <PackageReference Include="AWSSDK.ElasticBeanstalk" Version="3.5.2.5" />
     <PackageReference Include="Microsoft.TemplateEngine.IDE" Version="5.0.1" />
     <PackageReference Include="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="5.0.1" />

@@ -175,6 +175,16 @@ namespace AWS.Deploy.CLI.Commands
                         "Select Beanstalk environment to deploy to:",
                         currentValue?.ToString());
                 }
+                else if (setting.TypeHint == RecipeDefinition.OptionSettingTypeHint.ECSCluster)
+                {
+                    _toolInteractiveService.WriteLine(setting.Description);
+
+                    var clusters = await _awsResourceQueryer.GetListOfECSClusters(_session);
+
+                    settingValue = _consoleUtilities.AskUserToChooseOrCreateNew(clusters,
+                        "Select ECS Cluster to deploy to:",
+                        currentValue?.ToString());
+                }
                 else if (setting.Type == RecipeDefinition.OptionSettingValueType.Bool)
                 {
                     var answer = _consoleUtilities.AskYesNoQuestion(setting.Description, recommendation.GetOptionSettingValue(setting.Id).ToString());
