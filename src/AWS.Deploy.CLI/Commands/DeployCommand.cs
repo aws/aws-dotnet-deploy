@@ -5,34 +5,34 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Amazon.ElasticBeanstalk;
 using AWS.Deploy.Common;
 using AWS.Deploy.Orchestrator;
 using AWS.Deploy.Recipes;
+using AWS.Deploy.Orchestrator.Data;
 
 namespace AWS.Deploy.CLI.Commands
 {
     public class DeployCommand
     {
-        private readonly IAWSClientFactory _awsClientFactory;
         private readonly IToolInteractiveService _toolInteractiveService;
         private readonly IOrchestratorInteractiveService _orchestratorInteractiveService;
         private readonly ICdkProjectHandler _cdkProjectHandler;
+        private readonly IAWSResourceQueryer _awsResourceQueryer;
 
         private readonly ConsoleUtilities _consoleUtilities;
         private readonly OrchestratorSession _session;
 
         public DeployCommand(
-            IAWSClientFactory awsClientFactory,
             IToolInteractiveService toolInteractiveService,
             IOrchestratorInteractiveService orchestratorInteractiveService,
             ICdkProjectHandler cdkProjectHandler,
+            IAWSResourceQueryer awsResourceQueryer,
             OrchestratorSession session)
         {
-            _awsClientFactory = awsClientFactory;
             _toolInteractiveService = toolInteractiveService;
             _orchestratorInteractiveService = orchestratorInteractiveService;
             _cdkProjectHandler = cdkProjectHandler;
+            _awsResourceQueryer = awsResourceQueryer;
             _consoleUtilities = new ConsoleUtilities(toolInteractiveService);
             _session = session;
         }
@@ -121,7 +121,6 @@ namespace AWS.Deploy.CLI.Commands
         {
             Console.WriteLine(string.Empty);
 
-            var awsUtilities = new AWSUtilities(_toolInteractiveService);
             foreach (var setting in recommendation.Recipe.OptionSettings)
             {
                 var isDisplayed = true;
@@ -158,8 +157,8 @@ namespace AWS.Deploy.CLI.Commands
                 else if (setting.TypeHint == RecipeDefinition.OptionSettingTypeHint.BeanstalkApplication)
                 {
                     _toolInteractiveService.WriteLine(setting.Description);
-                    var applications = await awsUtilities.GetListOfElasticBeanstalkApplications(
-                        _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>(_session.AWSCredentials, _session.AWSRegion));
+
+                    var applications = await _awsResourceQueryer.GetListOfElasticBeanstalkApplications(_session);
 
                     settingValue = _consoleUtilities.AskUserToChooseOrCreateNew(applications,
                         "Select Beanstalk application to deploy to:",
@@ -168,10 +167,10 @@ namespace AWS.Deploy.CLI.Commands
                 else if (setting.TypeHint == RecipeDefinition.OptionSettingTypeHint.BeanstalkEnvironment)
                 {
                     _toolInteractiveService.WriteLine(setting.Description);
+
                     var applicationName = recommendation.GetOptionSettingValue(setting.ParentSettingId) as string;
-                    var environments = await awsUtilities.GetListOfElasticBeanstalkEnvironments(
-                        _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>(_session.AWSCredentials, _session.AWSRegion),
-                        applicationName);
+                    var environments = await _awsResourceQueryer.GetListOfElasticBeanstalkEnvironments(_session, applicationName);
+                    
                     settingValue = _consoleUtilities.AskUserToChooseOrCreateNew(environments,
                         "Select Beanstalk environment to deploy to:",
                         currentValue?.ToString());
