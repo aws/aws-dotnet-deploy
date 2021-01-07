@@ -4,7 +4,7 @@
     "Name": "Console Application to ECS Fargate Service",
     "DeploymentType": "CdkProject",
     "DeploymentBundle": "Container",
-    "CdkProjectTemplate": "../CdkTemplates/ConsoleAppEcsFargateService",
+    "CdkProjectTemplate": "../CdkTemplates/ConsoleAppECSFargateService",
     "CdkProjectTemplateId": "netdeploy.ConsoleAppEcsFargateService",
     "Description": "Console application built as a container and deployed as a service in Elastic Container Service. This is meant for console applications that run indefinitely like message processing applications.",
     "TargetService": "AWS Elastic Container Service",
