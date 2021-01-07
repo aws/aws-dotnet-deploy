@@ -79,9 +79,9 @@ namespace AWS.Deploy.Orchestrator
             {
                 _bootstrapper.Install(folderLocation);
             }
-            catch
+            catch(Exception e)
             {
-                throw new DefaultTemplateInstallationFailedException();
+                throw new DefaultTemplateInstallationFailedException(e);
             }
         }
 
