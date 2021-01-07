@@ -17,7 +17,7 @@ namespace AWS.Deploy.Orchestrator
     /// </summary>
     public class DefaultTemplateInstallationFailedException : Exception
     {
-        public DefaultTemplateInstallationFailedException() : base()
+        public DefaultTemplateInstallationFailedException(Exception innerException = null) : base(innerException?.Message, innerException)
         {
         }
     }
