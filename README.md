@@ -14,18 +14,9 @@ docker build -f ./test/ManualLinuxTesting/Dockerfile/ . -t 'aws-deploy:local'
 
 3.  Run the docker image in interactive mode: 
 ```
-docker run --privileged -it --entrypoint bash aws-deploy:local
+docker run -v $HOME/.aws/:/root/.aws --privileged -it --entrypoint bash aws-deploy:local
  ```
-
-4. Enter your aws profile file using the aws cli and follow the prompts:
-
-```
-aws configure
-```
-
-5. Optional: Start docker: `service docker start`.  This is only required to deploy projects via containers.
-
-For more assitance, follow the guide here: https://cdkworkshop.com/15-prerequisites/200-account.html
+ _Note:_ the above command assumes you are running in powershell and have the `$HOME` variable availabe and that you've [saved your aws credentials](https://cdkworkshop.com/15-prerequisites/200-account.html#configure-your-credentials) in your home directory.
 
 You are now free to play with the cli.  There are several sample applications in `/testapps` that you can deploy:
 

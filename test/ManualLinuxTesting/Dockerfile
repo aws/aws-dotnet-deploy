@@ -5,6 +5,9 @@
 ## Run at repository root with
 ## docker build -f /test/ManualLinuxTesting/Dockerfile/ . -t 'aws-deploy:local'
 ##
+## Execute with
+## docker run -v $HOME/.aws/:/root/.aws --privileged -it --entrypoint bash aws-deploy:local
+##
 ## See the /README.md file for more details
 ####################################
 
@@ -46,6 +49,9 @@ RUN add-apt-repository \
    stable"
 RUN apt-get update
 RUN apt-get install -y docker-ce docker-ce-cli containerd.io
+
+# start docker on login
+RUN echo 'service docker start' >> ~/.bashrc
 
 # install dotnet sdk
 RUN wget https://packages.microsoft.com/config/ubuntu/20.10/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
