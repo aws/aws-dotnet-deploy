@@ -1,18 +1,20 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
+using AWS.Deploy.Common;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Utils;
-using Microsoft.TemplateEngine.Edge.TemplateUpdates;
 using Microsoft.TemplateEngine.Orchestrator.RunnableProjects;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.IDE;
 using Microsoft.TemplateEngine.Edge.Template;
-using System.Threading.Tasks;
-using System;
-using AWS.Deploy.Common;
 
 namespace AWS.Deploy.Orchestrator
 {
