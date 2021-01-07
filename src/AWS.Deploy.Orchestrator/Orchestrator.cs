@@ -55,7 +55,7 @@ namespace AWS.Deploy.Orchestrator
             if (recommendation.Recipe.DeploymentBundle == RecipeDefinition.DeploymentBundleTypes.Container &&
                 !recommendation.ProjectDefinition.HasDockerFile)
             {
-                _interactiveService.LogErrorMessageLine("Generating Dockerfile");
+                _interactiveService.LogMessageLine("Generating Dockerfile");
                 var dockerEngine =
                     new DockerEngine.DockerEngine(
                         new ProjectDefinition(recommendation.ProjectPath));
