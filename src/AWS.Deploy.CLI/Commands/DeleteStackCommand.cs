@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using Amazon.CloudFormation;
 using Amazon.CloudFormation.Model;
 using AWS.Deploy.CLI.CloudFormation;
+using AWS.Deploy.Common;
 using AWS.Deploy.DockerEngine;
 using AWS.Deploy.Orchestrator;
-using AWS.DeploymentCommon;
 
 namespace AWS.Deploy.CLI.Commands
 {

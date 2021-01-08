@@ -5,7 +5,7 @@ using Amazon;
 using Amazon.Extensions.NETCore.Setup;
 using Amazon.Runtime;
 
-namespace AWS.DeploymentCommon
+namespace AWS.Deploy.Common
 {
     public class DefaultAWSClientFactory : IAWSClientFactory
     {

@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using AWS.DeploymentCommon;
+using AWS.Deploy.Common;
 
 namespace AWS.Deploy.CLI
 {

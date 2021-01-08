@@ -4,8 +4,8 @@
 using System;
 using System.IO;
 using System.Reflection;
+using AWS.Deploy.Common;
 using AWS.Deploy.DockerEngine;
-using AWS.DeploymentCommon;
 using Should;
 using Xunit;
 

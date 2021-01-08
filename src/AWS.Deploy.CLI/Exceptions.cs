@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
-using AWS.DeploymentCommon;
+using AWS.Deploy.Common;
 
 namespace AWS.Deploy.CLI
 {
@@ -13,7 +13,7 @@ namespace AWS.Deploy.CLI
     /// Throw if Delete Command is unable to delete
     /// the specified stack
     /// </summary>
-    [AWSDeploymentExpectedExceptionAttribute ]
+    [AWSDeploymentExpectedException ]
     public class FailedToDeleteException : Exception
     {
         public FailedToDeleteException(string message) : base(message)

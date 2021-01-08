@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using AWS.DeploymentCommon;
+using AWS.Deploy.Common;
 
 namespace AWS.Deploy.Orchestrator
 {

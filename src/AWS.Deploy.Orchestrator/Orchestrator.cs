@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
-using AWS.DeploymentCommon;
 
 namespace AWS.Deploy.Orchestrator
 {
@@ -45,7 +44,7 @@ namespace AWS.Deploy.Orchestrator
 
         public IList<Recommendation> GenerateDeploymentRecommendations()
         {
-            var engine = new RecommendationEngine(_recipeDefinitionPaths);
+            var engine = new RecommendationEngine.RecommendationEngine(_recipeDefinitionPaths);
             return engine.ComputeRecommendations(_session.ProjectPath);
         }
 

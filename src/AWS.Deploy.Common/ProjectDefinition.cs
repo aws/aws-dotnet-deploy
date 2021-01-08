@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 
-namespace AWS.DeploymentCommon
+namespace AWS.Deploy.Common
 {
     /// <summary>
     /// Stores metadata about a parsed project

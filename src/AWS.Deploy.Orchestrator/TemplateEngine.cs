@@ -6,13 +6,13 @@ using System.Reflection;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Utils;
 using Microsoft.TemplateEngine.Edge.TemplateUpdates;
-using AWS.DeploymentCommon;
 using Microsoft.TemplateEngine.Orchestrator.RunnableProjects;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.IDE;
 using Microsoft.TemplateEngine.Edge.Template;
 using System.Threading.Tasks;
 using System;
+using AWS.Deploy.Common;
 
 namespace AWS.Deploy.Orchestrator
 {

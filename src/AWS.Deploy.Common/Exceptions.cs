@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
-using System.Linq;
 using System.Reflection;
 
-namespace AWS.DeploymentCommon
+namespace AWS.Deploy.Common
 {
     public class ProjectFileNotFoundException : Exception
     {

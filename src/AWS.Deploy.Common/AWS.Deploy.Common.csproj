@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>AWS.DeploymentCommon</AssemblyName>
-    <RootNamespace>AWS.DeploymentCommon</RootNamespace>
+    <AssemblyName>AWS.Deploy.Common</AssemblyName>
+    <RootNamespace>AWS.Deploy.Common</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
