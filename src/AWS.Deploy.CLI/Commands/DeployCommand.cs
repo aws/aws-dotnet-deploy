@@ -6,9 +6,9 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Amazon.ElasticBeanstalk;
+using AWS.Deploy.Common;
 using AWS.Deploy.Orchestrator;
 using AWS.Deploy.Recipes;
-using AWS.DeploymentCommon;
 
 namespace AWS.Deploy.CLI.Commands
 {

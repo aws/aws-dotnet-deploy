@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using AWS.Deploy.Common;
 using AWS.Deploy.Orchestrator.Utilities;
-using AWS.DeploymentCommon;
 
 namespace AWS.Deploy.Orchestrator
 {

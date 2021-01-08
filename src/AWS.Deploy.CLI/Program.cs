@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 using AWS.Deploy.CLI.Commands;
 using AWS.Deploy.CLI.Utilities;
 using AWS.Deploy.Orchestrator;
-using AWS.DeploymentCommon;
 using Amazon.SecurityToken;
 using Amazon.SecurityToken.Model;
+using AWS.Deploy.Common;
 
 namespace AWS.Deploy.CLI
 {

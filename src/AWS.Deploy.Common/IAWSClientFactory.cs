@@ -3,7 +3,7 @@
 
 using Amazon.Runtime;
 
-namespace AWS.DeploymentCommon
+namespace AWS.Deploy.Common
 {
     public interface IAWSClientFactory
     {

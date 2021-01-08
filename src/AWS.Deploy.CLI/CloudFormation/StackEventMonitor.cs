@@ -9,8 +9,8 @@ using System.Threading.Tasks;
 using Amazon.CloudFormation;
 using Amazon.CloudFormation.Model;
 using AWS.Deploy.CLI.Extensions;
+using AWS.Deploy.Common;
 using AWS.Deploy.Orchestrator;
-using AWS.DeploymentCommon;
 
 namespace AWS.Deploy.CLI.CloudFormation
 {

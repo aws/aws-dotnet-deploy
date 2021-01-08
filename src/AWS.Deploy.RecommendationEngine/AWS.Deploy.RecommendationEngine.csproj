@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>Latest</LangVersion>
-    <AssemblyName>AWS.Deploy.Common</AssemblyName>
-    <RootNamespace>AWS.Deploy.Common</RootNamespace>
+    <AssemblyName>AWS.Deploy.RecommendationEngine</AssemblyName>
+    <RootNamespace>AWS.Deploy.RecommendationEngine</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

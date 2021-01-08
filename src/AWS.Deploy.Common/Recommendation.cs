@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace AWS.DeploymentCommon
+namespace AWS.Deploy.Common
 {
     public class Recommendation : IUserInputOption
     {

@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace AWS.DeploymentCommon
+namespace AWS.Deploy.Common
 {
     /// <summary>
     /// Used to deserialize a JSON recipe definition into.

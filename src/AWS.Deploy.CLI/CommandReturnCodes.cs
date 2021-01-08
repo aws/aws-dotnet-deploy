@@ -1,4 +1,4 @@
-using AWS.DeploymentCommon;
+using AWS.Deploy.Common;
 
 namespace AWS.Deploy.CLI
 {
