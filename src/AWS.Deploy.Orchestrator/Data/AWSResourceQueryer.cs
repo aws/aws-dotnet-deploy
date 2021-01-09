@@ -75,7 +75,7 @@ namespace AWS.Deploy.Orchestrator.Data
            
             do
             {
-                var response = await beanstalkClient.DescribeEnvironmentsAsync();
+                var response = await beanstalkClient.DescribeEnvironmentsAsync(request);
                 request.NextToken = response.NextToken;
 
                 environmentNames.AddRange(response.Environments.Select(x => x.EnvironmentName));
