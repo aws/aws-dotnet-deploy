@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace AWS.Deploy.Common
 {
     /// <summary>
-    /// Used to deserialize a JSON recipe definition into.
+    /// Serialization container for a JSON recipe definition.
     /// </summary>
     public class RecipeDefinition : IUserInputOption
     {
@@ -26,7 +26,8 @@ namespace AWS.Deploy.Common
             IAMRole,
             ECSCluster,
             ECSService,
-            ECSTaskSchedule
+            ECSTaskSchedule,
+            Vpc
         };
 
         public enum DeploymentTypes

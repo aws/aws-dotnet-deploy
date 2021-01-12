@@ -1,12 +1,9 @@
+using System.IO;
 using Amazon.CDK;
-using Amazon.CDK.AWS.AutoScaling;
 using Amazon.CDK.AWS.EC2;
 using Amazon.CDK.AWS.ECS;
 using Amazon.CDK.AWS.ECS.Patterns;
 using Amazon.CDK.AWS.IAM;
-using System.IO;
-using System.Collections.Generic;
-using Protocol = Amazon.CDK.AWS.ECS.Protocol;
 using Schedule = Amazon.CDK.AWS.ApplicationAutoScaling.Schedule;
 
 namespace ConsoleAppEcsFargateTask
@@ -31,11 +28,23 @@ namespace ConsoleAppEcsFargateTask
             });
 #endif
 
+
+#if (UseExistingECSCluster)
+            var cluster = Cluster.FromClusterAttributes(this, "Cluster", new ClusterAttributes
+            {
+                ClusterArn = configuration.ExistingClusterArn,
+                // ClusterName is required field, but is ignored
+                ClusterName = ""
+                SecurityGroups = new ISecurityGroup[0],
+                Vpc = vpc
+            });
+#else
             var cluster = new Cluster(this, "Cluster", new ClusterProps
             {
                 Vpc = vpc,
-                ClusterName = configuration.ClusterName
+                ClusterName = configuration.NewClusterName
             });
+#endif
 
             var executionRole = new Role(this, "ExecutionRole", new RoleProps
             {
@@ -71,8 +80,11 @@ namespace ConsoleAppEcsFargateTask
                     BuildArgs = GetDockerBuildArgs("DockerBuildArgs-Placeholder")
 #endif
                 }),
-                Logging = logging
+                Logging = logging,
+                Environment = configuration.EnvironmentVariables
             });
+
+            container.AddPortMappings(configuration.PortMappings);
 
             new ScheduledFargateTask(this, "FargateService", new ScheduledFargateTaskProps
             {

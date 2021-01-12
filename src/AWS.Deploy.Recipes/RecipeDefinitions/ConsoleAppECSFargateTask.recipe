@@ -37,14 +37,43 @@
 
     "OptionSettings": [
         {
-            "Id": "ClusterName",
-            "Name": "Cluster Name",
-            "Description": "The name of the ECS cluster.",
+            "Id": "UseExistingECSCluster",
+            "Name": "Use Existing ECS Cluster",
+            "Description": "Do you want to use an existing ECS Cluster for the deployment?",
+            "Type": "Bool",
+            "DefaultValue": "false",
+            "AdvancedSetting": true,
+            "Updatable": true
+        },
+        {
+            "Id": "ExistingClusterArn",
+            "Name": "Cluster Arn",
+            "Description": "The arn of the existing ECS cluster.",
             "Type": "String",
             "TypeHint": "ECSCluster",
+            "AdvancedSetting": false,
+            "Updatable": true,
+            "DependsOn": [
+                {
+                    "Id": "UseExistingECSCluster",
+                    "Value": "true"
+                }
+            ]
+        },
+        {
+            "Id": "NewClusterName",
+            "Name": "Cluster Name",
+            "Description": "The name of the new ECS cluster.",
+            "Type": "String",
             "DefaultValue": "{ProjectName}",
             "AdvancedSetting": false,
-            "Updatable": false
+            "Updatable": false,
+            "DependsOn": [
+                {
+                    "Id": "UseExistingECSCluster",
+                    "Value": "false"
+                }
+            ]
         },
         {
             "Id": "ApplicationIAMRole",
@@ -110,6 +139,7 @@
             "Description": "The Id of the existing VPC to use.",
             "Type": "String",
             "DefaultValue": "",
+            "TypeHint": "Vpc",
             "DependsOn": [
                 {
                     "Id": "UseExistingVPC",

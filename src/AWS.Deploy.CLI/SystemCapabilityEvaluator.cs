@@ -25,6 +25,7 @@ namespace AWS.Deploy.CLI
         public async Task<SystemCapabilities> Evaluate()
         {
             var dockerTask = HasDockerInstalledAndRunning();
+            await dockerTask;
             var nodeTask = HasMinVersionNodeJs();
             var cdkTask = HasCdkInstalled();
 

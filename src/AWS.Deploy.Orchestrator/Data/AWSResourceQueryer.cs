@@ -4,6 +4,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Amazon.EC2;
+using Amazon.EC2.Model;
 using Amazon.ECS;
 using Amazon.ECS.Model;
 using Amazon.ElasticBeanstalk;
@@ -17,6 +19,7 @@ namespace AWS.Deploy.Orchestrator.Data
         Task<List<string>> GetListOfECSClusters(OrchestratorSession session);
         Task<List<string>> GetListOfElasticBeanstalkApplications(OrchestratorSession session);
         Task<List<string>> GetListOfElasticBeanstalkEnvironments(OrchestratorSession session, string applicationName);
+        Task<List<string>> GetListOfVpcEndpoints(OrchestratorSession session);
     }
 
     public class AWSResourceQueryer : IAWSResourceQueryer
@@ -83,6 +86,26 @@ namespace AWS.Deploy.Orchestrator.Data
             } while (!string.IsNullOrEmpty(request.NextToken));
 
             return environmentNames;
+        }
+
+        public async Task<List<string>> GetListOfVpcEndpoints(OrchestratorSession session)
+        {
+            var vpcClient = _awsClientFactory.GetAWSClient<IAmazonEC2>(session.AWSCredentials, session.AWSRegion);
+
+            var vpcEndpoints = new List<string>();
+
+            var request = new DescribeVpcsRequest();
+
+            do
+            {
+                var response = await vpcClient.DescribeVpcsAsync(request);
+                request.NextToken = response.NextToken;
+
+                vpcEndpoints.AddRange(response.Vpcs.Select(x => x.VpcId));
+
+            } while (!string.IsNullOrEmpty(request.NextToken));
+
+            return vpcEndpoints;
         }
     }
 }

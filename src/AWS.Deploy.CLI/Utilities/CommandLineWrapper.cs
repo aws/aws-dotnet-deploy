@@ -36,7 +36,9 @@ namespace AWS.Deploy.CLI.Utilities
             Func<Process, Task> onComplete = null,
             CancellationToken cancelToken = default)
         {
+            var sw = Stopwatch.StartNew();
             _interactiveService.LogDebugLine($"Running [{command}] in [{workingDirectory}]");
+            
 
             var credentials = await _awsCredentials.GetCredentialsAsync();
 
@@ -90,11 +92,13 @@ namespace AWS.Deploy.CLI.Utilities
 
                 await Task.Delay(TimeSpan.FromMilliseconds(50), cancelToken);
             }
-
+            
             if (onComplete != null)
             {
                 await onComplete(process);
             }
+
+            _interactiveService.LogDebugLine($"Completed [{command}].  Total Time [{sw.ElapsedMilliseconds} ms].");
         }
 
         private string GetSystemShell()

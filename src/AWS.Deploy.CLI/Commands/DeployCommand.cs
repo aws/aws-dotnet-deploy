@@ -85,6 +85,10 @@ namespace AWS.Deploy.CLI.Commands
             var selectedRecommendation = _consoleUtilities.AskUserToChoose(recommendations, "Available options to deploy project", recommendations[0]);
             selectedRecommendation.ApplyPreviousSettings(previousDeployment?.RecipeOverrideSettings);
 
+            _toolInteractiveService.WriteDebugLine("Confirming System Capabilities");
+            await _session.SystemCapabilities;
+            _toolInteractiveService.WriteDebugLine("Confirmed System Capabilities");
+
             if (selectedRecommendation.Recipe.DeploymentType == RecipeDefinition.DeploymentTypes.CdkProject &&
                 !(await _session.SystemCapabilities).NodeJsMinVersionInstalled)
             {
@@ -181,8 +185,18 @@ namespace AWS.Deploy.CLI.Commands
 
                     var clusters = await _awsResourceQueryer.GetListOfECSClusters(_session);
 
-                    settingValue = _consoleUtilities.AskUserToChooseOrCreateNew(clusters,
+                    settingValue = _consoleUtilities.AskUserToChoose(clusters,
                         "Select ECS Cluster to deploy to:",
+                        currentValue?.ToString());
+                }
+                else if (setting.TypeHint == RecipeDefinition.OptionSettingTypeHint.Vpc)
+                {
+                    _toolInteractiveService.WriteLine(setting.Description);
+
+                    var vpcs = await _awsResourceQueryer.GetListOfVpcEndpoints(_session);
+
+                    settingValue = _consoleUtilities.AskUserToChoose(vpcs,
+                        "Select Vpc:",
                         currentValue?.ToString());
                 }
                 else if (setting.Type == RecipeDefinition.OptionSettingValueType.Bool)

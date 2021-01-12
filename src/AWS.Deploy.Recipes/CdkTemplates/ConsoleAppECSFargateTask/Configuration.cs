@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Amazon.CDK.AWS.ECS;
 using Amazon.CDK.AWS.ECS.Patterns;
 
@@ -40,11 +41,22 @@ namespace ConsoleAppEcsFargateTask
         /// </summary>
         public string Schedule { get; set; }
 
-        /// <summary>
-        /// The name of the ECS cluster.
-        /// </summary>
-        public string ClusterName { get; set; }
-        
+        /// <inheritdoc cref="ClusterProps.ClusterName"/>
+        /// <remarks>
+        /// This is only consumed if the deployment is configured
+        /// to use a new cluster.  Otherwise, <see cref="ExistingClusterArn"/>
+        /// will be used.
+        /// </remarks>
+        public string NewClusterName { get; set; }
+
+        /// <inheritdoc cref="ClusterAttributes.ClusterName"/>
+        /// <remarks>
+        /// This is only consumed if the deployment is configured
+        /// to use an existing cluster.  Otherwise, <see cref="NewClusterName"/>
+        /// will be used.
+        /// </remarks>
+        public string ExistingClusterArn { get; set; }
+
         /// <inheritdoc cref="FargateTaskDefinitionProps.Cpu"/>
         public double? CpuLimit { get; set; }
         
@@ -53,5 +65,11 @@ namespace ConsoleAppEcsFargateTask
         
         /// <inheritdoc cref="ScheduledTaskBase.DesiredTaskCount"/>
         public double? DesiredTaskCount { get; set; }
+
+        /// <inheritdoc cref="ContainerDefinition.PortMappings"/>
+        public PortMapping[] PortMappings { get; set; } = new PortMapping[0];
+
+        /// <inheritdoc cref="ContainerDefinitionOptions.Environment"/>
+        public Dictionary<string, string> EnvironmentVariables { get; set; } = new Dictionary<string, string>();
     }
 }
