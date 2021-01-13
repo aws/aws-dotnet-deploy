@@ -1,33 +1,66 @@
 {
+    "$schema": "./aws-deploy-recipe-schema.json",
     "Id": "AspNetAppEcsFargate",
     "Name": "ASP.NET Core App to ECS Fargate",
     "DeploymentType": "CdkProject",
+    "DeploymentBundle": "Container",    
     "CdkProjectTemplate": "../CdkTemplates/AspNetAppEcsFargate",
     "CdkProjectTemplateId": "netdeploy.AspNetAppEcsFargate",
     "Description": "ASP.NET Core applications built as a container and deployed to Elastic Container Service with compute power managed by Fargate.",
     "TargetService": "AWS Elastic Container Service",
 
-    "RecommendationRules": {
-        "RequiredRules": [
-            { "SdkType": "Microsoft.NET.Sdk.Web" },
-            {
-                "MSProperty": {
-                    "Name": "TargetFramework",
-                    "AllowedValues": [ "netcoreapp2.1", "netcoreapp3.1", "net5.0" ]
+    "RecipePriority": 110,
+    "RecommendationRules": [       
+        {
+            "Tests": [
+                {
+                    "Type" : "MSProjectSdkAttribute",
+                    "Condition": {
+                        "Value": "Microsoft.NET.Sdk.Web"
+                    }
+                },
+                {
+                    "Type": "MSProperty",
+                    "Condition": {
+                        "PropertyName": "TargetFramework",
+                        "AllowedValues": [ "netcoreapp2.1", "netcoreapp3.1", "net5.0" ]
+                    }
                 }
+            ]
+        },
+
+        {
+            "Tests": [
+                {
+                    "Type":"FileExists",
+                    "Condition": {
+                        "FileName": "Dockerfile"
+                    }
+                }
+            ],
+            "Effect": {
+                "Negative": {"PriorityAdjustment": -55}
             }
-        ],
-        "OptionalRules": [
-            { "HasFiles": [ "Dockerfile" ] }
-        ],
-        "NegativeRules": [
-            { "MSPropertyExists": "AWSProjectType" }
-        ],
+        },
 
-        "Priority": 110
-    },
 
-    "DeploymentBundle": "Container",
+        {
+            "Tests": [
+                {
+                    "Type": "MSPropertyExists",
+                    "Condition": {
+                        "PropertyName": "AWSProjectType"
+                    }
+                }
+            ],
+            "Effect": {
+                "Positive": {"Include": false}
+            }
+        }
+        
+    ],
+
+
 
     "OptionSettings": [
         {
@@ -68,9 +101,7 @@
             "TypeHint": "IAMRole",
             "DefaultValue": "aws-ecs-role",
             "AdvancedSetting": false,
-            "Updatable": false,
-            "MinimumPermissions": "...",
-            "AssumeRolePolicy": "..."
+            "Updatable": false
         },
         {
             "Id": "UseExistingVPC",

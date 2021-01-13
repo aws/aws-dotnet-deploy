@@ -1,0 +1,359 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "./aws-deploy-recipe-schema.json",
+    "title": "AWS Deploy Recipes",
+    "description": "Recipes for deploying application to AWS using the CDK",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+
+        "Id",
+        "Name",
+        "DeploymentType",
+        "DeploymentBundle",
+        "CdkProjectTemplate",
+        "CdkProjectTemplateId",
+        "Description",
+        "TargetService",
+        "RecipePriority",
+        "RecommendationRules",
+        "OptionSettings"
+    ],
+    "properties": {
+        "$schema": {
+            "type": "string",
+            "title": "Schema",
+            "description": "JSON schema for the document",
+            "minLength": 1
+        },        
+        "Id": {
+            "type": "string",
+            "title": "Unique ID for the recipe",
+            "description": "The unqiue id for the recipe. This value should never been change once the recipe is released because it will be stored in user config files.",
+            "minLength": 1
+        },
+        "Name": {
+            "type": "string",
+            "title": "Name",
+            "description": "The name that will be showed to the user when choosing which recipe to choose for deployment.",
+            "minLength": 1
+        },
+        "DeploymentType": {
+            "type": "string",
+            "title": "Deployment type",
+            "description": "The technology used to deploy the project.",
+            "enum": [ "CdkProject" ]
+        },
+        "DeploymentBundle": {
+            "type": "string",
+            "title": "Deployment Bundle",
+            "description": "How the project will be bundled for deployment.",
+            "enum": [ "Container", "DotnetPublishZipFile" ]
+        },        
+        "CdkProjectTemplate": {
+            "type": "string",
+            "title": "CDK Project Template",
+            "description": "The path to the directory containing project template for the CDK project",
+            "minLength": 1
+        },
+        "CdkProjectTemplateId": {
+            "type": "string",
+            "title": "CDK Project Template ID",
+            "description": "The id of project template",
+            "minLength": 1
+        },
+        "Description": {
+            "type": "string",
+            "title": "Description",
+            "description": "The description of the recipe",
+            "minLength": 1
+        },
+        "TargetService": {
+            "type": "string",
+            "title": "AWS Target Service",
+            "description": "The AWS service that the project will be deployed to",
+            "minLength": 1
+        },
+        "RecipePriority": {
+            "type": "integer",
+            "title": "Recipe Priority",
+            "description": "The type of test to perform."
+        },  
+        "RecommendationRules" : {
+            "$ref": "#/definitions/RecommendationRules"
+        },
+        "OptionSettings" : {
+            "$ref": "#/definitions/OptionSettings"
+        }        
+    },
+    "definitions": {
+
+        "RecommendationRules" : {
+            "type" : "array",
+            "description": "The rules that determine if the recipe is compatible with the project.",
+            "items": {"$ref": "#/definitions/RecommendationRule"}           
+        },
+        "RecommendationRule" : {
+            "type" : "object",
+            "additionalProperties": false,
+            "required": ["Tests"],
+            "properties": {
+                "Tests": {
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/RuleTest"} 
+                },              
+                "Effect": {
+                    "type": "object",
+                    "properties": {
+                        "Positive": {
+                            "$ref": "#/definitions/RuleEffect"
+                        },
+                        "Negative": {
+                            "$ref": "#/definitions/RuleEffect"
+                        }                        
+                    }
+                }                
+            }
+        },
+
+        "RuleTest" : {
+            "type" : "object",
+            "additionalProperties": false,
+            "required": ["Type", "Condition"],
+            "properties" : {
+                "Type": {
+                    "type": "string",
+                    "title": "Test Type",
+                    "description": "The type of test to perform.",
+                    "enum" : [
+                        "MSProjectSdkAttribute", 
+                        "MSProperty", 
+                        "MSPropertyExists", 
+                        "FileExists"
+                    ]
+                },
+                "Condition" : {
+                    "type": "object"
+                }
+            },
+            "allOf": [
+                {
+                    "if" : {
+                        "properties": {"Type" : {"const" : "MSProjectSdkAttribute"}}
+                    },
+                    "then" : {
+                        "properties": {
+                            "Condition": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": ["Value"],
+                                "properties" : {
+                                    "Value": {
+                                        "type": "string",
+                                        "title": "SDK Value",
+                                        "description": "The expected value of the sdk attribute",
+                                        "enum" : [
+                                            "Microsoft.NET.Sdk",
+                                            "Microsoft.NET.Sdk.Web"
+                                        ]
+                                    }                                
+                                }
+                            }  
+                        }
+                    }
+                },
+
+                {
+                    "if" : {
+                        "properties": {"Type" : {"const" : "MSProperty"}}
+                    },
+                    "then" : {
+                        "properties": {
+                            "Condition": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": ["PropertyName", "AllowedValues"],
+                                "properties" : {
+                                    "PropertyName": {
+                                        "type": "string",
+                                        "title": "Property Name",
+                                        "description": "The name of the property in the PropertyGroup to inspect.",
+                                        "minLength": 1
+                                    },                             
+                                    "AllowedValues": {
+                                        "type": "array",
+                                        "items" :{
+                                            "type": "string"
+                                        },
+                                        "title": "Allowed Values",
+                                        "description": "The list of allowed values for the property."
+                                    }                                
+                                }
+                            }  
+                        }
+                    }
+                },
+                
+                {
+                    "if" : {
+                        "properties": {"Type" : {"const" : "MSPropertyExists"}}
+                    },
+                    "then" : {
+                        "properties": {
+                            "Condition": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": ["PropertyName"],
+                                "properties" : {
+                                    "PropertyName": {
+                                        "type": "string",
+                                        "title": "Property Name",
+                                        "description": "The name of the property to check for existence",
+                                        "minLength": 1
+                                    }                         
+                                }
+                            }  
+                        }
+                    }
+                },
+                
+                {
+                    "if" : {
+                        "properties": {"Type" : {"const" : "FileExists"}}
+                    },
+                    "then" : {
+                        "properties": {
+                            "Condition": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": ["FileName"],
+                                "properties" : {
+                                    "FileName": {
+                                        "type": "string",
+                                        "title": "File Exists",
+                                        "description": "The name of the file to check if it exists within the project.",
+                                        "minLength": 1
+                                    }                                
+                                }
+                            }  
+                        }
+                    }
+                }                
+            ]
+        },
+
+        "RuleEffect" : {
+            "type" : "object",
+            "additionalProperties": false,
+            "properties": {
+                "Include": {
+                    "type": "boolean",
+                    "title": "Include",
+                    "description": "If true the rule allows recipe to be included, if false the recipe will be excluded."
+                },
+                "PriorityAdjustment": {
+                    "type": "integer",
+                    "title": "Priority Adjustment",
+                    "description": "Adjust the base priority"
+                }                
+            }
+        },
+
+        "OptionSettings" : {
+            "type" : "array",
+            "items": {"$ref": "#/definitions/OptionSetting"} 
+        },
+        "OptionSetting" : {
+            "type" : "object",
+            "additionalProperties": false,
+            "required": ["Id", "Name", "Description", "Type"],
+            "properties": {
+                "Id": {
+                    "type": "string",
+                    "title": "Unique ID for the setting",
+                    "description": "The unqiue id for the setting. This value should never been change once the recipe is released because it will be stored in user config files.",
+                    "minLength": 1
+                },
+                "ParentSettingId": {
+                    "type": "string",
+                    "title": "Parent Setting Id",
+                    "description": "The id of the parent setting. This is used by type hints to look up all of the existing resources of this setting using the id of the parent resource.",
+                    "minLength": 1
+                },
+                "Name": {
+                    "type": "string",
+                    "title": "Name",
+                    "description": "The name which will be shown to the user for the setting.",
+                    "minLength": 1
+                },
+                "Description": {
+                    "type": "string",
+                    "title": "Description",
+                    "description": "The description of the setting which will be shown to end users.",
+                    "minLength": 1
+                },
+                "Type": {
+                    "type": "string",
+                    "title": "Type",
+                    "description": "The data type of the setting.",
+                    "minLength": 1,
+                    "enum": ["String", "Int", "Bool"]
+                },
+                "TypeHint": {
+                    "type": "string",
+                    "title": "Type Hint",
+                    "description": "Hint to deploy tools to use to provide extra context for the setting. For example the value could be 'ECSCluster' and the deploy tool can show a list of ECS clusters to pick from.",
+                    "minLength": 1
+                },
+                "DefaultValue": {
+                    "type": "string",
+                    "title": "The default value for the setting.",
+                    "description": ""
+                },
+                "AllowedValues": {
+                    "type": "array",
+                    "title": "Allowed Values",
+                    "description": "The list of allowed values for the setting.",
+                    "items": {
+                        "type" : "string"
+                    }
+                },                
+                "AdvancedSetting": {
+                    "type": "boolean",
+                    "title": "Advance Setting",
+                    "description": "Info property to inform tooling whether the setting is advanced and doesn't need to be shown by default.",
+                    "minLength": 1
+                },
+                "Updatable": {
+                    "type": "boolean",
+                    "title": "Updatable",
+                    "description": "If the setting is false the setting can not be changed during redeployment.",
+                    "minLength": 1
+                },
+                "DependsOn": {
+                    "type": "array",
+                    "title": "",
+                    "description": "",
+                    "items": {
+                        "type" :"object",
+                        "additionalProperties": false,
+                        "required": ["Id", "Value"],
+                        "properties": {
+                            "Id": {
+                                "type": "string",
+                                "title": "",
+                                "description": "",
+                                "minLength": 1
+                            },
+                            "Value": {
+                                "type": "string",
+                                "title": "",
+                                "description": ""
+                            }                                                        
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
