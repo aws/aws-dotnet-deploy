@@ -33,7 +33,10 @@
                         "AllowedValues": [ "Exe" ]
                     }
                 }
-            ]
+            ],
+            "Effect": {
+                "Positive": {"Include": true}
+            }
         },
 
         {

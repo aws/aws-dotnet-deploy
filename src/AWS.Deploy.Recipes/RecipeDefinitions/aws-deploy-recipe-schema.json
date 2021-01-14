@@ -96,7 +96,7 @@
         "RecommendationRule" : {
             "type" : "object",
             "additionalProperties": false,
-            "required": ["Tests"],
+            "required": ["Tests", "Effect"],
             "properties": {
                 "Tests": {
                     "type": "array",
