@@ -164,6 +164,9 @@ namespace AWS.Deploy.CLI.Commands
                     settingValue = _consoleUtilities.AskUserToChooseOrCreateNew(applications,
                         "Select Beanstalk application to deploy to:",
                         currentValue?.ToString());
+
+                    if (applications.Contains(settingValue.ToString()))
+                        recommendation.SetOverrideOptionSettingValue("UseExistingApplication", "true");
                 }
                 else if (setting.TypeHint == RecipeDefinition.OptionSettingTypeHint.BeanstalkEnvironment)
                 {

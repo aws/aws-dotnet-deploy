@@ -17,10 +17,7 @@ namespace AspNetAppElasticBeanstalkLinux
                 Path = configuration.AssetPath
             });
 
-            var application = new CfnApplication(this, "Application", new CfnApplicationProps
-            {
-                ApplicationName = configuration.ApplicationName
-            });
+            CfnApplication application = null;
 
             // Create an app version from the S3 asset defined above
             // The S3 "putObject" will occur first before CF generates the template
@@ -33,6 +30,16 @@ namespace AspNetAppElasticBeanstalkLinux
                     S3Key = asset.S3ObjectKey
                 }
             });
+
+            if (!configuration.UseExistingApplication)
+            {
+                application = new CfnApplication(this, "Application", new CfnApplicationProps
+                {
+                    ApplicationName = configuration.ApplicationName
+                });
+
+                applicationVersion.AddDependsOn(application);
+            }
 
             var role = new Role(this, "Role", new RoleProps
             {
@@ -95,9 +102,6 @@ namespace AspNetAppElasticBeanstalkLinux
                 // This line is critical - reference the label created in this same stack
                 VersionLabel = applicationVersion.Ref,
             });
-
-            // Also very important - make sure that `app` exists before creating an app version
-            applicationVersion.AddDependsOn(application);
         }
     }
 }

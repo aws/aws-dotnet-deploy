@@ -33,6 +33,12 @@ namespace AWS.Deploy.Orchestrator
                 settings[optionSetting.Id] = recommendation.GetOptionSettingValue(optionSetting.Id);
             }
 
+            foreach (var optionSetting in recommendation.ListOptionSettings())
+            {
+                if (!settings.ContainsKey(optionSetting))
+                    settings[optionSetting] = recommendation.GetOptionSettingValue(optionSetting);
+            }
+
             return JsonSerializer.Serialize(settings);
         }
 

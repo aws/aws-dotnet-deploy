@@ -55,5 +55,10 @@ namespace AspNetAppElasticBeanstalkLinux
         /// The type of load balancer for your environment.
         /// </summary>
         public string LoadBalancerType { get; set; } = "application";
+        
+        /// <summary>
+        /// Use existing Elastic Beanstalk environment.
+        /// </summary>
+        public bool UseExistingApplication { get; set; }
     }
 }
