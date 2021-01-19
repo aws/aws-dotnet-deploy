@@ -179,6 +179,25 @@ namespace AWS.Deploy.CLI.Commands
                         "Select Beanstalk environment to deploy to:",
                         currentValue?.ToString());
                 }
+                else if (setting.TypeHint == RecipeDefinition.OptionSettingTypeHint.DotnetPublishArgs)
+                {
+                    settingValue =
+                      _consoleUtilities
+                            .AskUserForValue(
+                                 setting.Description,
+                                 recommendation.GetOptionSettingValue(setting.Id).ToString(),
+                                 // validators:
+                                 publishArgs =>
+                                          (publishArgs.Contains("-o ") || publishArgs.Contains("--output "))
+                                           ? "You must not include -o/--output as an additional argument as it is used internally."
+                                            : "",
+                                 publishArgs =>
+                                          (publishArgs.Contains("-c ") || publishArgs.Contains("--configuration ")
+                                           ? "You must not include -c/--configuration as an additional argument. You can set the build configuration in the advanced settings."
+                                            : ""))
+                           .ToString()
+                           .Replace("\"", "\"\"");
+                }
                 else if (setting.Type == RecipeDefinition.OptionSettingValueType.Bool)
                 {
                     var answer = _consoleUtilities.AskYesNoQuestion(setting.Description, recommendation.GetOptionSettingValue(setting.Id).ToString());

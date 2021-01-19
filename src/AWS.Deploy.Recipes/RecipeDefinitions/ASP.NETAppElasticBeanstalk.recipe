@@ -120,6 +120,16 @@
             "DefaultValue": "Release",
             "AdvancedSetting": true,
             "Updatable": true
+        },
+        {
+            "Id": "DotnetPublishArgs",
+            "Name": "Dotnet Publish Args",
+            "Description": "The list of additional dotnet publish args passed to the target application.",
+            "Type": "String",
+            "TypeHint": "DotnetPublishArgs",
+            "DefaultValue": "",
+            "AdvancedSetting": true,
+            "Updatable": true
         }
     ]
 }

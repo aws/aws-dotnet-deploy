@@ -32,6 +32,13 @@
             "replaces": "DotnetBuildConfiguration-Placeholder",
             "datatype": "string",
             "defaultValue": "Release"
+        },
+        "DotnetPublishArgs": {
+            "type": "parameter",
+            "description": "Specifies additional build args to the dotnet publish command",
+            "replaces": "DotNetPublishAdditionalArguments-Placeholder",
+            "datatype": "string",
+            "defaultValue": ""
         }
     }
 }

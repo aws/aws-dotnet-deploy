@@ -25,7 +25,8 @@ namespace AWS.Deploy.Common
             IAMRole,
             ECSCluster,
             ECSService,
-            ECSTaskSchedule
+            ECSTaskSchedule,
+            DotnetPublishArgs
         };
 
         public enum DeploymentTypes
