@@ -48,6 +48,11 @@ namespace AWS.Deploy.Common
             }
         }
 
+        public ICollection<string> ListOptionSettings()
+        {
+            return _overrideOptionSettingValues.Keys;
+        }
+
         public object GetOptionSettingValue(string settingId, bool ignoreDefaultValue = false)
         {
             if (_overrideOptionSettingValues.TryGetValue(settingId, out var value))
