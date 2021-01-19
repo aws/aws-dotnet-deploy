@@ -141,17 +141,14 @@ namespace AWS.Deploy.CLI
             return AskUserForValue("Enter name:", !options.Contains(defaultValue) ? defaultValue : null);
         }
 
-        public string AskUserForValue(string message, string defaultValue)
+        public string AskUserForValue(string message, string defaultValue, params Func<string, string>[] validators)
         {
-            if (!string.IsNullOrEmpty(defaultValue))
-            {
-                message += $" (default: {defaultValue})";
-            }
+            message += $" (default: {defaultValue})";
 
             _interactiveService.WriteLine(message);
 
             string userValue = null;
-            while (string.IsNullOrEmpty(userValue))
+            while (true)
             {
                 var line = _interactiveService.ReadLine()?.Trim();
 
@@ -161,6 +158,23 @@ namespace AWS.Deploy.CLI
                 }
 
                 userValue = line;
+
+                if (!string.IsNullOrEmpty(defaultValue) && string.IsNullOrEmpty(userValue))
+                   continue;
+
+                var errorMessages =
+                      validators
+                            .Select(v => v(userValue))
+                            .Where(e => !string.IsNullOrEmpty(e))
+                            .ToList();
+
+                if (errorMessages.Any())
+                {
+                    _interactiveService.WriteErrorLine(errorMessages.First());
+                    continue;
+                }
+
+                break;
             }
 
             return userValue;

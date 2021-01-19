@@ -26,7 +26,8 @@ namespace AspNetAppElasticBeanstalkLinux.Utilities
             var publishDirectoryInfo = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
             var publishCommands = new []
             {
-                $"dotnet publish {projectPath} -o {publishDirectoryInfo} -c DotnetBuildConfiguration-Placeholder"
+                $"dotnet publish {projectPath} -o {publishDirectoryInfo} -c DotnetBuildConfiguration-Placeholder" +
+                @" DotNetPublishAdditionalArguments-Placeholder"
             };
 
             _commandLineWrapper.Run(publishCommands);
