@@ -26,7 +26,10 @@ namespace AspNetAppElasticBeanstalkLinux
         /// </summary>
         public string ApplicationIAMRole { get; set; }
 
-        public string EnvironmentType { get; set; }
+        /// <summary>
+        /// The type of environment for the Elastic Beanstalk application.
+        /// </summary>
+        public string EnvironmentType { get; set; } = "SingleInstance";
 
         /// <summary>
         /// The EC2 instance type used for the EC2 instances created for the environment.
@@ -47,5 +50,10 @@ namespace AspNetAppElasticBeanstalkLinux
         /// Latest 64bit Amazon Linux 2 running .NET Core.
         /// </summary>
         public string SolutionStackName { get; set; }
+
+        /// <summary>
+        /// The type of load balancer for your environment.
+        /// </summary>
+        public string LoadBalancerType { get; set; } = "application";
     }
 }
