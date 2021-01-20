@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Amazon.CDK;
 using Amazon.CDK.AWS.ElasticBeanstalk;
 using Amazon.CDK.AWS.IAM;
@@ -7,6 +8,8 @@ namespace AspNetAppElasticBeanstalkLinux
 {
     public class AppStack : Stack
     {
+        private const string ENVIRONMENTTYPE_SINGLEINSTANCE = "SingleInstance";
+        private const string ENVIRONMENTTYPE_LOADBALANCED = "LoadBalanced";
         internal AppStack(Construct scope, string id, Configuration configuration, IStackProps props = null) : base(scope, id, props)
         {
             var asset = new Asset(this, "Asset", new AssetProps
@@ -53,7 +56,7 @@ namespace AspNetAppElasticBeanstalkLinux
                 }
             });
 
-            var optionSettingProperties = new[] {
+            var optionSettingProperties = new List<CfnEnvironment.OptionSettingProperty> {
                    new CfnEnvironment.OptionSettingProperty {
                         Namespace = "aws:autoscaling:launchconfiguration",
                         OptionName = "InstanceType",
@@ -63,15 +66,32 @@ namespace AspNetAppElasticBeanstalkLinux
                         Namespace = "aws:autoscaling:launchconfiguration",
                         OptionName =  "IamInstanceProfile",
                         Value = instanceProfile.AttrArn
+                   },
+                   new CfnEnvironment.OptionSettingProperty {
+                        Namespace = "aws:elasticbeanstalk:environment",
+                        OptionName =  "EnvironmentType",
+                        Value = configuration.EnvironmentType
                    }
                 };
+
+            if (configuration.EnvironmentType.Equals(ENVIRONMENTTYPE_LOADBALANCED))
+            {
+                optionSettingProperties.Add(
+                    new CfnEnvironment.OptionSettingProperty
+                    {
+                        Namespace = "aws:elasticbeanstalk:environment",
+                        OptionName = "LoadBalancerType",
+                        Value = configuration.LoadBalancerType
+                    }
+                );
+            }
 
             new CfnEnvironment(this, "Environment", new CfnEnvironmentProps
             {
                 EnvironmentName = configuration.EnvironmentName,
                 ApplicationName = configuration.ApplicationName,
                 SolutionStackName = configuration.SolutionStackName,
-                OptionSettings = optionSettingProperties,
+                OptionSettings = optionSettingProperties.ToArray(),
                 // This line is critical - reference the label created in this same stack
                 VersionLabel = applicationVersion.Ref,
             });
