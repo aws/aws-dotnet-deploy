@@ -1,30 +1,30 @@
 {
-  "author": "AWS",
-  "classifications": [
-    "AWS",
-    ".NET Deployment Tool"
-  ],
-  "name": "ASP.NET Template CDK Project for Elastic Beanstalk deployment on Linux",
-  "identity": "AWS.Deploy.Recipes.AspNetAppElasticBeanstalkLinux",
-  "shortName": "netdeploy.AspNetAppElasticBeanstalkLinux",
-  "tags": {
-    "language": "C#",
-    "type": "project"
-  },
-  "sourceName": "AspNetAppElasticBeanstalkLinux",
-  "preferNameDirectory": true,
-  "symbols": {
-    "AWSAccountId": {
-      "type": "parameter",
-      "description": "Specifies the AWS Account ID",
-      "replaces": "AWSAccountId",
-      "datatype": "string"
+    "author": "AWS",
+    "classifications": [
+        "AWS",
+        ".NET Deployment Tool"
+    ],
+    "name": "ASP.NET Template CDK Project for Elastic Beanstalk deployment on Linux",
+    "identity": "AWS.Deploy.Recipes.AspNetAppElasticBeanstalkLinux",
+    "shortName": "netdeploy.AspNetAppElasticBeanstalkLinux",
+    "tags": {
+        "language": "C#",
+        "type": "project"
     },
-    "AWSRegion": {
-      "type": "parameter",
-      "description": "Specifies the AWS Region",
-      "replaces": "AWSRegion",
-      "datatype": "string"
+    "sourceName": "AspNetAppElasticBeanstalkLinux",
+    "preferNameDirectory": true,
+    "symbols": {
+        "AWSAccountId": {
+            "type": "parameter",
+            "description": "Specifies the AWS Account ID",
+            "replaces": "AWSAccountId",
+            "datatype": "string"
+        },
+        "AWSRegion": {
+            "type": "parameter",
+            "description": "Specifies the AWS Region",
+            "replaces": "AWSRegion",
+            "datatype": "string"
+        }
     }
-  }
 }
