@@ -111,6 +111,15 @@
             "Updatable": false,
             "MinimumPermissions": "...",
             "AssumeRolePolicy": "..."
+        },
+        {
+            "Id": "DotnetBuildConfiguration",
+            "Name": "Dotnet Build Configuration",
+            "Description": "The build configuration to use for the dotnet build",
+            "Type": "String",
+            "DefaultValue": "Release",
+            "AdvancedSetting": true,
+            "Updatable": true
         }
     ]
 }
