@@ -25,6 +25,13 @@
             "description": "Specifies the AWS Region",
             "replaces": "AWSRegion",
             "datatype": "string"
+        },
+        "DotnetBuildConfiguration": {
+            "type": "parameter",
+            "description": "Specifies the dotnet build configuration",
+            "replaces": "DotnetBuildConfiguration-Placeholder",
+            "datatype": "string",
+            "defaultValue": "Release"
         }
     }
 }
