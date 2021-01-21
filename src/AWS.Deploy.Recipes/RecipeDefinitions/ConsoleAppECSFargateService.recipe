@@ -150,6 +150,15 @@
             ],
             "AdvancedSetting": true,
             "Updatable": true
+        },
+        {
+            "Id": "DockerExecutionDirectory",
+            "Name": "Docker Execution Directory",
+            "Description": "Specifies the docker execution directory where the docker build command will be executed from.",
+            "Type": "String",
+            "DefaultValue": "",
+            "AdvancedSetting": true,
+            "Updatable": true
         }
     ]
 }
