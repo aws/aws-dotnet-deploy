@@ -52,6 +52,13 @@
             "description": "Specifies additional build args to the docker build command",
             "replaces": "DockerBuildArgs-Placeholder",
             "datatype": "string"
+        },
+        "DockerExecutionDirectory": {
+            "type": "parameter",
+            "description": "Specifies the docker execution directory",
+            "replaces": "DockerExecutionDirectory-Placeholder",
+            "datatype": "string",
+            "defaultValue": ""
         }
     }
 }
