@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Amazon.CloudFormation;
 using Amazon.CloudFormation.Model;
@@ -23,35 +24,15 @@ namespace AWS.Deploy.CLI.Commands
         public async Task ExecuteAsync()
         {
             using var cloudFormationClient = _awsClientFactory.GetAWSClient<IAmazonCloudFormation>(_session.AWSCredentials, _session.AWSRegion);
-            var listStacksRequest = new ListStacksRequest
-            {
-                // Show only active Cloud Formation stacks, i.e. CREATE_FAILED & DELETE_COMPLETE statuses aren't included
-                StackStatusFilter = new List<string>
-                {
-                    "CREATE_IN_PROGRESS",
-                    "CREATE_COMPLETE",
-                    "ROLLBACK_IN_PROGRESS",
-                    "ROLLBACK_FAILED",
-                    "ROLLBACK_COMPLETE",
-                    "DELETE_IN_PROGRESS",
-                    "DELETE_FAILED",
-                    "UPDATE_IN_PROGRESS",
-                    "UPDATE_COMPLETE_CLEANUP_IN_PROGRESS",
-                    "UPDATE_COMPLETE",
-                    "UPDATE_ROLLBACK_IN_PROGRESS",
-                    "UPDATE_ROLLBACK_FAILED",
-                    "UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS",
-                    "UPDATE_ROLLBACK_COMPLETE",
-                    "REVIEW_IN_PROGRESS"
-                }
-            };
+            var describeStacksRequest = new DescribeStacksRequest();
 
-            var listStacksPaginator = cloudFormationClient.Paginators.ListStacks(listStacksRequest);
+            var listStacksPaginator = cloudFormationClient.Paginators.DescribeStacks(describeStacksRequest);
             await foreach (var response in listStacksPaginator.Responses)
             {
-                foreach (var stackSummary in response.StackSummaries)
+                var stacks = response.Stacks.Where(stack => stack.Tags.Any(tag => tag.Key.Equals(CloudApplication.StackTagKey)));
+                foreach (var stack in stacks)
                 {
-                    _interactiveService.WriteLine(stackSummary.StackName);
+                    _interactiveService.WriteLine(stack.StackName);
                 }
             }
         }

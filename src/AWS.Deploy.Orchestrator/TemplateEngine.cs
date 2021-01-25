@@ -52,7 +52,8 @@ namespace AWS.Deploy.Orchestrator
 
             var templateParameters = new Dictionary<string, string> {
                 { "AWSAccountID" , session.AWSAccountId },
-                { "AWSRegion" , session.AWSRegion }
+                { "AWSRegion" , session.AWSRegion },
+                { "StackTagKey", CloudApplication.StackTagKey }
             };
 
             foreach(var option in recommendation.Recipe.OptionSettings)

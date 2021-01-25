@@ -114,7 +114,12 @@ namespace AWS.Deploy.CLI.Commands
                 configureSettings = _consoleUtilities.AskYesNoQuestion("Do you wish to change any of these settings?", ConsoleUtilities.YesNo.No);
             }
 
-            await orchestrator.DeployRecommendation(cloudApplicationName, selectedRecommendation);
+            var cloudApplication = new CloudApplication
+            {
+                Name = cloudApplicationName
+            };
+
+            await orchestrator.DeployRecommendation(cloudApplication, selectedRecommendation);
         }
 
         private async Task ConfigureDeployment(Recommendation recommendation)
