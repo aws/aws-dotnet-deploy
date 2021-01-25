@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Amazon.CloudFormation;
 using Amazon.CloudFormation.Model;
@@ -41,6 +42,13 @@ namespace AWS.Deploy.CLI.Commands
         /// <exception cref="FailedToDeleteException">Thrown when deletion fails</exception>
         public async Task ExecuteAsync(string stackName)
         {
+            var canDelete = await CanDeleteAsync(stackName);
+            if (!canDelete)
+            {
+                _interactiveService.WriteErrorLine("Only Stacks that were deployed with this tool can be deleted.");
+                return;
+            }
+
             var confirmDelete = _consoleUtilities.AskYesNoQuestion($"Are you sure you want to delete {stackName}?", ConsoleUtilities.YesNo.No);
             if (confirmDelete == ConsoleUtilities.YesNo.No)
             {
@@ -73,6 +81,17 @@ namespace AWS.Deploy.CLI.Commands
                 // Stop monitoring CloudFormation stack status once the deletion operation finishes
                 monitor.Stop();
             }
+        }
+
+        private async Task<bool> CanDeleteAsync(string stackName)
+        {
+            var stack = await GetStackAsync(stackName);
+            if (stack == null)
+            {
+                throw new FailedToDeleteException($"Stack with name {stackName} does not exist.");
+            }
+
+            return stack.Tags.Any(tag => tag.Key.Equals(CloudApplication.StackTagKey));
         }
 
         private async Task WaitForStackDelete(string stackName)

@@ -10,8 +10,17 @@ namespace AspNetAppElasticBeanstalkLinux
     {
         private const string ENVIRONMENTTYPE_SINGLEINSTANCE = "SingleInstance";
         private const string ENVIRONMENTTYPE_LOADBALANCED = "LoadBalanced";
+
+        /// <summary>
+        /// Tag key of the CloudFormation stack
+        /// used to uniquely identify a stack that is deployed by aws-dotnet-deploy
+        /// </summary>
+        private const string STACK_TAG_KEY = "StackTagKey-Placeholder";
+
         internal AppStack(Construct scope, string id, Configuration configuration, IStackProps props = null) : base(scope, id, props)
         {
+            Tags.SetTag(STACK_TAG_KEY, "true");
+
             var asset = new Asset(this, "Asset", new AssetProps
             {
                 Path = configuration.AssetPath

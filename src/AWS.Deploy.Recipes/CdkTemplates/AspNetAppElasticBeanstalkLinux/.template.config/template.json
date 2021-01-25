@@ -39,6 +39,12 @@
             "replaces": "DotNetPublishAdditionalArguments-Placeholder",
             "datatype": "string",
             "defaultValue": ""
+        },
+        "StackTagKey": {
+            "type": "parameter",
+            "description": "Specifies the CloudFormation tag key",
+            "replaces": "StackTagKey-Placeholder",
+            "datatype": "string"
         }
     }
 }

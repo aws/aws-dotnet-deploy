@@ -11,14 +11,14 @@ namespace AWS.Deploy.Orchestrator
 {
     public class CdkAppSettingsSerializer
     {
-        public string Build(string stackName, Recommendation recommendation)
+        public string Build(CloudApplication cloudApplication, Recommendation recommendation)
         {
             // General Settings
             var settings = new Dictionary<string, object>
             {
                 { nameof(recommendation.ProjectPath), recommendation.ProjectPath },
-                { "StackName", stackName},
-                { "DockerfileDirectory",  new FileInfo(recommendation.ProjectPath).Directory.FullName}
+                { "StackName", cloudApplication.StackName },
+                { "DockerfileDirectory",  new FileInfo(recommendation.ProjectPath).Directory.FullName }
             };
 
             string solutionFilePath = GetProjectSolutionFile(recommendation.ProjectPath);

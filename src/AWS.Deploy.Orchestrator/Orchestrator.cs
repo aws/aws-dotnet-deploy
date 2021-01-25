@@ -48,7 +48,7 @@ namespace AWS.Deploy.Orchestrator
             return engine.ComputeRecommendations(_session.ProjectPath);
         }
 
-        public async Task DeployRecommendation(string cloudApplicationName, Recommendation recommendation)
+        public async Task DeployRecommendation(CloudApplication cloudApplication, Recommendation recommendation)
         {
             _interactiveService.LogMessageLine($"Initiating deployment: {recommendation.Name}");
 
@@ -65,8 +65,8 @@ namespace AWS.Deploy.Orchestrator
             switch (recommendation.Recipe.DeploymentType)
             {
                 case RecipeDefinition.DeploymentTypes.CdkProject:
-                    await _cdkProjectHandler.CreateCdkDeployment(_session, cloudApplicationName, recommendation);
-                    PersistDeploymentSettings(cloudApplicationName, recommendation);
+                    await _cdkProjectHandler.CreateCdkDeployment(_session, cloudApplication, recommendation);
+                    PersistDeploymentSettings(cloudApplication, recommendation);
                     break;
                 default:
                     _interactiveService.LogErrorMessageLine($"Unknown deployment type {recommendation.Recipe.DeploymentType} specified in recipe.");
@@ -74,20 +74,20 @@ namespace AWS.Deploy.Orchestrator
             }
         }
 
-        private void PersistDeploymentSettings(string cloudApplicationName, Recommendation recommendation)
+        private void PersistDeploymentSettings(CloudApplication cloudApplication, Recommendation recommendation)
         {
             var settings = GetPreviousDeploymentSettings();
             settings.Profile = _session.AWSProfileName;
             settings.Region = _session.AWSRegion;
 
-            var deployment = settings.Deployments.FirstOrDefault(x => string.Equals(cloudApplicationName, x.StackName));
+            var deployment = settings.Deployments.FirstOrDefault(x => string.Equals(cloudApplication.StackName, x.StackName));
             if (deployment == null)
             {
                 deployment = new PreviousDeploymentSettings.DeploymentSettings();
                 settings.Deployments.Add(deployment);
             }
 
-            deployment.StackName = cloudApplicationName;
+            deployment.StackName = cloudApplication.StackName;
             deployment.RecipeId = recommendation.Recipe.Id;
 
             deployment.RecipeOverrideSettings.Clear();

@@ -8,7 +8,7 @@ namespace AWS.Deploy.Orchestrator
 {
     public interface ICdkProjectHandler
     {
-        public Task CreateCdkDeployment(OrchestratorSession session, string cloudApplicationName, Recommendation recommendation);
+        public Task CreateCdkDeployment(OrchestratorSession session, CloudApplication cloudApplication, Recommendation recommendation);
     }
 
     public class CdkProjectHandler : ICdkProjectHandler
@@ -24,14 +24,14 @@ namespace AWS.Deploy.Orchestrator
             _appSettingsBuilder = new CdkAppSettingsSerializer();
         }
 
-        public async Task CreateCdkDeployment(OrchestratorSession session, string cloudApplicationName, Recommendation recommendation)
+        public async Task CreateCdkDeployment(OrchestratorSession session, CloudApplication cloudApplication, Recommendation recommendation)
         {
             // Create a new temporary CDK project for a new deployment
             _interactiveService.LogMessageLine($"Generating a {recommendation.Recipe.Name} CDK Project");
             var cdkProjectPath = await CreateCdkProjectForDeployment(recommendation, session);
 
             // Write required configuration in appsettings.json
-            var appSettingsBody = _appSettingsBuilder.Build(cloudApplicationName, recommendation);
+            var appSettingsBody = _appSettingsBuilder.Build(cloudApplication, recommendation);
             var appSettingsFilePath = Path.Combine(cdkProjectPath, "appsettings.json");
             using (var appSettingsFile = new StreamWriter(appSettingsFilePath))
             {
