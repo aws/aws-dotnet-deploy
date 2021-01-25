@@ -105,10 +105,10 @@
                 "Effect": {
                     "type": "object",
                     "properties": {
-                        "Positive": {
+                        "Pass": {
                             "$ref": "#/definitions/RuleEffect"
                         },
-                        "Negative": {
+                        "Fail": {
                             "$ref": "#/definitions/RuleEffect"
                         }                        
                     }

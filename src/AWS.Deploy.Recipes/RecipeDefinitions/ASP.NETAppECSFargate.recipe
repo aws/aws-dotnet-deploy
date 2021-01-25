@@ -39,7 +39,10 @@
                 }
             ],
             "Effect": {
-                "Negative": {"PriorityAdjustment": -55}
+                "Fail": {
+                    "PriorityAdjustment": -55,
+                    "Include": true
+                }
             }
         },
 
@@ -54,7 +57,8 @@
                 }
             ],
             "Effect": {
-                "Positive": {"Include": false}
+                "Pass": { "Include": false },
+                "Fail": { "Include": true }
             }
         }
         

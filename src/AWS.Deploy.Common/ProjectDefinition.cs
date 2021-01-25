@@ -84,48 +84,16 @@ namespace AWS.Deploy.Common
         /// </summary>
         public bool HasDockerFile => CheckIfDockerFileExists(ProjectPath);
 
+        public string GetMSPropertyValue(string propertyName)
+        {
+            var propertyValue = _xmlProjectFile.SelectSingleNode($"//PropertyGroup/{propertyName}")?.InnerText;
+            return propertyValue;
+        }
+
         private bool CheckIfDockerFileExists(string projectPath)
         {
             var dir = Directory.GetFiles(new FileInfo(projectPath).DirectoryName, "Dockerfile");
             return dir.Length == 1;
-        }
-
-        public bool EvaluateRules(IList<RecipeDefinition.AvailableRuleItem> rules)
-        {
-            if (rules == null)
-                return true;
-
-            foreach (var rule in rules)
-            {
-                if (!string.IsNullOrEmpty(rule.SdkType) && !string.Equals(SdkType, rule.SdkType, StringComparison.InvariantCultureIgnoreCase))
-                    return false;
-
-                if (rule.HasFiles?.Count > 0)
-                {
-                    var directory = Path.GetDirectoryName(ProjectPath);
-                    foreach (var file in rule.HasFiles)
-                    {
-                        if (Directory.GetFiles(directory, file).Length == 0)
-                            return false;
-                    }
-                }
-
-                if (!string.IsNullOrEmpty(rule.MSPropertyExists))
-                {
-                    var xmlProperty = _xmlProjectFile.SelectSingleNode($"//PropertyGroup/{rule.MSPropertyExists}");
-                    if (xmlProperty == null)
-                        return false;
-                }
-
-                if (rule.MSProperty != null)
-                {
-                    var propertyValue = _xmlProjectFile.SelectSingleNode($"//PropertyGroup/{rule.MSProperty.Name}")?.InnerText;
-                    if (propertyValue == null || !rule.MSProperty.AllowedValues.Contains(propertyValue))
-                        return false;
-                }
-            }
-
-            return true;
         }
     }
 }

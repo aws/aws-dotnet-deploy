@@ -25,4 +25,6 @@
         <None Remove="CdkTemplates\.vs\**" />
     </ItemGroup>
 
+    <ProjectExtensions><VisualStudio><UserProperties recipedefinitions_4aws-deploy-recipe-schema_1json__JsonSchema="https://json.schemastore.org/bower" recipedefinitions_4consoleappecsfargateservice_1recipe__JsonSchema="aws-deploy-recipe-schema.json" recipedefinitions_4test_1recipe__JsonSchema="aws-deploy-recipe-schema.json" /></VisualStudio></ProjectExtensions>
+
 </Project>

@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>Latest</LangVersion>
     <AssemblyName>AWS.Deploy.Common</AssemblyName>
     <RootNamespace>AWS.Deploy.Common</RootNamespace>
   </PropertyGroup>
