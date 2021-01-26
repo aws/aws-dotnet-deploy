@@ -93,8 +93,8 @@ namespace AWS.Deploy.CLI.UnitTests
             var recommendations = engine.ComputeRecommendations(projectPath);
             var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == ASPNET_CORE_BEANSTALK_RECIPE_ID);
 
-            beanstalkRecommendation.SetOverrideOptionSettingValue("EnvironmentType", "Single Instance");
-            Assert.Equal("SingleInstance", beanstalkRecommendation.GetOptionSettingValue("EnvironmentType", false));
+            beanstalkRecommendation.SetOverrideOptionSettingValue("EnvironmentType", "Load Balanced");
+            Assert.Equal("LoadBalanced", beanstalkRecommendation.GetOptionSettingValue("EnvironmentType", false));
         }
 
         [Fact]
@@ -105,8 +105,8 @@ namespace AWS.Deploy.CLI.UnitTests
             var recommendations = engine.ComputeRecommendations(projectPath);
             var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == ASPNET_CORE_BEANSTALK_RECIPE_ID);
 
-            beanstalkRecommendation.SetOverrideOptionSettingValue("EnvironmentType", "SingleInstance");
-            Assert.Equal("SingleInstance", beanstalkRecommendation.GetOptionSettingValue("EnvironmentType", false));
+            beanstalkRecommendation.SetOverrideOptionSettingValue("EnvironmentType", "LoadBalanced");
+            Assert.Equal("LoadBalanced", beanstalkRecommendation.GetOptionSettingValue("EnvironmentType", false));
         }
 
 
