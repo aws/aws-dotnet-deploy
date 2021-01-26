@@ -5,6 +5,8 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Amazon.EC2;
+using Amazon.ElasticBeanstalk;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestrator;
@@ -200,6 +202,38 @@ namespace AWS.Deploy.CLI.Commands
                                             : ""))
                            .ToString()
                            .Replace("\"", "\"\"");
+                }
+                else if (setting.TypeHint == OptionSettingTypeHint.EC2KeyPair)
+                {
+                    _toolInteractiveService.WriteLine(setting.Description);
+                    var keyPairs = await _awsResourceQueryer.GetListOfEC2KeyPairs(_session);
+
+                    while (true)
+                    {
+                        settingValue = _consoleUtilities.AskUserToChooseOrCreateNew(keyPairs,
+                            "Select Key Pair to use:",
+                            currentValue?.ToString(), true);
+
+                        if (!string.IsNullOrEmpty(settingValue.ToString()) && !keyPairs.Contains(settingValue.ToString()))
+                        {
+                            _toolInteractiveService.WriteLine(string.Empty);
+                            _toolInteractiveService.WriteLine("You have chosen to create a new Key Pair.");
+                            _toolInteractiveService.WriteLine("You are required to specify a directory to save the key pair private key.");
+
+                            var answer = _consoleUtilities.AskYesNoQuestion("Do you want to continue?", "false");
+                            if (answer == ConsoleUtilities.YesNo.No)
+                                continue;
+
+                            _toolInteractiveService.WriteLine(string.Empty);
+                            _toolInteractiveService.WriteLine($"A new Key Pair will be created with the name {settingValue}.");
+
+                            var keyPairDirectory = _consoleUtilities.AskForEC2KeyPairSaveDirectory(recommendation.ProjectPath);
+
+                            await _awsResourceQueryer.CreateEC2KeyPair(_session, settingValue.ToString(), keyPairDirectory);
+                        }
+
+                        break;
+                    }
                 }
                 else if (setting.Type == OptionSettingValueType.Bool)
                 {

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using AWS.Deploy.Common;
 
@@ -117,12 +118,17 @@ namespace AWS.Deploy.CLI
             _interactiveService.WriteLine(string.Format(format, values));
         }
 
-        public string AskUserToChooseOrCreateNew(IList<string> options, string title, string defaultValue)
+        public string AskUserToChooseOrCreateNew(IList<string> options, string title, string defaultValue, bool canBeEmpty = false)
         {
+            const string EMPTY_LABEL = "*** Empty ***";
             const string CREATE_NEW_LABEL = "*** Create new ***";
             if (options.Count > 0)
             {
                 var newList = new List<string>();
+
+                if (canBeEmpty)
+                    newList.Add(EMPTY_LABEL);
+
                 foreach (var option in options)
                 {
                     newList.Add(option);
@@ -131,6 +137,12 @@ namespace AWS.Deploy.CLI
                 newList.Add(CREATE_NEW_LABEL);
 
                 var selected = AskUserToChoose(newList, title, defaultValue);
+
+                if (selected.Equals(EMPTY_LABEL))
+                {
+                    return "";
+                }
+
                 if (selected != CREATE_NEW_LABEL)
                 {
                     return selected;
@@ -178,6 +190,43 @@ namespace AWS.Deploy.CLI
             }
 
             return userValue;
+        }
+
+        public string AskForEC2KeyPairSaveDirectory(string projectPath)
+        {
+            _interactiveService.WriteLine("Enter a directory to save the newly created Key Pair: (avoid from using your project directory)");
+
+            while (true)
+            {
+                var keyPairDirectory = _interactiveService.ReadLine();
+                if (Directory.Exists(keyPairDirectory))
+                {
+                    var projectFolder = new FileInfo(projectPath).Directory;
+                    var keyPairDirectoryInfo = new DirectoryInfo(keyPairDirectory);
+
+                    if (projectFolder.FullName.Equals(keyPairDirectoryInfo.FullName))
+                    {
+                        _interactiveService.WriteLine(string.Empty);
+                        _interactiveService.WriteLine("EC2 Key Pair is a private secret key and it is recommended to not save the key in the project directory where it could be checked into source control.");
+
+                        var verification = AskYesNoQuestion("Are you sure you want to use your project directory?", "false");
+                        if (verification == ConsoleUtilities.YesNo.No)
+                        {
+                            _interactiveService.WriteLine(string.Empty);
+                            _interactiveService.WriteLine("Please enter a valid directory:");
+                            continue;
+                        }
+                    }
+                    return keyPairDirectory;
+                }
+                else
+                {
+                    _interactiveService.WriteLine(string.Empty);
+                    _interactiveService.WriteLine("The directory you entered does not exist or is invalid.");
+                    _interactiveService.WriteLine("Please enter a valid directory:");
+                    continue;
+                }
+            }
         }
 
         public YesNo AskYesNoQuestion(string question, string defaultValue)

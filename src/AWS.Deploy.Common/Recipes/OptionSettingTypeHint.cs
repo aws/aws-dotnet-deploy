@@ -12,6 +12,7 @@ namespace AWS.Deploy.Common.Recipes
         ECSCluster,
         ECSService,
         ECSTaskSchedule,
-        DotnetPublishArgs
+        DotnetPublishArgs,
+        EC2KeyPair
     };
 }

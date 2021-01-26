@@ -152,6 +152,16 @@
             "DefaultValue": "",
             "AdvancedSetting": true,
             "Updatable": true
+        },
+        {
+            "Id": "EC2KeyPair",
+            "Name": "Key Pair",
+            "Description": "The EC2 Key Pair used to SSH into EC2 instances for the Beanstalk environment.",
+            "Type": "String",
+            "TypeHint": "EC2KeyPair",
+            "DefaultValue": "",
+            "AdvancedSetting": true,
+            "Updatable": false
         }
     ]
 }
