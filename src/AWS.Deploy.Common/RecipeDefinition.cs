@@ -1,6 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using System.Collections.Generic;
 
 namespace AWS.Deploy.Common
@@ -244,9 +245,10 @@ namespace AWS.Deploy.Common
             public IList<string> AllowedValues { get; set; } = new List<string>();
 
             /// <summary>
-            /// The value mapping for allowed values.
+            /// The value mapping for allowed values. The key of the dictionary is the display value shown to users and
+            /// the value is what is sent to services.
             /// </summary>
-            public IDictionary<string, string> ValueMapping { get; set; } = new Dictionary<string, string>();
+            public IDictionary<string, string> ValueMapping { get; set; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             /// <summary>
             /// Property will be displayed if specified dependencies are true
