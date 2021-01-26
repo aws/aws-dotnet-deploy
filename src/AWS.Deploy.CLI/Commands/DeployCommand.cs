@@ -148,8 +148,6 @@ namespace AWS.Deploy.CLI.Commands
                 {
                     _toolInteractiveService.WriteLine(setting.Description);
                     settingValue = _consoleUtilities.AskUserToChoose(setting.AllowedValues, null, currentValue?.ToString());
-                    if (setting.ValueMapping.ContainsKey(settingValue.ToString()))
-                        settingValue = setting.ValueMapping[settingValue.ToString()];
 
                     // If they didn't change the value then don't store so we can rely on using the default in the recipe.
                     if (Equals(settingValue, currentValue))
