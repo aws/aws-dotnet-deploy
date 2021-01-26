@@ -63,9 +63,15 @@ namespace AWS.Deploy.Common
             if (ignoreDefaultValue)
                 return null;
 
-            var defaultValue = Recipe.OptionSettings.FirstOrDefault((x) => string.Equals(x.Id, settingId, StringComparison.InvariantCultureIgnoreCase))?.DefaultValue;
+            var setting = Recipe.OptionSettings.FirstOrDefault((x) => string.Equals(x.Id, settingId, StringComparison.InvariantCultureIgnoreCase));
+            var defaultValue = setting?.DefaultValue;
             if (defaultValue == null)
                 return string.Empty;
+
+            if(setting.ValueMapping != null && setting.ValueMapping.ContainsKey(defaultValue))
+            {
+                defaultValue = setting.ValueMapping[defaultValue];
+            }
 
             defaultValue = ApplyReplacementTokens(defaultValue);
             return defaultValue;
@@ -73,6 +79,12 @@ namespace AWS.Deploy.Common
 
         public void SetOverrideOptionSettingValue(string settingId, object value)
         {
+            var setting = Recipe.OptionSettings.FirstOrDefault((x) => string.Equals(x.Id, settingId, StringComparison.InvariantCultureIgnoreCase));
+            if (setting != null && value != null && setting.ValueMapping != null && setting.ValueMapping.ContainsKey(value.ToString()))
+            {
+                value = setting.ValueMapping[value.ToString()];
+            }
+
             _overrideOptionSettingValues[settingId] = value;
         }
 

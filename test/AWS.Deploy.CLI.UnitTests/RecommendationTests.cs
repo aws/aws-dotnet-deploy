@@ -73,6 +73,43 @@ namespace AWS.Deploy.CLI.UnitTests
                 .ShouldBeTrue("Failed to receive Recommendation: " + CONSOLE_APP_FARGATE_TASK_RECIPE_ID);
         }
 
+
+        [Fact]
+        public void ValueMappingWithDefaultValue()
+        {
+            var projectPath = ResolvePath("WebAppNoDockerFile");
+            var engine = new RecommendationEngine.RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() });
+            var recommendations = engine.ComputeRecommendations(projectPath);
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == ASPNET_CORE_BEANSTALK_RECIPE_ID);
+
+            Assert.Equal("SingleInstance", beanstalkRecommendation.GetOptionSettingValue("EnvironmentType", false));
+        }
+
+        [Fact]
+        public void ValueMappingSetWithAllowedValues()
+        {
+            var projectPath = ResolvePath("WebAppNoDockerFile");
+            var engine = new RecommendationEngine.RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() });
+            var recommendations = engine.ComputeRecommendations(projectPath);
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == ASPNET_CORE_BEANSTALK_RECIPE_ID);
+
+            beanstalkRecommendation.SetOverrideOptionSettingValue("EnvironmentType", "Single Instance");
+            Assert.Equal("SingleInstance", beanstalkRecommendation.GetOptionSettingValue("EnvironmentType", false));
+        }
+
+        [Fact]
+        public void ValueMappingSetWithValue()
+        {
+            var projectPath = ResolvePath("WebAppNoDockerFile");
+            var engine = new RecommendationEngine.RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() });
+            var recommendations = engine.ComputeRecommendations(projectPath);
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == ASPNET_CORE_BEANSTALK_RECIPE_ID);
+
+            beanstalkRecommendation.SetOverrideOptionSettingValue("EnvironmentType", "SingleInstance");
+            Assert.Equal("SingleInstance", beanstalkRecommendation.GetOptionSettingValue("EnvironmentType", false));
+        }
+
+
         private string ResolvePath(string projectName)
         {
             var testsPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
