@@ -102,6 +102,18 @@ namespace AspNetAppElasticBeanstalkLinux
                 );
             }
 
+            if (!string.IsNullOrEmpty(configuration.EC2KeyPair))
+            {
+                optionSettingProperties.Add(
+                    new CfnEnvironment.OptionSettingProperty
+                    {
+                        Namespace = "aws:autoscaling:launchconfiguration",
+                        OptionName = "EC2KeyName",
+                        Value = configuration.EC2KeyPair
+                    }
+                );
+            }
+
             new CfnEnvironment(this, "Environment", new CfnEnvironmentProps
             {
                 EnvironmentName = configuration.EnvironmentName,

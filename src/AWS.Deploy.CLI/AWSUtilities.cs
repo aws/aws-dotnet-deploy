@@ -6,6 +6,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Amazon.Runtime;
 using Amazon.Runtime.CredentialManagement;
+using Amazon.EC2.Model;
+using System.IO;
 
 namespace AWS.Deploy.CLI
 {

@@ -60,5 +60,10 @@ namespace AspNetAppElasticBeanstalkLinux
         /// Use existing Elastic Beanstalk environment.
         /// </summary>
         public bool UseExistingApplication { get; set; }
+
+        /// <summary>
+        /// The EC2 Key Pair used for the Beanstalk Application.
+        /// </summary>
+        public string EC2KeyPair { get; set; }
     }
 }
