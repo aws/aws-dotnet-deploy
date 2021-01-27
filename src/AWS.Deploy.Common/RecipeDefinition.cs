@@ -92,7 +92,7 @@ namespace AWS.Deploy.Common
         /// <summary>
         /// The rules used by the recommendation engine to determine if the recipe definition is compatible with the project.
         /// </summary>
-        public RecommendationRulesItem RecommendationRules { get; set; }
+        public IList<RecommendationRuleItem> RecommendationRules { get; set; } = new List<RecommendationRuleItem>();
 
         /// <summary>
         /// The settings that can be configured by the user before deploying.
@@ -105,75 +105,100 @@ namespace AWS.Deploy.Common
         }
 
         /// <summary>
+        /// The priority of the recipe. The highest priority is the top choice for deploying to.
+        /// </summary>
+        public int RecipePriority { get; set; }
+
+        /// <summary>
         /// Container for the types of rules used by the recommendation engine.
         /// </summary>
-        public class RecommendationRulesItem
+        public class RecommendationRuleItem
         {
             /// <summary>
-            /// This rules must return back true for the recipe to be considered compatible.
+            /// The list of tests to run for the rule.
             /// </summary>
-            public IList<AvailableRuleItem> RequiredRules { get; set; }
+            public IList<RuleTest> Tests { get; set; } = new List<RuleTest>();
 
             /// <summary>
-            /// If any of these rules evaluate to true then the recipe is excluded.
+            /// The effect of the rule based on whether the test pass or not. If the effect is not defined
+            /// the effect is the Include option matches the result of the test passing.
             /// </summary>
-            public IList<AvailableRuleItem> NegativeRules { get; set; } = new List<AvailableRuleItem>();
-
-            /// <summary>
-            /// If these rules evaluate to false then the recipe can still be compatible but its priority is divided in half.
-            /// </summary>
-            public IList<AvailableRuleItem> OptionalRules { get; set; } = new List<AvailableRuleItem>();
-
-            /// <summary>
-            /// The priority of the recipe. The highest priority is the top choice for deploying to.
-            /// </summary>
-            public int Priority { get; set; }
+            public RuleEffect Effect { get; set; }
         }
 
         /// <summary>
-        /// Container for the types of rules that can be checked.
+        /// Test for a rule
         /// </summary>
-        public class AvailableRuleItem
+        public class RuleTest
         {
             /// <summary>
-            /// The value for the `Sdk` attribute of the project file. 
-            /// An example of this is checking to see if the project is a web project by seeing if the value is "Microsoft.NET.Sdk.Web"
+            /// The type of test to run
             /// </summary>
-            public string SdkType { get; set; }
+            public string Type { get; set; }
 
             /// <summary>
-            /// Check to see if the project has certain files.
-            /// An example of this is checking to see if a project has a Dockerfile
+            /// The conditions for the tests
             /// </summary>
-            public IList<string> HasFiles { get; set; } = new List<string>();
-
-            /// <summary>
-            /// Check to see if an specific property exists in a PropertyGroup of the project file.
-            /// An example of this is checking to see of the AWSProjectType property exists.
-            /// </summary>
-            public string MSPropertyExists { get; set; }
-
-            /// <summary>
-            /// Checks to see if the value of a property in a PropertyGroup of the project file containers one of the allowed values. 
-            /// An example of this is checking to see of the TargetFramework is netcoreapp3.1.
-            /// </summary>
-            public MSPropertyRule MSProperty { get; set; }
+            public RuleCondition Condition { get; set; }
         }
 
         /// <summary>
-        /// Container for the MSPropertyRule conditions
+        /// The conditions for the test used by the rule.
         /// </summary>
-        public class MSPropertyRule
+        public class RuleCondition
         {
             /// <summary>
-            /// The name of the property in a PropertyGroup to check.
+            /// The value to check for. Used by the MSProjectSdkAttribute test
             /// </summary>
-            public string Name { get; set; }
+            public string Value { get; set; }
 
             /// <summary>
-            /// The list of allowed values for the property.
+            /// The name of the ms property for tests. Used by the MSProperty and MSPropertyExists
+            /// </summary>
+            public string PropertyName { get; set; }
+
+            /// <summary>
+            /// The list of allowd values to check for. Used by the MSProperty test
             /// </summary>
             public IList<string> AllowedValues { get; set; } = new List<string>();
+
+
+            /// <summary>
+            /// The name of file to search for. Used by the FileExists test.
+            /// </summary>
+            public string FileName { get; set; }
+        }
+
+        /// <summary>
+        /// The effect to apply for the test run.
+        /// </summary>
+        public class RuleEffect
+        {
+            /// <summary>
+            /// The effects to run if all the test pass.
+            /// </summary>
+            public EffectOptions Pass { get; set; }
+
+            /// <summary>
+            /// The effects to run if all the test fail.
+            /// </summary>
+            public EffectOptions Fail { get; set; }
+        }
+
+        /// <summary>
+        /// The type of effects to apply.
+        /// </summary>
+        public class EffectOptions
+        {
+            /// <summary>
+            /// When the recipe should be included or not.
+            /// </summary>
+            public bool? Include {get;set;}
+
+            /// <summary>
+            /// Adjust the priority or the recipe.
+            /// </summary>
+            public int? PriorityAdjustment { get; set; }
         }
 
         /// <summary>

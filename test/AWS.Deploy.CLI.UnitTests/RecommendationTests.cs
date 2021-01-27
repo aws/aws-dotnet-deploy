@@ -2,12 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using AWS.Deploy.Recipes;
 using Should;
 using Xunit;
+
+using RuleEffect = AWS.Deploy.Common.RecipeDefinition.RuleEffect;
+using EffectOptions = AWS.Deploy.Common.RecipeDefinition.EffectOptions;
 
 namespace AWS.Deploy.CLI.UnitTests
 {
@@ -24,7 +28,7 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var projectPath = ResolvePath("WebAppNoDockerFile");
 
-            var engine = new RecommendationEngine.RecommendationEngine(new [] {RecipeLocator.FindRecipeDefinitionsPath()});
+            var engine = new RecommendationEngine.RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() });
 
             var recommendations = engine.ComputeRecommendations(projectPath);
 
@@ -120,5 +124,39 @@ namespace AWS.Deploy.CLI.UnitTests
 
             return Path.Combine(testsPath, "..", "testapps", projectName);
         }
+
+
+        [Theory]
+        [MemberData(nameof(ShouldIncludeTestCases))]
+        public void ShouldIncludeTests(Common.RecipeDefinition.RuleEffect effect, bool testPass, bool expectedResult)
+        {
+            var engine = new RecommendationEngine.RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() });
+
+            Assert.Equal(expectedResult, engine.ShouldInclude(effect, testPass));
+        }
+
+        public static IEnumerable<object[]> ShouldIncludeTestCases =>
+            new List<object[]>
+            {
+                // No effect defined
+                new object[]{ new RuleEffect { }, true, true },
+                new object[]{ new RuleEffect { }, false, false },
+
+                // Negative Rule
+                new object[]{ new RuleEffect { Pass = new EffectOptions {Include = false }, Fail = new EffectOptions { Include = true } }, true, false },
+                new object[]{ new RuleEffect { Pass = new EffectOptions {Include = false }, Fail = new EffectOptions { Include = true } }, false, true },
+
+                // Explicitly define effects
+                new object[]{ new RuleEffect { Pass = new EffectOptions {Include = true }, Fail = new EffectOptions { Include = false} }, true, true },
+                new object[]{ new RuleEffect { Pass = new EffectOptions {Include = true }, Fail = new EffectOptions { Include = false} }, false, false },
+
+                // Postive rule to adjust priority
+                new object[]{ new RuleEffect { Pass = new EffectOptions {PriorityAdjustment = 55 } }, true, true },
+                new object[]{ new RuleEffect { Pass = new EffectOptions { PriorityAdjustment = 55 }, Fail = new EffectOptions { Include = true } }, false, true },
+
+                // Negative rule to adjust priority
+                new object[]{ new RuleEffect { Fail = new EffectOptions {PriorityAdjustment = -55 } }, true, true },
+                new object[]{ new RuleEffect { Fail = new EffectOptions { PriorityAdjustment = -55 } }, false, true },
+            };
     }
 }

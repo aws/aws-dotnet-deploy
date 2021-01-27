@@ -17,6 +17,15 @@ namespace AWS.Deploy.Common
         public string Path { get; set; }
     }
 
+    [AWSDeploymentExpectedException]
+    public class InvalidRecipeDefinitionException : Exception
+    {
+        public InvalidRecipeDefinitionException(string message) : base(message)
+        {
+
+        }
+    }
+
     /// <summary>
     /// Throw if the user attempts to deploy a <see cref="RecipeDefinition"/>
     /// that uses <see cref="RecipeDefinition.DeploymentTypes.CdkProject"/>
