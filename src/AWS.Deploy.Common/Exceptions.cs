@@ -3,6 +3,7 @@
 
 using System;
 using System.Reflection;
+using AWS.Deploy.Common.Recipes;
 
 namespace AWS.Deploy.Common
 {
@@ -28,7 +29,7 @@ namespace AWS.Deploy.Common
 
     /// <summary>
     /// Throw if the user attempts to deploy a <see cref="RecipeDefinition"/>
-    /// that uses <see cref="RecipeDefinition.DeploymentTypes.CdkProject"/>
+    /// that uses <see cref="DeploymentTypes.CdkProject"/>
     /// but NodeJs/NPM could not be detected. 
     /// </summary>
     [AWSDeploymentExpectedException]
@@ -36,7 +37,7 @@ namespace AWS.Deploy.Common
 
     /// <summary>
     /// Throw if the user attempts to deploy a <see cref="RecipeDefinition"/>
-    /// that requires <see cref="RecipeDefinition.DeploymentBundleTypes.Container"/>
+    /// that requires <see cref="DeploymentBundleTypes.Container"/>
     /// but Docker could not be detected. 
     /// </summary>
     [AWSDeploymentExpectedException]

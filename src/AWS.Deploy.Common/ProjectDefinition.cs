@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
+using AWS.Deploy.Common.Recipes;
 
 namespace AWS.Deploy.Common
 {
