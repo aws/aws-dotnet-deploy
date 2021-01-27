@@ -6,12 +6,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Recipes;
 using Should;
 using Xunit;
-
-using RuleEffect = AWS.Deploy.Common.RecipeDefinition.RuleEffect;
-using EffectOptions = AWS.Deploy.Common.RecipeDefinition.EffectOptions;
 
 namespace AWS.Deploy.CLI.UnitTests
 {
@@ -128,7 +126,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
         [Theory]
         [MemberData(nameof(ShouldIncludeTestCases))]
-        public void ShouldIncludeTests(Common.RecipeDefinition.RuleEffect effect, bool testPass, bool expectedResult)
+        public void ShouldIncludeTests(RuleEffect effect, bool testPass, bool expectedResult)
         {
             var engine = new RecommendationEngine.RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() });
 

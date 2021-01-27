@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.Recipes;
 
 namespace AWS.Deploy.Orchestrator
 {
@@ -52,7 +53,7 @@ namespace AWS.Deploy.Orchestrator
         {
             _interactiveService.LogMessageLine($"Initiating deployment: {recommendation.Name}");
 
-            if (recommendation.Recipe.DeploymentBundle == RecipeDefinition.DeploymentBundleTypes.Container &&
+            if (recommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.Container &&
                 !recommendation.ProjectDefinition.HasDockerFile)
             {
                 _interactiveService.LogMessageLine("Generating Dockerfile");
@@ -64,7 +65,7 @@ namespace AWS.Deploy.Orchestrator
 
             switch (recommendation.Recipe.DeploymentType)
             {
-                case RecipeDefinition.DeploymentTypes.CdkProject:
+                case DeploymentTypes.CdkProject:
                     await _cdkProjectHandler.CreateCdkDeployment(_session, cloudApplication, recommendation);
                     PersistDeploymentSettings(cloudApplication, recommendation);
                     break;

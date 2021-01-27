@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestrator;
 using AWS.Deploy.Recipes;
 using AWS.Deploy.Orchestrator.Data;
@@ -85,14 +86,14 @@ namespace AWS.Deploy.CLI.Commands
             var selectedRecommendation = _consoleUtilities.AskUserToChoose(recommendations, "Available options to deploy project", recommendations[0]);
             selectedRecommendation.ApplyPreviousSettings(previousDeployment?.RecipeOverrideSettings);
 
-            if (selectedRecommendation.Recipe.DeploymentType == RecipeDefinition.DeploymentTypes.CdkProject &&
+            if (selectedRecommendation.Recipe.DeploymentType == DeploymentTypes.CdkProject &&
                 !(await _session.SystemCapabilities).NodeJsMinVersionInstalled)
             {
                 _toolInteractiveService.WriteErrorLine("The selected Recipe requires NodeJS 10.3 or later.  Please install NodeJS https://nodejs.org/en/download/");
                 throw new MissingNodeJsException();
             }
 
-            if (selectedRecommendation.Recipe.DeploymentBundle == RecipeDefinition.DeploymentBundleTypes.Container &&
+            if (selectedRecommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.Container &&
                 !(await _session.SystemCapabilities).DockerInstalled)
             {
                 _toolInteractiveService.WriteErrorLine("The selected Recipe requires docker but docker was not detected as running.  Please install and start docker: https://docs.docker.com/engine/install/");
@@ -157,7 +158,7 @@ namespace AWS.Deploy.CLI.Commands
                     if (Equals(settingValue, currentValue))
                         continue;
                 }
-                else if (setting.TypeHint == RecipeDefinition.OptionSettingTypeHint.BeanstalkApplication)
+                else if (setting.TypeHint == OptionSettingTypeHint.BeanstalkApplication)
                 {
                     _toolInteractiveService.WriteLine(setting.Description);
 
@@ -170,7 +171,7 @@ namespace AWS.Deploy.CLI.Commands
                     if (applications.Contains(settingValue.ToString()))
                         recommendation.SetOverrideOptionSettingValue("UseExistingApplication", "true");
                 }
-                else if (setting.TypeHint == RecipeDefinition.OptionSettingTypeHint.BeanstalkEnvironment)
+                else if (setting.TypeHint == OptionSettingTypeHint.BeanstalkEnvironment)
                 {
                     _toolInteractiveService.WriteLine(setting.Description);
 
@@ -181,7 +182,7 @@ namespace AWS.Deploy.CLI.Commands
                         "Select Beanstalk environment to deploy to:",
                         currentValue?.ToString());
                 }
-                else if (setting.TypeHint == RecipeDefinition.OptionSettingTypeHint.DotnetPublishArgs)
+                else if (setting.TypeHint == OptionSettingTypeHint.DotnetPublishArgs)
                 {
                     settingValue =
                       _consoleUtilities
@@ -200,7 +201,7 @@ namespace AWS.Deploy.CLI.Commands
                            .ToString()
                            .Replace("\"", "\"\"");
                 }
-                else if (setting.Type == RecipeDefinition.OptionSettingValueType.Bool)
+                else if (setting.Type == OptionSettingValueType.Bool)
                 {
                     var answer = _consoleUtilities.AskYesNoQuestion(setting.Description, recommendation.GetOptionSettingValue(setting.Id).ToString());
                     settingValue = answer == ConsoleUtilities.YesNo.Yes ? "true" : "false";

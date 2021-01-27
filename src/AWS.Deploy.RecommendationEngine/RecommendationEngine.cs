@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.Recipes;
 
 namespace AWS.Deploy.RecommendationEngine
 {
@@ -56,10 +57,10 @@ namespace AWS.Deploy.RecommendationEngine
             return recommendations;
         }
 
-        public RulesResult EvaluateRules(ProjectDefinition projectDefinition, IList<RecipeDefinition.RecommendationRuleItem> rules)
+        public RulesResult EvaluateRules(ProjectDefinition projectDefinition, IList<RecommendationRuleItem> rules)
         {
             // If there are no rules the recipe must be invalid so don't include it.
-            if(false == rules?.Any())
+            if (false == rules?.Any())
             {
                 return new RulesResult { Include = false };
             }
@@ -114,13 +115,13 @@ namespace AWS.Deploy.RecommendationEngine
             return results;
         }
 
-        public bool ShouldInclude(RecipeDefinition.RuleEffect effect, bool testPass)
+        public bool ShouldInclude(RuleEffect effect, bool testPass)
         {
             // Get either the pass or fail effect options.
             var effectOptions = GetEffectOptions(effect, testPass);
             if (effectOptions != null)
             {
-                if(effectOptions.Include.HasValue)
+                if (effectOptions.Include.HasValue)
                 {
                     return effectOptions.Include.Value;
                 }
@@ -128,15 +129,14 @@ namespace AWS.Deploy.RecommendationEngine
                 {
                     return true;
                 }
-                
             }
 
             return testPass;
         }
 
-        private RecipeDefinition.EffectOptions GetEffectOptions(RecipeDefinition.RuleEffect effect, bool testPass)
+        private EffectOptions GetEffectOptions(RuleEffect effect, bool testPass)
         {
-            if(effect == null)
+            if (effect == null)
             {
                 return null;
             }
