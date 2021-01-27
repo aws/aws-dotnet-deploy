@@ -110,14 +110,6 @@ namespace AWS.Deploy.CLI
             });
             rootCommand.Add(deployCommand);
 
-            var setupCICDCommand = new Command("setup-cicd", "Configure the project to be deployed to AWS using the AWS Code services") { _optionProfile, _optionRegion, _optionProjectPath, _optionDiagnosticLogging };
-            setupCICDCommand.Handler = CommandHandler.Create<string, bool> (SetupCICD);
-            rootCommand.Add(setupCICDCommand);
-
-            var inspectIAMPermissionsCommand = new Command("inspect-permissions", "Inspect the project to see what AWS permissions the application needs to access AWS services the application is using.") { _optionProjectPath, _optionDiagnosticLogging };
-            inspectIAMPermissionsCommand.Handler = CommandHandler.Create<string, bool>(InspectIAMPermissions);
-            rootCommand.Add(inspectIAMPermissionsCommand);
-
             var listCommand = new Command("list-stacks", "List CloudFormation stacks.")
             {
                 _optionProfile,
@@ -188,20 +180,6 @@ namespace AWS.Deploy.CLI
             rootCommand.Add(deleteCommand);
 
             return await rootCommand.InvokeAsync(args);
-        }
-
-        private static void SetupCICD(string projectPath, bool diagnostics)
-        {
-            var toolInteractiveService = new ConsoleInteractiveServiceImpl(diagnostics);
-            
-            toolInteractiveService.WriteLine("TODO: Make this work");
-        }
-
-        private static void InspectIAMPermissions(string projectPath, bool diagnostics)
-        {
-            var toolInteractiveService = new ConsoleInteractiveServiceImpl(diagnostics);
-            
-            toolInteractiveService.WriteLine("TODO: Make this work");
         }
     }
 }

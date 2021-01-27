@@ -87,12 +87,41 @@
             "Name": "Environment Type",
             "Description": "The type of environment to create for example a single instance for development or load balanced for production",
             "Type": "String",
-            "DefaultValue": "SingleInstance",
+            "DefaultValue": "Single Instance",
             "AllowedValues": [
-                "SingleInstance",
-                "LoadBalanced"
+                "Single Instance",
+                "Load Balanced"
             ],
+            "ValueMapping": {
+                "Single Instance": "SingleInstance",
+                "Load Balanced": "LoadBalanced"
+            },
             "AdvancedSetting": false,
+            "Updatable": true
+        },
+        {
+            "Id": "LoadBalancerType",
+            "Name": "Load Balancer Type",
+            "Description": "The type of load balancer for your environment.",
+            "Type": "String",
+            "DefaultValue": "Application",
+            "AllowedValues": [
+                "Application",
+                "Classic",
+                "Network"
+            ],
+            "ValueMapping": {
+                "Application": "application",
+                "Classic": "classic",
+                "Network": "network"
+            },
+            "DependsOn": [
+                {
+                    "Id": "EnvironmentType",
+                    "Value": "LoadBalanced"
+                }
+            ],
+            "AdvancedSetting": true,
             "Updatable": true
         },
         {
@@ -104,6 +133,25 @@
             "DefaultValue": "aws-elasticbeanstalk-role",
             "AdvancedSetting": false,
             "Updatable": false
+        },
+        {
+            "Id": "DotnetBuildConfiguration",
+            "Name": "Dotnet Build Configuration",
+            "Description": "The build configuration to use for the dotnet build",
+            "Type": "String",
+            "DefaultValue": "Release",
+            "AdvancedSetting": true,
+            "Updatable": true
+        },
+        {
+            "Id": "DotnetPublishArgs",
+            "Name": "Dotnet Publish Args",
+            "Description": "The list of additional dotnet publish args passed to the target application.",
+            "Type": "String",
+            "TypeHint": "DotnetPublishArgs",
+            "DefaultValue": "",
+            "AdvancedSetting": true,
+            "Updatable": true
         }
     ]
 }

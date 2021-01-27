@@ -114,7 +114,12 @@ namespace AWS.Deploy.CLI.Commands
                 configureSettings = _consoleUtilities.AskYesNoQuestion("Do you wish to change any of these settings?", ConsoleUtilities.YesNo.No);
             }
 
-            await orchestrator.DeployRecommendation(cloudApplicationName, selectedRecommendation);
+            var cloudApplication = new CloudApplication
+            {
+                Name = cloudApplicationName
+            };
+
+            await orchestrator.DeployRecommendation(cloudApplication, selectedRecommendation);
         }
 
         private async Task ConfigureDeployment(Recommendation recommendation)
@@ -148,8 +153,6 @@ namespace AWS.Deploy.CLI.Commands
                 {
                     _toolInteractiveService.WriteLine(setting.Description);
                     settingValue = _consoleUtilities.AskUserToChoose(setting.AllowedValues, null, currentValue?.ToString());
-                    if (setting.ValueMapping.ContainsKey(settingValue.ToString()))
-                        settingValue = setting.ValueMapping[settingValue.ToString()];
 
                     // If they didn't change the value then don't store so we can rely on using the default in the recipe.
                     if (Equals(settingValue, currentValue))
@@ -164,6 +167,9 @@ namespace AWS.Deploy.CLI.Commands
                     settingValue = _consoleUtilities.AskUserToChooseOrCreateNew(applications,
                         "Select Beanstalk application to deploy to:",
                         currentValue?.ToString());
+
+                    if (applications.Contains(settingValue.ToString()))
+                        recommendation.SetOverrideOptionSettingValue("UseExistingApplication", "true");
                 }
                 else if (setting.TypeHint == RecipeDefinition.OptionSettingTypeHint.BeanstalkEnvironment)
                 {
@@ -175,6 +181,25 @@ namespace AWS.Deploy.CLI.Commands
                     settingValue = _consoleUtilities.AskUserToChooseOrCreateNew(environments,
                         "Select Beanstalk environment to deploy to:",
                         currentValue?.ToString());
+                }
+                else if (setting.TypeHint == RecipeDefinition.OptionSettingTypeHint.DotnetPublishArgs)
+                {
+                    settingValue =
+                      _consoleUtilities
+                            .AskUserForValue(
+                                 setting.Description,
+                                 recommendation.GetOptionSettingValue(setting.Id).ToString(),
+                                 // validators:
+                                 publishArgs =>
+                                          (publishArgs.Contains("-o ") || publishArgs.Contains("--output "))
+                                           ? "You must not include -o/--output as an additional argument as it is used internally."
+                                            : "",
+                                 publishArgs =>
+                                          (publishArgs.Contains("-c ") || publishArgs.Contains("--configuration ")
+                                           ? "You must not include -c/--configuration as an additional argument. You can set the build configuration in the advanced settings."
+                                            : ""))
+                           .ToString()
+                           .Replace("\"", "\"\"");
                 }
                 else if (setting.Type == RecipeDefinition.OptionSettingValueType.Bool)
                 {

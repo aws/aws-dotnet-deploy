@@ -13,8 +13,16 @@ namespace ConsoleAppEcsFargateTask
 {
     public class AppStack : Stack
     {
+        /// <summary>
+        /// Tag key of the CloudFormation stack
+        /// used to uniquely identify a stack that is deployed by aws-dotnet-deploy
+        /// </summary>
+        private const string STACK_TAG_KEY = "StackTagKey-Placeholder";
+
         internal AppStack(Construct scope, string id, Configuration configuration, IStackProps props = null) : base(scope, id, props)
         {
+            Tags.SetTag(STACK_TAG_KEY, "true");
+
 #if (UseExistingVPC)
             var vpc = Vpc.FromLookup(this, "Vpc", new VpcLookupOptions
             {
@@ -57,14 +65,17 @@ namespace ConsoleAppEcsFargateTask
                 StreamPrefix = configuration.StackName
             });
 
-            var dockerExecutionDirectory = string.Empty;
-            if (string.IsNullOrEmpty(configuration.ProjectSolutionPath))
+            var dockerExecutionDirectory = @"DockerExecutionDirectory-Placeholder";
+            if (string.IsNullOrEmpty(dockerExecutionDirectory))
             {
-                dockerExecutionDirectory = new FileInfo(configuration.DockerfileDirectory).FullName;
-            }
-            else
-            {
-                dockerExecutionDirectory = new FileInfo(configuration.ProjectSolutionPath).Directory.FullName;
+                if (string.IsNullOrEmpty(configuration.ProjectSolutionPath))
+                {
+                    dockerExecutionDirectory = new FileInfo(configuration.DockerfileDirectory).FullName;
+                }
+                else
+                {
+                    dockerExecutionDirectory = new FileInfo(configuration.ProjectSolutionPath).Directory.FullName;
+                }
             }
             var relativePath = Path.GetRelativePath(dockerExecutionDirectory, configuration.DockerfileDirectory);
             var container = taskDefinition.AddContainer("Container", new ContainerDefinitionOptions

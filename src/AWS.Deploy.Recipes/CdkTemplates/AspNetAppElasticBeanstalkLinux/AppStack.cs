@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Amazon.CDK;
 using Amazon.CDK.AWS.ElasticBeanstalk;
 using Amazon.CDK.AWS.IAM;
@@ -7,17 +8,25 @@ namespace AspNetAppElasticBeanstalkLinux
 {
     public class AppStack : Stack
     {
+        private const string ENVIRONMENTTYPE_SINGLEINSTANCE = "SingleInstance";
+        private const string ENVIRONMENTTYPE_LOADBALANCED = "LoadBalanced";
+
+        /// <summary>
+        /// Tag key of the CloudFormation stack
+        /// used to uniquely identify a stack that is deployed by aws-dotnet-deploy
+        /// </summary>
+        private const string STACK_TAG_KEY = "StackTagKey-Placeholder";
+
         internal AppStack(Construct scope, string id, Configuration configuration, IStackProps props = null) : base(scope, id, props)
         {
+            Tags.SetTag(STACK_TAG_KEY, "true");
+
             var asset = new Asset(this, "Asset", new AssetProps
             {
                 Path = configuration.AssetPath
             });
 
-            var application = new CfnApplication(this, "Application", new CfnApplicationProps
-            {
-                ApplicationName = configuration.ApplicationName
-            });
+            CfnApplication application = null;
 
             // Create an app version from the S3 asset defined above
             // The S3 "putObject" will occur first before CF generates the template
@@ -30,6 +39,16 @@ namespace AspNetAppElasticBeanstalkLinux
                     S3Key = asset.S3ObjectKey
                 }
             });
+
+            if (!configuration.UseExistingApplication)
+            {
+                application = new CfnApplication(this, "Application", new CfnApplicationProps
+                {
+                    ApplicationName = configuration.ApplicationName
+                });
+
+                applicationVersion.AddDependsOn(application);
+            }
 
             var role = new Role(this, "Role", new RoleProps
             {
@@ -53,7 +72,7 @@ namespace AspNetAppElasticBeanstalkLinux
                 }
             });
 
-            var optionSettingProperties = new[] {
+            var optionSettingProperties = new List<CfnEnvironment.OptionSettingProperty> {
                    new CfnEnvironment.OptionSettingProperty {
                         Namespace = "aws:autoscaling:launchconfiguration",
                         OptionName = "InstanceType",
@@ -63,21 +82,35 @@ namespace AspNetAppElasticBeanstalkLinux
                         Namespace = "aws:autoscaling:launchconfiguration",
                         OptionName =  "IamInstanceProfile",
                         Value = instanceProfile.AttrArn
+                   },
+                   new CfnEnvironment.OptionSettingProperty {
+                        Namespace = "aws:elasticbeanstalk:environment",
+                        OptionName =  "EnvironmentType",
+                        Value = configuration.EnvironmentType
                    }
                 };
+
+            if (configuration.EnvironmentType.Equals(ENVIRONMENTTYPE_LOADBALANCED))
+            {
+                optionSettingProperties.Add(
+                    new CfnEnvironment.OptionSettingProperty
+                    {
+                        Namespace = "aws:elasticbeanstalk:environment",
+                        OptionName = "LoadBalancerType",
+                        Value = configuration.LoadBalancerType
+                    }
+                );
+            }
 
             new CfnEnvironment(this, "Environment", new CfnEnvironmentProps
             {
                 EnvironmentName = configuration.EnvironmentName,
                 ApplicationName = configuration.ApplicationName,
                 SolutionStackName = configuration.SolutionStackName,
-                OptionSettings = optionSettingProperties,
+                OptionSettings = optionSettingProperties.ToArray(),
                 // This line is critical - reference the label created in this same stack
                 VersionLabel = applicationVersion.Ref,
             });
-
-            // Also very important - make sure that `app` exists before creating an app version
-            applicationVersion.AddDependsOn(application);
         }
     }
 }
