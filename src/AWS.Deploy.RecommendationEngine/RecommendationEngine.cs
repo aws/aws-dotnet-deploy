@@ -23,11 +23,18 @@ namespace AWS.Deploy.RecommendationEngine
             {
                 foreach (var recipeFile in Directory.GetFiles(recommendationPath, "*.recipe", SearchOption.TopDirectoryOnly))
                 {
-                    var content = File.ReadAllText(recipeFile);
-                    var definition = JsonConvert.DeserializeObject<RecipeDefinition>(content);
-                    definition.RecipePath = recipeFile;
+                    try
+                    {
+                        var content = File.ReadAllText(recipeFile);
+                        var definition = JsonConvert.DeserializeObject<RecipeDefinition>(content);
+                        definition.RecipePath = recipeFile;
 
-                    _availableRecommendations.Add(definition);
+                        _availableRecommendations.Add(definition);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exception($"Failed to Deserialize Recipe [{recipeFile}]: {e.Message}", e);
+                    }
                 }
             }
         }
