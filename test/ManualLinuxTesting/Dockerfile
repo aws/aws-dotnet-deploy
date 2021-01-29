@@ -68,7 +68,7 @@ ENV PATH="${PATH}:/root/.dotnet/tools"
 
 WORKDIR /app
 
-FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
+FROM mcr.microsoft.com/dotnet/sdk:5.0.102-ca-patch-buster-slim-amd64 AS build
 ARG AWS_CLI_VERSION
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=true
 
