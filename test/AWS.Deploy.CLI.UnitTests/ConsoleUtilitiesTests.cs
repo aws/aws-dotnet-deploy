@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections.Generic;
+using Should;
 using Xunit;
 
 namespace AWS.Deploy.CLI.UnitTests
@@ -52,6 +53,36 @@ namespace AWS.Deploy.CLI.UnitTests
             Assert.Equal("Option1", selectedValue);
 
             Assert.Equal("1: Option1", interactiveServices.OutputMessages[0]);
+        }
+
+        [Fact]
+        public void AskUserForValueCanBeSetToEmptyString()
+        {
+            var interactiveServices = new TestToolInteractiveServiceImpl(new List<string> { "<clear>" });
+            var consoleUtilities = new ConsoleUtilities(interactiveServices);
+
+            var selectedValue =
+                consoleUtilities.AskUserForValue(
+                    "message",
+                    "defaultValue",
+                    allowEmpty: true);
+
+            selectedValue.ShouldEqual(string.Empty);
+        }
+
+        [Fact]
+        public void AskUserForValueCanBeSetToEmptyStringNoDefault()
+        {
+            var interactiveServices = new TestToolInteractiveServiceImpl(new List<string> { "<clear>" });
+            var consoleUtilities = new ConsoleUtilities(interactiveServices);
+
+            var selectedValue =
+                consoleUtilities.AskUserForValue(
+                    "message",
+                    "",
+                    allowEmpty: true);
+
+            selectedValue.ShouldEqual(string.Empty);
         }
 
         [Fact]

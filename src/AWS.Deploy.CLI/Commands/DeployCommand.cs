@@ -61,7 +61,11 @@ namespace AWS.Deploy.CLI.Commands
                     Environment.Exit(-1);
                 }
 
-                cloudApplicationName = _consoleUtilities.AskUserForValue("Enter name for Cloud Application", GetDefaultApplicationName(project.ProjectPath));
+                cloudApplicationName =
+                    _consoleUtilities.AskUserForValue(
+                        "Enter name for Cloud Application",
+                        GetDefaultApplicationName(new ProjectDefinition(_session.ProjectPath).ProjectPath),
+                        allowEmpty: false);
             }
             else
             {
@@ -257,6 +261,7 @@ namespace AWS.Deploy.CLI.Commands
                         .AskUserForValue(
                                 setting.Description,
                                 recommendation.GetOptionSettingValue(setting.Id).ToString(),
+                                 allowEmpty: true,
                                 // validators:
                                 publishArgs =>
                                         (publishArgs.Contains("-o ") || publishArgs.Contains("--output "))
@@ -312,12 +317,10 @@ namespace AWS.Deploy.CLI.Commands
             }
             else
             {
-                _toolInteractiveService.WriteLine(setting.Description);
-                _toolInteractiveService.WriteLine($"(default: {recommendation.GetOptionSettingValue(setting.Id)}):");
-                settingValue = _toolInteractiveService.ReadLine();
+                settingValue = _consoleUtilities.AskUserForValue(setting.Description, currentValue.ToString(), allowEmpty: true);
             }
 
-            if (!Equals(settingValue, currentValue) && settingValue != null && (settingValue as string) != string.Empty)
+            if (!Equals(settingValue, currentValue) && settingValue != null)
             {
                 recommendation.SetOverrideOptionSettingValue(setting.Id, settingValue);
             }
