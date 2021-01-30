@@ -150,19 +150,32 @@ namespace AWS.Deploy.CLI
             }
 
 
-            return AskUserForValue("Enter name:", !options.Contains(defaultValue) ? defaultValue : null);
+            return AskUserForValue("Enter name:", !options.Contains(defaultValue) ? defaultValue : null, allowEmpty: false);
         }
 
-        public string AskUserForValue(string message, string defaultValue, params Func<string, string>[] validators)
+        public string AskUserForValue(string message, string defaultValue, bool allowEmpty, params Func<string, string>[] validators)
         {
-            message += $" (default: {defaultValue})";
+            const string CLEAR = "<clear>";
 
             _interactiveService.WriteLine(message);
+
+            var prompt = $"Enter value (default: {defaultValue}.";
+            if (allowEmpty)
+                prompt += $"  Type {CLEAR} to clear.";
+            prompt += "): ";
+            _interactiveService.WriteLine(prompt);
 
             string userValue = null;
             while (true)
             {
-                var line = _interactiveService.ReadLine()?.Trim();
+                var line = _interactiveService.ReadLine()?.Trim() ?? "";
+
+                if (allowEmpty && 
+                    (string.Equals(CLEAR, line.Trim(), StringComparison.OrdinalIgnoreCase) ||
+                     string.Equals($"'{CLEAR}'", line.Trim(), StringComparison.OrdinalIgnoreCase)))
+                {
+                    return string.Empty;
+                }
 
                 if (string.IsNullOrEmpty(line) && !string.IsNullOrEmpty(defaultValue))
                 {
