@@ -52,6 +52,7 @@ namespace AWS.Deploy.CLI.Commands
                     _session,
                     _orchestratorInteractiveService,
                     _cdkProjectHandler,
+                    _awsResourceQueryer,
                     new []{ RecipeLocator.FindRecipeDefinitionsPath() });
 
             var previousSettings = orchestrator.GetPreviousDeploymentSettings();
@@ -82,7 +83,7 @@ namespace AWS.Deploy.CLI.Commands
 
             var previousDeployment = previousSettings.Deployments.FirstOrDefault(x => string.Equals(x.StackName, cloudApplicationName));
 
-            var recommendations = orchestrator.GenerateDeploymentRecommendations();
+            var recommendations = await orchestrator.GenerateDeploymentRecommendations();
 
             if (recommendations.Count == 0)
             {
@@ -356,6 +357,23 @@ namespace AWS.Deploy.CLI.Commands
 
                     break;
                 }
+            }
+            else if (setting.TypeHint == OptionSettingTypeHint.DotnetBeanstalkPlatformArn)
+            {
+                _toolInteractiveService.WriteLine(setting.Description);
+
+                var platformArns = await _awsResourceQueryer.GetElasticBeanstalkPlatformArns(_session);
+
+                var userInputConfiguration = new UserInputConfiguration<PlatformSummary>
+                {
+                    DisplaySelector = platform => $"{platform.PlatformBranchName} v{platform.PlatformVersion}",
+                    DefaultSelector = platform => platform.PlatformArn.Equals(currentValue),
+                    CreateNew = false
+                };
+
+                var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(platformArns, "Select the Platform to use:", userInputConfiguration);
+
+                settingValue = userResponse.SelectedOption?.PlatformArn;
             }
             else if (setting.Type == OptionSettingValueType.Bool)
             {

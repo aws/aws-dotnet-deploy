@@ -39,7 +39,7 @@ namespace AWS.Deploy.RecommendationEngine
             }
         }
 
-        public IList<Recommendation> ComputeRecommendations(string projectPath)
+        public IList<Recommendation> ComputeRecommendations(string projectPath, Dictionary<string, string> additionalReplacements)
         {
             var projectDefinition = new ProjectDefinition(projectPath);
             var recommendations = new List<Recommendation>();
@@ -53,7 +53,7 @@ namespace AWS.Deploy.RecommendationEngine
                 }
 
                 var priority = potentialRecipe.RecipePriority + results.PriorityAdjustment;
-                recommendations.Add(new Recommendation(potentialRecipe, projectDefinition.ProjectPath, priority));
+                recommendations.Add(new Recommendation(potentialRecipe, projectDefinition.ProjectPath, priority, additionalReplacements));
             }
 
             recommendations = recommendations.OrderByDescending(recommendation => recommendation.ComputedPriority).ToList();

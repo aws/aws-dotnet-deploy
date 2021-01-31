@@ -7,13 +7,17 @@ using System.Linq;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Orchestrator.Data;
 
 namespace AWS.Deploy.Orchestrator
 {
     public class Orchestrator
     {
+        private const string REPLACE_TOKEN_LATEST_DOTNET_BEANSTALK_PLATFORM_ARN = "{LatestDotnetBeanstalkPlatformArn}";
+
         private readonly ICdkProjectHandler _cdkProjectHandler;
         private readonly IOrchestratorInteractiveService _interactiveService;
+        private readonly IAWSResourceQueryer _awsResourceQueryer;
         private readonly IList<string> _recipeDefinitionPaths;
 
         private readonly OrchestratorSession _session;
@@ -22,12 +26,14 @@ namespace AWS.Deploy.Orchestrator
             OrchestratorSession session,
             IOrchestratorInteractiveService interactiveService,
             ICdkProjectHandler cdkProjectHandler,
+            IAWSResourceQueryer awsResourceQueryer,
             IList<string> recipeDefinitionPaths)
         {
             _session = session;
             _interactiveService = interactiveService;
             _cdkProjectHandler = cdkProjectHandler;
             _recipeDefinitionPaths = recipeDefinitionPaths;
+            _awsResourceQueryer = awsResourceQueryer;
         }
 
         public PreviousDeploymentSettings GetPreviousDeploymentSettings()
@@ -43,10 +49,21 @@ namespace AWS.Deploy.Orchestrator
             }
         }
 
-        public IList<Recommendation> GenerateDeploymentRecommendations()
+        public async Task<IList<Recommendation>> GenerateDeploymentRecommendations()
         {
             var engine = new RecommendationEngine.RecommendationEngine(_recipeDefinitionPaths);
-            return engine.ComputeRecommendations(_session.ProjectPath);
+            var additionalReplacements = await GetReplacements();
+            return engine.ComputeRecommendations(_session.ProjectPath, additionalReplacements);
+        }
+
+        public async Task<Dictionary<string, string>> GetReplacements()
+        {
+            var replacements = new Dictionary<string, string>();
+
+            var latestPlatform = await _awsResourceQueryer.GetLatestElasticBeanstalkPlatformArn(_session);
+            replacements[REPLACE_TOKEN_LATEST_DOTNET_BEANSTALK_PLATFORM_ARN] = latestPlatform.PlatformArn;
+
+            return replacements;
         }
 
         public async Task DeployRecommendation(CloudApplication cloudApplication, Recommendation recommendation)

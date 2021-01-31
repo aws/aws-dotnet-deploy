@@ -127,7 +127,7 @@ namespace AspNetAppElasticBeanstalkLinux
             {
                 EnvironmentName = configuration.EnvironmentName,
                 ApplicationName = configuration.BeanstalkApplication.ApplicationName,
-                SolutionStackName = configuration.SolutionStackName,
+                PlatformArn = configuration.ElasticBeanstalkPlatformArn,
                 OptionSettings = optionSettingProperties.ToArray(),
                 // This line is critical - reference the label created in this same stack
                 VersionLabel = applicationVersion.Ref,
