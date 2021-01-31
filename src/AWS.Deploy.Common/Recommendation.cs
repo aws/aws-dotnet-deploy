@@ -1,12 +1,10 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using AWS.Deploy.Common.Recipes;
-using Newtonsoft.Json.Linq;
 
 namespace AWS.Deploy.Common
 {
@@ -27,7 +25,7 @@ namespace AWS.Deploy.Common
 
         private readonly Dictionary<string, string> _replacementTokens = new();
 
-        public Recommendation(RecipeDefinition recipe, string projectPath, int computedPriority)
+        public Recommendation(RecipeDefinition recipe, string projectPath, int computedPriority, Dictionary<string, string> additionalReplacements)
         {
             Recipe = recipe;
             ProjectPath = projectPath;
@@ -38,6 +36,12 @@ namespace AWS.Deploy.Common
             if (File.Exists(projectPath))
             {
                 _replacementTokens[REPLACE_TOKEN_PROJECT_NAME] = Path.GetFileNameWithoutExtension(ProjectPath);
+            }
+
+            foreach (var replacement in additionalReplacements)
+            {
+                if (!_replacementTokens.ContainsKey(replacement.Key))
+                    _replacementTokens[replacement.Key] = replacement.Value;
             }
         }
 

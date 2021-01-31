@@ -44,5 +44,11 @@ namespace AWS.Deploy.CLI
         /// Default is <c>false</c>
         /// </summary>
         public bool CanBeEmpty { get; set; }
+
+        /// <summary>
+        /// If <see cref="CreateNew" /> is set to true,
+        /// then a "Create New" option will be added to the list of valid options.
+        /// </summary>
+        public bool CreateNew { get; set; } = true;
     }
 }

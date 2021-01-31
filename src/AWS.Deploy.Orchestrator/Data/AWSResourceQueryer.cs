@@ -1,7 +1,6 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,8 +10,6 @@ using Amazon.EC2.Model;
 using Amazon.ElasticBeanstalk;
 using Amazon.ElasticBeanstalk.Model;
 using AWS.Deploy.Common;
-using System.Net;
-using Amazon.Auth.AccessControlPolicy;
 using Amazon.IdentityManagement;
 using Amazon.IdentityManagement.Model;
 
@@ -26,6 +23,8 @@ namespace AWS.Deploy.Orchestrator.Data
         Task<string> CreateEC2KeyPair(OrchestratorSession session, string keyName, string saveLocation);
         Task<List<Role>> ListOfIAMRoles(OrchestratorSession session, string servicePrincipal);
         Task<List<Vpc>> GetListOfVpcs(OrchestratorSession session);
+        Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns(OrchestratorSession session);
+        Task<PlatformSummary> GetLatestElasticBeanstalkPlatformArn(OrchestratorSession session);
     }
 
     public class AWSResourceQueryer : IAWSResourceQueryer
@@ -118,6 +117,54 @@ namespace AWS.Deploy.Orchestrator.Data
                 .OrderByDescending(x => x.IsDefault)
                 .ThenBy(x => x.VpcId)
                 .ToListAsync();
+        }
+
+        public async Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns(OrchestratorSession session)
+        {
+            var beanstalkClient = _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>(session.AWSCredentials, session.AWSRegion);
+            
+            var request = new ListPlatformVersionsRequest
+            {
+                Filters = new List<PlatformFilter>
+                {
+                    new PlatformFilter
+                    {
+                        Operator = "=",
+                        Type = "PlatformStatus",
+                        Values = { "Ready" }
+                    }
+                }
+            };
+            var response = await beanstalkClient.ListPlatformVersionsAsync(request);
+
+            var platformVersions = new List<PlatformSummary>();
+            foreach (var version in response.PlatformSummaryList)
+            {
+                if (string.IsNullOrEmpty(version.PlatformCategory))
+                    continue;
+
+                if (!version.PlatformBranchLifecycleState.Equals("Supported"))
+                    continue;
+
+                if (!version.PlatformCategory.Equals(".NET Core"))
+                    continue;
+
+                platformVersions.Add(version);
+            }
+
+            return platformVersions;
+        }
+
+        public async Task<PlatformSummary> GetLatestElasticBeanstalkPlatformArn(OrchestratorSession session)
+        {
+            var platforms = await GetElasticBeanstalkPlatformArns(session);
+
+            if (!platforms.Any())
+            {
+                throw new AmazonElasticBeanstalkException(".NET Core Solution Stack doesn't exist.");
+            }
+
+            return platforms.First();
         }
     }
 }
