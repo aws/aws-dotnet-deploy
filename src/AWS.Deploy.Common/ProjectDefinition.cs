@@ -96,5 +96,20 @@ namespace AWS.Deploy.Common
             var dir = Directory.GetFiles(new FileInfo(projectPath).DirectoryName, "Dockerfile");
             return dir.Length == 1;
         }
+
+        public static bool TryParse(string path, out ProjectDefinition projectDefinition)
+        {
+            projectDefinition = null;
+
+            try
+            {
+                projectDefinition = new ProjectDefinition(path);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }

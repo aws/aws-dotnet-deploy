@@ -57,7 +57,13 @@ namespace AWS.Deploy.CLI.Commands
             string cloudApplicationName;
             if (previousSettings.Deployments.Count == 0)
             {
-                cloudApplicationName = _consoleUtilities.AskUserForValue("Enter name for Cloud Application", GetDefaultApplicationName(new ProjectDefinition(_session.ProjectPath).ProjectPath));
+                if (!ProjectDefinition.TryParse(_session.ProjectPath, out var project))
+                {
+                    _toolInteractiveService.WriteErrorLine($"A project was not found at the path {_session.ProjectPath}");
+                    Environment.Exit(-1);
+                }
+
+                cloudApplicationName = _consoleUtilities.AskUserForValue("Enter name for Cloud Application", GetDefaultApplicationName(project.ProjectPath));
             }
             else
             {

@@ -10,7 +10,7 @@ namespace AWS.Deploy.Common
     public class ProjectFileNotFoundException : Exception
     {
         public ProjectFileNotFoundException(string projectPath)
-            : base($"Project path {projectPath} not found.")
+            : base($"A project was not found at the path {projectPath}.")
         {
             Path = projectPath;
         }
