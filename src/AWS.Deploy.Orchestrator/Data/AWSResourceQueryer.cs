@@ -33,7 +33,7 @@ namespace AWS.Deploy.Orchestrator.Data
         public async Task<List<string>> GetListOfElasticBeanstalkApplications(OrchestratorSession session)
         {
             var beanstalkClient = _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>(session.AWSCredentials, session.AWSRegion);
-
+            
             return
                 (await beanstalkClient.DescribeApplicationsAsync())
                     .Applications
@@ -52,7 +52,7 @@ namespace AWS.Deploy.Orchestrator.Data
             {
                 ApplicationName = applicationName
             };
-
+           
             do
             {
                 var response = await beanstalkClient.DescribeEnvironmentsAsync(request);

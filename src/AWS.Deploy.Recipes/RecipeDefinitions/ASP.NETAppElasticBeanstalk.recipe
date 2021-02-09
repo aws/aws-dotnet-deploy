@@ -162,6 +162,15 @@
             "DefaultValue": "",
             "AdvancedSetting": true,
             "Updatable": false
+        },
+        {
+            "Id": "SelfContainedBuild",
+            "Name": "Self Contained Build",
+            "Description": "Publishing your app as self-contained produces an application that includes the .NET runtime and libraries. Users can run it on a machine that doesn't have the .NET runtime installed.",
+            "Type": "Bool",
+            "DefaultValue": "false",
+            "AdvancedSetting": true,
+            "Updatable": true
         }
     ]
 }
