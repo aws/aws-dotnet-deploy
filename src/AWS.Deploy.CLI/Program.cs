@@ -28,11 +28,11 @@ namespace AWS.Deploy.CLI
         {
             var preambleWriter = new ConsoleInteractiveServiceImpl(diagnosticLoggingEnabled: false);
 
-            preambleWriter.WriteLine("AWS .NET Suite for deploying .NET Core applications to AWS");
+            preambleWriter.WriteLine("AWS .NET Deployment Tool for deploying .NET Core applications to AWS");
             preambleWriter.WriteLine("Project Home: https://github.com/aws/aws-dotnet-deploy");
             preambleWriter.WriteLine(string.Empty);
 
-            var rootCommand = new RootCommand { Description = "The AWS .NET Suite for getting .NET applications running on AWS." };
+            var rootCommand = new RootCommand { Description = "The AWS .NET Deployment Tool for getting .NET applications running on AWS." };
 
            var deployCommand = new Command(
                 "deploy",
