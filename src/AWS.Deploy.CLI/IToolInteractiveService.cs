@@ -11,4 +11,12 @@ namespace AWS.Deploy.CLI
 
         string ReadLine();
     }
+
+    public static class ToolInteractiveServiceExtensions
+    {
+        public static void WriteLine(this IToolInteractiveService service)
+        {
+            service.WriteLine(string.Empty);
+        }
+    }
 }
