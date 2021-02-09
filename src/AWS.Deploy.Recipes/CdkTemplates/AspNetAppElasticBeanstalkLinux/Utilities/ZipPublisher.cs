@@ -21,13 +21,22 @@ namespace AspNetAppElasticBeanstalkLinux.Utilities
         /// and returns the path to the zip file
         /// </summary>
         /// <returns></returns>
-        public string GetZipPath(string projectPath)
+        public string GetZipPath(Configuration configuration)
         {
             var publishDirectoryInfo = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
+            var additionalArguments = @"DotNetPublishAdditionalArguments-Placeholder";
+            var runtimeArg =
+               configuration.SelfContainedBuild &&
+               !additionalArguments.Contains("--runtime ") &&
+               !additionalArguments.Contains("-r ")
+                     ? "--runtime linux-x64"
+                     : "";
             var publishCommands = new []
             {
-                $"dotnet publish {projectPath} -o {publishDirectoryInfo} -c DotnetBuildConfiguration-Placeholder" +
-                @" DotNetPublishAdditionalArguments-Placeholder"
+                $"dotnet publish {configuration.ProjectPath} -o {publishDirectoryInfo} -c DotnetBuildConfiguration-Placeholder" +
+                $" --self-contained {configuration.SelfContainedBuild}" +
+                $" {runtimeArg}" +
+                $" {additionalArguments}"
             };
 
             _commandLineWrapper.Run(publishCommands);

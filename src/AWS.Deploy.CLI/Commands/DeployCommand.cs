@@ -200,6 +200,10 @@ namespace AWS.Deploy.CLI.Commands
                                  publishArgs =>
                                           (publishArgs.Contains("-c ") || publishArgs.Contains("--configuration ")
                                            ? "You must not include -c/--configuration as an additional argument. You can set the build configuration in the advanced settings."
+                                            : ""),
+                                 publishArgs =>
+                                          (publishArgs.Contains("--self-contained") || publishArgs.Contains("--no-self-contained")
+                                           ? "You must not include --self-contained/--no-self-contained as an additional argument. You can set the self-contained property in the advanced settings."
                                             : ""))
                            .ToString()
                            .Replace("\"", "\"\"");

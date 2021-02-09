@@ -13,7 +13,7 @@ namespace AspNetAppElasticBeanstalkLinux
             var configuration = builder.Build().Get<Configuration>();
 
             var zipPublisher = new ZipPublisher();
-            configuration.AssetPath = zipPublisher.GetZipPath(configuration.ProjectPath);
+            configuration.AssetPath = zipPublisher.GetZipPath(configuration);
 
             var solutionStackNameProvider = new SolutionStackNameProvider();
             configuration.SolutionStackName = await solutionStackNameProvider.GetSolutionStackNameAsync();
