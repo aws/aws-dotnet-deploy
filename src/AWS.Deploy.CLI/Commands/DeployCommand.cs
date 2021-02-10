@@ -74,19 +74,20 @@ namespace AWS.Deploy.CLI.Commands
                 throw new FailedToGenerateAnyRecommendations();
             }
 
+            _toolInteractiveService.WriteLine(string.Empty);
+
+            Recommendation selectedRecommendation = null;
+
             // If there was a previous deployment be sure to make that recipe be the top recommendation.
             if (previousDeployment != null)
             {
-                var lastRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, previousDeployment.RecipeId, StringComparison.InvariantCultureIgnoreCase));
-                if (lastRecommendation != null)
-                {
-                    recommendations.Remove(lastRecommendation);
-                    recommendations.Insert(0, lastRecommendation);
-                }
+                selectedRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, previousDeployment.RecipeId, StringComparison.InvariantCultureIgnoreCase));
+                selectedRecommendation.ApplyPreviousSettings(previousDeployment?.RecipeOverrideSettings);
             }
-
-            var selectedRecommendation = _consoleUtilities.AskUserToChoose(recommendations, "Available options to deploy project", recommendations[0]);
-            selectedRecommendation.ApplyPreviousSettings(previousDeployment?.RecipeOverrideSettings);
+            else
+            {
+                selectedRecommendation = _consoleUtilities.AskUserToChoose(recommendations, "Available options to deploy project", recommendations[0]);
+            }
 
             if (selectedRecommendation.Recipe.DeploymentType == DeploymentTypes.CdkProject &&
                 !(await _session.SystemCapabilities).NodeJsMinVersionInstalled)
