@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Amazon.CDK;
 using Amazon.CDK.AWS.ElasticBeanstalk;
@@ -114,7 +115,7 @@ namespace AspNetAppElasticBeanstalkLinux
                 );
             }
 
-            new CfnEnvironment(this, "Environment", new CfnEnvironmentProps
+            var environment = new CfnEnvironment(this, "Environment", new CfnEnvironmentProps
             {
                 EnvironmentName = configuration.EnvironmentName,
                 ApplicationName = configuration.ApplicationName,
@@ -122,6 +123,11 @@ namespace AspNetAppElasticBeanstalkLinux
                 OptionSettings = optionSettingProperties.ToArray(),
                 // This line is critical - reference the label created in this same stack
                 VersionLabel = applicationVersion.Ref,
+            });
+
+            var output = new CfnOutput(this, "EndpointURL", new CfnOutputProps
+            {
+                Value = $"http://{environment.AttrEndpointUrl}/"
             });
         }
     }
