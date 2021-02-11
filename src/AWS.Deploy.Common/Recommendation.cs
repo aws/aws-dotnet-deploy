@@ -6,12 +6,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using AWS.Deploy.Common.Recipes;
+using Newtonsoft.Json.Linq;
 
 namespace AWS.Deploy.Common
 {
     public class Recommendation : IUserInputOption
     {
-        private const string REPLACE_TOKEN_PROJECTNAME = "{ProjectName}";
+        private const string REPLACE_TOKEN_PROJECT_NAME = "{ProjectName}";
 
         public string ProjectPath { get; }
 
@@ -24,7 +25,7 @@ namespace AWS.Deploy.Common
 
         public string Description => Recipe.Description;
 
-        private readonly IDictionary<string, object> _overrideOptionSettingValues = new Dictionary<string, object>();
+        private readonly Dictionary<string, string> _replacementTokens = new();
 
         public Recommendation(RecipeDefinition recipe, string projectPath, int computedPriority)
         {
@@ -33,6 +34,11 @@ namespace AWS.Deploy.Common
             ComputedPriority = computedPriority;
 
             ProjectDefinition = new ProjectDefinition(projectPath);
+
+            if (File.Exists(projectPath))
+            {
+                _replacementTokens[REPLACE_TOKEN_PROJECT_NAME] = Path.GetFileNameWithoutExtension(ProjectPath);
+            }
         }
 
         public void ApplyPreviousSettings(IDictionary<string, object> previousSettings)
@@ -40,60 +46,55 @@ namespace AWS.Deploy.Common
             if (previousSettings == null)
                 return;
 
-            foreach (var option in Recipe.OptionSettings)
+            ApplyPreviousSettings(Recipe.OptionSettings, previousSettings);
+        }
+
+        private void ApplyPreviousSettings(IEnumerable<OptionSettingItem> optionSettings, IDictionary<string, object> previousSettings)
+        {
+            foreach (var optionSetting in optionSettings)
             {
-                if (previousSettings.TryGetValue(option.Id, out var value))
+                if (previousSettings.TryGetValue(optionSetting.Id, out var value))
                 {
-                    SetOverrideOptionSettingValue(option.Id, value);
+                    optionSetting.SetValueOverride(value);
                 }
             }
         }
 
-        public ICollection<string> ListOptionSettings()
+        /// <summary>
+        /// Interactively traverses given json path and returns target option setting.
+        /// Returns null if there is no <see cref="OptionSettingItem" /> that matches <paramref name="jsonPath"/> />
+        /// </summary>
+        /// <param name="jsonPath">
+        /// Dot (.) separated key values string pointing to an option setting.
+        /// Read more <see href="https://tools.ietf.org/id/draft-goessner-dispatch-jsonpath-00.html"/>
+        /// </param>
+        /// <returns>Option setting at the json path. Returns null if, there doesn't exist an option setting.</returns>
+        public OptionSettingItem GetOptionSetting(string jsonPath)
         {
-            return _overrideOptionSettingValues.Keys;
-        }
+            var ids = jsonPath.Split('.');
+            OptionSettingItem optionSetting = null;
 
-        public object GetOptionSettingValue(string settingId, bool ignoreDefaultValue = false)
-        {
-            if (_overrideOptionSettingValues.TryGetValue(settingId, out var value))
+            foreach (var id in ids)
             {
-                return value;
+                var optionSettings = optionSetting?.ChildOptionSettings ?? Recipe.OptionSettings;
+                optionSetting = optionSettings.FirstOrDefault(os => os.Id.Equals(id));
+                if (optionSetting == null)
+                {
+                    return null;
+                }
             }
 
-            if (ignoreDefaultValue)
-                return null;
-
-            var setting = Recipe.OptionSettings.FirstOrDefault((x) => string.Equals(x.Id, settingId, StringComparison.InvariantCultureIgnoreCase));
-            var defaultValue = setting?.DefaultValue;
-            if (defaultValue == null)
-                return string.Empty;
-
-            if(setting.ValueMapping != null && setting.ValueMapping.ContainsKey(defaultValue))
-            {
-                defaultValue = setting.ValueMapping[defaultValue];
-            }
-
-            defaultValue = ApplyReplacementTokens(defaultValue);
-            return defaultValue;
+            return optionSetting;
         }
 
-        public void SetOverrideOptionSettingValue(string settingId, object value)
+        public T GetOptionSettingValue<T>(OptionSettingItem optionSetting, bool ignoreDefaultValue = false)
         {
-            var setting = Recipe.OptionSettings.FirstOrDefault((x) => string.Equals(x.Id, settingId, StringComparison.InvariantCultureIgnoreCase));
-            if (setting != null && value != null && setting.ValueMapping != null && setting.ValueMapping.ContainsKey(value.ToString()))
-            {
-                value = setting.ValueMapping[value.ToString()];
-            }
-
-            _overrideOptionSettingValues[settingId] = value;
+            return optionSetting.GetValue<T>(_replacementTokens, ignoreDefaultValue);
         }
 
-        public string ApplyReplacementTokens(string defaultValue)
+        public object GetOptionSettingValue(OptionSettingItem optionSetting, bool ignoreDefaultValue = false)
         {
-            var projectName = Path.GetFileNameWithoutExtension(ProjectPath);
-            defaultValue = defaultValue.Replace(REPLACE_TOKEN_PROJECTNAME, projectName);
-            return defaultValue;
+            return optionSetting.GetValue(_replacementTokens, ignoreDefaultValue);
         }
     }
 }

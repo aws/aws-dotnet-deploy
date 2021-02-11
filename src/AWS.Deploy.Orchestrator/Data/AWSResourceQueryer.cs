@@ -1,6 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,15 +11,20 @@ using Amazon.EC2;
 using AWS.Deploy.Common;
 using Amazon.EC2.Model;
 using System.IO;
+using System.Net;
+using Amazon.Auth.AccessControlPolicy;
+using Amazon.IdentityManagement;
+using Amazon.IdentityManagement.Model;
 
 namespace AWS.Deploy.Orchestrator.Data
 {
     public interface IAWSResourceQueryer
     {
-        Task<List<string>> GetListOfElasticBeanstalkApplications(OrchestratorSession session);
-        Task<List<string>> GetListOfElasticBeanstalkEnvironments(OrchestratorSession session, string applicationName);
-        Task<IList<string>> GetListOfEC2KeyPairs(OrchestratorSession session);
-        Task<string> CreateEC2KeyPair(OrchestratorSession session, string keyName, string saveLocation);
+        Task<List<ApplicationDescription>> ListOfElasticBeanstalkApplicationsAsync(OrchestratorSession session);
+        Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironmentsAsync(OrchestratorSession session, string applicationName);
+        Task<List<KeyPairInfo>> ListOfEC2KeyPairsAsync(OrchestratorSession session);
+        Task<string> CreateEC2KeyPairAsync(OrchestratorSession session, string keyName, string saveLocation);
+        Task<List<Role>> ListOfIAMRolesAsync(OrchestratorSession session, string servicePrincipal);
     }
 
     public class AWSResourceQueryer : IAWSResourceQueryer
@@ -30,57 +36,43 @@ namespace AWS.Deploy.Orchestrator.Data
             _awsClientFactory = awsClientFactory;
         }
 
-        public async Task<List<string>> GetListOfElasticBeanstalkApplications(OrchestratorSession session)
+        public async Task<List<ApplicationDescription>> ListOfElasticBeanstalkApplicationsAsync(OrchestratorSession session)
         {
             var beanstalkClient = _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>(session.AWSCredentials, session.AWSRegion);
-            
-            return
-                (await beanstalkClient.DescribeApplicationsAsync())
-                    .Applications
-                    .Select(x => x.ApplicationName).ToList();
+            var applications = await beanstalkClient.DescribeApplicationsAsync();
+            return applications.Applications;
         }
 
-        public async Task<List<string>> GetListOfElasticBeanstalkEnvironments(
-            OrchestratorSession session,
-            string applicationName)
+        public async Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironmentsAsync(OrchestratorSession session, string applicationName)
         {
             var beanstalkClient = _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>(session.AWSCredentials, session.AWSRegion);
-
-            var environmentNames = new List<string>();
-
+            var environments = new List<EnvironmentDescription>();
             var request = new DescribeEnvironmentsRequest
             {
                 ApplicationName = applicationName
             };
-           
+
             do
             {
                 var response = await beanstalkClient.DescribeEnvironmentsAsync(request);
                 request.NextToken = response.NextToken;
 
-                environmentNames.AddRange(response.Environments.Select(x => x.EnvironmentName));
+                environments.AddRange(response.Environments);
 
             } while (!string.IsNullOrEmpty(request.NextToken));
 
-            return environmentNames;
+            return environments;
         }
 
-        public async Task<IList<string>> GetListOfEC2KeyPairs(OrchestratorSession session)
+        public async Task<List<KeyPairInfo>> ListOfEC2KeyPairsAsync(OrchestratorSession session)
         {
             var ec2Client = _awsClientFactory.GetAWSClient<IAmazonEC2>(session.AWSCredentials, session.AWSRegion);
-
             var response = await ec2Client.DescribeKeyPairsAsync();
 
-            var keyPairNames = new List<string>();
-            foreach (var keyPair in response.KeyPairs)
-            {
-                keyPairNames.Add(keyPair.KeyName);
-            }
-
-            return keyPairNames;
+            return response.KeyPairs;
         }
 
-        public async Task<string> CreateEC2KeyPair(OrchestratorSession session, string keyName, string saveLocation)
+        public async Task<string> CreateEC2KeyPairAsync(OrchestratorSession session, string keyName, string saveLocation)
         {
             var ec2Client = _awsClientFactory.GetAWSClient<IAmazonEC2>(session.AWSCredentials, session.AWSRegion);
 
@@ -91,6 +83,28 @@ namespace AWS.Deploy.Orchestrator.Data
             File.WriteAllText(Path.Combine(saveLocation, $"{keyName}.pem"), response.KeyPair.KeyMaterial);
 
             return response.KeyPair.KeyName;
+        }
+
+        public async Task<List<Role>> ListOfIAMRolesAsync(OrchestratorSession session, string servicePrincipal)
+        {
+            var identityManagementServiceClient = _awsClientFactory.GetAWSClient<IAmazonIdentityManagementService>(session.AWSCredentials, session.AWSRegion);
+
+            var listRolesRequest = new ListRolesRequest();
+            var roles = new List<Role>();
+
+            var listStacksPaginator = identityManagementServiceClient.Paginators.ListRoles(listRolesRequest);
+            await foreach (var response in listStacksPaginator.Responses)
+            {
+                var filteredRoles = response.Roles.Where(role => AssumeRoleServicePrincipalSelector(role, servicePrincipal));
+                roles.AddRange(filteredRoles);
+            }
+
+            return roles;
+        }
+
+        private static bool AssumeRoleServicePrincipalSelector(Role role, string servicePrincipal)
+        {
+            return !string.IsNullOrEmpty(role.AssumeRolePolicyDocument) && role.AssumeRolePolicyDocument.Contains(servicePrincipal);
         }
     }
 }

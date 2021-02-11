@@ -118,39 +118,68 @@ namespace AWS.Deploy.CLI
             _interactiveService.WriteLine(string.Format(format, values));
         }
 
-        public string AskUserToChooseOrCreateNew(IList<string> options, string title, string defaultValue, bool canBeEmpty = false)
+        public UserResponse<string> AskUserToChooseOrCreateNew(IEnumerable<string> options, string title, bool askNewName = true, string defaultNewName = "", bool canBeEmpty = false)
         {
-            const string EMPTY_LABEL = "*** Empty ***";
-            const string CREATE_NEW_LABEL = "*** Create new ***";
-            if (options.Count > 0)
+            var configuration = new UserInputConfiguration<string>
             {
-                var newList = new List<string>();
+                DisplaySelector = option => option,
+                DefaultSelector = option => option.Contains(option),
+                AskNewName = askNewName,
+                DefaultNewName = defaultNewName,
+                CanBeEmpty = canBeEmpty
+            };
 
-                if (canBeEmpty)
-                    newList.Add(EMPTY_LABEL);
+            return AskUserToChooseOrCreateNew(options, title, configuration);
+        }
 
-                foreach (var option in options)
+        public UserResponse<T> AskUserToChooseOrCreateNew<T>(IEnumerable<T> options, string title,  UserInputConfiguration<T> userInputConfiguration)
+        {
+            var optionStrings = options.Select(userInputConfiguration.DisplaySelector);
+            var defaultOption = options.FirstOrDefault(userInputConfiguration.DefaultSelector);
+            var defaultValue = defaultOption != null ? userInputConfiguration.DisplaySelector(defaultOption) : Constants.CREATE_NEW_LABEL;
+
+            if (optionStrings.Any())
+            {
+                var displayOptionStrings = new List<string>(optionStrings)
                 {
-                    newList.Add(option);
+                    Constants.CREATE_NEW_LABEL
+                };
+
+                var selectedString = AskUserToChoose(displayOptionStrings, title, defaultValue);
+
+                if (selectedString == Constants.EMPTY_LABEL)
+                {
+                    return new UserResponse<T>
+                    {
+                        IsEmpty = true
+                    };
                 }
 
-                newList.Add(CREATE_NEW_LABEL);
-
-                var selected = AskUserToChoose(newList, title, defaultValue);
-
-                if (selected.Equals(EMPTY_LABEL))
+                if (selectedString != Constants.CREATE_NEW_LABEL)
                 {
-                    return "";
-                }
-
-                if (selected != CREATE_NEW_LABEL)
-                {
-                    return selected;
+                    var selectedOption = options.FirstOrDefault(option => userInputConfiguration.DisplaySelector(option) == selectedString);
+                    return new UserResponse<T>
+                    {
+                        SelectedOption = selectedOption,
+                        CreateNew = false
+                    };
                 }
             }
 
+            if (userInputConfiguration.AskNewName)
+            {
+                var newName = AskUserForValue("Enter name:", userInputConfiguration.DefaultNewName, false);
+                return new UserResponse<T>
+                {
+                    CreateNew = true,
+                    NewName = newName
+                };
+            }
 
-            return AskUserForValue("Enter name:", !options.Contains(defaultValue) ? defaultValue : null, allowEmpty: false);
+            return new UserResponse<T>
+            {
+                CreateNew = true,
+            };
         }
 
         public string AskUserForValue(string message, string defaultValue, bool allowEmpty, params Func<string, string>[] validators)
@@ -170,7 +199,7 @@ namespace AWS.Deploy.CLI
             {
                 var line = _interactiveService.ReadLine()?.Trim() ?? "";
 
-                if (allowEmpty && 
+                if (allowEmpty &&
                     (string.Equals(CLEAR, line.Trim(), StringComparison.OrdinalIgnoreCase) ||
                      string.Equals($"'{CLEAR}'", line.Trim(), StringComparison.OrdinalIgnoreCase)))
                 {

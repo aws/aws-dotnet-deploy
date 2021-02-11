@@ -1,4 +1,5 @@
 using Amazon.CDK;
+using AspNetAppEcsFargate.Configurations;
 using Microsoft.Extensions.Configuration;
 
 namespace AspNetAppEcsFargate

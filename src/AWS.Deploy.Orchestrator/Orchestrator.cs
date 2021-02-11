@@ -94,7 +94,7 @@ namespace AWS.Deploy.Orchestrator
             deployment.RecipeOverrideSettings.Clear();
             foreach (var option in recommendation.Recipe.OptionSettings)
             {
-                var value = recommendation.GetOptionSettingValue(option.Id, true);
+                var value = recommendation.GetOptionSettingValue(option, true);
                 if (value != null)
                 {
                     deployment.RecipeOverrideSettings[option.Id] = value;

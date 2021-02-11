@@ -9,7 +9,7 @@ namespace AWS.Deploy.Common.Recipes
     /// <summary>
     /// Container for the setting values
     /// </summary>
-    public class OptionSettingItem
+    public partial class OptionSettingItem
     {
         /// <summary>
         /// The unique id of setting. This value will be persisted in other config files so its value should never change once a recipe is released.
@@ -75,5 +75,16 @@ namespace AWS.Deploy.Common.Recipes
         /// Property will be displayed if specified dependencies are true
         /// </summary>
         public IList<PropertyDependency> DependsOn { get; set; } = new List<PropertyDependency>();
+
+        /// <summary>
+        /// Child option settings for <see cref="OptionSettingValueType.Object"/> value types
+        /// <see cref="ChildOptionSettings"/> value depends on the values of <see cref="ChildOptionSettings"/>
+        /// </summary>
+        public List<OptionSettingItem> ChildOptionSettings { get; set; } = new ();
+
+        /// <summary>
+        /// Type hint additional data required to facilitate handling of the option setting
+        /// </summary>
+        public OptionSettingTypeHintData TypeHintData { get; set; }
     }
 }

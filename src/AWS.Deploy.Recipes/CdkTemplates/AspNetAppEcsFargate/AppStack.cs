@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using AspNetAppEcsFargate.Configurations;
 using Protocol = Amazon.CDK.AWS.ECS.Protocol;
 
 namespace AspNetAppEcsFargate
@@ -23,21 +24,28 @@ namespace AspNetAppEcsFargate
         {
             Tags.SetTag(STACK_TAG_KEY, "true");
 
-#if (UseExistingVPC)
-            var vpc = Vpc.FromLookup(this, "Vpc", new VpcLookupOptions
+            IVpc vpc;
+            if (configuration.Vpc.IsDefault)
             {
-    #if (UseDefaultVPC)
-                IsDefault = true
-    #else
-                VpcId = "VPC-Placeholder"
-    #endif
-            });
-#else
-            var vpc = new Vpc(this, "Vpc", new VpcProps
+                vpc = Vpc.FromLookup(this, "Vpc", new VpcLookupOptions
+                {
+                    IsDefault = true
+                });
+            }
+            else if (configuration.Vpc.CreateNew)
             {
-                MaxAzs = 2
-            });
-#endif
+                vpc = new Vpc(this, "Vpc", new VpcProps
+                {
+                    MaxAzs = 2
+                });
+            }
+            else
+            {
+                vpc = Vpc.FromLookup(this, "Vpc", new VpcLookupOptions
+                {
+                    VpcId = configuration.Vpc.VpcId
+                });
+            }
 
             var cluster = new Cluster(this, "Cluster", new ClusterProps
             {
@@ -45,15 +53,24 @@ namespace AspNetAppEcsFargate
                 ClusterName = configuration.ClusterName
             });
 
-            var executionRole = new Role(this, "ExecutionRole", new RoleProps
+            IRole executionRole;
+            if (configuration.ApplicationIAMRole.CreateNew)
             {
-                AssumedBy = new ServicePrincipal("ecs-tasks.amazonaws.com"),
-                RoleName = configuration.ApplicationIAMRole,
-                ManagedPolicies = new[]
+                executionRole = new Role(this, "ExecutionRole", new RoleProps
                 {
-                    ManagedPolicy.FromAwsManagedPolicyName("service-role/AmazonECSTaskExecutionRolePolicy"),
-                }
-            });
+                    AssumedBy = new ServicePrincipal("ecs-tasks.amazonaws.com"),
+                    ManagedPolicies = new[]
+                    {
+                        ManagedPolicy.FromAwsManagedPolicyName("service-role/AmazonECSTaskExecutionRolePolicy"),
+                    }
+                });
+            }
+            else
+            {
+                executionRole = Role.FromRoleArn(this, "ExecutionRole", configuration.ApplicationIAMRole.RoleArn, new FromRoleArnOptions {
+                    Mutable = false
+                });
+            }
 
             var taskDefinition = new FargateTaskDefinition(this, "TaskDefinition", new FargateTaskDefinitionProps
             {
