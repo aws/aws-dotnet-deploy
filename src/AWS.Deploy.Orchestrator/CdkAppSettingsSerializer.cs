@@ -4,8 +4,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
 using AWS.Deploy.Common;
+using Newtonsoft.Json;
 
 namespace AWS.Deploy.Orchestrator
 {
@@ -30,16 +30,10 @@ namespace AWS.Deploy.Orchestrator
             // Option Settings
             foreach (var optionSetting in recommendation.Recipe.OptionSettings)
             {
-                settings[optionSetting.Id] = recommendation.GetOptionSettingValue(optionSetting.Id);
+                settings[optionSetting.Id] = recommendation.GetOptionSettingValue(optionSetting);
             }
 
-            foreach (var optionSetting in recommendation.ListOptionSettings())
-            {
-                if (!settings.ContainsKey(optionSetting))
-                    settings[optionSetting] = recommendation.GetOptionSettingValue(optionSetting);
-            }
-
-            return JsonSerializer.Serialize(settings);
+            return JsonConvert.SerializeObject(settings, Formatting.Indented);
         }
 
         private string GetProjectSolutionFile(string projectPath)

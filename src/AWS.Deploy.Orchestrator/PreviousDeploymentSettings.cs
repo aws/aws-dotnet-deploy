@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 using System.IO;
-using System.Text.Json;
+using Newtonsoft.Json;
 
 namespace AWS.Deploy.Orchestrator
 {
@@ -46,7 +46,7 @@ namespace AWS.Deploy.Orchestrator
 
         public static PreviousDeploymentSettings ReadSettings(string filePath)
         {
-            return JsonSerializer.Deserialize<PreviousDeploymentSettings>(File.ReadAllText(filePath));
+            return JsonConvert.DeserializeObject<PreviousDeploymentSettings>(File.ReadAllText(filePath));
         }
 
         public void SaveSettings(string projectPath, string configFile)
@@ -56,9 +56,7 @@ namespace AWS.Deploy.Orchestrator
 
         public void SaveSettings(string filePath)
         {
-            JsonSerializerOptions jsonOptions = new JsonSerializerOptions { WriteIndented = true, IgnoreNullValues = true };
-
-            var json = JsonSerializer.Serialize<PreviousDeploymentSettings>(this, jsonOptions);
+            var json = JsonConvert.SerializeObject(this, Formatting.Indented);
             File.WriteAllText(filePath, json);
         }
 

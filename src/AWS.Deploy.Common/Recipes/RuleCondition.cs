@@ -21,7 +21,7 @@ namespace AWS.Deploy.Common.Recipes
         public string PropertyName { get; set; }
 
         /// <summary>
-        /// The list of allowd values to check for. Used by the MSProperty test
+        /// The list of allowed values to check for. Used by the MSProperty test
         /// </summary>
         public IList<string> AllowedValues { get; set; } = new List<string>();
 

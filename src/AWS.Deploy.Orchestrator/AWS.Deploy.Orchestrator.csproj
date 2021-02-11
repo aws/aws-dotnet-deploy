@@ -8,11 +8,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.Core" Version="3.5.1.52" />
-    <PackageReference Include="AWSSDK.EC2" Version="3.5.2.5" />
-    <PackageReference Include="AWSSDK.ElasticBeanstalk" Version="3.5.2.5" />
+    <PackageReference Include="AWSSDK.Core" Version="3.5.2.4" />
+    <PackageReference Include="AWSSDK.EC2" Version="3.5.29.4" />
+    <PackageReference Include="AWSSDK.ElasticBeanstalk" Version="3.5.2.23" />
+    <PackageReference Include="AWSSDK.IdentityManagement" Version="3.5.0.65" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="5.0.0" />
     <PackageReference Include="Microsoft.TemplateEngine.IDE" Version="5.0.1" />
     <PackageReference Include="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="5.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 
   <ItemGroup>

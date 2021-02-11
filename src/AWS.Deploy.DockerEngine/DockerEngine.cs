@@ -5,9 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using AWS.Deploy.Common;
+using Newtonsoft.Json;
 
 namespace AWS.Deploy.DockerEngine
 {
@@ -108,11 +107,8 @@ namespace AWS.Deploy.DockerEngine
         /// </summary>
         private ImageMapping GetImageMapping()
         {
-            var options = new JsonSerializerOptions();
-            options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
-
             var content = ProjectUtilities.ReadDockerFileConfig();
-            var definitions = JsonSerializer.Deserialize<List<ImageDefinition>>(content, options);
+            var definitions = JsonConvert.DeserializeObject<List<ImageDefinition>>(content);
             var mappings = definitions.Where(x => x.SdkType.Equals(_project.SdkType)).FirstOrDefault();
 
             return mappings.ImageMapping.FirstOrDefault(x => x.TargetFramework.Equals(_project.TargetFramework));

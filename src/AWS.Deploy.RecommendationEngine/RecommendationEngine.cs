@@ -5,10 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
+using Newtonsoft.Json;
 
 namespace AWS.Deploy.RecommendationEngine
 {
@@ -20,15 +19,12 @@ namespace AWS.Deploy.RecommendationEngine
         {
             recipeDefinitionPaths ??= new List<string>();
 
-            var options = new JsonSerializerOptions();
-            options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
-
             foreach (var recommendationPath in recipeDefinitionPaths)
             {
                 foreach (var recipeFile in Directory.GetFiles(recommendationPath, "*.recipe", SearchOption.TopDirectoryOnly))
                 {
                     var content = File.ReadAllText(recipeFile);
-                    var definition = JsonSerializer.Deserialize<RecipeDefinition>(content, options);
+                    var definition = JsonConvert.DeserializeObject<RecipeDefinition>(content);
                     definition.RecipePath = recipeFile;
 
                     _availableRecommendations.Add(definition);

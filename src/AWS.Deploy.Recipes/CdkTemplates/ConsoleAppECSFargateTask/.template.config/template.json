@@ -26,22 +26,6 @@
             "replaces": "AWSRegion",
             "datatype": "string"
         },
-        "UseExistingVPC": {
-            "type": "parameter",
-            "dataType": "bool",
-            "defaultValue": "false"
-        },
-        "UseDefaultVPC": {
-            "type": "parameter",
-            "dataType": "bool",
-            "defaultValue": "true"
-        },
-        "ExistingVPC": {
-            "type": "parameter",
-            "description": "Specifies an existing VPC to use",
-            "replaces": "VPC-Placeholder",
-            "datatype": "string"
-        },
         "AddDockerBuildArgs": {
             "type": "parameter",
             "dataType": "bool",

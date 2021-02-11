@@ -52,18 +52,37 @@
 
     "OptionSettings": [
         {
-            "Id": "ApplicationName",
+            "Id": "BeanstalkApplication",
             "Name": "Application Name",
             "Description": "The Elastic Beanstalk application name.",
-            "Type": "String",
+            "Type": "Object",
             "TypeHint": "BeanstalkApplication",
-            "DefaultValue": "{ProjectName}",
             "AdvancedSetting": false,
-            "Updatable": false
+            "Updatable": false,
+            "ChildOptionSettings": [
+                {
+                    "Id": "CreateNew",
+                    "Name": "Create new Beanstalk application",
+                    "Description": "Do you want to create new application?",
+                    "Type": "Bool",
+                    "DefaultValue": "true",
+                    "AdvancedSetting": false,
+                    "Updatable": false
+                },
+                {
+                    "Id": "ApplicationName",
+                    "Name": "Application Name",
+                    "Description": "The Elastic Beanstalk application name.",
+                    "Type": "String",
+                    "DefaultValue": "{ProjectName}",
+                    "AdvancedSetting": false,
+                    "Updatable": false
+                }
+            ]
         },
         {
             "Id": "EnvironmentName",
-            "ParentSettingId": "ApplicationName",
+            "ParentSettingId": "BeanstalkApplication.ApplicationName",
             "Name": "Environment Name",
             "Description": "The Elastic Beanstalk environment name.",
             "Type": "String",
@@ -128,11 +147,38 @@
             "Id": "ApplicationIAMRole",
             "Name": "Application IAM Role",
             "Description": "The Identity and Access Management Role that provides AWS credentials to the application to access AWS services",
-            "Type": "String",
+            "Type": "Object",
             "TypeHint": "IAMRole",
-            "DefaultValue": "aws-elasticbeanstalk-role",
+            "TypeHintData": {
+                "ServicePrincipal": "elasticbeanstalk.amazonaws.com"
+            },
             "AdvancedSetting": false,
-            "Updatable": false
+            "Updatable": false,
+            "ChildOptionSettings": [
+                {
+                    "Id": "CreateNew",
+                    "Name": "Create New Role",
+                    "Description": "Do you want to create a new Role?",
+                    "Type": "Bool",
+                    "DefaultValue": "true",
+                    "AdvancedSetting": false,
+                    "Updatable": false
+                },
+                {
+                    "Id": "RoleArn",
+                    "Name": "Existing Role Arn",
+                    "Description": "The Arn of the existing role to use.",
+                    "Type": "String",
+                    "AdvancedSetting": false,
+                    "Updatable": false,
+                    "DependsOn": [
+                        {
+                            "Id": "ApplicationIAMRole.CreateNew",
+                            "Value": "false"
+                        }
+                    ]
+                }
+            ]
         },
         {
             "Id": "DotnetBuildConfiguration",

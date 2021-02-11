@@ -1,5 +1,6 @@
 using Amazon.CDK;
 using System.Threading.Tasks;
+using AspNetAppElasticBeanstalkLinux.Configurations;
 using AspNetAppElasticBeanstalkLinux.Utilities;
 using Microsoft.Extensions.Configuration;
 

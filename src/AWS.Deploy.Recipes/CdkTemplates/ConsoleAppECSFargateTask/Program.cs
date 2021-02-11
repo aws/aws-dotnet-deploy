@@ -1,4 +1,5 @@
 using Amazon.CDK;
+using ConsoleAppEcsFargateTask.Configurations;
 using Microsoft.Extensions.Configuration;
 
 namespace ConsoleAppEcsFargateTask

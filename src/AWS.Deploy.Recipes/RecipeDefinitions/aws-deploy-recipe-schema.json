@@ -297,16 +297,26 @@
                     "title": "Type",
                     "description": "The data type of the setting.",
                     "minLength": 1,
-                    "enum": ["String", "Int", "Bool"]
+                    "enum": ["String", "Int", "Bool", "Object"]
                 },
                 "TypeHint": {
                     "type": "string",
                     "title": "Type Hint",
                     "description": "Hint to deploy tools to use to provide extra context for the setting. For example the value could be 'ECSCluster' and the deploy tool can show a list of ECS clusters to pick from.",
-                    "minLength": 1
+                    "minLength": 1,
+                    "enum": [
+                        "ECSCluster",
+                        "ECSService",
+                        "Vpc",
+                        "IAMRole",
+                        "BeanstalkApplication",
+                        "BeanstalkEnvironment",
+                        "InstanceType",
+                        "ECSTaskSchedule"
+                    ]
                 },
                 "DefaultValue": {
-                    "type": "string",
+                    "type": ["string", "null"],
                     "title": "The default value for the setting.",
                     "description": ""
                 },
@@ -350,6 +360,19 @@
                                 "title": "",
                                 "description": ""
                             }
+                        }
+                    }
+                },
+                "ChildOptionSettings": {
+                    "items": {"$ref": "#/definitions/OptionSetting"}
+                },
+                "TypeHintData": {
+                    "type": "object",
+                    "title": "Type hint additional data",
+                    "description": "Additional data required to process option setting.",
+                    "properties": {
+                        "ServicePrincipal": {
+                            "type": ["string", "null"]
                         }
                     }
                 }

@@ -2,11 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
+using Amazon.EC2.Model;
+using Amazon.ElasticBeanstalk.Model;
+using Amazon.IdentityManagement.Model;
+using AWS.Deploy.CLI.TypeHintResponses;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.TypeHintData;
 using AWS.Deploy.Orchestrator;
 using AWS.Deploy.Recipes;
 using AWS.Deploy.Orchestrator.Data;
@@ -69,7 +76,8 @@ namespace AWS.Deploy.CLI.Commands
             }
             else
             {
-                cloudApplicationName = _consoleUtilities.AskUserToChooseOrCreateNew(previousDeploymentNames.ToList(), "Select Cloud Application to deploy to", null);
+                var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(previousDeploymentNames.ToList(), "Select Cloud Application to deploy to", true);
+                cloudApplicationName = userResponse.SelectedOption ?? userResponse.NewName;
             }
 
             var previousDeployment = previousSettings.Deployments.FirstOrDefault(x => string.Equals(x.StackName, cloudApplicationName));
@@ -141,7 +149,7 @@ namespace AWS.Deploy.CLI.Commands
 
                 for (var i = 1; i <= optionSettings.Length; i++)
                 {
-                    _toolInteractiveService.WriteLine($"{i}. {optionSettings[i - 1].Name}: {recommendation.GetOptionSettingValue(optionSettings[i - 1].Id)}");
+                    DisplayOptionSetting(recommendation, optionSettings[i-1], i);
                 }
 
                 _toolInteractiveService.WriteLine();
@@ -177,12 +185,12 @@ namespace AWS.Deploy.CLI.Commands
                     selectedNumber >= 1 &&
                     selectedNumber <= optionSettings.Length)
                 {
-                    await ConfigureOptionSetting(optionSettings[selectedNumber - 1], recommendation);
+                    await ConfigureDeployment(recommendation, optionSettings[selectedNumber - 1]);
 
                     _toolInteractiveService.WriteLine(string.Empty);
 
                     var additionalConfig = _consoleUtilities.AskYesNoQuestion("Do you want to do any additional configuration?", "false");
-                    
+
                     if (additionalConfig == ConsoleUtilities.YesNo.No)
                         return;
                     // If yes is selected, we will loop back into the prompt
@@ -192,19 +200,55 @@ namespace AWS.Deploy.CLI.Commands
             }
         }
 
-        private async Task ConfigureOptionSetting(OptionSettingItem setting, Recommendation recommendation)
+        private void DisplayOptionSetting(Recommendation recommendation, OptionSettingItem optionSetting, int optionSettingNumber)
+        {
+            var value = recommendation.GetOptionSettingValue(optionSetting);
+
+            switch (optionSetting.Type)
+            {
+                case OptionSettingValueType.Bool:
+                case OptionSettingValueType.Int:
+                case OptionSettingValueType.String:
+                    _toolInteractiveService.WriteLine($"{optionSettingNumber}. {optionSetting.Name}: {value}");
+                    break;
+                case OptionSettingValueType.Object:
+                    var typeHintResponseTypeFullName = $"AWS.Deploy.CLI.TypeHintResponses.{optionSetting.TypeHint}TypeHintResponse";
+                    var typeHintResponseType = Assembly.GetExecutingAssembly().GetType(typeHintResponseTypeFullName);
+                    if (typeHintResponseType != null)
+                    {
+                        DisplayValue(recommendation, optionSetting, optionSettingNumber, typeHintResponseType);
+                    }
+                    else
+                    {
+                        if (value is Dictionary<string, object> objectValues)
+                        {
+                            _toolInteractiveService.WriteLine($"{optionSettingNumber}. {optionSetting.Name}:");
+                            DisplayValues(objectValues, "\t");
+                        }
+                        else
+                        {
+                            throw new ArgumentOutOfRangeException(optionSetting.Id);
+                        }
+                    }
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(optionSetting.Id);
+            }
+        }
+
+        private async Task ConfigureDeployment(Recommendation recommendation, OptionSettingItem setting)
         {
             var isDisplayed = true;
             PropertyDependency failedDependency = null;
 
             foreach (var dependency in setting.DependsOn)
             {
-                var dependsOnValue = recommendation.GetOptionSettingValue(dependency.Id);
-                if (!dependsOnValue.Equals(dependency.Value))
+                var dependsOnOptionSetting = recommendation.GetOptionSetting(setting.Id);
+                if (dependsOnOptionSetting != null && !recommendation.GetOptionSettingValue(dependsOnOptionSetting).Equals(dependency.Value))
                 {
                     isDisplayed = false;
                     failedDependency = dependency;
-                    recommendation.SetOverrideOptionSettingValue(setting.Id, setting.DefaultValue);
+                    setting.SetValueOverride(setting.DefaultValue);
                     break;
                 }
             }
@@ -223,36 +267,32 @@ namespace AWS.Deploy.CLI.Commands
             _toolInteractiveService.WriteLine(string.Empty);
             _toolInteractiveService.WriteLine($"{setting.Name}:");
 
-            var currentValue = recommendation.GetOptionSettingValue(setting.Id);
+            var currentValue = recommendation.GetOptionSettingValue(setting);
             object settingValue = null;
             if (setting.AllowedValues?.Count > 0)
             {
                 _toolInteractiveService.WriteLine(setting.Description);
                 settingValue = _consoleUtilities.AskUserToChoose(setting.AllowedValues, null, currentValue?.ToString());
+
+                // If they didn't change the value then don't store so we can rely on using the default in the recipe.
+                if (Equals(settingValue, currentValue))
+                    return;
             }
-            else if (setting.TypeHint == OptionSettingTypeHint.BeanstalkApplication)
+            if (setting.TypeHint == OptionSettingTypeHint.BeanstalkEnvironment)
             {
                 _toolInteractiveService.WriteLine(setting.Description);
 
-                var applications = await _awsResourceQueryer.GetListOfElasticBeanstalkApplications(_session);
+                var applicationOptionSetting = recommendation.GetOptionSetting(setting.ParentSettingId);
 
-                settingValue = _consoleUtilities.AskUserToChooseOrCreateNew(applications,
-                    "Select Beanstalk application to deploy to:",
-                    currentValue?.ToString());
+                var applicationName = recommendation.GetOptionSettingValue(applicationOptionSetting) as string;
+                var environments = await _awsResourceQueryer.ListOfElasticBeanstalkEnvironments(_session, applicationName);
 
-                if (applications.Contains(settingValue.ToString()))
-                    recommendation.SetOverrideOptionSettingValue("UseExistingApplication", "true");
-            }
-            else if (setting.TypeHint == OptionSettingTypeHint.BeanstalkEnvironment)
-            {
-                _toolInteractiveService.WriteLine(setting.Description);
-
-                var applicationName = recommendation.GetOptionSettingValue(setting.ParentSettingId) as string;
-                var environments = await _awsResourceQueryer.GetListOfElasticBeanstalkEnvironments(_session, applicationName);
-
-                settingValue = _consoleUtilities.AskUserToChooseOrCreateNew(environments,
-                    "Select Beanstalk environment to deploy to:",
-                    currentValue?.ToString());
+                var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(
+                    options: environments.Select(env => env.EnvironmentName),
+                    title: "Select Beanstalk environment to deploy to:",
+                    askNewName: true,
+                    defaultNewName: currentValue.ToString());
+                settingValue = userResponse.SelectedOption ?? userResponse.NewName;
             }
             else if (setting.TypeHint == OptionSettingTypeHint.DotnetPublishArgs)
             {
@@ -260,7 +300,7 @@ namespace AWS.Deploy.CLI.Commands
                     _consoleUtilities
                         .AskUserForValue(
                                 setting.Description,
-                                recommendation.GetOptionSettingValue(setting.Id).ToString(),
+                                recommendation.GetOptionSettingValue(setting).ToString(),
                                  allowEmpty: true,
                                 // validators:
                                 publishArgs =>
@@ -281,15 +321,22 @@ namespace AWS.Deploy.CLI.Commands
             else if (setting.TypeHint == OptionSettingTypeHint.EC2KeyPair)
             {
                 _toolInteractiveService.WriteLine(setting.Description);
-                var keyPairs = await _awsResourceQueryer.GetListOfEC2KeyPairs(_session);
+                var keyPairs = await _awsResourceQueryer.ListOfEC2KeyPairs(_session);
+
+                var userInputConfiguration = new UserInputConfiguration<KeyPairInfo>
+                {
+                    DisplaySelector = kp => kp.KeyName,
+                    DefaultSelector = kp => kp.KeyName.Equals(currentValue),
+                    AskNewName = true
+                };
 
                 while (true)
                 {
-                    settingValue = _consoleUtilities.AskUserToChooseOrCreateNew(keyPairs,
-                        "Select Key Pair to use:",
-                        currentValue?.ToString(), true);
+                    var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(keyPairs, "Select Key Pair to use:", userInputConfiguration);
 
-                    if (!string.IsNullOrEmpty(settingValue.ToString()) && !keyPairs.Contains(settingValue.ToString()))
+                    settingValue = userResponse.SelectedOption?.KeyName ?? userResponse.NewName;
+
+                    if (userResponse.CreateNew && !string.IsNullOrEmpty(userResponse.NewName))
                     {
                         _toolInteractiveService.WriteLine(string.Empty);
                         _toolInteractiveService.WriteLine("You have chosen to create a new Key Pair.");
@@ -312,8 +359,61 @@ namespace AWS.Deploy.CLI.Commands
             }
             else if (setting.Type == OptionSettingValueType.Bool)
             {
-                var answer = _consoleUtilities.AskYesNoQuestion(setting.Description, recommendation.GetOptionSettingValue(setting.Id).ToString());
+                var answer = _consoleUtilities.AskYesNoQuestion(setting.Description, recommendation.GetOptionSettingValue(setting).ToString());
                 settingValue = answer == ConsoleUtilities.YesNo.Yes ? "true" : "false";
+            }
+            else if (setting.Type == OptionSettingValueType.Object)
+            {
+                if (setting.TypeHint == OptionSettingTypeHint.IAMRole)
+                {
+                    _toolInteractiveService.WriteLine(setting.Description);
+                    var typeHintData = setting.GetTypeHintData<IAMRoleTypeHintData>();
+                    var existingRoles = await _awsResourceQueryer.ListOfIAMRoles(_session, typeHintData?.ServicePrincipal);
+                    var currentTypeHintResponse = recommendation.GetOptionSettingValue<IAMRoleTypeHintResponse>(setting);
+
+                    var userInputConfiguration = new UserInputConfiguration<Role>
+                    {
+                        DisplaySelector = role => role.RoleName,
+                        DefaultSelector = role => currentTypeHintResponse.RoleArn?.Equals(role.Arn) ?? false,
+                    };
+
+                    var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(existingRoles ,"Select an IAM role", userInputConfiguration);
+
+                    settingValue = new IAMRoleTypeHintResponse
+                    {
+                        CreateNew = userResponse.CreateNew,
+                        RoleArn = userResponse.SelectedOption?.Arn
+                    };
+                }
+                else if (setting.TypeHint == OptionSettingTypeHint.BeanstalkApplication)
+                {
+                    _toolInteractiveService.WriteLine(setting.Description);
+
+                    var applications = await _awsResourceQueryer.ListOfElasticBeanstalkApplications(_session);
+                    var currentTypeHintResponse = recommendation.GetOptionSettingValue<BeanstalkApplicationTypeHintResponse>(setting);
+
+                    var userInputConfiguration = new UserInputConfiguration<ApplicationDescription>
+                    {
+                        DisplaySelector = app => app.ApplicationName,
+                        DefaultSelector = app => app.ApplicationName.Equals(currentTypeHintResponse?.ApplicationName),
+                        AskNewName = true
+                    };
+
+                    var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(applications, "Select Beanstalk application to deploy to:", userInputConfiguration);
+
+                    settingValue = new BeanstalkApplicationTypeHintResponse
+                    {
+                        CreateNew = userResponse.CreateNew,
+                        ApplicationName = userResponse.SelectedOption?.ApplicationName ?? userResponse.NewName
+                    };
+                }
+                else
+                {
+                    foreach (var childSetting in setting.ChildOptionSettings)
+                    {
+                        await ConfigureDeployment(recommendation, childSetting);
+                    }
+                }
             }
             else
             {
@@ -322,7 +422,40 @@ namespace AWS.Deploy.CLI.Commands
 
             if (!Equals(settingValue, currentValue) && settingValue != null)
             {
-                recommendation.SetOverrideOptionSettingValue(setting.Id, settingValue);
+                setting.SetValueOverride(settingValue);
+            }
+        }
+
+        /// <summary>
+        /// Uses reflection to call <see cref="Recommendation.GetOptionSettingValue{T}" /> with the Object type option setting value
+        /// This allows to use a generic implementation to display Object type option setting values without casting the response to
+        /// the specific TypeHintResponse type.
+        /// </summary>
+        private void DisplayValue(Recommendation recommendation, OptionSettingItem optionSetting, int optionSettingNumber, Type typeHintResponseType)
+        {
+            var methodInfo = typeof(Recommendation)
+                .GetMethod(nameof(Recommendation.GetOptionSettingValue), 1, new[] {typeof(OptionSettingItem), typeof(bool)});
+            var genericMethodInfo = methodInfo?.MakeGenericMethod(typeHintResponseType);
+            var response = genericMethodInfo?.Invoke(recommendation, new object[] {optionSetting, false});
+            _toolInteractiveService.WriteLine($"{optionSettingNumber}. {optionSetting.Name}: {((IDisplayable)response)?.ToDisplayString()}");
+        }
+
+        private void DisplayValues(Dictionary<string, object> objectValues, string indent)
+        {
+            foreach (var (key, value) in objectValues)
+            {
+                if (value is Dictionary<string, object> childObjectValue)
+                {
+                    _toolInteractiveService.WriteLine($"{indent}{key}");
+                    DisplayValues(childObjectValue, $"{indent}\t");
+                }
+                else if (value is string stringValue)
+                {
+                    if (!string.IsNullOrEmpty(stringValue))
+                    {
+                        _toolInteractiveService.WriteLine($"{indent}{key}: {stringValue}");
+                    }
+                }
             }
         }
 

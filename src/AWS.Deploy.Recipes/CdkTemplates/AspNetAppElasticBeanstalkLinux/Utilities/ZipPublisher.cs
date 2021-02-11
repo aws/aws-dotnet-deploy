@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.IO.Compression;
+using AspNetAppElasticBeanstalkLinux.Configurations;
 
 namespace AspNetAppElasticBeanstalkLinux.Utilities
 {

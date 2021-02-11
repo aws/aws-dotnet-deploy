@@ -3,12 +3,89 @@
 
 using System.Collections.Generic;
 using Should;
+using AWS.Deploy.Common;
 using Xunit;
 
 namespace AWS.Deploy.CLI.UnitTests
 {
     public class ConsoleUtilitiesTests
     {
+        private readonly List<OptionItem> _options = new List<OptionItem>
+        {
+            new()
+            {
+                DisplayName = "Option1",
+                Identifier = "Identifier1"
+            },
+            new()
+            {
+                DisplayName = "Option2",
+                Identifier = "Identifier2"
+            },
+        };
+
+        [Fact]
+        public void AskUserToChooseOrCreateNew()
+        {
+            var interactiveServices = new TestToolInteractiveServiceImpl(new List<string>
+            {
+                "3",
+                "CustomNewIdentifier"
+            });
+            var consoleUtilities = new ConsoleUtilities(interactiveServices);
+            var userInputConfiguration = new UserInputConfiguration<OptionItem>
+            {
+                DisplaySelector = option => option.DisplayName,
+                DefaultSelector = option => option.Identifier.Equals("Identifier2"),
+                AskNewName = true,
+                DefaultNewName = "NewIdentifier"
+            };
+            var userResponse = consoleUtilities.AskUserToChooseOrCreateNew(_options, "Title", userInputConfiguration);
+
+            Assert.True(interactiveServices.OutputContains("Title"));
+            Assert.True(interactiveServices.OutputContains("1: Option1"));
+            Assert.True(interactiveServices.OutputContains("2: Option2"));
+            Assert.True(interactiveServices.OutputContains($"3: {CLI.Constants.CREATE_NEW_LABEL}"));
+
+            Assert.Null(userResponse.SelectedOption);
+
+            Assert.True(interactiveServices.OutputContains("(default: 2"));
+
+            Assert.True(interactiveServices.OutputContains("(default: NewIdentifier"));
+            Assert.True(userResponse.CreateNew);
+            Assert.Equal("CustomNewIdentifier", userResponse.NewName);
+        }
+
+        [Fact]
+        public void AskUserToChooseOrCreateNewPickExisting()
+        {
+            var interactiveServices = new TestToolInteractiveServiceImpl(new List<string>
+            {
+                "1"
+            });
+            var consoleUtilities = new ConsoleUtilities(interactiveServices);
+            var userInputConfiguration = new UserInputConfiguration<OptionItem>
+            {
+                DisplaySelector = option => option.DisplayName,
+                DefaultSelector = option => option.Identifier.Equals("Identifier2"),
+                AskNewName = true,
+                DefaultNewName = "NewIdentifier"
+            };
+            var userResponse = consoleUtilities.AskUserToChooseOrCreateNew(_options, "Title", userInputConfiguration);
+
+            Assert.Equal("Title", interactiveServices.OutputMessages[0]);
+
+            Assert.True(interactiveServices.OutputContains("Title"));
+            Assert.True(interactiveServices.OutputContains("1: Option1"));
+            Assert.True(interactiveServices.OutputContains("2: Option2"));
+
+            Assert.True(interactiveServices.OutputContains("(default: 2"));
+
+            Assert.Equal(_options[0], userResponse.SelectedOption);
+            Assert.False(userResponse.CreateNew);
+            Assert.Null(userResponse.NewName);
+        }
+
         [Fact]
         public void AskUserToChooseStringsPickDefault()
         {
@@ -135,6 +212,12 @@ namespace AWS.Deploy.CLI.UnitTests
             consoleUtilities.DisplayRow(new[] { ("Hello", 10), ("World", 20) });
 
             Assert.Equal("Hello      | World               ", interactiveServices.OutputMessages[0]);
+        }
+
+        private class OptionItem
+        {
+            public string DisplayName { get; set; }
+            public string Identifier { get; set; }
         }
     }
 }

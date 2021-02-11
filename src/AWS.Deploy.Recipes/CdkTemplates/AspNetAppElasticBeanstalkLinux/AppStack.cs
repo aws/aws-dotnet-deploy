@@ -4,6 +4,7 @@ using Amazon.CDK;
 using Amazon.CDK.AWS.ElasticBeanstalk;
 using Amazon.CDK.AWS.IAM;
 using Amazon.CDK.AWS.S3.Assets;
+using AspNetAppElasticBeanstalkLinux.Configurations;
 
 namespace AspNetAppElasticBeanstalkLinux
 {
@@ -33,7 +34,7 @@ namespace AspNetAppElasticBeanstalkLinux
             // The S3 "putObject" will occur first before CF generates the template
             var applicationVersion = new CfnApplicationVersion(this, "ApplicationVersion", new CfnApplicationVersionProps
             {
-                ApplicationName = configuration.ApplicationName,
+                ApplicationName = configuration.BeanstalkApplication.ApplicationName,
                 SourceBundle = new CfnApplicationVersion.SourceBundleProperty
                 {
                     S3Bucket = asset.S3BucketName,
@@ -41,29 +42,36 @@ namespace AspNetAppElasticBeanstalkLinux
                 }
             });
 
-            if (!configuration.UseExistingApplication)
+            if (configuration.BeanstalkApplication.CreateNew)
             {
                 application = new CfnApplication(this, "Application", new CfnApplicationProps
                 {
-                    ApplicationName = configuration.ApplicationName
+                    ApplicationName = configuration.BeanstalkApplication.ApplicationName
                 });
 
                 applicationVersion.AddDependsOn(application);
             }
 
-            var role = new Role(this, "Role", new RoleProps
+            IRole role;
+            if (configuration.ApplicationIAMRole.CreateNew)
             {
-                AssumedBy = new ServicePrincipal("ec2.amazonaws.com"),
-                RoleName = configuration.ApplicationIAMRole,
-
-                // https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/iam-instanceprofile.html
-                ManagedPolicies = new[]
+                role = new Role(this, "Role", new RoleProps
                 {
-                    ManagedPolicy.FromAwsManagedPolicyName("AWSElasticBeanstalkWebTier"),
-                    ManagedPolicy.FromAwsManagedPolicyName("AWSElasticBeanstalkMulticontainerDocker"),
-                    ManagedPolicy.FromAwsManagedPolicyName("AWSElasticBeanstalkWorkerTier")
-                }
-            });
+                    AssumedBy = new ServicePrincipal("ec2.amazonaws.com"),
+
+                    // https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/iam-instanceprofile.html
+                    ManagedPolicies = new[]
+                    {
+                        ManagedPolicy.FromAwsManagedPolicyName("AWSElasticBeanstalkWebTier"),
+                        ManagedPolicy.FromAwsManagedPolicyName("AWSElasticBeanstalkMulticontainerDocker"),
+                        ManagedPolicy.FromAwsManagedPolicyName("AWSElasticBeanstalkWorkerTier")
+                    }
+                });
+            }
+            else
+            {
+                role = Role.FromRoleArn(this, "Role", configuration.ApplicationIAMRole.RoleArn);
+            }
 
             var instanceProfile = new CfnInstanceProfile(this, "InstanceProfile", new CfnInstanceProfileProps
             {
@@ -118,7 +126,7 @@ namespace AspNetAppElasticBeanstalkLinux
             var environment = new CfnEnvironment(this, "Environment", new CfnEnvironmentProps
             {
                 EnvironmentName = configuration.EnvironmentName,
-                ApplicationName = configuration.ApplicationName,
+                ApplicationName = configuration.BeanstalkApplication.ApplicationName,
                 SolutionStackName = configuration.SolutionStackName,
                 OptionSettings = optionSettingProperties.ToArray(),
                 // This line is critical - reference the label created in this same stack
