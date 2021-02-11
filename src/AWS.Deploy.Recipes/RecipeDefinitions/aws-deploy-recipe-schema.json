@@ -25,7 +25,7 @@
             "title": "Schema",
             "description": "JSON schema for the document",
             "minLength": 1
-        },        
+        },
         "Id": {
             "type": "string",
             "title": "Unique ID for the recipe",
@@ -49,7 +49,7 @@
             "title": "Deployment Bundle",
             "description": "How the project will be bundled for deployment.",
             "enum": [ "Container", "DotnetPublishZipFile" ]
-        },        
+        },
         "CdkProjectTemplate": {
             "type": "string",
             "title": "CDK Project Template",
@@ -78,20 +78,20 @@
             "type": "integer",
             "title": "Recipe Priority",
             "description": "The type of test to perform."
-        },  
+        },
         "RecommendationRules" : {
             "$ref": "#/definitions/RecommendationRules"
         },
         "OptionSettings" : {
             "$ref": "#/definitions/OptionSettings"
-        }        
+        }
     },
     "definitions": {
 
         "RecommendationRules" : {
             "type" : "array",
             "description": "The rules that determine if the recipe is compatible with the project.",
-            "items": {"$ref": "#/definitions/RecommendationRule"}           
+            "items": {"$ref": "#/definitions/RecommendationRule"}
         },
         "RecommendationRule" : {
             "type" : "object",
@@ -100,8 +100,8 @@
             "properties": {
                 "Tests": {
                     "type": "array",
-                    "items": {"$ref": "#/definitions/RuleTest"} 
-                },              
+                    "items": {"$ref": "#/definitions/RuleTest"}
+                },
                 "Effect": {
                     "type": "object",
                     "properties": {
@@ -110,9 +110,9 @@
                         },
                         "Fail": {
                             "$ref": "#/definitions/RuleEffect"
-                        }                        
+                        }
                     }
-                }                
+                }
             }
         },
 
@@ -126,9 +126,9 @@
                     "title": "Test Type",
                     "description": "The type of test to perform.",
                     "enum" : [
-                        "MSProjectSdkAttribute", 
-                        "MSProperty", 
-                        "MSPropertyExists", 
+                        "MSProjectSdkAttribute",
+                        "MSProperty",
+                        "MSPropertyExists",
                         "FileExists"
                     ]
                 },
@@ -156,9 +156,9 @@
                                             "Microsoft.NET.Sdk",
                                             "Microsoft.NET.Sdk.Web"
                                         ]
-                                    }                                
+                                    }
                                 }
-                            }  
+                            }
                         }
                     }
                 },
@@ -179,7 +179,7 @@
                                         "title": "Property Name",
                                         "description": "The name of the property in the PropertyGroup to inspect.",
                                         "minLength": 1
-                                    },                             
+                                    },
                                     "AllowedValues": {
                                         "type": "array",
                                         "items" :{
@@ -187,13 +187,13 @@
                                         },
                                         "title": "Allowed Values",
                                         "description": "The list of allowed values for the property."
-                                    }                                
+                                    }
                                 }
-                            }  
+                            }
                         }
                     }
                 },
-                
+
                 {
                     "if" : {
                         "properties": {"Type" : {"const" : "MSPropertyExists"}}
@@ -210,13 +210,13 @@
                                         "title": "Property Name",
                                         "description": "The name of the property to check for existence",
                                         "minLength": 1
-                                    }                         
+                                    }
                                 }
-                            }  
+                            }
                         }
                     }
                 },
-                
+
                 {
                     "if" : {
                         "properties": {"Type" : {"const" : "FileExists"}}
@@ -233,12 +233,12 @@
                                         "title": "File Exists",
                                         "description": "The name of the file to check if it exists within the project.",
                                         "minLength": 1
-                                    }                                
+                                    }
                                 }
-                            }  
+                            }
                         }
                     }
-                }                
+                }
             ]
         },
 
@@ -255,13 +255,13 @@
                     "type": "integer",
                     "title": "Priority Adjustment",
                     "description": "Adjust the base priority"
-                }                
+                }
             }
         },
 
         "OptionSettings" : {
             "type" : "array",
-            "items": {"$ref": "#/definitions/OptionSetting"} 
+            "items": {"$ref": "#/definitions/OptionSetting"}
         },
         "OptionSetting" : {
             "type" : "object",
@@ -317,7 +317,7 @@
                     "items": {
                         "type" : "string"
                     }
-                },                
+                },
                 "AdvancedSetting": {
                     "type": "boolean",
                     "title": "Advance Setting",
@@ -349,7 +349,7 @@
                                 "type": "string",
                                 "title": "",
                                 "description": ""
-                            }                                                        
+                            }
                         }
                     }
                 }

@@ -17,7 +17,7 @@ namespace AWS.Deploy.Common.Recipes
         public string Id { get; set; }
 
         /// <summary>
-        /// The id of the parent option setting. This is used for tooling that wants to look up the existing resources for a setting based on the TypeHint but needs 
+        /// The id of the parent option setting. This is used for tooling that wants to look up the existing resources for a setting based on the TypeHint but needs
         /// to know the parent AWS resource. For example if listing the available Beanstalk environments the listing should be for the environments of the Beanstalk application.
         /// </summary>
         public string ParentSettingId { get; set; }
@@ -33,13 +33,13 @@ namespace AWS.Deploy.Common.Recipes
         public string Description { get; set; }
 
         /// <summary>
-        /// The type of primitive value expected for this setting. 
+        /// The type of primitive value expected for this setting.
         /// For example String, Int
         /// </summary>
         public OptionSettingValueType Type { get; set; }
 
         /// <summary>
-        /// Hint the the UI what type of setting this is optionally add additional UI features to select a value. 
+        /// Hint the the UI what type of setting this is optionally add additional UI features to select a value.
         /// For example a value of BeanstalkApplication tells the UI it can display the list of available Beanstalk applications for the user to pick from.
         /// </summary>
         public OptionSettingTypeHint? TypeHint { get; set; }

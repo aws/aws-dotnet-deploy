@@ -75,8 +75,8 @@ namespace AspNetAppEcsFargate
             var relativePath = Path.GetRelativePath(dockerExecutionDirectory, configuration.DockerfileDirectory);
             var container = taskDefinition.AddContainer("Container", new ContainerDefinitionOptions
             {
-                Image = ContainerImage.FromAsset(dockerExecutionDirectory, new AssetImageProps 
-                { 
+                Image = ContainerImage.FromAsset(dockerExecutionDirectory, new AssetImageProps
+                {
                     File = Path.Combine(relativePath, configuration.DockerfileName),
 #if (AddDockerBuildArgs)
                     BuildArgs = GetDockerBuildArgs("DockerBuildArgs-Placeholder")

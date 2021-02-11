@@ -64,7 +64,7 @@ namespace AWS.Deploy.CLI
             var result = await _commandLineWrapper.TryRunWithResult("node --version");
 
             var versionString = result.StandardOut;
-            
+
             if (versionString.StartsWith("v", StringComparison.OrdinalIgnoreCase))
                 versionString = versionString.Substring(1, versionString.Length - 1);
 

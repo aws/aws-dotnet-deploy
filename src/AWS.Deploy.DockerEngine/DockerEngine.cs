@@ -81,7 +81,7 @@ namespace AWS.Deploy.DockerEngine
         private List<string> GetProjectList()
         {
             var projectDirectory = Directory.GetParent(_projectPath);
-            
+
             while (projectDirectory != null)
             {
                 var files = projectDirectory.GetFiles("*.sln");

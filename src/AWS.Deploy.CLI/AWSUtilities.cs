@@ -84,7 +84,7 @@ namespace AWS.Deploy.CLI
         {
             if (null == credentials)
                 return false;
-            
+
             try
             {
                 await credentials.GetCredentialsAsync();

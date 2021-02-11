@@ -15,7 +15,7 @@ namespace AWS.Deploy.RecommendationEngine
     public class RecommendationEngine
     {
         private readonly IList<RecipeDefinition> _availableRecommendations = new List<RecipeDefinition>();
-        
+
         public RecommendationEngine(IEnumerable<string> recipeDefinitionPaths)
         {
             recipeDefinitionPaths ??= new List<string>();
