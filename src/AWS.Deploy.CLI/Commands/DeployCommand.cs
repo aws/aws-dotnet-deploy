@@ -180,7 +180,7 @@ namespace AWS.Deploy.CLI.Commands
 
                     var applicationName = recommendation.GetOptionSettingValue(setting.ParentSettingId) as string;
                     var environments = await _awsResourceQueryer.GetListOfElasticBeanstalkEnvironments(_session, applicationName);
-                    
+
                     settingValue = _consoleUtilities.AskUserToChooseOrCreateNew(environments,
                         "Select Beanstalk environment to deploy to:",
                         currentValue?.ToString());

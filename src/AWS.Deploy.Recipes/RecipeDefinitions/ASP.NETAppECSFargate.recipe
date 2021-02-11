@@ -3,14 +3,14 @@
     "Id": "AspNetAppEcsFargate",
     "Name": "ASP.NET Core App to ECS Fargate",
     "DeploymentType": "CdkProject",
-    "DeploymentBundle": "Container",    
+    "DeploymentBundle": "Container",
     "CdkProjectTemplate": "../CdkTemplates/AspNetAppEcsFargate",
     "CdkProjectTemplateId": "netdeploy.AspNetAppEcsFargate",
     "Description": "ASP.NET Core applications built as a container and deployed to Elastic Container Service with compute power managed by Fargate.",
     "TargetService": "AWS Elastic Container Service",
 
     "RecipePriority": 110,
-    "RecommendationRules": [       
+    "RecommendationRules": [
         {
             "Tests": [
                 {
@@ -61,7 +61,7 @@
                 "Fail": { "Include": true }
             }
         }
-        
+
     ],
 
 

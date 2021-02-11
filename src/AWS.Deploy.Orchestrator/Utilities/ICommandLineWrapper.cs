@@ -92,7 +92,7 @@ namespace AWS.Deploy.Orchestrator.Utilities
         /// </summary>
         public bool Success => string.IsNullOrEmpty(StandardError);
         /// <summary>
-        /// Fully read <see cref="Process.StandardOutput"/> 
+        /// Fully read <see cref="Process.StandardOutput"/>
         /// </summary>
         public string StandardOut { get; set; }
         /// <summary>

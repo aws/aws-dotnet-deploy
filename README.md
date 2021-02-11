@@ -5,14 +5,14 @@ Initial prototyping for the AWS .NET CLI Tool
 
 You use `/test/ManualLinuxTesting/Dockerfile` to create a local sandbox for testing.  This image will build from source and install the aws cli deployment tool.
 
-1.  From the root directory, run 
+1.  From the root directory, run
 ```
 docker build -f ./test/ManualLinuxTesting/Dockerfile/ . -t 'aws-deploy:local'
 ```
 
 2. _Grab a caffeinated beverage_.  The first run can take several minutes.
 
-3.  Run the docker image in interactive mode: 
+3.  Run the docker image in interactive mode:
 ```
 docker run -v $HOME/.aws/:/root/.aws --privileged -it --entrypoint bash aws-deploy:local
  ```

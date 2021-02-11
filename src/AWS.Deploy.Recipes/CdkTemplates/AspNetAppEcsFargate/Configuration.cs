@@ -9,7 +9,7 @@ namespace AspNetAppEcsFargate
         /// The name of the CloudFormation Stack to create or update.
         /// </summary>
         public string StackName { get; set; }
-        
+
         /// <summary>
         /// The path of csproj file to be deployed.
         /// </summary>

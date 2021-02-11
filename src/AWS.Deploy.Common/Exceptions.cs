@@ -30,7 +30,7 @@ namespace AWS.Deploy.Common
     /// <summary>
     /// Throw if the user attempts to deploy a <see cref="RecipeDefinition"/>
     /// that uses <see cref="DeploymentTypes.CdkProject"/>
-    /// but NodeJs/NPM could not be detected. 
+    /// but NodeJs/NPM could not be detected.
     /// </summary>
     [AWSDeploymentExpectedException]
     public class MissingNodeJsException : Exception {}
@@ -38,7 +38,7 @@ namespace AWS.Deploy.Common
     /// <summary>
     /// Throw if the user attempts to deploy a <see cref="RecipeDefinition"/>
     /// that requires <see cref="DeploymentBundleTypes.Container"/>
-    /// but Docker could not be detected. 
+    /// but Docker could not be detected.
     /// </summary>
     [AWSDeploymentExpectedException]
     public class MissingDockerException : Exception {}

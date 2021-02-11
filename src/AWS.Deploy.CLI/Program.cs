@@ -103,7 +103,7 @@ namespace AWS.Deploy.CLI
                 {
                     // This is a bug
                     toolInteractiveService.WriteErrorLine(
-                        "Unhandled exception.  This is a bug.  Please copy the stack trace below and file a bug at https://github.com/aws/aws-dotnet-deploy. " + 
+                        "Unhandled exception.  This is a bug.  Please copy the stack trace below and file a bug at https://github.com/aws/aws-dotnet-deploy. " +
                         e.PrettyPrint());
 
                     return CommandReturnCodes.UNHANDLED_EXCEPTION;
