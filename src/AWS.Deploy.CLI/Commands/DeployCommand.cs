@@ -367,7 +367,7 @@ namespace AWS.Deploy.CLI.Commands
                 if (setting.TypeHint == OptionSettingTypeHint.IAMRole)
                 {
                     _toolInteractiveService.WriteLine(setting.Description);
-                    var typeHintData = setting.GetTypeHintData<IAMTypeHintData>();
+                    var typeHintData = setting.GetTypeHintData<IAMRoleTypeHintData>();
                     var existingRoles = await _awsResourceQueryer.ListOfIAMRolesAsync(_session, typeHintData?.ServicePrincipal);
                     var currentTypeHintResponse = recommendation.GetOptionSettingValue<IAMRoleTypeHintResponse>(setting);
 

@@ -8,7 +8,7 @@ namespace AWS.Deploy.Common.TypeHintData
     /// <summary>
     /// Holds additional data for <see cref="OptionSettingTypeHint.IAMRole"/> processing.
     /// </summary>
-    public class IAMTypeHintData
+    public class IAMRoleTypeHintData
     {
         /// <summary>
         /// ServicePrincipal to filter IAM roles.
