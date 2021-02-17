@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Newtonsoft.Json;
 
 namespace AWS.Deploy.Common.Recipes
 {
@@ -83,8 +85,24 @@ namespace AWS.Deploy.Common.Recipes
         public List<OptionSettingItem> ChildOptionSettings { get; set; } = new ();
 
         /// <summary>
-        /// Type hint additional data required to facilitate handling of the option setting
+        /// Type hint additional data required to facilitate handling of the option setting.
         /// </summary>
-        public OptionSettingTypeHintData TypeHintData { get; set; }
+        public Dictionary<string, object> TypeHintData { get; set; } = new ();
+
+        /// <summary>
+        /// Helper method to get strongly type <see cref="TypeHintData"/>.
+        /// </summary>
+        /// <typeparam name="T">Type of the type hint data</typeparam>
+        /// <returns>Returns strongly type type hint data. Returns default value if <see cref="TypeHintData"/> is empty.</returns>
+        public T? GetTypeHintData<T>()
+        {
+            if (!TypeHintData.Any())
+            {
+                return default;
+            }
+
+            var serialized = JsonConvert.SerializeObject(TypeHintData);
+            return JsonConvert.DeserializeObject<T>(serialized);
+        }
     }
 }

@@ -13,6 +13,7 @@ using Amazon.IdentityManagement.Model;
 using AWS.Deploy.CLI.TypeHintResponses;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.TypeHintData;
 using AWS.Deploy.Orchestrator;
 using AWS.Deploy.Recipes;
 using AWS.Deploy.Orchestrator.Data;
@@ -366,7 +367,8 @@ namespace AWS.Deploy.CLI.Commands
                 if (setting.TypeHint == OptionSettingTypeHint.IAMRole)
                 {
                     _toolInteractiveService.WriteLine(setting.Description);
-                    var existingRoles = await _awsResourceQueryer.ListOfIAMRolesAsync(_session, setting.TypeHintData.ServicePrincipal);
+                    var typeHintData = setting.GetTypeHintData<IAMTypeHintData>();
+                    var existingRoles = await _awsResourceQueryer.ListOfIAMRolesAsync(_session, typeHintData?.ServicePrincipal);
                     var currentTypeHintResponse = recommendation.GetOptionSettingValue<IAMRoleTypeHintResponse>(setting);
 
                     var userInputConfiguration = new UserInputConfiguration<Role>
