@@ -396,7 +396,8 @@ namespace AWS.Deploy.CLI.Commands
                     {
                         DisplaySelector = app => app.ApplicationName,
                         DefaultSelector = app => app.ApplicationName.Equals(currentTypeHintResponse?.ApplicationName),
-                        AskNewName = true
+                        AskNewName = true,
+                        DefaultNewName = currentTypeHintResponse.ApplicationName
                     };
 
                     var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(applications, "Select Beanstalk application to deploy to:", userInputConfiguration);
