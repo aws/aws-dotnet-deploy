@@ -20,11 +20,11 @@ namespace AWS.Deploy.Orchestrator.Data
 {
     public interface IAWSResourceQueryer
     {
-        Task<List<ApplicationDescription>> ListOfElasticBeanstalkApplicationsAsync(OrchestratorSession session);
-        Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironmentsAsync(OrchestratorSession session, string applicationName);
-        Task<List<KeyPairInfo>> ListOfEC2KeyPairsAsync(OrchestratorSession session);
-        Task<string> CreateEC2KeyPairAsync(OrchestratorSession session, string keyName, string saveLocation);
-        Task<List<Role>> ListOfIAMRolesAsync(OrchestratorSession session, string servicePrincipal);
+        Task<List<ApplicationDescription>> ListOfElasticBeanstalkApplications(OrchestratorSession session);
+        Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(OrchestratorSession session, string applicationName);
+        Task<List<KeyPairInfo>> ListOfEC2KeyPairs(OrchestratorSession session);
+        Task<string> CreateEC2KeyPair(OrchestratorSession session, string keyName, string saveLocation);
+        Task<List<Role>> ListOfIAMRoles(OrchestratorSession session, string servicePrincipal);
     }
 
     public class AWSResourceQueryer : IAWSResourceQueryer
@@ -36,14 +36,14 @@ namespace AWS.Deploy.Orchestrator.Data
             _awsClientFactory = awsClientFactory;
         }
 
-        public async Task<List<ApplicationDescription>> ListOfElasticBeanstalkApplicationsAsync(OrchestratorSession session)
+        public async Task<List<ApplicationDescription>> ListOfElasticBeanstalkApplications(OrchestratorSession session)
         {
             var beanstalkClient = _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>(session.AWSCredentials, session.AWSRegion);
             var applications = await beanstalkClient.DescribeApplicationsAsync();
             return applications.Applications;
         }
 
-        public async Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironmentsAsync(OrchestratorSession session, string applicationName)
+        public async Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(OrchestratorSession session, string applicationName)
         {
             var beanstalkClient = _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>(session.AWSCredentials, session.AWSRegion);
             var environments = new List<EnvironmentDescription>();
@@ -64,7 +64,7 @@ namespace AWS.Deploy.Orchestrator.Data
             return environments;
         }
 
-        public async Task<List<KeyPairInfo>> ListOfEC2KeyPairsAsync(OrchestratorSession session)
+        public async Task<List<KeyPairInfo>> ListOfEC2KeyPairs(OrchestratorSession session)
         {
             var ec2Client = _awsClientFactory.GetAWSClient<IAmazonEC2>(session.AWSCredentials, session.AWSRegion);
             var response = await ec2Client.DescribeKeyPairsAsync();
@@ -72,7 +72,7 @@ namespace AWS.Deploy.Orchestrator.Data
             return response.KeyPairs;
         }
 
-        public async Task<string> CreateEC2KeyPairAsync(OrchestratorSession session, string keyName, string saveLocation)
+        public async Task<string> CreateEC2KeyPair(OrchestratorSession session, string keyName, string saveLocation)
         {
             var ec2Client = _awsClientFactory.GetAWSClient<IAmazonEC2>(session.AWSCredentials, session.AWSRegion);
 
@@ -85,7 +85,7 @@ namespace AWS.Deploy.Orchestrator.Data
             return response.KeyPair.KeyName;
         }
 
-        public async Task<List<Role>> ListOfIAMRolesAsync(OrchestratorSession session, string servicePrincipal)
+        public async Task<List<Role>> ListOfIAMRoles(OrchestratorSession session, string servicePrincipal)
         {
             var identityManagementServiceClient = _awsClientFactory.GetAWSClient<IAmazonIdentityManagementService>(session.AWSCredentials, session.AWSRegion);
 

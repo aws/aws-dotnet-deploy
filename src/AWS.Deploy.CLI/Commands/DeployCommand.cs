@@ -285,7 +285,7 @@ namespace AWS.Deploy.CLI.Commands
                 var applicationOptionSetting = recommendation.GetOptionSetting(setting.ParentSettingId);
 
                 var applicationName = recommendation.GetOptionSettingValue(applicationOptionSetting) as string;
-                var environments = await _awsResourceQueryer.ListOfElasticBeanstalkEnvironmentsAsync(_session, applicationName);
+                var environments = await _awsResourceQueryer.ListOfElasticBeanstalkEnvironments(_session, applicationName);
 
                 var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(
                     options: environments.Select(env => env.EnvironmentName),
@@ -321,7 +321,7 @@ namespace AWS.Deploy.CLI.Commands
             else if (setting.TypeHint == OptionSettingTypeHint.EC2KeyPair)
             {
                 _toolInteractiveService.WriteLine(setting.Description);
-                var keyPairs = await _awsResourceQueryer.ListOfEC2KeyPairsAsync(_session);
+                var keyPairs = await _awsResourceQueryer.ListOfEC2KeyPairs(_session);
 
                 var userInputConfiguration = new UserInputConfiguration<KeyPairInfo>
                 {
@@ -351,7 +351,7 @@ namespace AWS.Deploy.CLI.Commands
 
                         var keyPairDirectory = _consoleUtilities.AskForEC2KeyPairSaveDirectory(recommendation.ProjectPath);
 
-                        await _awsResourceQueryer.CreateEC2KeyPairAsync(_session, settingValue.ToString(), keyPairDirectory);
+                        await _awsResourceQueryer.CreateEC2KeyPair(_session, settingValue.ToString(), keyPairDirectory);
                     }
 
                     break;
@@ -368,7 +368,7 @@ namespace AWS.Deploy.CLI.Commands
                 {
                     _toolInteractiveService.WriteLine(setting.Description);
                     var typeHintData = setting.GetTypeHintData<IAMRoleTypeHintData>();
-                    var existingRoles = await _awsResourceQueryer.ListOfIAMRolesAsync(_session, typeHintData?.ServicePrincipal);
+                    var existingRoles = await _awsResourceQueryer.ListOfIAMRoles(_session, typeHintData?.ServicePrincipal);
                     var currentTypeHintResponse = recommendation.GetOptionSettingValue<IAMRoleTypeHintResponse>(setting);
 
                     var userInputConfiguration = new UserInputConfiguration<Role>
@@ -389,7 +389,7 @@ namespace AWS.Deploy.CLI.Commands
                 {
                     _toolInteractiveService.WriteLine(setting.Description);
 
-                    var applications = await _awsResourceQueryer.ListOfElasticBeanstalkApplicationsAsync(_session);
+                    var applications = await _awsResourceQueryer.ListOfElasticBeanstalkApplications(_session);
                     var currentTypeHintResponse = recommendation.GetOptionSettingValue<BeanstalkApplicationTypeHintResponse>(setting);
 
                     var userInputConfiguration = new UserInputConfiguration<ApplicationDescription>
