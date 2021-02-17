@@ -417,7 +417,7 @@ namespace AWS.Deploy.CLI.Commands
             }
             else
             {
-                settingValue = _consoleUtilities.AskUserForValue(setting.Description, currentValue.ToString(), allowEmpty: true);
+                settingValue = _consoleUtilities.AskUserForValue(setting.Description, currentValue?.ToString(), allowEmpty: true);
             }
 
             if (!Equals(settingValue, currentValue) && settingValue != null)
