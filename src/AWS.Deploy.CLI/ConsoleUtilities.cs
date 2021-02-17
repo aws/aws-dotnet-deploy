@@ -188,9 +188,9 @@ namespace AWS.Deploy.CLI
 
             _interactiveService.WriteLine(message);
 
-            var prompt = $"Enter value (default: {defaultValue}.";
+            var prompt = $"Enter value (default: {defaultValue}";
             if (allowEmpty)
-                prompt += $"  Type {CLEAR} to clear.";
+                prompt += $". Type {CLEAR} to clear.";
             prompt += "): ";
             _interactiveService.WriteLine(prompt);
 
