@@ -113,7 +113,7 @@ namespace AWS.Deploy.CLI
             var fallbackRegion = FallbackRegionFactory.GetRegionEndpoint()?.SystemName;
             if (!string.IsNullOrEmpty(fallbackRegion))
             {
-                _toolInteractiveService.WriteLine($"Configuring AWS region using AWS SDK region search to {region}.");
+                _toolInteractiveService.WriteLine($"Configuring AWS region using AWS SDK region search to {fallbackRegion}.");
                 return fallbackRegion;
             }
 
