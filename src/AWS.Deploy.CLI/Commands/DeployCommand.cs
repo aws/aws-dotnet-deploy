@@ -408,6 +408,49 @@ namespace AWS.Deploy.CLI.Commands
                         ApplicationName = userResponse.SelectedOption?.ApplicationName ?? userResponse.NewName
                     };
                 }
+                else if (setting.TypeHint == OptionSettingTypeHint.Vpc)
+                {
+                    _toolInteractiveService.WriteLine(setting.Description);
+
+                    var currentVpcTypeHintResponse = setting.GetTypeHintData<VpcTypeHintResponse>();
+
+                    var vpcs = await _awsResourceQueryer.GetListOfVpcs(_session);
+
+                    var userInputConfig = new UserInputConfiguration<Vpc>
+                    {
+                        DisplaySelector = vpc =>
+                        {
+                            var name = vpc.Tags?.FirstOrDefault(x => x.Key == "Name")?.Value ?? string.Empty;
+                            var namePart =
+                                string.IsNullOrEmpty(name)
+                                    ? ""
+                                    : $" ({name}) ";
+
+                            var isDefaultPart =
+                                vpc.IsDefault
+                                    ? Constants.DEFAULT_LABEL
+                                    : "";
+
+                            return $"{vpc.VpcId}{namePart}{isDefaultPart}";
+                        },
+                        DefaultSelector = vpc =>
+                            !string.IsNullOrEmpty(currentVpcTypeHintResponse?.VpcId)
+                                ? vpc.VpcId == currentVpcTypeHintResponse.VpcId
+                                : vpc.IsDefault
+                    };
+
+                    var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(
+                        vpcs,
+                        "Select a VPC",
+                        userInputConfig);
+
+                    settingValue = new VpcTypeHintResponse
+                    {
+                        IsDefault = userResponse.SelectedOption?.IsDefault == true,
+                        CreateNew = userResponse.CreateNew,
+                        VpcId = userResponse.SelectedOption?.VpcId ?? ""
+                    };
+                }
                 else
                 {
                     foreach (var childSetting in setting.ChildOptionSettings)
