@@ -9,6 +9,7 @@ namespace AWS.Deploy.CLI
     public static class Constants
     {
         public const string CREATE_NEW_LABEL = "*** Create new ***";
+        public const string DEFAULT_LABEL = "*** Default ***";
         public const string EMPTY_LABEL = "*** Empty ***";
     }
 }

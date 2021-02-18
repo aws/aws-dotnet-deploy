@@ -136,13 +136,14 @@
             "Name": "Virtual Private Cloud",
             "Description": "A VPC enables you to launch the application into a virtual network that you've defined",
             "Type": "Object",
+            "TypeHint": "Vpc",
             "AdvancedSetting": true,
             "Updatable": false,
             "ChildOptionSettings": [
                 {
                     "Id": "IsDefault",
                     "Name": "Use default VPC",
-                    "Description": "Do you want to use the default VPC for the deployment?",
+                    "Description": "Do you want to use the default VPC?",
                     "Type": "Bool",
                     "DefaultValue": "true",
                     "AdvancedSetting": true,

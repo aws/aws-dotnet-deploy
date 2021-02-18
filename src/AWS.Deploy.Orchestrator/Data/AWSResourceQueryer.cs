@@ -5,12 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.IO;
+using Amazon.EC2;
+using Amazon.EC2.Model;
 using Amazon.ElasticBeanstalk;
 using Amazon.ElasticBeanstalk.Model;
-using Amazon.EC2;
 using AWS.Deploy.Common;
-using Amazon.EC2.Model;
-using System.IO;
 using System.Net;
 using Amazon.Auth.AccessControlPolicy;
 using Amazon.IdentityManagement;
@@ -25,6 +25,7 @@ namespace AWS.Deploy.Orchestrator.Data
         Task<List<KeyPairInfo>> ListOfEC2KeyPairs(OrchestratorSession session);
         Task<string> CreateEC2KeyPair(OrchestratorSession session, string keyName, string saveLocation);
         Task<List<Role>> ListOfIAMRoles(OrchestratorSession session, string servicePrincipal);
+        Task<List<Vpc>> GetListOfVpcs(OrchestratorSession session);
     }
 
     public class AWSResourceQueryer : IAWSResourceQueryer
@@ -105,6 +106,18 @@ namespace AWS.Deploy.Orchestrator.Data
         private static bool AssumeRoleServicePrincipalSelector(Role role, string servicePrincipal)
         {
             return !string.IsNullOrEmpty(role.AssumeRolePolicyDocument) && role.AssumeRolePolicyDocument.Contains(servicePrincipal);
+        }
+
+        public async Task<List<Vpc>> GetListOfVpcs(OrchestratorSession session)
+        {
+            var vpcClient = _awsClientFactory.GetAWSClient<IAmazonEC2>(session.AWSCredentials, session.AWSRegion);
+
+            return await vpcClient.Paginators
+                .DescribeVpcs(new DescribeVpcsRequest())
+                .Vpcs
+                .OrderByDescending(x => x.IsDefault)
+                .ThenBy(x => x.VpcId)
+                .ToListAsync();
         }
     }
 }

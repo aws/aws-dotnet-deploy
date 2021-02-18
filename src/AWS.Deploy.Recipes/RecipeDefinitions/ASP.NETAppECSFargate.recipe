@@ -139,6 +139,7 @@
             "Name": "Virtual Private Cloud",
             "Description": "A VPC enables you to launch the application into a virtual network that you've defined",
             "Type": "Object",
+            "TypeHint": "Vpc",
             "AdvancedSetting": true,
             "Updatable": false,
             "ChildOptionSettings": [

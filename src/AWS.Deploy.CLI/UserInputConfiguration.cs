@@ -26,6 +26,8 @@ namespace AWS.Deploy.CLI
 
         /// <summary>
         /// If true, ask for the new name
+        /// <para />
+        /// Default is <c>false</c>
         /// </summary>
         public bool AskNewName { get; set; }
 
@@ -38,6 +40,8 @@ namespace AWS.Deploy.CLI
         /// <summary>
         /// If <see cref="CanBeEmpty" /> is set to true,
         /// then an empty user input is considered as a valid value.
+        /// <para />
+        /// Default is <c>false</c>
         /// </summary>
         public bool CanBeEmpty { get; set; }
     }
