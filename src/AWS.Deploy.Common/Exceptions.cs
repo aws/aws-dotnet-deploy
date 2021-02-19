@@ -51,6 +51,18 @@ namespace AWS.Deploy.Common
     public class FailedToGenerateAnyRecommendations : Exception {}
 
     /// <summary>
+    /// Throw if there is a parse error reading the existing Cloud Application's metadata
+    /// </summary>
+    [AWSDeploymentExpectedException]
+    public class ParsingExistingCloudApplicationMetadataException : Exception
+    {
+        public ParsingExistingCloudApplicationMetadataException(string message, Exception inner) : base(message, inner)
+        {
+
+        }
+    }
+
+    /// <summary>
     /// Indicates a specific strongly typed Exception can be anticipated.
     /// Whoever throws this error should also present the user with helpful information
     /// on what wrong and how to fix it.  This is the preferred UX.

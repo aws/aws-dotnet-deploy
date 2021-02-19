@@ -60,7 +60,7 @@ namespace AWS.Deploy.Common.Recipes
 
         public void SetValueOverride(object valueOverride)
         {
-            if (valueOverride is bool || valueOverride is int)
+            if (valueOverride is bool || valueOverride is int || valueOverride is long)
             {
                 _valueOverride = valueOverride;
             }

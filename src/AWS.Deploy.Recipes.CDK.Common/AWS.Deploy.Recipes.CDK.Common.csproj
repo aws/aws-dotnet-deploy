@@ -1,0 +1,75 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Version>0.1.0</Version>
+    <Product>AWS Deployment Tooling for .NET CDK Utilities</Product>
+    <Description>Utility code used in CDK recipes used by the AWS Deployment Tool. This package is not intended for direct usage.</Description>
+    <PackageId>AWS.Deploy.Recipes.CDK.Common</PackageId>
+    <PackageTags>AWS;Amazon;Deploy</PackageTags>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Amazon.CDK" Version="1.89.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.7" />
+  </ItemGroup>
+
+  <UsingTask
+    TaskName="SetupLocalCache"
+    TaskFactory="RoslynCodeTaskFactory"
+    AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" >
+    <ParameterGroup>
+      <NuGetPackage ParameterType="System.String" Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System"/>
+      <Using Namespace="System.IO"/>
+      <Code Type="Fragment" Language="cs">
+        <![CDATA[
+
+            var cdkProjectDirectory =
+                            Path.Combine(
+                                Path.GetTempPath(),
+                                "AWS.Deploy",
+                                "Projects");
+
+            var nugetCacheDirectory =
+                            Path.Combine(
+                                cdkProjectDirectory,
+                                "nuget-cache");
+            Directory.CreateDirectory(nugetCacheDirectory);
+            File.Copy(NuGetPackage, Path.Combine(nugetCacheDirectory, Path.GetFileName(NuGetPackage)), true);
+
+            var nugetCachePackage = Path.Combine(
+                                        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                                        ".nuget",
+                                        "packages",
+                                        "aws.deploy.recipes.cdk.common"
+                                        );
+
+            if(Directory.Exists(nugetCachePackage))
+            {
+                Directory.Delete(nugetCachePackage, true);
+            }
+
+            var nugetConfigContent = @"
+<?xml version=""1.0"" encoding=""utf-8"" ?>
+<configuration>
+  <packageSources>
+    <add key=""deploy-tool-cache"" value=""./nuget-cache"" />
+  </packageSources>
+</configuration>
+".Trim();
+            File.WriteAllText(Path.Combine(cdkProjectDirectory, "nuget.config"), nugetConfigContent);
+ ]]></Code>
+    </Task>
+  </UsingTask>
+  
+  <Target Name="PublishBlazorApp" AfterTargets="Pack">
+
+    <SetupLocalCache NuGetPackage="$(OutputPath)..\$(PackageId).$(PackageVersion).nupkg"/>
+    
+  </Target>
+  
+</Project>

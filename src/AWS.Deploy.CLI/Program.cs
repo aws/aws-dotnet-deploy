@@ -121,6 +121,7 @@ namespace AWS.Deploy.CLI
             listCommand.Handler = CommandHandler.Create<string, string, string, bool>(async (profile, region, projectPath, diagnostics) =>
             {
                 var toolInteractiveService = new ConsoleInteractiveServiceImpl(diagnostics);
+                var orchestratorInteractiveService = new ConsoleOrchestratorLogger(toolInteractiveService);
 
                 var awsUtilities = new AWSUtilities(toolInteractiveService);
 
@@ -142,7 +143,17 @@ namespace AWS.Deploy.CLI
                     ProjectDirectory = projectPath
                 };
 
-                await new ListStacksCommand(new DefaultAWSClientFactory(), toolInteractiveService, session).ExecuteAsync();
+                var commandLineWrapper =
+                    new CommandLineWrapper(
+                        orchestratorInteractiveService,
+                        awsCredentials,
+                        awsRegion);
+
+                await new ListStacksCommand(new DefaultAWSClientFactory(),
+                                                toolInteractiveService,
+                                                new ConsoleOrchestratorLogger(toolInteractiveService),
+                                                new CdkProjectHandler(orchestratorInteractiveService, commandLineWrapper),
+                                                session).ExecuteAsync();
             });
             rootCommand.Add(listCommand);
 

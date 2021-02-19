@@ -5,35 +5,44 @@ using Amazon.CloudFormation;
 using Amazon.CloudFormation.Model;
 using AWS.Deploy.Common;
 using AWS.Deploy.Orchestrator;
+using AWS.Deploy.Recipes;
 
 namespace AWS.Deploy.CLI.Commands
 {
     public class ListStacksCommand
     {
         private readonly IAWSClientFactory _awsClientFactory;
+        private readonly IOrchestratorInteractiveService _orchestratorInteractiveService;
         private readonly IToolInteractiveService _interactiveService;
         private readonly OrchestratorSession _session;
+        private readonly ICdkProjectHandler _cdkProjectHandler;
 
-        public ListStacksCommand(IAWSClientFactory awsClientFactory, IToolInteractiveService interactiveService, OrchestratorSession session)
+        public ListStacksCommand(IAWSClientFactory awsClientFactory,
+            IToolInteractiveService interactiveService,
+            IOrchestratorInteractiveService orchestratorInteractiveService,
+            ICdkProjectHandler cdkProjectHandler, OrchestratorSession session)
         {
             _awsClientFactory = awsClientFactory;
             _interactiveService = interactiveService;
+            _orchestratorInteractiveService = orchestratorInteractiveService;
+            _cdkProjectHandler = cdkProjectHandler;
             _session = session;
         }
 
         public async Task ExecuteAsync()
         {
-            using var cloudFormationClient = _awsClientFactory.GetAWSClient<IAmazonCloudFormation>(_session.AWSCredentials, _session.AWSRegion);
-            var describeStacksRequest = new DescribeStacksRequest();
+            var orchestrator =
+                new Orchestrator.Orchestrator(
+                    _session,
+                    _orchestratorInteractiveService,
+                    _cdkProjectHandler,
+                    new[] { RecipeLocator.FindRecipeDefinitionsPath() });
 
-            var listStacksPaginator = cloudFormationClient.Paginators.DescribeStacks(describeStacksRequest);
-            await foreach (var response in listStacksPaginator.Responses)
+
+            var existingApplications = await orchestrator.GetExistingDeployedApplications();
+            foreach (var app in existingApplications)
             {
-                var stacks = response.Stacks.Where(stack => stack.Tags.Any(tag => tag.Key.Equals(CloudApplication.StackTagKey)));
-                foreach (var stack in stacks)
-                {
-                    _interactiveService.WriteLine(stack.StackName);
-                }
+                _interactiveService.WriteLine(app.Name);
             }
         }
     }

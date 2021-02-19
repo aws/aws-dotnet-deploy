@@ -4,6 +4,7 @@ using Amazon.CDK;
 using Amazon.CDK.AWS.ElasticBeanstalk;
 using Amazon.CDK.AWS.IAM;
 using Amazon.CDK.AWS.S3.Assets;
+using AWS.Deploy.Recipes.CDK.Common;
 using AspNetAppElasticBeanstalkLinux.Configurations;
 
 namespace AspNetAppElasticBeanstalkLinux
@@ -13,19 +14,14 @@ namespace AspNetAppElasticBeanstalkLinux
         private const string ENVIRONMENTTYPE_SINGLEINSTANCE = "SingleInstance";
         private const string ENVIRONMENTTYPE_LOADBALANCED = "LoadBalanced";
 
-        /// <summary>
-        /// Tag key of the CloudFormation stack
-        /// used to uniquely identify a stack that is deployed by aws-dotnet-deploy
-        /// </summary>
-        private const string STACK_TAG_KEY = "StackTagKey-Placeholder";
-
-        internal AppStack(Construct scope, string id, Configuration configuration, IStackProps props = null) : base(scope, id, props)
+        internal AppStack(Construct scope, RecipeConfiguration<Configuration> recipeConfiguration, IStackProps props = null)
+            : base(scope, recipeConfiguration.StackName, props)
         {
-            Tags.SetTag(STACK_TAG_KEY, "true");
+            var settings = recipeConfiguration.Settings;
 
             var asset = new Asset(this, "Asset", new AssetProps
             {
-                Path = configuration.AssetPath
+                Path = settings.AssetPath
             });
 
             CfnApplication application = null;
@@ -34,7 +30,7 @@ namespace AspNetAppElasticBeanstalkLinux
             // The S3 "putObject" will occur first before CF generates the template
             var applicationVersion = new CfnApplicationVersion(this, "ApplicationVersion", new CfnApplicationVersionProps
             {
-                ApplicationName = configuration.BeanstalkApplication.ApplicationName,
+                ApplicationName = settings.BeanstalkApplication.ApplicationName,
                 SourceBundle = new CfnApplicationVersion.SourceBundleProperty
                 {
                     S3Bucket = asset.S3BucketName,
@@ -42,18 +38,18 @@ namespace AspNetAppElasticBeanstalkLinux
                 }
             });
 
-            if (configuration.BeanstalkApplication.CreateNew)
+            if (settings.BeanstalkApplication.CreateNew)
             {
                 application = new CfnApplication(this, "Application", new CfnApplicationProps
                 {
-                    ApplicationName = configuration.BeanstalkApplication.ApplicationName
+                    ApplicationName = settings.BeanstalkApplication.ApplicationName
                 });
 
                 applicationVersion.AddDependsOn(application);
             }
 
             IRole role;
-            if (configuration.ApplicationIAMRole.CreateNew)
+            if (settings.ApplicationIAMRole.CreateNew)
             {
                 role = new Role(this, "Role", new RoleProps
                 {
@@ -70,7 +66,7 @@ namespace AspNetAppElasticBeanstalkLinux
             }
             else
             {
-                role = Role.FromRoleArn(this, "Role", configuration.ApplicationIAMRole.RoleArn);
+                role = Role.FromRoleArn(this, "Role", settings.ApplicationIAMRole.RoleArn);
             }
 
             var instanceProfile = new CfnInstanceProfile(this, "InstanceProfile", new CfnInstanceProfileProps
@@ -85,7 +81,7 @@ namespace AspNetAppElasticBeanstalkLinux
                    new CfnEnvironment.OptionSettingProperty {
                         Namespace = "aws:autoscaling:launchconfiguration",
                         OptionName = "InstanceType",
-                        Value= configuration.InstanceType
+                        Value= settings.InstanceType
                    },
                    new CfnEnvironment.OptionSettingProperty {
                         Namespace = "aws:autoscaling:launchconfiguration",
@@ -95,39 +91,39 @@ namespace AspNetAppElasticBeanstalkLinux
                    new CfnEnvironment.OptionSettingProperty {
                         Namespace = "aws:elasticbeanstalk:environment",
                         OptionName =  "EnvironmentType",
-                        Value = configuration.EnvironmentType
+                        Value = settings.EnvironmentType
                    }
                 };
 
-            if (configuration.EnvironmentType.Equals(ENVIRONMENTTYPE_LOADBALANCED))
+            if (settings.EnvironmentType.Equals(ENVIRONMENTTYPE_LOADBALANCED))
             {
                 optionSettingProperties.Add(
                     new CfnEnvironment.OptionSettingProperty
                     {
                         Namespace = "aws:elasticbeanstalk:environment",
                         OptionName = "LoadBalancerType",
-                        Value = configuration.LoadBalancerType
+                        Value = settings.LoadBalancerType
                     }
                 );
             }
 
-            if (!string.IsNullOrEmpty(configuration.EC2KeyPair))
+            if (!string.IsNullOrEmpty(settings.EC2KeyPair))
             {
                 optionSettingProperties.Add(
                     new CfnEnvironment.OptionSettingProperty
                     {
                         Namespace = "aws:autoscaling:launchconfiguration",
                         OptionName = "EC2KeyName",
-                        Value = configuration.EC2KeyPair
+                        Value = settings.EC2KeyPair
                     }
                 );
             }
 
             var environment = new CfnEnvironment(this, "Environment", new CfnEnvironmentProps
             {
-                EnvironmentName = configuration.EnvironmentName,
-                ApplicationName = configuration.BeanstalkApplication.ApplicationName,
-                SolutionStackName = configuration.SolutionStackName,
+                EnvironmentName = settings.EnvironmentName,
+                ApplicationName = settings.BeanstalkApplication.ApplicationName,
+                SolutionStackName = settings.SolutionStackName,
                 OptionSettings = optionSettingProperties.ToArray(),
                 // This line is critical - reference the label created in this same stack
                 VersionLabel = applicationVersion.Ref,

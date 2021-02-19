@@ -1,4 +1,5 @@
 using Amazon.CDK;
+using AWS.Deploy.Recipes.CDK.Common;
 using ConsoleAppEcsFargateService.Configurations;
 using Microsoft.Extensions.Configuration;
 
@@ -8,18 +9,20 @@ namespace ConsoleAppEcsFargateService
     {
         public static void Main(string[] args)
         {
-            var builder = new ConfigurationBuilder().AddJsonFile("appsettings.json", false, false);
-            var configuration = builder.Build().Get<Configuration>();
-
             var app = new App();
-            new AppStack(app, configuration.StackName, configuration, new StackProps
+
+            var builder = new ConfigurationBuilder().AddAWSDeployToolConfiguration(app);
+            var recipeConfiguration = builder.Build().Get<RecipeConfiguration<Configuration>>();
+
+            CDKRecipeSetup.RegisterStack<Configuration>(new AppStack(app, recipeConfiguration, new StackProps
             {
                 Env = new Environment
                 {
                     Account = "AWSAccountId",
                     Region = "AWSRegion"
                 }
-            });
+            }), recipeConfiguration);
+
             app.Synth();
         }
     }

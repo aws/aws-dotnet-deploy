@@ -15,6 +15,7 @@ using Microsoft.TemplateEngine.Orchestrator.RunnableProjects;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.IDE;
 using Microsoft.TemplateEngine.Edge.Template;
+using AWS.Deploy.Recipes.CDK.Common;
 
 namespace AWS.Deploy.Orchestrator
 {
@@ -53,7 +54,10 @@ namespace AWS.Deploy.Orchestrator
             var templateParameters = new Dictionary<string, string> {
                 { "AWSAccountID" , session.AWSAccountId },
                 { "AWSRegion" , session.AWSRegion },
-                { "StackTagKey", CloudApplication.StackTagKey }
+
+                // CDK Template projects can parameterize the version number of the AWS.Deploy.Recipes.CDK.Common package. This avoid
+                // projects having to be modified every time the package version is bumped.
+                { "AWSDeployRecipesCDKCommonVersion", typeof(CloudFormationIdentifierContants).Assembly.GetName().Version.ToString() }
             };
 
             foreach(var option in recommendation.Recipe.OptionSettings)

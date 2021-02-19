@@ -22,7 +22,7 @@ namespace AspNetAppElasticBeanstalkLinux.Utilities
         /// and returns the path to the zip file
         /// </summary>
         /// <returns></returns>
-        public string GetZipPath(Configuration configuration)
+        public string GetZipPath(Configuration configuration, string projectPath)
         {
             var publishDirectoryInfo = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
             var additionalArguments = @"DotNetPublishAdditionalArguments-Placeholder";
@@ -34,7 +34,7 @@ namespace AspNetAppElasticBeanstalkLinux.Utilities
                      : "";
             var publishCommands = new []
             {
-                $"dotnet publish {configuration.ProjectPath} -o {publishDirectoryInfo} -c DotnetBuildConfiguration-Placeholder" +
+                $"dotnet publish {projectPath} -o {publishDirectoryInfo} -c DotnetBuildConfiguration-Placeholder" +
                 $" --self-contained {configuration.SelfContainedBuild}" +
                 $" {runtimeArg}" +
                 $" {additionalArguments}"

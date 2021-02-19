@@ -1,0 +1,111 @@
+Description: AWSDotnetDeployCDKStack
+Metadata:
+  aws-dotnet-deploy-settings: '{"ApplicationIAMRole":"aws-elasticbeanstalk-role","EnvironmentType":"SingleInstance","InstanceType":"t2.micro","EnvironmentName":"BeanstalkTest2-dev","ApplicationName":"BeanstalkTest2","SolutionStackName":"64bit Amazon Linux 2 v2.1.2 running .NET Core","LoadBalancerType":"application","UseExistingApplication":false,"EC2KeyPair":""}'
+  aws-dotnet-deploy-recipe-id: AspNetAppElasticBeanstalkLinux
+  aws-dotnet-deploy-recipe-version: 0.1.0
+Parameters:
+  AssetParameters4ab0254e9f69b2a7092b1dcabd2715bc712a4f8ae04b631caf28bf1a07a2b4b1S3BucketA2E9145B:
+    Type: String
+    Description: S3 bucket for asset "4ab0254e9f69b2a7092b1dcabd2715bc712a4f8ae04b631caf28bf1a07a2b4b1"
+  AssetParameters4ab0254e9f69b2a7092b1dcabd2715bc712a4f8ae04b631caf28bf1a07a2b4b1S3VersionKey1D2B0FFE:
+    Type: String
+    Description: S3 key for asset version "4ab0254e9f69b2a7092b1dcabd2715bc712a4f8ae04b631caf28bf1a07a2b4b1"
+  AssetParameters4ab0254e9f69b2a7092b1dcabd2715bc712a4f8ae04b631caf28bf1a07a2b4b1ArtifactHash5304E17B:
+    Type: String
+    Description: Artifact hash for asset "4ab0254e9f69b2a7092b1dcabd2715bc712a4f8ae04b631caf28bf1a07a2b4b1"
+Resources:
+  ApplicationVersion:
+    Type: AWS::ElasticBeanstalk::ApplicationVersion
+    Properties:
+      ApplicationName: BeanstalkTest2
+      SourceBundle:
+        S3Bucket:
+          Ref: AssetParameters4ab0254e9f69b2a7092b1dcabd2715bc712a4f8ae04b631caf28bf1a07a2b4b1S3BucketA2E9145B
+        S3Key:
+          Fn::Join:
+            - ""
+            - - Fn::Select:
+                  - 0
+                  - Fn::Split:
+                      - "||"
+                      - Ref: AssetParameters4ab0254e9f69b2a7092b1dcabd2715bc712a4f8ae04b631caf28bf1a07a2b4b1S3VersionKey1D2B0FFE
+              - Fn::Select:
+                  - 1
+                  - Fn::Split:
+                      - "||"
+                      - Ref: AssetParameters4ab0254e9f69b2a7092b1dcabd2715bc712a4f8ae04b631caf28bf1a07a2b4b1S3VersionKey1D2B0FFE
+    DependsOn:
+      - Application
+    Metadata:
+      aws:cdk:path: B2a/ApplicationVersion
+  Application:
+    Type: AWS::ElasticBeanstalk::Application
+    Properties:
+      ApplicationName: BeanstalkTest2
+    Metadata:
+      aws:cdk:path: B2a/Application
+  Role1ABCC5F0:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/AWSElasticBeanstalkWebTier
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/AWSElasticBeanstalkMulticontainerDocker
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/AWSElasticBeanstalkWorkerTier
+      RoleName: aws-elasticbeanstalk-role
+    Metadata:
+      aws:cdk:path: B2a/Role/Resource
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - Ref: Role1ABCC5F0
+    Metadata:
+      aws:cdk:path: B2a/InstanceProfile
+  Environment:
+    Type: AWS::ElasticBeanstalk::Environment
+    Properties:
+      ApplicationName: BeanstalkTest2
+      EnvironmentName: BeanstalkTest2-dev
+      OptionSettings:
+        - Namespace: aws:autoscaling:launchconfiguration
+          OptionName: InstanceType
+          Value: t2.micro
+        - Namespace: aws:autoscaling:launchconfiguration
+          OptionName: IamInstanceProfile
+          Value:
+            Fn::GetAtt:
+              - InstanceProfile
+              - Arn
+        - Namespace: aws:elasticbeanstalk:environment
+          OptionName: EnvironmentType
+          Value: SingleInstance
+      SolutionStackName: 64bit Amazon Linux 2 v2.1.2 running .NET Core
+      VersionLabel:
+        Ref: ApplicationVersion
+    Metadata:
+      aws:cdk:path: B2a/Environment
+  CDKMetadata:
+    Type: AWS::CDK::Metadata
+    Properties:
+      Modules: aws-cdk=1.87.1,@aws-cdk/assets=1.89.0,@aws-cdk/aws-elasticbeanstalk=1.89.0,@aws-cdk/aws-events=1.89.0,@aws-cdk/aws-iam=1.89.0,@aws-cdk/aws-kms=1.89.0,@aws-cdk/aws-s3=1.89.0,@aws-cdk/aws-s3-assets=1.89.0,@aws-cdk/cloud-assembly-schema=1.89.0,@aws-cdk/core=1.89.0,@aws-cdk/cx-api=1.89.0,@aws-cdk/region-info=1.89.0,jsii-runtime=DotNet/3.1.11/.NETCoreApp,Version=v3.1/1.0.0.0
+    Metadata:
+      aws:cdk:path: B2a/CDKMetadata/Default

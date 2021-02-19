@@ -1,4 +1,5 @@
 using Amazon.CDK;
+using AWS.Deploy.Recipes.CDK.Common;
 using System.Threading.Tasks;
 using AspNetAppElasticBeanstalkLinux.Configurations;
 using AspNetAppElasticBeanstalkLinux.Utilities;
@@ -10,24 +11,26 @@ namespace AspNetAppElasticBeanstalkLinux
     {
         public static async Task Main(string[] args)
         {
-            var builder = new ConfigurationBuilder().AddJsonFile("appsettings.json", false, false);
-            var configuration = builder.Build().Get<Configuration>();
+            var app = new App();
+
+            var builder = new ConfigurationBuilder().AddAWSDeployToolConfiguration(app);
+            var recipeConfiguration = builder.Build().Get<RecipeConfiguration<Configuration>>();
 
             var zipPublisher = new ZipPublisher();
-            configuration.AssetPath = zipPublisher.GetZipPath(configuration);
+            recipeConfiguration.Settings.AssetPath = zipPublisher.GetZipPath(recipeConfiguration.Settings, recipeConfiguration.ProjectPath);
 
             var solutionStackNameProvider = new SolutionStackNameProvider();
-            configuration.SolutionStackName = await solutionStackNameProvider.GetSolutionStackNameAsync();
+            recipeConfiguration.Settings.SolutionStackName = await solutionStackNameProvider.GetSolutionStackNameAsync();
 
-            var app = new App();
-            new AppStack(app, configuration.StackName, configuration, new StackProps
+            CDKRecipeSetup.RegisterStack<Configuration>(new AppStack(app, recipeConfiguration, new StackProps
             {
                 Env = new Environment
                 {
                     Account = "AWSAccountId",
                     Region = "AWSRegion"
                 }
-            });
+            }), recipeConfiguration);
+
             app.Synth();
         }
     }

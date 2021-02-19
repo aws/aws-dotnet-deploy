@@ -6,26 +6,6 @@ namespace ConsoleAppEcsFargateService.Configurations
     public class Configuration
     {
         /// <summary>
-        /// The name of the CloudFormation Stack to create or update.
-        /// </summary>
-        public string StackName { get; set; }
-
-        /// <summary>
-        /// The path of csproj file to be deployed.
-        /// </summary>
-        public string ProjectPath { get; set; }
-
-        /// <summary>
-        /// The path of sln file to be deployed.
-        /// </summary>
-        public string ProjectSolutionPath { get; set; }
-
-        /// <summary>
-        /// The path of directory that contains the Dockerfile.
-        /// </summary>
-        public string DockerfileDirectory { get; set; }
-
-        /// <summary>
         /// The file name of the Dockerfile.
         /// </summary>
         public string DockerfileName { get; set; } = "Dockerfile";

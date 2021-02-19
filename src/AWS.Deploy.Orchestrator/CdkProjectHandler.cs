@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
 using AWS.Deploy.Orchestrator.Utilities;
+using AWS.Deploy.Recipes.CDK.Common;
 
 namespace AWS.Deploy.Orchestrator
 {
@@ -50,7 +51,8 @@ namespace AWS.Deploy.Orchestrator
             await _commandLineWrapper.Run($"npx cdk bootstrap aws://{session.AWSAccountId}/{session.AWSRegion}");
 
             // Handover to CDK command line tool
-            await _commandLineWrapper.Run( "npx cdk deploy --require-approval never", cdkProjectPath);
+            // Use a CDK Context parameter to specify the settings file that has been serialized.
+            await _commandLineWrapper.Run( $"npx cdk deploy --require-approval never -c {CloudFormationIdentifierContants.SettingsPathCDKContextParameter}=\"{appSettingsFilePath}\"", cdkProjectPath);
         }
 
         private async Task<string> CreateCdkProjectForDeployment(Recommendation recommendation, OrchestratorSession session)

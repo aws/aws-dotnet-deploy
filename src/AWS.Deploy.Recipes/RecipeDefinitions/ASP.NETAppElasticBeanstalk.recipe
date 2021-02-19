@@ -1,6 +1,7 @@
 {
     "$schema": "./aws-deploy-recipe-schema.json",
     "Id": "AspNetAppElasticBeanstalkLinux",
+    "Version": "0.1.0",
     "Name": "ASP.NET Core App to Elastic Beanstalk Linux",
     "DeploymentType": "CdkProject",
     "DeploymentBundle": "DotnetPublishZipFile",
@@ -14,7 +15,7 @@
         {
             "Tests": [
                 {
-                    "Type" : "MSProjectSdkAttribute",
+                    "Type": "MSProjectSdkAttribute",
                     "Condition": {
                         "Value": "Microsoft.NET.Sdk.Web"
                     }
@@ -28,7 +29,7 @@
                 }
             ],
             "Effect": {
-                "Pass": {"Include": true}
+                "Pass": { "Include": true }
             }
         },
 
