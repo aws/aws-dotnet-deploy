@@ -52,18 +52,18 @@ namespace AWS.Deploy.CLI.Utilities
                 RedirectStandardError = true,
                 UseShellExecute = false,
                 CreateNoWindow = true,
-                WorkingDirectory = workingDirectory,
-                EnvironmentVariables =
-                {
-                    { "AWS_ACCESS_KEY_ID", credentials.AccessKey },
-                    { "AWS_SECRET_ACCESS_KEY", credentials.SecretKey },
-                    { "AWS_REGION", _awsRegion }
-                }
+                WorkingDirectory = workingDirectory
             };
+
+            // environment variables could already be set at the machine level,
+            // use this syntax to make sure we don't create duplicate entries
+            processStartInfo.EnvironmentVariables["AWS_ACCESS_KEY"] = credentials.AccessKey;
+            processStartInfo.EnvironmentVariables["AWS_SECRET_ACCESS_KEY"] = credentials.SecretKey;
+            processStartInfo.EnvironmentVariables["AWS_REGION"] = _awsRegion;
 
             if (credentials.UseToken)
             {
-                processStartInfo.EnvironmentVariables.Add("AWS_SESSION_TOKEN", credentials.Token);
+                processStartInfo.EnvironmentVariables["AWS_SESSION_TOKEN"] = credentials.Token;
             }
 
             var process = Process.Start(processStartInfo);
