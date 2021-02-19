@@ -93,7 +93,7 @@
             "Name": "Desired Task Count",
             "Description": "The desired number of ECS tasks to run for the service.",
             "Type": "Int",
-            "DefaultValue": "3",
+            "DefaultValue": 3,
             "AdvancedSetting": false,
             "Updatable": true
         },
@@ -114,7 +114,7 @@
                     "Name": "Create New Role",
                     "Description": "Do you want to create a new Role?",
                     "Type": "Bool",
-                    "DefaultValue": "true",
+                    "DefaultValue": true,
                     "AdvancedSetting": false,
                     "Updatable": false
                 },
@@ -128,7 +128,7 @@
                     "DependsOn": [
                         {
                             "Id": "ApplicationIAMRole.CreateNew",
-                            "Value": "false"
+                            "Value": false
                         }
                     ]
                 }
@@ -148,7 +148,7 @@
                     "Name": "Use default VPC",
                     "Description": "Do you want to use the default VPC for the deployment?",
                     "Type": "Bool",
-                    "DefaultValue": "true",
+                    "DefaultValue": true,
                     "AdvancedSetting": true,
                     "Updatable": false
                 },
@@ -157,13 +157,13 @@
                     "Name": "Create New VPC",
                     "Description": "Do you want to create a new VPC?",
                     "Type": "Bool",
-                    "DefaultValue": "false",
+                    "DefaultValue": false,
                     "AdvancedSetting": true,
                     "Updatable": false,
                     "DependsOn": [
                         {
                             "Id": "Vpc.IsDefault",
-                            "Value": "false"
+                            "Value": false
                         }
                     ]
                 },
@@ -178,11 +178,11 @@
                     "DependsOn": [
                         {
                             "Id": "Vpc.IsDefault",
-                            "Value": "false"
+                            "Value": false
                         },
                         {
                             "Id": "Vpc.CreateNew",
-                            "Value": "false"
+                            "Value": false
                         }
                     ]
                 }
@@ -193,7 +193,7 @@
             "Name": "Add Docker Build Args",
             "Description": "Do you want to pass additional Docker build args?",
             "Type": "Bool",
-            "DefaultValue": "false",
+            "DefaultValue": false,
             "AdvancedSetting": true,
             "Updatable": true
         },
@@ -206,7 +206,7 @@
             "DependsOn": [
                 {
                     "Id": "AddDockerBuildArgs",
-                    "Value": "true"
+                    "Value": true
                 }
             ],
             "AdvancedSetting": true,

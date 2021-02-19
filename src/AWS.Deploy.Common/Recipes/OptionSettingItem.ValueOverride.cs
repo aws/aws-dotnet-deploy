@@ -54,14 +54,18 @@ namespace AWS.Deploy.Common.Recipes
                 return null;
             }
 
-            var mappedValue = string.Copy(DefaultValue);
-            if (ValueMapping != null && ValueMapping.ContainsKey(DefaultValue))
+            if (DefaultValue is string defaultValueString)
             {
-                mappedValue = ValueMapping[DefaultValue];
+                var mappedValue = string.Copy(defaultValueString);
+                if (ValueMapping != null && ValueMapping.ContainsKey(defaultValueString))
+                {
+                    mappedValue = ValueMapping[defaultValueString];
+                }
+                mappedValue = ApplyReplacementTokens(replacementTokens, mappedValue);
+                return mappedValue;
             }
 
-            mappedValue = ApplyReplacementTokens(replacementTokens, mappedValue);
-            return mappedValue;
+            return DefaultValue;
         }
 
         public void SetValueOverride(object valueOverride)
@@ -72,12 +76,22 @@ namespace AWS.Deploy.Common.Recipes
             }
             else if (valueOverride is string valueOverrideString)
             {
-                if (ValueMapping != null && ValueMapping.ContainsKey(valueOverrideString))
+                if (bool.TryParse(valueOverrideString, out var valueOverrideBool))
                 {
-                    valueOverrideString = ValueMapping[valueOverrideString];
+                    _valueOverride = valueOverrideBool;
                 }
-
-                _valueOverride = valueOverrideString;
+                else if (int.TryParse(valueOverrideString, out var valueOverrideInt))
+                {
+                    _valueOverride = valueOverrideInt;
+                }
+                else
+                {
+                    if (ValueMapping != null && ValueMapping.ContainsKey(valueOverrideString))
+                    {
+                        valueOverrideString = ValueMapping[valueOverrideString];
+                    }
+                    _valueOverride = valueOverrideString;
+                }
             }
             else
             {

@@ -100,5 +100,30 @@ namespace AWS.Deploy.Common
         {
             return optionSetting.GetValue(_replacementTokens, ignoreDefaultValue);
         }
+
+        /// <summary>
+        /// Checks whether all the dependencies are satisfied or not, if there exists an unsatisfied dependency then returns false.
+        /// It allows caller to decide whether we want to display an <see cref="OptionSettingItem"/> to configure or not.
+        /// </summary>
+        /// <param name="optionSetting">Option setting to check whether it can be displayed for configuration or not.</param>
+        /// <returns>Returns true, if all the dependencies are satisfied, else false.</returns>
+        public bool IsOptionSettingDisplayable(OptionSettingItem optionSetting)
+        {
+            if (!optionSetting.DependsOn.Any())
+            {
+                return true;
+            }
+
+            foreach (var dependency in optionSetting.DependsOn)
+            {
+                var dependsOnOptionSetting = GetOptionSetting(dependency.Id);
+                if (dependsOnOptionSetting != null && !GetOptionSettingValue(dependsOnOptionSetting).Equals(dependency.Value))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 }
