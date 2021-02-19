@@ -9,6 +9,6 @@ namespace AWS.Deploy.Common.Recipes
     public class PropertyDependency
     {
         public string Id { get; set; }
-        public string Value { get; set; }
+        public object Value { get; set; }
     }
 }

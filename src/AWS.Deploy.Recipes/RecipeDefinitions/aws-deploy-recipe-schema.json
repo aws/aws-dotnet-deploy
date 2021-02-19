@@ -316,7 +316,7 @@
                     ]
                 },
                 "DefaultValue": {
-                    "type": ["string", "null"],
+                    "type": ["string", "null", "boolean", "integer"],
                     "title": "The default value for the setting.",
                     "description": ""
                 },
@@ -356,7 +356,7 @@
                                 "minLength": 1
                             },
                             "Value": {
-                                "type": "string",
+                                "type": ["boolean", "string"],
                                 "title": "",
                                 "description": ""
                             }
