@@ -218,6 +218,16 @@
             "DefaultValue": "false",
             "AdvancedSetting": true,
             "Updatable": true
+        },
+        {
+            "Id": "ElasticBeanstalkPlatformArn",
+            "Name": "Beanstalk Platform",
+            "Description": "The name of the Beanstalk platform to use with the environment.",
+            "Type": "String",
+            "TypeHint": "DotnetBeanstalkPlatformArn",
+            "DefaultValue": "{LatestDotnetBeanstalkPlatformArn}",
+            "AdvancedSetting": true,
+            "Updatable": false
         }
     ]
 }

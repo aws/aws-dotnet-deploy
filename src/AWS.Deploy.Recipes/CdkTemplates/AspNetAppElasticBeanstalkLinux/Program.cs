@@ -9,7 +9,7 @@ namespace AspNetAppElasticBeanstalkLinux
 {
     sealed class Program
     {
-        public static async Task Main(string[] args)
+        public static void Main(string[] args)
         {
             var app = new App();
 
@@ -18,9 +18,6 @@ namespace AspNetAppElasticBeanstalkLinux
 
             var zipPublisher = new ZipPublisher();
             recipeConfiguration.Settings.AssetPath = zipPublisher.GetZipPath(recipeConfiguration.Settings, recipeConfiguration.ProjectPath);
-
-            var solutionStackNameProvider = new SolutionStackNameProvider();
-            recipeConfiguration.Settings.SolutionStackName = await solutionStackNameProvider.GetSolutionStackNameAsync();
 
             CDKRecipeSetup.RegisterStack<Configuration>(new AppStack(app, recipeConfiguration, new StackProps
             {

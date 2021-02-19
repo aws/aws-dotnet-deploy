@@ -14,6 +14,7 @@ namespace AWS.Deploy.Common.Recipes
         ECSTaskSchedule,
         DotnetPublishArgs,
         EC2KeyPair,
-        Vpc
+        Vpc,
+        DotnetBeanstalkPlatformArn
     };
 }

@@ -8,7 +8,7 @@ namespace AWS.Deploy.Common.Recipes
     /// <summary>
     /// Used to deserialize a JSON recipe definition into.
     /// </summary>
-    public class RecipeDefinition : IUserInputOption
+    public class RecipeDefinition
     {
         /// <summary>
         /// The unique id of the recipe. That value will be persisted in other config files so it should never be changed once the recipe definition is released.

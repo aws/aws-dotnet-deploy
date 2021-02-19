@@ -23,16 +23,23 @@ namespace AWS.Deploy.RecommendationEngine
             {
                 foreach (var recipeFile in Directory.GetFiles(recommendationPath, "*.recipe", SearchOption.TopDirectoryOnly))
                 {
-                    var content = File.ReadAllText(recipeFile);
-                    var definition = JsonConvert.DeserializeObject<RecipeDefinition>(content);
-                    definition.RecipePath = recipeFile;
+                    try
+                    {
+                        var content = File.ReadAllText(recipeFile);
+                        var definition = JsonConvert.DeserializeObject<RecipeDefinition>(content);
+                        definition.RecipePath = recipeFile;
 
-                    _availableRecommendations.Add(definition);
+                        _availableRecommendations.Add(definition);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exception($"Failed to Deserialize Recipe [{recipeFile}]: {e.Message}", e);
+                    }
                 }
             }
         }
 
-        public IList<Recommendation> ComputeRecommendations(string projectPath)
+        public IList<Recommendation> ComputeRecommendations(string projectPath, Dictionary<string, string> additionalReplacements)
         {
             var projectDefinition = new ProjectDefinition(projectPath);
             var recommendations = new List<Recommendation>();
@@ -46,7 +53,7 @@ namespace AWS.Deploy.RecommendationEngine
                 }
 
                 var priority = potentialRecipe.RecipePriority + results.PriorityAdjustment;
-                recommendations.Add(new Recommendation(potentialRecipe, projectDefinition.ProjectPath, priority));
+                recommendations.Add(new Recommendation(potentialRecipe, projectDefinition.ProjectPath, priority, additionalReplacements));
             }
 
             recommendations = recommendations.OrderByDescending(recommendation => recommendation.ComputedPriority).ToList();

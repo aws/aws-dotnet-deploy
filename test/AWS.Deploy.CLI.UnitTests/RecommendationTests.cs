@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using AWS.Deploy.CLI.TypeHintResponses;
 using AWS.Deploy.CLI.UnitTests.Utilities;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Recipes;
@@ -23,7 +24,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var engine = new RecommendationEngine.RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() });
 
-            var recommendations = engine.ComputeRecommendations(projectPath);
+            var recommendations = engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
 
             recommendations
                 .Any(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID)
@@ -41,7 +42,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var engine = new RecommendationEngine.RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() });
 
-            var recommendations = engine.ComputeRecommendations(projectPath);
+            var recommendations = engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
 
             recommendations
                 .Any(r => r.Recipe.Id == Constants.ASPNET_CORE_ASPNET_CORE_FARGATE_RECIPE_ID)
@@ -59,7 +60,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var engine = new RecommendationEngine.RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() });
 
-            var recommendations = engine.ComputeRecommendations(projectPath);
+            var recommendations = engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
 
             recommendations
                 .Any(r => r.Recipe.Id == Constants.CONSOLE_APP_FARGATE_SERVICE_RECIPE_ID)
@@ -76,7 +77,7 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
             var engine = new RecommendationEngine.RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() });
-            var recommendations = engine.ComputeRecommendations(projectPath);
+            var recommendations = engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
             var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
             var environmentTypeOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("EnvironmentType"));
 
@@ -84,11 +85,39 @@ namespace AWS.Deploy.CLI.UnitTests
         }
 
         [Fact]
+        public void ObjectMappingWithDefaultValue()
+        {
+            var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
+            var engine = new RecommendationEngine.RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() });
+            var recommendations = engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var applicationIAMRoleOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("ApplicationIAMRole"));
+
+            var iamRoleTypeHintResponse = beanstalkRecommendation.GetOptionSettingValue<IAMRoleTypeHintResponse>(applicationIAMRoleOptionSetting, false);
+
+            Assert.Null(iamRoleTypeHintResponse.RoleArn);
+            Assert.True(iamRoleTypeHintResponse.CreateNew);
+        }
+
+        [Fact]
+        public void ObjectMappingWithoutDefaultValue()
+        {
+            var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
+            var engine = new RecommendationEngine.RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() });
+            var recommendations = engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var applicationIAMRoleOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("ApplicationIAMRole"));
+
+            Assert.Null(beanstalkRecommendation.GetOptionSettingValue(applicationIAMRoleOptionSetting, true));
+        }
+
+
+        [Fact]
         public void ValueMappingSetWithAllowedValues()
         {
             var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
             var engine = new RecommendationEngine.RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() });
-            var recommendations = engine.ComputeRecommendations(projectPath);
+            var recommendations = engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
             var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
             var environmentTypeOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("EnvironmentType"));
 
@@ -101,12 +130,29 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
             var engine = new RecommendationEngine.RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() });
-            var recommendations = engine.ComputeRecommendations(projectPath);
+            var recommendations = engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
             var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
             var environmentTypeOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("EnvironmentType"));
 
             environmentTypeOptionSetting.SetValueOverride("LoadBalanced");
             Assert.Equal("LoadBalanced", beanstalkRecommendation.GetOptionSettingValue(environmentTypeOptionSetting, false));
+        }
+
+        [Fact]
+        public void ObjectMappingSetWithValue()
+        {
+            var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
+            var engine = new RecommendationEngine.RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() });
+            var recommendations = engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var applicationIAMRoleOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("ApplicationIAMRole"));
+
+            applicationIAMRoleOptionSetting.SetValueOverride(new IAMRoleTypeHintResponse {CreateNew = false, RoleArn = "role_arn"});
+
+            var iamRoleTypeHintResponse = beanstalkRecommendation.GetOptionSettingValue<IAMRoleTypeHintResponse>(applicationIAMRoleOptionSetting, false);
+
+            Assert.Equal("role_arn", iamRoleTypeHintResponse.RoleArn);
+            Assert.False(iamRoleTypeHintResponse.CreateNew);
         }
 
         [Theory]

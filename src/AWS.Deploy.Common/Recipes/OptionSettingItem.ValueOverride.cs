@@ -32,10 +32,16 @@ namespace AWS.Deploy.Common.Recipes
 
             if (Type == OptionSettingValueType.Object)
             {
-                var objectValue = ChildOptionSettings
-                    .ToDictionary(childOptionSetting => childOptionSetting.Id, childOptionSetting => childOptionSetting.GetValue(replacementTokens, ignoreDefaultValue));
-
-                return objectValue;
+                var objectValue = new Dictionary<string, object>();
+                foreach (var childOptionSetting in ChildOptionSettings)
+                {
+                    var childValue = childOptionSetting.GetValue(replacementTokens, ignoreDefaultValue);
+                    if (childValue != null)
+                    {
+                        objectValue[childOptionSetting.Id] = childValue;
+                    }
+                }
+                return objectValue.Any() ? objectValue : null;
             }
 
             if (ignoreDefaultValue)
@@ -78,7 +84,10 @@ namespace AWS.Deploy.Common.Recipes
                 var deserialized = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(valueOverride));
                 foreach (var childOptionSetting in ChildOptionSettings)
                 {
-                    childOptionSetting.SetValueOverride(deserialized[childOptionSetting.Id]);
+                    if (deserialized.TryGetValue(childOptionSetting.Id, out var childValueOverride))
+                    {
+                        childOptionSetting.SetValueOverride(childValueOverride);
+                    }
                 }
             }
         }

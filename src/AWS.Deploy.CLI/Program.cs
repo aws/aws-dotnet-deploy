@@ -153,6 +153,7 @@ namespace AWS.Deploy.CLI
                                                 toolInteractiveService,
                                                 new ConsoleOrchestratorLogger(toolInteractiveService),
                                                 new CdkProjectHandler(orchestratorInteractiveService, commandLineWrapper),
+                                                new AWSResourceQueryer(new DefaultAWSClientFactory()),
                                                 session).ExecuteAsync();
             });
             rootCommand.Add(listCommand);

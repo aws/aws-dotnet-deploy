@@ -37,9 +37,9 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
         public BeanstalkApplicationConfiguration BeanstalkApplication { get; set; }
 
         /// <summary>
-        /// Latest 64bit Amazon Linux 2 running .NET Core.
+        /// The name of an Elastic Beanstalk solution stack (platform version) to use with the environment.
         /// </summary>
-        public string SolutionStackName { get; set; }
+        public string ElasticBeanstalkPlatformArn { get; set; }
 
         /// <summary>
         /// The type of load balancer for your environment.

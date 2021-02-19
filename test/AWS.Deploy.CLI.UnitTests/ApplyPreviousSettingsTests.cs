@@ -22,7 +22,7 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
             var engine = new RecommendationEngine.RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() });
-            var recommendations = engine.ComputeRecommendations(projectPath);
+            var recommendations = engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
             var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
 
             var roleArnValue = roleArn == null ? "null" : $"\"{roleArn}\"";
@@ -54,7 +54,7 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var projectPath = SystemIOUtilities.ResolvePath("WebAppWithDockerFile");
             var engine = new RecommendationEngine.RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() });
-            var recommendations = engine.ComputeRecommendations(projectPath);
+            var recommendations = engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
             var fargateRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_ASPNET_CORE_FARGATE_RECIPE_ID);
 
             var vpcIdValue = vpcId == null ? "null" : $"\"{vpcId}\"";

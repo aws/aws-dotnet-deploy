@@ -5,6 +5,7 @@ using Amazon.CloudFormation;
 using Amazon.CloudFormation.Model;
 using AWS.Deploy.Common;
 using AWS.Deploy.Orchestrator;
+using AWS.Deploy.Orchestrator.Data;
 using AWS.Deploy.Recipes;
 
 namespace AWS.Deploy.CLI.Commands
@@ -16,16 +17,18 @@ namespace AWS.Deploy.CLI.Commands
         private readonly IToolInteractiveService _interactiveService;
         private readonly OrchestratorSession _session;
         private readonly ICdkProjectHandler _cdkProjectHandler;
+        private readonly IAWSResourceQueryer _awsResourceQueryer;
 
         public ListStacksCommand(IAWSClientFactory awsClientFactory,
             IToolInteractiveService interactiveService,
             IOrchestratorInteractiveService orchestratorInteractiveService,
-            ICdkProjectHandler cdkProjectHandler, OrchestratorSession session)
+            ICdkProjectHandler cdkProjectHandler, IAWSResourceQueryer awsResourceQueryer, OrchestratorSession session)
         {
             _awsClientFactory = awsClientFactory;
             _interactiveService = interactiveService;
             _orchestratorInteractiveService = orchestratorInteractiveService;
             _cdkProjectHandler = cdkProjectHandler;
+            _awsResourceQueryer = awsResourceQueryer;
             _session = session;
         }
 
@@ -36,6 +39,7 @@ namespace AWS.Deploy.CLI.Commands
                     _session,
                     _orchestratorInteractiveService,
                     _cdkProjectHandler,
+                    _awsResourceQueryer,
                     new[] { RecipeLocator.FindRecipeDefinitionsPath() });
 
 

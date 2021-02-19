@@ -59,10 +59,11 @@ namespace AWS.Deploy.CLI.Commands
                     _session,
                     _orchestratorInteractiveService,
                     _cdkProjectHandler,
+                    _awsResourceQueryer,
                     new []{ RecipeLocator.FindRecipeDefinitionsPath() });
 
             // Determine what recommendations are possible for the project.
-            var recommendations = orchestrator.GenerateDeploymentRecommendations();
+            var recommendations = await orchestrator.GenerateDeploymentRecommendations();
             if (recommendations.Count == 0)
             {
                 _toolInteractiveService.WriteErrorLine($"Unable to determine a method for deploying application: {_session.ProjectPath}");
@@ -358,6 +359,23 @@ namespace AWS.Deploy.CLI.Commands
                     break;
                 }
             }
+            else if (setting.TypeHint == OptionSettingTypeHint.DotnetBeanstalkPlatformArn)
+            {
+                _toolInteractiveService.WriteLine(setting.Description);
+
+                var platformArns = await _awsResourceQueryer.GetElasticBeanstalkPlatformArns(_session);
+
+                var userInputConfiguration = new UserInputConfiguration<PlatformSummary>
+                {
+                    DisplaySelector = platform => $"{platform.PlatformBranchName} v{platform.PlatformVersion}",
+                    DefaultSelector = platform => platform.PlatformArn.Equals(currentValue),
+                    CreateNew = false
+                };
+
+                var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(platformArns, "Select the Platform to use:", userInputConfiguration);
+
+                settingValue = userResponse.SelectedOption?.PlatformArn;
+            }
             else if (setting.Type == OptionSettingValueType.Bool)
             {
                 var answer = _consoleUtilities.AskYesNoQuestion(setting.Description, recommendation.GetOptionSettingValue(setting).ToString());
@@ -407,6 +425,49 @@ namespace AWS.Deploy.CLI.Commands
                     {
                         CreateNew = userResponse.CreateNew,
                         ApplicationName = userResponse.SelectedOption?.ApplicationName ?? userResponse.NewName
+                    };
+                }
+                else if (setting.TypeHint == OptionSettingTypeHint.Vpc)
+                {
+                    _toolInteractiveService.WriteLine(setting.Description);
+
+                    var currentVpcTypeHintResponse = setting.GetTypeHintData<VpcTypeHintResponse>();
+
+                    var vpcs = await _awsResourceQueryer.GetListOfVpcs(_session);
+
+                    var userInputConfig = new UserInputConfiguration<Vpc>
+                    {
+                        DisplaySelector = vpc =>
+                        {
+                            var name = vpc.Tags?.FirstOrDefault(x => x.Key == "Name")?.Value ?? string.Empty;
+                            var namePart =
+                                string.IsNullOrEmpty(name)
+                                    ? ""
+                                    : $" ({name}) ";
+
+                            var isDefaultPart =
+                                vpc.IsDefault
+                                    ? Constants.DEFAULT_LABEL
+                                    : "";
+
+                            return $"{vpc.VpcId}{namePart}{isDefaultPart}";
+                        },
+                        DefaultSelector = vpc =>
+                            !string.IsNullOrEmpty(currentVpcTypeHintResponse?.VpcId)
+                                ? vpc.VpcId == currentVpcTypeHintResponse.VpcId
+                                : vpc.IsDefault
+                    };
+
+                    var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(
+                        vpcs,
+                        "Select a VPC",
+                        userInputConfig);
+
+                    settingValue = new VpcTypeHintResponse
+                    {
+                        IsDefault = userResponse.SelectedOption?.IsDefault == true,
+                        CreateNew = userResponse.CreateNew,
+                        VpcId = userResponse.SelectedOption?.VpcId ?? ""
                     };
                 }
                 else
