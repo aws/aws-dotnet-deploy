@@ -8,7 +8,7 @@ using System.Text;
 namespace AWS.Deploy.Recipes.CDK.Common
 {
     /// <summary>
-    /// A representation of the settings transfered from the AWS Deploy Tool to the CDK project.
+    /// A representation of the settings transferred from the AWS Deploy Tool to the CDK project.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class RecipeConfiguration<T>
@@ -29,7 +29,7 @@ namespace AWS.Deploy.Recipes.CDK.Common
         public string ProjectSolutionPath { get; set; }
 
         /// <summary>
-        /// The docker file to build the container with.
+        /// The directory containing the docker file to build the container with.
         /// </summary>
         public string DockerfileDirectory { get; set; }
 

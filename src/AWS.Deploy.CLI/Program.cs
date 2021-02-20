@@ -149,8 +149,7 @@ namespace AWS.Deploy.CLI
                         awsCredentials,
                         awsRegion);
 
-                await new ListStacksCommand(new DefaultAWSClientFactory(),
-                                                toolInteractiveService,
+                await new ListStacksCommand(toolInteractiveService,
                                                 new ConsoleOrchestratorLogger(toolInteractiveService),
                                                 new CdkProjectHandler(orchestratorInteractiveService, commandLineWrapper),
                                                 new AWSResourceQueryer(new DefaultAWSClientFactory()),

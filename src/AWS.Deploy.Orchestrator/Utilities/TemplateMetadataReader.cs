@@ -18,38 +18,27 @@ namespace AWS.Deploy.Orchestrator.Utilities
     /// </summary>
     public class TemplateMetadataReader
     {
-        private readonly string _templateBody;
-
-        /// <summary>
-        /// Constructs an instance of the TemplateMetadataReader with the template to parse.
-        /// </summary>
-        /// <param name="templateBody"></param>
-        public TemplateMetadataReader(string templateBody)
-        {
-            _templateBody = templateBody;
-        }
-
-
         /// <summary>
         /// Read the AWS Deploy Tool metadata from the CloudFormation template.
         /// </summary>
         /// <returns></returns>
-        public CloudApplicationMetadata ReadSettings()
+        public static CloudApplicationMetadata ReadSettings(string templateBody)
         {
             try
             {
-                var metadataSection = ExtractMetadataSection();
+                var metadataSection = ExtractMetadataSection(templateBody);
 
                 var yamlMetadata = new YamlStream();
-                yamlMetadata.Load(new StringReader(metadataSection));
+                using var reader = new StringReader(metadataSection);
+                yamlMetadata.Load(reader);
                 var root = (YamlMappingNode)yamlMetadata.Documents[0].RootNode;
                 var metadataNode = (YamlMappingNode)root.Children[new YamlScalarNode("Metadata")];
 
                 var cloudApplicationMetadata = new CloudApplicationMetadata();
-                cloudApplicationMetadata.RecipeId = ((YamlScalarNode)metadataNode.Children[new YamlScalarNode(CloudFormationIdentifierContants.StackMetadataRecipeId)]).Value;
-                cloudApplicationMetadata.RecipeVersion = ((YamlScalarNode)metadataNode.Children[new YamlScalarNode(CloudFormationIdentifierContants.StackMetadataRecipeVersion)]).Value;
+                cloudApplicationMetadata.RecipeId = ((YamlScalarNode)metadataNode.Children[new YamlScalarNode(CloudFormationIdentifierConstants.STACK_METADATA_RECIPE_ID)]).Value;
+                cloudApplicationMetadata.RecipeVersion = ((YamlScalarNode)metadataNode.Children[new YamlScalarNode(CloudFormationIdentifierConstants.STACK_METADATA_RECIPE_VERSION)]).Value;
 
-                var jsonString = ((YamlScalarNode)metadataNode.Children[new YamlScalarNode(CloudFormationIdentifierContants.StackMetadataSettings)]).Value;
+                var jsonString = ((YamlScalarNode)metadataNode.Children[new YamlScalarNode(CloudFormationIdentifierConstants.STACK_METADATA_SETTINGS)]).Value;
                 cloudApplicationMetadata.Settings = JsonConvert.DeserializeObject<IDictionary<string, object>>(jsonString);
 
                 return cloudApplicationMetadata;
@@ -65,11 +54,11 @@ namespace AWS.Deploy.Orchestrator.Utilities
         /// using string parsing to extract just the Metadata section from the template.
         /// </summary>
         /// <returns></returns>
-        private string ExtractMetadataSection()
+        private static string ExtractMetadataSection(string templateBody)
         {
             var builder = new StringBuilder();
             bool inMetadata = false;
-            using var reader = new StringReader(_templateBody);
+            using var reader = new StringReader(templateBody);
             string line;
             while((line = reader.ReadLine()) != null)
             {
@@ -93,7 +82,6 @@ namespace AWS.Deploy.Orchestrator.Utilities
                     builder.AppendLine(line);
                 }
             }
-
 
             return builder.ToString();
         }

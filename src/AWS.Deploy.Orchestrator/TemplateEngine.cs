@@ -57,7 +57,7 @@ namespace AWS.Deploy.Orchestrator
 
                 // CDK Template projects can parameterize the version number of the AWS.Deploy.Recipes.CDK.Common package. This avoid
                 // projects having to be modified every time the package version is bumped.
-                { "AWSDeployRecipesCDKCommonVersion", typeof(CloudFormationIdentifierContants).Assembly.GetName().Version.ToString() }
+                { "AWSDeployRecipesCDKCommonVersion", typeof(CloudFormationIdentifierConstants).Assembly.GetName().Version.ToString() }
             };
 
             foreach(var option in recommendation.Recipe.OptionSettings)

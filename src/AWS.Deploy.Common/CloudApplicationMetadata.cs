@@ -25,6 +25,6 @@ namespace AWS.Deploy.Common
         /// <summary>
         /// All of the settings configured for the deployment of the application with the recipe.
         /// </summary>
-        public IDictionary<string, object> Settings { get; set; }
+        public IDictionary<string, object> Settings { get; set; } = new Dictionary<string, object>();
     }
 }

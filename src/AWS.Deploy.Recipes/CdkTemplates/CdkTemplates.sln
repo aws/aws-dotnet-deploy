@@ -1,4 +1,3 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30413.136
@@ -10,6 +9,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleAppEcsFargateService", "ConsoleAppEcsFargateService\ConsoleAppEcsFargateService.csproj", "{B118AA46-CBA1-4201-9833-FA0E97FD6109}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleAppEcsFargateTask", "ConsoleAppEcsFargateTask\ConsoleAppEcsFargateTask.csproj", "{ADD3DBF0-92C6-493D-ACB8-867EF064997C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AWS.Deploy.Recipes.CDK.Common", "..\..\AWS.Deploy.Recipes.CDK.Common\AWS.Deploy.Recipes.CDK.Common.csproj", "{A4B77E71-3F69-492B-82AB-71632A20A424}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +34,10 @@ Global
 		{ADD3DBF0-92C6-493D-ACB8-867EF064997C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ADD3DBF0-92C6-493D-ACB8-867EF064997C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ADD3DBF0-92C6-493D-ACB8-867EF064997C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4B77E71-3F69-492B-82AB-71632A20A424}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4B77E71-3F69-492B-82AB-71632A20A424}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4B77E71-3F69-492B-82AB-71632A20A424}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4B77E71-3F69-492B-82AB-71632A20A424}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

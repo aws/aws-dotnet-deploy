@@ -21,8 +21,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public void ReadYamlMetadata()
         {
             var templateBody = File.ReadAllText("./TestFiles/ReadYamlTemplateMetadata.yml");
-            var reader = new TemplateMetadataReader(templateBody);
-            var metadata = reader.ReadSettings();
+            var metadata = TemplateMetadataReader.ReadSettings(templateBody);
 
             Assert.Equal("aws-elasticbeanstalk-role", metadata.Settings["ApplicationIAMRole"].ToString());
         }

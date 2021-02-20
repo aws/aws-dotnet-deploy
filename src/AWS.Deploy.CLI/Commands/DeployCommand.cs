@@ -97,7 +97,7 @@ namespace AWS.Deploy.CLI.Commands
             // If using a previous deployment preset settings for deployment based on last deployment.
             if (existingCloudApplication != null)
             {
-                var existingCloudApplicationMetadata = await orchestrator.LoadCloudApplicationMetadataAsync(existingCloudApplication.Name);
+                var existingCloudApplicationMetadata = await orchestrator.LoadCloudApplicationMetadata(existingCloudApplication.Name);
 
                 selectedRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, existingCloudApplication.RecipeId, StringComparison.InvariantCultureIgnoreCase));
                 selectedRecommendation.ApplyPreviousSettings(existingCloudApplicationMetadata.Settings);

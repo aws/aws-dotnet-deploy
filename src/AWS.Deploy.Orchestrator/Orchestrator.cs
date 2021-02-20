@@ -87,7 +87,6 @@ namespace AWS.Deploy.Orchestrator
         /// Get the list of existing deployed applications by describe the CloudFormation stacks and filtering the stacks to the
         /// ones that have the AWS Deploy Tool tag and description.
         /// </summary>
-        /// <returns></returns>
         public Task<IList<CloudApplication>> GetExistingDeployedApplications()
         {
             return GetExistingDeployedApplications(null);
@@ -109,13 +108,13 @@ namespace AWS.Deploy.Orchestrator
             await foreach (var stack in client.Paginators.DescribeStacks(new DescribeStacksRequest()).Stacks)
             {
                 // Check to see if stack has AWS Deploy Tool tag and the stack is not deleted or in the process of being deleted.
-                var deployTag = stack.Tags.FirstOrDefault(tags => string.Equals(tags.Key, CloudFormationIdentifierContants.StackTag));
+                var deployTag = stack.Tags.FirstOrDefault(tags => string.Equals(tags.Key, CloudFormationIdentifierConstants.STACK_TAG));
 
                 // Skip stacks that don't have AWS Deploy Tool tag
                 if (deployTag == null ||
 
                     // Skip stacks does not have AWS Deploy Tool description prefix. (This is filter out stacks that have the tag propagated to it like the Beanstalk stack)
-                    (stack.Description == null || !stack.Description.StartsWith(CloudFormationIdentifierContants.StackDescriptionPrefix)) ||
+                    (stack.Description == null || !stack.Description.StartsWith(CloudFormationIdentifierConstants.STACK_DESCRIPTION_PREFIX)) ||
 
                     // Skip tags that are deleted or in the process of being deleted
                     stack.StackStatus.ToString().StartsWith("DELETE"))
@@ -146,7 +145,7 @@ namespace AWS.Deploy.Orchestrator
         /// </summary>
         /// <param name="cloudApplication"></param>
         /// <returns></returns>
-        public async Task<CloudApplicationMetadata> LoadCloudApplicationMetadataAsync(string cloudApplication)
+        public async Task<CloudApplicationMetadata> LoadCloudApplicationMetadata(string cloudApplication)
         {
             using var client = _awsClientFactory.GetAWSClient<Amazon.CloudFormation.IAmazonCloudFormation>(_session.AWSCredentials, _session.AWSRegion);
 
@@ -155,8 +154,7 @@ namespace AWS.Deploy.Orchestrator
                 StackName = cloudApplication
             });
 
-            var reader = new TemplateMetadataReader(response.TemplateBody);
-            return reader.ReadSettings();
+            return TemplateMetadataReader.ReadSettings(response.TemplateBody);
         }
     }
 }

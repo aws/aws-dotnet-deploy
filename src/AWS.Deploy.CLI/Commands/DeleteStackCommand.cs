@@ -92,7 +92,7 @@ namespace AWS.Deploy.CLI.Commands
                 throw new FailedToDeleteException($"Stack with name {stackName} does not exist.");
             }
 
-            return stack.Tags.Any(tag => tag.Key.Equals(CloudFormationIdentifierContants.StackTag));
+            return stack.Tags.Any(tag => tag.Key.Equals(CloudFormationIdentifierConstants.STACK_TAG));
         }
 
         private async Task WaitForStackDelete(string stackName)
