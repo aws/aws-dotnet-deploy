@@ -1,4 +1,4 @@
-﻿// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
@@ -68,8 +68,8 @@ namespace AWS.Deploy.Common.Recipes
         public IList<string> AllowedValues { get; set; } = new List<string>();
 
         /// <summary>
-        /// The value mapping for allowed values. The key of the dictionary is the display value shown to users and
-        /// the value is what is sent to services.
+        /// The value mapping for allowed values. The key of the dictionary is what is sent to services
+        /// and the value is the display value shown to users.
         /// </summary>
         public IDictionary<string, string> ValueMapping { get; set; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 

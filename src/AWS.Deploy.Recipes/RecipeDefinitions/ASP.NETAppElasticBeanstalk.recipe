@@ -107,14 +107,14 @@
             "Name": "Environment Type",
             "Description": "The type of environment to create for example a single instance for development or load balanced for production",
             "Type": "String",
-            "DefaultValue": "Single Instance",
+            "DefaultValue": "SingleInstance",
             "AllowedValues": [
-                "Single Instance",
-                "Load Balanced"
+                "SingleInstance",
+                "LoadBalanced"
             ],
             "ValueMapping": {
-                "Single Instance": "SingleInstance",
-                "Load Balanced": "LoadBalanced"
+                "SingleInstance": "Single Instance",
+                "LoadBalanced": "Load Balanced"
             },
             "AdvancedSetting": false,
             "Updatable": true
@@ -124,16 +124,16 @@
             "Name": "Load Balancer Type",
             "Description": "The type of load balancer for your environment.",
             "Type": "String",
-            "DefaultValue": "Application",
+            "DefaultValue": "application",
             "AllowedValues": [
-                "Application",
-                "Classic",
-                "Network"
+                "application",
+                "classic",
+                "network"
             ],
             "ValueMapping": {
-                "Application": "application",
-                "Classic": "classic",
-                "Network": "network"
+                "application": "Application",
+                "classic": "Classic",
+                "network": "Network"
             },
             "DependsOn": [
                 {

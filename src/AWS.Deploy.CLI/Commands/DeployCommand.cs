@@ -248,7 +248,15 @@ namespace AWS.Deploy.CLI.Commands
             if (setting.AllowedValues?.Count > 0)
             {
                 _toolInteractiveService.WriteLine(setting.Description);
-                settingValue = _consoleUtilities.AskUserToChoose(setting.AllowedValues, null, currentValue?.ToString());
+                var userInputConfig = new UserInputConfiguration<string>
+                {
+                    DisplaySelector = x => setting.ValueMapping[x],
+                    DefaultSelector = x => x.Equals(currentValue),
+                    CreateNew = false
+                };
+
+                var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(setting.AllowedValues, string.Empty, userInputConfig);
+                settingValue = userResponse.SelectedOption;
 
                 // If they didn't change the value then don't store so we can rely on using the default in the recipe.
                 if (Equals(settingValue, currentValue))

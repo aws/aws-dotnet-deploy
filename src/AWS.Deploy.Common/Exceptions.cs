@@ -51,6 +51,13 @@ namespace AWS.Deploy.Common
     public class FailedToGenerateAnyRecommendations : Exception {}
 
     /// <summary>
+    /// Throw if a value is set that is not part of the allowed values
+    /// of an option setting item
+    /// </summary>
+    [AWSDeploymentExpectedException]
+    public class InvalidOverrideValueException : Exception { }
+
+    /// <summary>
     /// Throw if there is a parse error reading the existing Cloud Application's metadata
     /// </summary>
     [AWSDeploymentExpectedException]
