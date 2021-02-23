@@ -30,7 +30,6 @@
 	    <ProjectReference Include="..\..\src\AWS.Deploy.CLI\AWS.Deploy.CLI.csproj" />
 	    <ProjectReference Include="..\..\src\AWS.Deploy.DockerEngine\AWS.Deploy.DockerEngine.csproj" />
 	    <ProjectReference Include="..\..\src\AWS.Deploy.Recipes\AWS.Deploy.Recipes.csproj" />
-	    <ProjectReference Include="..\..\src\AWS.Deploy.RecommendationEngine\AWS.Deploy.RecommendationEngine.csproj" />
     </ItemGroup>
 
 </Project>

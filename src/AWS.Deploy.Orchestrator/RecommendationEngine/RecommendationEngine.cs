@@ -5,18 +5,22 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
 using Newtonsoft.Json;
 
-namespace AWS.Deploy.RecommendationEngine
+namespace AWS.Deploy.Orchestrator.RecommendationEngine
 {
     public class RecommendationEngine
     {
         private readonly IList<RecipeDefinition> _availableRecommendations = new List<RecipeDefinition>();
+        private readonly OrchestratorSession _orchestratorSession;
 
-        public RecommendationEngine(IEnumerable<string> recipeDefinitionPaths)
+        public RecommendationEngine(IEnumerable<string> recipeDefinitionPaths, OrchestratorSession orchestratorSession)
         {
+            _orchestratorSession = orchestratorSession;
+
             recipeDefinitionPaths ??= new List<string>();
 
             foreach (var recommendationPath in recipeDefinitionPaths)
@@ -39,14 +43,14 @@ namespace AWS.Deploy.RecommendationEngine
             }
         }
 
-        public IList<Recommendation> ComputeRecommendations(string projectPath, Dictionary<string, string> additionalReplacements)
+        public async Task<IList<Recommendation>> ComputeRecommendations(string projectPath, Dictionary<string, string> additionalReplacements)
         {
             var projectDefinition = new ProjectDefinition(projectPath);
             var recommendations = new List<Recommendation>();
 
             foreach (var potentialRecipe in _availableRecommendations)
             {
-                var results = EvaluateRules(projectDefinition, potentialRecipe.RecommendationRules);
+                var results = await EvaluateRules(projectDefinition, potentialRecipe.RecommendationRules);
                 if(!results.Include)
                 {
                     continue;
@@ -60,7 +64,7 @@ namespace AWS.Deploy.RecommendationEngine
             return recommendations;
         }
 
-        public RulesResult EvaluateRules(ProjectDefinition projectDefinition, IList<RecommendationRuleItem> rules)
+        public async Task<RulesResult> EvaluateRules(ProjectDefinition projectDefinition, IList<RecommendationRuleItem> rules)
         {
             // If there are no rules the recipe must be invalid so don't include it.
             if (false == rules?.Any())
@@ -68,6 +72,7 @@ namespace AWS.Deploy.RecommendationEngine
                 return new RulesResult { Include = false };
             }
 
+            var availableTests = RecommendationTestFactory.LoadAvailableTests();
             var results = new RulesResult {Include = true };
 
             foreach (var rule in rules)
@@ -75,28 +80,18 @@ namespace AWS.Deploy.RecommendationEngine
                 var allTestPass = true;
                 foreach (var test in rule.Tests)
                 {
-                    switch (test.Type)
+                    if(!availableTests.TryGetValue(test.Type, out var testInstance))
                     {
-                        case "MSProjectSdkAttribute":
-                            allTestPass &= string.Equals(projectDefinition.SdkType, test.Condition.Value, StringComparison.InvariantCultureIgnoreCase);
-                            break;
-
-                        case "MSProperty":
-                            var propertyValue = projectDefinition.GetMSPropertyValue(test.Condition.PropertyName);
-                            allTestPass &= (propertyValue != null && test.Condition.AllowedValues.Contains(propertyValue));
-                            break;
-
-                        case "MSPropertyExists":
-                            allTestPass &= !string.IsNullOrEmpty(projectDefinition.GetMSPropertyValue(test.Condition.PropertyName));
-                            break;
-
-                        case "FileExists":
-                            var directory = Path.GetDirectoryName(projectDefinition.ProjectPath);
-                            allTestPass &= (Directory.GetFiles(directory, test.Condition.FileName).Length == 1);
-                            break;
-                        default:
-                            throw new InvalidRecipeDefinitionException($"Invalid test type for rule: {test.Type}");
+                        throw new InvalidRecipeDefinitionException($"Invalid test type [{test.Type}] found in rule.");
                     }
+
+                    var input = new RecommendationTestInput
+                    {
+                        Test = test,
+                        ProjectDefinition = projectDefinition,
+                        Session = _orchestratorSession
+                    };
+                    allTestPass &= await testInstance.Execute(input);
 
                     if (!allTestPass)
                         break;
