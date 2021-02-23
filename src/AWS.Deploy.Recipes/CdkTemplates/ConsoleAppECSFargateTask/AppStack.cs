@@ -49,28 +49,24 @@ namespace ConsoleAppEcsFargateTask
                 ClusterName = settings.ClusterName
             });
 
-            IRole executionRole;
+            IRole taskRole;
             if (settings.ApplicationIAMRole.CreateNew)
             {
-                executionRole = new Role(this, "ExecutionRole", new RoleProps
+                taskRole = new Role(this, "TaskRole", new RoleProps
                 {
-                    AssumedBy = new ServicePrincipal("ecs-tasks.amazonaws.com"),
-                    ManagedPolicies = new[]
-                    {
-                        ManagedPolicy.FromAwsManagedPolicyName("service-role/AmazonECSTaskExecutionRolePolicy"),
-                    }
+                    AssumedBy = new ServicePrincipal("ecs-tasks.amazonaws.com")
                 });
             }
             else
             {
-                executionRole = Role.FromRoleArn(this, "ExecutionRole", settings.ApplicationIAMRole.RoleArn, new FromRoleArnOptions {
+                taskRole = Role.FromRoleArn(this, "TaskRole", settings.ApplicationIAMRole.RoleArn, new FromRoleArnOptions {
                     Mutable = false
                 });
             }
 
             var taskDefinition = new FargateTaskDefinition(this, "TaskDefinition", new FargateTaskDefinitionProps
             {
-                ExecutionRole = executionRole,
+                TaskRole = taskRole,
             });
 
             var logging = new AwsLogDriver(new AwsLogDriverProps
@@ -103,6 +99,15 @@ namespace ConsoleAppEcsFargateTask
                 Logging = logging
             });
 
+            SubnetSelection subnetSelection = null;
+            if (settings.Vpc.IsDefault)
+            {
+                subnetSelection = new SubnetSelection
+                {
+                    SubnetType = SubnetType.PUBLIC
+                };
+            }
+
             new ScheduledFargateTask(this, "FargateService", new ScheduledFargateTaskProps
             {
                 Cluster = cluster,
@@ -111,7 +116,8 @@ namespace ConsoleAppEcsFargateTask
                 ScheduledFargateTaskDefinitionOptions = new ScheduledFargateTaskDefinitionOptions
                 {
                     TaskDefinition = taskDefinition
-                }
+                },
+                SubnetSelection = subnetSelection
             });
         }
 

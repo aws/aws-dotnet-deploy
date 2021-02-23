@@ -59,7 +59,6 @@ namespace AspNetAppElasticBeanstalkLinux
                     ManagedPolicies = new[]
                     {
                         ManagedPolicy.FromAwsManagedPolicyName("AWSElasticBeanstalkWebTier"),
-                        ManagedPolicy.FromAwsManagedPolicyName("AWSElasticBeanstalkMulticontainerDocker"),
                         ManagedPolicy.FromAwsManagedPolicyName("AWSElasticBeanstalkWorkerTier")
                     }
                 });
