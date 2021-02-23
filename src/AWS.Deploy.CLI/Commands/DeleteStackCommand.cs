@@ -10,6 +10,7 @@ using AWS.Deploy.CLI.CloudFormation;
 using AWS.Deploy.Common;
 using AWS.Deploy.DockerEngine;
 using AWS.Deploy.Orchestrator;
+using AWS.Deploy.Recipes.CDK.Common;
 
 namespace AWS.Deploy.CLI.Commands
 {
@@ -91,7 +92,7 @@ namespace AWS.Deploy.CLI.Commands
                 throw new FailedToDeleteException($"Stack with name {stackName} does not exist.");
             }
 
-            return stack.Tags.Any(tag => tag.Key.Equals(CloudApplication.StackTagKey));
+            return stack.Tags.Any(tag => tag.Key.Equals(CloudFormationIdentifierConstants.STACK_TAG));
         }
 
         private async Task WaitForStackDelete(string stackName)

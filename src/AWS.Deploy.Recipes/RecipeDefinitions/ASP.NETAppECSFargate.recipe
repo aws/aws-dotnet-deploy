@@ -1,6 +1,7 @@
 {
     "$schema": "./aws-deploy-recipe-schema.json",
     "Id": "AspNetAppEcsFargate",
+    "Version": "0.1.0",
     "Name": "ASP.NET Core App to ECS Fargate",
     "DeploymentType": "CdkProject",
     "DeploymentBundle": "Container",
@@ -14,7 +15,7 @@
         {
             "Tests": [
                 {
-                    "Type" : "MSProjectSdkAttribute",
+                    "Type": "MSProjectSdkAttribute",
                     "Condition": {
                         "Value": "Microsoft.NET.Sdk.Web"
                     }
@@ -32,7 +33,7 @@
         {
             "Tests": [
                 {
-                    "Type":"FileExists",
+                    "Type": "FileExists",
                     "Condition": {
                         "FileName": "Dockerfile"
                     }

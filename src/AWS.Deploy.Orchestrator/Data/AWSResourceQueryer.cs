@@ -140,7 +140,7 @@ namespace AWS.Deploy.Orchestrator.Data
             var platformVersions = new List<PlatformSummary>();
             foreach (var version in response.PlatformSummaryList)
             {
-                if (string.IsNullOrEmpty(version.PlatformCategory))
+                if (string.IsNullOrEmpty(version.PlatformCategory) || string.IsNullOrEmpty(version.PlatformBranchLifecycleState))
                     continue;
 
                 if (!version.PlatformBranchLifecycleState.Equals("Supported"))

@@ -16,6 +16,11 @@ namespace AWS.Deploy.Common.Recipes
         public string Id { get; set; }
 
         /// <summary>
+        /// The version of the recipe
+        /// </summary>
+        public string Version { get; set; }
+
+        /// <summary>
         /// The display friendly name of the recipe definition
         /// </summary>
         public string Name { get; set; }

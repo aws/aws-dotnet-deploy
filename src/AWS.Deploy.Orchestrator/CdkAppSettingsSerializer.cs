@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using AWS.Deploy.Common;
 using Newtonsoft.Json;
+using AWS.Deploy.Recipes.CDK.Common;
 
 namespace AWS.Deploy.Orchestrator
 {
@@ -14,26 +15,30 @@ namespace AWS.Deploy.Orchestrator
         public string Build(CloudApplication cloudApplication, Recommendation recommendation)
         {
             // General Settings
-            var settings = new Dictionary<string, object>
+            var appSettingsContainer = new RecipeConfiguration<Dictionary<string, object>>()
             {
-                { nameof(recommendation.ProjectPath), recommendation.ProjectPath },
-                { "StackName", cloudApplication.StackName },
-                { "DockerfileDirectory",  new FileInfo(recommendation.ProjectPath).Directory.FullName }
+                StackName = cloudApplication.StackName,
+                ProjectPath = new FileInfo(recommendation.ProjectPath).Directory.FullName,
+                DockerfileDirectory = new FileInfo(recommendation.ProjectPath).Directory.FullName,
+                Settings = new Dictionary<string, object>()
             };
+
+            appSettingsContainer.RecipeId = recommendation.Recipe.Id;
+            appSettingsContainer.RecipeVersion = recommendation.Recipe.Version;
 
             string solutionFilePath = GetProjectSolutionFile(recommendation.ProjectPath);
             if (!string.IsNullOrEmpty(solutionFilePath))
             {
-                settings["ProjectSolutionPath"] = solutionFilePath;
+                appSettingsContainer.ProjectSolutionPath = solutionFilePath;
             }
 
             // Option Settings
             foreach (var optionSetting in recommendation.Recipe.OptionSettings)
             {
-                settings[optionSetting.Id] = recommendation.GetOptionSettingValue(optionSetting);
+                appSettingsContainer.Settings[optionSetting.Id] = recommendation.GetOptionSettingValue(optionSetting);
             }
 
-            return JsonConvert.SerializeObject(settings, Formatting.Indented);
+            return JsonConvert.SerializeObject(appSettingsContainer, Formatting.Indented);
         }
 
         private string GetProjectSolutionFile(string projectPath)

@@ -4,6 +4,7 @@ using Amazon.CDK.AWS.EC2;
 using Amazon.CDK.AWS.ECS;
 using Amazon.CDK.AWS.ECS.Patterns;
 using Amazon.CDK.AWS.IAM;
+using AWS.Deploy.Recipes.CDK.Common;
 using System.IO;
 using System.Collections.Generic;
 using ConsoleAppEcsFargateTask.Configurations;
@@ -14,25 +15,20 @@ namespace ConsoleAppEcsFargateTask
 {
     public class AppStack : Stack
     {
-        /// <summary>
-        /// Tag key of the CloudFormation stack
-        /// used to uniquely identify a stack that is deployed by aws-dotnet-deploy
-        /// </summary>
-        private const string STACK_TAG_KEY = "StackTagKey-Placeholder";
-
-        internal AppStack(Construct scope, string id, Configuration configuration, IStackProps props = null) : base(scope, id, props)
+        internal AppStack(Construct scope, RecipeConfiguration<Configuration> recipeConfiguration, IStackProps props = null)
+            : base(scope, recipeConfiguration.StackName, props)
         {
-            Tags.SetTag(STACK_TAG_KEY, "true");
+            var settings = recipeConfiguration.Settings;
 
             IVpc vpc;
-            if (configuration.Vpc.IsDefault)
+            if (settings.Vpc.IsDefault)
             {
                 vpc = Vpc.FromLookup(this, "Vpc", new VpcLookupOptions
                 {
                     IsDefault = true
                 });
             }
-            else if (configuration.Vpc.CreateNew)
+            else if (settings.Vpc.CreateNew)
             {
                 vpc = new Vpc(this, "Vpc", new VpcProps
                 {
@@ -43,18 +39,18 @@ namespace ConsoleAppEcsFargateTask
             {
                 vpc = Vpc.FromLookup(this, "Vpc", new VpcLookupOptions
                 {
-                    VpcId = configuration.Vpc.VpcId
+                    VpcId = settings.Vpc.VpcId
                 });
             }
 
             var cluster = new Cluster(this, "Cluster", new ClusterProps
             {
                 Vpc = vpc,
-                ClusterName = configuration.ClusterName
+                ClusterName = settings.ClusterName
             });
 
             IRole executionRole;
-            if (configuration.ApplicationIAMRole.CreateNew)
+            if (settings.ApplicationIAMRole.CreateNew)
             {
                 executionRole = new Role(this, "ExecutionRole", new RoleProps
                 {
@@ -67,7 +63,7 @@ namespace ConsoleAppEcsFargateTask
             }
             else
             {
-                executionRole = Role.FromRoleArn(this, "ExecutionRole", configuration.ApplicationIAMRole.RoleArn, new FromRoleArnOptions {
+                executionRole = Role.FromRoleArn(this, "ExecutionRole", settings.ApplicationIAMRole.RoleArn, new FromRoleArnOptions {
                     Mutable = false
                 });
             }
@@ -79,27 +75,27 @@ namespace ConsoleAppEcsFargateTask
 
             var logging = new AwsLogDriver(new AwsLogDriverProps
             {
-                StreamPrefix = configuration.StackName
+                StreamPrefix = recipeConfiguration.StackName
             });
 
             var dockerExecutionDirectory = @"DockerExecutionDirectory-Placeholder";
             if (string.IsNullOrEmpty(dockerExecutionDirectory))
             {
-                if (string.IsNullOrEmpty(configuration.ProjectSolutionPath))
+                if (string.IsNullOrEmpty(recipeConfiguration.ProjectSolutionPath))
                 {
-                    dockerExecutionDirectory = new FileInfo(configuration.DockerfileDirectory).FullName;
+                    dockerExecutionDirectory = new FileInfo(recipeConfiguration.DockerfileDirectory).FullName;
                 }
                 else
                 {
-                    dockerExecutionDirectory = new FileInfo(configuration.ProjectSolutionPath).Directory.FullName;
+                    dockerExecutionDirectory = new FileInfo(recipeConfiguration.ProjectSolutionPath).Directory.FullName;
                 }
             }
-            var relativePath = Path.GetRelativePath(dockerExecutionDirectory, configuration.DockerfileDirectory);
+            var relativePath = Path.GetRelativePath(dockerExecutionDirectory, recipeConfiguration.DockerfileDirectory);
             var container = taskDefinition.AddContainer("Container", new ContainerDefinitionOptions
             {
                 Image = ContainerImage.FromAsset(dockerExecutionDirectory, new AssetImageProps
                 {
-                    File = Path.Combine(relativePath, configuration.DockerfileName),
+                    File = Path.Combine(relativePath, settings.DockerfileName),
 #if (AddDockerBuildArgs)
                     BuildArgs = GetDockerBuildArgs("DockerBuildArgs-Placeholder")
 #endif
@@ -110,7 +106,7 @@ namespace ConsoleAppEcsFargateTask
             new ScheduledFargateTask(this, "FargateService", new ScheduledFargateTaskProps
             {
                 Cluster = cluster,
-                Schedule = Schedule.Expression(configuration.Schedule),
+                Schedule = Schedule.Expression(settings.Schedule),
                 Vpc = vpc,
                 ScheduledFargateTaskDefinitionOptions = new ScheduledFargateTaskDefinitionOptions
                 {

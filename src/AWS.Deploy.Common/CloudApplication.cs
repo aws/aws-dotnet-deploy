@@ -23,9 +23,14 @@ namespace AWS.Deploy.Common
         public string StackName => Name;
 
         /// <summary>
-        /// Tag key of the CloudFormation stack
-        /// used to uniquely identify a stack that is deployed by aws-dotnet-deploy
+        /// The id of the AWS Deploy recipe used to create the cloud application.
         /// </summary>
-        public const string StackTagKey = "aws-dotnet-deploy";
+        public string RecipeId { get; set; }
+
+        /// <summary>
+        /// Display the name of the Cloud Application
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString() => Name;
     }
 }

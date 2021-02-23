@@ -40,10 +40,10 @@
             "datatype": "string",
             "defaultValue": ""
         },
-        "StackTagKey": {
+        "AWSDeployRecipesCDKCommonVersion": {
             "type": "parameter",
-            "description": "Specifies the CloudFormation tag key",
-            "replaces": "StackTagKey-Placeholder",
+            "description": "The version number of AWS.Deploy.Recipes.CDK.Common to use",
+            "replaces": "AWSDeployRecipesCDKCommonVersion",
             "datatype": "string"
         }
     }

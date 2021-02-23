@@ -14,27 +14,6 @@ namespace AWS.Deploy.Orchestrator
         public string Profile { get; set; }
         public string Region { get; set; }
 
-        public IList<DeploymentSettings> Deployments { get; set; } = new List<DeploymentSettings>();
-
-        public string[] GetDeploymentNames()
-        {
-            var names = new List<string>();
-
-            foreach (var deployment in Deployments)
-            {
-                names.Add(deployment.StackName);
-            }
-
-            return names.ToArray();
-        }
-
-        public class DeploymentSettings
-        {
-            public string StackName { get; set; }
-            public string RecipeId { get; set; }
-            public IDictionary<string, object> RecipeOverrideSettings { get; set; } = new Dictionary<string, object>();
-        }
-
         public static PreviousDeploymentSettings ReadSettings(string projectPath, string configFile)
         {
             var fullPath = GetFullConfigFilePath(projectPath, configFile);

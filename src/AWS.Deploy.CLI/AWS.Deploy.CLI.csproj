@@ -17,15 +17,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.Core" Version="3.5.2.4" />
     <PackageReference Include="AWSSDK.IdentityManagement" Version="3.5.0.65" />
-    <PackageReference Include="AWSSDK.CloudFormation" Version="3.5.2.23" />
+    <PackageReference Include="AWSSDK.CloudFormation" Version="3.5.2.27" />
     <PackageReference Include="AWSSDK.SecurityToken" Version="3.5.1.45" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20427.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\AWS.Deploy.Orchestrator\AWS.Deploy.Orchestrator.csproj" />
+    <ProjectReference Include="..\AWS.Deploy.Recipes.CDK.Common\AWS.Deploy.Recipes.CDK.Common.csproj" />
   </ItemGroup>
 
 </Project>
