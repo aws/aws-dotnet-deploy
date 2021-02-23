@@ -45,6 +45,15 @@ namespace AWS.Deploy.Common
             }
         }
 
+        /// <summary>
+        /// Overrides the project name used as a replacement token in default setting values.
+        /// </summary>
+        /// <param name="name"></param>
+        public void OverrideProjectName(string name)
+        {
+            _replacementTokens[REPLACE_TOKEN_PROJECT_NAME] = name;
+        }
+
         public void ApplyPreviousSettings(IDictionary<string, object> previousSettings)
         {
             if (previousSettings == null)
