@@ -56,13 +56,7 @@ namespace AWS.Deploy.Common.Recipes
 
             if (DefaultValue is string defaultValueString)
             {
-                var mappedValue = string.Copy(defaultValueString);
-                if (ValueMapping != null && ValueMapping.ContainsKey(defaultValueString))
-                {
-                    mappedValue = ValueMapping[defaultValueString];
-                }
-                mappedValue = ApplyReplacementTokens(replacementTokens, mappedValue);
-                return mappedValue;
+                return ApplyReplacementTokens(replacementTokens, defaultValueString);
             }
 
             return DefaultValue;
@@ -86,10 +80,8 @@ namespace AWS.Deploy.Common.Recipes
                 }
                 else
                 {
-                    if (ValueMapping != null && ValueMapping.ContainsKey(valueOverrideString))
-                    {
-                        valueOverrideString = ValueMapping[valueOverrideString];
-                    }
+                    if (AllowedValues != null && !AllowedValues.Contains(valueOverrideString))
+                        throw new InvalidOverrideValueException();
                     _valueOverride = valueOverrideString;
                 }
             }
