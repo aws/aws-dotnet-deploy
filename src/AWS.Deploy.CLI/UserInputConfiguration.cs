@@ -25,6 +25,11 @@ namespace AWS.Deploy.CLI
         public Func<T, bool> DefaultSelector;
 
         /// <summary>
+        /// The current value for the option setting.
+        /// </summary>
+        public object CurrentValue;
+
+        /// <summary>
         /// If true, ask for the new name
         /// <para />
         /// Default is <c>false</c>
@@ -50,5 +55,11 @@ namespace AWS.Deploy.CLI
         /// then a "Create New" option will be added to the list of valid options.
         /// </summary>
         public bool CreateNew { get; set; } = true;
+
+        /// <summary>
+        /// If <see cref="EmptyOption" /> is set to true,
+        /// then an "Empty" option will be added to the list of valid options.
+        /// </summary>
+        public bool EmptyOption { get; set; }
     }
 }

@@ -303,14 +303,24 @@ namespace AWS.Deploy.CLI.Commands
                 {
                     DisplaySelector = kp => kp.KeyName,
                     DefaultSelector = kp => kp.KeyName.Equals(currentValue),
-                    AskNewName = true
+                    AskNewName = true,
+                    EmptyOption = true,
+                    CurrentValue = currentValue
                 };
 
                 while (true)
                 {
                     var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(keyPairs, "Select Key Pair to use:", userInputConfiguration);
 
-                    settingValue = userResponse.SelectedOption?.KeyName ?? userResponse.NewName;
+                    if (userResponse.IsEmpty)
+                    {
+                        settingValue = "";
+                        break;
+                    }
+                    else
+                    {
+                        settingValue = userResponse.SelectedOption?.KeyName ?? userResponse.NewName;
+                    }
 
                     if (userResponse.CreateNew && !string.IsNullOrEmpty(userResponse.NewName))
                     {
