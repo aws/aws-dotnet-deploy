@@ -138,13 +138,22 @@ namespace AWS.Deploy.CLI
             var defaultOption = options.FirstOrDefault(userInputConfiguration.DefaultSelector);
             var defaultValue = "";
             if (defaultOption != null)
+            {
                 defaultValue = userInputConfiguration.DisplaySelector(defaultOption);
+            }
             else
-                defaultValue = userInputConfiguration.CreateNew ? Constants.CREATE_NEW_LABEL : userInputConfiguration.DisplaySelector(options.FirstOrDefault());
+            {
+                if (userInputConfiguration.CurrentValue != null && string.IsNullOrEmpty(userInputConfiguration.CurrentValue.ToString()))
+                    defaultValue = Constants.EMPTY_LABEL;
+                else
+                    defaultValue = userInputConfiguration.CreateNew ? Constants.CREATE_NEW_LABEL : userInputConfiguration.DisplaySelector(options.FirstOrDefault());
+            }
 
             if (optionStrings.Any())
             {
                 var displayOptionStrings = new List<string>(optionStrings);
+                if (userInputConfiguration.EmptyOption)
+                    displayOptionStrings.Insert(0, Constants.EMPTY_LABEL);
                 if (userInputConfiguration.CreateNew)
                     displayOptionStrings.Add(Constants.CREATE_NEW_LABEL);
 
