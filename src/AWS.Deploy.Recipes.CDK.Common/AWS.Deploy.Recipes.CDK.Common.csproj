@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>0.1.0</Version>
+    <VersionPrefix>0.1.0</VersionPrefix>
     <Product>AWS Deployment Tooling for .NET CDK Utilities</Product>
     <Description>Utility code used in CDK recipes used by the AWS Deployment Tool. This package is not intended for direct usage.</Description>
     <PackageId>AWS.Deploy.Recipes.CDK.Common</PackageId>
@@ -65,11 +65,12 @@
  ]]></Code>
     </Task>
   </UsingTask>
-  
-  <Target Name="PublishBlazorApp" AfterTargets="Pack">
 
-    <SetupLocalCache NuGetPackage="$(OutputPath)..\$(PackageId).$(PackageVersion).nupkg"/>
-    
-  </Target>
-  
+<!-- TODO: we need to find a better fix for execute SetupLocalCache than skipping in Release configuration -->
+<Target Name="PublishBlazorApp" AfterTargets="Pack" Condition=" '$(Configuration)' != 'Release' ">
+
+  <SetupLocalCache NuGetPackage="$(OutputPath)..\$(PackageId).$(PackageVersion).nupkg"/>
+
+</Target>
+
 </Project>
