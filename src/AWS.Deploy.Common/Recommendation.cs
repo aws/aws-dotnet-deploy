@@ -21,6 +21,8 @@ namespace AWS.Deploy.Common
 
         public string Name => Recipe.Name;
 
+        public bool IsExistingCloudApplication { get; private set; }
+
         public string Description => Recipe.Description;
 
         private readonly Dictionary<string, string> _replacementTokens = new();
@@ -55,6 +57,8 @@ namespace AWS.Deploy.Common
 
         private void ApplyPreviousSettings(IEnumerable<OptionSettingItem> optionSettings, IDictionary<string, object> previousSettings)
         {
+            IsExistingCloudApplication = true;
+
             foreach (var optionSetting in optionSettings)
             {
                 if (previousSettings.TryGetValue(optionSetting.Id, out var value))

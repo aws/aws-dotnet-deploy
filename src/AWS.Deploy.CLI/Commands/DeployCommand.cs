@@ -60,7 +60,7 @@ namespace AWS.Deploy.CLI.Commands
                     _orchestratorInteractiveService,
                     _cdkProjectHandler,
                     _awsResourceQueryer,
-                    new []{ RecipeLocator.FindRecipeDefinitionsPath() });
+                    new[] { RecipeLocator.FindRecipeDefinitionsPath() });
 
             // Determine what recommendations are possible for the project.
             var recommendations = await orchestrator.GenerateDeploymentRecommendations();
@@ -101,6 +101,33 @@ namespace AWS.Deploy.CLI.Commands
 
                 selectedRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, existingCloudApplication.RecipeId, StringComparison.InvariantCultureIgnoreCase));
                 selectedRecommendation.ApplyPreviousSettings(existingCloudApplicationMetadata.Settings);
+
+                var header = $"Loading {existingCloudApplication.Name} settings:";
+
+                _toolInteractiveService.WriteLine(string.Empty);
+                _toolInteractiveService.WriteLine(header);
+                _toolInteractiveService.WriteLine(new string('-', header.Length));
+                var optionSettings =
+                    selectedRecommendation
+                        .Recipe
+                        .OptionSettings
+                        .Where(x =>
+                            {
+                                if (!selectedRecommendation.IsOptionSettingDisplayable(x))
+                                    return false;
+
+                                var value = selectedRecommendation.GetOptionSettingValue(x);
+                                if (value == null || value.ToString() == string.Empty || object.Equals(value, x.DefaultValue))
+                                    return false;
+
+                                return true;
+                            })
+                        .ToArray();
+
+                foreach (var setting in optionSettings)
+                {
+                    DisplayOptionSetting(selectedRecommendation, setting, -1, DisplayOptionSettingsMode.Readonly);
+                }
             }
             else
             {
@@ -138,7 +165,7 @@ namespace AWS.Deploy.CLI.Commands
             while (true)
             {
                 var title =
-                    (showAdvancedSettings) ? "Select the setting you want to configure:" : "Below are the settings we'll use to deploy:";
+                    (showAdvancedSettings) ? "Select the setting you want to configure:" : "Below are the settings that can be configured:";
 
                 _toolInteractiveService.WriteLine(title);
 
@@ -146,12 +173,12 @@ namespace AWS.Deploy.CLI.Commands
                     recommendation
                         .Recipe
                         .OptionSettings
-                        .Where(x => (!x.AdvancedSetting || showAdvancedSettings) && recommendation.IsOptionSettingDisplayable(x))
+                        .Where(x => (!recommendation.IsExistingCloudApplication || x.Updatable) && (!x.AdvancedSetting || showAdvancedSettings) && recommendation.IsOptionSettingDisplayable(x))
                         .ToArray();
 
                 for (var i = 1; i <= optionSettings.Length; i++)
                 {
-                    DisplayOptionSetting(recommendation, optionSettings[i-1], i);
+                    DisplayOptionSetting(recommendation, optionSettings[i - 1], i, DisplayOptionSettingsMode.Editable);
                 }
 
                 _toolInteractiveService.WriteLine();
@@ -202,40 +229,19 @@ namespace AWS.Deploy.CLI.Commands
             }
         }
 
-        private void DisplayOptionSetting(Recommendation recommendation, OptionSettingItem optionSetting, int optionSettingNumber)
+        enum DisplayOptionSettingsMode {Editable, Readonly}
+        private void DisplayOptionSetting(Recommendation recommendation, OptionSettingItem optionSetting, int optionSettingNumber, DisplayOptionSettingsMode mode)
         {
             var value = recommendation.GetOptionSettingValue(optionSetting);
 
-            switch (optionSetting.Type)
+            Type typeHintResponseType = null;
+            if(optionSetting.Type == OptionSettingValueType.Object)
             {
-                case OptionSettingValueType.Bool:
-                case OptionSettingValueType.Int:
-                case OptionSettingValueType.String:
-                    _toolInteractiveService.WriteLine($"{optionSettingNumber}. {optionSetting.Name}: {value}");
-                    break;
-                case OptionSettingValueType.Object:
-                    var typeHintResponseTypeFullName = $"AWS.Deploy.CLI.TypeHintResponses.{optionSetting.TypeHint}TypeHintResponse";
-                    var typeHintResponseType = Assembly.GetExecutingAssembly().GetType(typeHintResponseTypeFullName);
-                    if (typeHintResponseType != null)
-                    {
-                        DisplayValue(recommendation, optionSetting, optionSettingNumber, typeHintResponseType);
-                    }
-                    else
-                    {
-                        if (value is Dictionary<string, object> objectValues)
-                        {
-                            _toolInteractiveService.WriteLine($"{optionSettingNumber}. {optionSetting.Name}:");
-                            DisplayValues(objectValues, "\t");
-                        }
-                        else
-                        {
-                            throw new ArgumentOutOfRangeException(optionSetting.Id);
-                        }
-                    }
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(optionSetting.Id);
+                var typeHintResponseTypeFullName = $"AWS.Deploy.CLI.TypeHintResponses.{optionSetting.TypeHint}TypeHintResponse";
+                typeHintResponseType = Assembly.GetExecutingAssembly().GetType(typeHintResponseTypeFullName);
             }
+
+            DisplayValue(recommendation, optionSetting, optionSettingNumber, typeHintResponseType, mode);
         }
 
         private async Task ConfigureDeployment(Recommendation recommendation, OptionSettingItem setting)
@@ -478,13 +484,40 @@ namespace AWS.Deploy.CLI.Commands
         /// This allows to use a generic implementation to display Object type option setting values without casting the response to
         /// the specific TypeHintResponse type.
         /// </summary>
-        private void DisplayValue(Recommendation recommendation, OptionSettingItem optionSetting, int optionSettingNumber, Type typeHintResponseType)
+        private void DisplayValue(Recommendation recommendation, OptionSettingItem optionSetting, int optionSettingNumber, Type typeHintResponseType, DisplayOptionSettingsMode mode)
         {
-            var methodInfo = typeof(Recommendation)
-                .GetMethod(nameof(Recommendation.GetOptionSettingValue), 1, new[] {typeof(OptionSettingItem), typeof(bool)});
-            var genericMethodInfo = methodInfo?.MakeGenericMethod(typeHintResponseType);
-            var response = genericMethodInfo?.Invoke(recommendation, new object[] {optionSetting, false});
-            _toolInteractiveService.WriteLine($"{optionSettingNumber}. {optionSetting.Name}: {((IDisplayable)response)?.ToDisplayString()}");
+            object displayValue = null;
+            Dictionary<string, object> objectValues = null;
+            if (typeHintResponseType != null)
+            {
+                var methodInfo = typeof(Recommendation)
+                    .GetMethod(nameof(Recommendation.GetOptionSettingValue), 1, new[] { typeof(OptionSettingItem), typeof(bool) });
+                var genericMethodInfo = methodInfo?.MakeGenericMethod(typeHintResponseType);
+                var response = genericMethodInfo?.Invoke(recommendation, new object[] { optionSetting, false });
+
+                displayValue = ((IDisplayable)response)?.ToDisplayString();
+            }
+            else
+            {
+                var value = recommendation.GetOptionSettingValue(optionSetting);
+                objectValues = value as Dictionary<string, object>;
+                displayValue = objectValues == null ? value : string.Empty;
+            }
+
+            if(mode == DisplayOptionSettingsMode.Editable)
+            {
+                _toolInteractiveService.WriteLine($"{optionSettingNumber}. {optionSetting.Name}: {displayValue}");
+            }
+            else if(mode == DisplayOptionSettingsMode.Readonly)
+            {
+                _toolInteractiveService.WriteLine($"{optionSetting.Name}: {displayValue}");
+            }
+
+            if (objectValues != null)
+            {
+                DisplayValues(objectValues, "\t");
+            }
+            
         }
 
         private void DisplayValues(Dictionary<string, object> objectValues, string indent)
