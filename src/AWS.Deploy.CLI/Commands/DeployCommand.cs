@@ -146,7 +146,7 @@ namespace AWS.Deploy.CLI.Commands
                     recommendation
                         .Recipe
                         .OptionSettings
-                        .Where(x => !x.AdvancedSetting || showAdvancedSettings)
+                        .Where(x => (!x.AdvancedSetting || showAdvancedSettings) && recommendation.IsOptionSettingDisplayable(x))
                         .ToArray();
 
                 for (var i = 1; i <= optionSettings.Length; i++)
@@ -240,32 +240,6 @@ namespace AWS.Deploy.CLI.Commands
 
         private async Task ConfigureDeployment(Recommendation recommendation, OptionSettingItem setting)
         {
-            var isDisplayed = true;
-            PropertyDependency failedDependency = null;
-
-            foreach (var dependency in setting.DependsOn)
-            {
-                var dependsOnOptionSetting = recommendation.GetOptionSetting(setting.Id);
-                if (dependsOnOptionSetting != null && !recommendation.GetOptionSettingValue(dependsOnOptionSetting).Equals(dependency.Value))
-                {
-                    isDisplayed = false;
-                    failedDependency = dependency;
-                    setting.SetValueOverride(setting.DefaultValue);
-                    break;
-                }
-            }
-
-            if (!isDisplayed)
-            {
-                var dependentOption = recommendation.Recipe.OptionSettings.First(x => x.Id.Equals(failedDependency.Id)).Name;
-                _toolInteractiveService.WriteLine(string.Empty);
-                _toolInteractiveService.WriteLine(
-                    $"{setting.Name} depends on '{dependentOption}' to have the value '{failedDependency.Value}'");
-                _toolInteractiveService.WriteLine($"Please configure '{dependentOption}' to have the value '{failedDependency.Value}' first, or select another setting.");
-                _toolInteractiveService.WriteLine(string.Empty);
-                return;
-            }
-
             _toolInteractiveService.WriteLine(string.Empty);
             _toolInteractiveService.WriteLine($"{setting.Name}:");
 
@@ -280,7 +254,7 @@ namespace AWS.Deploy.CLI.Commands
                 if (Equals(settingValue, currentValue))
                     return;
             }
-            if (setting.TypeHint == OptionSettingTypeHint.BeanstalkEnvironment)
+            else if (setting.TypeHint == OptionSettingTypeHint.BeanstalkEnvironment)
             {
                 _toolInteractiveService.WriteLine(setting.Description);
 

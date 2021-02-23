@@ -187,5 +187,55 @@ namespace AWS.Deploy.CLI.UnitTests
                 new object[]{ new RuleEffect { Fail = new EffectOptions {PriorityAdjustment = -55 } }, true, true },
                 new object[]{ new RuleEffect { Fail = new EffectOptions { PriorityAdjustment = -55 } }, false, true },
             };
+
+        [Fact]
+        public void IsDisplayable_OneDependency()
+        {
+            var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
+            var engine = new RecommendationEngine.RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() });
+            var recommendations = engine.ComputeRecommendations(projectPath, new());
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var environmentTypeOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("EnvironmentType"));
+
+            var loadBalancerTypeOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("LoadBalancerType"));
+
+            Assert.Equal("SingleInstance", beanstalkRecommendation.GetOptionSettingValue(environmentTypeOptionSetting));
+
+            // Before dependency isn't satisfied
+            Assert.False(beanstalkRecommendation.IsOptionSettingDisplayable(loadBalancerTypeOptionSetting));
+
+            // Satisfy dependency
+            environmentTypeOptionSetting.SetValueOverride("LoadBalanced");
+            Assert.Equal("LoadBalanced", beanstalkRecommendation.GetOptionSettingValue(environmentTypeOptionSetting));
+
+            // Verify
+            Assert.True(beanstalkRecommendation.IsOptionSettingDisplayable(loadBalancerTypeOptionSetting));
+        }
+
+        [Fact]
+        public void IsDisplayable_ManyDependencies()
+        {
+            var projectPath = SystemIOUtilities.ResolvePath("WebAppWithDockerFile");
+            var engine = new RecommendationEngine.RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() });
+            var recommendations = engine.ComputeRecommendations(projectPath, new ());
+            var fargateRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_ASPNET_CORE_FARGATE_RECIPE_ID);
+            var isDefaultOptionSetting = fargateRecommendation.GetOptionSetting("Vpc.IsDefault");
+            var createNewOptionSetting = fargateRecommendation.GetOptionSetting("Vpc.CreateNew");
+            var vpcIdOptionSetting = fargateRecommendation.GetOptionSetting("Vpc.VpcId");
+
+            // Before dependency aren't satisfied
+            Assert.False(fargateRecommendation.IsOptionSettingDisplayable(vpcIdOptionSetting));
+
+            // Satisfy dependencies
+            isDefaultOptionSetting.SetValueOverride(false);
+            Assert.False(fargateRecommendation.GetOptionSettingValue<bool>(isDefaultOptionSetting));
+
+            // Default value for Vpc.CreateNew already false, this is to show explicitly setting an override that satisfies Vpc Id option setting
+            createNewOptionSetting.SetValueOverride(false);
+            Assert.False(fargateRecommendation.GetOptionSettingValue<bool>(createNewOptionSetting));
+
+            // Verify
+            Assert.True(fargateRecommendation.IsOptionSettingDisplayable(vpcIdOptionSetting));
+        }
     }
 }

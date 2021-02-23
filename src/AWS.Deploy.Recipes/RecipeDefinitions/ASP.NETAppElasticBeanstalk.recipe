@@ -66,7 +66,7 @@
                     "Name": "Create new Beanstalk application",
                     "Description": "Do you want to create new application?",
                     "Type": "Bool",
-                    "DefaultValue": "true",
+                    "DefaultValue": true,
                     "AdvancedSetting": false,
                     "Updatable": false
                 },
@@ -161,7 +161,7 @@
                     "Name": "Create New Role",
                     "Description": "Do you want to create a new Role?",
                     "Type": "Bool",
-                    "DefaultValue": "true",
+                    "DefaultValue": true,
                     "AdvancedSetting": false,
                     "Updatable": false
                 },
@@ -175,7 +175,7 @@
                     "DependsOn": [
                         {
                             "Id": "ApplicationIAMRole.CreateNew",
-                            "Value": "false"
+                            "Value": false
                         }
                     ]
                 }
@@ -215,7 +215,7 @@
             "Name": "Self Contained Build",
             "Description": "Publishing your app as self-contained produces an application that includes the .NET runtime and libraries. Users can run it on a machine that doesn't have the .NET runtime installed.",
             "Type": "Bool",
-            "DefaultValue": "false",
+            "DefaultValue": false,
             "AdvancedSetting": true,
             "Updatable": true
         },

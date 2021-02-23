@@ -49,7 +49,7 @@ namespace AWS.Deploy.Common.Recipes
         /// <summary>
         /// The default value used for the recipe if the user doesn't override the value.
         /// </summary>
-        public string DefaultValue { get; set; }
+        public object DefaultValue { get; set; }
 
         /// <summary>
         /// UI can use this to reduce the amount of settings to show to the user when confirming the recommendation. This can make it so the user sees only the most important settings

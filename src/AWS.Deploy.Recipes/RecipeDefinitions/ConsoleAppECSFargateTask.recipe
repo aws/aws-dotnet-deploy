@@ -102,7 +102,7 @@
                     "Name": "Create New Role",
                     "Description": "Do you want to create a new Role?",
                     "Type": "Bool",
-                    "DefaultValue": "true",
+                    "DefaultValue": true,
                     "AdvancedSetting": false,
                     "Updatable": false
                 },
@@ -116,7 +116,7 @@
                     "DependsOn": [
                         {
                             "Id": "ApplicationIAMRole.CreateNew",
-                            "Value": "false"
+                            "Value": false
                         }
                     ]
                 }
@@ -146,7 +146,7 @@
                     "Name": "Use default VPC",
                     "Description": "Do you want to use the default VPC?",
                     "Type": "Bool",
-                    "DefaultValue": "true",
+                    "DefaultValue": true,
                     "AdvancedSetting": true,
                     "Updatable": false
                 },
@@ -155,13 +155,13 @@
                     "Name": "Create New VPC",
                     "Description": "Do you want to create a new VPC?",
                     "Type": "Bool",
-                    "DefaultValue": "false",
+                    "DefaultValue": false,
                     "AdvancedSetting": true,
                     "Updatable": false,
                     "DependsOn": [
                         {
                             "Id": "Vpc.IsDefault",
-                            "Value": "false"
+                            "Value": false
                         }
                     ]
                 },
@@ -176,11 +176,11 @@
                     "DependsOn": [
                         {
                             "Id": "Vpc.IsDefault",
-                            "Value": "false"
+                            "Value": false
                         },
                         {
                             "Id": "Vpc.CreateNew",
-                            "Value": "false"
+                            "Value": false
                         }
                     ]
                 }
@@ -191,7 +191,7 @@
             "Name": "Add Docker Build Args",
             "Description": "Do you want to pass additional Docker build args?",
             "Type": "Bool",
-            "DefaultValue": "false",
+            "DefaultValue": false,
             "AdvancedSetting": true,
             "Updatable": true
         },
@@ -204,7 +204,7 @@
             "DependsOn": [
                 {
                     "Id": "AddDockerBuildArgs",
-                    "Value": "true"
+                    "Value": true
                 }
             ],
             "AdvancedSetting": true,
