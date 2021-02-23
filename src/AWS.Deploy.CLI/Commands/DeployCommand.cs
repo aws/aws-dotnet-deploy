@@ -134,6 +134,9 @@ namespace AWS.Deploy.CLI.Commands
                 selectedRecommendation = _consoleUtilities.AskUserToChoose(recommendations, "Available options to deploy project", recommendations[0]);
             }
 
+            // Apply the user enter project name to the recommendation so that any default settings based on project name are applied.
+            selectedRecommendation.OverrideProjectName(cloudApplicationName);
+
             if (selectedRecommendation.Recipe.DeploymentType == DeploymentTypes.CdkProject &&
                 !(await _session.SystemCapabilities).NodeJsMinVersionInstalled)
             {

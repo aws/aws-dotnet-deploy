@@ -155,6 +155,23 @@ namespace AWS.Deploy.CLI.UnitTests
             Assert.False(iamRoleTypeHintResponse.CreateNew);
         }
 
+        [Fact]
+        public void ApplyProjectNameToSettings()
+        {
+            var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
+
+            var engine = new RecommendationEngine.RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() });
+
+            var recommendations = engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
+
+            var beanstalkRecommendation = recommendations.FirstOrDefault(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var beanstalEnvNameSetting = beanstalkRecommendation.Recipe.OptionSettings.FirstOrDefault(x => string.Equals("EnvironmentName", x.Id));
+            Assert.Equal("WebAppNoDockerFile-dev", beanstalkRecommendation.GetOptionSettingValue<string>(beanstalEnvNameSetting));
+
+            beanstalkRecommendation.OverrideProjectName("CustomName");
+            Assert.Equal("CustomName-dev", beanstalkRecommendation.GetOptionSettingValue<string>(beanstalEnvNameSetting));
+        }
+
         [Theory]
         [MemberData(nameof(ShouldIncludeTestCases))]
         public void ShouldIncludeTests(RuleEffect effect, bool testPass, bool expectedResult)
