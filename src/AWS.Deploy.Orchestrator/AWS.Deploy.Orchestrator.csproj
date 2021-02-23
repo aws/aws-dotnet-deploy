@@ -24,7 +24,6 @@
     <ProjectReference Include="..\AWS.Deploy.Recipes.CDK.Common\AWS.Deploy.Recipes.CDK.Common.csproj" />
     <ProjectReference Include="..\AWS.Deploy.Recipes\AWS.Deploy.Recipes.csproj" />
     <ProjectReference Include="..\AWS.Deploy.DockerEngine\AWS.Deploy.DockerEngine.csproj" />
-    <ProjectReference Include="..\AWS.Deploy.RecommendationEngine\AWS.Deploy.RecommendationEngine.csproj" />
   </ItemGroup>
 
 </Project>

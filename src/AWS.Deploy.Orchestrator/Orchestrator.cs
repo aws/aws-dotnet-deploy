@@ -43,9 +43,9 @@ namespace AWS.Deploy.Orchestrator
 
         public async Task<IList<Recommendation>> GenerateDeploymentRecommendations()
         {
-            var engine = new RecommendationEngine.RecommendationEngine(_recipeDefinitionPaths);
+            var engine = new RecommendationEngine.RecommendationEngine(_recipeDefinitionPaths, _session);
             var additionalReplacements = await GetReplacements();
-            return engine.ComputeRecommendations(_session.ProjectPath, additionalReplacements);
+            return await engine.ComputeRecommendations(_session.ProjectPath, additionalReplacements);
         }
 
         public async Task<Dictionary<string, string>> GetReplacements()
