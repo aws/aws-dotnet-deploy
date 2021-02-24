@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -67,7 +67,7 @@
   </UsingTask>
 
 <!-- TODO: we need to find a better fix for execute SetupLocalCache than skipping in Release configuration -->
-<Target Name="PublishBlazorApp" AfterTargets="Pack" Condition=" '$(Configuration)' != 'Release' ">
+<Target Name="SetupNuGetCache" AfterTargets="Pack" Condition=" '$(Configuration)' != 'Release' ">
 
   <SetupLocalCache NuGetPackage="$(OutputPath)..\$(PackageId).$(PackageVersion).nupkg"/>
 
