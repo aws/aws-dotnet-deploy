@@ -80,7 +80,7 @@ namespace AWS.Deploy.Common.Recipes
                 }
                 else
                 {
-                    if (AllowedValues != null && !AllowedValues.Contains(valueOverrideString))
+                    if (AllowedValues != null && AllowedValues.Count > 0 && !AllowedValues.Contains(valueOverrideString))
                         throw new InvalidOverrideValueException();
                     _valueOverride = valueOverrideString;
                 }

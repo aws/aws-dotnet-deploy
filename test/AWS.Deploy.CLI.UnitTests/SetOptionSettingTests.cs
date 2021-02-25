@@ -3,9 +3,11 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AWS.Deploy.CLI.UnitTests.Utilities;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Orchestrator.RecommendationEngine;
 using AWS.Deploy.Recipes;
 using Xunit;
 
@@ -14,15 +16,16 @@ namespace AWS.Deploy.CLI.UnitTests
     public class SetOptionSettingTests
     {
         private readonly OptionSettingItem _optionSetting;
+        private readonly Recommendation _recommendation;
 
         public SetOptionSettingTests()
         {
             var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
-            var engine = new RecommendationEngine.RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() });
-            var recommendations = engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
-            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new Orchestrator.OrchestratorSession());
+            var recommendations = engine.ComputeRecommendations(projectPath, new Dictionary<string, string>()).GetAwaiter().GetResult();
+            _recommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
 
-            _optionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(x => x.Id.Equals("EnvironmentType"));
+            _optionSetting = _recommendation.Recipe.OptionSettings.First(x => x.Id.Equals("EnvironmentType"));
         }
 
         /// <summary>
@@ -33,6 +36,8 @@ namespace AWS.Deploy.CLI.UnitTests
         public void SetOptionSettingTests_AllowedValues()
         {
             _optionSetting.SetValueOverride(_optionSetting.AllowedValues.First());
+
+            Assert.Equal(_optionSetting.AllowedValues.First(), _recommendation.GetOptionSettingValue<string>(_optionSetting));
         }
 
         /// <summary>
