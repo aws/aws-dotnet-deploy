@@ -57,7 +57,7 @@ namespace AWS.Deploy.CLI.Utilities
 
             // environment variables could already be set at the machine level,
             // use this syntax to make sure we don't create duplicate entries
-            processStartInfo.EnvironmentVariables["AWS_ACCESS_KEY"] = credentials.AccessKey;
+            processStartInfo.EnvironmentVariables["AWS_ACCESS_KEY_ID"] = credentials.AccessKey;
             processStartInfo.EnvironmentVariables["AWS_SECRET_ACCESS_KEY"] = credentials.SecretKey;
             processStartInfo.EnvironmentVariables["AWS_REGION"] = _awsRegion;
 
