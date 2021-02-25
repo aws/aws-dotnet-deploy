@@ -113,20 +113,6 @@ namespace AWS.Deploy.CLI.UnitTests
             Assert.Null(beanstalkRecommendation.GetOptionSettingValue(applicationIAMRoleOptionSetting, true));
         }
 
-
-        [Fact]
-        public async Task ValueMappingSetWithAllowedValues()
-        {
-            var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
-            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new Orchestrator.OrchestratorSession());
-            var recommendations = await engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
-            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
-            var environmentTypeOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("EnvironmentType"));
-
-            environmentTypeOptionSetting.SetValueOverride("Load Balanced");
-            Assert.Equal("LoadBalanced", beanstalkRecommendation.GetOptionSettingValue(environmentTypeOptionSetting, false));
-        }
-
         [Fact]
         public async Task ValueMappingSetWithValue()
         {
