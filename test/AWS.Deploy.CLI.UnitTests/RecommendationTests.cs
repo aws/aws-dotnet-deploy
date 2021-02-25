@@ -158,13 +158,13 @@ namespace AWS.Deploy.CLI.UnitTests
         }
 
         [Fact]
-        public void ApplyProjectNameToSettings()
+        public async Task ApplyProjectNameToSettings()
         {
             var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
 
-            var engine = new RecommendationEngine.RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() });
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new Orchestrator.OrchestratorSession());
 
-            var recommendations = engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
+            var recommendations = await engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
 
             var beanstalkRecommendation = recommendations.FirstOrDefault(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
             var beanstalEnvNameSetting = beanstalkRecommendation.Recipe.OptionSettings.FirstOrDefault(x => string.Equals("EnvironmentName", x.Id));
