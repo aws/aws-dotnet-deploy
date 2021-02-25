@@ -330,5 +330,24 @@ namespace AWS.Deploy.CLI
 
             return selectedValue.Value;
         }
+
+        public void DisplayValues(Dictionary<string, object> objectValues, string indent)
+        {
+            foreach (var (key, value) in objectValues)
+            {
+                if (value is Dictionary<string, object> childObjectValue)
+                {
+                    _interactiveService.WriteLine($"{indent}{key}");
+                    DisplayValues(childObjectValue, $"{indent}\t");
+                }
+                else if (value is string stringValue)
+                {
+                    if (!string.IsNullOrEmpty(stringValue))
+                    {
+                        _interactiveService.WriteLine($"{indent}{key}: {stringValue}");
+                    }
+                }
+            }
+        }
     }
 }
