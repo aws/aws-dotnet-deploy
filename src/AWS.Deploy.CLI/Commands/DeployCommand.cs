@@ -7,13 +7,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Amazon.EC2.Model;
-using Amazon.ElasticBeanstalk.Model;
-using Amazon.IdentityManagement.Model;
-using AWS.Deploy.CLI.TypeHintResponses;
+using AWS.Deploy.CLI.Commands.TypeHints;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
-using AWS.Deploy.Common.TypeHintData;
 using AWS.Deploy.Orchestrator;
 using AWS.Deploy.Recipes;
 using AWS.Deploy.Orchestrator.Data;
@@ -29,6 +25,7 @@ namespace AWS.Deploy.CLI.Commands
 
         private readonly ConsoleUtilities _consoleUtilities;
         private readonly OrchestratorSession _session;
+        private readonly TypeHintCommandFactory _typeHintCommandFactory;
 
         public DeployCommand(
             IToolInteractiveService toolInteractiveService,
@@ -43,6 +40,7 @@ namespace AWS.Deploy.CLI.Commands
             _awsResourceQueryer = awsResourceQueryer;
             _consoleUtilities = new ConsoleUtilities(toolInteractiveService);
             _session = session;
+            _typeHintCommandFactory = new TypeHintCommandFactory(_toolInteractiveService, _awsResourceQueryer, _session, _consoleUtilities);
         }
 
         public async Task ExecuteAsync(bool saveCdkProject)
@@ -271,217 +269,34 @@ namespace AWS.Deploy.CLI.Commands
                 if (Equals(settingValue, currentValue))
                     return;
             }
-            else if (setting.TypeHint == OptionSettingTypeHint.BeanstalkEnvironment)
+            else
             {
-                _toolInteractiveService.WriteLine(setting.Description);
-
-                var applicationOptionSetting = recommendation.GetOptionSetting(setting.ParentSettingId);
-
-                var applicationName = recommendation.GetOptionSettingValue(applicationOptionSetting) as string;
-                var environments = await _awsResourceQueryer.ListOfElasticBeanstalkEnvironments(_session, applicationName);
-
-                var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(
-                    options: environments.Select(env => env.EnvironmentName),
-                    title: "Select Beanstalk environment to deploy to:",
-                    askNewName: true,
-                    defaultNewName: currentValue.ToString());
-                settingValue = userResponse.SelectedOption ?? userResponse.NewName;
-            }
-            else if (setting.TypeHint == OptionSettingTypeHint.DotnetPublishArgs)
-            {
-                settingValue =
-                    _consoleUtilities
-                        .AskUserForValue(
-                                setting.Description,
-                                recommendation.GetOptionSettingValue(setting).ToString(),
-                                 allowEmpty: true,
-                                // validators:
-                                publishArgs =>
-                                        (publishArgs.Contains("-o ") || publishArgs.Contains("--output "))
-                                        ? "You must not include -o/--output as an additional argument as it is used internally."
-                                        : "",
-                                publishArgs =>
-                                        (publishArgs.Contains("-c ") || publishArgs.Contains("--configuration ")
-                                        ? "You must not include -c/--configuration as an additional argument. You can set the build configuration in the advanced settings."
-                                        : ""),
-                                publishArgs =>
-                                        (publishArgs.Contains("--self-contained") || publishArgs.Contains("--no-self-contained")
-                                        ? "You must not include --self-contained/--no-self-contained as an additional argument. You can set the self-contained property in the advanced settings."
-                                        : ""))
-                        .ToString()
-                        .Replace("\"", "\"\"");
-            }
-            else if (setting.TypeHint == OptionSettingTypeHint.EC2KeyPair)
-            {
-                _toolInteractiveService.WriteLine(setting.Description);
-                var keyPairs = await _awsResourceQueryer.ListOfEC2KeyPairs(_session);
-
-                var userInputConfiguration = new UserInputConfiguration<KeyPairInfo>
+                if (setting.TypeHint.HasValue && _typeHintCommandFactory.GetCommand(setting.TypeHint.Value) is var typeHintCommand && typeHintCommand != null)
                 {
-                    DisplaySelector = kp => kp.KeyName,
-                    DefaultSelector = kp => kp.KeyName.Equals(currentValue),
-                    AskNewName = true,
-                    EmptyOption = true,
-                    CurrentValue = currentValue
-                };
-
-                while (true)
-                {
-                    var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(keyPairs, "Select Key Pair to use:", userInputConfiguration);
-
-                    if (userResponse.IsEmpty)
-                    {
-                        settingValue = "";
-                        break;
-                    }
-                    else
-                    {
-                        settingValue = userResponse.SelectedOption?.KeyName ?? userResponse.NewName;
-                    }
-
-                    if (userResponse.CreateNew && !string.IsNullOrEmpty(userResponse.NewName))
-                    {
-                        _toolInteractiveService.WriteLine(string.Empty);
-                        _toolInteractiveService.WriteLine("You have chosen to create a new Key Pair.");
-                        _toolInteractiveService.WriteLine("You are required to specify a directory to save the key pair private key.");
-
-                        var answer = _consoleUtilities.AskYesNoQuestion("Do you want to continue?", "false");
-                        if (answer == ConsoleUtilities.YesNo.No)
-                            continue;
-
-                        _toolInteractiveService.WriteLine(string.Empty);
-                        _toolInteractiveService.WriteLine($"A new Key Pair will be created with the name {settingValue}.");
-
-                        var keyPairDirectory = _consoleUtilities.AskForEC2KeyPairSaveDirectory(recommendation.ProjectPath);
-
-                        await _awsResourceQueryer.CreateEC2KeyPair(_session, settingValue.ToString(), keyPairDirectory);
-                    }
-
-                    break;
-                }
-            }
-            else if (setting.TypeHint == OptionSettingTypeHint.DotnetBeanstalkPlatformArn)
-            {
-                _toolInteractiveService.WriteLine(setting.Description);
-
-                var platformArns = await _awsResourceQueryer.GetElasticBeanstalkPlatformArns(_session);
-
-                var userInputConfiguration = new UserInputConfiguration<PlatformSummary>
-                {
-                    DisplaySelector = platform => $"{platform.PlatformBranchName} v{platform.PlatformVersion}",
-                    DefaultSelector = platform => platform.PlatformArn.Equals(currentValue),
-                    CreateNew = false
-                };
-
-                var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(platformArns, "Select the Platform to use:", userInputConfiguration);
-
-                settingValue = userResponse.SelectedOption?.PlatformArn;
-            }
-            else if (setting.Type == OptionSettingValueType.Bool)
-            {
-                var answer = _consoleUtilities.AskYesNoQuestion(setting.Description, recommendation.GetOptionSettingValue(setting).ToString());
-                settingValue = answer == ConsoleUtilities.YesNo.Yes ? "true" : "false";
-            }
-            else if (setting.Type == OptionSettingValueType.Object)
-            {
-                if (setting.TypeHint == OptionSettingTypeHint.IAMRole)
-                {
-                    _toolInteractiveService.WriteLine(setting.Description);
-                    var typeHintData = setting.GetTypeHintData<IAMRoleTypeHintData>();
-                    var existingRoles = await _awsResourceQueryer.ListOfIAMRoles(_session, typeHintData?.ServicePrincipal);
-                    var currentTypeHintResponse = recommendation.GetOptionSettingValue<IAMRoleTypeHintResponse>(setting);
-
-                    var userInputConfiguration = new UserInputConfiguration<Role>
-                    {
-                        DisplaySelector = role => role.RoleName,
-                        DefaultSelector = role => currentTypeHintResponse.RoleArn?.Equals(role.Arn) ?? false,
-                    };
-
-                    var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(existingRoles ,"Select an IAM role", userInputConfiguration);
-
-                    settingValue = new IAMRoleTypeHintResponse
-                    {
-                        CreateNew = userResponse.CreateNew,
-                        RoleArn = userResponse.SelectedOption?.Arn
-                    };
-                }
-                else if (setting.TypeHint == OptionSettingTypeHint.BeanstalkApplication)
-                {
-                    _toolInteractiveService.WriteLine(setting.Description);
-
-                    var applications = await _awsResourceQueryer.ListOfElasticBeanstalkApplications(_session);
-                    var currentTypeHintResponse = recommendation.GetOptionSettingValue<BeanstalkApplicationTypeHintResponse>(setting);
-
-                    var userInputConfiguration = new UserInputConfiguration<ApplicationDescription>
-                    {
-                        DisplaySelector = app => app.ApplicationName,
-                        DefaultSelector = app => app.ApplicationName.Equals(currentTypeHintResponse?.ApplicationName),
-                        AskNewName = true,
-                        DefaultNewName = currentTypeHintResponse.ApplicationName
-                    };
-
-                    var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(applications, "Select Beanstalk application to deploy to:", userInputConfiguration);
-
-                    settingValue = new BeanstalkApplicationTypeHintResponse
-                    {
-                        CreateNew = userResponse.CreateNew,
-                        ApplicationName = userResponse.SelectedOption?.ApplicationName ?? userResponse.NewName
-                    };
-                }
-                else if (setting.TypeHint == OptionSettingTypeHint.Vpc)
-                {
-                    _toolInteractiveService.WriteLine(setting.Description);
-
-                    var currentVpcTypeHintResponse = setting.GetTypeHintData<VpcTypeHintResponse>();
-
-                    var vpcs = await _awsResourceQueryer.GetListOfVpcs(_session);
-
-                    var userInputConfig = new UserInputConfiguration<Vpc>
-                    {
-                        DisplaySelector = vpc =>
-                        {
-                            var name = vpc.Tags?.FirstOrDefault(x => x.Key == "Name")?.Value ?? string.Empty;
-                            var namePart =
-                                string.IsNullOrEmpty(name)
-                                    ? ""
-                                    : $" ({name}) ";
-
-                            var isDefaultPart =
-                                vpc.IsDefault
-                                    ? Constants.DEFAULT_LABEL
-                                    : "";
-
-                            return $"{vpc.VpcId}{namePart}{isDefaultPart}";
-                        },
-                        DefaultSelector = vpc =>
-                            !string.IsNullOrEmpty(currentVpcTypeHintResponse?.VpcId)
-                                ? vpc.VpcId == currentVpcTypeHintResponse.VpcId
-                                : vpc.IsDefault
-                    };
-
-                    var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(
-                        vpcs,
-                        "Select a VPC",
-                        userInputConfig);
-
-                    settingValue = new VpcTypeHintResponse
-                    {
-                        IsDefault = userResponse.SelectedOption?.IsDefault == true,
-                        CreateNew = userResponse.CreateNew,
-                        VpcId = userResponse.SelectedOption?.VpcId ?? ""
-                    };
+                    settingValue = await typeHintCommand.Execute(recommendation, setting);
                 }
                 else
                 {
-                    foreach (var childSetting in setting.ChildOptionSettings)
+                    switch (setting.Type)
                     {
-                        await ConfigureDeployment(recommendation, childSetting);
+                        case OptionSettingValueType.String:
+                        case OptionSettingValueType.Int:
+                            settingValue = _consoleUtilities.AskUserForValue(setting.Description, currentValue?.ToString(), allowEmpty: true);
+                            break;
+                        case OptionSettingValueType.Bool:
+                            var answer = _consoleUtilities.AskYesNoQuestion(setting.Description, recommendation.GetOptionSettingValue(setting).ToString());
+                            settingValue = answer == ConsoleUtilities.YesNo.Yes ? "true" : "false";
+                            break;
+                        case OptionSettingValueType.Object:
+                            foreach (var childSetting in setting.ChildOptionSettings)
+                            {
+                                await ConfigureDeployment(recommendation, childSetting);
+                            }
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
                     }
                 }
-            }
-            else
-            {
-                settingValue = _consoleUtilities.AskUserForValue(setting.Description, currentValue?.ToString(), allowEmpty: true);
             }
 
             if (!Equals(settingValue, currentValue) && settingValue != null)
@@ -526,27 +341,7 @@ namespace AWS.Deploy.CLI.Commands
 
             if (objectValues != null)
             {
-                DisplayValues(objectValues, "\t");
-            }
-            
-        }
-
-        private void DisplayValues(Dictionary<string, object> objectValues, string indent)
-        {
-            foreach (var (key, value) in objectValues)
-            {
-                if (value is Dictionary<string, object> childObjectValue)
-                {
-                    _toolInteractiveService.WriteLine($"{indent}{key}");
-                    DisplayValues(childObjectValue, $"{indent}\t");
-                }
-                else if (value is string stringValue)
-                {
-                    if (!string.IsNullOrEmpty(stringValue))
-                    {
-                        _toolInteractiveService.WriteLine($"{indent}{key}: {stringValue}");
-                    }
-                }
+                _consoleUtilities.DisplayValues(objectValues, "\t");
             }
         }
 
