@@ -150,7 +150,7 @@
             "Description": "A VPC enables you to launch the application into a virtual network that you've defined",
             "Type": "Object",
             "TypeHint": "Vpc",
-            "AdvancedSetting": true,
+            "AdvancedSetting": false,
             "Updatable": false,
             "ChildOptionSettings": [
                 {
@@ -159,7 +159,7 @@
                     "Description": "Do you want to use the default VPC for the deployment?",
                     "Type": "Bool",
                     "DefaultValue": true,
-                    "AdvancedSetting": true,
+                    "AdvancedSetting": false,
                     "Updatable": false
                 },
                 {
@@ -168,7 +168,7 @@
                     "Description": "Do you want to create a new VPC?",
                     "Type": "Bool",
                     "DefaultValue": false,
-                    "AdvancedSetting": true,
+                    "AdvancedSetting": false,
                     "Updatable": false,
                     "DependsOn": [
                         {
@@ -183,7 +183,7 @@
                     "Description": "The Id of the existing VPC to use.",
                     "Type": "String",
                     "DefaultValue": null,
-                    "AdvancedSetting": true,
+                    "AdvancedSetting": false,
                     "Updatable": false,
                     "DependsOn": [
                         {
