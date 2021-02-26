@@ -29,5 +29,10 @@ namespace AWS.Deploy.Common.Recipes
         /// The name of file to search for. Used by the FileExists test.
         /// </summary>
         public string FileName { get; set; }
+
+        /// <summary>
+        /// The name of a NuGet package for tests. Used to see if projects are taking dependencies on specific packages.
+        /// </summary>
+        public string NuGetPackageName { get; set; }
     }
 }
