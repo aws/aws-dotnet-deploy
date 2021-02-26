@@ -91,6 +91,12 @@ namespace AWS.Deploy.Common
             return propertyValue;
         }
 
+        public string GetPackageReferenceVersion(string packageName)
+        {
+            var packageReference = _xmlProjectFile.SelectSingleNode($"//ItemGroup/PackageReference[@Include='{packageName}']") as XmlElement;
+            return packageReference?.GetAttribute("Version");
+        }
+
         private bool CheckIfDockerFileExists(string projectPath)
         {
             var dir = Directory.GetFiles(new FileInfo(projectPath).DirectoryName, "Dockerfile");

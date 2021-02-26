@@ -14,6 +14,7 @@ using AWS.Deploy.Orchestrator.RecommendationEngine;
 using Should;
 using Xunit;
 using System.Threading.Tasks;
+using AWS.Deploy.Common;
 
 namespace AWS.Deploy.CLI.UnitTests
 {
@@ -252,6 +253,40 @@ namespace AWS.Deploy.CLI.UnitTests
 
             // Look to see if the known system test FileExists has been found by LoadAvailableTests.
             Assert.Contains(new FileExistsTest().Name, tests);
+        }
+
+        [Fact]
+        public async Task PackageReferenceTest()
+        {
+            var projectPath = SystemIOUtilities.ResolvePath("MessageProcessingApp");
+            var projectDefinition = new ProjectDefinition(projectPath);
+            var test = new NuGetPackageReferenceTest();
+
+            Assert.True(await test.Execute(new RecommendationTestInput
+            {
+                Test = new RuleTest
+                {
+                    Type = test.Name,
+                    Condition = new RuleCondition
+                    {
+                        NuGetPackageName = "AWSSDK.SQS"
+                    }                    
+                },
+                ProjectDefinition = projectDefinition
+            }));
+
+            Assert.False(await test.Execute(new RecommendationTestInput
+            {
+                Test = new RuleTest
+                {
+                    Type = test.Name,
+                    Condition = new RuleCondition
+                    {
+                        NuGetPackageName = "AWSSDK.S3"
+                    }
+                },
+                ProjectDefinition = projectDefinition
+            }));
         }
     }
 }
