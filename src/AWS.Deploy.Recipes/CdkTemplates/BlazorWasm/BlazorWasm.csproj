@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+
+    <!-- The value "AWSDeployRecipesCDKCommonVersion" is replaced by the project template system. -->
+    <RecipeCDKCommonVersion>AWSDeployRecipesCDKCommonVersion</RecipeCDKCommonVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="cdk.out\**" />
+    <EmbeddedResource Remove="cdk.out\**" />
+    <None Remove="cdk.out\**" />
+    <None Include="appsettings.json" CopyToOutputDirectory="Always" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="node_modules\**" />
+    <EmbeddedResource Remove="node_modules\**" />
+    <None Remove="node_modules\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- CDK Construct Library dependencies -->
+    <PackageReference Include="Amazon.CDK" Version="1.89.0" />
+    <PackageReference Include="Amazon.CDK.AWS.S3" Version="1.89.0" />
+    <PackageReference Include="Amazon.CDK.AWS.S3.Deployment" Version="1.89.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.7" />
+
+    <!-- jsii Roslyn analyzers (un-comment to obtain compile-time checks for missing required props
+    <PackageReference Include="Amazon.Jsii.Analyzers" Version="*" PrivateAssets="all" />
+    -->
+  </ItemGroup>
+
+  <!--If the project template is being compiled it self the "AWSDeployRecipesCDKCommonVersion" token won't have been replaced. To make sure the project can still compile use a project reference. -->
+  <ItemGroup Condition=" '$(RecipeCDKCommonVersion.ToUpper())' == 'AWSDEPLOYRECIPESCDKCOMMONVERSION' ">
+    <ProjectReference Include="..\..\..\AWS.Deploy.Recipes.CDK.Common\AWS.Deploy.Recipes.CDK.Common.csproj" />
+  </ItemGroup>
+  <!-- The project has run through the project template engine and "AWSDeployRecipesCDKCommonVersion" has been replaced with valid version number so a PackageReference is used. -->
+  <ItemGroup Condition=" '$(RecipeCDKCommonVersion.ToUpper())' != 'AWSDEPLOYRECIPESCDKCOMMONVERSION' ">
+    <PackageReference Include="AWS.Deploy.Recipes.CDK.Common" Version="AWSDeployRecipesCDKCommonVersion"/>
+  </ItemGroup>
+
+</Project>

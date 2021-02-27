@@ -74,6 +74,22 @@ namespace AWS.Deploy.CLI.UnitTests
                 .ShouldBeTrue("Failed to receive Recommendation: " + Constants.CONSOLE_APP_FARGATE_TASK_RECIPE_ID);
         }
 
+        [Theory]
+        [InlineData("BlazorWasm31")]
+        [InlineData("BlazorWasm50")]
+        public async Task BlazorWasmTest(string projectName)
+        {
+            var projectPath = SystemIOUtilities.ResolvePath(projectName);
+
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new Orchestrator.OrchestratorSession());
+
+            var recommendations = await engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
+
+            recommendations
+                .Any(r => r.Recipe.Id == Constants.BLAZOR_WASM)
+                .ShouldBeTrue("Failed to receive Recommendation: " + Constants.BLAZOR_WASM);
+        }
+
 
         [Fact]
         public async Task ValueMappingWithDefaultValue()

@@ -10,5 +10,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
         public const string CONSOLE_APP_FARGATE_SERVICE_RECIPE_ID = "ConsoleAppEcsFargateService";
         public const string CONSOLE_APP_FARGATE_TASK_RECIPE_ID = "ConsoleAppEcsFargateTask";
+
+        public const string BLAZOR_WASM = "BlazorWasm";
     }
 }

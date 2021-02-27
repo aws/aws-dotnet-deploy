@@ -12,6 +12,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleAppEcsFargateTask", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AWS.Deploy.Recipes.CDK.Common", "..\..\AWS.Deploy.Recipes.CDK.Common\AWS.Deploy.Recipes.CDK.Common.csproj", "{A4B77E71-3F69-492B-82AB-71632A20A424}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorWasm", "BlazorWasm\BlazorWasm.csproj", "{6D7B336F-1122-4E48-8F68-9F405B31DD99}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,6 +40,10 @@ Global
 		{A4B77E71-3F69-492B-82AB-71632A20A424}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A4B77E71-3F69-492B-82AB-71632A20A424}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A4B77E71-3F69-492B-82AB-71632A20A424}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D7B336F-1122-4E48-8F68-9F405B31DD99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D7B336F-1122-4E48-8F68-9F405B31DD99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D7B336F-1122-4E48-8F68-9F405B31DD99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D7B336F-1122-4E48-8F68-9F405B31DD99}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

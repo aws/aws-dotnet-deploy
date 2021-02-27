@@ -98,9 +98,14 @@
             "additionalProperties": false,
             "required": ["Tests", "Effect"],
             "properties": {
+                "Comment": {
+                    "type": "string",
+                    "title": "Comment",
+                    "description": "Comment to help recipe author document their decisions. The comment is not shown to users of the recipe."
+                },
                 "Tests": {
                     "type": "array",
-                    "items": {"$ref": "#/definitions/RuleTest"}
+                    "items": { "$ref": "#/definitions/RuleTest" }
                 },
                 "Effect": {
                     "type": "object",

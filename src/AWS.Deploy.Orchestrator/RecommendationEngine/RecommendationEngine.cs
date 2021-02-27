@@ -57,6 +57,12 @@ namespace AWS.Deploy.Orchestrator.RecommendationEngine
                 }
 
                 var priority = potentialRecipe.RecipePriority + results.PriorityAdjustment;
+                // Recipes with a negative priority are ignored.
+                if (priority < 0)
+                {
+                    continue;
+                }
+
                 recommendations.Add(new Recommendation(potentialRecipe, projectDefinition.ProjectPath, priority, additionalReplacements));
             }
 
