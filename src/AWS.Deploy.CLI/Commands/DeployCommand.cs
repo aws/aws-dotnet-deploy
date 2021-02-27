@@ -186,7 +186,11 @@ namespace AWS.Deploy.CLI.Commands
                 _toolInteractiveService.WriteLine("Select a number to change its value.");
                 if (!showAdvancedSettings)
                 {
-                    _toolInteractiveService.WriteLine("Enter 'more' to include Advanced settings. ");
+                    // Don't bother showing 'more' for advanced options if there aren't any advanced options.
+                    if(optionSettings.Any(x => x.AdvancedSetting))
+                    {
+                        _toolInteractiveService.WriteLine("Enter 'more' to include Advanced settings. ");
+                    }
                 }
                 else
                 {

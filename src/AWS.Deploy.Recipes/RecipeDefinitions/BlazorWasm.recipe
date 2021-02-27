@@ -1,0 +1,108 @@
+{
+    "$schema": "./aws-deploy-recipe-schema.json",
+    "Id": "BlazorWasm",
+    "Version": "0.1.0",
+    "Name": "Blazor WebAssembly App",
+    "DeploymentType": "CdkProject",
+    "DeploymentBundle": "DotnetPublishZipFile",
+    "CdkProjectTemplate": "../CdkTemplates/BlazorWasm",
+    "CdkProjectTemplateId": "netdeploy.BlazorWasm",
+    "Description": "A Blazor WebAssembly application deployed to a Amazon S3 bucket. The S3 bucket will be configured for web hosting and allow public read access to the contents of the bucket.",
+    "TargetService": "Amazon S3",
+
+    "RecipePriority": -1,
+    "RecommendationRules": [
+        {
+            "Comment": "Blazor WebAssembly apps starting with .NET 5.0 used a new Microsoft.NET.Sdk.BlazorWebAssembly SDK attribute.",
+            "Tests": [
+                {
+                    "Type": "MSProjectSdkAttribute",
+                    "Condition": {
+                        "Value": "Microsoft.NET.Sdk.BlazorWebAssembly"
+                    }
+                },
+                {
+                    "Type": "NuGetPackageReference",
+                    "Condition": {
+                        "NuGetPackageName": "Microsoft.AspNetCore.Components.WebAssembly"
+                    }
+                }
+            ],
+            "Effect": {
+                "Pass": {
+                    "Include": true,
+                    "PriorityAdjustment": 100
+                },
+                "Fail": {
+                    "Include": true
+                }
+            }
+        },
+
+        {
+            "Comment": "Blazor WebAssembly apps build for .NET 3.1 use the same SDK attribute as regular ASP.NET Core",
+            "Tests": [
+                {
+                    "Type": "MSProjectSdkAttribute",
+                    "Condition": {
+                        "Value": "Microsoft.NET.Sdk.Web"
+                    }
+                },
+                {
+                    "Type": "MSProperty",
+                    "Condition": {
+                        "PropertyName": "TargetFramework",
+                        "AllowedValues": [ "netstandard2.1" ]
+                    }
+                },
+                {
+                    "Type": "NuGetPackageReference",
+                    "Condition": {
+                        "NuGetPackageName": "Microsoft.AspNetCore.Components.WebAssembly"
+                    }
+                }
+            ],
+            "Effect": {
+                "Pass": {
+                    "Include": true,
+                    "PriorityAdjustment": 100
+                },
+                "Fail": {
+                    "Include": true
+                }
+            }
+        }
+    ],
+
+
+
+    "OptionSettings": [
+        {
+            "Id": "IndexDocument",
+            "Name": "Index Document",
+            "Description": "The default page to use when endpoint accessed with no resource path.",
+            "Type": "String",
+            "DefaultValue": "index.html",
+            "AdvancedSetting": false,
+            "Updatable": true
+        },
+        {
+            "Id": "ErrorDocument",
+            "Name": "Error Document",
+            "Description": "The error page to use when an error occurred accessing the resource path.",
+            "Type": "String",
+            "DefaultValue": "",
+            "AdvancedSetting": false,
+            "Updatable": true
+        },
+        {
+            "Id": "Redirect404ToRoot",
+            "Name": "Redirect 404 Errors",
+            "Description": "Redirect any 404 requests to the index document. This is useful in Blazor applications that modify the resource path. If the modified resource path is reused in a new browser it will result in a 404 from S3 since no S3 object exists at that resource path.",
+            "Type": "Bool",
+            "DefaultValue": true,
+            "AdvancedSetting": false,
+            "Updatable": true
+        }
+    ]
+}
