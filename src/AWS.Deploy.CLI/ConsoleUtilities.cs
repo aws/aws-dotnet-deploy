@@ -296,8 +296,12 @@ namespace AWS.Deploy.CLI
 
         public YesNo AskYesNoQuestion(string question, YesNo? defaultValue = default)
         {
-            var message = question;
-            message += ": y/n";
+            string message = string.Empty;
+            if(!string.IsNullOrEmpty(question))
+            {
+                message += question + ": ";
+            }
+            message += "y/n";
             if (defaultValue.HasValue)
             {
                 var defaultChar = defaultValue == YesNo.Yes ? 'y' : 'n';
@@ -314,11 +318,11 @@ namespace AWS.Deploy.CLI
                 {
                     selectedValue = defaultValue.Value;
                 }
-                else if (string.Equals(line, "y"))
+                else if (string.Equals(line, "y", StringComparison.OrdinalIgnoreCase))
                 {
                     selectedValue = YesNo.Yes;
                 }
-                else if (String.Equals(line, "n"))
+                else if (String.Equals(line, "n", StringComparison.OrdinalIgnoreCase))
                 {
                     selectedValue = YesNo.No;
                 }

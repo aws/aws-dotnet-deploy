@@ -28,9 +28,6 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var currentValue = recommendation.GetOptionSettingValue(optionSetting);
-
-            _toolInteractiveService.WriteLine(optionSetting.Description);
-
             var platformArns = await _awsResourceQueryer.GetElasticBeanstalkPlatformArns(_session);
 
             var userInputConfiguration = new UserInputConfiguration<PlatformSummary>

@@ -249,12 +249,13 @@ namespace AWS.Deploy.CLI.Commands
         {
             _toolInteractiveService.WriteLine(string.Empty);
             _toolInteractiveService.WriteLine($"{setting.Name}:");
+            _toolInteractiveService.WriteLine($"{setting.Description}");
+            _toolInteractiveService.WriteLine(string.Empty);
 
             var currentValue = recommendation.GetOptionSettingValue(setting);
             object settingValue = null;
             if (setting.AllowedValues?.Count > 0)
             {
-                _toolInteractiveService.WriteLine(setting.Description);
                 var userInputConfig = new UserInputConfiguration<string>
                 {
                     DisplaySelector = x => setting.ValueMapping[x],
@@ -281,10 +282,10 @@ namespace AWS.Deploy.CLI.Commands
                     {
                         case OptionSettingValueType.String:
                         case OptionSettingValueType.Int:
-                            settingValue = _consoleUtilities.AskUserForValue(setting.Description, currentValue?.ToString(), allowEmpty: true);
+                            settingValue = _consoleUtilities.AskUserForValue(string.Empty, currentValue?.ToString(), allowEmpty: true);
                             break;
                         case OptionSettingValueType.Bool:
-                            var answer = _consoleUtilities.AskYesNoQuestion(setting.Description, recommendation.GetOptionSettingValue(setting).ToString());
+                            var answer = _consoleUtilities.AskYesNoQuestion(string.Empty, recommendation.GetOptionSettingValue(setting).ToString());
                             settingValue = answer == ConsoleUtilities.YesNo.Yes ? "true" : "false";
                             break;
                         case OptionSettingValueType.Object:
