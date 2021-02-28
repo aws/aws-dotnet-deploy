@@ -10,7 +10,7 @@ using AWS.Deploy.Recipes;
 
 namespace AWS.Deploy.CLI.Commands
 {
-    public class ListStacksCommand
+    public class ListApplicationCommand
     {
         private readonly IOrchestratorInteractiveService _orchestratorInteractiveService;
         private readonly IToolInteractiveService _interactiveService;
@@ -18,7 +18,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly ICdkProjectHandler _cdkProjectHandler;
         private readonly IAWSResourceQueryer _awsResourceQueryer;
 
-        public ListStacksCommand(IToolInteractiveService interactiveService,
+        public ListApplicationCommand(IToolInteractiveService interactiveService,
             IOrchestratorInteractiveService orchestratorInteractiveService,
             ICdkProjectHandler cdkProjectHandler,
             IAWSResourceQueryer awsResourceQueryer,
@@ -41,6 +41,10 @@ namespace AWS.Deploy.CLI.Commands
                     _awsResourceQueryer,
                     new[] { RecipeLocator.FindRecipeDefinitionsPath() });
 
+            // Add Header
+            _interactiveService.WriteLine();
+            _interactiveService.WriteLine("Cloud Applications:");
+            _interactiveService.WriteLine("-------------------");
 
             var existingApplications = await orchestrator.GetExistingDeployedApplications();
             foreach (var app in existingApplications)

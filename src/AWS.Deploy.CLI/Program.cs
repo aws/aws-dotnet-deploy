@@ -116,7 +116,7 @@ namespace AWS.Deploy.CLI
             });
             rootCommand.Add(deployCommand);
 
-            var listCommand = new Command("list-stacks", "List CloudFormation stacks.")
+            var listCommand = new Command("list-applications", "List Cloud Applications.")
             {
                 _optionProfile,
                 _optionRegion,
@@ -154,7 +154,7 @@ namespace AWS.Deploy.CLI
                         awsCredentials,
                         awsRegion);
 
-                await new ListStacksCommand(toolInteractiveService,
+                await new ListApplicationCommand(toolInteractiveService,
                                                 new ConsoleOrchestratorLogger(toolInteractiveService),
                                                 new CdkProjectHandler(orchestratorInteractiveService, commandLineWrapper),
                                                 new AWSResourceQueryer(new DefaultAWSClientFactory()),
@@ -162,18 +162,15 @@ namespace AWS.Deploy.CLI
             });
             rootCommand.Add(listCommand);
 
-            var deleteCommand = new Command("delete-stack", "Deletes a CloudFormation stack.")
+            var deleteCommand = new Command("delete-application", "Deletes a Cloud Application.")
             {
                 _optionProfile,
                 _optionRegion,
                 _optionProjectPath,
-                new Option<string>("--stack-name", "The name or the unique stack ID that is associated with the stack.")
-                {
-                    IsRequired = true,
-                },
-                _optionDiagnosticLogging
+                _optionDiagnosticLogging,
+                new Argument("application-name")
             };
-            deleteCommand.Handler = CommandHandler.Create<string, string, string, string, bool>(async (profile, region, projectPath, stackName, diagnostics) =>
+            deleteCommand.Handler = CommandHandler.Create<string, string, string, string, bool>(async (profile, region, projectPath, applicationName, diagnostics) =>
             {
                 var toolInteractiveService = new ConsoleInteractiveServiceImpl(diagnostics);
                 var awsUtilities = new AWSUtilities(toolInteractiveService);
@@ -190,7 +187,7 @@ namespace AWS.Deploy.CLI
                     AWSRegion = awsRegion,
                 };
 
-                await new DeleteStackCommand(new DefaultAWSClientFactory(), toolInteractiveService, session).ExecuteAsync(stackName);
+                await new DeleteApplicationCommand(new DefaultAWSClientFactory(), toolInteractiveService, session).ExecuteAsync(applicationName);
 
                 return CommandReturnCodes.SUCCESS;
             });
