@@ -28,8 +28,6 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
-            _toolInteractiveService.WriteLine(optionSetting.Description);
-
             var applications = await _awsResourceQueryer.ListOfElasticBeanstalkApplications(_session);
             var currentTypeHintResponse = recommendation.GetOptionSettingValue<BeanstalkApplicationTypeHintResponse>(optionSetting);
 

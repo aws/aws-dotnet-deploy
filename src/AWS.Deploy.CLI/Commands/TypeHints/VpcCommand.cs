@@ -29,8 +29,6 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
-            _toolInteractiveService.WriteLine(optionSetting.Description);
-
             var currentVpcTypeHintResponse = optionSetting.GetTypeHintData<VpcTypeHintResponse>();
 
             var vpcs = await _awsResourceQueryer.GetListOfVpcs(_session);

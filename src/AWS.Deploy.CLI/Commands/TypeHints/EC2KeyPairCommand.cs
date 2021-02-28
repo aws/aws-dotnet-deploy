@@ -28,8 +28,6 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var currentValue = recommendation.GetOptionSettingValue(optionSetting);
-
-            _toolInteractiveService.WriteLine(optionSetting.Description);
             var keyPairs = await _awsResourceQueryer.ListOfEC2KeyPairs(_session);
 
             var userInputConfiguration = new UserInputConfiguration<KeyPairInfo>

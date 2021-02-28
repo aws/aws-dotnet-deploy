@@ -29,7 +29,6 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
-            _toolInteractiveService.WriteLine(optionSetting.Description);
             var typeHintData = optionSetting.GetTypeHintData<IAMRoleTypeHintData>();
             var existingRoles = await _awsResourceQueryer.ListOfIAMRoles(_session, typeHintData?.ServicePrincipal);
             var currentTypeHintResponse = recommendation.GetOptionSettingValue<IAMRoleTypeHintResponse>(optionSetting);

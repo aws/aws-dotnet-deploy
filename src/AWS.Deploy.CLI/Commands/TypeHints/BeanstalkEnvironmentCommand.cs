@@ -28,9 +28,6 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var currentValue = recommendation.GetOptionSettingValue(optionSetting);
-
-            _toolInteractiveService.WriteLine(optionSetting.Description);
-
             var applicationOptionSetting = recommendation.GetOptionSetting(optionSetting.ParentSettingId);
 
             var applicationName = recommendation.GetOptionSettingValue(applicationOptionSetting) as string;
