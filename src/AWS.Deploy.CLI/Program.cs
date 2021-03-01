@@ -13,6 +13,9 @@ using AWS.Deploy.Orchestrator;
 using AWS.Deploy.Orchestrator.Data;
 using Amazon.SecurityToken;
 using Amazon.SecurityToken.Model;
+using System.Reflection;
+using System.Linq;
+using System.Text;
 
 namespace AWS.Deploy.CLI
 {
@@ -26,6 +29,8 @@ namespace AWS.Deploy.CLI
 
         private static async Task<int> Main(string[] args)
         {
+            SetExecutionEnvironment();
+
             var preambleWriter = new ConsoleInteractiveServiceImpl(diagnosticLoggingEnabled: false);
 
             preambleWriter.WriteLine("AWS .NET Deployment Tool for deploying .NET Core applications to AWS");
@@ -192,6 +197,34 @@ namespace AWS.Deploy.CLI
             rootCommand.Add(deleteCommand);
 
             return await rootCommand.InvokeAsync(args);
+        }
+
+
+        /// <summary>
+        /// Set up the execution environment variable picked up by the AWS .NET SDK. This can be useful for identify calls
+        /// made by this tool in AWS CloudTrail.
+        /// </summary>
+        private static void SetExecutionEnvironment()
+        {
+            const string envName = "AWS_EXECUTION_ENV";
+            const string awsDotnetDeployCLI = "aws-dotnet-deploy-cli";
+
+            var assemblyVersion = typeof(Program).Assembly
+                .GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute), false)
+                .FirstOrDefault()
+                as AssemblyInformationalVersionAttribute;
+
+            var envValue = new StringBuilder();
+
+            // If there is an existing execution environment variable add this tool as a suffix.
+            if(!string.IsNullOrEmpty(Environment.GetEnvironmentVariable(envName)))
+            {
+                envValue.Append($"{Environment.GetEnvironmentVariable(envName)}_");
+            }
+
+            envValue.Append($"{awsDotnetDeployCLI}_{assemblyVersion?.InformationalVersion}");
+
+            Environment.SetEnvironmentVariable(envName, envValue.ToString());
         }
     }
 }
