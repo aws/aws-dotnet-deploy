@@ -6,11 +6,6 @@ namespace ConsoleAppEcsFargateService.Configurations
     public class Configuration
     {
         /// <summary>
-        /// The file name of the Dockerfile.
-        /// </summary>
-        public string DockerfileName { get; set; } = "Dockerfile";
-
-        /// <summary>
         /// The desired number of ECS tasks to run for the service.
         /// </summary>
         public double DesiredCount { get; set; }

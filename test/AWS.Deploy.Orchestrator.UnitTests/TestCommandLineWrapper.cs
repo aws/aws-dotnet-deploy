@@ -1,4 +1,4 @@
-﻿// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
@@ -22,6 +22,7 @@ namespace AWS.Deploy.Orchestrator.UnitTests
             string workingDirectory = "",
             bool streamOutputToInteractiveService = true,
             Action<TryRunResult> onComplete = null,
+            bool redirectIO = true,
             CancellationToken cancelToken = default)
         {
             Commands.Add((command, workingDirectory, streamOutputToInteractiveService));

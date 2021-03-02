@@ -1,3 +1,6 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -26,6 +29,10 @@ namespace AWS.Deploy.Orchestrator.Utilities
         /// Async callback to inspect/manipulate the completed <see cref="Process"/>.  Useful
         /// if you need to get an exit code or <see cref="Process.StandardOutput"/>.
         /// </param>
+        /// <param name="redirectIO">
+        /// By default, <see cref="Process.StandardInput"/>, <see cref="Process.StandardOutput"/> and <see cref="Process.StandardError"/> will be redirected.
+        /// Set this to false to avoid redirection.
+        /// </param>
         /// <param name="cancelToken">
         /// <see cref="CancellationToken"/>
         /// </param>
@@ -34,6 +41,7 @@ namespace AWS.Deploy.Orchestrator.Utilities
             string workingDirectory = "",
             bool streamOutputToInteractiveService = true,
             Action<TryRunResult> onComplete = null,
+            bool redirectIO = true,
             CancellationToken cancelToken = default);
     }
 
@@ -58,6 +66,10 @@ namespace AWS.Deploy.Orchestrator.Utilities
         /// By default standard out/error will be piped to a <see cref="IOrchestratorInteractiveService"/>.
         /// Set this to false to disable sending output.
         /// </param>
+        /// <param name="redirectIO">
+        /// By default, <see cref="Process.StandardInput"/>, <see cref="Process.StandardOutput"/> and <see cref="Process.StandardError"/> will be redirected.
+        /// Set this to false to avoid redirection.
+        /// </param>
         /// <param name="cancelToken">
         /// <see cref="CancellationToken"/>
         /// </param>
@@ -66,6 +78,7 @@ namespace AWS.Deploy.Orchestrator.Utilities
             string command,
             string workingDirectory = "",
             bool streamOutputToInteractiveService = false,
+            bool redirectIO = true,
             CancellationToken cancelToken = default)
         {
             var result = new TryRunResult();
@@ -75,6 +88,7 @@ namespace AWS.Deploy.Orchestrator.Utilities
                 workingDirectory,
                 streamOutputToInteractiveService,
                 onComplete: runResult => result = runResult,
+                redirectIO: redirectIO,
                 cancelToken);
 
             return result;

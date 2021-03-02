@@ -4,23 +4,15 @@
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
-using AWS.Deploy.Orchestrator;
-using AWS.Deploy.Orchestrator.Data;
 
 namespace AWS.Deploy.CLI.Commands.TypeHints
 {
     public class DotnetPublishArgsCommand : ITypeHintCommand
     {
-        private readonly IToolInteractiveService _toolInteractiveService;
-        private readonly IAWSResourceQueryer _awsResourceQueryer;
-        private readonly OrchestratorSession _session;
         private readonly ConsoleUtilities _consoleUtilities;
 
-        public DotnetPublishArgsCommand(IToolInteractiveService toolInteractiveService, IAWSResourceQueryer awsResourceQueryer, OrchestratorSession session, ConsoleUtilities consoleUtilities)
+        public DotnetPublishArgsCommand(ConsoleUtilities consoleUtilities)
         {
-            _toolInteractiveService = toolInteractiveService;
-            _awsResourceQueryer = awsResourceQueryer;
-            _session = session;
             _consoleUtilities = consoleUtilities;
         }
 
@@ -46,6 +38,9 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                             : ""))
                 .ToString()
                 .Replace("\"", "\"\"");
+
+            recommendation.DeploymentBundle.DotnetPublishAdditionalBuildArguments = settingValue;
+
             return Task.FromResult<object>(settingValue);
         }
     }

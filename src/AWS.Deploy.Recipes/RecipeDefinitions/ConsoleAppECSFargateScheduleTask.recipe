@@ -187,39 +187,6 @@
             ]
         },
         {
-            "Id": "AddDockerBuildArgs",
-            "Name": "Add Docker Build Args",
-            "Description": "Do you want to pass additional Docker build args?",
-            "Type": "Bool",
-            "DefaultValue": false,
-            "AdvancedSetting": true,
-            "Updatable": true
-        },
-        {
-            "Id": "DockerBuildArgs",
-            "Name": "Docker Build Args",
-            "Description": "The list of additional docker build args.",
-            "Type": "String",
-            "DefaultValue": "",
-            "DependsOn": [
-                {
-                    "Id": "AddDockerBuildArgs",
-                    "Value": true
-                }
-            ],
-            "AdvancedSetting": true,
-            "Updatable": true
-        },
-        {
-            "Id": "DockerExecutionDirectory",
-            "Name": "Docker Execution Directory",
-            "Description": "Specifies the docker execution directory where the docker build command will be executed from.",
-            "Type": "String",
-            "DefaultValue": "",
-            "AdvancedSetting": true,
-            "Updatable": true
-        },
-        {
             "Id": "TaskCpu",
             "Name": "Task CPU",
             "Description": "The number of CPU units used by the task. See here for more details on CPU values https://docs.aws.amazon.com/AmazonECS/latest/developerguide/AWS_Fargate.html#fargate-task-defs",

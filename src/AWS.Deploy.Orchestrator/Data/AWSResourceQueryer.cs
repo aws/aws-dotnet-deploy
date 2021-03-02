@@ -9,9 +9,11 @@ using Amazon.EC2;
 using Amazon.EC2.Model;
 using Amazon.ElasticBeanstalk;
 using Amazon.ElasticBeanstalk.Model;
+using Amazon.ECR;
 using AWS.Deploy.Common;
 using Amazon.IdentityManagement;
 using Amazon.IdentityManagement.Model;
+using Amazon.ECR.Model;
 
 namespace AWS.Deploy.Orchestrator.Data
 {
@@ -25,6 +27,9 @@ namespace AWS.Deploy.Orchestrator.Data
         Task<List<Vpc>> GetListOfVpcs(OrchestratorSession session);
         Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns(OrchestratorSession session);
         Task<PlatformSummary> GetLatestElasticBeanstalkPlatformArn(OrchestratorSession session);
+        Task<List<AuthorizationData>> GetECRAuthorizationToken(OrchestratorSession session);
+        Task<List<Repository>> GetECRRepositories(OrchestratorSession session, List<string> repositoryNames);
+        Task<Repository> CreateECRRepository(OrchestratorSession session, string repositoryName);
     }
 
     public class AWSResourceQueryer : IAWSResourceQueryer
@@ -165,6 +170,51 @@ namespace AWS.Deploy.Orchestrator.Data
             }
 
             return platforms.First();
+        }
+
+        public async Task<List<AuthorizationData>> GetECRAuthorizationToken(OrchestratorSession session)
+        {
+            var ecrClient = _awsClientFactory.GetAWSClient<IAmazonECR>(session.AWSCredentials, session.AWSRegion);
+
+            var response = await ecrClient.GetAuthorizationTokenAsync(new GetAuthorizationTokenRequest());
+
+            return response.AuthorizationData;
+        }
+
+        public async Task<List<Repository>> GetECRRepositories(OrchestratorSession session, List<string> repositoryNames)
+        {
+            var ecrClient = _awsClientFactory.GetAWSClient<IAmazonECR>(session.AWSCredentials, session.AWSRegion);
+
+            var request = new DescribeRepositoriesRequest
+            {
+                RepositoryNames = repositoryNames
+            };
+
+            try
+            {
+                return await ecrClient.Paginators
+                    .DescribeRepositories(request)
+                    .Repositories
+                    .ToListAsync();
+            }
+            catch (RepositoryNotFoundException)
+            {
+                return new List<Repository>();
+            }
+        }
+
+        public async Task<Repository> CreateECRRepository(OrchestratorSession session, string repositoryName)
+        {
+            var ecrClient = _awsClientFactory.GetAWSClient<IAmazonECR>(session.AWSCredentials, session.AWSRegion);
+
+            var request = new CreateRepositoryRequest
+            {
+                RepositoryName = repositoryName
+            };
+
+            var response = await ecrClient.CreateRepositoryAsync(request);
+
+            return response.Repository;
         }
     }
 }

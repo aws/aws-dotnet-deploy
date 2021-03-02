@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Amazon.CloudFormation.Model;
@@ -11,7 +12,9 @@ using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestrator.CDK;
 using AWS.Deploy.Orchestrator.Data;
 using AWS.Deploy.Orchestrator.Utilities;
+using AWS.Deploy.Recipes;
 using AWS.Deploy.Recipes.CDK.Common;
+using Newtonsoft.Json;
 
 namespace AWS.Deploy.Orchestrator
 {
@@ -22,6 +25,7 @@ namespace AWS.Deploy.Orchestrator
         private readonly ICdkProjectHandler _cdkProjectHandler;
         private readonly IOrchestratorInteractiveService _interactiveService;
         private readonly IAWSResourceQueryer _awsResourceQueryer;
+        private readonly IDeploymentBundleHandler _deploymentBundleHandler;
         private readonly IList<string> _recipeDefinitionPaths;
 
         private readonly OrchestratorSession _session;
@@ -32,11 +36,13 @@ namespace AWS.Deploy.Orchestrator
             IOrchestratorInteractiveService interactiveService,
             ICdkProjectHandler cdkProjectHandler,
             IAWSResourceQueryer awsResourceQueryer,
+            IDeploymentBundleHandler deploymentBundleHandler,
             IList<string> recipeDefinitionPaths)
         {
             _session = session;
             _interactiveService = interactiveService;
             _cdkProjectHandler = cdkProjectHandler;
+            _deploymentBundleHandler = deploymentBundleHandler;
             _recipeDefinitionPaths = recipeDefinitionPaths;
             _awsResourceQueryer = awsResourceQueryer;
             _awsClientFactory = new DefaultAWSClientFactory();
@@ -61,22 +67,13 @@ namespace AWS.Deploy.Orchestrator
 
         public async Task DeployRecommendation(CloudApplication cloudApplication, Recommendation recommendation)
         {
+            _interactiveService.LogMessageLine(string.Empty);
             _interactiveService.LogMessageLine($"Initiating deployment: {recommendation.Name}");
 
             if (recommendation.Recipe.DeploymentType == DeploymentTypes.CdkProject)
             {
                 _interactiveService.LogMessageLine("AWS CDK is being configured.");
                 await _session.CdkManager.EnsureCompatibleCDKExists(CDKConstants.TempDirectoryRoot, CDKConstants.MinimumCDKVersion);
-            }
-
-            if (recommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.Container &&
-                !recommendation.ProjectDefinition.HasDockerFile)
-            {
-                _interactiveService.LogMessageLine("Generating Dockerfile");
-                var dockerEngine =
-                    new DockerEngine.DockerEngine(
-                        new ProjectDefinition(recommendation.ProjectPath));
-                dockerEngine.GenerateDockerFile();
             }
 
             switch (recommendation.Recipe.DeploymentType)
@@ -162,6 +159,83 @@ namespace AWS.Deploy.Orchestrator
             });
 
             return TemplateMetadataReader.ReadSettings(response.TemplateBody);
+        }
+
+        public DeploymentBundleDefinition GetDeploymentBundleDefinition(Recommendation recommendation)
+        {
+            var deploymentBundleDefinitionsPath = DeploymentBundleDefinitionLocator.FindDeploymentBundleDefinitionPath();
+
+            try
+            {
+                foreach (var deploymentBundleFile in Directory.GetFiles(deploymentBundleDefinitionsPath, "*.deploymentbundle", SearchOption.TopDirectoryOnly))
+                {
+                    try
+                    {
+                        var content = File.ReadAllText(deploymentBundleFile);
+                        var definition = JsonConvert.DeserializeObject<DeploymentBundleDefinition>(content);
+                        if (definition.Type.Equals(recommendation.Recipe.DeploymentBundle))
+                            return definition;
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exception($"Failed to Deserialize Deployment Bundle [{deploymentBundleFile}]: {e.Message}", e);
+                    }
+                }
+            }
+            catch(IOException e)
+            {
+                throw new NoDeploymentBundleDefinitionsFoundException();
+            }
+
+            throw new NoDeploymentBundleDefinitionsFoundException();
+        }
+
+        public async Task<bool> CreateContainerDeploymentBundle(CloudApplication cloudApplication, Recommendation recommendation)
+        {
+            var dockerEngine =
+                    new DockerEngine.DockerEngine(
+                        new ProjectDefinition(recommendation.ProjectPath));
+
+            if (!recommendation.ProjectDefinition.HasDockerFile)
+            {
+                _interactiveService.LogMessageLine("Generating Dockerfile...");
+                dockerEngine.GenerateDockerFile();
+            }
+
+            dockerEngine.DetermineDockerExecutionDirectory(recommendation);
+
+            try
+            {
+                var imageTag = await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation);
+
+                await _deploymentBundleHandler.PushDockerImageToECR(cloudApplication, recommendation, imageTag);
+            }
+            catch(DockerBuildFailedException ex)
+            {
+                _interactiveService.LogErrorMessageLine("We were unable to build the docker image due to the following error:");
+                _interactiveService.LogErrorMessageLine(ex.Message);
+                _interactiveService.LogErrorMessageLine("Docker builds usually fail due to executing them from a working directory that is incompatible with the Dockerfile.");
+                _interactiveService.LogErrorMessageLine("You can try setting the 'Docker Execution Directory' in the option settings.");
+                return false;
+            }
+
+            return true;
+        }
+
+        public async Task<bool> CreateDotnetPublishDeploymentBundle(Recommendation recommendation)
+        {
+            try
+            {
+                await _deploymentBundleHandler.CreateDotnetPublishZip(recommendation);
+            }
+            catch (DotnetPublishFailedException ex)
+            {
+                _interactiveService.LogErrorMessageLine("We were unable to package the application using 'dotnet publish' due to the following error:");
+                _interactiveService.LogErrorMessageLine(ex.Message);
+                return false;
+            }
+
+            return true;
         }
     }
 }

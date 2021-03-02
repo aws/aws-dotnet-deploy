@@ -1,9 +1,7 @@
-using System.Collections.Generic;
-using System.Linq;
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 using System.Threading.Tasks;
-using Amazon.CloudFormation;
-using Amazon.CloudFormation.Model;
-using AWS.Deploy.Common;
 using AWS.Deploy.Orchestrator;
 using AWS.Deploy.Orchestrator.Data;
 using AWS.Deploy.Recipes;
@@ -17,16 +15,19 @@ namespace AWS.Deploy.CLI.Commands
         private readonly OrchestratorSession _session;
         private readonly ICdkProjectHandler _cdkProjectHandler;
         private readonly IAWSResourceQueryer _awsResourceQueryer;
+        private readonly IDeploymentBundleHandler _deploymentBundleHandler;
 
         public ListApplicationCommand(IToolInteractiveService interactiveService,
             IOrchestratorInteractiveService orchestratorInteractiveService,
             ICdkProjectHandler cdkProjectHandler,
+            IDeploymentBundleHandler deploymentBundleHandler,
             IAWSResourceQueryer awsResourceQueryer,
             OrchestratorSession session)
         {
             _interactiveService = interactiveService;
             _orchestratorInteractiveService = orchestratorInteractiveService;
             _cdkProjectHandler = cdkProjectHandler;
+            _deploymentBundleHandler = deploymentBundleHandler;
             _awsResourceQueryer = awsResourceQueryer;
             _session = session;
         }
@@ -39,6 +40,7 @@ namespace AWS.Deploy.CLI.Commands
                     _orchestratorInteractiveService,
                     _cdkProjectHandler,
                     _awsResourceQueryer,
+                    _deploymentBundleHandler,
                     new[] { RecipeLocator.FindRecipeDefinitionsPath() });
 
             // Add Header

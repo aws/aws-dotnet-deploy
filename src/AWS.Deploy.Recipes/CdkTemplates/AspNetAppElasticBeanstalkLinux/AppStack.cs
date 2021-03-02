@@ -1,4 +1,6 @@
-using System;
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 using System.Collections.Generic;
 using Amazon.CDK;
 using Amazon.CDK.AWS.ElasticBeanstalk;
@@ -21,7 +23,7 @@ namespace AspNetAppElasticBeanstalkLinux
 
             var asset = new Asset(this, "Asset", new AssetProps
             {
-                Path = settings.AssetPath
+                Path = recipeConfiguration.DotnetPublishZipPath
             });
 
             CfnApplication application = null;

@@ -19,6 +19,7 @@ using System.Linq;
 using System.Text;
 using AWS.Deploy.Common.Extensions;
 using AWS.Deploy.Orchestrator.CDK;
+using AWS.Deploy.Common.IO;
 
 namespace AWS.Deploy.CLI
 {
@@ -97,11 +98,16 @@ namespace AWS.Deploy.CLI
                         CdkManager = cdkManager
                     };
 
+                    var awsResourceQueryer = new AWSResourceQueryer(new DefaultAWSClientFactory());
+                    var directoryManager = new DirectoryManager();
+                    var zipFileManager = new ZipFileManager();
+
                     var deploy = new DeployCommand(
                         toolInteractiveService,
                         orchestratorInteractiveService,
                         new CdkProjectHandler(orchestratorInteractiveService, commandLineWrapper),
-                        new AWSResourceQueryer(new DefaultAWSClientFactory()),
+                        new DeploymentBundleHandler(session, commandLineWrapper, awsResourceQueryer, orchestratorInteractiveService, directoryManager, zipFileManager),
+                        awsResourceQueryer,
                         session);
 
                     await deploy.ExecuteAsync(saveCdkProject);
@@ -164,10 +170,15 @@ namespace AWS.Deploy.CLI
                         awsCredentials,
                         awsRegion);
 
+                var awsResourceQueryer = new AWSResourceQueryer(new DefaultAWSClientFactory());
+                var directoryManager = new DirectoryManager();
+                var zipFileManager = new ZipFileManager();
+
                 await new ListApplicationCommand(toolInteractiveService,
                                                 new ConsoleOrchestratorLogger(toolInteractiveService),
                                                 new CdkProjectHandler(orchestratorInteractiveService, commandLineWrapper),
-                                                new AWSResourceQueryer(new DefaultAWSClientFactory()),
+                                                new DeploymentBundleHandler(session, commandLineWrapper, awsResourceQueryer, orchestratorInteractiveService, directoryManager, zipFileManager),
+                                                awsResourceQueryer,
                                                 session).ExecuteAsync();
             });
             rootCommand.Add(listCommand);

@@ -1,0 +1,25 @@
+{
+    "Type": "Container",
+    "Parameters": [
+        {
+            "Id": "DockerBuildArgs",
+            "Name": "Docker Build Args",
+            "Description": "The list of additional docker build args.",
+            "Type": "String",
+            "TypeHint": "DockerBuildArgs",
+            "DefaultValue": "",
+            "AdvancedSetting": true,
+            "Updatable": true
+        },
+        {
+            "Id": "DockerExecutionDirectory",
+            "Name": "Docker Execution Directory",
+            "Description": "Specifies the docker execution directory where the docker build command will be executed from.",
+            "Type": "String",
+            "TypeHint": "DockerExecutionDirectory",
+            "DefaultValue": "",
+            "AdvancedSetting": true,
+            "Updatable": true
+        }
+    ]
+}

@@ -26,24 +26,6 @@
             "replaces": "AWSRegion",
             "datatype": "string"
         },
-        "AddDockerBuildArgs": {
-            "type": "parameter",
-            "dataType": "bool",
-            "defaultValue": "false"
-        },
-        "DockerBuildArgs": {
-            "type": "parameter",
-            "description": "Specifies additional build args to the docker build command",
-            "replaces": "DockerBuildArgs-Placeholder",
-            "datatype": "string"
-        },
-        "DockerExecutionDirectory": {
-            "type": "parameter",
-            "description": "Specifies the docker execution directory",
-            "replaces": "DockerExecutionDirectory-Placeholder",
-            "datatype": "string",
-            "defaultValue": ""
-        },
         "AWSDeployRecipesCDKCommonVersion": {
             "type": "parameter",
             "description": "The version number of AWS.Deploy.Recipes.CDK.Common to use",

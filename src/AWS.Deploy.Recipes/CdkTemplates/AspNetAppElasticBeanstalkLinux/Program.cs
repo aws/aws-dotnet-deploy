@@ -1,8 +1,9 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 using Amazon.CDK;
 using AWS.Deploy.Recipes.CDK.Common;
-using System.Threading.Tasks;
 using AspNetAppElasticBeanstalkLinux.Configurations;
-using AspNetAppElasticBeanstalkLinux.Utilities;
 using Microsoft.Extensions.Configuration;
 
 namespace AspNetAppElasticBeanstalkLinux
@@ -15,9 +16,6 @@ namespace AspNetAppElasticBeanstalkLinux
 
             var builder = new ConfigurationBuilder().AddAWSDeployToolConfiguration(app);
             var recipeConfiguration = builder.Build().Get<RecipeConfiguration<Configuration>>();
-
-            var zipPublisher = new ZipPublisher();
-            recipeConfiguration.Settings.AssetPath = zipPublisher.GetZipPath(recipeConfiguration.Settings, recipeConfiguration.ProjectPath);
 
             CDKRecipeSetup.RegisterStack<Configuration>(new AppStack(app, recipeConfiguration, new StackProps
             {
