@@ -6,11 +6,6 @@ namespace ConsoleAppECSFargateScheduleTask.Configurations
     public class Configuration
     {
         /// <summary>
-        /// The file name of the Dockerfile.
-        /// </summary>
-        public string DockerfileName { get; set; } = "Dockerfile";
-
-        /// <summary>
         /// The Identity and Access Management Role that provides AWS credentials to the application to access AWS services.
         /// </summary>
         public IAMRoleConfiguration ApplicationIAMRole { get; set; }

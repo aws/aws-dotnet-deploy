@@ -46,7 +46,7 @@ namespace BlazorWasm
 
             new BucketDeployment(this, "BlazorDeployment", new BucketDeploymentProps
             {
-                Sources = new ISource[] { Source.Asset(Path.Combine(recipeConfiguration.Settings.AssetPath, "wwwroot")) },
+                Sources = new ISource[] { Source.Asset(Path.Combine(recipeConfiguration.DotnetPublishOutputDirectory, "wwwroot")) },
                 DestinationBucket = bucket
             });
 

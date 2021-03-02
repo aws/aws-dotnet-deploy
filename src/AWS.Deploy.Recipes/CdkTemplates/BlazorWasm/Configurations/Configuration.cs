@@ -6,12 +6,6 @@ namespace BlazorWasm.Configurations
     public class Configuration
     {
         /// <summary>
-        /// The path of archive file to be deployed.
-        /// </summary>
-        [System.Text.Json.Serialization.JsonIgnore]
-        public string AssetPath { get; set; }
-
-        /// <summary>
         /// The default page to use when endpoint accessed with no resource path.
         /// </summary>
         public string IndexDocument { get; set; }

@@ -12,9 +12,13 @@ namespace AWS.Deploy.Common.Recipes
         ECSCluster,
         ECSService,
         ECSTaskSchedule,
-        DotnetPublishArgs,
         EC2KeyPair,
         Vpc,
-        DotnetBeanstalkPlatformArn
+        DotnetBeanstalkPlatformArn,
+        DotnetPublishSelfContainedBuild,
+        DotnetPublishBuildConfiguration,
+        DotnetPublishAdditionalBuildArguments,
+        DockerExecutionDirectory,
+        DockerBuildArgs
     };
 }

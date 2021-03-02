@@ -310,14 +310,21 @@
                     "description": "Hint to deploy tools to use to provide extra context for the setting. For example the value could be 'ECSCluster' and the deploy tool can show a list of ECS clusters to pick from.",
                     "minLength": 1,
                     "enum": [
-                        "ECSCluster",
-                        "ECSService",
-                        "Vpc",
-                        "IAMRole",
                         "BeanstalkApplication",
                         "BeanstalkEnvironment",
                         "InstanceType",
-                        "ECSTaskSchedule"
+                        "IAMRole",
+                        "ECSCluster",
+                        "ECSService",
+                        "ECSTaskSchedule",
+                        "EC2KeyPair",
+                        "Vpc",
+                        "DotnetBeanstalkPlatformArn",
+                        "DotnetPublishSelfContainedBuild",
+                        "DotnetPublishBuildConfiguration",
+                        "DotnetPublishAdditionalBuildArguments",
+                        "DockerExecutionDirectory",
+                        "DockerBuildArgs"
                     ]
                 },
                 "DefaultValue": {

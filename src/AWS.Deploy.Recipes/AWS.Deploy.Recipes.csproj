@@ -25,4 +25,18 @@
         <None Remove="CdkTemplates\.vs\**" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="DeploymentBundleDefinitions\Container.deploymentbundle" />
+      <None Remove="DeploymentBundleDefinitions\DotnetPublishZipFile.deploymentbundle" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="DeploymentBundleDefinitions\Container.deploymentbundle">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <Content Include="DeploymentBundleDefinitions\DotnetPublishZipFile.deploymentbundle">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
 </Project>

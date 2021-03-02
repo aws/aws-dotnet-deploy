@@ -6,12 +6,6 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
     public class Configuration
     {
         /// <summary>
-        /// The path of archive file to be deployed.
-        /// </summary>
-        [System.Text.Json.Serialization.JsonIgnore]
-        public string AssetPath { get; set; }
-
-        /// <summary>
         /// The Identity and Access Management Role that provides AWS credentials to the application to access AWS services
         /// </summary>
         public IAMRoleConfiguration ApplicationIAMRole { get; set; }
@@ -50,10 +44,5 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
         /// The EC2 Key Pair used for the Beanstalk Application.
         /// </summary>
         public string EC2KeyPair { get; set; }
-
-        /// <summary>
-        /// Specifies whether to do a a self contained build or not.
-        /// </summary>
-        public bool SelfContainedBuild { get; set; }
     }
 }

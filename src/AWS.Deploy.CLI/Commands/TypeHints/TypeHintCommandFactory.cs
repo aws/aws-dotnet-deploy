@@ -32,10 +32,14 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 { OptionSettingTypeHint.BeanstalkApplication, new BeanstalkApplicationCommand(toolInteractiveService, awsResourceQueryer, session, consoleUtilities) },
                 { OptionSettingTypeHint.BeanstalkEnvironment, new BeanstalkEnvironmentCommand(toolInteractiveService, awsResourceQueryer, session, consoleUtilities) },
                 { OptionSettingTypeHint.DotnetBeanstalkPlatformArn, new DotnetBeanstalkPlatformArnCommand(toolInteractiveService, awsResourceQueryer, session, consoleUtilities) },
-                { OptionSettingTypeHint.DotnetPublishArgs, new DotnetPublishArgsCommand(toolInteractiveService, awsResourceQueryer, session, consoleUtilities) },
                 { OptionSettingTypeHint.EC2KeyPair, new EC2KeyPairCommand(toolInteractiveService, awsResourceQueryer, session, consoleUtilities) },
                 { OptionSettingTypeHint.IAMRole, new IAMRoleCommand(toolInteractiveService, awsResourceQueryer, session, consoleUtilities) },
                 { OptionSettingTypeHint.Vpc, new VpcCommand(toolInteractiveService, awsResourceQueryer, session, consoleUtilities) },
+                { OptionSettingTypeHint.DotnetPublishAdditionalBuildArguments, new DotnetPublishArgsCommand(consoleUtilities) },
+                { OptionSettingTypeHint.DotnetPublishSelfContainedBuild, new DotnetPublishSelfContainedBuildCommand(consoleUtilities) },
+                { OptionSettingTypeHint.DotnetPublishBuildConfiguration, new DotnetPublishBuildConfigurationCommand(consoleUtilities) },
+                { OptionSettingTypeHint.DockerExecutionDirectory, new DockerExecutionDirectoryCommand(consoleUtilities) },
+                { OptionSettingTypeHint.DockerBuildArgs, new DockerBuildArgsCommand(consoleUtilities) },
             };
         }
 
