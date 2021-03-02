@@ -187,7 +187,7 @@ namespace AWS.Deploy.CLI.Commands
                 if (!showAdvancedSettings)
                 {
                     // Don't bother showing 'more' for advanced options if there aren't any advanced options.
-                    if(optionSettings.Any(x => x.AdvancedSetting))
+                    if(recommendation.Recipe.OptionSettings.Any(x => x.AdvancedSetting))
                     {
                         _toolInteractiveService.WriteLine("Enter 'more' to include Advanced settings. ");
                     }

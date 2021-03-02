@@ -28,7 +28,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         {
             var settingValue = _consoleUtilities
                 .AskUserForValue(
-                    optionSetting.Description,
+                    string.Empty,
                     recommendation.GetOptionSettingValue(optionSetting).ToString(),
                     allowEmpty: true,
                     // validators:
