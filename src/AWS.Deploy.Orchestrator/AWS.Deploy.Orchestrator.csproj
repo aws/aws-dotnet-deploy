@@ -26,4 +26,10 @@
     <ProjectReference Include="..\AWS.Deploy.DockerEngine\AWS.Deploy.DockerEngine.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="CDK\package.json.template">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

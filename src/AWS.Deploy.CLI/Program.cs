@@ -13,9 +13,11 @@ using AWS.Deploy.Orchestrator;
 using AWS.Deploy.Orchestrator.Data;
 using Amazon.SecurityToken;
 using Amazon.SecurityToken.Model;
+using AWS.Deploy.Common.IO;
 using System.Reflection;
 using System.Linq;
 using System.Text;
+using AWS.Deploy.Orchestrator.CDK;
 
 namespace AWS.Deploy.CLI
 {
@@ -70,7 +72,12 @@ namespace AWS.Deploy.CLI
                             awsCredentials,
                             awsRegion);
 
-                    var systemCapabilityEvaluator = new SystemCapabilityEvaluator(commandLineWrapper);
+                    var fileManager = new FileManager();
+                    var templateInitializer = new TemplateWriter(PackageJsonLocator.FindTemplatesPath(), fileManager);
+                    var nodeInitializer = new NodeInitializer(commandLineWrapper, templateInitializer, fileManager);
+                    var cdkInstaller = new CDKInstaller(commandLineWrapper);
+                    var cdkManager = new CDKManager(cdkInstaller, nodeInitializer);
+                    var systemCapabilityEvaluator = new SystemCapabilityEvaluator(commandLineWrapper, cdkManager);
                     var systemCapabilities = systemCapabilityEvaluator.Evaluate();
 
                     var stsClient = new AmazonSecurityTokenServiceClient(awsCredentials);

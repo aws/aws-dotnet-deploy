@@ -34,18 +34,12 @@ namespace AWS.Deploy.Orchestrator.Utilities
             bool streamOutputToInteractiveService = true,
             Func<Process, Task> onComplete = null,
             CancellationToken cancelToken = default);
-    }
 
-    public static class CommandLineWrapperExtensions
-    {
         /// <summary>
         /// Convenience extension to <see cref="ICommandLineWrapper.Run"/>
         /// that returns a <see cref="TryRunWithResult"/> with the full contents
         /// of <see cref="Process.StandardError"/> and <see cref="Process.StandardOutput"/>
         /// </summary>
-        /// <param name="commandLineWrapper">
-        /// See <see cref="ICommandLineWrapper"/>
-        /// </param>
         /// <param name="command">
         /// Shell script to execute
         /// </param>
@@ -60,28 +54,11 @@ namespace AWS.Deploy.Orchestrator.Utilities
         /// <param name="cancelToken">
         /// <see cref="CancellationToken"/>
         /// </param>
-        public static async Task<TryRunResult> TryRunWithResult(
-            this ICommandLineWrapper commandLineWrapper,
+        Task<TryRunResult> TryRunWithResult(
             string command,
             string workingDirectory = "",
             bool streamOutputToInteractiveService = false,
-            CancellationToken cancelToken = default)
-        {
-            var result = new TryRunResult();
-
-            await commandLineWrapper.Run(
-                command,
-                streamOutputToInteractiveService: streamOutputToInteractiveService,
-                onComplete:
-                    async process =>
-                    {
-                        result.StandardError = await process.StandardError.ReadToEndAsync();
-                        result.StandardOut = await process.StandardOutput.ReadToEndAsync();
-                    },
-                cancelToken: cancelToken);
-
-            return result;
-        }
+            CancellationToken cancelToken = default);
     }
 
     public class TryRunResult

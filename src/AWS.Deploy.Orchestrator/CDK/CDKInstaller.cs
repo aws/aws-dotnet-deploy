@@ -1,0 +1,78 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
+using System;
+using System.Text;
+using System.Threading.Tasks;
+using AWS.Deploy.Orchestrator.Utilities;
+
+namespace AWS.Deploy.Orchestrator.CDK
+{
+    public interface ICDKInstaller
+    {
+        Task<(bool, string)> GetVersion(string workingDirectory, bool checkGlobal);
+        Task Install(string workingDirectory, string version);
+    }
+
+    /// <summary>
+    /// Abstracts low level node package manager commands to list and install AWS CDK CLI
+    /// in high level APIs.
+    /// </summary>
+    public class CDKInstaller : ICDKInstaller
+    {
+        private readonly ICommandLineWrapper _commandLineWrapper;
+
+        public CDKInstaller(ICommandLineWrapper commandLineWrapper)
+        {
+            _commandLineWrapper = commandLineWrapper;
+        }
+
+        /// <summary>
+        /// Gets AWS CDK CLI version using npm command.
+        /// </summary>
+        /// <param name="workingDirectory">Directory for local node app.</param>
+        /// <param name="checkGlobal">If true, global installation of AWS CDK CLI is checked.</param>
+        /// <returns></returns>
+        public async Task<(bool, string)> GetVersion(string workingDirectory, bool checkGlobal)
+        {
+            var command = new StringBuilder("npm list aws-cdk");
+            if (checkGlobal)
+            {
+                command.Append(" --global");
+            }
+
+            var result = await _commandLineWrapper.TryRunWithResult(command.ToString(), workingDirectory, false);
+            var standardOut = result.StandardOut;
+            var lines = standardOut.Split(Environment.NewLine);
+            if (lines.Length < 2)
+            {
+                return (false, null);
+            }
+
+            var versionLine = lines[1];
+            var parts = versionLine.Split(' ', '@');
+            if (parts.Length < 3)
+            {
+                return (false, null);
+            }
+
+            if (!parts[1].Equals("aws-cdk"))
+            {
+                return (false, null);
+            }
+
+            return (true, parts[2]);
+        }
+
+        /// <summary>
+        /// Installs local version of the AWS SDK CLI in the given working directory
+        /// </summary>
+        /// <param name="workingDirectory">Directory for local node app.</param>
+        /// <param name="version">AWS CDK CLI version to update</param>
+        /// <returns></returns>
+        public async Task Install(string workingDirectory, string version)
+        {
+            await _commandLineWrapper.Run($"npm install aws-cdk@{version}", workingDirectory, false);
+        }
+    }
+}

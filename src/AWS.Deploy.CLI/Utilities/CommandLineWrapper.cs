@@ -95,6 +95,29 @@ namespace AWS.Deploy.CLI.Utilities
             }
         }
 
+        public async Task<TryRunResult> TryRunWithResult(
+            string command,
+            string workingDirectory = "",
+            bool streamOutputToInteractiveService = false,
+            CancellationToken cancelToken = default)
+        {
+            var result = new TryRunResult();
+
+            await Run(
+                command,
+                workingDirectory,
+                streamOutputToInteractiveService: streamOutputToInteractiveService,
+                onComplete:
+                async process =>
+                {
+                    result.StandardError = await process.StandardError.ReadToEndAsync();
+                    result.StandardOut = await process.StandardOutput.ReadToEndAsync();
+                },
+                cancelToken: cancelToken);
+
+            return result;
+        }
+
         private string GetSystemShell()
         {
             if (TryGetEnvironmentVariable("COMSPEC", out var comspec))
