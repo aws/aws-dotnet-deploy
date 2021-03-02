@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using AWS.Deploy.Orchestrator;
+using AWS.Deploy.Orchestrator.CDK;
 using AWS.Deploy.Orchestrator.Utilities;
 
 namespace AWS.Deploy.CLI
@@ -16,23 +18,23 @@ namespace AWS.Deploy.CLI
     internal class SystemCapabilityEvaluator : ISystemCapabilityEvaluator
     {
         private readonly ICommandLineWrapper _commandLineWrapper;
+        private readonly CDKManager _cdkManager;
 
-        public SystemCapabilityEvaluator(ICommandLineWrapper commandLineWrapper)
+        public SystemCapabilityEvaluator(ICommandLineWrapper commandLineWrapper, CDKManager cdkManager)
         {
             _commandLineWrapper = commandLineWrapper;
+            _cdkManager = cdkManager;
         }
 
         public async Task<SystemCapabilities> Evaluate()
         {
             var dockerTask = HasDockerInstalledAndRunning();
             var nodeTask = HasMinVersionNodeJs();
-            var cdkTask = HasCdkInstalled();
 
             var capabilities = new SystemCapabilities
             {
                 DockerInstalled = await dockerTask,
                 NodeJsMinVersionInstalled = await nodeTask,
-                CdkNpmModuleInstalledGlobally = await cdkTask
             };
 
             return capabilities;
@@ -48,7 +50,6 @@ namespace AWS.Deploy.CLI
                 onComplete: proc =>
                 {
                     processExitCode = proc.ExitCode;
-                    return Task.CompletedTask;
                 });
 
             return processExitCode == 0;
@@ -72,13 +73,6 @@ namespace AWS.Deploy.CLI
                 return false;
 
             return version.Major > 10 || version.Major == 10 && version.Minor >= 3;
-        }
-
-        private async Task<bool> HasCdkInstalled()
-        {
-            var result = await _commandLineWrapper.TryRunWithResult("cdk --version");
-
-            return result.Success;
         }
     }
 }

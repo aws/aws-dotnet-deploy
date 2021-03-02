@@ -26,4 +26,8 @@
     <ProjectReference Include="..\AWS.Deploy.DockerEngine\AWS.Deploy.DockerEngine.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="CDK\package.json.template" />
+  </ItemGroup>
+
 </Project>
