@@ -187,7 +187,7 @@ namespace AWS.Deploy.CLI.Commands
                 if (!showAdvancedSettings)
                 {
                     // Don't bother showing 'more' for advanced options if there aren't any advanced options.
-                    if(optionSettings.Any(x => x.AdvancedSetting))
+                    if (recommendation.Recipe.OptionSettings.Any(x => x.AdvancedSetting))
                     {
                         _toolInteractiveService.WriteLine("Enter 'more' to include Advanced settings. ");
                     }
@@ -253,13 +253,12 @@ namespace AWS.Deploy.CLI.Commands
         {
             _toolInteractiveService.WriteLine(string.Empty);
             _toolInteractiveService.WriteLine($"{setting.Name}:");
-            _toolInteractiveService.WriteLine($"{setting.Description}");
-            _toolInteractiveService.WriteLine(string.Empty);
 
             var currentValue = recommendation.GetOptionSettingValue(setting);
             object settingValue = null;
             if (setting.AllowedValues?.Count > 0)
             {
+                _toolInteractiveService.WriteLine(setting.Description);
                 var userInputConfig = new UserInputConfiguration<string>
                 {
                     DisplaySelector = x => setting.ValueMapping[x],
@@ -278,6 +277,7 @@ namespace AWS.Deploy.CLI.Commands
             {
                 if (setting.TypeHint.HasValue && _typeHintCommandFactory.GetCommand(setting.TypeHint.Value) is var typeHintCommand && typeHintCommand != null)
                 {
+                    _toolInteractiveService.WriteLine(setting.Description);
                     settingValue = await typeHintCommand.Execute(recommendation, setting);
                 }
                 else
@@ -286,13 +286,14 @@ namespace AWS.Deploy.CLI.Commands
                     {
                         case OptionSettingValueType.String:
                         case OptionSettingValueType.Int:
-                            settingValue = _consoleUtilities.AskUserForValue(string.Empty, currentValue?.ToString(), allowEmpty: true);
+                            settingValue = _consoleUtilities.AskUserForValue(setting.Description, currentValue?.ToString(), allowEmpty: true);
                             break;
                         case OptionSettingValueType.Bool:
-                            var answer = _consoleUtilities.AskYesNoQuestion(string.Empty, recommendation.GetOptionSettingValue(setting).ToString());
+                            var answer = _consoleUtilities.AskYesNoQuestion(setting.Description, recommendation.GetOptionSettingValue(setting).ToString());
                             settingValue = answer == ConsoleUtilities.YesNo.Yes ? "true" : "false";
                             break;
                         case OptionSettingValueType.Object:
+                            _toolInteractiveService.WriteLine(setting.Description);
                             foreach (var childSetting in setting.ChildOptionSettings)
                             {
                                 await ConfigureDeployment(recommendation, childSetting);

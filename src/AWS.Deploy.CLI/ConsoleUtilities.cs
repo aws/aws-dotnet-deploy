@@ -180,7 +180,7 @@ namespace AWS.Deploy.CLI
 
             if (userInputConfiguration.AskNewName)
             {
-                var newName = AskUserForValue("Enter name:", userInputConfiguration.DefaultNewName, false);
+                var newName = AskUserForValue(title, userInputConfiguration.DefaultNewName, false);
                 return new UserResponse<T>
                 {
                     CreateNew = true,
@@ -198,7 +198,10 @@ namespace AWS.Deploy.CLI
         {
             const string CLEAR = "<clear>";
 
-            _interactiveService.WriteLine(message);
+            if (!string.IsNullOrEmpty(message))
+            {
+                _interactiveService.WriteLine(message);
+            }
 
             var prompt = $"Enter value (default: {defaultValue}";
             if (allowEmpty)
