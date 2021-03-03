@@ -35,6 +35,11 @@ namespace AspNetAppEcsFargate.Configurations
         /// </summary>
         public VpcConfiguration Vpc { get; set; }
 
+        /// <summary>
+        /// Comma-delimited list of security groups assigned to the ECS service.
+        /// </summary>
+        public string AdditionalECSServiceSecurityGroups { get; set; }
+
         /// <inheritdoc cref="FargateTaskDefinitionProps.Cpu"/>
         public double? TaskCpu { get; set; }
 

@@ -101,13 +101,35 @@ namespace AspNetAppEcsFargate
                 Protocol = Protocol.TCP
             });
 
+            var ecsLoadBalancerAccessSecurityGroup = new SecurityGroup(this, "WebAccessSecurityGroup", new SecurityGroupProps
+            {
+                Vpc = vpc,
+                SecurityGroupName = $"{recipeConfiguration.StackName}-ECSService"
+            });
+
+            var ecsServiceSecurityGroups = new List<ISecurityGroup>();
+            ecsServiceSecurityGroups.Add(ecsLoadBalancerAccessSecurityGroup);
+
+            if (!string.IsNullOrEmpty(settings.AdditionalECSServiceSecurityGroups))
+            {
+                var count = 1;
+                foreach (var securityGroupId in settings.AdditionalECSServiceSecurityGroups.Split(','))
+                {
+                    ecsServiceSecurityGroups.Add(SecurityGroup.FromSecurityGroupId(this, $"AdditionalGroup-{count++}", securityGroupId.Trim(), new SecurityGroupImportOptions
+                    {
+                        Mutable = false
+                    }));
+                }
+            }
+
             new ApplicationLoadBalancedFargateService(this, "FargateService", new ApplicationLoadBalancedFargateServiceProps
             {
                 Cluster = cluster,
                 TaskDefinition = taskDefinition,
                 DesiredCount = settings.DesiredCount,
                 ServiceName = settings.ECSServiceName,
-                AssignPublicIp = settings.Vpc.IsDefault
+                AssignPublicIp = settings.Vpc.IsDefault,
+                SecurityGroups = ecsServiceSecurityGroups.ToArray()
             });
         }
 
