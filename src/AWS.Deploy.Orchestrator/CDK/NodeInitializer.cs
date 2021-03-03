@@ -1,6 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -13,7 +14,7 @@ namespace AWS.Deploy.Orchestrator.CDK
     public interface INodeInitializer
     {
         bool IsInitialized(string workingDirectory);
-        Task Initialize(string workingDirectory, string cdkVersion);
+        Task Initialize(string workingDirectory, Version cdkVersion);
     }
 
     /// <summary>
@@ -51,12 +52,12 @@ namespace AWS.Deploy.Orchestrator.CDK
         /// </summary>
         /// <param name="workingDirectory">Directory for local node app.</param>
         /// <param name="cdkVersion">Version of AWS CDK CLI</param>
-        public async Task Initialize(string workingDirectory, string cdkVersion)
+        public async Task Initialize(string workingDirectory, Version cdkVersion)
         {
             var assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;
             var replacementTokens = new Dictionary<string, string>
             {
-                { "{aws-cdk-version}", cdkVersion },
+                { "{aws-cdk-version}", cdkVersion.ToString() },
                 { "{version}", $"{assemblyVersion?.Major}.{assemblyVersion?.Minor}.{assemblyVersion?.Build}" }
             };
             var packageFilePath = Path.Combine(workingDirectory, "package.json");

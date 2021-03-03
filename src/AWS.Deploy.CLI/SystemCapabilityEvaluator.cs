@@ -17,7 +17,7 @@ namespace AWS.Deploy.CLI
 
     internal class SystemCapabilityEvaluator : ISystemCapabilityEvaluator
     {
-        private const string _minimumCDKVersion = "1.89.0";
+        private readonly Version _minimumCDKVersion = Version.Parse("1.89.0");
         private readonly ICommandLineWrapper _commandLineWrapper;
         private readonly CDKManager _cdkManager;
 

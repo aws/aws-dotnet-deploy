@@ -1,13 +1,14 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using System.Threading.Tasks;
 
 namespace AWS.Deploy.Orchestrator.CDK
 {
     public interface ICDKManager
     {
-        Task<bool> InstallIfNeeded(string workingDirectory, string cdkVersion);
+        Task<bool> InstallIfNeeded(string workingDirectory, Version cdkVersion);
     }
 
     /// <summary>
@@ -33,12 +34,12 @@ namespace AWS.Deploy.Orchestrator.CDK
         /// </summary>
         /// <param name="workingDirectory">Directory used for local node app</param>
         /// <param name="cdkVersion">Version of AWS CDK CLI</param>
-        public async Task<bool> InstallIfNeeded(string workingDirectory, string cdkVersion)
+        public async Task<bool> InstallIfNeeded(string workingDirectory, Version cdkVersion)
         {
             try
             {
-                var (isGlobalCdkInstalled, globalCdkVersion) = await _cdkInstaller.GetVersion(workingDirectory, true);
-                if (isGlobalCdkInstalled && globalCdkVersion?.CompareTo(cdkVersion) >= 0)
+                var globalCDKVersionResult = await _cdkInstaller.GetVersion(workingDirectory, true);
+                if (globalCDKVersionResult.Success && globalCDKVersionResult.Result?.CompareTo(cdkVersion) >= 0)
                 {
                     return true;
                 }
@@ -49,8 +50,8 @@ namespace AWS.Deploy.Orchestrator.CDK
                     await _nodeInitializer.Initialize(workingDirectory, cdkVersion);
                 }
 
-                var (isLocalCdkInstalled, localCdkVersion) = await _cdkInstaller.GetVersion(workingDirectory, false);
-                if (isLocalCdkInstalled && localCdkVersion?.CompareTo(cdkVersion) >= 0)
+                var localCDKVersionResult = await _cdkInstaller.GetVersion(workingDirectory, false);
+                if (localCDKVersionResult.Success && localCDKVersionResult.Result?.CompareTo(cdkVersion) >= 0)
                 {
                     return true;
                 }

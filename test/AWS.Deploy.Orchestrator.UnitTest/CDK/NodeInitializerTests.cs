@@ -1,6 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using AWS.Deploy.Orchestrator.CDK;
@@ -67,7 +68,7 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
             _fileManager.InMemoryStore[_packageJsonFileName] = _packageJsonTemplate;
 
             // Initialize node app
-            await _nodeInitializer.Initialize(_workingDirectory, "1.0.1");
+            await _nodeInitializer.Initialize(_workingDirectory, Version.Parse("1.0.1"));
 
             // Verify initialized package.json
             var actualPackageJsonContent = await _fileManager.ReadAllTextAsync(Path.Combine(_workingDirectory, _packageJsonFileName));
