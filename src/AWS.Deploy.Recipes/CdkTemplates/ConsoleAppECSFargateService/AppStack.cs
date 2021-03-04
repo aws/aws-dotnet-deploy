@@ -66,6 +66,8 @@ namespace ConsoleAppEcsFargateService
             var taskDefinition = new FargateTaskDefinition(this, "TaskDefinition", new FargateTaskDefinitionProps
             {
                 TaskRole = taskRole,
+                Cpu = settings.TaskCpu,
+                MemoryLimitMiB = settings.TaskMemory
             });
 
             var logging = new AwsLogDriver(new AwsLogDriverProps

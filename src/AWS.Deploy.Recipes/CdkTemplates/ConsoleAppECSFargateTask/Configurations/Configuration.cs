@@ -29,5 +29,11 @@ namespace ConsoleAppEcsFargateTask.Configurations
         /// Virtual Private Cloud to launch container instance into a virtual network.
         /// </summary>
         public VpcConfiguration Vpc { get; set; }
+
+        /// <inheritdoc cref="FargateTaskDefinitionProps.Cpu"/>
+        public double? TaskCpu { get; set; }
+
+        /// <inheritdoc cref="FargateTaskDefinitionProps.MemoryLimitMiB"/>
+        public double? TaskMemory { get; set; }
     }
 }
