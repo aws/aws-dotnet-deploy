@@ -67,6 +67,8 @@ namespace AspNetAppEcsFargate
             var taskDefinition = new FargateTaskDefinition(this, "TaskDefinition", new FargateTaskDefinitionProps
             {
                 TaskRole = taskRole,
+                Cpu = settings.TaskCpu,
+                MemoryLimitMiB = settings.TaskMemory
             });
 
             var dockerExecutionDirectory = @"DockerExecutionDirectory-Placeholder";
