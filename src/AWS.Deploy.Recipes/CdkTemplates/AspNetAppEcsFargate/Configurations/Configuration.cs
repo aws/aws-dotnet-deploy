@@ -21,9 +21,9 @@ namespace AspNetAppEcsFargate.Configurations
         public string ECSServiceName { get; set; }
 
         /// <summary>
-        /// The name of the ECS cluster.
+        /// The ECS cluster that will host the deployed application.
         /// </summary>
-        public string ClusterName { get; set; }
+        public ECSClusterConfiguration ECSCluster { get; set; }
 
         /// <summary>
         /// Virtual Private Cloud to launch container instance into a virtual network.
