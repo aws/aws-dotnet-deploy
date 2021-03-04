@@ -26,7 +26,7 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
         [Theory]
         [InlineData("1.0.1", "1.0.0")]
         [InlineData("1.0.1", "1.0.1")]
-        public async Task Install_CompatibleGlobalCDKExists(string installedVersion, string requiredVersion)
+        public async Task EnsureCompatibleCDKExists_CompatibleGlobalCDKExists(string installedVersion, string requiredVersion)
         {
             // Arrange
             _mockCdkManager
@@ -42,7 +42,7 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
 
         [Theory]
         [InlineData("1.0.1")]
-        public async Task Install_NPMPackageIsNotInitialized(string requiredVersion)
+        public async Task EnsureCompatibleCDKExists_NPMPackageIsNotInitialized(string requiredVersion)
         {
             // Arrange
             _mockCdkManager
@@ -63,7 +63,7 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
         [Theory]
         [InlineData("1.0.1", "1.0.0")]
         [InlineData("1.0.1", "1.0.1")]
-        public async Task Install_CompatibleLocalCDKExists(string installedVersion, string requiredVersion)
+        public async Task EnsureCompatibleCDKExists_CompatibleLocalCDKExists(string installedVersion, string requiredVersion)
         {
             // Arrange
             _mockCdkManager
@@ -87,7 +87,7 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
 
         [Theory]
         [InlineData("1.0.0", "2.0.0")]
-        public async Task Install_CompatibleLocalCDKDoesNotExist(string localVersion, string requiredVersion)
+        public async Task EnsureCompatibleCDKExists_CompatibleLocalCDKDoesNotExist(string localVersion, string requiredVersion)
         {
             // Arrange
             _mockCdkManager

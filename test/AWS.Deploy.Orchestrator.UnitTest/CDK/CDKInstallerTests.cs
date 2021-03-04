@@ -22,7 +22,7 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
         }
 
         [Fact]
-        public async Task GetVersion_InGlobalNodeModules_CDKExists()
+        public async Task GetGlobalVersion_CDKExists()
         {
             // Arrange: add fake version information to return
             _commandLineWrapper.Results.Add(new TryRunResult
@@ -41,7 +41,7 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
         }
 
         [Fact]
-        public async Task GetVersion_InLocalNodeModules_CDKExists()
+        public async Task GetLocalVersion_CDKExists()
         {
             // Arrange: add fake version information to return
             _commandLineWrapper.Results.Add(new TryRunResult
@@ -60,7 +60,7 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
         }
 
         [Fact]
-        public async Task GetVersion_InLocalNodeModules_CDKDependentExists()
+        public async Task GetLocalVersion_CDKDependentExists()
         {
             // Arrange: add fake version information to return for a CDK CLI plugin
             _commandLineWrapper.Results.Add(new TryRunResult
@@ -79,7 +79,7 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
         }
 
         [Fact]
-        public async Task GetVersion_InLocalNodeModules_CDKDoesNotExist()
+        public async Task GetLocalVersion_CDKDoesNotExist()
         {
             // Arrange: add empty version information to return
             _commandLineWrapper.Results.Add(new TryRunResult
@@ -98,7 +98,7 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
         }
 
         [Fact]
-        public async Task Update_InLocalNodeModules()
+        public async Task Install_InLocalNodeModules()
         {
             // Act
             await _cdkInstaller.Install(_workingDirectory, Version.Parse("1.0.2"));
