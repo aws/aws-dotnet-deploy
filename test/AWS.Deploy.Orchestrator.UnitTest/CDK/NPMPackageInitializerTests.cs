@@ -9,7 +9,7 @@ using Xunit;
 
 namespace AWS.Deploy.Orchestrator.UnitTest.CDK
 {
-    public class NodeInitializerTests
+    public class NPMPackageInitializerTests
     {
         private readonly TestCommandLineWrapper _testCommandLineWrapper;
         private readonly INPMPackageInitializer _npmPackageInitializer;
@@ -40,7 +40,7 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
 
         private const string _packageJsonFileName = "package.json";
 
-        public NodeInitializerTests()
+        public NPMPackageInitializerTests()
         {
             _fileManager = new TestFileManager();
             _testCommandLineWrapper = new TestCommandLineWrapper();
