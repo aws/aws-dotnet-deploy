@@ -52,7 +52,7 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
         }
 
         [Fact]
-        public async Task GetVersion_InLocalNodeModules_CDKDependencyExists()
+        public async Task GetVersion_InLocalNodeModules_CDKDependentExists()
         {
             _commandLineWrapper.Results.Add(new TryRunResult()
             {

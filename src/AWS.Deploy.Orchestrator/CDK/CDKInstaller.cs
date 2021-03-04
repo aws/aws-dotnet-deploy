@@ -48,6 +48,14 @@ namespace AWS.Deploy.Orchestrator.CDK
             }
 
             var result = await _commandLineWrapper.TryRunWithResult(command.ToString(), workingDirectory, false);
+
+            /*
+             * A typical Standard out looks like with version information in line 2
+             *
+             * > npm list aws-cdk --global
+             * C:\Users\user\AppData\Roaming\npm
+             * `-- aws-cdk@0.0.0
+             */
             var standardOut = result.StandardOut;
             var lines = standardOut.Split(Environment.NewLine);
             if (lines.Length < 2)
@@ -56,12 +64,31 @@ namespace AWS.Deploy.Orchestrator.CDK
             }
 
             var versionLine = lines[1];
+
+            /*
+             * Split line 2 in parts so that we have package name and version in separate parts
+             *
+             * part 0: `--
+             * part 1: aws-cdk
+             * part 2: 0.0.0
+             *
+             * It could be possible we have more than 3 parts with more information but they can be ignored.
+             */
             var parts = versionLine.Split(' ', '@');
             if (parts.Length < 3)
             {
                 return TryGetResult.Failure<Version>();
             }
 
+            /*
+             * Make sure that we are checking aws-cdk only
+             * If a customer has plugin which depends on aws-cdk and then customer removes aws-cdk
+             * Plugin version information is shown which can lead to a false positive.
+             *
+             * > npm list aws-cdk --global
+             * C:\Users\user\AppData\Roaming\npm
+             * `-- cdk-assume-role-credential-plugin@1.0.0 (git+https://github.com/aws-samples/cdk-assume-role-credential-plugin.git#5167c798a50bc9c96a9d660b28306428be4e99fb)
+             */
             if (!parts[1].Equals("aws-cdk"))
             {
                 return TryGetResult.Failure<Version>();
