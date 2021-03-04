@@ -12,8 +12,8 @@ namespace AWS.Deploy.Orchestrator.UnitTest
 {
     public class TestCommandLineWrapper : ICommandLineWrapper
     {
-        public readonly List<(string, string, bool)> Commands = new List<(string, string, bool)>();
-        public readonly List<TryRunResult> Results = new List<TryRunResult>();
+        public List<(string, string, bool)> Commands { get; } = new List<(string, string, bool)>();
+        public List<TryRunResult> Results { get; } = new List<TryRunResult>();
 
         public Task Run(string command, string workingDirectory = "", bool streamOutputToInteractiveService = true, Func<Process, Task> onComplete = null, CancellationToken cancelToken = default)
         {
