@@ -129,7 +129,7 @@ namespace AWS.Deploy.CLI.Commands
             }
             else
             {
-                selectedRecommendation = _consoleUtilities.AskUserToChoose(recommendations, "Available options to deploy project", recommendations[0]);
+                selectedRecommendation = _consoleUtilities.AskToChooseRecommendation(recommendations);
             }
 
             // Apply the user enter project name to the recommendation so that any default settings based on project name are applied.

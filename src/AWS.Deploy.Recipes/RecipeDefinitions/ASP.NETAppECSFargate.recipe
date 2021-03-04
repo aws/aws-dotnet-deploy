@@ -7,7 +7,7 @@
     "DeploymentBundle": "Container",
     "CdkProjectTemplate": "../CdkTemplates/AspNetAppEcsFargate",
     "CdkProjectTemplateId": "netdeploy.AspNetAppEcsFargate",
-    "Description": "ASP.NET Core applications built as a container and deployed to Elastic Container Service with compute power managed by Fargate.",
+    "Description": "ASP.NET Core applications built as a container and deployed to Elastic Container Service with compute power managed by Fargate. If a Dockerfile does not exist then a Dockerfile be generated into the project.",
     "TargetService": "AWS Elastic Container Service",
 
     "RecipePriority": 110,
