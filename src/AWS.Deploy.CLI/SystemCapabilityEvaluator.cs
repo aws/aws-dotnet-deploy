@@ -50,7 +50,6 @@ namespace AWS.Deploy.CLI
                 onComplete: proc =>
                 {
                     processExitCode = proc.ExitCode;
-                    return Task.CompletedTask;
                 });
 
             return processExitCode == 0;

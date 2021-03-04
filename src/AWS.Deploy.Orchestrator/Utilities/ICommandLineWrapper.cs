@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -32,14 +33,20 @@ namespace AWS.Deploy.Orchestrator.Utilities
             string command,
             string workingDirectory = "",
             bool streamOutputToInteractiveService = true,
-            Func<Process, Task> onComplete = null,
+            Action<TryRunResult> onComplete = null,
             CancellationToken cancelToken = default);
+    }
 
+    public static class CommandLineWrapperExtensions
+    {
         /// <summary>
         /// Convenience extension to <see cref="ICommandLineWrapper.Run"/>
         /// that returns a <see cref="TryRunWithResult"/> with the full contents
         /// of <see cref="Process.StandardError"/> and <see cref="Process.StandardOutput"/>
         /// </summary>
+        /// <param name="commandLineWrapper">
+        /// See <see cref="ICommandLineWrapper"/>
+        /// </param>
         /// <param name="command">
         /// Shell script to execute
         /// </param>
@@ -54,11 +61,24 @@ namespace AWS.Deploy.Orchestrator.Utilities
         /// <param name="cancelToken">
         /// <see cref="CancellationToken"/>
         /// </param>
-        Task<TryRunResult> TryRunWithResult(
+        public static async Task<TryRunResult> TryRunWithResult(
+            this ICommandLineWrapper commandLineWrapper,
             string command,
             string workingDirectory = "",
             bool streamOutputToInteractiveService = false,
-            CancellationToken cancelToken = default);
+            CancellationToken cancelToken = default)
+        {
+            var result = new TryRunResult();
+
+            await commandLineWrapper.Run(
+                command,
+                workingDirectory,
+                streamOutputToInteractiveService,
+                onComplete: runResult => result = runResult,
+                cancelToken);
+
+            return result;
+        }
     }
 
     public class TryRunResult
@@ -68,13 +88,20 @@ namespace AWS.Deploy.Orchestrator.Utilities
         /// <see cref="StandardError"/> is empty.
         /// </summary>
         public bool Success => string.IsNullOrEmpty(StandardError);
+
         /// <summary>
         /// Fully read <see cref="Process.StandardOutput"/>
         /// </summary>
         public string StandardOut { get; set; }
+
         /// <summary>
         /// Fully read <see cref="Process.StandardError"/>
         /// </summary>
         public string StandardError { get; set; }
+
+        /// <summary>
+        /// Fully read <see cref="Process.ExitCode"/>
+        /// </summary>
+        public int ExitCode { get; set; }
     }
 }

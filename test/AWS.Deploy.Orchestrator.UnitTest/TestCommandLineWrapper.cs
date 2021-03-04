@@ -4,6 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AWS.Deploy.Orchestrator.Utilities;
@@ -12,19 +14,19 @@ namespace AWS.Deploy.Orchestrator.UnitTest
 {
     public class TestCommandLineWrapper : ICommandLineWrapper
     {
-        public List<(string, string, bool)> Commands { get; } = new List<(string, string, bool)>();
-        public List<TryRunResult> Results { get; } = new List<TryRunResult>();
+        public List<(string command, string workingDirectory, bool streamOutputToInteractiveService)> Commands { get; } = new();
+        public List<TryRunResult> Results { get; } = new();
 
-        public Task Run(string command, string workingDirectory = "", bool streamOutputToInteractiveService = true, Func<Process, Task> onComplete = null, CancellationToken cancelToken = default)
+        public Task Run(
+            string command,
+            string workingDirectory = "",
+            bool streamOutputToInteractiveService = true,
+            Action<TryRunResult> onComplete = null,
+            CancellationToken cancelToken = default)
         {
             Commands.Add((command, workingDirectory, streamOutputToInteractiveService));
+            onComplete?.Invoke(Results.Last());
             return Task.CompletedTask;
-        }
-
-        public Task<TryRunResult> TryRunWithResult(string command, string workingDirectory = "", bool streamOutputToInteractiveService = false, CancellationToken cancelToken = default)
-        {
-            Commands.Add((command, workingDirectory, streamOutputToInteractiveService));
-            return Task.FromResult(Results[Commands.Count-1]);
         }
     }
 }
