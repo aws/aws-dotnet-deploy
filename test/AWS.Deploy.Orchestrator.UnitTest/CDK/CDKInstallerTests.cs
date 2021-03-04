@@ -82,7 +82,7 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
         }
 
         [Fact]
-        public async Task Update()
+        public async Task Update_InLocalNodeModules()
         {
             await _cdkInstaller.Install(_workingDirectory, Version.Parse("1.0.2"));
 
