@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
+using AWS.Deploy.Orchestrator.CDK;
 using AWS.Deploy.Orchestrator.Utilities;
 using AWS.Deploy.Recipes.CDK.Common;
 
@@ -41,12 +42,6 @@ namespace AWS.Deploy.Orchestrator
 
             _interactiveService.LogMessageLine("Starting deployment of CDK Project");
 
-            // install cdk locally if needed
-            if (!(await session.SystemCapabilities).CdkNpmModuleInstalledGlobally)
-            {
-                await _commandLineWrapper.Run("npm install aws-cdk", cdkProjectPath, streamOutputToInteractiveService: false);
-            }
-
             // Ensure region is bootstrapped
             await _commandLineWrapper.Run($"npx cdk bootstrap aws://{session.AWSAccountId}/{session.AWSRegion}");
 
@@ -59,8 +54,7 @@ namespace AWS.Deploy.Orchestrator
         {
             var tempDirectoryPath =
                 Path.Combine(
-                    Path.GetTempPath(),
-                    "AWS.Deploy",
+                    CDKConstants.TempDirectoryRoot,
                     "Projects",
                     Path.GetFileNameWithoutExtension(Path.GetRandomFileName()));
             Directory.CreateDirectory(tempDirectoryPath);

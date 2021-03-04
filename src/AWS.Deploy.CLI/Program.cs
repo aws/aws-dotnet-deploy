@@ -77,9 +77,10 @@ namespace AWS.Deploy.CLI
                     var packageJsonGenerator = new PackageJsonGenerator(
                         typeof(PackageJsonGenerator).Assembly
                         .ReadEmbeddedFile(PackageJsonGenerator.TemplateIdentifier));
-                    var nodeInitializer = new NPMPackageInitializer(commandLineWrapper, packageJsonGenerator, fileManager);
+                    var npmPackageInitializer = new NPMPackageInitializer(commandLineWrapper, packageJsonGenerator, fileManager);
                     var cdkInstaller = new CDKInstaller(commandLineWrapper);
-                    var cdkManager = new CDKManager(cdkInstaller, nodeInitializer);
+                    var cdkManager = new CDKManager(cdkInstaller, npmPackageInitializer);
+
                     var systemCapabilityEvaluator = new SystemCapabilityEvaluator(commandLineWrapper, cdkManager);
                     var systemCapabilities = systemCapabilityEvaluator.Evaluate();
 
@@ -102,7 +103,8 @@ namespace AWS.Deploy.CLI
                         orchestratorInteractiveService,
                         new CdkProjectHandler(orchestratorInteractiveService, commandLineWrapper),
                         new AWSResourceQueryer(new DefaultAWSClientFactory()),
-                        session);
+                        session,
+                        cdkManager);
 
                     await deploy.ExecuteAsync(saveCdkProject);
 

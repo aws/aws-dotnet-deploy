@@ -81,7 +81,7 @@ namespace AWS.Deploy.Orchestrator.CDK
              * `-- aws-cdk@0.0.0
              */
             var standardOut = result.StandardOut;
-            var lines = standardOut.Split(Environment.NewLine);
+            var lines = standardOut.Split('\n'); // Environment.NewLine doesn't work here.
             if (lines.Length < 2)
             {
                 return TryGetResult.Failure<Version>();

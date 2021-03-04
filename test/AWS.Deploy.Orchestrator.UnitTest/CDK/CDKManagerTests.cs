@@ -4,7 +4,6 @@
 using System;
 using System.Threading.Tasks;
 using AWS.Deploy.Orchestrator.CDK;
-using AWS.Deploy.Orchestrator.Utilities;
 using Moq;
 using Xunit;
 

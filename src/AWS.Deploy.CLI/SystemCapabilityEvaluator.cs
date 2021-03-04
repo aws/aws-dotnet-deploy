@@ -17,7 +17,6 @@ namespace AWS.Deploy.CLI
 
     internal class SystemCapabilityEvaluator : ISystemCapabilityEvaluator
     {
-        private readonly Version _minimumCDKVersion = Version.Parse("1.89.0");
         private readonly ICommandLineWrapper _commandLineWrapper;
         private readonly CDKManager _cdkManager;
 
@@ -31,13 +30,11 @@ namespace AWS.Deploy.CLI
         {
             var dockerTask = HasDockerInstalledAndRunning();
             var nodeTask = HasMinVersionNodeJs();
-            var cdkTask = InstallCDKIfNeeded();
 
             var capabilities = new SystemCapabilities
             {
                 DockerInstalled = await dockerTask,
                 NodeJsMinVersionInstalled = await nodeTask,
-                CdkNpmModuleInstalledGlobally = await cdkTask
             };
 
             return capabilities;
@@ -77,12 +74,6 @@ namespace AWS.Deploy.CLI
                 return false;
 
             return version.Major > 10 || version.Major == 10 && version.Minor >= 3;
-        }
-
-        private Task<bool> InstallCDKIfNeeded()
-        {
-            // return await _cdkManager.InstallIfNeeded(Path.Combine(Path.GetTempPath(), "AWS.Deploy"), _minimumCDKVersion);
-            throw new NotImplementedException();
         }
     }
 }
