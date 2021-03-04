@@ -9,19 +9,19 @@ using AWS.Deploy.Orchestrator.Utilities;
 namespace AWS.Deploy.Orchestrator.CDK
 {
     /// <summary>
-    /// Abstracts low level node package manager commands to list and install AWS CDK CLI
+    /// Abstracts low level node package manager commands to list and install CDK CLI
     /// in high level APIs.
     /// </summary>
     public interface ICDKInstaller
     {
         /// <summary>
-        /// Gets AWS CDK CLI version installed in global node_modules using npm command.
+        /// Gets CDK CLI version installed in global node_modules using npm command.
         /// </summary>
         /// <returns><see cref="Version"/> object wrapped in <see cref="TryGetResult{TResult}"/></returns>
         Task<TryGetResult<Version>> GetGlobalVersion();
 
         /// <summary>
-        /// Gets AWS CDK CLI version installed <see cref="workingDirectory"/> using npm command.
+        /// Gets CDK CLI version installed <see cref="workingDirectory"/> using npm command.
         /// </summary>
         /// <param name="workingDirectory">Directory for local node app.</param>
         /// <returns><see cref="Version"/> object wrapped in <see cref="TryGetResult{TResult}"/></returns>
@@ -31,7 +31,7 @@ namespace AWS.Deploy.Orchestrator.CDK
         /// Installs local version of the AWS SDK CLI in the given working directory
         /// </summary>
         /// <param name="workingDirectory">Directory for local node app.</param>
-        /// <param name="version">AWS CDK CLI version to update</param>
+        /// <param name="version">CDK CLI version to update</param>
         Task Install(string workingDirectory, Version version);
     }
 
@@ -62,7 +62,16 @@ namespace AWS.Deploy.Orchestrator.CDK
                 command.Append(" --global");
             }
 
-            var result = await _commandLineWrapper.TryRunWithResult(command.ToString(), workingDirectory, false);
+            TryRunResult result;
+
+            try
+            {
+                result = await _commandLineWrapper.TryRunWithResult(command.ToString(), workingDirectory, false);
+            }
+            catch (Exception exception)
+            {
+                throw new NPMCommandFailedException($"Failed to execute {command}", exception);
+            }
 
             /*
              * A typical Standard out looks like with version information in line 2

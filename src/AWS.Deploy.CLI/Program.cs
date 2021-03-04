@@ -17,6 +17,7 @@ using AWS.Deploy.Common.IO;
 using System.Reflection;
 using System.Linq;
 using System.Text;
+using AWS.Deploy.Common.Extensions;
 using AWS.Deploy.Orchestrator.CDK;
 
 namespace AWS.Deploy.CLI
@@ -73,8 +74,10 @@ namespace AWS.Deploy.CLI
                             awsRegion);
 
                     var fileManager = new FileManager();
-                    var templateInitializer = new TemplateWriter(PackageJsonLocator.FindTemplatesPath(), fileManager);
-                    var nodeInitializer = new NodeInitializer(commandLineWrapper, templateInitializer, fileManager);
+                    var packageJsonGenerator = new PackageJsonGenerator(
+                        typeof(PackageJsonGenerator).Assembly
+                        .ReadEmbeddedFile(PackageJsonGenerator.TemplateIdentifier));
+                    var nodeInitializer = new NPMPackageInitializer(commandLineWrapper, packageJsonGenerator, fileManager);
                     var cdkInstaller = new CDKInstaller(commandLineWrapper);
                     var cdkManager = new CDKManager(cdkInstaller, nodeInitializer);
                     var systemCapabilityEvaluator = new SystemCapabilityEvaluator(commandLineWrapper, cdkManager);

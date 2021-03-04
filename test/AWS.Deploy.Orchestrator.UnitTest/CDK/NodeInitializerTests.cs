@@ -12,7 +12,7 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
     public class NodeInitializerTests
     {
         private readonly TestCommandLineWrapper _testCommandLineWrapper;
-        private readonly INodeInitializer _nodeInitializer;
+        private readonly INPMPackageInitializer _inpmPackageInitializer;
         private readonly TestFileManager _fileManager;
         private const string _workingDirectory = @"c:\fake\path";
 
@@ -43,8 +43,8 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
         {
             _fileManager = new TestFileManager();
             _testCommandLineWrapper = new TestCommandLineWrapper();
-            var templateManager = new TemplateWriter(_packageJsonFileName, _fileManager);
-            _nodeInitializer = new NodeInitializer(_testCommandLineWrapper, templateManager, _fileManager);
+            var packageJsonGenerator = new PackageJsonGenerator(_packageJsonTemplate);
+            _inpmPackageInitializer = new NPMPackageInitializer(_testCommandLineWrapper, packageJsonGenerator, _fileManager);
         }
 
         [Fact]
@@ -54,7 +54,7 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
             await _fileManager.WriteAllTextAsync(Path.Combine(_workingDirectory, _packageJsonFileName), _packageJsonContent);
 
             // Act
-            var isInitialized = _nodeInitializer.IsInitialized(_workingDirectory);
+            var isInitialized = _inpmPackageInitializer.IsInitialized(_workingDirectory);
 
             // Assert
             Assert.True(isInitialized);
@@ -63,17 +63,17 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
         [Fact]
         public void IsInitialized_PackagesJsonDoesNotExist()
         {
-            Assert.False(_nodeInitializer.IsInitialized(_workingDirectory));
+            Assert.False(_inpmPackageInitializer.IsInitialized(_workingDirectory));
         }
 
         [Fact]
-        public async Task Initialize()
+        public async Task Initialize_PackageJsonDoesNotExist()
         {
             // Arrange: Setup template file
             _fileManager.InMemoryStore[_packageJsonFileName] = _packageJsonTemplate;
 
             // Act: Initialize node app
-            await _nodeInitializer.Initialize(_workingDirectory, Version.Parse("1.0.1"));
+            await _inpmPackageInitializer.Initialize(_workingDirectory, Version.Parse("1.0.1"));
 
             // Assert: verify initialized package.json
             var actualPackageJsonContent = await _fileManager.ReadAllTextAsync(Path.Combine(_workingDirectory, _packageJsonFileName));

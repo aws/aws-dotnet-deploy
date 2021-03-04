@@ -27,9 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="CDK\package.json.template">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <EmbeddedResource Include="CDK\package.json.template" />
   </ItemGroup>
 
 </Project>

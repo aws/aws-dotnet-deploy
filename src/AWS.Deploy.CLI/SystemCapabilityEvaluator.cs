@@ -79,9 +79,10 @@ namespace AWS.Deploy.CLI
             return version.Major > 10 || version.Major == 10 && version.Minor >= 3;
         }
 
-        private async Task<bool> InstallCDKIfNeeded()
+        private Task<bool> InstallCDKIfNeeded()
         {
-            return await _cdkManager.InstallIfNeeded(Path.Combine(Path.GetTempPath(), "AWS.Deploy"), _minimumCDKVersion);
+            // return await _cdkManager.InstallIfNeeded(Path.Combine(Path.GetTempPath(), "AWS.Deploy"), _minimumCDKVersion);
+            throw new NotImplementedException();
         }
     }
 }
