@@ -50,9 +50,14 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
         [Fact]
         public async Task IsInitialized_PackagesJsonExists()
         {
+            // Arrange: create a fake package.json file
             await _fileManager.WriteAllTextAsync(Path.Combine(_workingDirectory, _packageJsonFileName), _packageJsonContent);
 
-            Assert.True(_nodeInitializer.IsInitialized(_workingDirectory));
+            // Act
+            var isInitialized = _nodeInitializer.IsInitialized(_workingDirectory);
+
+            // Assert
+            Assert.True(isInitialized);
         }
 
         [Fact]
@@ -64,13 +69,13 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
         [Fact]
         public async Task Initialize()
         {
-            // Setup template file
+            // Arrange: Setup template file
             _fileManager.InMemoryStore[_packageJsonFileName] = _packageJsonTemplate;
 
-            // Initialize node app
+            // Act: Initialize node app
             await _nodeInitializer.Initialize(_workingDirectory, Version.Parse("1.0.1"));
 
-            // Verify initialized package.json
+            // Assert: verify initialized package.json
             var actualPackageJsonContent = await _fileManager.ReadAllTextAsync(Path.Combine(_workingDirectory, _packageJsonFileName));
             Assert.Equal(_packageJsonContent, actualPackageJsonContent);
 

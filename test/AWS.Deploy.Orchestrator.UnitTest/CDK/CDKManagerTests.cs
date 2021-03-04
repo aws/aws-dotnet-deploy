@@ -29,13 +29,18 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
         [InlineData("1.0.1", "1.0.1")]
         public async Task Install_GlobalCDKExists(string installedVersion, string requiredVersion)
         {
+            // Arrange
             _mockCdkManager
                 .Setup(cm => cm.GetGlobalVersion())
                 .Returns(Task.FromResult(TryGetResult.FromResult(Version.Parse(installedVersion))));
 
+            // Act
             var isCDKInstalled = await _cdkManager.InstallIfNeeded(_workingDirectory, Version.Parse(requiredVersion));
 
+            // Assert
             Assert.True(isCDKInstalled);
+
+            // when CDK CLI is installed in global node_modules, local node_modules must not be referenced.
             _mockCdkManager.Verify(cm => cm.GetLocalVersion(_workingDirectory), Times.Never);
         }
 
@@ -43,6 +48,7 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
         [InlineData("1.0.1")]
         public async Task Install_NodeAppNotInitialized(string requiredVersion)
         {
+            // Arrange
             _mockCdkManager
                 .Setup(cm => cm.GetGlobalVersion())
                 .Returns(Task.FromResult(TryGetResult.Failure<Version>()));
@@ -53,10 +59,14 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
 
             _mockNodeInitializer.Setup(nodeInitializer => nodeInitializer.IsInitialized(_workingDirectory)).Returns(false);
 
+            // Act
             var isCDKInstalled = await _cdkManager.InstallIfNeeded(_workingDirectory, Version.Parse(requiredVersion));
 
+            // Assert
             Assert.True(isCDKInstalled);
-            _mockNodeInitializer.Verify(nodeInitializer => nodeInitializer.Initialize(_workingDirectory, Version.Parse(requiredVersion)));
+
+            // Node app must be initialized if global node_modules doesn't contain AWS CDK CLI.
+            _mockNodeInitializer.Verify(nodeInitializer => nodeInitializer.Initialize(_workingDirectory, Version.Parse(requiredVersion)), Times.Once);
         }
 
         [Theory]
@@ -64,6 +74,7 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
         [InlineData("1.0.1", "1.0.1")]
         public async Task Install_LocalCDKExists(string installedVersion, string requiredVersion)
         {
+            // Arrange
             _mockCdkManager
                 .Setup(cm => cm.GetGlobalVersion())
                 .Returns(Task.FromResult(TryGetResult.Failure<Version>()));
@@ -72,9 +83,13 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
                 .Setup(cm => cm.GetLocalVersion(_workingDirectory))
                 .Returns(Task.FromResult(TryGetResult.FromResult(Version.Parse(installedVersion))));
 
+            // Act
             var isCDKInstalled = await _cdkManager.InstallIfNeeded(_workingDirectory, Version.Parse(requiredVersion));
 
+            // Assert
             Assert.True(isCDKInstalled);
+
+            // When a local node_modules contains a compatible AWS CDK CLI, AWS CDK CLI installation must not be performed.
             _mockCdkManager.Verify(cm => cm.Install(_workingDirectory, Version.Parse(requiredVersion)), Times.Never);
         }
 
@@ -82,6 +97,7 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
         [InlineData("2.0.0")]
         public async Task Install_LocalCDKDoesNotExist(string requiredVersion)
         {
+            // Arrange
             _mockCdkManager
                 .Setup(cm => cm.GetGlobalVersion())
                 .Returns(Task.FromResult(TryGetResult.Failure<Version>()));
@@ -90,9 +106,13 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
                 .Setup(cm => cm.GetLocalVersion(_workingDirectory))
                 .Returns(Task.FromResult(TryGetResult.Failure<Version>()));
 
+            // Act
             var isCDKInstalled = await _cdkManager.InstallIfNeeded(_workingDirectory, Version.Parse(requiredVersion));
 
+            // Assert
             Assert.True(isCDKInstalled);
+
+            // When a local node_modules doesn't contain a compatible AWS CDK CLI, AWS CDK CLI installation must be performed in local node_modules.
             _mockCdkManager.Verify(cm => cm.Install(_workingDirectory, Version.Parse(requiredVersion)), Times.Once);
         }
     }

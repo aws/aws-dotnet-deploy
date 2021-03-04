@@ -24,13 +24,17 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
         [Fact]
         public async Task GetVersion_InGlobalNodeModules_CDKExists()
         {
+            // Arrange: add fake version information to return
             _commandLineWrapper.Results.Add(new TryRunResult
             {
                 StandardOut = @"C:\Users\user\AppData\Roaming\npm
 +-- aws-cdk@1.91.0"
             });
+
+            // Act
             var globalCDKVersionResult = await _cdkInstaller.GetGlobalVersion();
 
+            // Assert
             Assert.True(globalCDKVersionResult.Success);
             Assert.Equal(0, Version.Parse("1.91.0").CompareTo(globalCDKVersionResult.Result));
             Assert.Contains(("npm list aws-cdk --global", string.Empty, false), _commandLineWrapper.Commands);
@@ -39,13 +43,17 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
         [Fact]
         public async Task GetVersion_InLocalNodeModules_CDKExists()
         {
+            // Arrange: add fake version information to return
             _commandLineWrapper.Results.Add(new TryRunResult
             {
                 StandardOut = @"C:\fake\path
 +-- aws-cdk@1.91.0"
             });
+
+            // Act
             var localCDKVersionResult = await _cdkInstaller.GetLocalVersion(_workingDirectory);
 
+            // Assert
             Assert.True(localCDKVersionResult.Success);
             Assert.Equal(0, Version.Parse("1.91.0").CompareTo(localCDKVersionResult.Result));
             Assert.Contains(("npm list aws-cdk", _workingDirectory, false), _commandLineWrapper.Commands);
@@ -54,13 +62,17 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
         [Fact]
         public async Task GetVersion_InLocalNodeModules_CDKDependentExists()
         {
+            // Arrange: add fake version information to return for a CDK CLI plugin
             _commandLineWrapper.Results.Add(new TryRunResult
             {
                 StandardOut = @"C:\Users\user\AppData\Roaming\npm
 `-- cdk-assume-role-credential-plugin@1.0.0 (git+https://github.com/aws-samples/cdk-assume-role-credential-plugin.git#5167c798a50bc9c96a9d660b28306428be4e99fb)"
             });
+
+            // Act
             var localCDKVersionResult = await _cdkInstaller.GetLocalVersion(_workingDirectory);
 
+            // Assert
             Assert.False(localCDKVersionResult.Success);
             Assert.Null(localCDKVersionResult.Result);
             Assert.Contains(("npm list aws-cdk", _workingDirectory, false), _commandLineWrapper.Commands);
@@ -69,13 +81,17 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
         [Fact]
         public async Task GetVersion_InLocalNodeModules_CDKDoesNotExist()
         {
+            // Arrange: add empty version information to return
             _commandLineWrapper.Results.Add(new TryRunResult
             {
                 StandardOut = @"C:\Users\user\AppData\Local\Temp\AWS.Deploy\Projects
 `-- (empty)"
             });
+
+            // Act
             var localCDKVersionResult = await _cdkInstaller.GetLocalVersion(_workingDirectory);
 
+            // Assert
             Assert.False(localCDKVersionResult.Success);
             Assert.Null(localCDKVersionResult.Result);
             Assert.Contains(("npm list aws-cdk", _workingDirectory, false), _commandLineWrapper.Commands);
@@ -84,8 +100,10 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
         [Fact]
         public async Task Update_InLocalNodeModules()
         {
+            // Act
             await _cdkInstaller.Install(_workingDirectory, Version.Parse("1.0.2"));
 
+            // Assert
             Assert.Contains(("npm install aws-cdk@1.0.2", _workingDirectory, false), _commandLineWrapper.Commands);
         }
     }
