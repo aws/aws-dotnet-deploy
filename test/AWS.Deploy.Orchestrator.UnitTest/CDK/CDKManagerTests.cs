@@ -29,7 +29,9 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
         [InlineData("1.0.1", "1.0.1")]
         public async Task Install_GlobalCDKExists(string installedVersion, string requiredVersion)
         {
-            _mockCdkManager.Setup(cm => cm.GetGlobalVersion()).Returns(Task.FromResult(TryGetResult.FromResult(Version.Parse(installedVersion))));
+            _mockCdkManager
+                .Setup(cm => cm.GetGlobalVersion())
+                .Returns(Task.FromResult(TryGetResult.FromResult(Version.Parse(installedVersion))));
 
             var isCDKInstalled = await _cdkManager.InstallIfNeeded(_workingDirectory, Version.Parse(requiredVersion));
 
@@ -41,8 +43,14 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
         [InlineData("1.0.1")]
         public async Task Install_NodeAppNotInitialized(string requiredVersion)
         {
-            _mockCdkManager.Setup(cm => cm.GetGlobalVersion()).Returns(Task.FromResult(TryGetResult.Failure<Version>()));
-            _mockCdkManager.Setup(cm => cm.GetLocalVersion(_workingDirectory)).Returns(Task.FromResult(TryGetResult.Failure<Version>()));
+            _mockCdkManager
+                .Setup(cm => cm.GetGlobalVersion())
+                .Returns(Task.FromResult(TryGetResult.Failure<Version>()));
+
+            _mockCdkManager
+                .Setup(cm => cm.GetLocalVersion(_workingDirectory))
+                .Returns(Task.FromResult(TryGetResult.Failure<Version>()));
+
             _mockNodeInitializer.Setup(nodeInitializer => nodeInitializer.IsInitialized(_workingDirectory)).Returns(false);
 
             var isCDKInstalled = await _cdkManager.InstallIfNeeded(_workingDirectory, Version.Parse(requiredVersion));
@@ -56,9 +64,12 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
         [InlineData("1.0.1", "1.0.1")]
         public async Task Install_LocalCDKExists(string installedVersion, string requiredVersion)
         {
-            _mockCdkManager.Setup(cm => cm.GetGlobalVersion())
+            _mockCdkManager
+                .Setup(cm => cm.GetGlobalVersion())
                 .Returns(Task.FromResult(TryGetResult.Failure<Version>()));
-            _mockCdkManager.Setup(cm => cm.GetLocalVersion(_workingDirectory))
+
+            _mockCdkManager
+                .Setup(cm => cm.GetLocalVersion(_workingDirectory))
                 .Returns(Task.FromResult(TryGetResult.FromResult(Version.Parse(installedVersion))));
 
             var isCDKInstalled = await _cdkManager.InstallIfNeeded(_workingDirectory, Version.Parse(requiredVersion));
@@ -71,9 +82,12 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
         [InlineData("2.0.0")]
         public async Task Install_LocalCDKDoesNotExist(string requiredVersion)
         {
-            _mockCdkManager.Setup(cm => cm.GetGlobalVersion())
+            _mockCdkManager
+                .Setup(cm => cm.GetGlobalVersion())
                 .Returns(Task.FromResult(TryGetResult.Failure<Version>()));
-            _mockCdkManager.Setup(cm => cm.GetLocalVersion(_workingDirectory))
+
+            _mockCdkManager
+                .Setup(cm => cm.GetLocalVersion(_workingDirectory))
                 .Returns(Task.FromResult(TryGetResult.Failure<Version>()));
 
             var isCDKInstalled = await _cdkManager.InstallIfNeeded(_workingDirectory, Version.Parse(requiredVersion));
