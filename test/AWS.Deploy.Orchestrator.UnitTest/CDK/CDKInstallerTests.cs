@@ -11,13 +11,13 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
 {
     public class CDKInstallerTests
     {
-        private readonly TestCommandLineWrapperImpl _commandLineWrapper;
+        private readonly TestCommandLineWrapper _commandLineWrapper;
         private readonly CDKInstaller _cdkInstaller;
         private const string _workingDirectory = @"c:\fake\path";
 
         public CDKInstallerTests()
         {
-            _commandLineWrapper = new TestCommandLineWrapperImpl();
+            _commandLineWrapper = new TestCommandLineWrapper();
             _cdkInstaller = new CDKInstaller(_commandLineWrapper);
         }
 

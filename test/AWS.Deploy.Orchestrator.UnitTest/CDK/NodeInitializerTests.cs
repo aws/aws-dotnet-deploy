@@ -11,9 +11,9 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
 {
     public class NodeInitializerTests
     {
-        private readonly TestCommandLineWrapperImpl _testCommandLineWrapper;
+        private readonly TestCommandLineWrapper _testCommandLineWrapper;
         private readonly INodeInitializer _nodeInitializer;
-        private readonly TestFileManagerImpl _fileManager;
+        private readonly TestFileManager _fileManager;
         private const string _workingDirectory = @"c:\fake\path";
 
         private const string _packageJsonContent = @"
@@ -41,8 +41,8 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
 
         public NodeInitializerTests()
         {
-            _fileManager = new TestFileManagerImpl();
-            _testCommandLineWrapper = new TestCommandLineWrapperImpl();
+            _fileManager = new TestFileManager();
+            _testCommandLineWrapper = new TestCommandLineWrapper();
             var templateManager = new TemplateWriter(_packageJsonFileName, _fileManager);
             _nodeInitializer = new NodeInitializer(_testCommandLineWrapper, templateManager, _fileManager);
         }

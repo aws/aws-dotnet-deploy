@@ -8,7 +8,7 @@ using AWS.Deploy.Common.IO;
 
 namespace AWS.Deploy.Orchestrator.UnitTest
 {
-    public class TestFileManagerImpl : IFileManager
+    public class TestFileManager : IFileManager
     {
         public readonly Dictionary<string, string> InMemoryStore = new Dictionary<string, string>();
 

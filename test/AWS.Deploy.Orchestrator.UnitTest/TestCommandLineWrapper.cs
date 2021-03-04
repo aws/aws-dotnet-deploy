@@ -10,7 +10,7 @@ using AWS.Deploy.Orchestrator.Utilities;
 
 namespace AWS.Deploy.Orchestrator.UnitTest
 {
-    public class TestCommandLineWrapperImpl : ICommandLineWrapper
+    public class TestCommandLineWrapper : ICommandLineWrapper
     {
         public readonly List<(string, string, bool)> Commands = new List<(string, string, bool)>();
         public readonly List<TryRunResult> Results = new List<TryRunResult>();
