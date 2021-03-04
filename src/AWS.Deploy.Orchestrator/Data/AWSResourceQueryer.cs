@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.IO;
+using Amazon.ECS;
+using Amazon.ECS.Model;
 using Amazon.EC2;
 using Amazon.EC2.Model;
 using Amazon.ElasticBeanstalk;
@@ -19,6 +21,7 @@ namespace AWS.Deploy.Orchestrator.Data
 {
     public interface IAWSResourceQueryer
     {
+        Task<List<Cluster>> ListOfECSClusters(OrchestratorSession session);
         Task<List<ApplicationDescription>> ListOfElasticBeanstalkApplications(OrchestratorSession session);
         Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(OrchestratorSession session, string applicationName);
         Task<List<KeyPairInfo>> ListOfEC2KeyPairs(OrchestratorSession session);
@@ -39,6 +42,23 @@ namespace AWS.Deploy.Orchestrator.Data
         public AWSResourceQueryer(IAWSClientFactory awsClientFactory)
         {
             _awsClientFactory = awsClientFactory;
+        }
+
+        public async Task<List<Cluster>> ListOfECSClusters(OrchestratorSession session)
+        {
+            var ecsClient = _awsClientFactory.GetAWSClient<IAmazonECS>(session.AWSCredentials, session.AWSRegion);
+
+            var clusterArns = await ecsClient.Paginators
+                .ListClusters(new ListClustersRequest())
+                .ClusterArns
+                .ToListAsync();
+
+            var clusters = await ecsClient.DescribeClustersAsync(new DescribeClustersRequest
+            {
+                Clusters = clusterArns
+            });
+
+            return clusters.Clusters;
         }
 
         public async Task<List<ApplicationDescription>> ListOfElasticBeanstalkApplications(OrchestratorSession session)

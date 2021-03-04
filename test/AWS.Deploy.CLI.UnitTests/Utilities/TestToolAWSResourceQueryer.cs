@@ -46,6 +46,7 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
         public Task<PlatformSummary> GetLatestElasticBeanstalkPlatformArn(OrchestratorSession session) => throw new NotImplementedException();
         public Task<List<Vpc>> GetListOfVpcs(OrchestratorSession session) => throw new NotImplementedException();
         public Task<List<KeyPairInfo>> ListOfEC2KeyPairs(OrchestratorSession session) => throw new NotImplementedException();
+        public Task<List<Amazon.ECS.Model.Cluster>> ListOfECSClusters(OrchestratorSession session) => throw new NotImplementedException();
         public Task<List<ApplicationDescription>> ListOfElasticBeanstalkApplications(OrchestratorSession session) => throw new NotImplementedException();
         public Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(OrchestratorSession session, string applicationName) => throw new NotImplementedException();
         public Task<List<Role>> ListOfIAMRoles(OrchestratorSession session, string servicePrincipal) => throw new NotImplementedException();

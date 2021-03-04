@@ -46,11 +46,25 @@ namespace ConsoleAppECSFargateScheduleTask
                 });
             }
 
-            var cluster = new Cluster(this, "Cluster", new ClusterProps
+            ICluster cluster;
+            if (settings.ECSCluster.CreateNew)
             {
-                Vpc = vpc,
-                ClusterName = settings.ClusterName
-            });
+                cluster = new Cluster(this, "Cluster", new ClusterProps
+                {
+                    Vpc = vpc,
+                    ClusterName = settings.ECSCluster.NewClusterName
+                });
+            }
+            else
+            {
+                cluster = Cluster.FromClusterAttributes(this, "Cluster", new ClusterAttributes
+                {
+                    ClusterArn = settings.ECSCluster.ClusterArn,
+                    ClusterName = ECSFargateUtilities.GetClusterNameFromArn(settings.ECSCluster.ClusterArn),
+                    SecurityGroups = new ISecurityGroup[0],
+                    Vpc = vpc
+                });
+            }
 
             IRole taskRole;
             if (settings.ApplicationIAMRole.CreateNew)

@@ -78,14 +78,53 @@
 
     "OptionSettings": [
         {
-            "Id": "ClusterName",
-            "Name": "Cluster Name",
-            "Description": "The name of the ECS cluster.",
-            "Type": "String",
+            "Id": "ECSCluster",
+            "Name": "ECS Cluster",
+            "Description": "The ECS cluster used for the deployment.",
+            "Type": "Object",
             "TypeHint": "ECSCluster",
-            "DefaultValue": "{ProjectName}",
             "AdvancedSetting": false,
-            "Updatable": false
+            "Updatable": false,
+            "ChildOptionSettings": [
+                {
+                    "Id": "CreateNew",
+                    "Name": "Create New ECS Cluster",
+                    "Description": "Do you want to create a new ECS Cluster?",
+                    "Type": "Bool",
+                    "DefaultValue": true,
+                    "AdvancedSetting": false,
+                    "Updatable": false
+                },
+                {
+                    "Id": "ClusterArn",
+                    "Name": "Existing Cluster Arn",
+                    "Description": "The Arn of the existing cluster to use.",
+                    "Type": "String",
+                    "AdvancedSetting": false,
+                    "Updatable": false,
+                    "DependsOn": [
+                        {
+                            "Id": "ECSCluster.CreateNew",
+                            "Value": false
+                        }
+                    ]
+                },
+                {
+                    "Id": "NewClusterName",
+                    "Name": "New Cluster Name",
+                    "Description": "The name of the new cluster to create.",
+                    "Type": "String",
+                    "DefaultValue": "{ProjectName}",
+                    "AdvancedSetting": false,
+                    "Updatable": false,
+                    "DependsOn": [
+                        {
+                            "Id": "ECSCluster.CreateNew",
+                            "Value": true
+                        }
+                    ]
+                }
+            ]
         },
         {
             "Id": "ECSServiceName",
