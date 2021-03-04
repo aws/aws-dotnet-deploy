@@ -38,7 +38,7 @@ namespace AWS.Deploy.Orchestrator.CDK
         {
             try
             {
-                var globalCDKVersionResult = await _cdkInstaller.GetVersion(workingDirectory, true);
+                var globalCDKVersionResult = await _cdkInstaller.GetGlobalVersion();
                 if (globalCDKVersionResult.Success && globalCDKVersionResult.Result?.CompareTo(cdkVersion) >= 0)
                 {
                     return true;
@@ -50,7 +50,7 @@ namespace AWS.Deploy.Orchestrator.CDK
                     await _nodeInitializer.Initialize(workingDirectory, cdkVersion);
                 }
 
-                var localCDKVersionResult = await _cdkInstaller.GetVersion(workingDirectory, false);
+                var localCDKVersionResult = await _cdkInstaller.GetLocalVersion(workingDirectory);
                 if (localCDKVersionResult.Success && localCDKVersionResult.Result?.CompareTo(cdkVersion) >= 0)
                 {
                     return true;

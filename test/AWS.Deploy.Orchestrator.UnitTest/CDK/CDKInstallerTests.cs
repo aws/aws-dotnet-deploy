@@ -29,11 +29,11 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
                 StandardOut = @"C:\Users\user\AppData\Roaming\npm
 +-- aws-cdk@1.91.0"
             });
-            var globalCDKVersionResult = await _cdkInstaller.GetVersion(_workingDirectory, true);
+            var globalCDKVersionResult = await _cdkInstaller.GetGlobalVersion();
 
             Assert.True(globalCDKVersionResult.Success);
             Assert.Equal(0, Version.Parse("1.91.0").CompareTo(globalCDKVersionResult.Result));
-            Assert.Contains(("npm list aws-cdk --global", _workingDirectory, false), _commandLineWrapper.Commands);
+            Assert.Contains(("npm list aws-cdk --global", string.Empty, false), _commandLineWrapper.Commands);
         }
 
         [Fact]
@@ -44,7 +44,7 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
                 StandardOut = @"C:\fake\path
 +-- aws-cdk@1.91.0"
             });
-            var localCDKVersionResult = await _cdkInstaller.GetVersion(_workingDirectory, false);
+            var localCDKVersionResult = await _cdkInstaller.GetLocalVersion(_workingDirectory);
 
             Assert.True(localCDKVersionResult.Success);
             Assert.Equal(0, Version.Parse("1.91.0").CompareTo(localCDKVersionResult.Result));
@@ -59,7 +59,7 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
                 StandardOut = @"C:\Users\user\AppData\Roaming\npm
 `-- cdk-assume-role-credential-plugin@1.0.0 (git+https://github.com/aws-samples/cdk-assume-role-credential-plugin.git#5167c798a50bc9c96a9d660b28306428be4e99fb)"
             });
-            var localCDKVersionResult = await _cdkInstaller.GetVersion(_workingDirectory, false);
+            var localCDKVersionResult = await _cdkInstaller.GetLocalVersion(_workingDirectory);
 
             Assert.False(localCDKVersionResult.Success);
             Assert.Null(localCDKVersionResult.Result);
@@ -74,7 +74,7 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
                 StandardOut = @"C:\Users\user\AppData\Local\Temp\AWS.Deploy\Projects
 `-- (empty)"
             });
-            var localCDKVersionResult = await _cdkInstaller.GetVersion(_workingDirectory, false);
+            var localCDKVersionResult = await _cdkInstaller.GetLocalVersion(_workingDirectory);
 
             Assert.False(localCDKVersionResult.Success);
             Assert.Null(localCDKVersionResult.Result);
