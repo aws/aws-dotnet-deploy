@@ -8,16 +8,28 @@ using AWS.Deploy.Orchestrator.Utilities;
 
 namespace AWS.Deploy.Orchestrator.CDK
 {
-    public interface ICDKInstaller
-    {
-        Task<TryGetResult<Version>> GetVersion(string workingDirectory, bool checkGlobal);
-        Task Install(string workingDirectory, Version version);
-    }
-
     /// <summary>
     /// Abstracts low level node package manager commands to list and install AWS CDK CLI
     /// in high level APIs.
     /// </summary>
+    public interface ICDKInstaller
+    {
+        /// <summary>
+        /// Gets AWS CDK CLI version using npm command.
+        /// </summary>
+        /// <param name="workingDirectory">Directory for local node app.</param>
+        /// <param name="checkGlobal">If true, global installation of AWS CDK CLI is checked.</param>
+        /// <returns><see cref="Version"/> object wrapped in <see cref="TryGetResult{TResult}"/></returns>
+        Task<TryGetResult<Version>> GetVersion(string workingDirectory, bool checkGlobal);
+
+        /// <summary>
+        /// Installs local version of the AWS SDK CLI in the given working directory
+        /// </summary>
+        /// <param name="workingDirectory">Directory for local node app.</param>
+        /// <param name="version">AWS CDK CLI version to update</param>
+        Task Install(string workingDirectory, Version version);
+    }
+
     public class CDKInstaller : ICDKInstaller
     {
         private readonly ICommandLineWrapper _commandLineWrapper;
@@ -27,12 +39,6 @@ namespace AWS.Deploy.Orchestrator.CDK
             _commandLineWrapper = commandLineWrapper;
         }
 
-        /// <summary>
-        /// Gets AWS CDK CLI version using npm command.
-        /// </summary>
-        /// <param name="workingDirectory">Directory for local node app.</param>
-        /// <param name="checkGlobal">If true, global installation of AWS CDK CLI is checked.</param>
-        /// <returns></returns>
         public async Task<TryGetResult<Version>> GetVersion(string workingDirectory, bool checkGlobal)
         {
             var command = new StringBuilder("npm list aws-cdk");
@@ -69,12 +75,6 @@ namespace AWS.Deploy.Orchestrator.CDK
             return TryGetResult.Failure<Version>();
         }
 
-        /// <summary>
-        /// Installs local version of the AWS SDK CLI in the given working directory
-        /// </summary>
-        /// <param name="workingDirectory">Directory for local node app.</param>
-        /// <param name="version">AWS CDK CLI version to update</param>
-        /// <returns></returns>
         public async Task Install(string workingDirectory, Version version)
         {
             await _commandLineWrapper.Run($"npm install aws-cdk@{version}", workingDirectory, false);

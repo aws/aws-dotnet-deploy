@@ -13,7 +13,19 @@ namespace AWS.Deploy.Orchestrator.CDK
 {
     public interface INodeInitializer
     {
+        /// <summary>
+        /// Checks whether package.json file exists at given working directory or not.
+        /// If there exists a package.json file, it is assumed to have node initialized.
+        /// </summary>
+        /// <param name="workingDirectory">Directory for local node app.</param>
+        /// <returns>True, if package.json exists at <see cref="workingDirectory"/></returns>
         bool IsInitialized(string workingDirectory);
+
+        /// <summary>
+        /// Initializes node app at <see cref="workingDirectory"/>
+        /// </summary>
+        /// <param name="workingDirectory">Directory for local node app.</param>
+        /// <param name="cdkVersion">Version of AWS CDK CLI</param>
         Task Initialize(string workingDirectory, Version cdkVersion);
     }
 
@@ -35,23 +47,12 @@ namespace AWS.Deploy.Orchestrator.CDK
             _fileManager = fileManager;
         }
 
-        /// <summary>
-        /// Checks whether package.json file exists at given working directory or not.
-        /// If there exists a package.json file, it is assumed to have node initialized.
-        /// </summary>
-        /// <param name="workingDirectory">Directory for local node app.</param>
-        /// <returns>True, if package.json exists at <see cref="workingDirectory"/></returns>
         public bool IsInitialized(string workingDirectory)
         {
             var packageFilePath = Path.Combine(workingDirectory, "package.json");
             return _fileManager.Exists(packageFilePath);
         }
 
-        /// <summary>
-        /// Initializes node app at <see cref="workingDirectory"/>
-        /// </summary>
-        /// <param name="workingDirectory">Directory for local node app.</param>
-        /// <param name="cdkVersion">Version of AWS CDK CLI</param>
         public async Task Initialize(string workingDirectory, Version cdkVersion)
         {
             var assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;
