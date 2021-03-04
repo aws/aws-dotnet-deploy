@@ -11,6 +11,14 @@ using AWS.Deploy.Orchestrator.Utilities;
 
 namespace AWS.Deploy.Orchestrator.CDK
 {
+    /// <summary>
+    /// Orchestrates local node app.
+    /// It makes sure that a local node application is initialized in order to be able to
+    /// install CDK CLI in local node_modules.
+    /// </summary>
+    /// <remarks>
+    /// When npm package is initialized, a specified version of CDK CLI is installed along with initialization.
+    /// </remarks>
     public interface INPMPackageInitializer
     {
         /// <summary>
@@ -22,10 +30,10 @@ namespace AWS.Deploy.Orchestrator.CDK
         bool IsInitialized(string workingDirectory);
 
         /// <summary>
-        /// Initializes node app at <see cref="workingDirectory"/>
+        /// Initializes npm package at <see cref="workingDirectory"/>
         /// </summary>
         /// <remarks>
-        /// Installs CDK CLI along with initialization.
+        /// When npm package is initialized, a specified version of CDK CLI is installed along with installation.
         /// </remarks>w
         /// <param name="workingDirectory">Directory for local node app.</param>
         /// <param name="cdkVersion">Version of CDK CLI.</param>
@@ -34,11 +42,6 @@ namespace AWS.Deploy.Orchestrator.CDK
         Task Initialize(string workingDirectory, Version cdkVersion);
     }
 
-    /// <summary>
-    /// Orchestrates local node app.
-    /// It makes sure that a local node application is initialized in order to be able to
-    /// install CDK CLI in local node_modules.
-    /// </summary>
     public class NPMPackageInitializer : INPMPackageInitializer
     {
         private readonly ICommandLineWrapper _commandLineWrapper;

@@ -8,6 +8,9 @@ using AWS.Deploy.Common.Extensions;
 
 namespace AWS.Deploy.Orchestrator.CDK
 {
+    /// <summary>
+    /// Generates package.json file from the given template.
+    /// </summary>
     public interface IPackageJsonGenerator
     {
         /// <summary>

@@ -46,7 +46,7 @@ namespace AWS.Deploy.Orchestrator.CDK
             if (!isNPMPackageInitialized)
             {
                 await _npmPackageInitializer.Initialize(workingDirectory, cdkVersion);
-                return; // There is no need to install CDK CLI explicity, npm install takes care of first time bootstrap.
+                return; // There is no need to install CDK CLI explicitly, npm install takes care of first time bootstrap.
             }
 
             var localCDKVersionResult = await _cdkInstaller.GetLocalVersion(workingDirectory);
