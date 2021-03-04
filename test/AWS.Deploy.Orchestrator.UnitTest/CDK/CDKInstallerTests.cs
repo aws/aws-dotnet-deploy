@@ -24,7 +24,7 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
         [Fact]
         public async Task GetVersion_InGlobalNodeModules_CDKExists()
         {
-            _commandLineWrapper.Results.Add(new TryRunResult()
+            _commandLineWrapper.Results.Add(new TryRunResult
             {
                 StandardOut = @"C:\Users\user\AppData\Roaming\npm
 +-- aws-cdk@1.91.0"
@@ -39,7 +39,7 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
         [Fact]
         public async Task GetVersion_InLocalNodeModules_CDKExists()
         {
-            _commandLineWrapper.Results.Add(new TryRunResult()
+            _commandLineWrapper.Results.Add(new TryRunResult
             {
                 StandardOut = @"C:\fake\path
 +-- aws-cdk@1.91.0"
@@ -54,7 +54,7 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
         [Fact]
         public async Task GetVersion_InLocalNodeModules_CDKDependentExists()
         {
-            _commandLineWrapper.Results.Add(new TryRunResult()
+            _commandLineWrapper.Results.Add(new TryRunResult
             {
                 StandardOut = @"C:\Users\user\AppData\Roaming\npm
 `-- cdk-assume-role-credential-plugin@1.0.0 (git+https://github.com/aws-samples/cdk-assume-role-credential-plugin.git#5167c798a50bc9c96a9d660b28306428be4e99fb)"
@@ -69,7 +69,7 @@ namespace AWS.Deploy.Orchestrator.UnitTest.CDK
         [Fact]
         public async Task GetVersion_InLocalNodeModules_CDKDoesNotExist()
         {
-            _commandLineWrapper.Results.Add(new TryRunResult()
+            _commandLineWrapper.Results.Add(new TryRunResult
             {
                 StandardOut = @"C:\Users\user\AppData\Local\Temp\AWS.Deploy\Projects
 `-- (empty)"
