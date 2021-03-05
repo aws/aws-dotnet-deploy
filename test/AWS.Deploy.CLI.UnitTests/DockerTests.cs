@@ -36,7 +36,7 @@ namespace AWS.Deploy.CLI.UnitTests
         [Fact]
         public void DockerGenerateWebAppWithSolutionParentLevel()
         {
-            var projectPath = ResolvePath("WebAppWithSolutionParentLevel\\WebAppWithSolutionParentLevel");
+            var projectPath = ResolvePath(Path.Combine("WebAppWithSolutionParentLevel", "WebAppWithSolutionParentLevel"));
             var engine = new DockerEngine.DockerEngine(new ProjectDefinition(projectPath));
             engine.GenerateDockerFile();
 
@@ -56,7 +56,7 @@ namespace AWS.Deploy.CLI.UnitTests
         [Fact]
         public void DockerGenerateWebAppProjectDependencies()
         {
-            var projectPath = ResolvePath("WebAppProjectDependencies\\WebAppProjectDependencies");
+            var projectPath = ResolvePath(Path.Combine("WebAppProjectDependencies", "WebAppProjectDependencies"));
             var engine = new DockerEngine.DockerEngine(new ProjectDefinition(projectPath));
             engine.GenerateDockerFile();
 
