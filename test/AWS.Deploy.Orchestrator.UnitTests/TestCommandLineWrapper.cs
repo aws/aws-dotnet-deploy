@@ -10,7 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using AWS.Deploy.Orchestrator.Utilities;
 
-namespace AWS.Deploy.Orchestrator.UnitTest
+namespace AWS.Deploy.Orchestrator.UnitTests
 {
     public class TestCommandLineWrapper : ICommandLineWrapper
     {

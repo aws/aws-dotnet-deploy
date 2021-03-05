@@ -7,7 +7,7 @@ using AWS.Deploy.Orchestrator.CDK;
 using AWS.Deploy.Orchestrator.Utilities;
 using Xunit;
 
-namespace AWS.Deploy.Orchestrator.UnitTest.CDK
+namespace AWS.Deploy.Orchestrator.UnitTests.CDK
 {
     public class CDKInstallerTests
     {

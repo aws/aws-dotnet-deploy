@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using AWS.Deploy.Common.IO;
 
-namespace AWS.Deploy.Orchestrator.UnitTest
+namespace AWS.Deploy.Orchestrator.UnitTests
 {
     public class TestFileManager : IFileManager
     {
