@@ -11,7 +11,7 @@
         "language": "C#",
         "type": "project"
     },
-    "sourceName": "ConsoleAppEcsFargateTask",
+    "sourceName": "ConsoleAppECSFargateScheduleTask",
     "preferNameDirectory": true,
     "symbols": {
         "AWSAccountId": {
