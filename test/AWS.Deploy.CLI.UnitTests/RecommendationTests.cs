@@ -70,8 +70,8 @@ namespace AWS.Deploy.CLI.UnitTests
                 .ShouldBeTrue("Failed to receive Recommendation: " + Constants.CONSOLE_APP_FARGATE_SERVICE_RECIPE_ID);
 
             recommendations
-                .Any(r => r.Recipe.Id == Constants.CONSOLE_APP_FARGATE_TASK_RECIPE_ID)
-                .ShouldBeTrue("Failed to receive Recommendation: " + Constants.CONSOLE_APP_FARGATE_TASK_RECIPE_ID);
+                .Any(r => r.Recipe.Id == Constants.CONSOLE_APP_FARGATE_SCHEDULE_TASK_RECIPE_ID)
+                .ShouldBeTrue("Failed to receive Recommendation: " + Constants.CONSOLE_APP_FARGATE_SCHEDULE_TASK_RECIPE_ID);
         }
 
         [Theory]

@@ -5,13 +5,13 @@
         ".NET Deployment Tool"
     ],
     "name": "Console Template CDK Project for ECS Fargate Task deployment",
-    "identity": "AWS.Deploy.Recipes.ConsoleAppEcsFargateTask",
-    "shortName": "netdeploy.ConsoleAppEcsFargateTask",
+    "identity": "AWS.Deploy.Recipes.ConsoleAppECSFargateScheduleTask",
+    "shortName": "netdeploy.ConsoleAppECSFargateScheduleTask",
     "tags": {
         "language": "C#",
         "type": "project"
     },
-    "sourceName": "ConsoleAppEcsFargateTask",
+    "sourceName": "ConsoleAppECSFargateScheduleTask",
     "preferNameDirectory": true,
     "symbols": {
         "AWSAccountId": {
