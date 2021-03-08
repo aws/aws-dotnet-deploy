@@ -76,15 +76,21 @@ namespace AWS.Deploy.CLI.Commands
             string cloudApplicationName;
             if (existingApplications.Count == 0)
             {
+                var title = "Name the AWS stack to deploy your application to" + Environment.NewLine +
+                              "(a stack is a collection of AWS resources that you can manage as a single unit.)" + Environment.NewLine +
+                              "--------------------------------------------------------------------------------";
                 cloudApplicationName =
                     _consoleUtilities.AskUserForValue(
-                        "Enter name for Cloud Application",
+                        title,
                         GetDefaultApplicationName(new ProjectDefinition(_session.ProjectPath).ProjectPath),
                         allowEmpty: false);
             }
             else
             {
-                var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(existingApplications.Select(x => x.Name).ToList(), "Select Cloud Application to deploy to", true);
+                var title = "Select the AWS stack to deploy your application to" + Environment.NewLine +
+                              "(a stack is a collection of AWS resources that you can manage as a single unit.)";
+
+                var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(existingApplications.Select(x => x.Name).ToList(), title, askNewName: true, defaultNewName: GetDefaultApplicationName(new ProjectDefinition(_session.ProjectPath).ProjectPath));
                 cloudApplicationName = userResponse.SelectedOption ?? userResponse.NewName;
             }
 
@@ -92,6 +98,7 @@ namespace AWS.Deploy.CLI.Commands
 
             Recommendation selectedRecommendation = null;
 
+            _toolInteractiveService.WriteLine(string.Empty);
             // If using a previous deployment preset settings for deployment based on last deployment.
             if (existingCloudApplication != null)
             {
@@ -101,8 +108,7 @@ namespace AWS.Deploy.CLI.Commands
                 selectedRecommendation.ApplyPreviousSettings(existingCloudApplicationMetadata.Settings);
 
                 var header = $"Loading {existingCloudApplication.Name} settings:";
-
-                _toolInteractiveService.WriteLine(string.Empty);
+                
                 _toolInteractiveService.WriteLine(header);
                 _toolInteractiveService.WriteLine(new string('-', header.Length));
                 var optionSettings =
@@ -124,7 +130,7 @@ namespace AWS.Deploy.CLI.Commands
 
                 foreach (var setting in optionSettings)
                 {
-                    DisplayOptionSetting(selectedRecommendation, setting, -1, DisplayOptionSettingsMode.Readonly);
+                    DisplayOptionSetting(selectedRecommendation, setting, -1, optionSettings.Length, DisplayOptionSettingsMode.Readonly);
                 }
             }
             else
@@ -138,14 +144,14 @@ namespace AWS.Deploy.CLI.Commands
             if (selectedRecommendation.Recipe.DeploymentType == DeploymentTypes.CdkProject &&
                 !(await _session.SystemCapabilities).NodeJsMinVersionInstalled)
             {
-                _toolInteractiveService.WriteErrorLine("The selected Recipe requires NodeJS 10.3 or later.  Please install NodeJS https://nodejs.org/en/download/");
+                _toolInteractiveService.WriteErrorLine("The selected deployment option NodeJS 10.3 or later.  Please install NodeJS https://nodejs.org/en/download/");
                 throw new MissingNodeJsException();
             }
 
             if (selectedRecommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.Container &&
                 !(await _session.SystemCapabilities).DockerInstalled)
             {
-                _toolInteractiveService.WriteErrorLine("The selected Recipe requires docker but docker was not detected as running.  Please install and start docker: https://docs.docker.com/engine/install/");
+                _toolInteractiveService.WriteErrorLine("The selected deployment option requires Docker which was not detected.  Please install and start the appropriate version of Docker for you OS: https://docs.docker.com/engine/install/");
                 throw new MissingDockerException();
             }
 
@@ -165,8 +171,8 @@ namespace AWS.Deploy.CLI.Commands
 
             while (true)
             {
-                var title =
-                    (showAdvancedSettings) ? "Select the setting you want to configure:" : "Below are the settings that can be configured:";
+                var message = "Current settings (select number to change its value)";
+                var title = message + Environment.NewLine + new string('-', message.Length);
 
                 _toolInteractiveService.WriteLine(title);
 
@@ -179,22 +185,17 @@ namespace AWS.Deploy.CLI.Commands
 
                 for (var i = 1; i <= optionSettings.Length; i++)
                 {
-                    DisplayOptionSetting(recommendation, optionSettings[i - 1], i, DisplayOptionSettingsMode.Editable);
+                    DisplayOptionSetting(recommendation, optionSettings[i - 1], i, optionSettings.Length, DisplayOptionSettingsMode.Editable);
                 }
 
                 _toolInteractiveService.WriteLine();
-                _toolInteractiveService.WriteLine("Select a number to change its value.");
                 if (!showAdvancedSettings)
                 {
                     // Don't bother showing 'more' for advanced options if there aren't any advanced options.
                     if(recommendation.Recipe.OptionSettings.Any(x => x.AdvancedSetting))
                     {
-                        _toolInteractiveService.WriteLine("Enter 'more' to include Advanced settings. ");
+                        _toolInteractiveService.WriteLine("Enter 'more' to display Advanced settings. ");
                     }
-                }
-                else
-                {
-                    _toolInteractiveService.WriteLine("(Advanced settings are displayed)");
                 }
                 _toolInteractiveService.WriteLine("Or press 'Enter' to deploy:");
 
@@ -229,7 +230,7 @@ namespace AWS.Deploy.CLI.Commands
         }
 
         enum DisplayOptionSettingsMode {Editable, Readonly}
-        private void DisplayOptionSetting(Recommendation recommendation, OptionSettingItem optionSetting, int optionSettingNumber, DisplayOptionSettingsMode mode)
+        private void DisplayOptionSetting(Recommendation recommendation, OptionSettingItem optionSetting, int optionSettingNumber, int optionSettingsCount, DisplayOptionSettingsMode mode)
         {
             var value = recommendation.GetOptionSettingValue(optionSetting);
 
@@ -240,7 +241,7 @@ namespace AWS.Deploy.CLI.Commands
                 typeHintResponseType = Assembly.GetExecutingAssembly().GetType(typeHintResponseTypeFullName);
             }
 
-            DisplayValue(recommendation, optionSetting, optionSettingNumber, typeHintResponseType, mode);
+            DisplayValue(recommendation, optionSetting, optionSettingNumber, optionSettingsCount, typeHintResponseType, mode);
         }
 
         private async Task ConfigureDeployment(Recommendation recommendation, OptionSettingItem setting)
@@ -309,7 +310,7 @@ namespace AWS.Deploy.CLI.Commands
         /// This allows to use a generic implementation to display Object type option setting values without casting the response to
         /// the specific TypeHintResponse type.
         /// </summary>
-        private void DisplayValue(Recommendation recommendation, OptionSettingItem optionSetting, int optionSettingNumber, Type typeHintResponseType, DisplayOptionSettingsMode mode)
+        private void DisplayValue(Recommendation recommendation, OptionSettingItem optionSetting, int optionSettingNumber, int optionSettingsCount, Type typeHintResponseType, DisplayOptionSettingsMode mode)
         {
             object displayValue = null;
             Dictionary<string, object> objectValues = null;
@@ -331,7 +332,7 @@ namespace AWS.Deploy.CLI.Commands
 
             if(mode == DisplayOptionSettingsMode.Editable)
             {
-                _toolInteractiveService.WriteLine($"{optionSettingNumber}. {optionSetting.Name}: {displayValue}");
+                _toolInteractiveService.WriteLine($"{optionSettingNumber.ToString().PadRight(optionSettingsCount.ToString().Length)}. {optionSetting.Name}: {displayValue}");
             }
             else if(mode == DisplayOptionSettingsMode.Readonly)
             {

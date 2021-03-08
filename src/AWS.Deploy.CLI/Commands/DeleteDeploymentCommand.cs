@@ -17,7 +17,7 @@ namespace AWS.Deploy.CLI.Commands
     /// <summary>
     /// Represents a Delete command allows to delete a CloudFormation stack
     /// </summary>
-    public class DeleteApplicationCommand
+    public class DeleteDeploymentCommand
     {
         private static readonly TimeSpan s_pollingPeriod = TimeSpan.FromSeconds(1);
 
@@ -27,7 +27,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly IAmazonCloudFormation _cloudFormationClient;
         private readonly ConsoleUtilities _consoleUtilities;
 
-        public DeleteApplicationCommand(IAWSClientFactory awsClientFactory, IToolInteractiveService interactiveService, OrchestratorSession session)
+        public DeleteDeploymentCommand(IAWSClientFactory awsClientFactory, IToolInteractiveService interactiveService, OrchestratorSession session)
         {
             _awsClientFactory = awsClientFactory;
             _interactiveService = interactiveService;

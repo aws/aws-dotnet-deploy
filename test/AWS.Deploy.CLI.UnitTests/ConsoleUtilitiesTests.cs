@@ -49,9 +49,9 @@ namespace AWS.Deploy.CLI.UnitTests
 
             Assert.Null(userResponse.SelectedOption);
 
-            Assert.True(interactiveServices.OutputContains("(default: 2"));
+            Assert.True(interactiveServices.OutputContains("(default 2"));
 
-            Assert.True(interactiveServices.OutputContains("(default: NewIdentifier"));
+            Assert.True(interactiveServices.OutputContains("(default NewIdentifier"));
             Assert.True(userResponse.CreateNew);
             Assert.Equal("CustomNewIdentifier", userResponse.NewName);
         }
@@ -79,7 +79,7 @@ namespace AWS.Deploy.CLI.UnitTests
             Assert.True(interactiveServices.OutputContains("1: Option1"));
             Assert.True(interactiveServices.OutputContains("2: Option2"));
 
-            Assert.True(interactiveServices.OutputContains("(default: 2"));
+            Assert.True(interactiveServices.OutputContains("(default 2"));
 
             Assert.Equal(_options[0], userResponse.SelectedOption);
             Assert.False(userResponse.CreateNew);
@@ -100,7 +100,7 @@ namespace AWS.Deploy.CLI.UnitTests
             Assert.True(interactiveServices.OutputContains("1: Option1"));
             Assert.True(interactiveServices.OutputContains("2: Option2"));
 
-            Assert.True(interactiveServices.OutputContains("(default: 2"));
+            Assert.True(interactiveServices.OutputContains("(default 2"));
         }
 
         [Fact]
@@ -170,7 +170,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var selectedValue = consoleUtilities.AskYesNoQuestion("Do you want to deploy", ConsoleUtilities.YesNo.Yes);
             Assert.Equal(ConsoleUtilities.YesNo.Yes, selectedValue);
 
-            Assert.Contains("(default: y)", interactiveServices.OutputMessages[0]);
+            Assert.Contains("(default y)", interactiveServices.OutputMessages[0]);
         }
 
         [Fact]

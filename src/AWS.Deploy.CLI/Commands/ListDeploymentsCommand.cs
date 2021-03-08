@@ -10,7 +10,7 @@ using AWS.Deploy.Recipes;
 
 namespace AWS.Deploy.CLI.Commands
 {
-    public class ListApplicationCommand
+    public class ListDeploymentsCommand
     {
         private readonly IOrchestratorInteractiveService _orchestratorInteractiveService;
         private readonly IToolInteractiveService _interactiveService;
@@ -18,7 +18,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly ICdkProjectHandler _cdkProjectHandler;
         private readonly IAWSResourceQueryer _awsResourceQueryer;
 
-        public ListApplicationCommand(IToolInteractiveService interactiveService,
+        public ListDeploymentsCommand(IToolInteractiveService interactiveService,
             IOrchestratorInteractiveService orchestratorInteractiveService,
             ICdkProjectHandler cdkProjectHandler,
             IAWSResourceQueryer awsResourceQueryer,

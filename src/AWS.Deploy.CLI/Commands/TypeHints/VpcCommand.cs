@@ -45,7 +45,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
                     var isDefaultPart =
                         vpc.IsDefault
-                            ? Constants.DEFAULT_LABEL
+                            ? " *** Account Default VPC ***"
                             : "";
 
                     return $"{vpc.VpcId}{namePart}{isDefaultPart}";
