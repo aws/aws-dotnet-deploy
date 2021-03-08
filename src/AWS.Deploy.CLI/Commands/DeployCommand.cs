@@ -11,7 +11,6 @@ using AWS.Deploy.CLI.Commands.TypeHints;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestrator;
-using AWS.Deploy.Orchestrator.CDK;
 using AWS.Deploy.Recipes;
 using AWS.Deploy.Orchestrator.Data;
 
@@ -26,7 +25,6 @@ namespace AWS.Deploy.CLI.Commands
 
         private readonly ConsoleUtilities _consoleUtilities;
         private readonly OrchestratorSession _session;
-        private readonly ICDKManager _cdkManager;
         private readonly TypeHintCommandFactory _typeHintCommandFactory;
 
         public DeployCommand(
@@ -34,8 +32,7 @@ namespace AWS.Deploy.CLI.Commands
             IOrchestratorInteractiveService orchestratorInteractiveService,
             ICdkProjectHandler cdkProjectHandler,
             IAWSResourceQueryer awsResourceQueryer,
-            OrchestratorSession session,
-            ICDKManager cdkManager)
+            OrchestratorSession session)
         {
             _toolInteractiveService = toolInteractiveService;
             _orchestratorInteractiveService = orchestratorInteractiveService;
@@ -43,7 +40,6 @@ namespace AWS.Deploy.CLI.Commands
             _awsResourceQueryer = awsResourceQueryer;
             _consoleUtilities = new ConsoleUtilities(toolInteractiveService);
             _session = session;
-            _cdkManager = cdkManager;
             _typeHintCommandFactory = new TypeHintCommandFactory(_toolInteractiveService, _awsResourceQueryer, _session, _consoleUtilities);
         }
 
@@ -139,15 +135,11 @@ namespace AWS.Deploy.CLI.Commands
             // Apply the user enter project name to the recommendation so that any default settings based on project name are applied.
             selectedRecommendation.OverrideProjectName(cloudApplicationName);
 
-            if (selectedRecommendation.Recipe.DeploymentType == DeploymentTypes.CdkProject)
+            if (selectedRecommendation.Recipe.DeploymentType == DeploymentTypes.CdkProject &&
+                !(await _session.SystemCapabilities).NodeJsMinVersionInstalled)
             {
-                if (!(await _session.SystemCapabilities).NodeJsMinVersionInstalled)
-                {
-                    _toolInteractiveService.WriteErrorLine("The selected Recipe requires NodeJS 10.3 or later.  Please install NodeJS https://nodejs.org/en/download/");
-                    throw new MissingNodeJsException();
-                }
-
-                await _cdkManager.EnsureCompatibleCDKExists(CDKConstants.TempDirectoryRoot, CDKConstants.MinimumCDKVersion);
+                _toolInteractiveService.WriteErrorLine("The selected Recipe requires NodeJS 10.3 or later.  Please install NodeJS https://nodejs.org/en/download/");
+                throw new MissingNodeJsException();
             }
 
             if (selectedRecommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.Container &&

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Amazon.CloudFormation.Model;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Orchestrator.CDK;
 using AWS.Deploy.Orchestrator.Data;
 using AWS.Deploy.Orchestrator.Utilities;
 using AWS.Deploy.Recipes.CDK.Common;
@@ -61,6 +62,9 @@ namespace AWS.Deploy.Orchestrator
         public async Task DeployRecommendation(CloudApplication cloudApplication, Recommendation recommendation)
         {
             _interactiveService.LogMessageLine($"Initiating deployment: {recommendation.Name}");
+
+            _interactiveService.LogMessageLine("AWS CDK is being configured.");
+            await _session.CdkManager.EnsureCompatibleCDKExists(CDKConstants.TempDirectoryRoot, CDKConstants.MinimumCDKVersion);
 
             if (recommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.Container &&
                 !recommendation.ProjectDefinition.HasDockerFile)

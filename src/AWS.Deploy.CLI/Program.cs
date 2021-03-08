@@ -95,7 +95,8 @@ namespace AWS.Deploy.CLI
                         AWSAccountId = callerIdentity.Account,
                         ProjectPath = projectPath,
                         ProjectDirectory = projectPath,
-                        SystemCapabilities = systemCapabilities
+                        SystemCapabilities = systemCapabilities,
+                        CdkManager = cdkManager
                     };
 
                     var deploy = new DeployCommand(
@@ -103,8 +104,7 @@ namespace AWS.Deploy.CLI
                         orchestratorInteractiveService,
                         new CdkProjectHandler(orchestratorInteractiveService, commandLineWrapper),
                         new AWSResourceQueryer(new DefaultAWSClientFactory()),
-                        session,
-                        cdkManager);
+                        session);
 
                     await deploy.ExecuteAsync(saveCdkProject);
 
