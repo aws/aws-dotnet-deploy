@@ -222,12 +222,6 @@ namespace AWS.Deploy.CLI.Commands
                     await ConfigureDeployment(recommendation, optionSettings[selectedNumber - 1]);
 
                     _toolInteractiveService.WriteLine(string.Empty);
-
-                    var additionalConfig = _consoleUtilities.AskYesNoQuestion("Do you want to do any additional configuration?", "false");
-
-                    if (additionalConfig == ConsoleUtilities.YesNo.No)
-                        return;
-                    // If yes is selected, we will loop back into the prompt
                 }
 
                 _toolInteractiveService.WriteLine(string.Empty);
