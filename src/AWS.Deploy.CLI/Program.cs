@@ -24,7 +24,6 @@ namespace AWS.Deploy.CLI
         private static readonly Option<string> _optionProfile = new Option<string>("--profile", "AWS credential profile used to make calls to AWS");
         private static readonly Option<string> _optionRegion = new Option<string>("--region", "AWS region to deploy application to. For example us-west-2.");
         private static readonly Option<string> _optionProjectPath = new Option<string>("--project-path", getDefaultValue: () => Directory.GetCurrentDirectory(), description: "Path to the project to deploy");
-        private static readonly Option<bool> _optionSaveCdkProject = new Option<bool>("--save-cdk-project", getDefaultValue: () => false, description: "Save generated CDK project in solution to customize");
         private static readonly Option<bool> _optionDiagnosticLogging = new Option<bool>(new []{"-d", "--diagnostics"}, description: "Enables diagnostic output");
 
         private static async Task<int> Main(string[] args)
@@ -46,7 +45,6 @@ namespace AWS.Deploy.CLI
                 _optionProfile,
                 _optionRegion,
                 _optionProjectPath,
-                _optionSaveCdkProject,
                 _optionDiagnosticLogging
             };
 
