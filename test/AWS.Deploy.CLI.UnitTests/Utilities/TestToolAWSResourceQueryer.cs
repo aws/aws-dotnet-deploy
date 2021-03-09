@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Amazon.CloudFormation.Model;
 using Amazon.EC2.Model;
 using Amazon.ECR.Model;
 using Amazon.ElasticBeanstalk.Model;
@@ -17,6 +18,7 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
     {
         public Task<string> CreateEC2KeyPair(OrchestratorSession session, string keyName, string saveLocation) => throw new NotImplementedException();
         public Task<Repository> CreateECRRepository(OrchestratorSession session, string repositoryName) => throw new NotImplementedException();
+        public Task<List<Stack>> GetCloudFormationStacks(OrchestratorSession session) => throw new NotImplementedException();
 
         public Task<List<AuthorizationData>> GetECRAuthorizationToken(OrchestratorSession session)
         {

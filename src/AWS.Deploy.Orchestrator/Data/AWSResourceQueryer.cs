@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.IO;
 using Amazon.ECS;
 using Amazon.ECS.Model;
+using Amazon.CloudFormation.Model;
 using Amazon.EC2;
 using Amazon.EC2.Model;
 using Amazon.ElasticBeanstalk;
@@ -33,6 +34,7 @@ namespace AWS.Deploy.Orchestrator.Data
         Task<List<AuthorizationData>> GetECRAuthorizationToken(OrchestratorSession session);
         Task<List<Repository>> GetECRRepositories(OrchestratorSession session, List<string> repositoryNames);
         Task<Repository> CreateECRRepository(OrchestratorSession session, string repositoryName);
+        Task<List<Stack>> GetCloudFormationStacks(OrchestratorSession session);
     }
 
     public class AWSResourceQueryer : IAWSResourceQueryer
@@ -147,7 +149,7 @@ namespace AWS.Deploy.Orchestrator.Data
         public async Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns(OrchestratorSession session)
         {
             var beanstalkClient = _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>(session.AWSCredentials, session.AWSRegion);
-            
+
             var request = new ListPlatformVersionsRequest
             {
                 Filters = new List<PlatformFilter>
@@ -235,6 +237,12 @@ namespace AWS.Deploy.Orchestrator.Data
             var response = await ecrClient.CreateRepositoryAsync(request);
 
             return response.Repository;
+        }
+
+        public async Task<List<Stack>> GetCloudFormationStacks(OrchestratorSession session)
+        {
+            using var cloudFormationClient = _awsClientFactory.GetAWSClient<Amazon.CloudFormation.IAmazonCloudFormation>(session.AWSCredentials, session.AWSRegion);
+            return await cloudFormationClient.Paginators.DescribeStacks(new DescribeStacksRequest()).Stacks.ToListAsync();
         }
     }
 }
