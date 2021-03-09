@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Amazon.CloudFormation;
 using Amazon.CloudFormation.Model;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
@@ -106,10 +107,10 @@ namespace AWS.Deploy.Orchestrator
         /// <returns></returns>
         public async Task<IList<CloudApplication>> GetExistingDeployedApplications(IList<Recommendation> compatibleRecommendations)
         {
-            using var client = _awsClientFactory.GetAWSClient<Amazon.CloudFormation.IAmazonCloudFormation>(_session.AWSCredentials, _session.AWSRegion);
-
+            var stacks = await _awsResourceQueryer.GetCloudFormationStacks(_session);
             var apps = new List<CloudApplication>();
-            await foreach (var stack in client.Paginators.DescribeStacks(new DescribeStacksRequest()).Stacks)
+
+            foreach (var stack in stacks)
             {
                 // Check to see if stack has AWS Deploy Tool tag and the stack is not deleted or in the process of being deleted.
                 var deployTag = stack.Tags.FirstOrDefault(tags => string.Equals(tags.Key, CloudFormationIdentifierConstants.STACK_TAG));
@@ -122,6 +123,15 @@ namespace AWS.Deploy.Orchestrator
 
                     // Skip tags that are deleted or in the process of being deleted
                     stack.StackStatus.ToString().StartsWith("DELETE"))
+                {
+                    continue;
+                }
+
+                // ROLLBACK_COMPLETE occurs when a stack creation fails and successfully rollbacks with cleaning partially created resources.
+                // In this state, only a delete operation can be performed. (https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-describing-stacks.html)
+                // We don't want to include ROLLBACK_COMPLETE because it never succeeded to deploy.
+                // However, a customer can give name of new application same as ROLLBACK_COMPLETE stack, which will trigger the re-deployment flow on the ROLLBACK_COMPLETE stack.
+                if (stack.StackStatus == StackStatus.ROLLBACK_COMPLETE)
                 {
                     continue;
                 }
