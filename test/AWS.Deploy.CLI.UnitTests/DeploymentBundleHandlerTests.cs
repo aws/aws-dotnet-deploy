@@ -108,7 +108,6 @@ namespace AWS.Deploy.CLI.UnitTests
                 $"dotnet publish \"{projectDefinition.ProjectPath}\"" +
                 $" -o \"{_directoryManager.CreatedDirectories.First()}\"" +
                 " -c Release" +
-                " --self-contained False" +
                 " " +
                 " --nologo";
 
@@ -133,9 +132,9 @@ namespace AWS.Deploy.CLI.UnitTests
                 $"dotnet publish \"{projectDefinition.ProjectPath}\"" +
                 $" -o \"{_directoryManager.CreatedDirectories.First()}\"" +
                 " -c Release" +
-                " --self-contained True" +
                 " --runtime linux-x64" +
-                " --nologo";
+                " --nologo" +
+                " --self-contained true";
 
             Assert.Equal(expectedCommand, _commandLineWrapper.CommandsToExecute.First().Command);
         }
