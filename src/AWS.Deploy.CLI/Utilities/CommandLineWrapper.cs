@@ -98,14 +98,19 @@ namespace AWS.Deploy.CLI.Utilities
                 await Task.Delay(TimeSpan.FromMilliseconds(50), cancelToken);
             }
 
-            if (redirectIO && onComplete != null)
+            if (onComplete != null)
             {
                 var result = new TryRunResult
                 {
-                    StandardOut = streamOutputToInteractiveService ? strOutput.ToString() : await process.StandardOutput.ReadToEndAsync(),
-                    StandardError = streamOutputToInteractiveService ? strError.ToString() : await process.StandardError.ReadToEndAsync(),
                     ExitCode = process.ExitCode
                 };
+
+                if (redirectIO)
+                {
+                    result.StandardError = streamOutputToInteractiveService ? strError.ToString() : await process.StandardError.ReadToEndAsync();
+                    result.StandardOut = streamOutputToInteractiveService ? strOutput.ToString() : await process.StandardOutput.ReadToEndAsync();
+                }
+
                 onComplete(result);
             }
         }
