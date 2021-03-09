@@ -23,6 +23,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                     string.Empty,
                     recommendation.GetOptionSettingValue(optionSetting).ToString(),
                     allowEmpty: true,
+                    resetValue: recommendation.GetOptionSettingDefaultValue<string>(optionSetting),
                     // validators:
                     publishArgs =>
                         (publishArgs.Contains("-o ") || publishArgs.Contains("--output "))

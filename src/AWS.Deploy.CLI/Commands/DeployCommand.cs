@@ -325,7 +325,7 @@ namespace AWS.Deploy.CLI.Commands
                     {
                         case OptionSettingValueType.String:
                         case OptionSettingValueType.Int:
-                            settingValue = _consoleUtilities.AskUserForValue(string.Empty, currentValue?.ToString(), allowEmpty: true);
+                            settingValue = _consoleUtilities.AskUserForValue(string.Empty, currentValue?.ToString(), allowEmpty: true, resetValue: recommendation.GetOptionSettingDefaultValue<string>(setting));
                             break;
                         case OptionSettingValueType.Bool:
                             var answer = _consoleUtilities.AskYesNoQuestion(string.Empty, recommendation.GetOptionSettingValue(setting).ToString());

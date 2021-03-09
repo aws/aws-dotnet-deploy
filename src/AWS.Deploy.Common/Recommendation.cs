@@ -118,6 +118,16 @@ namespace AWS.Deploy.Common
             return optionSetting.GetValue(_replacementTokens, ignoreDefaultValue);
         }
 
+        public T GetOptionSettingDefaultValue<T>(OptionSettingItem optionSetting)
+        {
+            return optionSetting.GetDefaultValue<T>(_replacementTokens);
+        }
+
+        public object GetOptionSettingDefaultValue(OptionSettingItem optionSetting)
+        {
+            return optionSetting.GetDefaultValue(_replacementTokens);
+        }
+
         /// <summary>
         /// Checks whether all the dependencies are satisfied or not, if there exists an unsatisfied dependency then returns false.
         /// It allows caller to decide whether we want to display an <see cref="OptionSettingItem"/> to configure or not.
