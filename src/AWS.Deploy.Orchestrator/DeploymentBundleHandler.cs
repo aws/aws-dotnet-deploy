@@ -107,9 +107,15 @@ namespace AWS.Deploy.Orchestrator
                 $"dotnet publish \"{recommendation.ProjectPath}\"" +
                 $" -o \"{publishDirectoryInfo}\"" +
                 $" -c {recommendation.DeploymentBundle.DotnetPublishBuildConfiguration}" +
-                $" --self-contained {recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild}" +
                 $" {runtimeArg}" +
                 $" {additionalArguments}";
+
+            // Blazor applications do not build with the default of setting self-contained to false.
+            // So only add the --self-contained true if the user explicitly sets it to true.
+            if(recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild)
+            {
+                publishCommand += " --self-contained true";
+            }
 
             var result = await _commandLineWrapper.TryRunWithResult(publishCommand, redirectIO: false);
             if (result.ExitCode != 0)
