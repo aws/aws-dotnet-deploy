@@ -3,6 +3,7 @@
 
 using System.IO;
 using System.Reflection;
+using AWS.Deploy.Common.Extensions;
 
 namespace AWS.Deploy.DockerEngine
 {
@@ -11,32 +12,12 @@ namespace AWS.Deploy.DockerEngine
         private const string DockerFileConfig = "AWS.Deploy.DockerEngine.Properties.DockerFileConfig.json";
         private const string DockerfileTemplate = "AWS.Deploy.DockerEngine.Templates.Dockerfile.template";
 
-        private static string GetEmbeddedResource(string resourceName)
-        {
-            var assembly = Assembly.GetExecutingAssembly();
-            var result = "";
-            using (Stream resource = assembly.GetManifestResourceStream(resourceName))
-            {
-                if (resource == null)
-                {
-                    throw new FileNotFoundException($"The resource {resourceName} was not found in the project.");
-                }
-
-                using (StreamReader reader = new StreamReader(resource))
-                {
-                    result = reader.ReadToEnd();
-                }
-            }
-
-            return result;
-        }
-
         /// <summary>
         /// Retrieves the Docker File Config
         /// </summary>
         internal static string ReadDockerFileConfig()
         {
-            var template = GetEmbeddedResource(DockerFileConfig);
+            var template = Assembly.GetExecutingAssembly().ReadEmbeddedFile(DockerFileConfig);
 
             if (string.IsNullOrWhiteSpace(template))
             {
@@ -51,7 +32,7 @@ namespace AWS.Deploy.DockerEngine
         /// </summary>
         internal static string ReadTemplate()
         {
-            var template = GetEmbeddedResource(DockerfileTemplate);
+            var template = Assembly.GetExecutingAssembly().ReadEmbeddedFile(DockerfileTemplate);
 
             if (string.IsNullOrWhiteSpace(template))
             {

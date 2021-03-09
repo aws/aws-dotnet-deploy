@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -32,7 +33,7 @@ namespace AWS.Deploy.Orchestrator.Utilities
             string command,
             string workingDirectory = "",
             bool streamOutputToInteractiveService = true,
-            Func<Process, Task> onComplete = null,
+            Action<TryRunResult> onComplete = null,
             CancellationToken cancelToken = default);
     }
 
@@ -71,14 +72,10 @@ namespace AWS.Deploy.Orchestrator.Utilities
 
             await commandLineWrapper.Run(
                 command,
-                streamOutputToInteractiveService: streamOutputToInteractiveService,
-                onComplete:
-                    async process =>
-                    {
-                        result.StandardError = await process.StandardError.ReadToEndAsync();
-                        result.StandardOut = await process.StandardOutput.ReadToEndAsync();
-                    },
-                cancelToken: cancelToken);
+                workingDirectory,
+                streamOutputToInteractiveService,
+                onComplete: runResult => result = runResult,
+                cancelToken);
 
             return result;
         }
@@ -91,13 +88,20 @@ namespace AWS.Deploy.Orchestrator.Utilities
         /// <see cref="StandardError"/> is empty.
         /// </summary>
         public bool Success => string.IsNullOrEmpty(StandardError);
+
         /// <summary>
         /// Fully read <see cref="Process.StandardOutput"/>
         /// </summary>
         public string StandardOut { get; set; }
+
         /// <summary>
         /// Fully read <see cref="Process.StandardError"/>
         /// </summary>
         public string StandardError { get; set; }
+
+        /// <summary>
+        /// Fully read <see cref="Process.ExitCode"/>
+        /// </summary>
+        public int ExitCode { get; set; }
     }
 }

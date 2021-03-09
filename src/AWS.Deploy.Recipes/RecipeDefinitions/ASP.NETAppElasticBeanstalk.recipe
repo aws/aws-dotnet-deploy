@@ -7,7 +7,7 @@
     "DeploymentBundle": "DotnetPublishZipFile",
     "CdkProjectTemplate": "../CdkTemplates/AspNetAppElasticBeanstalkLinux",
     "CdkProjectTemplateId": "netdeploy.AspNetAppElasticBeanstalkLinux",
-    "Description": "ASP.NET Core applications can be deployed Elastic Beanstalk and have the AWS resources automatically provisioned and managed by the service.",
+    "Description": "ASP.NET Core applications can be deployed Elastic Beanstalk and have the AWS resources automatically provisioned and managed by the service. Recommended for ASP.NET Core projects that do not have a Dockerfile.",
     "TargetService": "AWS Elastic Beanstalk",
 
     "RecipePriority": 100,

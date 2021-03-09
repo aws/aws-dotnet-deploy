@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,7 +34,7 @@ namespace AWS.Deploy.CLI.Utilities
             string command,
             string workingDirectory = "",
             bool streamOutputToInteractiveService = true,
-            Func<Process, Task> onComplete = null,
+            Action<TryRunResult> onComplete = null,
             CancellationToken cancelToken = default)
         {
             var credentials = await _awsCredentials.GetCredentialsAsync();
@@ -91,7 +92,13 @@ namespace AWS.Deploy.CLI.Utilities
 
             if (onComplete != null)
             {
-                await onComplete(process);
+                var result = new TryRunResult
+                {
+                    StandardOut = await process.StandardOutput.ReadToEndAsync(),
+                    StandardError = await process.StandardError.ReadToEndAsync(),
+                    ExitCode = process.ExitCode
+                };
+                onComplete(result);
             }
         }
 

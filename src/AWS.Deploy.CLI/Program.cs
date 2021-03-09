@@ -13,9 +13,12 @@ using AWS.Deploy.Orchestrator;
 using AWS.Deploy.Orchestrator.Data;
 using Amazon.SecurityToken;
 using Amazon.SecurityToken.Model;
+using AWS.Deploy.Common.IO;
 using System.Reflection;
 using System.Linq;
 using System.Text;
+using AWS.Deploy.Common.Extensions;
+using AWS.Deploy.Orchestrator.CDK;
 
 namespace AWS.Deploy.CLI
 {
@@ -68,7 +71,15 @@ namespace AWS.Deploy.CLI
                             awsCredentials,
                             awsRegion);
 
-                    var systemCapabilityEvaluator = new SystemCapabilityEvaluator(commandLineWrapper);
+                    var fileManager = new FileManager();
+                    var packageJsonGenerator = new PackageJsonGenerator(
+                        typeof(PackageJsonGenerator).Assembly
+                        .ReadEmbeddedFile(PackageJsonGenerator.TemplateIdentifier));
+                    var npmPackageInitializer = new NPMPackageInitializer(commandLineWrapper, packageJsonGenerator, fileManager);
+                    var cdkInstaller = new CDKInstaller(commandLineWrapper);
+                    var cdkManager = new CDKManager(cdkInstaller, npmPackageInitializer);
+
+                    var systemCapabilityEvaluator = new SystemCapabilityEvaluator(commandLineWrapper, cdkManager);
                     var systemCapabilities = systemCapabilityEvaluator.Evaluate();
 
                     var stsClient = new AmazonSecurityTokenServiceClient(awsCredentials);
@@ -82,7 +93,8 @@ namespace AWS.Deploy.CLI
                         AWSAccountId = callerIdentity.Account,
                         ProjectPath = projectPath,
                         ProjectDirectory = projectPath,
-                        SystemCapabilities = systemCapabilities
+                        SystemCapabilities = systemCapabilities,
+                        CdkManager = cdkManager
                     };
 
                     var deploy = new DeployCommand(

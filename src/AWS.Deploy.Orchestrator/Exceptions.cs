@@ -1,4 +1,5 @@
 using System;
+using AWS.Deploy.Orchestrator.CDK;
 
 namespace AWS.Deploy.Orchestrator
 {
@@ -28,6 +29,26 @@ namespace AWS.Deploy.Orchestrator
     public class RunCommandFailedException : Exception
     {
         public RunCommandFailedException() : base()
+        {
+        }
+    }
+
+    /// <summary>
+    /// Exception is thrown if package.json file IO fails.
+    /// </summary>
+    public class PackageJsonFileException : Exception
+    {
+        public PackageJsonFileException(string message, Exception innerException = null) : base(message, innerException)
+        {
+        }
+    }
+
+    /// <summary>
+    /// Exception is thrown if npm command fails to execute.
+    /// </summary>
+    public class NPMCommandFailedException : Exception
+    {
+        public NPMCommandFailedException(string message, Exception innerException = null) : base(message, innerException)
         {
         }
     }
