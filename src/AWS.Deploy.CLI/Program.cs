@@ -13,9 +13,12 @@ using AWS.Deploy.Orchestrator;
 using AWS.Deploy.Orchestrator.Data;
 using Amazon.SecurityToken;
 using Amazon.SecurityToken.Model;
+using AWS.Deploy.Common.IO;
 using System.Reflection;
 using System.Linq;
 using System.Text;
+using AWS.Deploy.Common.Extensions;
+using AWS.Deploy.Orchestrator.CDK;
 
 namespace AWS.Deploy.CLI
 {
@@ -24,7 +27,6 @@ namespace AWS.Deploy.CLI
         private static readonly Option<string> _optionProfile = new Option<string>("--profile", "AWS credential profile used to make calls to AWS");
         private static readonly Option<string> _optionRegion = new Option<string>("--region", "AWS region to deploy application to. For example us-west-2.");
         private static readonly Option<string> _optionProjectPath = new Option<string>("--project-path", getDefaultValue: () => Directory.GetCurrentDirectory(), description: "Path to the project to deploy");
-        private static readonly Option<bool> _optionSaveCdkProject = new Option<bool>("--save-cdk-project", getDefaultValue: () => false, description: "Save generated CDK project in solution to customize");
         private static readonly Option<bool> _optionDiagnosticLogging = new Option<bool>(new []{"-d", "--diagnostics"}, description: "Enables diagnostic output");
 
         private static async Task<int> Main(string[] args)
@@ -46,7 +48,6 @@ namespace AWS.Deploy.CLI
                 _optionProfile,
                 _optionRegion,
                 _optionProjectPath,
-                _optionSaveCdkProject,
                 _optionDiagnosticLogging
             };
 
@@ -70,7 +71,15 @@ namespace AWS.Deploy.CLI
                             awsCredentials,
                             awsRegion);
 
-                    var systemCapabilityEvaluator = new SystemCapabilityEvaluator(commandLineWrapper);
+                    var fileManager = new FileManager();
+                    var packageJsonGenerator = new PackageJsonGenerator(
+                        typeof(PackageJsonGenerator).Assembly
+                        .ReadEmbeddedFile(PackageJsonGenerator.TemplateIdentifier));
+                    var npmPackageInitializer = new NPMPackageInitializer(commandLineWrapper, packageJsonGenerator, fileManager);
+                    var cdkInstaller = new CDKInstaller(commandLineWrapper);
+                    var cdkManager = new CDKManager(cdkInstaller, npmPackageInitializer);
+
+                    var systemCapabilityEvaluator = new SystemCapabilityEvaluator(commandLineWrapper, cdkManager);
                     var systemCapabilities = systemCapabilityEvaluator.Evaluate();
 
                     var stsClient = new AmazonSecurityTokenServiceClient(awsCredentials);
@@ -84,7 +93,8 @@ namespace AWS.Deploy.CLI
                         AWSAccountId = callerIdentity.Account,
                         ProjectPath = projectPath,
                         ProjectDirectory = projectPath,
-                        SystemCapabilities = systemCapabilities
+                        SystemCapabilities = systemCapabilities,
+                        CdkManager = cdkManager
                     };
 
                     var deploy = new DeployCommand(

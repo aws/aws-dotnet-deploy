@@ -1,7 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.\r
 // SPDX-License-Identifier: Apache-2.0
 
-namespace ConsoleAppEcsFargateTask.Configurations
+namespace ConsoleAppECSFargateScheduleTask.Configurations
 {
     public class Configuration
     {
@@ -29,5 +29,11 @@ namespace ConsoleAppEcsFargateTask.Configurations
         /// Virtual Private Cloud to launch container instance into a virtual network.
         /// </summary>
         public VpcConfiguration Vpc { get; set; }
+
+        /// <inheritdoc cref="FargateTaskDefinitionProps.Cpu"/>
+        public double? TaskCpu { get; set; }
+
+        /// <inheritdoc cref="FargateTaskDefinitionProps.MemoryLimitMiB"/>
+        public double? TaskMemory { get; set; }
     }
 }

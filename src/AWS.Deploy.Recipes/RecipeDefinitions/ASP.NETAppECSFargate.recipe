@@ -190,6 +190,15 @@
             ]
         },
         {
+            "Id": "AdditionalECSServiceSecurityGroups",
+            "Name": "ECS Service Security Groups",
+            "Description": "Comma delimited list of EC2 security groups to assign to the ECS service. This is commonly used to provide access to RDS databases running in their own security groups.",
+            "Type": "String",
+            "DefaultValue": "",
+            "AdvancedSetting": true,
+            "Updatable": true
+        },
+        {
             "Id": "AddDockerBuildArgs",
             "Name": "Add Docker Build Args",
             "Description": "Do you want to pass additional Docker build args?",
@@ -219,6 +228,24 @@
             "Description": "Specifies the docker execution directory where the docker build command will be executed from.",
             "Type": "String",
             "DefaultValue": "",
+            "AdvancedSetting": true,
+            "Updatable": true
+        },
+        {
+            "Id": "TaskCpu",
+            "Name": "Task CPU",
+            "Description": "The number of CPU units used by the task. See here for more details on CPU values https://docs.aws.amazon.com/AmazonECS/latest/developerguide/AWS_Fargate.html#fargate-task-defs",
+            "Type": "Int",
+            "DefaultValue": 256,
+            "AdvancedSetting": true,
+            "Updatable": true
+        },
+        {
+            "Id": "TaskMemory",
+            "Name": "Task Memory",
+            "Description": "The amount of memory (in MB) used by the task. See here for more details on Memory values https://docs.aws.amazon.com/AmazonECS/latest/developerguide/AWS_Fargate.html#fargate-task-defs",
+            "Type": "Int",
+            "DefaultValue": 512,
             "AdvancedSetting": true,
             "Updatable": true
         }

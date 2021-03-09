@@ -26,6 +26,12 @@ namespace AWS.Deploy.CLI
 
         public Recommendation AskToChooseRecommendation(IList<Recommendation> recommendations)
         {
+            if (recommendations.Count == 0)
+            {
+                // This should never happen as application should have aborted sooner if there was no valid recommendations.
+                throw new Exception("No recommendations available for user to select");
+            }
+
             _interactiveService.WriteLine("Recommended Deployment Option");
             _interactiveService.WriteLine("-----------------------------");
             _interactiveService.WriteLine($"1: {recommendations[0].Name}");
@@ -368,12 +374,23 @@ namespace AWS.Deploy.CLI
 
         private T ReadOptionFromUser<T>(IList<T> options, int defaultValueIndex)
         {
+            if(options.Count == 0)
+            {
+                throw new Exception("No options available for user to select");
+            }
+
+            // If defaultValueIndex is used it starts as 1 just like the user sees the list of options.
+            if (defaultValueIndex != -1 && (defaultValueIndex < 1 || defaultValueIndex > options.Count))
+            {
+                throw new Exception($"Invalid default index {defaultValueIndex}");
+            }
+
             while (true)
             {
                 var selectedOption = _interactiveService.ReadLine();
                 if (string.IsNullOrEmpty(selectedOption) && defaultValueIndex != -1)
                 {
-                    return options[defaultValueIndex];
+                    return options[defaultValueIndex - 1];
                 }
 
                 if (int.TryParse(selectedOption, out var intOption) && intOption >= 1 && intOption <= options.Count)

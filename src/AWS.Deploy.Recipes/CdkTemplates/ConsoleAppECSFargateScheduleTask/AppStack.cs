@@ -7,11 +7,11 @@ using Amazon.CDK.AWS.IAM;
 using AWS.Deploy.Recipes.CDK.Common;
 using System.IO;
 using System.Collections.Generic;
-using ConsoleAppEcsFargateTask.Configurations;
+using ConsoleAppECSFargateScheduleTask.Configurations;
 using Protocol = Amazon.CDK.AWS.ECS.Protocol;
 using Schedule = Amazon.CDK.AWS.ApplicationAutoScaling.Schedule;
 
-namespace ConsoleAppEcsFargateTask
+namespace ConsoleAppECSFargateScheduleTask
 {
     public class AppStack : Stack
     {
@@ -67,6 +67,8 @@ namespace ConsoleAppEcsFargateTask
             var taskDefinition = new FargateTaskDefinition(this, "TaskDefinition", new FargateTaskDefinitionProps
             {
                 TaskRole = taskRole,
+                Cpu = settings.TaskCpu,
+                MemoryLimitMiB = settings.TaskMemory
             });
 
             var logging = new AwsLogDriver(new AwsLogDriverProps

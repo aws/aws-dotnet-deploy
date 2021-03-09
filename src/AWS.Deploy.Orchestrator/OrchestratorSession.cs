@@ -4,6 +4,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using Amazon.Runtime;
+using AWS.Deploy.Orchestrator.CDK;
 
 namespace AWS.Deploy.Orchestrator
 {
@@ -42,5 +43,7 @@ namespace AWS.Deploy.Orchestrator
                 }
             }
         }
+
+        public CDKManager CdkManager { get; set; }
     }
 }
