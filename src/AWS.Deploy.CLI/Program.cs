@@ -28,7 +28,7 @@ namespace AWS.Deploy.CLI
         private static readonly Option<string> _optionProfile = new Option<string>("--profile", "AWS credential profile used to make calls to AWS");
         private static readonly Option<string> _optionRegion = new Option<string>("--region", "AWS region to deploy application to. For example us-west-2.");
         private static readonly Option<string> _optionProjectPath = new Option<string>("--project-path", getDefaultValue: () => Directory.GetCurrentDirectory(), description: "Path to the project to deploy");
-        private static readonly Option<bool> _optionDiagnosticLogging = new Option<bool>(new []{"-d", "--diagnostics"}, description: "Enables diagnostic output");
+        private static readonly Option<bool> _optionDiagnosticLogging = new Option<bool>(new []{"-d", "--diagnostics"}, description: "Enable diagnostic output");
 
         private static async Task<int> Main(string[] args)
         {
@@ -36,15 +36,17 @@ namespace AWS.Deploy.CLI
 
             var preambleWriter = new ConsoleInteractiveServiceImpl(diagnosticLoggingEnabled: false);
 
-            preambleWriter.WriteLine("AWS .NET Deployment Tool for deploying .NET Core applications to AWS");
+            preambleWriter.WriteLine("AWS .NET deployment tool for deploying .NET Core applications to AWS");
             preambleWriter.WriteLine("Project Home: https://github.com/aws/aws-dotnet-deploy");
             preambleWriter.WriteLine(string.Empty);
 
-            var rootCommand = new RootCommand { Description = "The AWS .NET Deployment Tool for getting .NET applications running on AWS." };
+            // Name is important to set here to show correctly in the CLI usage help.
+            // Either dotnet-aws or dotnet aws works from the CLI. System.Commandline's help system does not like having a space with dotnet aws.
+            var rootCommand = new RootCommand {Name = "dotnet-aws",  Description = "The AWS .NET deployment tool for deploying .NET applications on AWS." };
 
            var deployCommand = new Command(
                 "deploy",
-                "Inspect the .NET project and deploy the application to AWS to the appropriate AWS service.")
+                "Inspect, build, and deploy the .NET project to AWS using the recommended AWS service.")
             {
                 _optionProfile,
                 _optionRegion,
@@ -132,11 +134,10 @@ namespace AWS.Deploy.CLI
             });
             rootCommand.Add(deployCommand);
 
-            var listCommand = new Command("list-applications", "List Cloud Applications.")
+            var listCommand = new Command("list-deployments", "List existing deployments.")
             {
                 _optionProfile,
                 _optionRegion,
-                _optionProjectPath,
                 _optionDiagnosticLogging
             };
             listCommand.Handler = CommandHandler.Create<string, string, string, bool>(async (profile, region, projectPath, diagnostics) =>
@@ -174,7 +175,7 @@ namespace AWS.Deploy.CLI
                 var directoryManager = new DirectoryManager();
                 var zipFileManager = new ZipFileManager();
 
-                await new ListApplicationCommand(toolInteractiveService,
+                await new ListDeploymentsCommand(toolInteractiveService,
                                                 new ConsoleOrchestratorLogger(toolInteractiveService),
                                                 new CdkProjectHandler(orchestratorInteractiveService, commandLineWrapper),
                                                 new DeploymentBundleHandler(session, commandLineWrapper, awsResourceQueryer, orchestratorInteractiveService, directoryManager, zipFileManager),
@@ -183,15 +184,15 @@ namespace AWS.Deploy.CLI
             });
             rootCommand.Add(listCommand);
 
-            var deleteCommand = new Command("delete-application", "Deletes a Cloud Application.")
+            var deleteCommand = new Command("delete-deployment", "Delete an existing deployment.")
             {
                 _optionProfile,
                 _optionRegion,
                 _optionProjectPath,
                 _optionDiagnosticLogging,
-                new Argument("application-name")
+                new Argument("deployment-name")
             };
-            deleteCommand.Handler = CommandHandler.Create<string, string, string, string, bool>(async (profile, region, projectPath, applicationName, diagnostics) =>
+            deleteCommand.Handler = CommandHandler.Create<string, string, string, string, bool>(async (profile, region, projectPath, deploymentName, diagnostics) =>
             {
                 var toolInteractiveService = new ConsoleInteractiveServiceImpl(diagnostics);
                 var awsUtilities = new AWSUtilities(toolInteractiveService);
@@ -208,7 +209,7 @@ namespace AWS.Deploy.CLI
                     AWSRegion = awsRegion,
                 };
 
-                await new DeleteApplicationCommand(new DefaultAWSClientFactory(), toolInteractiveService, session).ExecuteAsync(applicationName);
+                await new DeleteDeploymentCommand(new DefaultAWSClientFactory(), toolInteractiveService, session).ExecuteAsync(deploymentName);
 
                 return CommandReturnCodes.SUCCESS;
             });
@@ -216,7 +217,6 @@ namespace AWS.Deploy.CLI
 
             return await rootCommand.InvokeAsync(args);
         }
-
 
         /// <summary>
         /// Set up the execution environment variable picked up by the AWS .NET SDK. This can be useful for identify calls

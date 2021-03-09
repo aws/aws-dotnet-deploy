@@ -72,8 +72,17 @@ namespace AWS.Deploy.CLI
         {
             if (!string.IsNullOrEmpty(title))
             {
+                var dashLength = -1;
+                foreach(var line in title.Split('\n'))
+                {
+                    var length = line.Trim().Length;
+                    if(dashLength < length)
+                    {
+                        dashLength = length;
+                    }
+                }
                 _interactiveService.WriteLine(title);
-                _interactiveService.WriteLine(new string('-', title.Length));
+                _interactiveService.WriteLine(new string('-', dashLength));
             }
 
             var defaultValueIndex = -1;
@@ -90,7 +99,13 @@ namespace AWS.Deploy.CLI
             var padLength = options.Count.ToString().Length;
             foreach (var option in options)
             {
-                _interactiveService.WriteLine($"{optionNumber.ToString().PadRight(padLength)}: {option.Name}");
+                var optionText = $"{optionNumber.ToString().PadRight(padLength)}: {option.Name}";
+                if(optionNumber == defaultValueIndex)
+                {
+                    optionText += " (default)";
+                }
+
+                _interactiveService.WriteLine(optionText);
                 if (!string.IsNullOrEmpty(option.Description))
                 {
                     _interactiveService.WriteLine($"{option.Description}");
@@ -102,13 +117,13 @@ namespace AWS.Deploy.CLI
 
             if (defaultValueIndex != -1)
             {
-                _interactiveService.WriteLine($"Choose option: (default: {defaultValueIndex})");
+                _interactiveService.WriteLine($"Choose option (default {defaultValueIndex}):");
             }
             else
             {
                 if(options.Count == 1)
                 {
-                    _interactiveService.WriteLine($"Choose option: (default: 1)");
+                    _interactiveService.WriteLine($"Choose option (default 1):");
                     defaultValueIndex = 1;
                     defaultValue = options[0];
                 }
@@ -198,7 +213,7 @@ namespace AWS.Deploy.CLI
 
             if (userInputConfiguration.AskNewName)
             {
-                var newName = AskUserForValue("Enter name:", userInputConfiguration.DefaultNewName, false);
+                var newName = AskUserForValue(string.Empty, userInputConfiguration.DefaultNewName, false);
                 return new UserResponse<T>
                 {
                     CreateNew = true,
@@ -218,7 +233,7 @@ namespace AWS.Deploy.CLI
 
             _interactiveService.WriteLine(message);
 
-            var prompt = $"Enter value (default: {defaultValue}";
+            var prompt = $"Enter value (default {defaultValue}";
             if (allowEmpty)
                 prompt += $". Type {CLEAR} to clear.";
             prompt += "): ";
@@ -323,7 +338,7 @@ namespace AWS.Deploy.CLI
             if (defaultValue.HasValue)
             {
                 var defaultChar = defaultValue == YesNo.Yes ? 'y' : 'n';
-                message += $" (default: {defaultChar})";
+                message += $" (default {defaultChar})";
             }
 
             _interactiveService.WriteLine(message);
