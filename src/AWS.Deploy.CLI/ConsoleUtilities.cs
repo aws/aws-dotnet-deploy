@@ -53,7 +53,7 @@ namespace AWS.Deploy.CLI
 
             _interactiveService.WriteLine($"Choose deployment option (recommended default: 1)");
 
-            return ReadOptionFromUser(recommendations, 0);
+            return ReadOptionFromUser(recommendations, 1);
         }
 
         public string AskUserToChoose(IList<string> values, string title, string defaultValue)

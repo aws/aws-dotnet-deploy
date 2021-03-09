@@ -10,6 +10,7 @@ using AWS.Deploy.Recipes.CDK.Common;
 using AspNetAppEcsFargate.Configurations;
 using Protocol = Amazon.CDK.AWS.ECS.Protocol;
 using Amazon.CDK.AWS.ECR;
+using System.Collections.Generic;
 
 namespace AspNetAppEcsFargate
 {
