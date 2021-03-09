@@ -8,6 +8,7 @@ using Amazon.CDK.AWS.IAM;
 using AWS.Deploy.Recipes.CDK.Common;
 using ConsoleAppEcsFargateService.Configurations;
 using Amazon.CDK.AWS.ECR;
+using System.Collections.Generic;
 
 namespace ConsoleAppEcsFargateService
 {
