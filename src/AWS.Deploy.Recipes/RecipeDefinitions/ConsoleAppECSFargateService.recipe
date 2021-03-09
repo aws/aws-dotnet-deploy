@@ -103,7 +103,7 @@
             "Name": "Desired Task Count",
             "Description": "The desired number of ECS tasks to run for the service.",
             "Type": "Int",
-            "DefaultValue": 3,
+            "DefaultValue": 1,
             "AdvancedSetting": false,
             "Updatable": true
         },
@@ -197,6 +197,15 @@
                     ]
                 }
             ]
+        },
+        {
+            "Id": "ECSServiceSecurityGroups",
+            "Name": "ECS Service Security Groups",
+            "Description": "Comma delimited list of EC2 security groups to assign to the ECS service. This is commonly used to provide access to RDS databases running in their own security groups.",
+            "Type": "String",
+            "DefaultValue": "",
+            "AdvancedSetting": true,
+            "Updatable": true
         },
         {
             "Id": "AddDockerBuildArgs",

@@ -100,12 +100,31 @@ namespace ConsoleAppEcsFargateService
                 Logging = logging
             });
 
-            new FargateService(this, "FargateService", new FargateServiceProps
+            var fargateServiceProps = new FargateServiceProps
             {
                 Cluster = cluster,
                 TaskDefinition = taskDefinition,
-                AssignPublicIp = settings.Vpc.IsDefault
-            });
+                AssignPublicIp = settings.Vpc.IsDefault,
+                DesiredCount = settings.DesiredCount
+            };
+
+
+            if (!string.IsNullOrEmpty(settings.ECSServiceSecurityGroups))
+            {
+                var ecsServiceSecurityGroups = new List<ISecurityGroup>();
+                var count = 1;
+                foreach (var securityGroupId in settings.ECSServiceSecurityGroups.Split(','))
+                {
+                    ecsServiceSecurityGroups.Add(SecurityGroup.FromSecurityGroupId(this, $"AdditionalGroup-{count++}", securityGroupId.Trim(), new SecurityGroupImportOptions
+                    {
+                        Mutable = false
+                    }));
+                }
+
+                fargateServiceProps.SecurityGroups = ecsServiceSecurityGroups.ToArray();
+            }
+
+            new FargateService(this, "FargateService", fargateServiceProps);
         }
 
 #if (AddDockerBuildArgs)
