@@ -63,8 +63,11 @@ namespace AWS.Deploy.Orchestrator
         {
             _interactiveService.LogMessageLine($"Initiating deployment: {recommendation.Name}");
 
-            _interactiveService.LogMessageLine("AWS CDK is being configured.");
-            await _session.CdkManager.EnsureCompatibleCDKExists(CDKConstants.TempDirectoryRoot, CDKConstants.MinimumCDKVersion);
+            if (recommendation.Recipe.DeploymentType == DeploymentTypes.CdkProject)
+            {
+                _interactiveService.LogMessageLine("AWS CDK is being configured.");
+                await _session.CdkManager.EnsureCompatibleCDKExists(CDKConstants.TempDirectoryRoot, CDKConstants.MinimumCDKVersion);
+            }
 
             if (recommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.Container &&
                 !recommendation.ProjectDefinition.HasDockerFile)
