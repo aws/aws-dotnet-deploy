@@ -62,6 +62,32 @@ namespace AWS.Deploy.Common.Recipes
             return DefaultValue;
         }
 
+        public T GetDefaultValue<T>(IDictionary<string, string> replacementTokens)
+        {
+            var value = GetDefaultValue(replacementTokens);
+            if (value == null)
+            {
+                return default;
+            }
+
+            return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(value));
+        }
+
+        public object GetDefaultValue(IDictionary<string, string> replacementTokens)
+        {
+            if (DefaultValue == null)
+            {
+                return null;
+            }
+
+            if (DefaultValue is string defaultValueString)
+            {
+                return ApplyReplacementTokens(replacementTokens, defaultValueString);
+            }
+
+            return DefaultValue;
+        }
+
         public void SetValueOverride(object valueOverride)
         {
             if (valueOverride is bool || valueOverride is int || valueOverride is long)

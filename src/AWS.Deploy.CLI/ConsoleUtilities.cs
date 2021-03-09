@@ -227,15 +227,15 @@ namespace AWS.Deploy.CLI
             };
         }
 
-        public string AskUserForValue(string message, string defaultValue, bool allowEmpty, params Func<string, string>[] validators)
+        public string AskUserForValue(string message, string defaultValue, bool allowEmpty, string resetValue = "", params Func<string, string>[] validators)
         {
-            const string CLEAR = "<clear>";
+            const string RESET = "<reset>";
 
             _interactiveService.WriteLine(message);
 
             var prompt = $"Enter value (default {defaultValue}";
             if (allowEmpty)
-                prompt += $". Type {CLEAR} to clear.";
+                prompt += $". Type {RESET} to reset.";
             prompt += "): ";
             _interactiveService.WriteLine(prompt);
 
@@ -245,10 +245,10 @@ namespace AWS.Deploy.CLI
                 var line = _interactiveService.ReadLine()?.Trim() ?? "";
 
                 if (allowEmpty &&
-                    (string.Equals(CLEAR, line.Trim(), StringComparison.OrdinalIgnoreCase) ||
-                     string.Equals($"'{CLEAR}'", line.Trim(), StringComparison.OrdinalIgnoreCase)))
+                    (string.Equals(RESET, line.Trim(), StringComparison.OrdinalIgnoreCase) ||
+                     string.Equals($"'{RESET}'", line.Trim(), StringComparison.OrdinalIgnoreCase)))
                 {
-                    return string.Empty;
+                    return resetValue;
                 }
 
                 if (string.IsNullOrEmpty(line) && !string.IsNullOrEmpty(defaultValue))

@@ -135,7 +135,7 @@ namespace AWS.Deploy.CLI.UnitTests
         [Fact]
         public void AskUserForValueCanBeSetToEmptyString()
         {
-            var interactiveServices = new TestToolInteractiveServiceImpl(new List<string> { "<clear>" });
+            var interactiveServices = new TestToolInteractiveServiceImpl(new List<string> { "<reset>" });
             var consoleUtilities = new ConsoleUtilities(interactiveServices);
 
             var selectedValue =
@@ -150,7 +150,7 @@ namespace AWS.Deploy.CLI.UnitTests
         [Fact]
         public void AskUserForValueCanBeSetToEmptyStringNoDefault()
         {
-            var interactiveServices = new TestToolInteractiveServiceImpl(new List<string> { "<clear>" });
+            var interactiveServices = new TestToolInteractiveServiceImpl(new List<string> { "<reset>" });
             var consoleUtilities = new ConsoleUtilities(interactiveServices);
 
             var selectedValue =

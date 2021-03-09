@@ -104,6 +104,56 @@ namespace AWS.Deploy.CLI.UnitTests
         }
 
         [Fact]
+        public async Task ClearOptionSettingValue_Int()
+        {
+            var interactiveServices = new TestToolInteractiveServiceImpl(new List<string>
+            {
+                "<reset>"
+            });
+            var consoleUtilities = new ConsoleUtilities(interactiveServices);
+            var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new Orchestrator.OrchestratorSession());
+            var recommendations = await engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
+            var fargateRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_ASPNET_CORE_FARGATE_RECIPE_ID);
+            var desiredCountOptionSetting = fargateRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("DesiredCount"));
+
+            var originalDefaultValue = fargateRecommendation.GetOptionSettingDefaultValue<int>(desiredCountOptionSetting);
+
+            desiredCountOptionSetting.SetValueOverride(2);
+
+            Assert.Equal(2, fargateRecommendation.GetOptionSettingValue<int>(desiredCountOptionSetting));
+            
+            desiredCountOptionSetting.SetValueOverride(consoleUtilities.AskUserForValue("Title", "2", true, originalDefaultValue.ToString()));
+
+            Assert.Equal(originalDefaultValue, fargateRecommendation.GetOptionSettingValue<int>(desiredCountOptionSetting));
+        }
+
+        [Fact]
+        public async Task ClearOptionSettingValue_String()
+        {
+            var interactiveServices = new TestToolInteractiveServiceImpl(new List<string>
+            {
+                "<reset>"
+            });
+            var consoleUtilities = new ConsoleUtilities(interactiveServices);
+            var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new Orchestrator.OrchestratorSession());
+            var recommendations = await engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
+            var fargateRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_ASPNET_CORE_FARGATE_RECIPE_ID);
+            var ecsServiceNameOptionSetting = fargateRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("ECSServiceName"));
+
+            var originalDefaultValue = fargateRecommendation.GetOptionSettingDefaultValue<string>(ecsServiceNameOptionSetting);
+
+            ecsServiceNameOptionSetting.SetValueOverride("TestService");
+
+            Assert.Equal("TestService", fargateRecommendation.GetOptionSettingValue<string>(ecsServiceNameOptionSetting));
+
+            ecsServiceNameOptionSetting.SetValueOverride(consoleUtilities.AskUserForValue("Title", "TestService", true, originalDefaultValue));
+
+            Assert.Equal(originalDefaultValue, fargateRecommendation.GetOptionSettingValue<string>(ecsServiceNameOptionSetting));
+        }
+
+        [Fact]
         public async Task ObjectMappingWithDefaultValue()
         {
             var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
