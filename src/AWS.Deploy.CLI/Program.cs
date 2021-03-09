@@ -138,6 +138,7 @@ namespace AWS.Deploy.CLI
             {
                 _optionProfile,
                 _optionRegion,
+                _optionProjectPath,
                 _optionDiagnosticLogging
             };
             listCommand.Handler = CommandHandler.Create<string, string, string, bool>(async (profile, region, projectPath, diagnostics) =>
