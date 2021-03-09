@@ -32,6 +32,8 @@ namespace AWS.Deploy.CLI
 
         private static async Task<int> Main(string[] args)
         {
+            Console.OutputEncoding = Encoding.UTF8;
+
             SetExecutionEnvironment();
 
             var preambleWriter = new ConsoleInteractiveServiceImpl(diagnosticLoggingEnabled: false);
