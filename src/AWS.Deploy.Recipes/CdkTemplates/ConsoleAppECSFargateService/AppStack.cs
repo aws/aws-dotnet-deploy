@@ -1,14 +1,13 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 using Amazon.CDK;
-using Amazon.CDK.AWS.AutoScaling;
 using Amazon.CDK.AWS.EC2;
 using Amazon.CDK.AWS.ECS;
-using Amazon.CDK.AWS.ECS.Patterns;
 using Amazon.CDK.AWS.IAM;
 using AWS.Deploy.Recipes.CDK.Common;
-using System.IO;
-using System.Collections.Generic;
 using ConsoleAppEcsFargateService.Configurations;
-using Protocol = Amazon.CDK.AWS.ECS.Protocol;
+using Amazon.CDK.AWS.ECR;
 
 namespace ConsoleAppEcsFargateService
 {
@@ -75,28 +74,10 @@ namespace ConsoleAppEcsFargateService
                 StreamPrefix = recipeConfiguration.StackName
             });
 
-            var dockerExecutionDirectory = @"DockerExecutionDirectory-Placeholder";
-            if (string.IsNullOrEmpty(dockerExecutionDirectory))
+            var ecrRepository = Repository.FromRepositoryName(this, "ECRRepository", recipeConfiguration.ECRRepositoryName);
+            taskDefinition.AddContainer("Container", new ContainerDefinitionOptions
             {
-                if (string.IsNullOrEmpty(recipeConfiguration.ProjectSolutionPath))
-                {
-                    dockerExecutionDirectory = new FileInfo(recipeConfiguration.DockerfileDirectory).FullName;
-                }
-                else
-                {
-                    dockerExecutionDirectory = new FileInfo(recipeConfiguration.ProjectSolutionPath).Directory.FullName;
-                }
-            }
-            var relativePath = Path.GetRelativePath(dockerExecutionDirectory, recipeConfiguration.DockerfileDirectory);
-            var container = taskDefinition.AddContainer("Container", new ContainerDefinitionOptions
-            {
-                Image = ContainerImage.FromAsset(dockerExecutionDirectory, new AssetImageProps
-                {
-                    File = Path.Combine(relativePath, settings.DockerfileName),
-#if (AddDockerBuildArgs)
-                    BuildArgs = GetDockerBuildArgs("DockerBuildArgs-Placeholder")
-#endif
-                }),
+                Image = ContainerImage.FromEcrRepository(ecrRepository, recipeConfiguration.ECRImageTag),
                 Logging = logging
             });
 
@@ -126,18 +107,5 @@ namespace ConsoleAppEcsFargateService
 
             new FargateService(this, "FargateService", fargateServiceProps);
         }
-
-#if (AddDockerBuildArgs)
-        private Dictionary<string, string> GetDockerBuildArgs(string buildArgsString)
-        {
-            return buildArgsString
-                .Split(',')
-                .Where(x => x.Contains("="))
-                .ToDictionary(
-                    k => k.Split('=')[0],
-                    v => v.Split('=')[1]
-                );
-        }
-#endif
     }
 }

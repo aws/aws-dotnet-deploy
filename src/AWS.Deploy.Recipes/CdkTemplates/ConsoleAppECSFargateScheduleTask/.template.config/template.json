@@ -5,13 +5,13 @@
         ".NET Deployment Tool"
     ],
     "name": "Console Template CDK Project for ECS Fargate Task deployment",
-    "identity": "AWS.Deploy.Recipes.ConsoleAppEcsFargateTask",
-    "shortName": "netdeploy.ConsoleAppEcsFargateTask",
+    "identity": "AWS.Deploy.Recipes.ConsoleAppECSFargateScheduleTask",
+    "shortName": "netdeploy.ConsoleAppECSFargateScheduleTask",
     "tags": {
         "language": "C#",
         "type": "project"
     },
-    "sourceName": "ConsoleAppEcsFargateTask",
+    "sourceName": "ConsoleAppECSFargateScheduleTask",
     "preferNameDirectory": true,
     "symbols": {
         "AWSAccountId": {
@@ -25,24 +25,6 @@
             "description": "Specifies the AWS Region",
             "replaces": "AWSRegion",
             "datatype": "string"
-        },
-        "AddDockerBuildArgs": {
-            "type": "parameter",
-            "dataType": "bool",
-            "defaultValue": "false"
-        },
-        "DockerBuildArgs": {
-            "type": "parameter",
-            "description": "Specifies additional build args to the docker build command",
-            "replaces": "DockerBuildArgs-Placeholder",
-            "datatype": "string"
-        },
-        "DockerExecutionDirectory": {
-            "type": "parameter",
-            "description": "Specifies the docker execution directory",
-            "replaces": "DockerExecutionDirectory-Placeholder",
-            "datatype": "string",
-            "defaultValue": ""
         },
         "AWSDeployRecipesCDKCommonVersion": {
             "type": "parameter",

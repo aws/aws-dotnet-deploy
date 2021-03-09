@@ -17,6 +17,7 @@ namespace AWS.Deploy.Common
         public ProjectDefinition ProjectDefinition { get; }
 
         public RecipeDefinition Recipe { get; }
+
         public int ComputedPriority { get; }
 
         public string Name => Recipe.Name;
@@ -24,6 +25,8 @@ namespace AWS.Deploy.Common
         public bool IsExistingCloudApplication { get; private set; }
 
         public string Description => Recipe.Description;
+
+        public DeploymentBundle DeploymentBundle { get; }
 
         private readonly Dictionary<string, string> _replacementTokens = new();
 
@@ -34,6 +37,7 @@ namespace AWS.Deploy.Common
             ComputedPriority = computedPriority;
 
             ProjectDefinition = new ProjectDefinition(projectPath);
+            DeploymentBundle = new DeploymentBundle();
 
             if (File.Exists(projectPath))
             {

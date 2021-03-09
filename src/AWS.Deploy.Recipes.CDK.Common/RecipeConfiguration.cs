@@ -1,10 +1,6 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace AWS.Deploy.Recipes.CDK.Common
 {
     /// <summary>
@@ -24,14 +20,24 @@ namespace AWS.Deploy.Recipes.CDK.Common
         public string ProjectPath { get; set; }
 
         /// <summary>
-        /// The path to the .NET solution file for the project.
+        /// The ECR Repository Name where the docker image will be pushed to.
         /// </summary>
-        public string ProjectSolutionPath { get; set; }
+        public string ECRRepositoryName { get; set; }
 
         /// <summary>
-        /// The directory containing the docker file to build the container with.
+        /// The ECR Image Tag of the docker image.
         /// </summary>
-        public string DockerfileDirectory { get; set; }
+        public string ECRImageTag { get; set; }
+
+        /// <summary>
+        /// The path of the zip file containing the assemblies produced by the dotnet publish command.
+        /// </summary>
+        public string DotnetPublishZipPath { get; set; }
+
+        /// <summary>
+        /// The directory containing the assemblies produced by the dotnet publish command.
+        /// </summary>
+        public string DotnetPublishOutputDirectory { get; set; }
 
         /// <summary>
         /// The ID of the recipe being used to deploy the application.

@@ -113,5 +113,37 @@ namespace AWS.Deploy.DockerEngine
 
             return mappings.ImageMapping.FirstOrDefault(x => x.TargetFramework.Equals(_project.TargetFramework));
         }
+
+        /// <summary>
+        /// Inspects the Dockerfile associated with the recommendation
+        /// and determines the appropriate Docker Execution Directory,
+        /// if one is not set.
+        /// </summary>
+        /// <param name="recommendation"></param>
+        public void DetermineDockerExecutionDirectory(Recommendation recommendation)
+        {
+            if (string.IsNullOrEmpty(recommendation.DeploymentBundle.DockerExecutionDirectory))
+            {
+                var projectFilename = Path.GetFileName(recommendation.ProjectPath);
+                var dockerFilePath = Path.Combine(Path.GetDirectoryName(recommendation.ProjectPath), "Dockerfile");
+                if (File.Exists(dockerFilePath))
+                {
+                    using (var stream = File.OpenRead(dockerFilePath))
+                    using (var reader = new StreamReader(stream))
+                    {
+                        string line;
+                        while ((line = reader.ReadLine()) != null)
+                        {
+                            var noSpaceLine = line.Replace(" ", "");
+
+                            if (noSpaceLine.StartsWith("COPY") && (noSpaceLine.EndsWith(".sln./") || (projectFilename != null && noSpaceLine.Contains("/" + projectFilename))))
+                            {
+                                recommendation.DeploymentBundle.DockerExecutionDirectory = Path.GetDirectoryName(recommendation.ProjectDefinition.ProjectSolutionPath);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

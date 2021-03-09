@@ -1,0 +1,35 @@
+{
+    "Type": "DotnetPublishZipFile",
+    "Parameters": [
+        {
+            "Id": "DotnetBuildConfiguration",
+            "Name": "Dotnet Build Configuration",
+            "Description": "The build configuration to use for the dotnet build",
+            "Type": "String",
+            "TypeHint": "DotnetPublishBuildConfiguration",
+            "DefaultValue": "Release",
+            "AdvancedSetting": true,
+            "Updatable": true
+        },
+        {
+            "Id": "DotnetPublishArgs",
+            "Name": "Dotnet Publish Args",
+            "Description": "The list of additional dotnet publish args passed to the target application.",
+            "Type": "String",
+            "TypeHint": "DotnetPublishAdditionalBuildArguments",
+            "DefaultValue": "",
+            "AdvancedSetting": true,
+            "Updatable": true
+        },
+        {
+            "Id": "SelfContainedBuild",
+            "Name": "Self Contained Build",
+            "Description": "Publishing your app as self-contained produces an application that includes the .NET runtime and libraries. Users can run it on a machine that doesn't have the .NET runtime installed.",
+            "Type": "Bool",
+            "TypeHint": "DotnetPublishSelfContainedBuild",
+            "DefaultValue": false,
+            "AdvancedSetting": true,
+            "Updatable": true
+        }
+    ]
+}

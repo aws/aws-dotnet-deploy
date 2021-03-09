@@ -1,13 +1,13 @@
 {
     "$schema": "./aws-deploy-recipe-schema.json",
-    "Id": "ConsoleAppEcsFargateTask",
+    "Id": "ConsoleAppEcsFargateScheduleTask",
     "Version": "0.1.0",
-    "Name": "Console Application to ECS Fargate Task",
+    "Name": "Console Application to ECS Fargate Schedule Task",
     "DeploymentType": "CdkProject",
     "DeploymentBundle": "Container",
-    "CdkProjectTemplate": "../CdkTemplates/ConsoleAppECSFargateTask",
-    "CdkProjectTemplateId": "netdeploy.ConsoleAppEcsFargateTask",
-    "Description": "Console application built as a container and deployed as a task in Elastic Container Service. This is meant for console application that process finite amount of work and exit when complete.",
+    "CdkProjectTemplate": "../CdkTemplates/ConsoleAppECSFargateScheduleTask",
+    "CdkProjectTemplateId": "netdeploy.ConsoleAppECSFargateScheduleTask",
+    "Description": "Deploy a console application as a scheduled task on Elastic Container Service. If a Dockerfile does not exist a Dockerfile will be generated.",
     "TargetService": "AWS Elastic Container Service",
 
     "RecipePriority": 100,
@@ -125,7 +125,7 @@
         {
             "Id": "Schedule",
             "Name": "Task Schedule",
-            "Description": "The schedule or rate (frequency) that determines when CloudWatch Events runs the rule.",
+            "Description": "The schedule or rate (frequency) that determines when CloudWatch Events runs the rule. View the CloudWatch Events guide for details about the format for this value. https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html",
             "Type": "String",
             "TypeHint": "ECSTaskSchedule",
             "DefaultValue": "rate(1 hour)",
@@ -185,39 +185,6 @@
                     ]
                 }
             ]
-        },
-        {
-            "Id": "AddDockerBuildArgs",
-            "Name": "Add Docker Build Args",
-            "Description": "Do you want to pass additional Docker build args?",
-            "Type": "Bool",
-            "DefaultValue": false,
-            "AdvancedSetting": true,
-            "Updatable": true
-        },
-        {
-            "Id": "DockerBuildArgs",
-            "Name": "Docker Build Args",
-            "Description": "The list of additional docker build args.",
-            "Type": "String",
-            "DefaultValue": "",
-            "DependsOn": [
-                {
-                    "Id": "AddDockerBuildArgs",
-                    "Value": true
-                }
-            ],
-            "AdvancedSetting": true,
-            "Updatable": true
-        },
-        {
-            "Id": "DockerExecutionDirectory",
-            "Name": "Docker Execution Directory",
-            "Description": "Specifies the docker execution directory where the docker build command will be executed from.",
-            "Type": "String",
-            "DefaultValue": "",
-            "AdvancedSetting": true,
-            "Updatable": true
         },
         {
             "Id": "TaskCpu",

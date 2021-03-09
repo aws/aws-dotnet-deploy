@@ -21,6 +21,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly IToolInteractiveService _toolInteractiveService;
         private readonly IOrchestratorInteractiveService _orchestratorInteractiveService;
         private readonly ICdkProjectHandler _cdkProjectHandler;
+        private readonly IDeploymentBundleHandler _deploymentBundleHandler;
         private readonly IAWSResourceQueryer _awsResourceQueryer;
 
         private readonly ConsoleUtilities _consoleUtilities;
@@ -31,12 +32,14 @@ namespace AWS.Deploy.CLI.Commands
             IToolInteractiveService toolInteractiveService,
             IOrchestratorInteractiveService orchestratorInteractiveService,
             ICdkProjectHandler cdkProjectHandler,
+            IDeploymentBundleHandler deploymentBundleHandler,
             IAWSResourceQueryer awsResourceQueryer,
             OrchestratorSession session)
         {
             _toolInteractiveService = toolInteractiveService;
             _orchestratorInteractiveService = orchestratorInteractiveService;
             _cdkProjectHandler = cdkProjectHandler;
+            _deploymentBundleHandler = deploymentBundleHandler;
             _awsResourceQueryer = awsResourceQueryer;
             _consoleUtilities = new ConsoleUtilities(toolInteractiveService);
             _session = session;
@@ -58,6 +61,7 @@ namespace AWS.Deploy.CLI.Commands
                     _orchestratorInteractiveService,
                     _cdkProjectHandler,
                     _awsResourceQueryer,
+                    _deploymentBundleHandler,
                     new[] { RecipeLocator.FindRecipeDefinitionsPath() });
 
             // Determine what recommendations are possible for the project.
@@ -135,7 +139,7 @@ namespace AWS.Deploy.CLI.Commands
             }
             else
             {
-                selectedRecommendation = _consoleUtilities.AskUserToChoose(recommendations, "Available options to deploy project", recommendations[0]);
+                selectedRecommendation = _consoleUtilities.AskToChooseRecommendation(recommendations);
             }
 
             // Apply the user enter project name to the recommendation so that any default settings based on project name are applied.
@@ -155,17 +159,59 @@ namespace AWS.Deploy.CLI.Commands
                 throw new MissingDockerException();
             }
 
-            await ConfigureDeployment(selectedRecommendation, false);
+            var deploymentBundleDefinition = orchestrator.GetDeploymentBundleDefinition(selectedRecommendation);
+
+            var configurableOptionSettings = selectedRecommendation.Recipe.OptionSettings.Union(deploymentBundleDefinition.Parameters);
+
+            await ConfigureDeployment(selectedRecommendation, configurableOptionSettings, false);
 
             var cloudApplication = new CloudApplication
             {
                 Name = cloudApplicationName
             };
 
+            await CreateDeploymentBundle(orchestrator, selectedRecommendation, cloudApplication);
+
             await orchestrator.DeployRecommendation(cloudApplication, selectedRecommendation);
         }
 
-        private async Task ConfigureDeployment(Recommendation recommendation, bool showAdvancedSettings)
+        private async Task CreateDeploymentBundle(Orchestrator.Orchestrator orchestrator, Recommendation selectedRecommendation, CloudApplication cloudApplication)
+        {
+            if (selectedRecommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.Container)
+            {
+                while (!await orchestrator.CreateContainerDeploymentBundle(cloudApplication, selectedRecommendation))
+                {
+                    _toolInteractiveService.WriteLine(string.Empty);
+                    var answer = _consoleUtilities.AskYesNoQuestion("Do you want to go back and modify the current configuration?", "true");
+                    if (answer == ConsoleUtilities.YesNo.Yes)
+                    {
+                        var dockerExecutionDirectory =
+                        _consoleUtilities.AskUserForValue(
+                            "Enter the docker execution directory where the docker build command will be executed from:",
+                            selectedRecommendation.DeploymentBundle.DockerExecutionDirectory,
+                            allowEmpty: true);
+
+                        if (!Directory.Exists(dockerExecutionDirectory))
+                            continue;
+
+                        selectedRecommendation.DeploymentBundle.DockerExecutionDirectory = dockerExecutionDirectory;
+                    }
+                    else
+                    {
+                        _toolInteractiveService.WriteLine(string.Empty);
+                        throw new FailedToCreateDeploymentBundleException();
+                    }
+                }
+            }
+            else if (selectedRecommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.DotnetPublishZipFile)
+            {
+                var dotnetPublishDeploymentBundleResult = await orchestrator.CreateDotnetPublishDeploymentBundle(selectedRecommendation);
+                if (!dotnetPublishDeploymentBundleResult)
+                    throw new FailedToCreateDeploymentBundleException();
+            }
+        }
+
+        private async Task ConfigureDeployment(Recommendation recommendation, IEnumerable<OptionSettingItem> configurableOptionSettings, bool showAdvancedSettings)
         {
             _toolInteractiveService.WriteLine(string.Empty);
 
@@ -177,9 +223,7 @@ namespace AWS.Deploy.CLI.Commands
                 _toolInteractiveService.WriteLine(title);
 
                 var optionSettings =
-                    recommendation
-                        .Recipe
-                        .OptionSettings
+                    configurableOptionSettings
                         .Where(x => (!recommendation.IsExistingCloudApplication || x.Updatable) && (!x.AdvancedSetting || showAdvancedSettings) && recommendation.IsOptionSettingDisplayable(x))
                         .ToArray();
 
@@ -192,7 +236,7 @@ namespace AWS.Deploy.CLI.Commands
                 if (!showAdvancedSettings)
                 {
                     // Don't bother showing 'more' for advanced options if there aren't any advanced options.
-                    if(recommendation.Recipe.OptionSettings.Any(x => x.AdvancedSetting))
+                    if(configurableOptionSettings.Any(x => x.AdvancedSetting))
                     {
                         _toolInteractiveService.WriteLine("Enter 'more' to display Advanced settings. ");
                     }
@@ -352,5 +396,7 @@ namespace AWS.Deploy.CLI.Commands
 
             return new DirectoryInfo(projectPath).Name;
         }
+
+
     }
 }

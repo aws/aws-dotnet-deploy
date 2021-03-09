@@ -7,7 +7,7 @@
     "DeploymentBundle": "DotnetPublishZipFile",
     "CdkProjectTemplate": "../CdkTemplates/AspNetAppElasticBeanstalkLinux",
     "CdkProjectTemplateId": "netdeploy.AspNetAppElasticBeanstalkLinux",
-    "Description": "ASP.NET Core applications can be deployed Elastic Beanstalk and have the AWS resources automatically provisioned and managed by the service.",
+    "Description": "ASP.NET Core applications can be deployed Elastic Beanstalk and have the AWS resources automatically provisioned and managed by the service. Recommended for ASP.NET Core projects that do not have a Dockerfile.",
     "TargetService": "AWS Elastic Beanstalk",
 
     "RecipePriority": 100,
@@ -182,25 +182,6 @@
             ]
         },
         {
-            "Id": "DotnetBuildConfiguration",
-            "Name": "Dotnet Build Configuration",
-            "Description": "The build configuration to use for the dotnet build",
-            "Type": "String",
-            "DefaultValue": "Release",
-            "AdvancedSetting": true,
-            "Updatable": true
-        },
-        {
-            "Id": "DotnetPublishArgs",
-            "Name": "Dotnet Publish Args",
-            "Description": "The list of additional dotnet publish args passed to the target application.",
-            "Type": "String",
-            "TypeHint": "DotnetPublishArgs",
-            "DefaultValue": "",
-            "AdvancedSetting": true,
-            "Updatable": true
-        },
-        {
             "Id": "EC2KeyPair",
             "Name": "Key Pair",
             "Description": "The EC2 Key Pair used to SSH into EC2 instances for the Beanstalk environment.",
@@ -209,15 +190,6 @@
             "DefaultValue": "",
             "AdvancedSetting": true,
             "Updatable": false
-        },
-        {
-            "Id": "SelfContainedBuild",
-            "Name": "Self Contained Build",
-            "Description": "Publishing your app as self-contained produces an application that includes the .NET runtime and libraries. Users can run it on a machine that doesn't have the .NET runtime installed.",
-            "Type": "Bool",
-            "DefaultValue": false,
-            "AdvancedSetting": true,
-            "Updatable": true
         },
         {
             "Id": "ElasticBeanstalkPlatformArn",

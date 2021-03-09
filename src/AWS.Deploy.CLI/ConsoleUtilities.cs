@@ -24,6 +24,38 @@ namespace AWS.Deploy.CLI
             No = 0
         };
 
+        public Recommendation AskToChooseRecommendation(IList<Recommendation> recommendations)
+        {
+            if (recommendations.Count == 0)
+            {
+                // This should never happen as application should have aborted sooner if there was no valid recommendations.
+                throw new Exception("No recommendations available for user to select");
+            }
+
+            _interactiveService.WriteLine("Recommended Deployment Option");
+            _interactiveService.WriteLine("-----------------------------");
+            _interactiveService.WriteLine($"1: {recommendations[0].Name}");
+            _interactiveService.WriteLine(recommendations[0].Description);
+
+            _interactiveService.WriteLine(string.Empty);
+
+            if (recommendations.Count > 1)
+            {
+                _interactiveService.WriteLine("Additional Deployments Options");
+                _interactiveService.WriteLine("------------------------------");
+                for (var index = 1; index < recommendations.Count; index++)
+                {
+                    _interactiveService.WriteLine($"{index + 1}: {recommendations[index].Name}");
+                    _interactiveService.WriteLine(recommendations[index].Description);
+                    _interactiveService.WriteLine(string.Empty);
+                }
+            }
+
+            _interactiveService.WriteLine($"Choose deployment option (recommended default: 1)");
+
+            return ReadOptionFromUser(recommendations, 0);
+        }
+
         public string AskUserToChoose(IList<string> values, string title, string defaultValue)
         {
             var options = new List<UserInputOption>();
@@ -101,21 +133,7 @@ namespace AWS.Deploy.CLI
                 }
             }
 
-            while (true)
-            {
-                var selectedOption = _interactiveService.ReadLine();
-                if (string.IsNullOrEmpty(selectedOption) && defaultValueIndex != -1)
-                {
-                    return defaultValue;
-                }
-
-                if (int.TryParse(selectedOption, out var intOption) && intOption >= 1 && intOption <= options.Count)
-                {
-                    return options[intOption - 1];
-                }
-
-                _interactiveService.WriteLine($"Invalid option. The selected option should be between 1 and {options.Count}.");
-            }
+            return ReadOptionFromUser(options, defaultValueIndex);
         }
 
         public void DisplayRow((string, int)[] row)
@@ -366,6 +384,36 @@ namespace AWS.Deploy.CLI
                         _interactiveService.WriteLine($"{indent}{key}: {stringValue}");
                     }
                 }
+            }
+        }
+
+        private T ReadOptionFromUser<T>(IList<T> options, int defaultValueIndex)
+        {
+            if(options.Count == 0)
+            {
+                throw new Exception("No options available for user to select");
+            }
+
+            // If defaultValueIndex is used it starts as 1 just like the user sees the list of options.
+            if (defaultValueIndex != -1 && (defaultValueIndex < 1 || defaultValueIndex > options.Count))
+            {
+                throw new Exception($"Invalid default index {defaultValueIndex}");
+            }
+
+            while (true)
+            {
+                var selectedOption = _interactiveService.ReadLine();
+                if (string.IsNullOrEmpty(selectedOption) && defaultValueIndex != -1)
+                {
+                    return options[defaultValueIndex - 1];
+                }
+
+                if (int.TryParse(selectedOption, out var intOption) && intOption >= 1 && intOption <= options.Count)
+                {
+                    return options[intOption - 1];
+                }
+
+                _interactiveService.WriteLine($"Invalid option. The selected option should be between 1 and {options.Count}.");
             }
         }
     }

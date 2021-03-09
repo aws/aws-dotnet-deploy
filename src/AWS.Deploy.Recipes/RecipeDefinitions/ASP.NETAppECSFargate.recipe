@@ -7,7 +7,7 @@
     "DeploymentBundle": "Container",
     "CdkProjectTemplate": "../CdkTemplates/AspNetAppEcsFargate",
     "CdkProjectTemplateId": "netdeploy.AspNetAppEcsFargate",
-    "Description": "ASP.NET Core applications built as a container and deployed to Elastic Container Service with compute power managed by Fargate.",
+    "Description": "ASP.NET Core applications built as a container and deployed to Elastic Container Service with compute power managed by Fargate. If a Dockerfile does not exist then a Dockerfile be generated into the project.",
     "TargetService": "AWS Elastic Container Service",
 
     "RecipePriority": 110,
@@ -193,39 +193,6 @@
             "Id": "AdditionalECSServiceSecurityGroups",
             "Name": "ECS Service Security Groups",
             "Description": "Comma delimited list of EC2 security groups to assign to the ECS service. This is commonly used to provide access to RDS databases running in their own security groups.",
-            "Type": "String",
-            "DefaultValue": "",
-            "AdvancedSetting": true,
-            "Updatable": true
-        },
-        {
-            "Id": "AddDockerBuildArgs",
-            "Name": "Add Docker Build Args",
-            "Description": "Do you want to pass additional Docker build args?",
-            "Type": "Bool",
-            "DefaultValue": false,
-            "AdvancedSetting": true,
-            "Updatable": true
-        },
-        {
-            "Id": "DockerBuildArgs",
-            "Name": "Docker Build Args",
-            "Description": "The list of additional docker build args.",
-            "Type": "String",
-            "DefaultValue": "",
-            "DependsOn": [
-                {
-                    "Id": "AddDockerBuildArgs",
-                    "Value": true
-                }
-            ],
-            "AdvancedSetting": true,
-            "Updatable": true
-        },
-        {
-            "Id": "DockerExecutionDirectory",
-            "Name": "Docker Execution Directory",
-            "Description": "Specifies the docker execution directory where the docker build command will be executed from.",
             "Type": "String",
             "DefaultValue": "",
             "AdvancedSetting": true,

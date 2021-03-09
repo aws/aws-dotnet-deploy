@@ -3,7 +3,9 @@
 
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Amazon.Runtime;
@@ -33,9 +35,12 @@ namespace AWS.Deploy.CLI.Utilities
             string command,
             string workingDirectory = "",
             bool streamOutputToInteractiveService = true,
-            Func<Process, Task> onComplete = null,
+            Action<TryRunResult> onComplete = null,
+            bool redirectIO = true,
             CancellationToken cancelToken = default)
         {
+            StringBuilder strOutput = new StringBuilder();
+            StringBuilder strError = new StringBuilder();
             var credentials = await _awsCredentials.GetCredentialsAsync();
 
             var processStartInfo = new ProcessStartInfo
@@ -47,11 +52,11 @@ namespace AWS.Deploy.CLI.Utilities
                         ? $"/c {command}"
                         : $"-c \"{command}\"",
 
-                RedirectStandardInput = true,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
+                RedirectStandardInput = redirectIO,
+                RedirectStandardOutput = redirectIO,
+                RedirectStandardError = redirectIO,
                 UseShellExecute = false,
-                CreateNoWindow = true,
+                CreateNoWindow = redirectIO,
                 WorkingDirectory = workingDirectory
             };
 
@@ -70,10 +75,14 @@ namespace AWS.Deploy.CLI.Utilities
             if (null == process)
                 throw new Exception("Process.Start failed to return a non-null process");
 
-            if (streamOutputToInteractiveService)
+            if (redirectIO && streamOutputToInteractiveService)
             {
-                process.OutputDataReceived += (sender, e) => { _interactiveService.LogMessageLine(e.Data); };
-                process.ErrorDataReceived += (sender, e) => { _interactiveService.LogMessageLine(e.Data); };
+                process.OutputDataReceived += (sender, e) => {
+                    _interactiveService.LogMessageLine(e.Data);
+                    strOutput.Append(e.Data); };
+                process.ErrorDataReceived += (sender, e) => {
+                    _interactiveService.LogMessageLine(e.Data);
+                    strError.Append(e.Data); };
                 process.BeginOutputReadLine();
                 process.BeginErrorReadLine();
             }
@@ -89,9 +98,15 @@ namespace AWS.Deploy.CLI.Utilities
                 await Task.Delay(TimeSpan.FromMilliseconds(50), cancelToken);
             }
 
-            if (onComplete != null)
+            if (redirectIO && onComplete != null)
             {
-                await onComplete(process);
+                var result = new TryRunResult
+                {
+                    StandardOut = streamOutputToInteractiveService ? strOutput.ToString() : await process.StandardOutput.ReadToEndAsync(),
+                    StandardError = streamOutputToInteractiveService ? strError.ToString() : await process.StandardError.ReadToEndAsync(),
+                    ExitCode = process.ExitCode
+                };
+                onComplete(result);
             }
         }
 

@@ -68,6 +68,13 @@ namespace AWS.Deploy.Common
 
         }
     }
+    
+    /// <summary>
+    /// Throw if Orchestrator is unable to create
+    /// the deployment bundle.
+    /// </summary>
+    [AWSDeploymentExpectedException]
+    public class FailedToCreateDeploymentBundleException : Exception {}
 
     /// <summary>
     /// Indicates a specific strongly typed Exception can be anticipated.

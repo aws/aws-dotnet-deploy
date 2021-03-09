@@ -1,0 +1,21 @@
+{
+    "name": "AWS.Deploy",
+    "version": "{version}",
+    "description": "CDK apps for AWS.Deploy",
+    "devDependencies": {
+        "aws-cdk": "{aws-cdk-version}"
+    },
+    "scripts": {
+        "cdk": "cdk"
+    },
+    "license": "APACHE2.0",
+    "keywords": [
+        "aws",
+        "cdk",
+        ".NET"
+    ],
+    "author": {
+        "name": "Amazon Web Services",
+        "url": "https://aws.amazon.com"
+    }
+}

@@ -1,15 +1,10 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.\r
 // SPDX-License-Identifier: Apache-2.0
 
-namespace ConsoleAppEcsFargateTask.Configurations
+namespace ConsoleAppECSFargateScheduleTask.Configurations
 {
     public class Configuration
     {
-        /// <summary>
-        /// The file name of the Dockerfile.
-        /// </summary>
-        public string DockerfileName { get; set; } = "Dockerfile";
-
         /// <summary>
         /// The Identity and Access Management Role that provides AWS credentials to the application to access AWS services.
         /// </summary>

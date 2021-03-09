@@ -1,9 +1,12 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 using Amazon.CDK;
 using AWS.Deploy.Recipes.CDK.Common;
-using ConsoleAppEcsFargateTask.Configurations;
+using ConsoleAppECSFargateScheduleTask.Configurations;
 using Microsoft.Extensions.Configuration;
 
-namespace ConsoleAppEcsFargateTask
+namespace ConsoleAppECSFargateScheduleTask
 {
     sealed class Program
     {

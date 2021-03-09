@@ -1,11 +1,10 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml;
-using AWS.Deploy.Common.Recipes;
 
 namespace AWS.Deploy.Common
 {
@@ -85,6 +84,11 @@ namespace AWS.Deploy.Common
         /// </summary>
         public bool HasDockerFile => CheckIfDockerFileExists(ProjectPath);
 
+        /// <summary>
+        /// The Solution file path of the project.
+        /// </summary>
+        public string ProjectSolutionPath => GetProjectSolutionFile(ProjectPath);
+
         public string GetMSPropertyValue(string propertyName)
         {
             var propertyValue = _xmlProjectFile.SelectSingleNode($"//PropertyGroup/{propertyName}")?.InnerText;
@@ -116,6 +120,41 @@ namespace AWS.Deploy.Common
             {
                 return false;
             }
+        }
+
+        private string GetProjectSolutionFile(string projectPath)
+        {
+            var projectDirectory = Directory.GetParent(projectPath);
+            var solutionExists = false;
+            while (solutionExists == false && projectDirectory != null)
+            {
+                var files = projectDirectory.GetFiles("*.sln");
+                foreach (var solutionFile in files)
+                {
+                    if (ValidateProjectInSolution(projectPath, solutionFile.FullName))
+                    {
+                        return solutionFile.FullName;
+                    }
+                }
+                projectDirectory = projectDirectory.Parent;
+            }
+            return string.Empty;
+        }
+
+        private bool ValidateProjectInSolution(string projectPath, string solutionFile)
+        {
+            var projectFileName = Path.GetFileName(projectPath);
+            if (string.IsNullOrWhiteSpace(solutionFile) ||
+                string.IsNullOrWhiteSpace(projectFileName))
+            {
+                return false;
+            }
+            List<string> lines = File.ReadAllLines(solutionFile).ToList();
+            var projectLines = lines.Where(x => x.StartsWith("Project"));
+            var projectPaths = projectLines.Select(x => x.Split(',')[1].Replace('\"', ' ').Trim()).ToList();
+
+            //Validate project exists in solution
+            return projectPaths.Select(x => Path.GetFileName(x)).Where(x => x.Equals(projectFileName)).Any();
         }
     }
 }

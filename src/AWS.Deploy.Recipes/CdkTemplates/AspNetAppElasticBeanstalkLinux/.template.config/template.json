@@ -26,20 +26,6 @@
             "replaces": "AWSRegion",
             "datatype": "string"
         },
-        "DotnetBuildConfiguration": {
-            "type": "parameter",
-            "description": "Specifies the dotnet build configuration",
-            "replaces": "DotnetBuildConfiguration-Placeholder",
-            "datatype": "string",
-            "defaultValue": "Release"
-        },
-        "DotnetPublishArgs": {
-            "type": "parameter",
-            "description": "Specifies additional build args to the dotnet publish command",
-            "replaces": "DotNetPublishAdditionalArguments-Placeholder",
-            "datatype": "string",
-            "defaultValue": ""
-        },
         "AWSDeployRecipesCDKCommonVersion": {
             "type": "parameter",
             "description": "The version number of AWS.Deploy.Recipes.CDK.Common to use",
