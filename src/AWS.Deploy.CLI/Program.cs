@@ -218,6 +218,12 @@ namespace AWS.Deploy.CLI
             });
             rootCommand.Add(deleteCommand);
 
+            // if user didn't specify a command, default to help
+            if (args.Length == 0)
+            {
+                args = new string[] { "-h" };
+            }
+
             return await rootCommand.InvokeAsync(args);
         }
 
