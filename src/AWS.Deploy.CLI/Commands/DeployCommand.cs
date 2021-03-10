@@ -149,7 +149,7 @@ namespace AWS.Deploy.CLI.Commands
             if (selectedRecommendation.Recipe.DeploymentType == DeploymentTypes.CdkProject &&
                 !(await _session.SystemCapabilities).NodeJsMinVersionInstalled)
             {
-                _toolInteractiveService.WriteErrorLine("The selected deployment option NodeJS 10.3 or later.  Please install NodeJS https://nodejs.org/en/download/");
+                _toolInteractiveService.WriteErrorLine("The selected deployment option requires Node.js 10.3 or later which was not detected.  Please install Node.js: https://nodejs.org/en/download/");
                 throw new MissingNodeJsException();
             }
 
