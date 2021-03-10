@@ -117,7 +117,7 @@
                 "LoadBalanced": "Load Balanced"
             },
             "AdvancedSetting": false,
-            "Updatable": true
+            "Updatable": false
         },
         {
             "Id": "LoadBalancerType",
