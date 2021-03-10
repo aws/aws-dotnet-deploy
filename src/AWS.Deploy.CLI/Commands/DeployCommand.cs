@@ -266,8 +266,6 @@ namespace AWS.Deploy.CLI.Commands
                     selectedNumber <= optionSettings.Length)
                 {
                     await ConfigureDeployment(recommendation, optionSettings[selectedNumber - 1]);
-
-                    _toolInteractiveService.WriteLine(string.Empty);
                 }
 
                 _toolInteractiveService.WriteLine(string.Empty);
@@ -294,7 +292,6 @@ namespace AWS.Deploy.CLI.Commands
             _toolInteractiveService.WriteLine(string.Empty);
             _toolInteractiveService.WriteLine($"{setting.Name}:");
             _toolInteractiveService.WriteLine($"{setting.Description}");
-            _toolInteractiveService.WriteLine(string.Empty);
 
             var currentValue = recommendation.GetOptionSettingValue(setting);
             object settingValue = null;
