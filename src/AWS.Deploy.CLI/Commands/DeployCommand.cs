@@ -68,7 +68,8 @@ namespace AWS.Deploy.CLI.Commands
             var recommendations = await orchestrator.GenerateDeploymentRecommendations();
             if (recommendations.Count == 0)
             {
-                _toolInteractiveService.WriteErrorLine($"Unable to determine a method for deploying application: {_session.ProjectPath}");
+                _toolInteractiveService.WriteLine(string.Empty);
+                _toolInteractiveService.WriteErrorLine($"The project you are trying to deploy is currently not supported.");
                 throw new FailedToGenerateAnyRecommendations();
             }
 

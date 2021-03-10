@@ -45,7 +45,7 @@ namespace AWS.Deploy.Common
             _xmlProjectFile.LoadXml(File.ReadAllText(projectPath));
 
             var sdkType = _xmlProjectFile.DocumentElement.Attributes["Sdk"];
-            SdkType = sdkType.Value;
+            SdkType = sdkType?.Value;
 
             var targetFramework = _xmlProjectFile.GetElementsByTagName("TargetFramework");
             if (targetFramework.Count > 0)
