@@ -231,7 +231,8 @@ namespace AWS.Deploy.CLI
         {
             const string RESET = "<reset>";
 
-            _interactiveService.WriteLine(message);
+            if (!string.IsNullOrEmpty(message))
+                _interactiveService.WriteLine(message);
 
             var prompt = $"Enter value (default {defaultValue}";
             if (allowEmpty)
