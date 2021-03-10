@@ -7,7 +7,7 @@
     "DeploymentBundle": "DotnetPublishZipFile",
     "CdkProjectTemplate": "../CdkTemplates/AspNetAppElasticBeanstalkLinux",
     "CdkProjectTemplateId": "netdeploy.AspNetAppElasticBeanstalkLinux",
-    "Description": "Deployed ASP.NET Core application to AWS Elastic Beanstalk. Recommended for applications that are not set up to be deployed as containers.",
+    "Description": "Deploy an ASP.NET Core application to AWS Elastic Beanstalk. Recommended for applications that are not set up to be deployed as containers.",
     "TargetService": "AWS Elastic Beanstalk",
 
     "RecipePriority": 100,
