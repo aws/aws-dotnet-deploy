@@ -46,7 +46,6 @@ namespace AWS.Deploy.CLI.Commands
             var canDelete = await CanDeleteAsync(stackName);
             if (!canDelete)
             {
-                _interactiveService.WriteErrorLine("Only Stacks that were deployed with this tool can be deleted.");
                 return;
             }
 
@@ -89,10 +88,17 @@ namespace AWS.Deploy.CLI.Commands
             var stack = await GetStackAsync(stackName);
             if (stack == null)
             {
-                throw new FailedToDeleteException($"Stack with name {stackName} does not exist.");
+                _interactiveService.WriteErrorLine($"Stack with name {stackName} does not exist.");
+                return false;
             }
 
-            return stack.Tags.Any(tag => tag.Key.Equals(CloudFormationIdentifierConstants.STACK_TAG));
+            var canDelete = stack.Tags.Any(tag => tag.Key.Equals(CloudFormationIdentifierConstants.STACK_TAG));
+            if (!canDelete)
+            {
+                _interactiveService.WriteErrorLine("Only Stacks that were deployed with this tool can be deleted.");
+            }
+
+            return canDelete;
         }
 
         private async Task WaitForStackDelete(string stackName)
