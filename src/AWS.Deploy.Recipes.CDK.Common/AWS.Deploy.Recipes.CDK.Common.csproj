@@ -30,8 +30,8 @@
 
             var cdkProjectDirectory =
                             Path.Combine(
-                                Path.GetTempPath(),
-                                "AWS.Deploy",
+                                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                                ".aws-dotnet-deploy",
                                 "Projects");
 
             var nugetCacheDirectory =
