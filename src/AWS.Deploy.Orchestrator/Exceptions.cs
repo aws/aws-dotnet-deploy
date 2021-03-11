@@ -112,4 +112,14 @@ namespace AWS.Deploy.Orchestrator
         {
         }
     }
+
+    /// <summary>
+    /// Throw if Zip File Manager fails to create a Zip File
+    /// </summary>
+    public class FailedToCreateZipFileException : Exception
+    {
+        public FailedToCreateZipFileException(string message) : base(message)
+        {
+        }
+    }
 }

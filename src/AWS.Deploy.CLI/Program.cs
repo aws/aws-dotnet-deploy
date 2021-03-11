@@ -19,7 +19,7 @@ using System.Linq;
 using System.Text;
 using AWS.Deploy.Common.Extensions;
 using AWS.Deploy.Orchestrator.CDK;
-using AWS.Deploy.Common.IO;
+using AWS.Deploy.Orchestrator.Utilities;
 
 namespace AWS.Deploy.CLI
 {
@@ -104,7 +104,7 @@ namespace AWS.Deploy.CLI
                     };
 
                     var awsResourceQueryer = new AWSResourceQueryer(new DefaultAWSClientFactory());
-                    var zipFileManager = new ZipFileManager();
+                    var zipFileManager = new ZipFileManager(commandLineWrapper);
 
                     var deploy = new DeployCommand(
                         toolInteractiveService,
@@ -176,7 +176,7 @@ namespace AWS.Deploy.CLI
 
                 var awsResourceQueryer = new AWSResourceQueryer(new DefaultAWSClientFactory());
                 var directoryManager = new DirectoryManager();
-                var zipFileManager = new ZipFileManager();
+                var zipFileManager = new ZipFileManager(commandLineWrapper);
 
                 await new ListDeploymentsCommand(toolInteractiveService,
                                                 new ConsoleOrchestratorLogger(toolInteractiveService),
