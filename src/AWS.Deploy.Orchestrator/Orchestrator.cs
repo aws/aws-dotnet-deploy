@@ -74,7 +74,7 @@ namespace AWS.Deploy.Orchestrator
             if (recommendation.Recipe.DeploymentType == DeploymentTypes.CdkProject)
             {
                 _interactiveService.LogMessageLine("AWS CDK is being configured.");
-                await _session.CdkManager.EnsureCompatibleCDKExists(CDKConstants.TempDirectoryRoot, CDKConstants.MinimumCDKVersion);
+                await _session.CdkManager.EnsureCompatibleCDKExists(CDKConstants.DeployToolWorkspaceDirectoryRoot, CDKConstants.MinimumCDKVersion);
             }
 
             switch (recommendation.Recipe.DeploymentType)

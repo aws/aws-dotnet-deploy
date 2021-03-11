@@ -9,14 +9,14 @@ namespace AWS.Deploy.Orchestrator.CDK
     public static class CDKConstants
     {
         /// <summary>
-        /// Temporary directory to create CDK app during the deployment.
+        /// Deploy Tool workspace directory to create CDK app during the deployment.
         /// </summary>
-        public static readonly string TempDirectoryRoot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".aws-dotnet-deploy");
+        public static readonly string DeployToolWorkspaceDirectoryRoot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".aws-dotnet-deploy");
 
         /// <summary>
         /// Directory that contains CDK projects
         /// </summary>
-        public static string ProjectsDirectory => Path.Combine(TempDirectoryRoot, "Projects");
+        public static string ProjectsDirectory => Path.Combine(DeployToolWorkspaceDirectoryRoot, "Projects");
 
         /// <summary>
         /// Minimum version of CDK CLI to check before starting the deployment
