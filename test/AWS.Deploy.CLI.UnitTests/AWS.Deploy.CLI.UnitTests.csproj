@@ -31,6 +31,7 @@
 	    <ProjectReference Include="..\..\src\AWS.Deploy.CLI\AWS.Deploy.CLI.csproj" />
 	    <ProjectReference Include="..\..\src\AWS.Deploy.DockerEngine\AWS.Deploy.DockerEngine.csproj" />
 	    <ProjectReference Include="..\..\src\AWS.Deploy.Recipes\AWS.Deploy.Recipes.csproj" />
+	    <ProjectReference Include="..\AWS.Deploy.CLI.Common.UnitTests\AWS.Deploy.CLI.Common.UnitTests.csproj" />
     </ItemGroup>
 
 </Project>

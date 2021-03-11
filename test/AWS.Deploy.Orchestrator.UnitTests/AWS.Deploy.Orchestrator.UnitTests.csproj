@@ -16,6 +16,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\src\AWS.Deploy.Orchestrator\AWS.Deploy.Orchestrator.csproj" />
+      <ProjectReference Include="..\AWS.Deploy.CLI.Common.UnitTests\AWS.Deploy.CLI.Common.UnitTests.csproj" />
     </ItemGroup>
 
 </Project>

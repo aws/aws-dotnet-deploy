@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.Orchestrator.CDK;
 using Xunit;
 
@@ -14,6 +15,7 @@ namespace AWS.Deploy.Orchestrator.UnitTests.CDK
         private readonly TestCommandLineWrapper _testCommandLineWrapper;
         private readonly INPMPackageInitializer _npmPackageInitializer;
         private readonly TestFileManager _fileManager;
+        private readonly TestDirectoryManager _directoryManager;
         private const string _workingDirectory = @"c:\fake\path";
 
         private const string _packageJsonContent =
@@ -43,9 +45,10 @@ namespace AWS.Deploy.Orchestrator.UnitTests.CDK
         public NPMPackageInitializerTests()
         {
             _fileManager = new TestFileManager();
+            _directoryManager = new TestDirectoryManager();
             _testCommandLineWrapper = new TestCommandLineWrapper();
             var packageJsonGenerator = new PackageJsonGenerator(_packageJsonTemplate);
-            _npmPackageInitializer = new NPMPackageInitializer(_testCommandLineWrapper, packageJsonGenerator, _fileManager);
+            _npmPackageInitializer = new NPMPackageInitializer(_testCommandLineWrapper, packageJsonGenerator, _fileManager, _directoryManager);
         }
 
         [Fact]
@@ -80,6 +83,7 @@ namespace AWS.Deploy.Orchestrator.UnitTests.CDK
             var actualPackageJsonContent = await _fileManager.ReadAllTextAsync(Path.Combine(_workingDirectory, _packageJsonFileName));
             Assert.Equal(_packageJsonContent, actualPackageJsonContent);
             Assert.Contains(("npm install", _workingDirectory, false), _testCommandLineWrapper.Commands);
+            Assert.True(_directoryManager.Exists(_workingDirectory));
         }
     }
 }

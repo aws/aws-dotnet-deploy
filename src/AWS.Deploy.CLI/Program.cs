@@ -76,11 +76,12 @@ namespace AWS.Deploy.CLI
                             awsCredentials,
                             awsRegion);
 
+                    var directoryManager = new DirectoryManager();
                     var fileManager = new FileManager();
                     var packageJsonGenerator = new PackageJsonGenerator(
                         typeof(PackageJsonGenerator).Assembly
                         .ReadEmbeddedFile(PackageJsonGenerator.TemplateIdentifier));
-                    var npmPackageInitializer = new NPMPackageInitializer(commandLineWrapper, packageJsonGenerator, fileManager);
+                    var npmPackageInitializer = new NPMPackageInitializer(commandLineWrapper, packageJsonGenerator, fileManager, directoryManager);
                     var cdkInstaller = new CDKInstaller(commandLineWrapper);
                     var cdkManager = new CDKManager(cdkInstaller, npmPackageInitializer);
 
@@ -103,7 +104,6 @@ namespace AWS.Deploy.CLI
                     };
 
                     var awsResourceQueryer = new AWSResourceQueryer(new DefaultAWSClientFactory());
-                    var directoryManager = new DirectoryManager();
                     var zipFileManager = new ZipFileManager();
 
                     var deploy = new DeployCommand(

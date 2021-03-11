@@ -47,13 +47,15 @@ namespace AWS.Deploy.Orchestrator.CDK
         private readonly ICommandLineWrapper _commandLineWrapper;
         private readonly IPackageJsonGenerator _packageJsonGenerator;
         private readonly IFileManager _fileManager;
+        private readonly IDirectoryManager _directoryManager;
         private const string _packageJsonFileName = "package.json";
 
-        public NPMPackageInitializer(ICommandLineWrapper commandLineWrapper, IPackageJsonGenerator packageJsonGenerator, IFileManager fileManager)
+        public NPMPackageInitializer(ICommandLineWrapper commandLineWrapper, IPackageJsonGenerator packageJsonGenerator, IFileManager fileManager, IDirectoryManager directoryManager)
         {
             _commandLineWrapper = commandLineWrapper;
             _packageJsonGenerator = packageJsonGenerator;
             _fileManager = fileManager;
+            _directoryManager = directoryManager;
         }
 
         public bool IsInitialized(string workingDirectory)
@@ -69,6 +71,11 @@ namespace AWS.Deploy.Orchestrator.CDK
 
             try
             {
+                if (!_directoryManager.Exists(workingDirectory))
+                {
+                    _directoryManager.CreateDirectory(workingDirectory);
+                }
+
                 await _fileManager.WriteAllTextAsync(packageJsonFilePath, packageJsonFileContent);
             }
             catch (Exception exception)
