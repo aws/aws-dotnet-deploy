@@ -35,7 +35,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
             var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(
                 options: environments.Select(env => env.EnvironmentName),
-                title: "Select Beanstalk environment to deploy to:",
+                title: "Select Elastic Beanstalk environment to deploy to:",
                 askNewName: true,
                 defaultNewName: currentValue.ToString());
             return userResponse.SelectedOption ?? userResponse.NewName;

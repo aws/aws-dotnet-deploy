@@ -82,7 +82,7 @@ namespace AWS.Deploy.CLI.Commands
             if (existingApplications.Count == 0)
             {
                 var title = "Name the AWS stack to deploy your application to" + Environment.NewLine +
-                              "(a stack is a collection of AWS resources that you can manage as a single unit.)" + Environment.NewLine +
+                              "(A stack is a collection of AWS resources that you can manage as a single unit.)" + Environment.NewLine +
                               "--------------------------------------------------------------------------------";
                 cloudApplicationName =
                     _consoleUtilities.AskUserForValue(
@@ -93,7 +93,7 @@ namespace AWS.Deploy.CLI.Commands
             else
             {
                 var title = "Select the AWS stack to deploy your application to" + Environment.NewLine +
-                              "(a stack is a collection of AWS resources that you can manage as a single unit.)";
+                              "(A stack is a collection of AWS resources that you can manage as a single unit.)";
 
                 var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(existingApplications.Select(x => x.Name).ToList(), title, askNewName: true, defaultNewName: GetDefaultApplicationName(new ProjectDefinition(_session.ProjectPath).ProjectPath));
                 cloudApplicationName = userResponse.SelectedOption ?? userResponse.NewName;
@@ -149,14 +149,14 @@ namespace AWS.Deploy.CLI.Commands
             if (selectedRecommendation.Recipe.DeploymentType == DeploymentTypes.CdkProject &&
                 !(await _session.SystemCapabilities).NodeJsMinVersionInstalled)
             {
-                _toolInteractiveService.WriteErrorLine("The selected deployment option requires Node.js 10.3 or later which was not detected.  Please install Node.js: https://nodejs.org/en/download/");
+                _toolInteractiveService.WriteErrorLine("The selected deployment option requires Node.js 10.3 or later, which was not detected.  Please install Node.js: https://nodejs.org/en/download/");
                 throw new MissingNodeJsException();
             }
 
             if (selectedRecommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.Container &&
                 !(await _session.SystemCapabilities).DockerInstalled)
             {
-                _toolInteractiveService.WriteErrorLine("The selected deployment option requires Docker which was not detected.  Please install and start the appropriate version of Docker for you OS: https://docs.docker.com/engine/install/");
+                _toolInteractiveService.WriteErrorLine("The selected deployment option requires Docker, which was not detected. Please install and start the appropriate version of Docker for you OS: https://docs.docker.com/engine/install/");
                 throw new MissingDockerException();
             }
 
