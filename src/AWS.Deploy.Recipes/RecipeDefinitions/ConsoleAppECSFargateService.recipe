@@ -2,12 +2,12 @@
     "$schema": "./aws-deploy-recipe-schema.json",
     "Id": "ConsoleAppEcsFargateService",
     "Version": "0.1.0",
-    "Name": "Service on Amazon Elastic Container Service (ECS) using Fargate",
+    "Name": "Service on Amazon ECS using Fargate",
     "DeploymentType": "CdkProject",
     "DeploymentBundle": "Container",
     "CdkProjectTemplate": "../CdkTemplates/ConsoleAppECSFargateService",
     "CdkProjectTemplateId": "netdeploy.ConsoleAppEcsFargateService",
-    "Description": "Deploy a console application as a service to Amazon Elastic Container Service (ECS). Recommended for applications that can be deployed as a container image. If your project does not contain a Dockerfile, one will be generated for the project.",
+    "Description": "Deploy a console application as a service to Amazon Elastic Container Service (Amazon ECS). Recommended for applications that can be deployed as a container image. If your project does not contain a Dockerfile, one will be generated for the project.",
     "TargetService": "Amazon Elastic Container Service",
 
     "RecipePriority": 110,
@@ -89,7 +89,7 @@
                 {
                     "Id": "CreateNew",
                     "Name": "Create New ECS Cluster",
-                    "Description": "Do you want to create a new ECS Cluster?",
+                    "Description": "Do you want to create a new ECS cluster?",
                     "Type": "Bool",
                     "DefaultValue": true,
                     "AdvancedSetting": false,
@@ -97,8 +97,8 @@
                 },
                 {
                     "Id": "ClusterArn",
-                    "Name": "Existing Cluster Arn",
-                    "Description": "The Arn of the existing cluster to use.",
+                    "Name": "Existing Cluster ARN",
+                    "Description": "The ARN of the existing cluster to use.",
                     "Type": "String",
                     "AdvancedSetting": false,
                     "Updatable": false,
@@ -149,7 +149,7 @@
         {
             "Id": "ApplicationIAMRole",
             "Name": "Application IAM Role",
-            "Description": "The Identity and Access Management Role that provides AWS credentials to the application to access AWS services",
+            "Description": "The Identity and Access Management (IAM) role that provides AWS credentials to the application to access AWS services.",
             "Type": "Object",
             "TypeHint": "IAMRole",
             "TypeHintData": {
@@ -161,7 +161,7 @@
                 {
                     "Id": "CreateNew",
                     "Name": "Create New Role",
-                    "Description": "Do you want to create a new Role?",
+                    "Description": "Do you want to create a new role?",
                     "Type": "Bool",
                     "DefaultValue": true,
                     "AdvancedSetting": false,
@@ -169,8 +169,8 @@
                 },
                 {
                     "Id": "RoleArn",
-                    "Name": "Existing Role Arn",
-                    "Description": "The Arn of the existing role to use.",
+                    "Name": "Existing Role ARN",
+                    "Description": "The ARN of the existing role to use.",
                     "Type": "String",
                     "AdvancedSetting": false,
                     "Updatable": false,
@@ -185,8 +185,8 @@
         },
         {
             "Id": "Vpc",
-            "Name": "Virtual Private Cloud",
-            "Description": "A VPC enables you to launch the application into a virtual network that you've defined",
+            "Name": "Virtual Private Cloud (VPC)",
+            "Description": "A VPC enables you to launch the application into a virtual network that you've defined.",
             "Type": "Object",
             "TypeHint": "Vpc",
             "AdvancedSetting": false,
@@ -218,8 +218,8 @@
                 },
                 {
                     "Id": "VpcId",
-                    "Name": "Existing VPC Id",
-                    "Description": "The Id of the existing VPC to use.",
+                    "Name": "Existing VPC ID",
+                    "Description": "The ID of the existing VPC to use.",
                     "Type": "String",
                     "DefaultValue": null,
                     "AdvancedSetting": false,
@@ -240,7 +240,7 @@
         {
             "Id": "ECSServiceSecurityGroups",
             "Name": "ECS Service Security Groups",
-            "Description": "Comma delimited list of EC2 security groups to assign to the ECS service. This is commonly used to provide access to RDS databases running in their own security groups.",
+            "Description": "A comma-delimited list of EC2 security groups to assign to the ECS service. This is commonly used to provide access to Amazon RDS databases running in their own security groups.",
             "Type": "String",
             "DefaultValue": "",
             "AdvancedSetting": true,
@@ -249,7 +249,7 @@
         {
             "Id": "TaskCpu",
             "Name": "Task CPU",
-            "Description": "The number of CPU units used by the task. See here for more details on CPU values https://docs.aws.amazon.com/AmazonECS/latest/developerguide/AWS_Fargate.html#fargate-task-defs",
+            "Description": "The number of CPU units used by the task. See the following for details on CPU values: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/AWS_Fargate.html#fargate-task-defs",
             "Type": "Int",
             "DefaultValue": 256,
             "AdvancedSetting": true,
@@ -258,7 +258,7 @@
         {
             "Id": "TaskMemory",
             "Name": "Task Memory",
-            "Description": "The amount of memory (in MB) used by the task. See here for more details on Memory values https://docs.aws.amazon.com/AmazonECS/latest/developerguide/AWS_Fargate.html#fargate-task-defs",
+            "Description": "The amount of memory (in MB) used by the task. See the following for details on memory values: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/AWS_Fargate.html#fargate-task-defs",
             "Type": "Int",
             "DefaultValue": 512,
             "AdvancedSetting": true,

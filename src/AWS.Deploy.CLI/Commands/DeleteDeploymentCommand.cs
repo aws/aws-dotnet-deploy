@@ -95,7 +95,7 @@ namespace AWS.Deploy.CLI.Commands
             var canDelete = stack.Tags.Any(tag => tag.Key.Equals(CloudFormationIdentifierConstants.STACK_TAG));
             if (!canDelete)
             {
-                _interactiveService.WriteErrorLine("Only Stacks that were deployed with this tool can be deleted.");
+                _interactiveService.WriteErrorLine("Only stacks that were deployed with this tool can be deleted.");
             }
 
             return canDelete;
@@ -116,7 +116,7 @@ namespace AWS.Deploy.CLI.Commands
 
             if (stack.StackStatus.IsFailed())
             {
-                throw new FailedToDeleteException($"The stack {stackName} is in failed state. You may need to delete it from the AWS Console.");
+                throw new FailedToDeleteException($"The stack {stackName} is in a failed state. You may need to delete it from the AWS Console.");
             }
 
             throw new FailedToDeleteException($"Failed to delete {stackName} stack: {stack.StackStatus}");

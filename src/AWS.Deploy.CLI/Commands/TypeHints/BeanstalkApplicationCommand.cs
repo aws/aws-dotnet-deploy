@@ -39,7 +39,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 DefaultNewName = currentTypeHintResponse.ApplicationName
             };
 
-            var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(applications, "Select Beanstalk application to deploy to:", userInputConfiguration);
+            var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(applications, "Select Elastic Beanstalk application to deploy to:", userInputConfiguration);
 
             return new BeanstalkApplicationTypeHintResponse
             {

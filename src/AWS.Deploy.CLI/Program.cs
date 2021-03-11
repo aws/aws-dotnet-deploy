@@ -25,10 +25,10 @@ namespace AWS.Deploy.CLI
 {
     internal class Program
     {
-        private static readonly Option<string> _optionProfile = new Option<string>("--profile", "AWS credential profile used to make calls to AWS");
-        private static readonly Option<string> _optionRegion = new Option<string>("--region", "AWS region to deploy application to. For example us-west-2.");
-        private static readonly Option<string> _optionProjectPath = new Option<string>("--project-path", getDefaultValue: () => Directory.GetCurrentDirectory(), description: "Path to the project to deploy");
-        private static readonly Option<bool> _optionDiagnosticLogging = new Option<bool>(new []{"-d", "--diagnostics"}, description: "Enable diagnostic output");
+        private static readonly Option<string> _optionProfile = new Option<string>("--profile", "AWS credential profile used to make calls to AWS.");
+        private static readonly Option<string> _optionRegion = new Option<string>("--region", "AWS region to deploy the application to. For example, us-west-2.");
+        private static readonly Option<string> _optionProjectPath = new Option<string>("--project-path", getDefaultValue: () => Directory.GetCurrentDirectory(), description: "Path to the project to deploy.");
+        private static readonly Option<bool> _optionDiagnosticLogging = new Option<bool>(new []{"-d", "--diagnostics"}, description: "Enable diagnostic output.");
 
         private static async Task<int> Main(string[] args)
         {
@@ -38,7 +38,7 @@ namespace AWS.Deploy.CLI
 
             var preambleWriter = new ConsoleInteractiveServiceImpl(diagnosticLoggingEnabled: false);
 
-            preambleWriter.WriteLine("AWS .NET deployment tool for deploying .NET Core applications to AWS");
+            preambleWriter.WriteLine("AWS .NET deployment tool for deploying .NET Core applications to AWS.");
             preambleWriter.WriteLine("Project Home: https://github.com/aws/aws-dotnet-deploy");
             preambleWriter.WriteLine(string.Empty);
 

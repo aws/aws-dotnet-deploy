@@ -63,7 +63,7 @@
             "ChildOptionSettings": [
                 {
                     "Id": "CreateNew",
-                    "Name": "Create new Beanstalk application",
+                    "Name": "Create new Elastic Beanstalk application",
                     "Description": "Do you want to create new application?",
                     "Type": "Bool",
                     "DefaultValue": true,
@@ -95,7 +95,7 @@
         {
             "Id": "InstanceType",
             "Name": "EC2 Instance Type",
-            "Description": "The EC2 instance type used for the EC2 instances created for the environment.",
+            "Description": "The EC2 instance type of the EC2 instances created for the environment.",
             "Type": "String",
             "TypeHint": "InstanceType",
             "DefaultValue": "",
@@ -105,7 +105,7 @@
         {
             "Id": "EnvironmentType",
             "Name": "Environment Type",
-            "Description": "The type of environment to create for example a single instance for development or load balanced for production",
+            "Description": "The type of environment to create; for example, a single instance for development work or load balanced for production.",
             "Type": "String",
             "DefaultValue": "SingleInstance",
             "AllowedValues": [
@@ -147,7 +147,7 @@
         {
             "Id": "ApplicationIAMRole",
             "Name": "Application IAM Role",
-            "Description": "The Identity and Access Management Role that provides AWS credentials to the application to access AWS services",
+            "Description": "The Identity and Access Management (IAM) role that provides AWS credentials to the application to access AWS services.",
             "Type": "Object",
             "TypeHint": "IAMRole",
             "TypeHintData": {
@@ -159,7 +159,7 @@
                 {
                     "Id": "CreateNew",
                     "Name": "Create New Role",
-                    "Description": "Do you want to create a new Role?",
+                    "Description": "Do you want to create a new role?",
                     "Type": "Bool",
                     "DefaultValue": true,
                     "AdvancedSetting": false,
@@ -167,8 +167,8 @@
                 },
                 {
                     "Id": "RoleArn",
-                    "Name": "Existing Role Arn",
-                    "Description": "The Arn of the existing role to use.",
+                    "Name": "Existing Role ARN",
+                    "Description": "The ARN of the existing role to use.",
                     "Type": "String",
                     "AdvancedSetting": false,
                     "Updatable": false,
@@ -184,7 +184,7 @@
         {
             "Id": "EC2KeyPair",
             "Name": "Key Pair",
-            "Description": "The EC2 Key Pair used to SSH into EC2 instances for the Beanstalk environment.",
+            "Description": "The EC2 key pair used to SSH into EC2 instances for the Elastic Beanstalk environment.",
             "Type": "String",
             "TypeHint": "EC2KeyPair",
             "DefaultValue": "",
@@ -194,7 +194,7 @@
         {
             "Id": "ElasticBeanstalkPlatformArn",
             "Name": "Beanstalk Platform",
-            "Description": "The name of the Beanstalk platform to use with the environment.",
+            "Description": "The name of the Elastic Beanstalk platform to use with the environment.",
             "Type": "String",
             "TypeHint": "DotnetBeanstalkPlatformArn",
             "DefaultValue": "{LatestDotnetBeanstalkPlatformArn}",

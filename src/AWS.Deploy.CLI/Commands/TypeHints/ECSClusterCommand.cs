@@ -40,7 +40,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 DefaultNewName = currentTypeHintResponse.NewClusterName
             };
 
-            var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(clusters, "Select ECS Cluster to deploy to:", userInputConfiguration);
+            var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(clusters, "Select ECS cluster to deploy to:", userInputConfiguration);
 
             return new ECSClusterTypeHintResponse
             {
