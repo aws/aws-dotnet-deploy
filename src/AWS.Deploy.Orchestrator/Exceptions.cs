@@ -42,7 +42,8 @@ namespace AWS.Deploy.Orchestrator
         {
         }
     }
-    
+
+    /// <summary>
     /// Exception is thrown if docker build attempt failed
     /// </summary>
     public class DockerBuildFailedException : Exception
@@ -61,7 +62,8 @@ namespace AWS.Deploy.Orchestrator
         {
         }
     }
-    
+
+    /// <summary>
     /// Exception is thrown if docker login attempt failed
     /// </summary>
     public class DockerLoginFailedException : Exception

@@ -54,8 +54,7 @@ namespace AWS.Deploy.Orchestrator
         {
             var tempDirectoryPath =
                 Path.Combine(
-                    CDKConstants.TempDirectoryRoot,
-                    "Projects",
+                    CDKConstants.ProjectsDirectory,
                     Path.GetFileNameWithoutExtension(Path.GetRandomFileName()));
             Directory.CreateDirectory(tempDirectoryPath);
 
