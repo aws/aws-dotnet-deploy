@@ -244,6 +244,12 @@ namespace AWS.Deploy.Orchestrator
                 _interactiveService.LogErrorMessageLine(ex.Message);
                 return false;
             }
+            catch (FailedToCreateZipFileException)
+            {
+                _interactiveService.LogErrorMessageLine("We were unable to create a zip archive of the packaged application.");
+                _interactiveService.LogErrorMessageLine("Normally this indicates a problem running the \"zip\" utility. Make sure that application is installed and available in your PATH.");
+                return false;
+            }
 
             return true;
         }

@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections.Generic;
-using AWS.Deploy.Common.IO;
+using System.Threading.Tasks;
+using AWS.Deploy.Orchestrator.Utilities;
 
 namespace AWS.Deploy.CLI.UnitTests.Utilities
 {
@@ -10,9 +11,10 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
     {
         public readonly List<string> CreatedZipFiles = new List<string>();
 
-        public void CreateFromDirectory(string sourceDirectoryName, string destinationArchiveFileName)
+        public Task CreateFromDirectory(string sourceDirectoryName, string destinationArchiveFileName)
         {
             CreatedZipFiles.Add(destinationArchiveFileName);
+            return Task.CompletedTask;
         }
     }
 }
