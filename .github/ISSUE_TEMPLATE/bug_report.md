@@ -36,3 +36,7 @@ If applicable, add screen recording to help explain your problem.
 
 **Additional context**
 Add any other context about the problem here.
+
+---
+
+This is a :bug: bug report
