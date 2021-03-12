@@ -50,7 +50,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorWasm50", "testapps\Bl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AWS.Deploy.Orchestrator.UnitTests", "test\AWS.Deploy.Orchestrator.UnitTests\AWS.Deploy.Orchestrator.UnitTests.csproj", "{3F7A5CA6-7178-4DBF-8DAD-6A63684C7A8E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AWS.Deploy.CLI.Common.UnitTests", "test\AWS.Deploy.CLI.Common.UnitTests\AWS.Deploy.CLI.Common.UnitTests.csproj", "{4AD9D400-3F3D-4076-B34C-0F88576C1889}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AWS.Deploy.CLI.Common.UnitTests", "test\AWS.Deploy.CLI.Common.UnitTests\AWS.Deploy.CLI.Common.UnitTests.csproj", "{4AD9D400-3F3D-4076-B34C-0F88576C1889}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ContosoUniversity", "testapps\ContosoUniversityWeb\ContosoUniversity.csproj", "{6EDCA334-3317-44A4-A017-2A8D810EE7A7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ContosoUniversityBackendService", "testapps\ContosoUniversityBackendService\ContosoUniversityBackendService.csproj", "{AC7B0880-00CB-41E0-996C-B4C99103CEF9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -122,6 +126,14 @@ Global
 		{4AD9D400-3F3D-4076-B34C-0F88576C1889}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4AD9D400-3F3D-4076-B34C-0F88576C1889}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4AD9D400-3F3D-4076-B34C-0F88576C1889}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6EDCA334-3317-44A4-A017-2A8D810EE7A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6EDCA334-3317-44A4-A017-2A8D810EE7A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6EDCA334-3317-44A4-A017-2A8D810EE7A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6EDCA334-3317-44A4-A017-2A8D810EE7A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC7B0880-00CB-41E0-996C-B4C99103CEF9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC7B0880-00CB-41E0-996C-B4C99103CEF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC7B0880-00CB-41E0-996C-B4C99103CEF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC7B0880-00CB-41E0-996C-B4C99103CEF9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -144,6 +156,8 @@ Global
 		{315E01AE-51DC-410F-983E-BA80AD561C57} = {C3A0C716-BDEA-4393-B223-AF8F8531522A}
 		{3F7A5CA6-7178-4DBF-8DAD-6A63684C7A8E} = {BD466B5C-D8B0-4069-98A9-6DC8F01FA757}
 		{4AD9D400-3F3D-4076-B34C-0F88576C1889} = {BD466B5C-D8B0-4069-98A9-6DC8F01FA757}
+		{6EDCA334-3317-44A4-A017-2A8D810EE7A7} = {C3A0C716-BDEA-4393-B223-AF8F8531522A}
+		{AC7B0880-00CB-41E0-996C-B4C99103CEF9} = {C3A0C716-BDEA-4393-B223-AF8F8531522A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5A4B2863-1763-4496-B122-651A38A4F5D7}
