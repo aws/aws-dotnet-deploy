@@ -28,4 +28,10 @@
     <ProjectReference Include="..\AWS.Deploy.Recipes.CDK.Common\AWS.Deploy.Recipes.CDK.Common.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\..\LICENSE" Pack="true" />
+    <None Include="..\..\NOTICE" Pack="true" />
+    <None Include="..\..\THIRD_PARTY_LICENSES" Pack="true" />
+  </ItemGroup>
+
 </Project>
