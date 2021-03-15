@@ -63,7 +63,9 @@ namespace AWS.Deploy.DockerEngine
             var projectLines = lines.Where(x => x.StartsWith("Project"));
             var projectPaths = projectLines
                 .Select(x => x.Split(',')[1].Replace('\"', ' ').Trim())
-                .Where(x => x.EndsWith(".csproj") || x.EndsWith(".fsproj")).ToList();
+                .Where(x => x.EndsWith(".csproj") || x.EndsWith(".fsproj"))
+                .Select(x => x.Replace('\\', Path.DirectorySeparatorChar))
+                .ToList();
 
             //Validate project exists in solution
             if (projectPaths.Select(x => Path.GetFileName(x)).Where(x => x.Equals(projectFileName)).ToList().Count == 0)
