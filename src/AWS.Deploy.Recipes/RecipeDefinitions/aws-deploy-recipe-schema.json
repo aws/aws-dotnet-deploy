@@ -74,29 +74,45 @@
             "description": "The AWS service that the project will be deployed to",
             "minLength": 1
         },
+        "DeploymentConfirmation": {
+            "$ref": "#/definitions/DeploymentConfirmation"
+        },
         "RecipePriority": {
             "type": "integer",
             "title": "Recipe Priority",
             "description": "The type of test to perform."
         },
-        "RecommendationRules" : {
+        "RecommendationRules": {
             "$ref": "#/definitions/RecommendationRules"
         },
-        "OptionSettings" : {
+        "OptionSettings": {
             "$ref": "#/definitions/OptionSettings"
         }
     },
     "definitions": {
 
-        "RecommendationRules" : {
-            "type" : "array",
-            "description": "The rules that determine if the recipe is compatible with the project.",
-            "items": {"$ref": "#/definitions/RecommendationRule"}
-        },
-        "RecommendationRule" : {
-            "type" : "object",
+        "DeploymentConfirmation": {
+            "type": "object",
             "additionalProperties": false,
-            "required": ["Tests", "Effect"],
+            "description": "Settings for asking the user to confirm they want to continue with the deployment.",
+            "properties": {
+                "DefaultMessage": {
+                    "type": "string",
+                    "title": "Default Message",
+                    "description": "The message displayed to the user to confirm they want to continue with the deployment."
+                }
+            }
+        },
+
+        "RecommendationRules": {
+            "type": "array",
+            "description": "The rules that determine if the recipe is compatible with the project.",
+            "items": { "$ref": "#/definitions/RecommendationRule" }
+        },
+        "RecommendationRule": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [ "Tests", "Effect" ],
             "properties": {
                 "Comment": {
                     "type": "string",
@@ -121,43 +137,43 @@
             }
         },
 
-        "RuleTest" : {
-            "type" : "object",
+        "RuleTest": {
+            "type": "object",
             "additionalProperties": false,
-            "required": ["Type", "Condition"],
-            "properties" : {
+            "required": [ "Type", "Condition" ],
+            "properties": {
                 "Type": {
                     "type": "string",
                     "title": "Test Type",
                     "description": "The type of test to perform.",
-                    "enum" : [
+                    "enum": [
                         "MSProjectSdkAttribute",
                         "MSProperty",
                         "MSPropertyExists",
                         "FileExists"
                     ]
                 },
-                "Condition" : {
+                "Condition": {
                     "type": "object"
                 }
             },
             "allOf": [
                 {
-                    "if" : {
-                        "properties": {"Type" : {"const" : "MSProjectSdkAttribute"}}
+                    "if": {
+                        "properties": { "Type": { "const": "MSProjectSdkAttribute" } }
                     },
-                    "then" : {
+                    "then": {
                         "properties": {
                             "Condition": {
                                 "type": "object",
                                 "additionalProperties": false,
-                                "required": ["Value"],
-                                "properties" : {
+                                "required": [ "Value" ],
+                                "properties": {
                                     "Value": {
                                         "type": "string",
                                         "title": "SDK Value",
                                         "description": "The expected value of the sdk attribute",
-                                        "enum" : [
+                                        "enum": [
                                             "Microsoft.NET.Sdk",
                                             "Microsoft.NET.Sdk.Web"
                                         ]
@@ -169,16 +185,16 @@
                 },
 
                 {
-                    "if" : {
-                        "properties": {"Type" : {"const" : "MSProperty"}}
+                    "if": {
+                        "properties": { "Type": { "const": "MSProperty" } }
                     },
-                    "then" : {
+                    "then": {
                         "properties": {
                             "Condition": {
                                 "type": "object",
                                 "additionalProperties": false,
-                                "required": ["PropertyName", "AllowedValues"],
-                                "properties" : {
+                                "required": [ "PropertyName", "AllowedValues" ],
+                                "properties": {
                                     "PropertyName": {
                                         "type": "string",
                                         "title": "Property Name",
@@ -187,7 +203,7 @@
                                     },
                                     "AllowedValues": {
                                         "type": "array",
-                                        "items" :{
+                                        "items": {
                                             "type": "string"
                                         },
                                         "title": "Allowed Values",
@@ -200,16 +216,16 @@
                 },
 
                 {
-                    "if" : {
-                        "properties": {"Type" : {"const" : "MSPropertyExists"}}
+                    "if": {
+                        "properties": { "Type": { "const": "MSPropertyExists" } }
                     },
-                    "then" : {
+                    "then": {
                         "properties": {
                             "Condition": {
                                 "type": "object",
                                 "additionalProperties": false,
-                                "required": ["PropertyName"],
-                                "properties" : {
+                                "required": [ "PropertyName" ],
+                                "properties": {
                                     "PropertyName": {
                                         "type": "string",
                                         "title": "Property Name",
@@ -223,16 +239,16 @@
                 },
 
                 {
-                    "if" : {
-                        "properties": {"Type" : {"const" : "FileExists"}}
+                    "if": {
+                        "properties": { "Type": { "const": "FileExists" } }
                     },
-                    "then" : {
+                    "then": {
                         "properties": {
                             "Condition": {
                                 "type": "object",
                                 "additionalProperties": false,
-                                "required": ["FileName"],
-                                "properties" : {
+                                "required": [ "FileName" ],
+                                "properties": {
                                     "FileName": {
                                         "type": "string",
                                         "title": "File Exists",
@@ -247,8 +263,8 @@
             ]
         },
 
-        "RuleEffect" : {
-            "type" : "object",
+        "RuleEffect": {
+            "type": "object",
             "additionalProperties": false,
             "properties": {
                 "Include": {
@@ -264,14 +280,14 @@
             }
         },
 
-        "OptionSettings" : {
-            "type" : "array",
-            "items": {"$ref": "#/definitions/OptionSetting"}
+        "OptionSettings": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/OptionSetting" }
         },
-        "OptionSetting" : {
-            "type" : "object",
+        "OptionSetting": {
+            "type": "object",
             "additionalProperties": false,
-            "required": ["Id", "Name", "Description", "Type"],
+            "required": [ "Id", "Name", "Description", "Type" ],
             "properties": {
                 "Id": {
                     "type": "string",
@@ -302,7 +318,7 @@
                     "title": "Type",
                     "description": "The data type of the setting.",
                     "minLength": 1,
-                    "enum": ["String", "Int", "Bool", "Object"]
+                    "enum": [ "String", "Int", "Bool", "Object" ]
                 },
                 "TypeHint": {
                     "type": "string",
@@ -328,7 +344,7 @@
                     ]
                 },
                 "DefaultValue": {
-                    "type": ["string", "null", "boolean", "integer"],
+                    "type": [ "string", "null", "boolean", "integer" ],
                     "title": "The default value for the setting.",
                     "description": ""
                 },
@@ -337,7 +353,7 @@
                     "title": "Allowed Values",
                     "description": "The list of allowed values for the setting.",
                     "items": {
-                        "type" : "string"
+                        "type": "string"
                     }
                 },
                 "AdvancedSetting": {
@@ -357,9 +373,9 @@
                     "title": "",
                     "description": "",
                     "items": {
-                        "type" :"object",
+                        "type": "object",
                         "additionalProperties": false,
-                        "required": ["Id", "Value"],
+                        "required": [ "Id", "Value" ],
                         "properties": {
                             "Id": {
                                 "type": "string",
@@ -368,7 +384,7 @@
                                 "minLength": 1
                             },
                             "Value": {
-                                "type": ["boolean", "string"],
+                                "type": [ "boolean", "string" ],
                                 "title": "",
                                 "description": ""
                             }
@@ -376,7 +392,7 @@
                     }
                 },
                 "ChildOptionSettings": {
-                    "items": {"$ref": "#/definitions/OptionSetting"}
+                    "items": { "$ref": "#/definitions/OptionSetting" }
                 },
                 "TypeHintData": {
                     "type": "object",
@@ -384,7 +400,7 @@
                     "description": "Additional data required to process option setting.",
                     "properties": {
                         "ServicePrincipal": {
-                            "type": ["string", "null"]
+                            "type": [ "string", "null" ]
                         }
                     }
                 }

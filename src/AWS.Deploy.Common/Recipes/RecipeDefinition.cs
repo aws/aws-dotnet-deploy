@@ -43,6 +43,11 @@ namespace AWS.Deploy.Common.Recipes
         public string TargetService { get; set; }
 
         /// <summary>
+        /// Confirmation messages to display to the user before performing deployment.
+        /// </summary>
+        public DeploymentConfirmationType DeploymentConfirmation { get; set; }
+
+        /// <summary>
         /// The type of deployment to perform. This controls what other tool to use to perform the deployment. For example a value of `CdkProject` means that CDK should
         /// be used to perform the deployment.
         /// </summary>

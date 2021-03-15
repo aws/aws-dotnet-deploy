@@ -190,9 +190,25 @@ namespace AWS.Deploy.CLI.Commands
                 Name = cloudApplicationName
             };
 
+            if(!ConfirmDeployment(selectedRecommendation))
+            {
+                return;
+            }
+
             await CreateDeploymentBundle(orchestrator, selectedRecommendation, cloudApplication);
 
             await orchestrator.DeployRecommendation(cloudApplication, selectedRecommendation);
+        }
+
+        private bool ConfirmDeployment(Recommendation recommendation)
+        {
+            var message = recommendation.Recipe.DeploymentConfirmation?.DefaultMessage;
+            if (string.IsNullOrEmpty(message))
+                return true;
+
+            var result = _consoleUtilities.AskYesNoQuestion(message);
+
+            return result == ConsoleUtilities.YesNo.Yes;
         }
 
         private async Task CreateDeploymentBundle(Orchestrator.Orchestrator orchestrator, Recommendation selectedRecommendation, CloudApplication cloudApplication)

@@ -85,9 +85,10 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var recommendations = await engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
 
-            recommendations
-                .Any(r => r.Recipe.Id == Constants.BLAZOR_WASM)
-                .ShouldBeTrue("Failed to receive Recommendation: " + Constants.BLAZOR_WASM);
+            var blazorRecommendation = recommendations.FirstOrDefault(r => r.Recipe.Id == Constants.BLAZOR_WASM);
+
+            Assert.NotNull(blazorRecommendation);
+            Assert.NotNull(blazorRecommendation.Recipe.DeploymentConfirmation.DefaultMessage);
         }
 
 
