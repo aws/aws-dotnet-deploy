@@ -44,6 +44,14 @@ namespace AWS.Deploy.Common
     public class MissingDockerException : Exception {}
 
     /// <summary>
+    /// Throw if the user attempts to deploy a <see cref="RecipeDefinition"/>
+    /// that requires <see cref="DeploymentBundleTypes.Container"/>
+    /// but Docker is not running in linux mode.
+    /// </summary>
+    [AWSDeploymentExpectedException]
+    public class DockerContainerTypeException : Exception { }
+
+    /// <summary>
     /// Throw if Recommendation Engine is unable to generate
     /// recommendations for a given target context
     /// </summary>

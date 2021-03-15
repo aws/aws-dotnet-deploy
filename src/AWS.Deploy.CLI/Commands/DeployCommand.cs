@@ -146,18 +146,27 @@ namespace AWS.Deploy.CLI.Commands
             // Apply the user enter project name to the recommendation so that any default settings based on project name are applied.
             selectedRecommendation.OverrideProjectName(cloudApplicationName);
 
+            var systemCapabilities = await _session.SystemCapabilities;
             if (selectedRecommendation.Recipe.DeploymentType == DeploymentTypes.CdkProject &&
-                !(await _session.SystemCapabilities).NodeJsMinVersionInstalled)
+                !systemCapabilities.NodeJsMinVersionInstalled)
             {
                 _toolInteractiveService.WriteErrorLine("The selected deployment option requires Node.js 10.3 or later, which was not detected.  Please install Node.js: https://nodejs.org/en/download/");
                 throw new MissingNodeJsException();
             }
 
-            if (selectedRecommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.Container &&
-                !(await _session.SystemCapabilities).DockerInstalled)
+            if (selectedRecommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.Container)
             {
-                _toolInteractiveService.WriteErrorLine("The selected deployment option requires Docker, which was not detected. Please install and start the appropriate version of Docker for you OS: https://docs.docker.com/engine/install/");
-                throw new MissingDockerException();
+                if (!systemCapabilities.DockerInfo.DockerInstalled)
+                {
+                    _toolInteractiveService.WriteErrorLine("The selected deployment option requires Docker, which was not detected. Please install and start the appropriate version of Docker for you OS: https://docs.docker.com/engine/install/");
+                    throw new MissingDockerException();
+                }
+
+                if (!systemCapabilities.DockerInfo.DockerContainerType.Equals("linux", StringComparison.OrdinalIgnoreCase))
+                {
+                    _toolInteractiveService.WriteErrorLine("The deployment tool requires Docker to be running in linux mode. Please switch Docker to linux mode to continue.");
+                    throw new DockerContainerTypeException();
+                }
             }
 
             var deploymentBundleDefinition = orchestrator.GetDeploymentBundleDefinition(selectedRecommendation);
