@@ -81,11 +81,6 @@ namespace AspNetAppElasticBeanstalkLinux
             var optionSettingProperties = new List<CfnEnvironment.OptionSettingProperty> {
                    new CfnEnvironment.OptionSettingProperty {
                         Namespace = "aws:autoscaling:launchconfiguration",
-                        OptionName = "InstanceType",
-                        Value= settings.InstanceType
-                   },
-                   new CfnEnvironment.OptionSettingProperty {
-                        Namespace = "aws:autoscaling:launchconfiguration",
                         OptionName =  "IamInstanceProfile",
                         Value = instanceProfile.AttrArn
                    },
@@ -95,6 +90,16 @@ namespace AspNetAppElasticBeanstalkLinux
                         Value = settings.EnvironmentType
                    }
                 };
+
+            if(!string.IsNullOrEmpty(settings.InstanceType))
+            {
+                optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
+                {
+                    Namespace = "aws:autoscaling:launchconfiguration",
+                    OptionName = "InstanceType",
+                    Value = settings.InstanceType
+                });
+            }
 
             if (settings.EnvironmentType.Equals(ENVIRONMENTTYPE_LOADBALANCED))
             {
