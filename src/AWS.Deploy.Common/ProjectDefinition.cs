@@ -107,21 +107,6 @@ namespace AWS.Deploy.Common
             return dir.Length == 1;
         }
 
-        public static bool TryParse(string path, out ProjectDefinition projectDefinition)
-        {
-            projectDefinition = null;
-
-            try
-            {
-                projectDefinition = new ProjectDefinition(path);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
         private string GetProjectSolutionFile(string projectPath)
         {
             var projectDirectory = Directory.GetParent(projectPath);

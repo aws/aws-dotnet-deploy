@@ -20,4 +20,16 @@ namespace AWS.Deploy.CLI
         {
         }
     }
+
+    /// <summary>
+    /// Throw if Deploy Command is unable to find a target to deploy.
+    /// Currently, this is limited to .csproj or .fsproj files.
+    /// </summary>
+    [AWSDeploymentExpectedException]
+    public class FailedToFindDeployableTargetException : Exception
+    {
+        public FailedToFindDeployableTargetException(Exception innerException = null) : base(string.Empty, innerException)
+        {
+        }
+    }
 }
