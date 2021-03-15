@@ -98,7 +98,7 @@
             "Description": "The EC2 instance type used for the EC2 instances created for the environment.",
             "Type": "String",
             "TypeHint": "InstanceType",
-            "DefaultValue": "t2.micro",
+            "DefaultValue": "",
             "AdvancedSetting": true,
             "Updatable": true
         },
