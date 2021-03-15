@@ -33,26 +33,33 @@ namespace AWS.Deploy.CLI
 
             var capabilities = new SystemCapabilities
             {
-                DockerInstalled = await dockerTask,
+                DockerInfo = await dockerTask,
                 NodeJsMinVersionInstalled = await nodeTask,
             };
 
             return capabilities;
         }
 
-        private async Task<bool> HasDockerInstalledAndRunning()
+        private async Task<DockerInfo> HasDockerInstalledAndRunning()
         {
             var processExitCode = -1;
+            var containerType = "";
 
             await _commandLineWrapper.Run(
-                "docker info",
+                "docker info -f \"{{.OSType}}\"",
                 streamOutputToInteractiveService: false,
                 onComplete: proc =>
                 {
                     processExitCode = proc.ExitCode;
+                    containerType = proc.StandardOut.TrimEnd('\n');
                 });
 
-            return processExitCode == 0;
+            var dockerInfo = new DockerInfo
+            {
+                DockerInstalled = processExitCode == 0,
+                DockerContainerType = containerType
+            };
+            return dockerInfo;
         }
 
         /// <summary>
