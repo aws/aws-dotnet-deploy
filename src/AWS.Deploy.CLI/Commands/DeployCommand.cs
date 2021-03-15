@@ -49,10 +49,20 @@ namespace AWS.Deploy.CLI.Commands
         public async Task ExecuteAsync(bool saveCdkProject)
         {
             // Ensure a .NET project can be found.
-            if (!ProjectDefinition.TryParse(_session.ProjectPath, out var project))
+            ProjectDefinition project = null;
+            try
             {
-                _toolInteractiveService.WriteErrorLine($"A project was not found at the path {_session.ProjectPath}");
-                Environment.Exit(-1);
+                project = new ProjectDefinition(_session.ProjectPath);
+            }
+            catch (ProjectFileNotFoundException ex)
+            {
+                var files = Directory.GetFiles(_session.ProjectPath, "*.sln");
+                if (files.Any())
+                    _toolInteractiveService.WriteErrorLine($"This directory contains a solution file, but the tool requires a project file. Please run the tool from the directory that contains a .csproj/.fsproj or provide a path to the .csproj/.fsproj via --project-path flag.");
+                else
+                    _toolInteractiveService.WriteErrorLine($"A project was not found at the path {_session.ProjectPath}");
+
+                throw new FailedToFindDeployableTargetException(ex);
             }
 
             var orchestrator =
@@ -87,7 +97,7 @@ namespace AWS.Deploy.CLI.Commands
                 cloudApplicationName =
                     _consoleUtilities.AskUserForValue(
                         title,
-                        GetDefaultApplicationName(new ProjectDefinition(_session.ProjectPath).ProjectPath),
+                        GetDefaultApplicationName(project.ProjectPath),
                         allowEmpty: false);
             }
             else
@@ -95,7 +105,7 @@ namespace AWS.Deploy.CLI.Commands
                 var title = "Select the AWS stack to deploy your application to" + Environment.NewLine +
                               "(A stack is a collection of AWS resources that you can manage as a single unit.)";
 
-                var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(existingApplications.Select(x => x.Name).ToList(), title, askNewName: true, defaultNewName: GetDefaultApplicationName(new ProjectDefinition(_session.ProjectPath).ProjectPath));
+                var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(existingApplications.Select(x => x.Name).ToList(), title, askNewName: true, defaultNewName: GetDefaultApplicationName(project.ProjectPath));
                 cloudApplicationName = userResponse.SelectedOption ?? userResponse.NewName;
             }
 
