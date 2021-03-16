@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <VersionPrefix>0.1.0</VersionPrefix>
-    <Product>AWS Deployment Tooling for .NET CDK Utilities</Product>
-    <Description>Utility code used in CDK recipes used by the AWS Deployment Tool. This package is not intended for direct usage.</Description>
+    <Product>AWS .NET deployment tool CDK Utilities</Product>
+    <Description>Utility code used in CDK recipes used by the AWS .NET deployment tool. This package is not intended for direct usage.</Description>
     <PackageId>AWS.Deploy.Recipes.CDK.Common</PackageId>
     <PackageTags>AWS;Amazon;Deploy</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -14,6 +14,12 @@
   <ItemGroup>
     <PackageReference Include="Amazon.CDK" Version="1.89.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\LICENSE" Pack="true" PackagePath="" />
+    <None Include="..\..\NOTICE" Pack="true"  PackagePath="" />
+    <None Include="..\..\THIRD_PARTY_LICENSES" Pack="true" PackagePath="" />
   </ItemGroup>
 
   <ItemGroup>

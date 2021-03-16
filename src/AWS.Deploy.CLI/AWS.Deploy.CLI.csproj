@@ -30,9 +30,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\..\LICENSE" Pack="true" />
-    <None Include="..\..\NOTICE" Pack="true" />
-    <None Include="..\..\THIRD_PARTY_LICENSES" Pack="true" />
+    <None Include="..\..\LICENSE" Pack="true" PackagePath="" />
+    <None Include="..\..\NOTICE" Pack="true" PackagePath="" />
+    <None Include="..\..\THIRD_PARTY_LICENSES" Pack="true" PackagePath="" />
   </ItemGroup>
 
   <ItemGroup>
