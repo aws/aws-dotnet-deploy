@@ -13,7 +13,7 @@ namespace AWS.Deploy.Recipes.CDK.Common
     public static class AWSDeployToolConfigurationExtensions
     {
         /// <summary>
-        /// Add the AWS Deploy Tool configuration as a source to the IConfigurationBuilder.
+        /// Add the AWS .NET deployment tool configuration as a source to the IConfigurationBuilder.
         /// </summary>
         /// <param name="builder"></param>
         /// <param name="app"></param>
@@ -25,10 +25,10 @@ namespace AWS.Deploy.Recipes.CDK.Common
         }
 
         /// <summary>
-        /// Determine the location of the JSON config file written by the AWS Deploy Tool.
+        /// Determine the location of the JSON config file written by the AWS .NET deployment tool.
         ///
-        /// Currently only the appsettings.json is used which is created by the AWS Deploy Tool. The "args" parameter
-        /// is passed in so in the future the file could be customized by the AWS Deploy Tool.
+        /// Currently only the appsettings.json is used which is created by the AWS .NET deployment tool. The "args" parameter
+        /// is passed in so in the future the file could be customized by the AWS .NET deployment tool.
         /// </summary>
         /// <param name="app"></param>
         /// <returns></returns>
@@ -38,11 +38,11 @@ namespace AWS.Deploy.Recipes.CDK.Common
 
             if (string.IsNullOrEmpty(settingsPath))
             {
-                throw new InvalidAWSDeployToolSettingsException("Missing CDK context parameter specifying the AWS Deploy Tool settings file.");
+                throw new InvalidAWSDeployToolSettingsException("Missing CDK context parameter specifying the AWS .NET deployment tool settings file.");
             }
             if (!File.Exists(settingsPath))
             {
-                throw new InvalidAWSDeployToolSettingsException($"AWS Deploy Tool settings file {settingsPath} can not be found.");
+                throw new InvalidAWSDeployToolSettingsException($"AWS .NET deployment tool settings file {settingsPath} can not be found.");
             }
 
             return settingsPath;

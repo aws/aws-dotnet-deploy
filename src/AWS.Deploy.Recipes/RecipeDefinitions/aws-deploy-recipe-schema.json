@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "./aws-deploy-recipe-schema.json",
-    "title": "AWS Deploy Recipes",
+    "title": "AWS .NET deployment tool Recipes",
     "description": "Recipes for deploying application to AWS using the CDK",
     "type": "object",
     "additionalProperties": false,
@@ -323,7 +323,7 @@
                 "TypeHint": {
                     "type": "string",
                     "title": "Type Hint",
-                    "description": "Hint to deploy tools to use to provide extra context for the setting. For example the value could be 'ECSCluster' and the deploy tool can show a list of ECS clusters to pick from.",
+                    "description": "Hint to deployment tool to use to provide extra context for the setting. For example the value could be 'ECSCluster' and the deployment tool can show a list of ECS clusters to pick from.",
                     "minLength": 1,
                     "enum": [
                         "BeanstalkApplication",
