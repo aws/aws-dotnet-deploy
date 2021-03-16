@@ -4,7 +4,7 @@
 namespace AWS.Deploy.Recipes.CDK.Common
 {
     /// <summary>
-    /// A representation of the settings transferred from the AWS Deploy Tool to the CDK project.
+    /// A representation of the settings transferred from the AWS .NET deployment tool to the CDK project.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class RecipeConfiguration<T>

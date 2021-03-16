@@ -1,9 +1,9 @@
-## AWS .NET Deploy CLI Tool
+# AWS .NET deployment tool
 
 
 This repository contains the AWS .NET deployment tool for .NET CLI - the opinionated tooling that simplifies deployment of .NET applications with minimum AWS knowledge. The tool suggests the right AWS compute service to deploy your application to.  It then builds and packages your application as required by the chosen compute service, generates the deployment infrastructure, deploys your application by using the Cloud Development Kit (CDK), and displays the endpoint.
 
-The tool assumes minimal knowledge of AWS. It is designed to guide you through the deployment process and provides suggested defaults. The tool will show you all compute service options available to deploy your application, and will recommend a default with information about why it was chosen. The other compute service options will be shown with an explanation of their differences. If the selected compute option does not match your needs, you can select a different compute service. 
+The tool assumes minimal knowledge of AWS. It is designed to guide you through the deployment process and provides suggested defaults. The tool will show you all compute service options available to deploy your application, and will recommend a default with information about why it was chosen. The other compute service options will be shown with an explanation of their differences. If the selected compute option does not match your needs, you can select a different compute service.
 
 The goal of the deployment tool is to deploy cloud-native .NET applications that are built with .NET Core 2.1 and above. A cloud-native .NET application is written in .NET with the intent to deploy to Linux. It is not tied to any Windows specific technology such as Windows registry, IIS or MSMQ, and can be deployed on virtualized compute. The tool **cannot** be used to deploy .NET Framework, Desktop, Xamarin, or other applications that do not fit the "cloud-native" criteria.
 
@@ -19,9 +19,9 @@ To take advantage of this library you’ll need:
 * [.NET Core 3.1](https://dotnet.microsoft.com/download) or later
 * [Node.js 10.3](https://nodejs.org/en/download/) or later
   * The [AWS Cloud Development Kit (CDK)](https://aws.amazon.com/cdk/) is used by this tool to create the AWS infrastructure to run applications. The CDK requires Node.js to function.
-* (optional) [Docker](https://docs.docker.com/get-docker/) 
+* (optional) [Docker](https://docs.docker.com/get-docker/)
   * Used when deploying to a container based service like Amazon Elastic Container Service (Amazon ECS)
-* (optional) The zip cli tool 
+* (optional) The zip cli tool
    *   Mac / Linux only. Used when creating zip packages for deployment bundles. The zip cli is used to maintain Linux file permissions.
 ## Getting started
 
@@ -54,18 +54,18 @@ dotnet aws --help
 To get help about individual commands like deploy or delete-deployment you can use the `--help` switch with the commands. For example to get help for the deploy command type:
 ```
 dotnet aws deploy --help
-``` 
+```
 
 ## Deploying your application
 
-To deploy your application, `cd` to the directory that contains the .csproj or .fsproj file and type: 
+To deploy your application, `cd` to the directory that contains the .csproj or .fsproj file and type:
 ```
 dotnet aws deploy
 ```
 
 *(Alternatively the `--project-path` switch can be used to point to specific directory or project file.)*
 
-You will be prompted to enter the name of the stack that your application will be deployed to. (A **stack** is a collection of **AWS** resources that you can manage as a single unit. In other words, you can create, update, or delete a collection of resources by creating, updating, or deleting stacks.) 
+You will be prompted to enter the name of the stack that your application will be deployed to. (A **stack** is a collection of **AWS** resources that you can manage as a single unit. In other words, you can create, update, or delete a collection of resources by creating, updating, or deleting stacks.)
 
 Once you enter the name of the stack, the deployment tool's recommendation engine will inspect your project codebase and provide its recommendation for how you should deploy the application. If possible the tool will also show other compatible ways to deploy the application that you can choose to use over the recommendation.
 
@@ -101,7 +101,7 @@ Blazor WebAssembly applications can be deployed by creating and configuring an A
 Programs that are meant to run indefinitely can be deployed as an Amazon ECS service. This is common for backend services that process messages. The application will be deployed as a container image. If your project does not yet have a Dockerfile, one will be generated for you into your project during deployment."
 
 
-### Schedule tasks 
+### Schedule tasks
 Programs that need to run periodically, for example, once every hour, can be deployed as a schedule task using Amazon ECS and Amazon CloudWatch Events. The application will be deployed as a container image. If your project does not yet have a `Dockerfile`, one will be generated for you into your project during deployment.
 
 ## Getting Help

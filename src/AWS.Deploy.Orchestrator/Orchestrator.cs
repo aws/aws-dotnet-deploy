@@ -90,7 +90,7 @@ namespace AWS.Deploy.Orchestrator
 
         /// <summary>
         /// Get the list of existing deployed applications by describe the CloudFormation stacks and filtering the stacks to the
-        /// ones that have the AWS Deploy Tool tag and description.
+        /// ones that have the AWS .NET deployment tool tag and description.
         /// </summary>
         public Task<IList<CloudApplication>> GetExistingDeployedApplications()
         {
@@ -99,7 +99,7 @@ namespace AWS.Deploy.Orchestrator
 
         /// <summary>
         /// Get the list of existing deployed applications by describe the CloudFormation stacks and filtering the stacks to the
-        /// ones that have the AWS Deploy Tool tag and description.
+        /// ones that have the AWS .NET deployment tool tag and description.
         ///
         /// If compatibleRecommendations has any values that only existing applications that were deployed with any of the recipes
         /// identified by the recommendations will be returned.
@@ -112,13 +112,13 @@ namespace AWS.Deploy.Orchestrator
 
             foreach (var stack in stacks)
             {
-                // Check to see if stack has AWS Deploy Tool tag and the stack is not deleted or in the process of being deleted.
+                // Check to see if stack has AWS .NET deployment tool tag and the stack is not deleted or in the process of being deleted.
                 var deployTag = stack.Tags.FirstOrDefault(tags => string.Equals(tags.Key, CloudFormationIdentifierConstants.STACK_TAG));
 
-                // Skip stacks that don't have AWS Deploy Tool tag
+                // Skip stacks that don't have AWS .NET deployment tool tag
                 if (deployTag == null ||
 
-                    // Skip stacks does not have AWS Deploy Tool description prefix. (This is filter out stacks that have the tag propagated to it like the Beanstalk stack)
+                    // Skip stacks does not have AWS .NET deployment tool description prefix. (This is filter out stacks that have the tag propagated to it like the Beanstalk stack)
                     (stack.Description == null || !stack.Description.StartsWith(CloudFormationIdentifierConstants.STACK_DESCRIPTION_PREFIX)) ||
 
                     // Skip tags that are deleted or in the process of being deleted

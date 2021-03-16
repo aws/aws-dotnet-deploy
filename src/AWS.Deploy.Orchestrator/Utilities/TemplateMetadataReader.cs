@@ -14,12 +14,12 @@ using Newtonsoft.Json;
 namespace AWS.Deploy.Orchestrator.Utilities
 {
     /// <summary>
-    /// A class for reading the metadata section of an CloudFormation template to pull out the AWS Deploy Tool settings.
+    /// A class for reading the metadata section of an CloudFormation template to pull out the AWS .NET deployment tool settings.
     /// </summary>
     public class TemplateMetadataReader
     {
         /// <summary>
-        /// Read the AWS Deploy Tool metadata from the CloudFormation template.
+        /// Read the AWS .NET deployment tool metadata from the CloudFormation template.
         /// </summary>
         /// <returns></returns>
         public static CloudApplicationMetadata ReadSettings(string templateBody)

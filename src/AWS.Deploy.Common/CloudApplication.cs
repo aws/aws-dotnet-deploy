@@ -23,7 +23,7 @@ namespace AWS.Deploy.Common
         public string StackName => Name;
 
         /// <summary>
-        /// The id of the AWS Deploy recipe used to create the cloud application.
+        /// The id of the AWS .NET deployment tool recipe used to create the cloud application.
         /// </summary>
         public string RecipeId { get; set; }
 
