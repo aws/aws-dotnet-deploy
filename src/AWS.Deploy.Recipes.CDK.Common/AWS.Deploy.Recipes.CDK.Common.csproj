@@ -8,11 +8,16 @@
     <PackageId>AWS.Deploy.Recipes.CDK.Common</PackageId>
     <PackageTags>AWS;Amazon;Deploy</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Amazon.CDK" Version="1.89.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\icon.png" Pack="true" PackagePath="" />
   </ItemGroup>
 
   <UsingTask
