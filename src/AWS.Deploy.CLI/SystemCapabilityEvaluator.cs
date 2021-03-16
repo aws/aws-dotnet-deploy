@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using AWS.Deploy.Orchestrator;
 using AWS.Deploy.Orchestrator.CDK;
@@ -44,14 +45,15 @@ namespace AWS.Deploy.CLI
         {
             var processExitCode = -1;
             var containerType = "";
+            var command = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "docker info -f \"{{.OSType}}\"" : "docker info";
 
             await _commandLineWrapper.Run(
-                "docker info -f \"{{.OSType}}\"",
+                command,
                 streamOutputToInteractiveService: false,
                 onComplete: proc =>
                 {
                     processExitCode = proc.ExitCode;
-                    containerType = proc.StandardOut.TrimEnd('\n');
+                    containerType = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? proc.StandardOut.TrimEnd('\n') : "linux";
                 });
 
             var dockerInfo = new DockerInfo
