@@ -192,7 +192,7 @@ namespace AWS.Deploy.Orchestrator
                     }
                 }
             }
-            catch(IOException e)
+            catch(IOException)
             {
                 throw new NoDeploymentBundleDefinitionsFoundException();
             }

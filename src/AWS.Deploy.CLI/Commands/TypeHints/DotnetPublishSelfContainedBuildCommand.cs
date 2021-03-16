@@ -16,11 +16,12 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             _consoleUtilities = consoleUtilities;
         }
 
-        public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
+        public Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var answer = _consoleUtilities.AskYesNoQuestion(string.Empty, recommendation.GetOptionSettingValue<string>(optionSetting));
             recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild = answer == ConsoleUtilities.YesNo.Yes;
-            return answer == ConsoleUtilities.YesNo.Yes ? "true" : "false";
+            var result = answer == ConsoleUtilities.YesNo.Yes ? "true" : "false";
+            return Task.FromResult<object>(result);
         }
     }
 }

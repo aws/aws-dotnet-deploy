@@ -49,7 +49,7 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
     {
         public List<CommandLineRunObject> CommandsToExecute = new List<CommandLineRunObject>();
 
-        public async Task Run(string command, string workingDirectory = "", bool streamOutputToInteractiveService = true, Action<TryRunResult> onComplete = null, bool redirectIO = true, CancellationToken cancelToken = default)
+        public Task Run(string command, string workingDirectory = "", bool streamOutputToInteractiveService = true, Action<TryRunResult> onComplete = null, bool redirectIO = true, CancellationToken cancelToken = default)
         {
             CommandsToExecute.Add(new CommandLineRunObject
             {
@@ -60,6 +60,8 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
                 RedirectIO = redirectIO,
                 CancelToken = cancelToken
             });
+
+            return Task.CompletedTask;
         }
     }
 }
