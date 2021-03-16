@@ -16,7 +16,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             _consoleUtilities = consoleUtilities;
         }
 
-        public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
+        public Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var settingValue =
                 _consoleUtilities.AskUserForValue(
@@ -25,7 +25,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                     allowEmpty: false,
                     resetValue: recommendation.GetOptionSettingDefaultValue<string>(optionSetting));
             recommendation.DeploymentBundle.DotnetPublishBuildConfiguration = settingValue;
-            return settingValue;
+            return Task.FromResult<object>(settingValue);
         }
     }
 }

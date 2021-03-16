@@ -94,7 +94,7 @@ namespace AWS.Deploy.Common.Recipes
         /// </summary>
         /// <typeparam name="T">Type of the type hint data</typeparam>
         /// <returns>Returns strongly type type hint data. Returns default value if <see cref="TypeHintData"/> is empty.</returns>
-        public T? GetTypeHintData<T>()
+        public T GetTypeHintData<T>()
         {
             if (!TypeHintData.Any())
             {

@@ -124,7 +124,7 @@ namespace AWS.Deploy.Orchestrator
             }
 
             var zipFilePath = $"{publishDirectoryInfo.FullName}.zip";
-            _zipFileManager.CreateFromDirectory(publishDirectoryInfo.FullName, zipFilePath);
+            await _zipFileManager.CreateFromDirectory(publishDirectoryInfo.FullName, zipFilePath);
 
             recommendation.DeploymentBundle.DotnetPublishZipPath = zipFilePath;
             recommendation.DeploymentBundle.DotnetPublishOutputDirectory = publishDirectoryInfo.FullName;

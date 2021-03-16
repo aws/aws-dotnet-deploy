@@ -17,7 +17,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             _consoleUtilities = consoleUtilities;
         }
 
-        public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
+        public Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var settingValue = _consoleUtilities
                 .AskUserForValue(
@@ -29,7 +29,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                     executionDirectory => ValidateExecutionDirectory(executionDirectory));
 
             recommendation.DeploymentBundle.DockerExecutionDirectory = settingValue;
-            return settingValue;
+            return Task.FromResult<object>(settingValue);
         }
 
         private string ValidateExecutionDirectory(string executionDirectory)
