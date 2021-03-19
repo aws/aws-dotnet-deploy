@@ -9,6 +9,7 @@
     <PackageTags>AWS;Amazon;Deploy</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageIcon>icon.png</PackageIcon>
+    <PackageProjectUrl>https://github.com/aws/aws-dotnet-deploy</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>
