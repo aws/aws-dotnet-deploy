@@ -3,11 +3,11 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using AWS.Deploy.CLI.UnitTests.Utilities;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
-using AWS.Deploy.Orchestrator.RecommendationEngine;
+using AWS.Deploy.Orchestration;
+using AWS.Deploy.Orchestration.RecommendationEngine;
 using AWS.Deploy.Recipes;
 using Xunit;
 
@@ -21,7 +21,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public SetOptionSettingTests()
         {
             var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
-            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new Orchestrator.OrchestratorSession());
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new OrchestratorSession());
             var recommendations = engine.ComputeRecommendations(projectPath, new Dictionary<string, string>()).GetAwaiter().GetResult();
             _recommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
 

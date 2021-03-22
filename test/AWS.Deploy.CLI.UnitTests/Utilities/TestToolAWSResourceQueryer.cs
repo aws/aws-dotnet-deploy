@@ -9,8 +9,8 @@ using Amazon.EC2.Model;
 using Amazon.ECR.Model;
 using Amazon.ElasticBeanstalk.Model;
 using Amazon.IdentityManagement.Model;
-using AWS.Deploy.Orchestrator;
-using AWS.Deploy.Orchestrator.Data;
+using AWS.Deploy.Orchestration;
+using AWS.Deploy.Orchestration.Data;
 
 namespace AWS.Deploy.CLI.UnitTests.Utilities
 {

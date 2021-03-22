@@ -9,8 +9,8 @@ using System.Threading.Tasks;
 using AWS.Deploy.Common;
 using AWS.Deploy.CLI.Commands;
 using AWS.Deploy.CLI.Utilities;
-using AWS.Deploy.Orchestrator;
-using AWS.Deploy.Orchestrator.Data;
+using AWS.Deploy.Orchestration;
+using AWS.Deploy.Orchestration.Data;
 using Amazon.SecurityToken;
 using Amazon.SecurityToken.Model;
 using AWS.Deploy.Common.IO;
@@ -18,8 +18,8 @@ using System.Reflection;
 using System.Linq;
 using System.Text;
 using AWS.Deploy.Common.Extensions;
-using AWS.Deploy.Orchestrator.CDK;
-using AWS.Deploy.Orchestrator.Utilities;
+using AWS.Deploy.Orchestration.CDK;
+using AWS.Deploy.Orchestration.Utilities;
 
 namespace AWS.Deploy.CLI
 {

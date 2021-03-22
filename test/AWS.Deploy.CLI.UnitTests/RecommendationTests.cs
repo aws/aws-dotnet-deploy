@@ -1,20 +1,18 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reflection;
+using System.Threading.Tasks;
 using AWS.Deploy.CLI.TypeHintResponses;
 using AWS.Deploy.CLI.UnitTests.Utilities;
+using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Orchestration;
+using AWS.Deploy.Orchestration.RecommendationEngine;
 using AWS.Deploy.Recipes;
-using AWS.Deploy.Orchestrator.RecommendationEngine;
 using Should;
 using Xunit;
-using System.Threading.Tasks;
-using AWS.Deploy.Common;
 
 namespace AWS.Deploy.CLI.UnitTests
 {
@@ -25,7 +23,7 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
 
-            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new Orchestrator.OrchestratorSession());
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new OrchestratorSession());
 
             var recommendations = await engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
 
@@ -43,7 +41,7 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var projectPath = SystemIOUtilities.ResolvePath("WebAppWithDockerFile");
 
-            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new Orchestrator.OrchestratorSession());
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new OrchestratorSession());
 
             var recommendations = await engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
 
@@ -61,7 +59,7 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var projectPath = SystemIOUtilities.ResolvePath("MessageProcessingApp");
 
-            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new Orchestrator.OrchestratorSession());
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new OrchestratorSession());
 
             var recommendations = await engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
 
@@ -81,7 +79,7 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var projectPath = SystemIOUtilities.ResolvePath(projectName);
 
-            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new Orchestrator.OrchestratorSession());
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new OrchestratorSession());
 
             var recommendations = await engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
 
@@ -96,7 +94,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public async Task ValueMappingWithDefaultValue()
         {
             var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
-            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new Orchestrator.OrchestratorSession());
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new OrchestratorSession());
             var recommendations = await engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
             var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
             var environmentTypeOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("EnvironmentType"));
@@ -113,7 +111,7 @@ namespace AWS.Deploy.CLI.UnitTests
             });
             var consoleUtilities = new ConsoleUtilities(interactiveServices);
             var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
-            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new Orchestrator.OrchestratorSession());
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new OrchestratorSession());
             var recommendations = await engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
             var fargateRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_ASPNET_CORE_FARGATE_RECIPE_ID);
             var desiredCountOptionSetting = fargateRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("DesiredCount"));
@@ -138,7 +136,7 @@ namespace AWS.Deploy.CLI.UnitTests
             });
             var consoleUtilities = new ConsoleUtilities(interactiveServices);
             var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
-            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new Orchestrator.OrchestratorSession());
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new OrchestratorSession());
             var recommendations = await engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
             var fargateRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_ASPNET_CORE_FARGATE_RECIPE_ID);
             var ecsServiceNameOptionSetting = fargateRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("ECSServiceName"));
@@ -158,7 +156,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public async Task ObjectMappingWithDefaultValue()
         {
             var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
-            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new Orchestrator.OrchestratorSession());
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new OrchestratorSession());
             var recommendations = await engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
             var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
             var applicationIAMRoleOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("ApplicationIAMRole"));
@@ -173,7 +171,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public async Task ObjectMappingWithoutDefaultValue()
         {
             var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
-            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new Orchestrator.OrchestratorSession());
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new OrchestratorSession());
             var recommendations = await engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
             var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
             var applicationIAMRoleOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("ApplicationIAMRole"));
@@ -185,7 +183,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public async Task ValueMappingSetWithValue()
         {
             var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
-            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new Orchestrator.OrchestratorSession());
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new OrchestratorSession());
             var recommendations = await engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
             var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
             var environmentTypeOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("EnvironmentType"));
@@ -198,7 +196,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public async Task ObjectMappingSetWithValue()
         {
             var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
-            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new Orchestrator.OrchestratorSession());
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new OrchestratorSession());
             var recommendations = await engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
             var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
             var applicationIAMRoleOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("ApplicationIAMRole"));
@@ -216,7 +214,7 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
 
-            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new Orchestrator.OrchestratorSession());
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new OrchestratorSession());
 
             var recommendations = await engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
 
@@ -232,7 +230,7 @@ namespace AWS.Deploy.CLI.UnitTests
         [MemberData(nameof(ShouldIncludeTestCases))]
         public void ShouldIncludeTests(RuleEffect effect, bool testPass, bool expectedResult)
         {
-            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new Orchestrator.OrchestratorSession());
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new OrchestratorSession());
 
             Assert.Equal(expectedResult, engine.ShouldInclude(effect, testPass));
         }
@@ -265,7 +263,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public async Task IsDisplayable_OneDependency()
         {
             var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
-            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new Orchestrator.OrchestratorSession());
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new OrchestratorSession());
             var recommendations = await engine.ComputeRecommendations(projectPath, new());
             var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
             var environmentTypeOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("EnvironmentType"));
@@ -289,7 +287,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public async Task IsDisplayable_ManyDependencies()
         {
             var projectPath = SystemIOUtilities.ResolvePath("WebAppWithDockerFile");
-            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new Orchestrator.OrchestratorSession());
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new OrchestratorSession());
             var recommendations = await engine.ComputeRecommendations(projectPath, new ());
             var fargateRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_ASPNET_CORE_FARGATE_RECIPE_ID);
             var isDefaultOptionSetting = fargateRecommendation.GetOptionSetting("Vpc.IsDefault");

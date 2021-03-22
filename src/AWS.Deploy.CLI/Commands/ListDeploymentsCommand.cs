@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Threading.Tasks;
-using AWS.Deploy.Orchestrator;
-using AWS.Deploy.Orchestrator.Data;
+using AWS.Deploy.Orchestration;
+using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Recipes;
 
 namespace AWS.Deploy.CLI.Commands
@@ -35,7 +35,7 @@ namespace AWS.Deploy.CLI.Commands
         public async Task ExecuteAsync()
         {
             var orchestrator =
-                new Orchestrator.Orchestrator(
+                new Orchestrator(
                     _session,
                     _orchestratorInteractiveService,
                     _cdkProjectHandler,
