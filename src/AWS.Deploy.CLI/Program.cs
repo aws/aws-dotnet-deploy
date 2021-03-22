@@ -29,6 +29,7 @@ namespace AWS.Deploy.CLI
         private static readonly Option<string> _optionProfile = new Option<string>("--profile", "AWS credential profile used to make calls to AWS.");
         private static readonly Option<string> _optionRegion = new Option<string>("--region", "AWS region to deploy the application to. For example, us-west-2.");
         private static readonly Option<string> _optionProjectPath = new Option<string>("--project-path", getDefaultValue: () => Directory.GetCurrentDirectory(), description: "Path to the project to deploy.");
+        private static readonly Option<string> _optionStackName = new Option<string>("--stack-name", description: "Name the AWS stack to deploy your application to.");
         private static readonly Option<bool> _optionDiagnosticLogging = new Option<bool>(new []{"-d", "--diagnostics"}, description: "Enable diagnostic output.");
 
         private static async Task<int> Main(string[] args)
@@ -54,10 +55,11 @@ namespace AWS.Deploy.CLI
                 _optionProfile,
                 _optionRegion,
                 _optionProjectPath,
+                _optionStackName,
                 _optionDiagnosticLogging
             };
 
-            deployCommand.Handler = CommandHandler.Create<string, string, string, bool, bool>(async (profile, region, projectPath, saveCdkProject, diagnostics) =>
+            deployCommand.Handler = CommandHandler.Create<string, string, string, string, bool, bool>(async (profile, region, projectPath, stackName, saveCdkProject, diagnostics) =>
             {
                 var toolInteractiveService = new ConsoleInteractiveServiceImpl(diagnostics);
 
@@ -126,7 +128,7 @@ namespace AWS.Deploy.CLI
                         consoleUtilities,
                         session);
 
-                    await deploy.ExecuteAsync(saveCdkProject);
+                    await deploy.ExecuteAsync(stackName, saveCdkProject);
 
                     return CommandReturnCodes.SUCCESS;
                 }
