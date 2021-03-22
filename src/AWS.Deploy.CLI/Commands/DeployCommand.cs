@@ -59,7 +59,7 @@ namespace AWS.Deploy.CLI.Commands
             _session = session;
         }
 
-        public async Task ExecuteAsync(bool saveCdkProject)
+        public async Task ExecuteAsync(string stackName, bool saveCdkProject)
         {
             var orchestrator =
                 new Orchestrator(
@@ -83,32 +83,39 @@ namespace AWS.Deploy.CLI.Commands
             // Look to see if there are any existing deployed applications using any of the compatible recommendations.
             var existingApplications = await _deployedApplicationQueryer.GetExistingDeployedApplications(recommendations);
 
-            _toolInteractiveService.WriteLine(string.Empty);
-
             string cloudApplicationName;
-            if (existingApplications.Count == 0)
+            if (!string.IsNullOrEmpty(stackName))
             {
-                var title = "Name the AWS stack to deploy your application to" + Environment.NewLine +
-                              "(A stack is a collection of AWS resources that you can manage as a single unit.)" + Environment.NewLine +
-                              "--------------------------------------------------------------------------------";
-                cloudApplicationName =
-                    _consoleUtilities.AskUserForValue(
-                        title,
-                        GetDefaultApplicationName(_session.ProjectDefinition.ProjectPath),
-                        allowEmpty: false);
+                cloudApplicationName = stackName;
             }
             else
             {
-                var title = "Select the AWS stack to deploy your application to" + Environment.NewLine +
-                              "(A stack is a collection of AWS resources that you can manage as a single unit.)";
+                _toolInteractiveService.WriteLine(string.Empty);
 
-                var userResponse =
-                    _consoleUtilities.AskUserToChooseOrCreateNew(
-                        existingApplications.Select(x => x.Name),
-                        title, askNewName: true,
-                        defaultNewName: GetDefaultApplicationName(_session.ProjectDefinition.ProjectPath));
+                if (existingApplications.Count == 0)
+                {
+                    var title = "Name the AWS stack to deploy your application to" + Environment.NewLine +
+                                  "(A stack is a collection of AWS resources that you can manage as a single unit.)" + Environment.NewLine +
+                                  "--------------------------------------------------------------------------------";
+                    cloudApplicationName =
+                        _consoleUtilities.AskUserForValue(
+                            title,
+                            GetDefaultApplicationName(_session.ProjectDefinition.ProjectPath),
+                            allowEmpty: false);
+                }
+                else
+                {
+                    var title = "Select the AWS stack to deploy your application to" + Environment.NewLine +
+                                  "(A stack is a collection of AWS resources that you can manage as a single unit.)";
 
-                cloudApplicationName = userResponse.SelectedOption ?? userResponse.NewName;
+                    var userResponse =
+                        _consoleUtilities.AskUserToChooseOrCreateNew(
+                            existingApplications.Select(x => x.Name),
+                            title, askNewName: true,
+                            defaultNewName: GetDefaultApplicationName(_session.ProjectDefinition.ProjectPath));
+
+                    cloudApplicationName = userResponse.SelectedOption ?? userResponse.NewName;
+                }
             }
 
             var existingCloudApplication = existingApplications.FirstOrDefault(x => string.Equals(x.Name, cloudApplicationName));
@@ -125,7 +132,7 @@ namespace AWS.Deploy.CLI.Commands
                 selectedRecommendation.ApplyPreviousSettings(existingCloudApplicationMetadata.Settings);
 
                 var header = $"Loading {existingCloudApplication.Name} settings:";
-                
+
                 _toolInteractiveService.WriteLine(header);
                 _toolInteractiveService.WriteLine(new string('-', header.Length));
                 var optionSettings =
