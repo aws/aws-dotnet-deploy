@@ -5,9 +5,9 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using AWS.Deploy.Orchestrator;
-using AWS.Deploy.Orchestrator.CDK;
-using AWS.Deploy.Orchestrator.Utilities;
+using AWS.Deploy.Orchestration;
+using AWS.Deploy.Orchestration.CDK;
+using AWS.Deploy.Orchestration.Utilities;
 
 namespace AWS.Deploy.CLI
 {

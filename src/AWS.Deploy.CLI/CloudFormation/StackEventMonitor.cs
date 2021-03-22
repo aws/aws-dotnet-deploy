@@ -10,7 +10,7 @@ using Amazon.CloudFormation;
 using Amazon.CloudFormation.Model;
 using AWS.Deploy.CLI.Extensions;
 using AWS.Deploy.Common;
-using AWS.Deploy.Orchestrator;
+using AWS.Deploy.Orchestration;
 
 namespace AWS.Deploy.CLI.CloudFormation
 {

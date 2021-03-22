@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections.Generic;
-using AWS.Deploy.Orchestrator;
+using AWS.Deploy.Orchestration;
 
 namespace AWS.Deploy.CLI.UnitTests.Utilities
 {

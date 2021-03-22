@@ -9,7 +9,7 @@ using Amazon.CloudFormation.Model;
 using AWS.Deploy.CLI.CloudFormation;
 using AWS.Deploy.Common;
 using AWS.Deploy.DockerEngine;
-using AWS.Deploy.Orchestrator;
+using AWS.Deploy.Orchestration;
 using AWS.Deploy.Recipes.CDK.Common;
 
 namespace AWS.Deploy.CLI.Commands

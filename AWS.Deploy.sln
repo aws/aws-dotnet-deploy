@@ -6,7 +6,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{11C7056E-93C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AWS.Deploy.CLI", "src\AWS.Deploy.CLI\AWS.Deploy.CLI.csproj", "{8A351CC0-70C0-4412-B45E-358606251512}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AWS.Deploy.Orchestrator", "src\AWS.Deploy.Orchestrator\AWS.Deploy.Orchestrator.csproj", "{5F8EC972-781D-4A82-A73F-36A97281B0D5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AWS.Deploy.Orchestration", "src\AWS.Deploy.Orchestration\AWS.Deploy.Orchestration.csproj", "{5F8EC972-781D-4A82-A73F-36A97281B0D5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{BD466B5C-D8B0-4069-98A9-6DC8F01FA757}"
 EndProject
@@ -48,7 +48,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorWasm31", "testapps\Bl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorWasm50", "testapps\BlazorWasm50\BlazorWasm50.csproj", "{315E01AE-51DC-410F-983E-BA80AD561C57}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AWS.Deploy.Orchestrator.UnitTests", "test\AWS.Deploy.Orchestrator.UnitTests\AWS.Deploy.Orchestrator.UnitTests.csproj", "{3F7A5CA6-7178-4DBF-8DAD-6A63684C7A8E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AWS.Deploy.Orchestration.UnitTests", "test\AWS.Deploy.Orchestration.UnitTests\AWS.Deploy.Orchestration.UnitTests.csproj", "{3F7A5CA6-7178-4DBF-8DAD-6A63684C7A8E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AWS.Deploy.CLI.Common.UnitTests", "test\AWS.Deploy.CLI.Common.UnitTests\AWS.Deploy.CLI.Common.UnitTests.csproj", "{4AD9D400-3F3D-4076-B34C-0F88576C1889}"
 EndProject
