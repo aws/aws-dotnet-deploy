@@ -7,8 +7,8 @@ using AWS.Deploy.CLI.TypeHintResponses;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.TypeHintData;
-using AWS.Deploy.Orchestrator;
-using AWS.Deploy.Orchestrator.Data;
+using AWS.Deploy.Orchestration;
+using AWS.Deploy.Orchestration.Data;
 
 namespace AWS.Deploy.CLI.Commands.TypeHints
 {

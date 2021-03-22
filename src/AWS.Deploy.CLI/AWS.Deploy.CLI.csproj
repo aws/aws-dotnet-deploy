@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AWS.Deploy.Orchestrator\AWS.Deploy.Orchestrator.csproj" />
+    <ProjectReference Include="..\AWS.Deploy.Orchestration\AWS.Deploy.Orchestration.csproj" />
     <ProjectReference Include="..\AWS.Deploy.Recipes.CDK.Common\AWS.Deploy.Recipes.CDK.Common.csproj" />
   </ItemGroup>
 

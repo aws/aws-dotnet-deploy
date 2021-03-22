@@ -4,14 +4,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AWS.Deploy.CLI.TypeHintResponses;
 using AWS.Deploy.CLI.UnitTests.Utilities;
 using AWS.Deploy.Recipes;
-using AWS.Deploy.Orchestrator.RecommendationEngine;
+using AWS.Deploy.Orchestration;
+using AWS.Deploy.Orchestration.RecommendationEngine;
 using Newtonsoft.Json;
 using Xunit;
 using Assert = Should.Core.Assertions.Assert;
-using System.Threading.Tasks;
 
 namespace AWS.Deploy.CLI.UnitTests
 {
@@ -23,7 +24,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public async Task ApplyApplicationIAMRolePreviousSettings(bool createNew, string roleArn)
         {
             var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
-            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new Orchestrator.OrchestratorSession());
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new OrchestratorSession());
             var recommendations = await engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
             var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
 
@@ -55,7 +56,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public async Task ApplyVpcPreviousSettings(bool isDefault, bool createNew, string vpcId)
         {
             var projectPath = SystemIOUtilities.ResolvePath("WebAppWithDockerFile");
-            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new Orchestrator.OrchestratorSession());
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new OrchestratorSession());
             var recommendations = await engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
             var fargateRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_ASPNET_CORE_FARGATE_RECIPE_ID);
 

@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using AWS.Deploy.Orchestrator.Utilities;
+using AWS.Deploy.Orchestration.Utilities;
 
 namespace AWS.Deploy.CLI.UnitTests.Utilities
 {

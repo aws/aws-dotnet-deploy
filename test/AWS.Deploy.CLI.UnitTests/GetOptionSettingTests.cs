@@ -3,13 +3,12 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using AWS.Deploy.CLI.TypeHintResponses;
-using AWS.Deploy.CLI.UnitTests.Utilities;
-using AWS.Deploy.Recipes;
-using AWS.Deploy.Orchestrator.RecommendationEngine;
-using Newtonsoft.Json;
-using Xunit;
 using System.Threading.Tasks;
+using AWS.Deploy.CLI.UnitTests.Utilities;
+using AWS.Deploy.Orchestration;
+using AWS.Deploy.Orchestration.RecommendationEngine;
+using AWS.Deploy.Recipes;
+using Xunit;
 
 namespace AWS.Deploy.CLI.UnitTests
 {
@@ -20,7 +19,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public async Task GetOptionSettingTests_OptionSettingExists(string jsonPath, string targetId)
         {
             var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
-            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new Orchestrator.OrchestratorSession());
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new OrchestratorSession());
             var recommendations = await engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
             var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
 
@@ -35,7 +34,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public async Task GetOptionSettingTests_OptionSettingDoesNotExist(string jsonPath)
         {
             var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
-            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new Orchestrator.OrchestratorSession());
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new OrchestratorSession());
             var recommendations = await engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
             var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
 
