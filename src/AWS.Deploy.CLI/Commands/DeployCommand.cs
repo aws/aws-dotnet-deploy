@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 using AWS.Deploy.CLI.Commands.TypeHints;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
-using AWS.Deploy.Orchestrator;
+using AWS.Deploy.Orchestration;
 using AWS.Deploy.Recipes;
-using AWS.Deploy.Orchestrator.Data;
+using AWS.Deploy.Orchestration.Data;
 
 namespace AWS.Deploy.CLI.Commands
 {
@@ -66,7 +66,7 @@ namespace AWS.Deploy.CLI.Commands
             }
 
             var orchestrator =
-                new Orchestrator.Orchestrator(
+                new Orchestrator(
                     _session,
                     _orchestratorInteractiveService,
                     _cdkProjectHandler,
@@ -211,7 +211,7 @@ namespace AWS.Deploy.CLI.Commands
             return result == ConsoleUtilities.YesNo.Yes;
         }
 
-        private async Task CreateDeploymentBundle(Orchestrator.Orchestrator orchestrator, Recommendation selectedRecommendation, CloudApplication cloudApplication)
+        private async Task CreateDeploymentBundle(Orchestrator orchestrator, Recommendation selectedRecommendation, CloudApplication cloudApplication)
         {
             if (selectedRecommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.Container)
             {
