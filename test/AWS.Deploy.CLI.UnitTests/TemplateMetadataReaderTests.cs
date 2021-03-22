@@ -10,8 +10,8 @@ using System.Threading.Tasks;
 
 using Xunit;
 
-using AWS.Deploy.Orchestrator;
-using AWS.Deploy.Orchestrator.Utilities;
+using AWS.Deploy.Orchestration;
+using AWS.Deploy.Orchestration.Utilities;
 
 namespace AWS.Deploy.CLI.UnitTests
 {
