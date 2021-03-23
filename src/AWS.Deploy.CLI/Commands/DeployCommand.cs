@@ -13,6 +13,7 @@ using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Recipes;
 using AWS.Deploy.Orchestration.Data;
+using AWS.Deploy.Orchestration.Utilities;
 
 namespace AWS.Deploy.CLI.Commands
 {
@@ -23,10 +24,12 @@ namespace AWS.Deploy.CLI.Commands
         private readonly ICdkProjectHandler _cdkProjectHandler;
         private readonly IDeploymentBundleHandler _deploymentBundleHandler;
         private readonly IAWSResourceQueryer _awsResourceQueryer;
+        private readonly ITemplateMetadataReader _templateMetadataReader;
+        private readonly IDeployedApplicationQueryer _deployedApplicationQueryer;
+        private readonly ITypeHintCommandFactory _typeHintCommandFactory;
 
         private readonly ConsoleUtilities _consoleUtilities;
         private readonly OrchestratorSession _session;
-        private readonly TypeHintCommandFactory _typeHintCommandFactory;
 
         public DeployCommand(
             IToolInteractiveService toolInteractiveService,
@@ -34,6 +37,10 @@ namespace AWS.Deploy.CLI.Commands
             ICdkProjectHandler cdkProjectHandler,
             IDeploymentBundleHandler deploymentBundleHandler,
             IAWSResourceQueryer awsResourceQueryer,
+            ITemplateMetadataReader templateMetadataReader,
+            IDeployedApplicationQueryer deployedApplicationQueryer,
+            ITypeHintCommandFactory typeHintCommandFactory,
+            ConsoleUtilities consoleUtilities,
             OrchestratorSession session)
         {
             _toolInteractiveService = toolInteractiveService;
@@ -41,9 +48,11 @@ namespace AWS.Deploy.CLI.Commands
             _cdkProjectHandler = cdkProjectHandler;
             _deploymentBundleHandler = deploymentBundleHandler;
             _awsResourceQueryer = awsResourceQueryer;
-            _consoleUtilities = new ConsoleUtilities(toolInteractiveService);
+            _templateMetadataReader = templateMetadataReader;
+            _deployedApplicationQueryer = deployedApplicationQueryer;
+            _typeHintCommandFactory = typeHintCommandFactory;
+            _consoleUtilities = consoleUtilities;
             _session = session;
-            _typeHintCommandFactory = new TypeHintCommandFactory(_toolInteractiveService, _awsResourceQueryer, _session, _consoleUtilities);
         }
 
         public async Task ExecuteAsync(bool saveCdkProject)
@@ -84,7 +93,7 @@ namespace AWS.Deploy.CLI.Commands
             }
 
             // Look to see if there are any existing deployed applications using any of the compatible recommendations.
-            var existingApplications = await orchestrator.GetExistingDeployedApplications(recommendations);
+            var existingApplications = await _deployedApplicationQueryer.GetExistingDeployedApplications(recommendations);
 
             _toolInteractiveService.WriteLine(string.Empty);
 
@@ -117,7 +126,7 @@ namespace AWS.Deploy.CLI.Commands
             // If using a previous deployment preset settings for deployment based on last deployment.
             if (existingCloudApplication != null)
             {
-                var existingCloudApplicationMetadata = await orchestrator.LoadCloudApplicationMetadata(existingCloudApplication.Name);
+                var existingCloudApplicationMetadata = await _templateMetadataReader.LoadCloudApplicationMetadata(cloudApplicationName);
 
                 selectedRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, existingCloudApplication.RecipeId, StringComparison.InvariantCultureIgnoreCase));
                 selectedRecommendation.ApplyPreviousSettings(existingCloudApplicationMetadata.Settings);

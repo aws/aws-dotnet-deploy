@@ -13,22 +13,18 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 {
     public class BeanstalkApplicationCommand : ITypeHintCommand
     {
-        private readonly IToolInteractiveService _toolInteractiveService;
         private readonly IAWSResourceQueryer _awsResourceQueryer;
-        private readonly OrchestratorSession _session;
         private readonly ConsoleUtilities _consoleUtilities;
 
-        public BeanstalkApplicationCommand(IToolInteractiveService toolInteractiveService, IAWSResourceQueryer awsResourceQueryer, OrchestratorSession session, ConsoleUtilities consoleUtilities)
+        public BeanstalkApplicationCommand(IAWSResourceQueryer awsResourceQueryer, ConsoleUtilities consoleUtilities)
         {
-            _toolInteractiveService = toolInteractiveService;
             _awsResourceQueryer = awsResourceQueryer;
-            _session = session;
             _consoleUtilities = consoleUtilities;
         }
 
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
-            var applications = await _awsResourceQueryer.ListOfElasticBeanstalkApplications(_session);
+            var applications = await _awsResourceQueryer.ListOfElasticBeanstalkApplications();
             var currentTypeHintResponse = recommendation.GetOptionSettingValue<BeanstalkApplicationTypeHintResponse>(optionSetting);
 
             var userInputConfiguration = new UserInputConfiguration<ApplicationDescription>

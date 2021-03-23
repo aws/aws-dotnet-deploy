@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Amazon.EC2.Model;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
-using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.Data;
 
 namespace AWS.Deploy.CLI.Commands.TypeHints
@@ -14,21 +13,19 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
     {
         private readonly IToolInteractiveService _toolInteractiveService;
         private readonly IAWSResourceQueryer _awsResourceQueryer;
-        private readonly OrchestratorSession _session;
         private readonly ConsoleUtilities _consoleUtilities;
 
-        public EC2KeyPairCommand(IToolInteractiveService toolInteractiveService, IAWSResourceQueryer awsResourceQueryer, OrchestratorSession session, ConsoleUtilities consoleUtilities)
+        public EC2KeyPairCommand(IToolInteractiveService toolInteractiveService, IAWSResourceQueryer awsResourceQueryer, ConsoleUtilities consoleUtilities)
         {
             _toolInteractiveService = toolInteractiveService;
             _awsResourceQueryer = awsResourceQueryer;
-            _session = session;
             _consoleUtilities = consoleUtilities;
         }
 
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var currentValue = recommendation.GetOptionSettingValue(optionSetting);
-            var keyPairs = await _awsResourceQueryer.ListOfEC2KeyPairs(_session);
+            var keyPairs = await _awsResourceQueryer.ListOfEC2KeyPairs();
 
             var userInputConfiguration = new UserInputConfiguration<KeyPairInfo>
             {
@@ -70,7 +67,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
                     var keyPairDirectory = _consoleUtilities.AskForEC2KeyPairSaveDirectory(recommendation.ProjectPath);
 
-                    await _awsResourceQueryer.CreateEC2KeyPair(_session, settingValue.ToString(), keyPairDirectory);
+                    await _awsResourceQueryer.CreateEC2KeyPair(settingValue, keyPairDirectory);
                 }
 
                 break;

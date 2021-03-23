@@ -5,20 +5,21 @@ using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
-using AWS.Deploy.Common;
-using AWS.Deploy.CLI.Commands;
-using AWS.Deploy.CLI.Utilities;
-using AWS.Deploy.Orchestration;
-using AWS.Deploy.Orchestration.Data;
 using Amazon.SecurityToken;
 using Amazon.SecurityToken.Model;
-using AWS.Deploy.Common.IO;
-using System.Reflection;
-using System.Linq;
-using System.Text;
+using AWS.Deploy.CLI.Commands;
+using AWS.Deploy.CLI.Commands.TypeHints;
+using AWS.Deploy.CLI.Utilities;
+using AWS.Deploy.Common;
 using AWS.Deploy.Common.Extensions;
+using AWS.Deploy.Common.IO;
+using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.CDK;
+using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.Utilities;
 
 namespace AWS.Deploy.CLI
@@ -76,6 +77,8 @@ namespace AWS.Deploy.CLI
                             awsCredentials,
                             awsRegion);
 
+                    var awsClientFactory = new DefaultAWSClientFactory(awsCredentials, awsRegion);
+
                     var directoryManager = new DirectoryManager();
                     var fileManager = new FileManager();
                     var packageJsonGenerator = new PackageJsonGenerator(
@@ -103,15 +106,20 @@ namespace AWS.Deploy.CLI
                         CdkManager = cdkManager
                     };
 
-                    var awsResourceQueryer = new AWSResourceQueryer(new DefaultAWSClientFactory());
+                    var awsResourceQueryer = new AWSResourceQueryer(awsClientFactory);
                     var zipFileManager = new ZipFileManager(commandLineWrapper);
+                    var consoleUtilities = new ConsoleUtilities(toolInteractiveService);
 
                     var deploy = new DeployCommand(
                         toolInteractiveService,
                         orchestratorInteractiveService,
                         new CdkProjectHandler(orchestratorInteractiveService, commandLineWrapper),
-                        new DeploymentBundleHandler(session, commandLineWrapper, awsResourceQueryer, orchestratorInteractiveService, directoryManager, zipFileManager),
+                        new DeploymentBundleHandler(commandLineWrapper, awsResourceQueryer, orchestratorInteractiveService, directoryManager, zipFileManager),
                         awsResourceQueryer,
+                        new TemplateMetadataReader(awsClientFactory),
+                        new DeployedApplicationQueryer(awsResourceQueryer),
+                        new TypeHintCommandFactory(toolInteractiveService, awsResourceQueryer, consoleUtilities),
+                        consoleUtilities,
                         session);
 
                     await deploy.ExecuteAsync(saveCdkProject);
@@ -146,8 +154,7 @@ namespace AWS.Deploy.CLI
             listCommand.Handler = CommandHandler.Create<string, string, string, bool>(async (profile, region, projectPath, diagnostics) =>
             {
                 var toolInteractiveService = new ConsoleInteractiveServiceImpl(diagnostics);
-                var orchestratorInteractiveService = new ConsoleOrchestratorLogger(toolInteractiveService);
-
+                
                 var awsUtilities = new AWSUtilities(toolInteractiveService);
 
                 var previousSettings = PreviousDeploymentSettings.ReadSettings(projectPath, null);
@@ -155,35 +162,15 @@ namespace AWS.Deploy.CLI
                 var awsCredentials = await awsUtilities.ResolveAWSCredentials(profile, previousSettings.Profile);
                 var awsRegion = awsUtilities.ResolveAWSRegion(region, previousSettings.Region);
 
-                var stsClient = new AmazonSecurityTokenServiceClient(awsCredentials);
-                var callerIdentity = await stsClient.GetCallerIdentityAsync(new GetCallerIdentityRequest());
+                var awsClientFactory = new DefaultAWSClientFactory(awsCredentials, awsRegion);
+                
+                var listDeploymentsCommand =
+                    new ListDeploymentsCommand(
+                        toolInteractiveService,
+                        new DeployedApplicationQueryer(
+                            new AWSResourceQueryer(awsClientFactory)));
 
-                var session = new OrchestratorSession
-                {
-                    AWSProfileName = profile,
-                    AWSCredentials = awsCredentials,
-                    AWSRegion = awsRegion,
-                    AWSAccountId = callerIdentity.Account,
-                    ProjectPath = projectPath,
-                    ProjectDirectory = projectPath
-                };
-
-                var commandLineWrapper =
-                    new CommandLineWrapper(
-                        orchestratorInteractiveService,
-                        awsCredentials,
-                        awsRegion);
-
-                var awsResourceQueryer = new AWSResourceQueryer(new DefaultAWSClientFactory());
-                var directoryManager = new DirectoryManager();
-                var zipFileManager = new ZipFileManager(commandLineWrapper);
-
-                await new ListDeploymentsCommand(toolInteractiveService,
-                                                new ConsoleOrchestratorLogger(toolInteractiveService),
-                                                new CdkProjectHandler(orchestratorInteractiveService, commandLineWrapper),
-                                                new DeploymentBundleHandler(session, commandLineWrapper, awsResourceQueryer, orchestratorInteractiveService, directoryManager, zipFileManager),
-                                                awsResourceQueryer,
-                                                session).ExecuteAsync();
+                await listDeploymentsCommand.ExecuteAsync();
             });
             rootCommand.Add(listCommand);
 
@@ -205,14 +192,9 @@ namespace AWS.Deploy.CLI
                 var awsCredentials = await awsUtilities.ResolveAWSCredentials(profile, previousSettings.Profile);
                 var awsRegion = awsUtilities.ResolveAWSRegion(region, previousSettings.Region);
 
-                var session = new OrchestratorSession
-                {
-                    AWSProfileName = profile,
-                    AWSCredentials = awsCredentials,
-                    AWSRegion = awsRegion,
-                };
+                var awsClientFactory = new DefaultAWSClientFactory(awsCredentials, awsRegion);
 
-                await new DeleteDeploymentCommand(new DefaultAWSClientFactory(), toolInteractiveService, session).ExecuteAsync(deploymentName);
+                await new DeleteDeploymentCommand(awsClientFactory, toolInteractiveService).ExecuteAsync(deploymentName);
 
                 return CommandReturnCodes.SUCCESS;
             });
