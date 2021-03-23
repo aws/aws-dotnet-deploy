@@ -16,11 +16,11 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
 {
     public class TestToolAWSResourceQueryer : IAWSResourceQueryer
     {
-        public Task<string> CreateEC2KeyPair(OrchestratorSession session, string keyName, string saveLocation) => throw new NotImplementedException();
-        public Task<Repository> CreateECRRepository(OrchestratorSession session, string repositoryName) => throw new NotImplementedException();
-        public Task<List<Stack>> GetCloudFormationStacks(OrchestratorSession session) => throw new NotImplementedException();
+        public Task<string> CreateEC2KeyPair(string keyName, string saveLocation) => throw new NotImplementedException();
+        public Task<Repository> CreateECRRepository(string repositoryName) => throw new NotImplementedException();
+        public Task<List<Stack>> GetCloudFormationStacks() => throw new NotImplementedException();
 
-        public Task<List<AuthorizationData>> GetECRAuthorizationToken(OrchestratorSession session)
+        public Task<List<AuthorizationData>> GetECRAuthorizationToken()
         {
             var authorizationData = new AuthorizationData
             {
@@ -31,7 +31,7 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
             return Task.FromResult<List<AuthorizationData>>(new List<AuthorizationData>(){ authorizationData });
         }
 
-        public Task<List<Repository>> GetECRRepositories(OrchestratorSession session, List<string> repositoryNames)
+        public Task<List<Repository>> GetECRRepositories(List<string> repositoryNames)
         {
             if (repositoryNames.Count == 0)
                 return Task.FromResult<List<Repository>>(new List<Repository>() { });
@@ -44,13 +44,13 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
             return Task.FromResult<List<Repository>>(new List<Repository>() { repository });
         }
 
-        public Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns(OrchestratorSession session) => throw new NotImplementedException();
-        public Task<PlatformSummary> GetLatestElasticBeanstalkPlatformArn(OrchestratorSession session) => throw new NotImplementedException();
-        public Task<List<Vpc>> GetListOfVpcs(OrchestratorSession session) => throw new NotImplementedException();
-        public Task<List<KeyPairInfo>> ListOfEC2KeyPairs(OrchestratorSession session) => throw new NotImplementedException();
-        public Task<List<Amazon.ECS.Model.Cluster>> ListOfECSClusters(OrchestratorSession session) => throw new NotImplementedException();
-        public Task<List<ApplicationDescription>> ListOfElasticBeanstalkApplications(OrchestratorSession session) => throw new NotImplementedException();
-        public Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(OrchestratorSession session, string applicationName) => throw new NotImplementedException();
-        public Task<List<Role>> ListOfIAMRoles(OrchestratorSession session, string servicePrincipal) => throw new NotImplementedException();
+        public Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns() => throw new NotImplementedException();
+        public Task<PlatformSummary> GetLatestElasticBeanstalkPlatformArn() => throw new NotImplementedException();
+        public Task<List<Vpc>> GetListOfVpcs() => throw new NotImplementedException();
+        public Task<List<KeyPairInfo>> ListOfEC2KeyPairs() => throw new NotImplementedException();
+        public Task<List<Amazon.ECS.Model.Cluster>> ListOfECSClusters() => throw new NotImplementedException();
+        public Task<List<ApplicationDescription>> ListOfElasticBeanstalkApplications() => throw new NotImplementedException();
+        public Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(string applicationName) => throw new NotImplementedException();
+        public Task<List<Role>> ListOfIAMRoles(string servicePrincipal) => throw new NotImplementedException();
     }
 }

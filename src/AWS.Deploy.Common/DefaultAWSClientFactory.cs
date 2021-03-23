@@ -9,9 +9,18 @@ namespace AWS.Deploy.Common
 {
     public class DefaultAWSClientFactory : IAWSClientFactory
     {
-        public T GetAWSClient<T>(AWSCredentials credentials, string region) where T : IAmazonService
+        private readonly AWSCredentials _credentials;
+        private readonly string _region;
+
+        public DefaultAWSClientFactory(AWSCredentials credentials, string region)
         {
-            var awsOptions = new AWSOptions { Credentials = credentials, Region = RegionEndpoint.GetBySystemName(region) };
+            _credentials = credentials;
+            _region = region;
+        }
+
+        public T GetAWSClient<T>() where T : IAmazonService
+        {
+            var awsOptions = new AWSOptions { Credentials = _credentials, Region = RegionEndpoint.GetBySystemName(_region) };
 
             return awsOptions.CreateServiceClient<T>();
         }

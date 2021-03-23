@@ -2,53 +2,31 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Threading.Tasks;
-using AWS.Deploy.Orchestration;
-using AWS.Deploy.Orchestration.Data;
-using AWS.Deploy.Recipes;
+using AWS.Deploy.Orchestration.Utilities;
 
 namespace AWS.Deploy.CLI.Commands
 {
     public class ListDeploymentsCommand
     {
-        private readonly IOrchestratorInteractiveService _orchestratorInteractiveService;
         private readonly IToolInteractiveService _interactiveService;
-        private readonly OrchestratorSession _session;
-        private readonly ICdkProjectHandler _cdkProjectHandler;
-        private readonly IAWSResourceQueryer _awsResourceQueryer;
-        private readonly IDeploymentBundleHandler _deploymentBundleHandler;
-
-        public ListDeploymentsCommand(IToolInteractiveService interactiveService,
-            IOrchestratorInteractiveService orchestratorInteractiveService,
-            ICdkProjectHandler cdkProjectHandler,
-            IDeploymentBundleHandler deploymentBundleHandler,
-            IAWSResourceQueryer awsResourceQueryer,
-            OrchestratorSession session)
+        private readonly IDeployedApplicationQueryer _deployedApplicationQueryer;
+        
+        public ListDeploymentsCommand(
+            IToolInteractiveService interactiveService,
+            IDeployedApplicationQueryer deployedApplicationQueryer)
         {
             _interactiveService = interactiveService;
-            _orchestratorInteractiveService = orchestratorInteractiveService;
-            _cdkProjectHandler = cdkProjectHandler;
-            _deploymentBundleHandler = deploymentBundleHandler;
-            _awsResourceQueryer = awsResourceQueryer;
-            _session = session;
+            _deployedApplicationQueryer = deployedApplicationQueryer;
         }
 
         public async Task ExecuteAsync()
         {
-            var orchestrator =
-                new Orchestrator(
-                    _session,
-                    _orchestratorInteractiveService,
-                    _cdkProjectHandler,
-                    _awsResourceQueryer,
-                    _deploymentBundleHandler,
-                    new[] { RecipeLocator.FindRecipeDefinitionsPath() });
-
             // Add Header
             _interactiveService.WriteLine();
             _interactiveService.WriteLine("Cloud Applications:");
             _interactiveService.WriteLine("-------------------");
 
-            var existingApplications = await orchestrator.GetExistingDeployedApplications();
+            var existingApplications = await _deployedApplicationQueryer.GetExistingDeployedApplications();
             foreach (var app in existingApplications)
             {
                 _interactiveService.WriteLine(app.Name);

@@ -8,8 +8,6 @@ using Amazon.CloudFormation;
 using Amazon.CloudFormation.Model;
 using AWS.Deploy.CLI.CloudFormation;
 using AWS.Deploy.Common;
-using AWS.Deploy.DockerEngine;
-using AWS.Deploy.Orchestration;
 using AWS.Deploy.Recipes.CDK.Common;
 
 namespace AWS.Deploy.CLI.Commands
@@ -23,16 +21,14 @@ namespace AWS.Deploy.CLI.Commands
 
         private readonly IAWSClientFactory _awsClientFactory;
         private readonly IToolInteractiveService _interactiveService;
-        private readonly OrchestratorSession _session;
         private readonly IAmazonCloudFormation _cloudFormationClient;
         private readonly ConsoleUtilities _consoleUtilities;
 
-        public DeleteDeploymentCommand(IAWSClientFactory awsClientFactory, IToolInteractiveService interactiveService, OrchestratorSession session)
+        public DeleteDeploymentCommand(IAWSClientFactory awsClientFactory, IToolInteractiveService interactiveService)
         {
             _awsClientFactory = awsClientFactory;
             _interactiveService = interactiveService;
-            _session = session;
-            _cloudFormationClient = _awsClientFactory.GetAWSClient<IAmazonCloudFormation>(_session.AWSCredentials, _session.AWSRegion);
+            _cloudFormationClient = _awsClientFactory.GetAWSClient<IAmazonCloudFormation>();
             _consoleUtilities = new ConsoleUtilities(interactiveService);
         }
 
@@ -56,7 +52,7 @@ namespace AWS.Deploy.CLI.Commands
             }
 
             _interactiveService.WriteLine($"{stackName}: deleting...");
-            var monitor = new StackEventMonitor(stackName, _awsClientFactory, _interactiveService, _session);
+            var monitor = new StackEventMonitor(stackName, _awsClientFactory, _interactiveService);
 
             try
             {

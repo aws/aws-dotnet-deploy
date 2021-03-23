@@ -5,23 +5,18 @@ using System.Linq;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
-using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.Data;
 
 namespace AWS.Deploy.CLI.Commands.TypeHints
 {
     public class BeanstalkEnvironmentCommand : ITypeHintCommand
     {
-        private readonly IToolInteractiveService _toolInteractiveService;
         private readonly IAWSResourceQueryer _awsResourceQueryer;
-        private readonly OrchestratorSession _session;
         private readonly ConsoleUtilities _consoleUtilities;
 
-        public BeanstalkEnvironmentCommand(IToolInteractiveService toolInteractiveService, IAWSResourceQueryer awsResourceQueryer, OrchestratorSession session, ConsoleUtilities consoleUtilities)
+        public BeanstalkEnvironmentCommand(IAWSResourceQueryer awsResourceQueryer, ConsoleUtilities consoleUtilities)
         {
-            _toolInteractiveService = toolInteractiveService;
             _awsResourceQueryer = awsResourceQueryer;
-            _session = session;
             _consoleUtilities = consoleUtilities;
         }
 
@@ -31,7 +26,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             var applicationOptionSetting = recommendation.GetOptionSetting(optionSetting.ParentSettingId);
 
             var applicationName = recommendation.GetOptionSettingValue(applicationOptionSetting) as string;
-            var environments = await _awsResourceQueryer.ListOfElasticBeanstalkEnvironments(_session, applicationName);
+            var environments = await _awsResourceQueryer.ListOfElasticBeanstalkEnvironments(applicationName);
 
             var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(
                 options: environments.Select(env => env.EnvironmentName),

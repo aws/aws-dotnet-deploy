@@ -22,19 +22,19 @@ namespace AWS.Deploy.Orchestration.Data
 {
     public interface IAWSResourceQueryer
     {
-        Task<List<Cluster>> ListOfECSClusters(OrchestratorSession session);
-        Task<List<ApplicationDescription>> ListOfElasticBeanstalkApplications(OrchestratorSession session);
-        Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(OrchestratorSession session, string applicationName);
-        Task<List<KeyPairInfo>> ListOfEC2KeyPairs(OrchestratorSession session);
-        Task<string> CreateEC2KeyPair(OrchestratorSession session, string keyName, string saveLocation);
-        Task<List<Role>> ListOfIAMRoles(OrchestratorSession session, string servicePrincipal);
-        Task<List<Vpc>> GetListOfVpcs(OrchestratorSession session);
-        Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns(OrchestratorSession session);
-        Task<PlatformSummary> GetLatestElasticBeanstalkPlatformArn(OrchestratorSession session);
-        Task<List<AuthorizationData>> GetECRAuthorizationToken(OrchestratorSession session);
-        Task<List<Repository>> GetECRRepositories(OrchestratorSession session, List<string> repositoryNames);
-        Task<Repository> CreateECRRepository(OrchestratorSession session, string repositoryName);
-        Task<List<Stack>> GetCloudFormationStacks(OrchestratorSession session);
+        Task<List<Cluster>> ListOfECSClusters();
+        Task<List<ApplicationDescription>> ListOfElasticBeanstalkApplications();
+        Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(string applicationName);
+        Task<List<KeyPairInfo>> ListOfEC2KeyPairs();
+        Task<string> CreateEC2KeyPair(string keyName, string saveLocation);
+        Task<List<Role>> ListOfIAMRoles(string servicePrincipal);
+        Task<List<Vpc>> GetListOfVpcs();
+        Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns();
+        Task<PlatformSummary> GetLatestElasticBeanstalkPlatformArn();
+        Task<List<AuthorizationData>> GetECRAuthorizationToken();
+        Task<List<Repository>> GetECRRepositories(List<string> repositoryNames);
+        Task<Repository> CreateECRRepository(string repositoryName);
+        Task<List<Stack>> GetCloudFormationStacks();
     }
 
     public class AWSResourceQueryer : IAWSResourceQueryer
@@ -46,9 +46,9 @@ namespace AWS.Deploy.Orchestration.Data
             _awsClientFactory = awsClientFactory;
         }
 
-        public async Task<List<Cluster>> ListOfECSClusters(OrchestratorSession session)
+        public async Task<List<Cluster>> ListOfECSClusters()
         {
-            var ecsClient = _awsClientFactory.GetAWSClient<IAmazonECS>(session.AWSCredentials, session.AWSRegion);
+            var ecsClient = _awsClientFactory.GetAWSClient<IAmazonECS>();
 
             var clusterArns = await ecsClient.Paginators
                 .ListClusters(new ListClustersRequest())
@@ -63,16 +63,16 @@ namespace AWS.Deploy.Orchestration.Data
             return clusters.Clusters;
         }
 
-        public async Task<List<ApplicationDescription>> ListOfElasticBeanstalkApplications(OrchestratorSession session)
+        public async Task<List<ApplicationDescription>> ListOfElasticBeanstalkApplications()
         {
-            var beanstalkClient = _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>(session.AWSCredentials, session.AWSRegion);
+            var beanstalkClient = _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>();
             var applications = await beanstalkClient.DescribeApplicationsAsync();
             return applications.Applications;
         }
 
-        public async Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(OrchestratorSession session, string applicationName)
+        public async Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(string applicationName)
         {
-            var beanstalkClient = _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>(session.AWSCredentials, session.AWSRegion);
+            var beanstalkClient = _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>();
             var environments = new List<EnvironmentDescription>();
             var request = new DescribeEnvironmentsRequest
             {
@@ -91,19 +91,19 @@ namespace AWS.Deploy.Orchestration.Data
             return environments;
         }
 
-        public async Task<List<KeyPairInfo>> ListOfEC2KeyPairs(OrchestratorSession session)
+        public async Task<List<KeyPairInfo>> ListOfEC2KeyPairs()
         {
-            var ec2Client = _awsClientFactory.GetAWSClient<IAmazonEC2>(session.AWSCredentials, session.AWSRegion);
+            var ec2Client = _awsClientFactory.GetAWSClient<IAmazonEC2>();
             var response = await ec2Client.DescribeKeyPairsAsync();
 
             return response.KeyPairs;
         }
 
-        public async Task<string> CreateEC2KeyPair(OrchestratorSession session, string keyName, string saveLocation)
+        public async Task<string> CreateEC2KeyPair(string keyName, string saveLocation)
         {
-            var ec2Client = _awsClientFactory.GetAWSClient<IAmazonEC2>(session.AWSCredentials, session.AWSRegion);
+            var ec2Client = _awsClientFactory.GetAWSClient<IAmazonEC2>();
 
-            var request = new CreateKeyPairRequest() { KeyName = keyName };
+            var request = new CreateKeyPairRequest { KeyName = keyName };
 
             var response = await ec2Client.CreateKeyPairAsync(request);
 
@@ -112,9 +112,9 @@ namespace AWS.Deploy.Orchestration.Data
             return response.KeyPair.KeyName;
         }
 
-        public async Task<List<Role>> ListOfIAMRoles(OrchestratorSession session, string servicePrincipal)
+        public async Task<List<Role>> ListOfIAMRoles(string servicePrincipal)
         {
-            var identityManagementServiceClient = _awsClientFactory.GetAWSClient<IAmazonIdentityManagementService>(session.AWSCredentials, session.AWSRegion);
+            var identityManagementServiceClient = _awsClientFactory.GetAWSClient<IAmazonIdentityManagementService>();
 
             var listRolesRequest = new ListRolesRequest();
             var roles = new List<Role>();
@@ -134,9 +134,9 @@ namespace AWS.Deploy.Orchestration.Data
             return !string.IsNullOrEmpty(role.AssumeRolePolicyDocument) && role.AssumeRolePolicyDocument.Contains(servicePrincipal);
         }
 
-        public async Task<List<Vpc>> GetListOfVpcs(OrchestratorSession session)
+        public async Task<List<Vpc>> GetListOfVpcs()
         {
-            var vpcClient = _awsClientFactory.GetAWSClient<IAmazonEC2>(session.AWSCredentials, session.AWSRegion);
+            var vpcClient = _awsClientFactory.GetAWSClient<IAmazonEC2>();
 
             return await vpcClient.Paginators
                 .DescribeVpcs(new DescribeVpcsRequest())
@@ -146,9 +146,9 @@ namespace AWS.Deploy.Orchestration.Data
                 .ToListAsync();
         }
 
-        public async Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns(OrchestratorSession session)
+        public async Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns()
         {
-            var beanstalkClient = _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>(session.AWSCredentials, session.AWSRegion);
+            var beanstalkClient = _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>();
 
             var request = new ListPlatformVersionsRequest
             {
@@ -182,9 +182,9 @@ namespace AWS.Deploy.Orchestration.Data
             return platformVersions;
         }
 
-        public async Task<PlatformSummary> GetLatestElasticBeanstalkPlatformArn(OrchestratorSession session)
+        public async Task<PlatformSummary> GetLatestElasticBeanstalkPlatformArn()
         {
-            var platforms = await GetElasticBeanstalkPlatformArns(session);
+            var platforms = await GetElasticBeanstalkPlatformArns();
 
             if (!platforms.Any())
             {
@@ -194,18 +194,18 @@ namespace AWS.Deploy.Orchestration.Data
             return platforms.First();
         }
 
-        public async Task<List<AuthorizationData>> GetECRAuthorizationToken(OrchestratorSession session)
+        public async Task<List<AuthorizationData>> GetECRAuthorizationToken()
         {
-            var ecrClient = _awsClientFactory.GetAWSClient<IAmazonECR>(session.AWSCredentials, session.AWSRegion);
+            var ecrClient = _awsClientFactory.GetAWSClient<IAmazonECR>();
 
             var response = await ecrClient.GetAuthorizationTokenAsync(new GetAuthorizationTokenRequest());
 
             return response.AuthorizationData;
         }
 
-        public async Task<List<Repository>> GetECRRepositories(OrchestratorSession session, List<string> repositoryNames)
+        public async Task<List<Repository>> GetECRRepositories(List<string> repositoryNames)
         {
-            var ecrClient = _awsClientFactory.GetAWSClient<IAmazonECR>(session.AWSCredentials, session.AWSRegion);
+            var ecrClient = _awsClientFactory.GetAWSClient<IAmazonECR>();
 
             var request = new DescribeRepositoriesRequest
             {
@@ -225,9 +225,9 @@ namespace AWS.Deploy.Orchestration.Data
             }
         }
 
-        public async Task<Repository> CreateECRRepository(OrchestratorSession session, string repositoryName)
+        public async Task<Repository> CreateECRRepository(string repositoryName)
         {
-            var ecrClient = _awsClientFactory.GetAWSClient<IAmazonECR>(session.AWSCredentials, session.AWSRegion);
+            var ecrClient = _awsClientFactory.GetAWSClient<IAmazonECR>();
 
             var request = new CreateRepositoryRequest
             {
@@ -239,9 +239,9 @@ namespace AWS.Deploy.Orchestration.Data
             return response.Repository;
         }
 
-        public async Task<List<Stack>> GetCloudFormationStacks(OrchestratorSession session)
+        public async Task<List<Stack>> GetCloudFormationStacks()
         {
-            using var cloudFormationClient = _awsClientFactory.GetAWSClient<Amazon.CloudFormation.IAmazonCloudFormation>(session.AWSCredentials, session.AWSRegion);
+            using var cloudFormationClient = _awsClientFactory.GetAWSClient<Amazon.CloudFormation.IAmazonCloudFormation>();
             return await cloudFormationClient.Paginators.DescribeStacks(new DescribeStacksRequest()).Stacks.ToListAsync();
         }
     }
