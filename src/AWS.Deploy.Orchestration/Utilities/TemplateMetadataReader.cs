@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
+using Amazon.CloudFormation.Model;
 using AWS.Deploy.Common;
 using AWS.Deploy.Recipes.CDK.Common;
 using Newtonsoft.Json;
@@ -12,16 +14,45 @@ using YamlDotNet.RepresentationModel;
 
 namespace AWS.Deploy.Orchestration.Utilities
 {
+    public interface ITemplateMetadataReader
+    {
+        /// <summary>
+        /// For a given Cloud Application loads the metadata for it. This includes the settings used to deploy and the recipe information.
+        /// </summary>
+        Task<CloudApplicationMetadata> LoadCloudApplicationMetadata(string cloudApplication);
+    }
+
     /// <summary>
     /// A class for reading the metadata section of an CloudFormation template to pull out the AWS .NET deployment tool settings.
     /// </summary>
-    public class TemplateMetadataReader
+    public class TemplateMetadataReader : ITemplateMetadataReader
     {
+        private readonly IAWSClientFactory _awsClientFactory;
+
+        public TemplateMetadataReader(IAWSClientFactory awsClientFactory)
+        {
+            _awsClientFactory = awsClientFactory;
+        }
+
+        public async Task<CloudApplicationMetadata> LoadCloudApplicationMetadata(string cloudApplication)
+        {
+            using var client = _awsClientFactory.GetAWSClient<Amazon.CloudFormation.IAmazonCloudFormation>();
+
+            var request = new GetTemplateRequest
+            {
+                StackName = cloudApplication
+            };
+
+            var response = await client.GetTemplateAsync(request);
+
+            return ReadSettings(response.TemplateBody);
+        }
+
         /// <summary>
         /// Read the AWS .NET deployment tool metadata from the CloudFormation template.
         /// </summary>
         /// <returns></returns>
-        public static CloudApplicationMetadata ReadSettings(string templateBody)
+        private static CloudApplicationMetadata ReadSettings(string templateBody)
         {
             try
             {
@@ -44,7 +75,7 @@ namespace AWS.Deploy.Orchestration.Utilities
             }
             catch(Exception e)
             {
-                throw new ParsingExistingCloudApplicationMetadataException($"Error parsing existing application's metadata", e);
+                throw new ParsingExistingCloudApplicationMetadataException("Error parsing existing application's metadata", e);
             }
         }
 

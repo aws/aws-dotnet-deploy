@@ -14,16 +14,12 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 {
     public class VpcCommand : ITypeHintCommand
     {
-        private readonly IToolInteractiveService _toolInteractiveService;
         private readonly IAWSResourceQueryer _awsResourceQueryer;
-        private readonly OrchestratorSession _session;
         private readonly ConsoleUtilities _consoleUtilities;
 
-        public VpcCommand(IToolInteractiveService toolInteractiveService, IAWSResourceQueryer awsResourceQueryer, OrchestratorSession session, ConsoleUtilities consoleUtilities)
+        public VpcCommand(IAWSResourceQueryer awsResourceQueryer, ConsoleUtilities consoleUtilities)
         {
-            _toolInteractiveService = toolInteractiveService;
             _awsResourceQueryer = awsResourceQueryer;
-            _session = session;
             _consoleUtilities = consoleUtilities;
         }
 
@@ -31,7 +27,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         {
             var currentVpcTypeHintResponse = optionSetting.GetTypeHintData<VpcTypeHintResponse>();
 
-            var vpcs = await _awsResourceQueryer.GetListOfVpcs(_session);
+            var vpcs = await _awsResourceQueryer.GetListOfVpcs();
 
             var userInputConfig = new UserInputConfiguration<Vpc>
             {

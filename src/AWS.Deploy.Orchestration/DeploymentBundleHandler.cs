@@ -27,19 +27,16 @@ namespace AWS.Deploy.Orchestration
         private readonly ICommandLineWrapper _commandLineWrapper;
         private readonly IAWSResourceQueryer _awsResourceQueryer;
         private readonly IOrchestratorInteractiveService _interactiveService;
-        private readonly OrchestratorSession _session;
         private readonly IDirectoryManager _directoryManager;
         private readonly IZipFileManager _zipFileManager;
 
         public DeploymentBundleHandler(
-            OrchestratorSession session,
             ICommandLineWrapper commandLineWrapper,
             IAWSResourceQueryer awsResourceQueryer,
             IOrchestratorInteractiveService interactiveService,
             IDirectoryManager directoryManager,
             IZipFileManager zipFileManager)
         {
-            _session = session;
             _commandLineWrapper = commandLineWrapper;
             _awsResourceQueryer = awsResourceQueryer;
             _interactiveService = interactiveService;
@@ -235,7 +232,7 @@ namespace AWS.Deploy.Orchestration
 
         private async Task InitiateDockerLogin()
         {
-            var authorizationTokens = await _awsResourceQueryer.GetECRAuthorizationToken(_session);
+            var authorizationTokens = await _awsResourceQueryer.GetECRAuthorizationToken();
 
             if (authorizationTokens.Count == 0)
                 throw new DockerLoginFailedException();
@@ -253,7 +250,7 @@ namespace AWS.Deploy.Orchestration
 
         private async Task<Repository> SetupECRRepository(string ecrRepositoryName)
         {
-            var existingRepositories = await _awsResourceQueryer.GetECRRepositories(_session, new List<string> { ecrRepositoryName });
+            var existingRepositories = await _awsResourceQueryer.GetECRRepositories(new List<string> { ecrRepositoryName });
 
             if (existingRepositories.Count == 1)
             {
@@ -261,7 +258,7 @@ namespace AWS.Deploy.Orchestration
             }
             else
             {
-                return await _awsResourceQueryer.CreateECRRepository(_session, ecrRepositoryName);
+                return await _awsResourceQueryer.CreateECRRepository(ecrRepositoryName);
             }
         }
 

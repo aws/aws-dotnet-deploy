@@ -1,15 +1,11 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using Amazon.ECS.Model;
 using AWS.Deploy.CLI.TypeHintResponses;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
-using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.Data;
 
 namespace AWS.Deploy.CLI.Commands.TypeHints
@@ -17,19 +13,17 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
     public class ECSClusterCommand : ITypeHintCommand
     {
         private readonly IAWSResourceQueryer _awsResourceQueryer;
-        private readonly OrchestratorSession _session;
         private readonly ConsoleUtilities _consoleUtilities;
 
-        public ECSClusterCommand(IAWSResourceQueryer awsResourceQueryer, OrchestratorSession session, ConsoleUtilities consoleUtilities)
+        public ECSClusterCommand(IAWSResourceQueryer awsResourceQueryer, ConsoleUtilities consoleUtilities)
         {
             _awsResourceQueryer = awsResourceQueryer;
-            _session = session;
             _consoleUtilities = consoleUtilities;
         }
 
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
-            var clusters = await _awsResourceQueryer.ListOfECSClusters(_session);
+            var clusters = await _awsResourceQueryer.ListOfECSClusters();
             var currentTypeHintResponse = recommendation.GetOptionSettingValue<ECSClusterTypeHintResponse>(optionSetting);
 
             var userInputConfiguration = new UserInputConfiguration<Cluster>

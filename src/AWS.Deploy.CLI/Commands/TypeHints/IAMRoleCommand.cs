@@ -14,23 +14,19 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 {
     public class IAMRoleCommand : ITypeHintCommand
     {
-        private readonly IToolInteractiveService _toolInteractiveService;
         private readonly IAWSResourceQueryer _awsResourceQueryer;
-        private readonly OrchestratorSession _session;
         private readonly ConsoleUtilities _consoleUtilities;
 
-        public IAMRoleCommand(IToolInteractiveService toolInteractiveService, IAWSResourceQueryer awsResourceQueryer, OrchestratorSession session, ConsoleUtilities consoleUtilities)
+        public IAMRoleCommand(IAWSResourceQueryer awsResourceQueryer, ConsoleUtilities consoleUtilities)
         {
-            _toolInteractiveService = toolInteractiveService;
             _awsResourceQueryer = awsResourceQueryer;
-            _session = session;
             _consoleUtilities = consoleUtilities;
         }
 
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var typeHintData = optionSetting.GetTypeHintData<IAMRoleTypeHintData>();
-            var existingRoles = await _awsResourceQueryer.ListOfIAMRoles(_session, typeHintData?.ServicePrincipal);
+            var existingRoles = await _awsResourceQueryer.ListOfIAMRoles(typeHintData?.ServicePrincipal);
             var currentTypeHintResponse = recommendation.GetOptionSettingValue<IAMRoleTypeHintResponse>(optionSetting);
 
             var userInputConfiguration = new UserInputConfiguration<Role>

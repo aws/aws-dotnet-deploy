@@ -43,7 +43,7 @@ namespace AWS.Deploy.Orchestration.RecommendationEngine
             }
         }
 
-        public async Task<IList<Recommendation>> ComputeRecommendations(string projectPath, Dictionary<string, string> additionalReplacements)
+        public async Task<List<Recommendation>> ComputeRecommendations(string projectPath, Dictionary<string, string> additionalReplacements)
         {
             var projectDefinition = new ProjectDefinition(projectPath);
             var recommendations = new List<Recommendation>();
