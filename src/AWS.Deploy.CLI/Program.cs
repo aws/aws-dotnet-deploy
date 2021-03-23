@@ -125,6 +125,7 @@ namespace AWS.Deploy.CLI
                         new TemplateMetadataReader(awsClientFactory),
                         new DeployedApplicationQueryer(awsResourceQueryer),
                         new TypeHintCommandFactory(toolInteractiveService, awsResourceQueryer, consoleUtilities),
+                        new CloudApplicationNameGenerator(fileManager, directoryManager),
                         consoleUtilities,
                         session);
 

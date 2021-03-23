@@ -29,6 +29,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly ITemplateMetadataReader _templateMetadataReader;
         private readonly IDeployedApplicationQueryer _deployedApplicationQueryer;
         private readonly ITypeHintCommandFactory _typeHintCommandFactory;
+        private readonly ICloudApplicationNameGenerator _cloudApplicationNameGenerator;
 
         private readonly ConsoleUtilities _consoleUtilities;
         private readonly OrchestratorSession _session;
@@ -43,6 +44,7 @@ namespace AWS.Deploy.CLI.Commands
             ITemplateMetadataReader templateMetadataReader,
             IDeployedApplicationQueryer deployedApplicationQueryer,
             ITypeHintCommandFactory typeHintCommandFactory,
+            ICloudApplicationNameGenerator cloudApplicationNameGenerator,
             ConsoleUtilities consoleUtilities,
             OrchestratorSession session)
         {
@@ -55,6 +57,7 @@ namespace AWS.Deploy.CLI.Commands
             _templateMetadataReader = templateMetadataReader;
             _deployedApplicationQueryer = deployedApplicationQueryer;
             _typeHintCommandFactory = typeHintCommandFactory;
+            _cloudApplicationNameGenerator = cloudApplicationNameGenerator;
             _consoleUtilities = consoleUtilities;
             _session = session;
         }
@@ -75,63 +78,40 @@ namespace AWS.Deploy.CLI.Commands
             var recommendations = await orchestrator.GenerateDeploymentRecommendations();
             if (recommendations.Count == 0)
             {
-                _toolInteractiveService.WriteLine(string.Empty);
-                _toolInteractiveService.WriteErrorLine($"The project you are trying to deploy is currently not supported.");
+                _toolInteractiveService.WriteLine();
+                _toolInteractiveService.WriteErrorLine("The project you are trying to deploy is currently not supported.");
                 throw new FailedToGenerateAnyRecommendations();
             }
 
             // Look to see if there are any existing deployed applications using any of the compatible recommendations.
-            var existingApplications = await _deployedApplicationQueryer.GetExistingDeployedApplications(recommendations);
+            var deployedApplications = await _deployedApplicationQueryer.GetExistingDeployedApplications(recommendations);
 
-            string cloudApplicationName;
-            if (!string.IsNullOrEmpty(stackName))
+            if (!string.IsNullOrEmpty(stackName) && !_cloudApplicationNameGenerator.IsValidName(stackName))
             {
-                cloudApplicationName = stackName;
-            }
-            else
-            {
-                _toolInteractiveService.WriteLine(string.Empty);
-
-                if (existingApplications.Count == 0)
-                {
-                    var title = "Name the AWS stack to deploy your application to" + Environment.NewLine +
-                                  "(A stack is a collection of AWS resources that you can manage as a single unit.)" + Environment.NewLine +
-                                  "--------------------------------------------------------------------------------";
-                    cloudApplicationName =
-                        _consoleUtilities.AskUserForValue(
-                            title,
-                            GetDefaultApplicationName(_session.ProjectDefinition.ProjectPath),
-                            allowEmpty: false);
-                }
-                else
-                {
-                    var title = "Select the AWS stack to deploy your application to" + Environment.NewLine +
-                                  "(A stack is a collection of AWS resources that you can manage as a single unit.)";
-
-                    var userResponse =
-                        _consoleUtilities.AskUserToChooseOrCreateNew(
-                            existingApplications.Select(x => x.Name),
-                            title, askNewName: true,
-                            defaultNewName: GetDefaultApplicationName(_session.ProjectDefinition.ProjectPath));
-
-                    cloudApplicationName = userResponse.SelectedOption ?? userResponse.NewName;
-                }
+                PrintInvalidStackNameMessage();
+                throw new InvalidCliArgumentException();
             }
 
-            var existingCloudApplication = existingApplications.FirstOrDefault(x => string.Equals(x.Name, cloudApplicationName));
+            var cloudApplicationName = 
+                !string.IsNullOrEmpty(stackName)
+                ? stackName
+                : AskUserForCloudApplicationName(_session.ProjectDefinition, deployedApplications);
+
+            var deployedApplication = deployedApplications.FirstOrDefault(x => string.Equals(x.Name, cloudApplicationName));
 
             Recommendation selectedRecommendation = null;
 
-            _toolInteractiveService.WriteLine(string.Empty);
-            // If using a previous deployment preset settings for deployment based on last deployment.
-            if (existingCloudApplication != null)
-            {
-                var existingCloudApplicationMetadata = await _templateMetadataReader.LoadCloudApplicationMetadata(cloudApplicationName);
+            _toolInteractiveService.WriteLine();
 
-                selectedRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, existingCloudApplication.RecipeId, StringComparison.InvariantCultureIgnoreCase));
+            // If using a previous deployment preset settings for deployment based on last deployment.
+            if (deployedApplication != null)
+            {
+                var existingCloudApplicationMetadata = await _templateMetadataReader.LoadCloudApplicationMetadata(deployedApplication.Name);
+
+                selectedRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, deployedApplication.RecipeId, StringComparison.InvariantCultureIgnoreCase));
                 selectedRecommendation.ApplyPreviousSettings(existingCloudApplicationMetadata.Settings);
 
-                var header = $"Loading {existingCloudApplication.Name} settings:";
+                var header = $"Loading {deployedApplication.Name} settings:";
 
                 _toolInteractiveService.WriteLine(header);
                 _toolInteractiveService.WriteLine(new string('-', header.Length));
@@ -207,6 +187,64 @@ namespace AWS.Deploy.CLI.Commands
             await CreateDeploymentBundle(orchestrator, selectedRecommendation, cloudApplication);
 
             await orchestrator.DeployRecommendation(cloudApplication, selectedRecommendation);
+        }
+
+        private string AskUserForCloudApplicationName(ProjectDefinition project, List<CloudApplication> existingApplications)
+        {
+            var defaultName = "";
+
+            try
+            {
+                defaultName = _cloudApplicationNameGenerator.GenerateValidName(project, existingApplications);
+            }
+            catch { }
+
+            var cloudApplicationName = "";
+
+            while (true)
+            {
+                _toolInteractiveService.WriteLine();
+
+                if (!existingApplications.Any())
+                {
+                    var title = "Name the AWS stack to deploy your application to" + Environment.NewLine +
+                                "(A stack is a collection of AWS resources that you can manage as a single unit.)" + Environment.NewLine +
+                                "--------------------------------------------------------------------------------";
+
+                    cloudApplicationName =
+                        _consoleUtilities.AskUserForValue(
+                            title,
+                            defaultName,
+                            allowEmpty: false);
+                }
+                else
+                {
+                    var title = "Select the AWS stack to deploy your application to" + Environment.NewLine +
+                                "(A stack is a collection of AWS resources that you can manage as a single unit.)";
+
+                    var userResponse =
+                        _consoleUtilities.AskUserToChooseOrCreateNew(
+                            existingApplications.Select(x => x.Name),
+                            title,
+                            askNewName: true,
+                            defaultNewName: defaultName);
+
+                    cloudApplicationName = userResponse.SelectedOption ?? userResponse.NewName;
+                }
+
+                if (_cloudApplicationNameGenerator.IsValidName(cloudApplicationName))
+                    return cloudApplicationName;
+
+                PrintInvalidStackNameMessage();
+            }
+        }
+
+        private void PrintInvalidStackNameMessage()
+        {
+            _toolInteractiveService.WriteLine();
+            _toolInteractiveService.WriteLine(
+                "Invalid stack name.  A stack name can contain only alphanumeric characters (case-sensitive) and hyphens. " +
+                "It must start with an alphabetic character and can't be longer than 128 characters");
         }
 
         private bool ConfirmDeployment(Recommendation recommendation)
@@ -430,15 +468,5 @@ namespace AWS.Deploy.CLI.Commands
                 _consoleUtilities.DisplayValues(objectValues, "\t");
             }
         }
-
-        public static string GetDefaultApplicationName(string projectPath)
-        {
-            if (File.Exists(projectPath))
-                return Path.GetFileNameWithoutExtension(projectPath);
-
-            return new DirectoryInfo(projectPath).Name;
-        }
-
-
     }
 }
