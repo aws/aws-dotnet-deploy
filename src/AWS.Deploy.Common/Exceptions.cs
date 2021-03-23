@@ -18,6 +18,12 @@ namespace AWS.Deploy.Common
         public string Path { get; set; }
     }
 
+    /// <summary>
+    /// Common exception if the user has passed invalid input from the command line
+    /// </summary>
+    [AWSDeploymentExpectedException]
+    public class InvalidCliArgumentException : Exception { }
+
     [AWSDeploymentExpectedException]
     public class InvalidRecipeDefinitionException : Exception
     {
