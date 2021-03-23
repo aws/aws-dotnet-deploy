@@ -23,17 +23,18 @@ namespace AWS.Deploy.CLI.UnitTests
         private readonly TestToolCommandLineWrapper _commandLineWrapper;
         private readonly OrchestratorSession _session;
         private readonly TestDirectoryManager _directoryManager;
-        private readonly TestZipFileManager _zipFileManager;
 
         public DeploymentBundleHandlerTests()
         {
             _session = new OrchestratorSession();
             var awsResourceQueryer = new TestToolAWSResourceQueryer();
             var interactiveService = new TestToolOrchestratorInteractiveService();
+            var zipFileManager = new TestZipFileManager();
+
             _commandLineWrapper = new TestToolCommandLineWrapper();
             _directoryManager = new TestDirectoryManager();
-            _zipFileManager = new TestZipFileManager();
-            _deploymentBundleHandler = new DeploymentBundleHandler(_session, _commandLineWrapper, awsResourceQueryer, interactiveService, _directoryManager, _zipFileManager);
+            
+            _deploymentBundleHandler = new DeploymentBundleHandler(_commandLineWrapper, awsResourceQueryer, interactiveService, _directoryManager, zipFileManager);
         }
 
         [Fact]

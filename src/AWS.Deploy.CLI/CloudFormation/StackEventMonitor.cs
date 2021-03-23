@@ -10,7 +10,6 @@ using Amazon.CloudFormation;
 using Amazon.CloudFormation.Model;
 using AWS.Deploy.CLI.Extensions;
 using AWS.Deploy.Common;
-using AWS.Deploy.Orchestration;
 
 namespace AWS.Deploy.CLI.CloudFormation
 {
@@ -33,11 +32,11 @@ namespace AWS.Deploy.CLI.CloudFormation
         private readonly HashSet<string> _processedEventIds = new HashSet<string>();
         private readonly ConsoleUtilities _consoleUtilities;
 
-        public StackEventMonitor(string stackName, IAWSClientFactory awsClientFactory, IToolInteractiveService interactiveService, OrchestratorSession session)
+        public StackEventMonitor(string stackName, IAWSClientFactory awsClientFactory, IToolInteractiveService interactiveService)
         {
             _stackName = stackName;
 
-            _cloudFormationClient = awsClientFactory.GetAWSClient<IAmazonCloudFormation>(session.AWSCredentials, session.AWSRegion);
+            _cloudFormationClient = awsClientFactory.GetAWSClient<IAmazonCloudFormation>();
             _consoleUtilities = new ConsoleUtilities(interactiveService);
         }
 

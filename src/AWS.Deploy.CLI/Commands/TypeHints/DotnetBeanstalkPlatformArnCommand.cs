@@ -12,23 +12,19 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 {
     public class DotnetBeanstalkPlatformArnCommand : ITypeHintCommand
     {
-        private readonly IToolInteractiveService _toolInteractiveService;
         private readonly IAWSResourceQueryer _awsResourceQueryer;
-        private readonly OrchestratorSession _session;
         private readonly ConsoleUtilities _consoleUtilities;
 
-        public DotnetBeanstalkPlatformArnCommand(IToolInteractiveService toolInteractiveService, IAWSResourceQueryer awsResourceQueryer, OrchestratorSession session, ConsoleUtilities consoleUtilities)
+        public DotnetBeanstalkPlatformArnCommand(IAWSResourceQueryer awsResourceQueryer, ConsoleUtilities consoleUtilities)
         {
-            _toolInteractiveService = toolInteractiveService;
             _awsResourceQueryer = awsResourceQueryer;
-            _session = session;
             _consoleUtilities = consoleUtilities;
         }
 
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var currentValue = recommendation.GetOptionSettingValue(optionSetting);
-            var platformArns = await _awsResourceQueryer.GetElasticBeanstalkPlatformArns(_session);
+            var platformArns = await _awsResourceQueryer.GetElasticBeanstalkPlatformArns();
 
             var userInputConfiguration = new UserInputConfiguration<PlatformSummary>
             {
