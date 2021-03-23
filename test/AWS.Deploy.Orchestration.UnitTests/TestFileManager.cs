@@ -35,4 +35,20 @@ namespace AWS.Deploy.Orchestration.UnitTests
             return Task.CompletedTask;
         }
     }
+
+    public static class TestFileManagerExtensions
+    {
+        /// <summary>
+        /// Adds a virtual csproj file with valid xml contents
+        /// </summary>
+        /// <returns>
+        /// Returns <paramref name="fullPath"/>
+        /// </returns>
+        public static string AddEmptyProjectFile(this TestFileManager fileManager, string fullPath)
+        {
+            fileManager.InMemoryStore.Add(fullPath, "<Project Sdk=\"Microsoft.NET.Sdk\"></Project>");
+
+            return fullPath;
+        }
+    }
 }
