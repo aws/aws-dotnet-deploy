@@ -7,6 +7,6 @@ namespace AWS.Deploy.Common
 {
     public interface IAWSClientFactory
     {
-        T GetAWSClient<T>(AWSCredentials credentials, string region) where T : IAmazonService;
+        T GetAWSClient<T>() where T : IAmazonService;
     }
 }
