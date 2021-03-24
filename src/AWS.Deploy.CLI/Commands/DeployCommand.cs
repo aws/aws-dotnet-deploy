@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using AWS.Deploy.CLI.Commands.TypeHints;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.DockerEngine;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Recipes;
 using AWS.Deploy.Orchestration.Data;
@@ -23,6 +24,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly IOrchestratorInteractiveService _orchestratorInteractiveService;
         private readonly ICdkProjectHandler _cdkProjectHandler;
         private readonly IDeploymentBundleHandler _deploymentBundleHandler;
+        private readonly IDockerEngine _dockerEngine;
         private readonly IAWSResourceQueryer _awsResourceQueryer;
         private readonly ITemplateMetadataReader _templateMetadataReader;
         private readonly IDeployedApplicationQueryer _deployedApplicationQueryer;
@@ -36,6 +38,7 @@ namespace AWS.Deploy.CLI.Commands
             IOrchestratorInteractiveService orchestratorInteractiveService,
             ICdkProjectHandler cdkProjectHandler,
             IDeploymentBundleHandler deploymentBundleHandler,
+            IDockerEngine dockerEngine,
             IAWSResourceQueryer awsResourceQueryer,
             ITemplateMetadataReader templateMetadataReader,
             IDeployedApplicationQueryer deployedApplicationQueryer,
@@ -47,6 +50,7 @@ namespace AWS.Deploy.CLI.Commands
             _orchestratorInteractiveService = orchestratorInteractiveService;
             _cdkProjectHandler = cdkProjectHandler;
             _deploymentBundleHandler = deploymentBundleHandler;
+            _dockerEngine = dockerEngine;
             _awsResourceQueryer = awsResourceQueryer;
             _templateMetadataReader = templateMetadataReader;
             _deployedApplicationQueryer = deployedApplicationQueryer;
@@ -57,23 +61,6 @@ namespace AWS.Deploy.CLI.Commands
 
         public async Task ExecuteAsync(bool saveCdkProject)
         {
-            // Ensure a .NET project can be found.
-            ProjectDefinition project = null;
-            try
-            {
-                project = new ProjectDefinition(_session.ProjectPath);
-            }
-            catch (ProjectFileNotFoundException ex)
-            {
-                var files = Directory.GetFiles(_session.ProjectPath, "*.sln");
-                if (files.Any())
-                    _toolInteractiveService.WriteErrorLine($"This directory contains a solution file, but the tool requires a project file. Please run the tool from the directory that contains a .csproj/.fsproj or provide a path to the .csproj/.fsproj via --project-path flag.");
-                else
-                    _toolInteractiveService.WriteErrorLine($"A project was not found at the path {_session.ProjectPath}");
-
-                throw new FailedToFindDeployableTargetException(ex);
-            }
-
             var orchestrator =
                 new Orchestrator(
                     _session,
@@ -81,6 +68,7 @@ namespace AWS.Deploy.CLI.Commands
                     _cdkProjectHandler,
                     _awsResourceQueryer,
                     _deploymentBundleHandler,
+                    _dockerEngine,
                     new[] { RecipeLocator.FindRecipeDefinitionsPath() });
 
             // Determine what recommendations are possible for the project.
@@ -106,7 +94,7 @@ namespace AWS.Deploy.CLI.Commands
                 cloudApplicationName =
                     _consoleUtilities.AskUserForValue(
                         title,
-                        GetDefaultApplicationName(project.ProjectPath),
+                        GetDefaultApplicationName(_session.ProjectDefinition.ProjectPath),
                         allowEmpty: false);
             }
             else
@@ -114,7 +102,12 @@ namespace AWS.Deploy.CLI.Commands
                 var title = "Select the AWS stack to deploy your application to" + Environment.NewLine +
                               "(A stack is a collection of AWS resources that you can manage as a single unit.)";
 
-                var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(existingApplications.Select(x => x.Name).ToList(), title, askNewName: true, defaultNewName: GetDefaultApplicationName(project.ProjectPath));
+                var userResponse =
+                    _consoleUtilities.AskUserToChooseOrCreateNew(
+                        existingApplications.Select(x => x.Name),
+                        title, askNewName: true,
+                        defaultNewName: GetDefaultApplicationName(_session.ProjectDefinition.ProjectPath));
+
                 cloudApplicationName = userResponse.SelectedOption ?? userResponse.NewName;
             }
 
@@ -199,7 +192,7 @@ namespace AWS.Deploy.CLI.Commands
                 Name = cloudApplicationName
             };
 
-            if(!ConfirmDeployment(selectedRecommendation))
+            if (!ConfirmDeployment(selectedRecommendation))
             {
                 return;
             }
@@ -281,7 +274,7 @@ namespace AWS.Deploy.CLI.Commands
                 if (!showAdvancedSettings)
                 {
                     // Don't bother showing 'more' for advanced options if there aren't any advanced options.
-                    if(configurableOptionSettings.Any(x => x.AdvancedSetting))
+                    if (configurableOptionSettings.Any(x => x.AdvancedSetting))
                     {
                         _toolInteractiveService.WriteLine("Enter 'more' to display Advanced settings. ");
                     }
@@ -316,13 +309,13 @@ namespace AWS.Deploy.CLI.Commands
             }
         }
 
-        enum DisplayOptionSettingsMode {Editable, Readonly}
+        enum DisplayOptionSettingsMode { Editable, Readonly }
         private void DisplayOptionSetting(Recommendation recommendation, OptionSettingItem optionSetting, int optionSettingNumber, int optionSettingsCount, DisplayOptionSettingsMode mode)
         {
             var value = recommendation.GetOptionSettingValue(optionSetting);
 
             Type typeHintResponseType = null;
-            if(optionSetting.Type == OptionSettingValueType.Object)
+            if (optionSetting.Type == OptionSettingValueType.Object)
             {
                 var typeHintResponseTypeFullName = $"AWS.Deploy.CLI.TypeHintResponses.{optionSetting.TypeHint}TypeHintResponse";
                 typeHintResponseType = Assembly.GetExecutingAssembly().GetType(typeHintResponseTypeFullName);
@@ -416,11 +409,11 @@ namespace AWS.Deploy.CLI.Commands
                 displayValue = objectValues == null ? value : string.Empty;
             }
 
-            if(mode == DisplayOptionSettingsMode.Editable)
+            if (mode == DisplayOptionSettingsMode.Editable)
             {
                 _toolInteractiveService.WriteLine($"{optionSettingNumber.ToString().PadRight(optionSettingsCount.ToString().Length)}. {optionSetting.Name}: {displayValue}");
             }
-            else if(mode == DisplayOptionSettingsMode.Readonly)
+            else if (mode == DisplayOptionSettingsMode.Readonly)
             {
                 _toolInteractiveService.WriteLine($"{optionSetting.Name}: {displayValue}");
             }
