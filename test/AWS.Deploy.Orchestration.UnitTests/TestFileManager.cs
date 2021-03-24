@@ -1,6 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,6 +22,11 @@ namespace AWS.Deploy.Orchestration.UnitTests
         {
             var text = InMemoryStore[path];
             return Task.FromResult(text);
+        }
+
+        public async Task<string[]> ReadAllLinesAsync(string path)
+        {
+            return (await ReadAllTextAsync(path)).Split(Environment.NewLine);
         }
 
         public Task WriteAllTextAsync(string filePath, string contents, CancellationToken cancellationToken = default)

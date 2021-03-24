@@ -22,5 +22,8 @@ namespace AWS.Deploy.CLI.Common.UnitTests.IO
         {
             return CreatedDirectories.Contains(path);
         }
+
+        public string[] GetFiles(string projectPath, string searchPattern = null) =>
+            throw new NotImplementedException("If your test needs this method, you'll need to implement this.");
     }
 }
