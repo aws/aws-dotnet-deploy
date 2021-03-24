@@ -4,7 +4,9 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.IO;
 using AWS.Deploy.DockerEngine;
 using Should;
 using Xunit;
@@ -13,71 +15,22 @@ namespace AWS.Deploy.CLI.UnitTests
 {
     public class DockerTests
     {
-        [Fact]
-        public void DockerGenerateWebAppNoSolution()
+        [Theory]
+        [InlineData("WebAppNoSolution", "")]
+        [InlineData("WebAppWithSolutionSameLevel", "")]
+        [InlineData("WebAppWithSolutionParentLevel", "WebAppWithSolutionParentLevel")]
+        [InlineData("WebAppDifferentAssemblyName", "")]
+        [InlineData("WebAppProjectDependencies", "WebAppProjectDependencies")]
+        [InlineData("WebAppDifferentTargetFramework", "")]
+        [InlineData("ConsoleSdkType", "")]
+        public async Task DockerGenerate(string topLevelFolder, string projectName)
         {
-            var projectPath = ResolvePath("WebAppNoSolution");
-            var engine = new DockerEngine.DockerEngine(new ProjectDefinition(projectPath));
-            engine.GenerateDockerFile();
+            var projectPath = ResolvePath(Path.Combine(topLevelFolder, projectName));
 
-            AssertDockerFilesAreEqual(projectPath);
-        }
+            var project = await new ProjectDefinitionParser(new FileManager(), new DirectoryManager()).Parse(projectPath);
 
-        [Fact]
-        public void DockerGenerateWebAppWithSolutionSameLevel()
-        {
-            var projectPath = ResolvePath("WebAppWithSolutionSameLevel");
-            var engine = new DockerEngine.DockerEngine(new ProjectDefinition(projectPath));
-            engine.GenerateDockerFile();
+            var engine = new DockerEngine.DockerEngine(project);
 
-            AssertDockerFilesAreEqual(projectPath);
-        }
-
-        [Fact]
-        public void DockerGenerateWebAppWithSolutionParentLevel()
-        {
-            var projectPath = ResolvePath(Path.Combine("WebAppWithSolutionParentLevel", "WebAppWithSolutionParentLevel"));
-            var engine = new DockerEngine.DockerEngine(new ProjectDefinition(projectPath));
-            engine.GenerateDockerFile();
-
-            AssertDockerFilesAreEqual(projectPath);
-        }
-
-        [Fact]
-        public void DockerGenerateWebAppDifferentAssemblyName()
-        {
-            var projectPath = ResolvePath("WebAppDifferentAssemblyName");
-            var engine = new DockerEngine.DockerEngine(new ProjectDefinition(projectPath));
-            engine.GenerateDockerFile();
-
-            AssertDockerFilesAreEqual(projectPath);
-        }
-
-        [Fact]
-        public void DockerGenerateWebAppProjectDependencies()
-        {
-            var projectPath = ResolvePath(Path.Combine("WebAppProjectDependencies", "WebAppProjectDependencies"));
-            var engine = new DockerEngine.DockerEngine(new ProjectDefinition(projectPath));
-            engine.GenerateDockerFile();
-
-            AssertDockerFilesAreEqual(projectPath);
-        }
-
-        [Fact]
-        public void DockerGenerateWebAppDifferentTargetFramework()
-        {
-            var projectPath = ResolvePath("WebAppDifferentTargetFramework");
-            var engine = new DockerEngine.DockerEngine(new ProjectDefinition(projectPath));
-            engine.GenerateDockerFile();
-
-            AssertDockerFilesAreEqual(projectPath);
-        }
-
-        [Fact]
-        public void DockerGenerateConsoleSdkType()
-        {
-            var projectPath = ResolvePath("ConsoleSdkType");
-            var engine = new DockerEngine.DockerEngine(new ProjectDefinition(projectPath));
             engine.GenerateDockerFile();
 
             AssertDockerFilesAreEqual(projectPath);

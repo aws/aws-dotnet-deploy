@@ -12,7 +12,7 @@ namespace AWS.Deploy.Common
     {
         private const string REPLACE_TOKEN_PROJECT_NAME = "{ProjectName}";
 
-        public string ProjectPath { get; }
+        public string ProjectPath => ProjectDefinition.ProjectPath;
 
         public ProjectDefinition ProjectDefinition { get; }
 
@@ -30,19 +30,16 @@ namespace AWS.Deploy.Common
 
         private readonly Dictionary<string, string> _replacementTokens = new();
 
-        public Recommendation(RecipeDefinition recipe, string projectPath, int computedPriority, Dictionary<string, string> additionalReplacements)
+        public Recommendation(RecipeDefinition recipe, ProjectDefinition projectDefinition, int computedPriority, Dictionary<string, string> additionalReplacements)
         {
             Recipe = recipe;
-            ProjectPath = projectPath;
+
             ComputedPriority = computedPriority;
 
-            ProjectDefinition = new ProjectDefinition(projectPath);
+            ProjectDefinition = projectDefinition;
             DeploymentBundle = new DeploymentBundle();
 
-            if (File.Exists(projectPath))
-            {
-                _replacementTokens[REPLACE_TOKEN_PROJECT_NAME] = Path.GetFileNameWithoutExtension(ProjectPath);
-            }
+            _replacementTokens[REPLACE_TOKEN_PROJECT_NAME] = Path.GetFileNameWithoutExtension(projectDefinition.ProjectPath);
 
             foreach (var replacement in additionalReplacements)
             {

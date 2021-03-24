@@ -91,6 +91,10 @@ namespace AWS.Deploy.CLI
                     var systemCapabilityEvaluator = new SystemCapabilityEvaluator(commandLineWrapper, cdkManager);
                     var systemCapabilities = systemCapabilityEvaluator.Evaluate();
 
+                    var projectParser = new ProjectDefinitionParser(fileManager, directoryManager);
+                    var projectParserUtility = new ProjectParserUtility(toolInteractiveService, projectParser, directoryManager);
+                    var projectDefinition = await projectParserUtility.Parse(projectPath);
+
                     var stsClient = new AmazonSecurityTokenServiceClient(awsCredentials);
                     var callerIdentity = await stsClient.GetCallerIdentityAsync(new GetCallerIdentityRequest());
 
@@ -100,8 +104,7 @@ namespace AWS.Deploy.CLI
                         AWSCredentials = awsCredentials,
                         AWSRegion = awsRegion,
                         AWSAccountId = callerIdentity.Account,
-                        ProjectPath = projectPath,
-                        ProjectDirectory = projectPath,
+                        ProjectDefinition = projectDefinition,
                         SystemCapabilities = systemCapabilities,
                         CdkManager = cdkManager
                     };
@@ -115,6 +118,7 @@ namespace AWS.Deploy.CLI
                         orchestratorInteractiveService,
                         new CdkProjectHandler(orchestratorInteractiveService, commandLineWrapper),
                         new DeploymentBundleHandler(commandLineWrapper, awsResourceQueryer, orchestratorInteractiveService, directoryManager, zipFileManager),
+                        new DockerEngine.DockerEngine(projectDefinition),
                         awsResourceQueryer,
                         new TemplateMetadataReader(awsClientFactory),
                         new DeployedApplicationQueryer(awsResourceQueryer),

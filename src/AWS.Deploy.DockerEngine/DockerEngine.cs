@@ -10,10 +10,25 @@ using Newtonsoft.Json;
 
 namespace AWS.Deploy.DockerEngine
 {
+    public interface IDockerEngine
+    {
+        /// <summary>
+        /// Generates a docker file
+        /// </summary>
+        void GenerateDockerFile();
+
+        /// <summary>
+        /// Inspects the Dockerfile associated with the recommendation
+        /// and determines the appropriate Docker Execution Directory,
+        /// if one is not set.
+        /// </summary>
+        void DetermineDockerExecutionDirectory(Recommendation recommendation);
+    }
+
     /// <summary>
     /// Orchestrates the moving parts involved in creating a dockerfile for a project
     /// </summary>
-    public class DockerEngine
+    public class DockerEngine : IDockerEngine
     {
         private readonly ProjectDefinition _project;
         private readonly string _projectPath;

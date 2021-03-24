@@ -7,6 +7,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using AWS.Deploy.CLI.TypeHintResponses;
 using AWS.Deploy.CLI.UnitTests.Utilities;
+using AWS.Deploy.Common;
+using AWS.Deploy.Common.IO;
 using AWS.Deploy.Recipes;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.RecommendationEngine;
@@ -18,14 +20,29 @@ namespace AWS.Deploy.CLI.UnitTests
 {
     public class ApplyPreviousSettingsTests
     {
+        private async Task<RecommendationEngine> BuildRecommendationEngine(string testProjectName)
+        {
+            var fullPath = SystemIOUtilities.ResolvePath(testProjectName);
+
+            var parser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
+
+            var session =  new OrchestratorSession
+            {
+                ProjectDefinition = await parser.Parse(fullPath)
+            };
+
+            return new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, session);
+        }
+
         [Theory]
         [InlineData(true, null)]
         [InlineData(false, "role_arn")]
         public async Task ApplyApplicationIAMRolePreviousSettings(bool createNew, string roleArn)
         {
-            var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
-            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new OrchestratorSession());
-            var recommendations = await engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
+            var engine = await BuildRecommendationEngine("WebAppNoDockerFile");
+
+            var recommendations = await engine.ComputeRecommendations();
+
             var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
 
             var roleArnValue = roleArn == null ? "null" : $"\"{roleArn}\"";
@@ -55,9 +72,10 @@ namespace AWS.Deploy.CLI.UnitTests
         [InlineData(false, false, "vpc_id")]
         public async Task ApplyVpcPreviousSettings(bool isDefault, bool createNew, string vpcId)
         {
-            var projectPath = SystemIOUtilities.ResolvePath("WebAppWithDockerFile");
-            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new OrchestratorSession());
-            var recommendations = await engine.ComputeRecommendations(projectPath, new Dictionary<string, string>());
+            var engine = await BuildRecommendationEngine("WebAppWithDockerFile");
+
+            var recommendations = await engine.ComputeRecommendations();
+
             var fargateRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_ASPNET_CORE_FARGATE_RECIPE_ID);
 
             var vpcIdValue = vpcId == null ? "null" : $"\"{vpcId}\"";
