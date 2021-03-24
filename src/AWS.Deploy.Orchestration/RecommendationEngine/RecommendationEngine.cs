@@ -43,14 +43,15 @@ namespace AWS.Deploy.Orchestration.RecommendationEngine
             }
         }
 
-        public async Task<List<Recommendation>> ComputeRecommendations(string projectPath, Dictionary<string, string> additionalReplacements)
+        public async Task<List<Recommendation>> ComputeRecommendations(Dictionary<string, string> additionalReplacements = null)
         {
-            var projectDefinition = new ProjectDefinition(projectPath);
+            additionalReplacements ??= new Dictionary<string, string>();
+
             var recommendations = new List<Recommendation>();
 
             foreach (var potentialRecipe in _availableRecommendations)
             {
-                var results = await EvaluateRules(projectDefinition, potentialRecipe.RecommendationRules);
+                var results = await EvaluateRules(potentialRecipe.RecommendationRules);
                 if(!results.Include)
                 {
                     continue;
@@ -63,14 +64,14 @@ namespace AWS.Deploy.Orchestration.RecommendationEngine
                     continue;
                 }
 
-                recommendations.Add(new Recommendation(potentialRecipe, projectDefinition.ProjectPath, priority, additionalReplacements));
+                recommendations.Add(new Recommendation(potentialRecipe, _orchestratorSession.ProjectDefinition, priority, additionalReplacements));
             }
 
             recommendations = recommendations.OrderByDescending(recommendation => recommendation.ComputedPriority).ToList();
             return recommendations;
         }
 
-        public async Task<RulesResult> EvaluateRules(ProjectDefinition projectDefinition, IList<RecommendationRuleItem> rules)
+        public async Task<RulesResult> EvaluateRules(IList<RecommendationRuleItem> rules)
         {
             // If there are no rules the recipe must be invalid so don't include it.
             if (false == rules?.Any())
@@ -94,7 +95,7 @@ namespace AWS.Deploy.Orchestration.RecommendationEngine
                     var input = new RecommendationTestInput
                     {
                         Test = test,
-                        ProjectDefinition = projectDefinition,
+                        ProjectDefinition = _orchestratorSession.ProjectDefinition,
                         Session = _orchestratorSession
                     };
                     allTestPass &= await testInstance.Execute(input);
