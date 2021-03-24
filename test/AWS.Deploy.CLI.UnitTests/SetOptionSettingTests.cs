@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AWS.Deploy.CLI.UnitTests.Utilities;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.RecommendationEngine;
@@ -21,8 +22,16 @@ namespace AWS.Deploy.CLI.UnitTests
         public SetOptionSettingTests()
         {
             var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
-            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new OrchestratorSession());
-            var recommendations = engine.ComputeRecommendations(projectPath, new Dictionary<string, string>()).GetAwaiter().GetResult();
+
+            var parser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
+
+            var session =  new OrchestratorSession
+            {
+                ProjectDefinition = parser.Parse(projectPath).Result
+            };
+
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, session);
+            var recommendations = engine.ComputeRecommendations().GetAwaiter().GetResult();
             _recommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
 
             _optionSetting = _recommendation.Recipe.OptionSettings.First(x => x.Id.Equals("EnvironmentType"));

@@ -7,6 +7,7 @@ using System.IO;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.DockerEngine;
 using AWS.Deploy.Orchestration.CDK;
 using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Recipes;
@@ -22,6 +23,7 @@ namespace AWS.Deploy.Orchestration
         private readonly IOrchestratorInteractiveService _interactiveService;
         private readonly IAWSResourceQueryer _awsResourceQueryer;
         private readonly IDeploymentBundleHandler _deploymentBundleHandler;
+        private readonly IDockerEngine _dockerEngine;
         private readonly IList<string> _recipeDefinitionPaths;
 
         private readonly OrchestratorSession _session;
@@ -32,21 +34,23 @@ namespace AWS.Deploy.Orchestration
             ICdkProjectHandler cdkProjectHandler,
             IAWSResourceQueryer awsResourceQueryer,
             IDeploymentBundleHandler deploymentBundleHandler,
+            IDockerEngine dockerEngine,
             IList<string> recipeDefinitionPaths)
         {
             _session = session;
             _interactiveService = interactiveService;
             _cdkProjectHandler = cdkProjectHandler;
-            _deploymentBundleHandler = deploymentBundleHandler;
-            _recipeDefinitionPaths = recipeDefinitionPaths;
             _awsResourceQueryer = awsResourceQueryer;
+            _deploymentBundleHandler = deploymentBundleHandler;
+            _dockerEngine = dockerEngine;
+            _recipeDefinitionPaths = recipeDefinitionPaths;
         }
 
         public async Task<List<Recommendation>> GenerateDeploymentRecommendations()
         {
             var engine = new RecommendationEngine.RecommendationEngine(_recipeDefinitionPaths, _session);
             var additionalReplacements = await GetReplacements();
-            return await engine.ComputeRecommendations(_session.ProjectPath, additionalReplacements);
+            return await engine.ComputeRecommendations(additionalReplacements);
         }
 
         public async Task<Dictionary<string, string>> GetReplacements()
@@ -112,17 +116,13 @@ namespace AWS.Deploy.Orchestration
 
         public async Task<bool> CreateContainerDeploymentBundle(CloudApplication cloudApplication, Recommendation recommendation)
         {
-            var dockerEngine =
-                    new DockerEngine.DockerEngine(
-                        new ProjectDefinition(recommendation.ProjectPath));
-
             if (!recommendation.ProjectDefinition.HasDockerFile)
             {
                 _interactiveService.LogMessageLine("Generating Dockerfile...");
-                dockerEngine.GenerateDockerFile();
+                _dockerEngine.GenerateDockerFile();
             }
 
-            dockerEngine.DetermineDockerExecutionDirectory(recommendation);
+            _dockerEngine.DetermineDockerExecutionDirectory(recommendation);
 
             try
             {
