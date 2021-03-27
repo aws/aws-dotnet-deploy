@@ -334,7 +334,7 @@ namespace AWS.Deploy.CLI.Commands
             {
                 var userInputConfig = new UserInputConfiguration<string>
                 {
-                    DisplaySelector = x => setting.ValueMapping[x],
+                    DisplaySelector = x => setting.ValueMapping.ContainsKey(x) ? setting.ValueMapping[x] : x,
                     DefaultSelector = x => x.Equals(currentValue),
                     CreateNew = false
                 };
