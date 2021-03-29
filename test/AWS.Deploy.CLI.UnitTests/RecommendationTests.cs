@@ -21,6 +21,7 @@ namespace AWS.Deploy.CLI.UnitTests
     {
         private async Task<RecommendationEngine> BuildRecommendationEngine(string testProjectName)
         {
+            var interactiveService = new TestToolOrchestratorInteractiveService();
             var fullPath = SystemIOUtilities.ResolvePath(testProjectName);
 
             var parser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
@@ -30,7 +31,7 @@ namespace AWS.Deploy.CLI.UnitTests
                 ProjectDefinition = await parser.Parse(fullPath)
             };
 
-            return new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, session);
+            return new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, session, interactiveService);
         }
 
         [Fact]
@@ -248,7 +249,8 @@ namespace AWS.Deploy.CLI.UnitTests
         [MemberData(nameof(ShouldIncludeTestCases))]
         public void ShouldIncludeTests(RuleEffect effect, bool testPass, bool expectedResult)
         {
-            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new OrchestratorSession());
+            var interactiveService = new TestToolOrchestratorInteractiveService();
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new OrchestratorSession(), interactiveService);
 
             Assert.Equal(expectedResult, engine.ShouldInclude(effect, testPass));
         }

@@ -57,7 +57,7 @@ namespace AWS.Deploy.Orchestration
                     Path.GetFileNameWithoutExtension(Path.GetRandomFileName()));
             Directory.CreateDirectory(tempDirectoryPath);
 
-            var templateEngine = new TemplateEngine();
+            var templateEngine = new TemplateEngine(_interactiveService);
             await templateEngine.GenerateCDKProjectFromTemplate(recommendation, session, tempDirectoryPath);
 
             return tempDirectoryPath;

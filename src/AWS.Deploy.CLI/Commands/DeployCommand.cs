@@ -282,6 +282,7 @@ namespace AWS.Deploy.CLI.Commands
                     else
                     {
                         _toolInteractiveService.WriteLine(string.Empty);
+                        _toolInteractiveService.WriteErrorLine("We were unable to create the deployment bundle.");
                         throw new FailedToCreateDeploymentBundleException();
                     }
                 }
@@ -290,7 +291,10 @@ namespace AWS.Deploy.CLI.Commands
             {
                 var dotnetPublishDeploymentBundleResult = await orchestrator.CreateDotnetPublishDeploymentBundle(selectedRecommendation);
                 if (!dotnetPublishDeploymentBundleResult)
+                {
+                    _toolInteractiveService.WriteErrorLine("We were unable to create the deployment bundle.");
                     throw new FailedToCreateDeploymentBundleException();
+                }
             }
         }
 

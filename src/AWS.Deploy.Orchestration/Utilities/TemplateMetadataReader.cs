@@ -28,10 +28,14 @@ namespace AWS.Deploy.Orchestration.Utilities
     public class TemplateMetadataReader : ITemplateMetadataReader
     {
         private readonly IAWSClientFactory _awsClientFactory;
+        private readonly IOrchestratorInteractiveService _interactiveService;
 
-        public TemplateMetadataReader(IAWSClientFactory awsClientFactory)
+        public TemplateMetadataReader(
+            IAWSClientFactory awsClientFactory,
+            IOrchestratorInteractiveService interactiveService)
         {
             _awsClientFactory = awsClientFactory;
+            _interactiveService = interactiveService;
         }
 
         public async Task<CloudApplicationMetadata> LoadCloudApplicationMetadata(string cloudApplication)
@@ -52,7 +56,7 @@ namespace AWS.Deploy.Orchestration.Utilities
         /// Read the AWS .NET deployment tool metadata from the CloudFormation template.
         /// </summary>
         /// <returns></returns>
-        private static CloudApplicationMetadata ReadSettings(string templateBody)
+        private CloudApplicationMetadata ReadSettings(string templateBody)
         {
             try
             {
@@ -75,7 +79,8 @@ namespace AWS.Deploy.Orchestration.Utilities
             }
             catch(Exception e)
             {
-                throw new ParsingExistingCloudApplicationMetadataException("Error parsing existing application's metadata", e);
+                _interactiveService.LogErrorMessageLine("Error parsing existing application's metadata");
+                throw new ParsingExistingCloudApplicationMetadataException(e);
             }
         }
 
@@ -84,7 +89,7 @@ namespace AWS.Deploy.Orchestration.Utilities
         /// using string parsing to extract just the Metadata section from the template.
         /// </summary>
         /// <returns></returns>
-        private static string ExtractMetadataSection(string templateBody)
+        private string ExtractMetadataSection(string templateBody)
         {
             var builder = new StringBuilder();
             bool inMetadata = false;

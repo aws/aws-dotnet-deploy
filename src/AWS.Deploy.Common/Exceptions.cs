@@ -7,16 +7,8 @@ using AWS.Deploy.Common.Recipes;
 
 namespace AWS.Deploy.Common
 {
-    public class ProjectFileNotFoundException : Exception
-    {
-        public ProjectFileNotFoundException(string projectPath)
-            : base($"A project was not found at the path {projectPath}.")
-        {
-            Path = projectPath;
-        }
-
-        public string Path { get; set; }
-    }
+    [AWSDeploymentExpectedException]
+    public class ProjectFileNotFoundException : Exception { }
 
     /// <summary>
     /// Common exception if the user has passed invalid input from the command line
@@ -25,13 +17,7 @@ namespace AWS.Deploy.Common
     public class InvalidCliArgumentException : Exception { }
 
     [AWSDeploymentExpectedException]
-    public class InvalidRecipeDefinitionException : Exception
-    {
-        public InvalidRecipeDefinitionException(string message) : base(message)
-        {
-
-        }
-    }
+    public class InvalidRecipeDefinitionException : Exception { }
 
     /// <summary>
     /// Throw if the user attempts to deploy a <see cref="RecipeDefinition"/>
@@ -77,7 +63,7 @@ namespace AWS.Deploy.Common
     [AWSDeploymentExpectedException]
     public class ParsingExistingCloudApplicationMetadataException : Exception
     {
-        public ParsingExistingCloudApplicationMetadataException(string message, Exception inner) : base(message, inner)
+        public ParsingExistingCloudApplicationMetadataException(Exception inner) : base(string.Empty, inner)
         {
 
         }

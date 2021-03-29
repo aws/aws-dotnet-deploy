@@ -53,7 +53,7 @@ namespace AWS.Deploy.DockerEngine
             var imageMapping = GetImageMapping();
             if (imageMapping == null)
             {
-                throw new UnknownDockerImageException($"Unable to determine a valid docker base and build image for project of type {_project.SdkType} and Target Framework {_project.TargetFramework}");
+                throw new UnknownDockerImageException();
             }
 
             var dockerFile = new DockerFile(imageMapping, projectFileName, _project.AssemblyName);

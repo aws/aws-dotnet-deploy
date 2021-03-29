@@ -13,13 +13,8 @@ namespace AWS.Deploy.CLI
     /// Throw if Delete Command is unable to delete
     /// the specified stack
     /// </summary>
-    [AWSDeploymentExpectedException ]
-    public class FailedToDeleteException : Exception
-    {
-        public FailedToDeleteException(string message) : base(message)
-        {
-        }
-    }
+    [AWSDeploymentExpectedException]
+    public class FailedToDeleteException : Exception { }
 
     /// <summary>
     /// Throw if Deploy Command is unable to find a target to deploy.
@@ -28,7 +23,7 @@ namespace AWS.Deploy.CLI
     [AWSDeploymentExpectedException]
     public class FailedToFindDeployableTargetException : Exception
     {
-        public FailedToFindDeployableTargetException(Exception innerException = null) : base(string.Empty, innerException)
+        public FailedToFindDeployableTargetException(Exception innerException = null) : base(null, innerException)
         {
         }
     }

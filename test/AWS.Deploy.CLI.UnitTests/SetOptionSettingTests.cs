@@ -21,6 +21,8 @@ namespace AWS.Deploy.CLI.UnitTests
 
         public SetOptionSettingTests()
         {
+            var interactiveServices = new TestToolInteractiveServiceImpl();
+            var orchestratorInteractiveService = new ConsoleOrchestratorLogger(interactiveServices);
             var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
 
             var parser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
@@ -30,7 +32,7 @@ namespace AWS.Deploy.CLI.UnitTests
                 ProjectDefinition = parser.Parse(projectPath).Result
             };
 
-            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, session);
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, session, orchestratorInteractiveService);
             var recommendations = engine.ComputeRecommendations().GetAwaiter().GetResult();
             _recommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
 

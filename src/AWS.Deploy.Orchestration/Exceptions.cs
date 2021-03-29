@@ -1,33 +1,21 @@
 using System;
+using AWS.Deploy.Common;
 
 namespace AWS.Deploy.Orchestration
 {
     /// <summary>
     /// Exception is thrown if Microsoft Templating Engine is unable to generate a template
     /// </summary>
-    public class TemplateGenerationFailedException : Exception
-    {
-        public TemplateGenerationFailedException() : base()
-        {
-        }
-    }
+    [AWSDeploymentExpectedException]
+    public class TemplateGenerationFailedException : Exception { }
 
     /// <summary>
     /// Exception is thrown if Microsoft Templating Engine is unable to find location to install templates from
     /// </summary>
+    [AWSDeploymentExpectedException]
     public class DefaultTemplateInstallationFailedException : Exception
     {
-        public DefaultTemplateInstallationFailedException(Exception innerException = null) : base(innerException?.Message, innerException)
-        {
-        }
-    }
-
-    /// <summary>
-    /// Exception is thrown if Microsoft Templating Engine returns an error when running a command
-    /// </summary>
-    public class RunCommandFailedException : Exception
-    {
-        public RunCommandFailedException() : base()
+        public DefaultTemplateInstallationFailedException(Exception innerException = null) : base(string.Empty, innerException)
         {
         }
     }
@@ -35,9 +23,10 @@ namespace AWS.Deploy.Orchestration
     /// <summary>
     /// Exception is thrown if package.json file IO fails.
     /// </summary>
+    [AWSDeploymentExpectedException]
     public class PackageJsonFileException : Exception
     {
-        public PackageJsonFileException(string message, Exception innerException = null) : base(message, innerException)
+        public PackageJsonFileException(Exception innerException = null) : base(string.Empty, innerException)
         {
         }
     }
@@ -45,19 +34,16 @@ namespace AWS.Deploy.Orchestration
     /// <summary>
     /// Exception is thrown if docker build attempt failed
     /// </summary>
-    public class DockerBuildFailedException : Exception
-    {
-        public DockerBuildFailedException(string message) : base(message)
-        {
-        }
-    }
+    [AWSDeploymentExpectedException]
+    public class DockerBuildFailedException : Exception { }
 
     /// <summary>
     /// Exception is thrown if npm command fails to execute.
     /// </summary>
+    [AWSDeploymentExpectedException]
     public class NPMCommandFailedException : Exception
     {
-        public NPMCommandFailedException(string message, Exception innerException = null) : base(message, innerException)
+        public NPMCommandFailedException(Exception innerException = null) : base(string.Empty, innerException)
         {
         }
     }
@@ -65,60 +51,48 @@ namespace AWS.Deploy.Orchestration
     /// <summary>
     /// Exception is thrown if docker login attempt failed
     /// </summary>
-    public class DockerLoginFailedException : Exception
-    {
-        public DockerLoginFailedException() : base()
-        {
-        }
-    }
+    [AWSDeploymentExpectedException]
+    public class DockerLoginFailedException : Exception { }
 
     /// <summary>
     /// Exception is thrown if docker tag attempt failed
     /// </summary>
-    public class DockerTagFailedException : Exception
-    {
-        public DockerTagFailedException() : base()
-        {
-        }
-    }
+    [AWSDeploymentExpectedException]
+    public class DockerTagFailedException : Exception { }
 
     /// <summary>
     /// Exception is thrown if docker push attempt failed
     /// </summary>
-    public class DockerPushFailedException : Exception
-    {
-        public DockerPushFailedException() : base()
-        {
-        }
-    }
+    [AWSDeploymentExpectedException]
+    public class DockerPushFailedException : Exception { }
 
     /// <summary>
     /// Exception is thrown if we cannot retrieve deployment bundle definitions
     /// </summary>
-    public class NoDeploymentBundleDefinitionsFoundException : Exception
-    {
-        public NoDeploymentBundleDefinitionsFoundException() : base()
-        {
-        }
-    }
+    [AWSDeploymentExpectedException]
+    public class NoDeploymentBundleDefinitionsFoundException : Exception { }
 
     /// <summary>
     /// Exception is thrown if dotnet publish attempt failed
     /// </summary>
-    public class DotnetPublishFailedException : Exception
-    {
-        public DotnetPublishFailedException(string message) : base(message)
-        {
-        }
-    }
+    [AWSDeploymentExpectedException]
+    public class DotnetPublishFailedException : Exception { }
 
     /// <summary>
     /// Throw if Zip File Manager fails to create a Zip File
     /// </summary>
-    public class FailedToCreateZipFileException : Exception
+    [AWSDeploymentExpectedException]
+    public class FailedToCreateZipFileException : Exception { }
+
+    /// <summary>
+    /// Throw if Docker Engine fails to generate a dockerfile
+    /// </summary>
+    [AWSDeploymentExpectedException]
+    public class FailedToGenerateDockerFileException : Exception
     {
-        public FailedToCreateZipFileException(string message) : base(message)
+        public FailedToGenerateDockerFileException(Exception innerException = null) : base(string.Empty, innerException)
         {
+
         }
     }
 }

@@ -16,10 +16,15 @@ namespace AWS.Deploy.Orchestration.RecommendationEngine
     {
         private readonly IList<RecipeDefinition> _availableRecommendations = new List<RecipeDefinition>();
         private readonly OrchestratorSession _orchestratorSession;
+        private readonly IOrchestratorInteractiveService _interactiveService;
 
-        public RecommendationEngine(IEnumerable<string> recipeDefinitionPaths, OrchestratorSession orchestratorSession)
+        public RecommendationEngine(
+            IEnumerable<string> recipeDefinitionPaths,
+            OrchestratorSession orchestratorSession,
+            IOrchestratorInteractiveService interactiveService)
         {
             _orchestratorSession = orchestratorSession;
+            _interactiveService = interactiveService;
 
             recipeDefinitionPaths ??= new List<string>();
 
@@ -89,7 +94,8 @@ namespace AWS.Deploy.Orchestration.RecommendationEngine
                 {
                     if(!availableTests.TryGetValue(test.Type, out var testInstance))
                     {
-                        throw new InvalidRecipeDefinitionException($"Invalid test type [{test.Type}] found in rule.");
+                        _interactiveService.LogErrorMessageLine($"Invalid test type [{test.Type}] found in rule.");
+                        throw new InvalidRecipeDefinitionException();
                     }
 
                     var input = new RecommendationTestInput

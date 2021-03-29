@@ -53,7 +53,7 @@ namespace AWS.Deploy.Common
 
             if (!_fileManager.Exists(projectPath))
             {
-                throw new ProjectFileNotFoundException(projectPath);
+                throw new ProjectFileNotFoundException();
             }
 
             var xmlProjectFile = new XmlDocument();

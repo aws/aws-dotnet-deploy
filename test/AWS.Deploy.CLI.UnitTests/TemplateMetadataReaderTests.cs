@@ -17,6 +17,8 @@ namespace AWS.Deploy.CLI.UnitTests
         [Fact]
         public async Task ReadYamlMetadata()
         {
+            var interactiveServices = new TestToolInteractiveServiceImpl();
+            var orchestratorInteractiveService = new ConsoleOrchestratorLogger(interactiveServices);
             // ARRANGE
             var templateBody = File.ReadAllText("./TestFiles/ReadYamlTemplateMetadata.yml");
 
@@ -28,7 +30,7 @@ namespace AWS.Deploy.CLI.UnitTests
                     TemplateBody = templateBody
                 }));
 
-            var templateMetadataReader = new TemplateMetadataReader(new TestAWSClientFactory(mockClient.Object));
+            var templateMetadataReader = new TemplateMetadataReader(new TestAWSClientFactory(mockClient.Object), orchestratorInteractiveService);
 
             // ACT
             var metadata = await templateMetadataReader.LoadCloudApplicationMetadata("");

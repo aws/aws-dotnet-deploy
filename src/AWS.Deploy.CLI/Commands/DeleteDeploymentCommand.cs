@@ -70,7 +70,8 @@ namespace AWS.Deploy.CLI.Commands
             }
             catch (AmazonCloudFormationException)
             {
-                throw new FailedToDeleteException($"Failed to delete {stackName} stack.");
+                _interactiveService.WriteErrorLine($"Failed to delete {stackName} stack.");
+                throw new FailedToDeleteException();
             }
             finally
             {
@@ -112,10 +113,12 @@ namespace AWS.Deploy.CLI.Commands
 
             if (stack.StackStatus.IsFailed())
             {
-                throw new FailedToDeleteException($"The stack {stackName} is in a failed state. You may need to delete it from the AWS Console.");
+                _interactiveService.WriteErrorLine($"The stack {stackName} is in a failed state. You may need to delete it from the AWS Console.");
+                throw new FailedToDeleteException();
             }
 
-            throw new FailedToDeleteException($"Failed to delete {stackName} stack: {stack.StackStatus}");
+            _interactiveService.WriteErrorLine($"Failed to delete {stackName} stack: {stack.StackStatus}");
+            throw new FailedToDeleteException();
         }
 
         private async Task<Stack> StabilizeStack(string stackName)

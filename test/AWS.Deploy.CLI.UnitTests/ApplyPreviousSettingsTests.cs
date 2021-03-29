@@ -22,6 +22,9 @@ namespace AWS.Deploy.CLI.UnitTests
     {
         private async Task<RecommendationEngine> BuildRecommendationEngine(string testProjectName)
         {
+            var interactiveServices = new TestToolInteractiveServiceImpl();
+            var orchestratorInteractiveService = new ConsoleOrchestratorLogger(interactiveServices);
+
             var fullPath = SystemIOUtilities.ResolvePath(testProjectName);
 
             var parser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
@@ -31,7 +34,7 @@ namespace AWS.Deploy.CLI.UnitTests
                 ProjectDefinition = await parser.Parse(fullPath)
             };
 
-            return new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, session);
+            return new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, session, orchestratorInteractiveService);
         }
 
         [Theory]

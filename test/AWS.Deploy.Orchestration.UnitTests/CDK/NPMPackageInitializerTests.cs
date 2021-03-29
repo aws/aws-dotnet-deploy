@@ -4,7 +4,9 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using AWS.Deploy.CLI;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
+using AWS.Deploy.CLI.UnitTests;
 using AWS.Deploy.Orchestration.CDK;
 using Xunit;
 
@@ -44,11 +46,13 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
 
         public NPMPackageInitializerTests()
         {
+            var interactiveServices = new TestToolInteractiveServiceImpl();
+            var orchestratorInteractiveService = new ConsoleOrchestratorLogger(interactiveServices);
             _fileManager = new TestFileManager();
             _directoryManager = new TestDirectoryManager();
             _testCommandLineWrapper = new TestCommandLineWrapper();
             var packageJsonGenerator = new PackageJsonGenerator(_packageJsonTemplate);
-            _npmPackageInitializer = new NPMPackageInitializer(_testCommandLineWrapper, packageJsonGenerator, _fileManager, _directoryManager);
+            _npmPackageInitializer = new NPMPackageInitializer(_testCommandLineWrapper, packageJsonGenerator, _fileManager, _directoryManager, orchestratorInteractiveService);
         }
 
         [Fact]

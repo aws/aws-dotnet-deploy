@@ -38,10 +38,12 @@ namespace AWS.Deploy.Orchestration.CDK
     public class CDKInstaller : ICDKInstaller
     {
         private readonly ICommandLineWrapper _commandLineWrapper;
+        private readonly IOrchestratorInteractiveService _interactiveService;
 
-        public CDKInstaller(ICommandLineWrapper commandLineWrapper)
+        public CDKInstaller(ICommandLineWrapper commandLineWrapper, IOrchestratorInteractiveService interactiveService)
         {
             _commandLineWrapper = commandLineWrapper;
+            _interactiveService = interactiveService;
         }
 
         public Task<TryGetResult<Version>> GetGlobalVersion()
@@ -70,7 +72,8 @@ namespace AWS.Deploy.Orchestration.CDK
             }
             catch (Exception exception)
             {
-                throw new NPMCommandFailedException($"Failed to execute {command}", exception);
+                _interactiveService.LogErrorMessageLine($"Failed to execute {command}");
+                throw new NPMCommandFailedException(exception);
             }
 
             /*

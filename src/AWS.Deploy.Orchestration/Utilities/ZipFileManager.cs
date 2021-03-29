@@ -19,10 +19,14 @@ namespace AWS.Deploy.Orchestration.Utilities
     public class ZipFileManager : IZipFileManager
     {
         private readonly ICommandLineWrapper _commandLineWrapper;
+        private readonly IOrchestratorInteractiveService _interactiveService;
 
-        public ZipFileManager(ICommandLineWrapper commandLineWrapper)
+        public ZipFileManager(
+            ICommandLineWrapper commandLineWrapper,
+            IOrchestratorInteractiveService interactiveService)
         {
             _commandLineWrapper = commandLineWrapper;
+            _interactiveService = interactiveService;
         }
 
         public async Task CreateFromDirectory(string sourceDirectoryName, string destinationArchiveFileName)
@@ -45,7 +49,10 @@ namespace AWS.Deploy.Orchestration.Utilities
             var zipCLI = FindExecutableInPath("zip");
 
             if (string.IsNullOrEmpty(zipCLI))
-                throw new FailedToCreateZipFileException("Failed to find the \"zip\" utility program in path. This program is required to maintain Linux file permissions in the zip archive.");
+            {
+                _interactiveService.LogErrorMessageLine("Failed to find the \"zip\" utility program in path. This program is required to maintain Linux file permissions in the zip archive.");
+                throw new FailedToCreateZipFileException();
+            }
 
             var args = new StringBuilder($"\"{destinationArchiveFileName}\"");
 
@@ -58,7 +65,10 @@ namespace AWS.Deploy.Orchestration.Utilities
             var command = $"{zipCLI} {args}";
             var result = await _commandLineWrapper.TryRunWithResult(command, sourceDirectoryName);
             if (result.ExitCode != 0)
-                throw new FailedToCreateZipFileException("\"zip\" utility program has failed to create a zip archive.");
+            {
+                _interactiveService.LogErrorMessageLine("\"zip\" utility program has failed to create a zip archive.");
+                throw new FailedToCreateZipFileException();
+            }
         }
 
         /// <summary>

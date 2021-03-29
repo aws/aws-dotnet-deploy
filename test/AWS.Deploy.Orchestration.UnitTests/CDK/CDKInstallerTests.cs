@@ -3,6 +3,8 @@
 
 using System;
 using System.Threading.Tasks;
+using AWS.Deploy.CLI;
+using AWS.Deploy.CLI.UnitTests;
 using AWS.Deploy.Orchestration.CDK;
 using AWS.Deploy.Orchestration.Utilities;
 using Xunit;
@@ -17,8 +19,10 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
 
         public CDKInstallerTests()
         {
+            var interactiveServices = new TestToolInteractiveServiceImpl();
+            var orchestratorInteractiveService = new ConsoleOrchestratorLogger(interactiveServices);
             _commandLineWrapper = new TestCommandLineWrapper();
-            _cdkInstaller = new CDKInstaller(_commandLineWrapper);
+            _cdkInstaller = new CDKInstaller(_commandLineWrapper, orchestratorInteractiveService);
         }
 
         [Fact]

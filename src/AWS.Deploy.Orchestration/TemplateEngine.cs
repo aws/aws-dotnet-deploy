@@ -25,10 +25,12 @@ namespace AWS.Deploy.Orchestration
         private const string HostIdentifier = "aws-net-deploy-template-generator";
         private const string HostVersion = "v1.0.0";
         private readonly Bootstrapper _bootstrapper;
+        private readonly IOrchestratorInteractiveService _interactiveService;
 
-        public TemplateEngine()
+        public TemplateEngine(IOrchestratorInteractiveService interactiveService)
         {
             _bootstrapper = new Bootstrapper(CreateHost(), null, virtualizeConfiguration: true);
+            _interactiveService = interactiveService;
         }
 
         public async Task GenerateCDKProjectFromTemplate(Recommendation recommendation, OrchestratorSession session, string outputDirectory)
@@ -75,6 +77,7 @@ namespace AWS.Deploy.Orchestration
             }
             catch
             {
+                _interactiveService.LogErrorMessageLine("We were unable to generate the project template.");
                 throw new TemplateGenerationFailedException();
             }
         }
@@ -87,6 +90,7 @@ namespace AWS.Deploy.Orchestration
             }
             catch(Exception e)
             {
+                _interactiveService.LogErrorMessageLine("We were unable to install the project templates in preparation for template generation.");
                 throw new DefaultTemplateInstallationFailedException(e);
             }
         }

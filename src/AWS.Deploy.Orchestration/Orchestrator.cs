@@ -48,7 +48,7 @@ namespace AWS.Deploy.Orchestration
 
         public async Task<List<Recommendation>> GenerateDeploymentRecommendations()
         {
-            var engine = new RecommendationEngine.RecommendationEngine(_recipeDefinitionPaths, _session);
+            var engine = new RecommendationEngine.RecommendationEngine(_recipeDefinitionPaths, _session, _interactiveService);
             var additionalReplacements = await GetReplacements();
             return await engine.ComputeRecommendations(additionalReplacements);
         }
@@ -108,9 +108,11 @@ namespace AWS.Deploy.Orchestration
             }
             catch(IOException)
             {
+                _interactiveService.LogErrorMessageLine("We were unable to find existing deployment bundle types.");
                 throw new NoDeploymentBundleDefinitionsFoundException();
             }
 
+            _interactiveService.LogErrorMessageLine("We were unable to find existing deployment bundle types.");
             throw new NoDeploymentBundleDefinitionsFoundException();
         }
 
@@ -119,7 +121,25 @@ namespace AWS.Deploy.Orchestration
             if (!recommendation.ProjectDefinition.HasDockerFile)
             {
                 _interactiveService.LogMessageLine("Generating Dockerfile...");
-                _dockerEngine.GenerateDockerFile();
+                try
+                {
+                    _dockerEngine.GenerateDockerFile();
+                }
+                catch(DockerFileTemplateException ex)
+                {
+                    _interactiveService.LogErrorMessageLine("The Dockerfile template for the project was not found.");
+                    throw new FailedToGenerateDockerFileException(ex);
+                }
+                catch (DockerEngineException ex)
+                {
+                    _interactiveService.LogErrorMessageLine("The DockerEngine could not find the embedded config file responsible for mapping projects to Docker images.");
+                    throw new FailedToGenerateDockerFileException(ex);
+                }
+                catch (UnknownDockerImageException ex)
+                {
+                    _interactiveService.LogErrorMessageLine($"Unable to determine a valid docker base and build image for project of type {recommendation.ProjectDefinition.SdkType} and Target Framework {recommendation.ProjectDefinition.TargetFramework}");
+                    throw new FailedToGenerateDockerFileException(ex);
+                }
             }
 
             _dockerEngine.DetermineDockerExecutionDirectory(recommendation);

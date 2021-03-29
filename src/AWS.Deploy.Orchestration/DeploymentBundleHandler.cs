@@ -62,7 +62,8 @@ namespace AWS.Deploy.Orchestration
             var result = await _commandLineWrapper.TryRunWithResult(dockerBuildCommand, dockerExecutionDirectory, redirectIO: false);
             if (result.ExitCode != 0)
             {
-                throw new DockerBuildFailedException(result.StandardError);
+                _interactiveService.LogErrorMessageLine(result.StandardError);
+                throw new DockerBuildFailedException();
             }
 
             return imageTag;
@@ -117,7 +118,8 @@ namespace AWS.Deploy.Orchestration
             var result = await _commandLineWrapper.TryRunWithResult(publishCommand, redirectIO: false);
             if (result.ExitCode != 0)
             {
-                throw new DotnetPublishFailedException(result.StandardError);
+                _interactiveService.LogErrorMessageLine(result.StandardError);
+                throw new DotnetPublishFailedException();
             }
 
             var zipFilePath = $"{publishDirectoryInfo.FullName}.zip";
@@ -235,7 +237,10 @@ namespace AWS.Deploy.Orchestration
             var authorizationTokens = await _awsResourceQueryer.GetECRAuthorizationToken();
 
             if (authorizationTokens.Count == 0)
+            {
+                _interactiveService.LogErrorMessageLine("We were unable to login to docker.");
                 throw new DockerLoginFailedException();
+            }
 
             var authTokenBytes = Convert.FromBase64String(authorizationTokens[0].AuthorizationToken);
             var authToken = Encoding.UTF8.GetString(authTokenBytes);
@@ -245,7 +250,10 @@ namespace AWS.Deploy.Orchestration
             var result = await _commandLineWrapper.TryRunWithResult(dockerLoginCommand);
 
             if (result.ExitCode != 0)
+            {
+                _interactiveService.LogErrorMessageLine("We were unable to login to docker.");
                 throw new DockerLoginFailedException();
+            }
         }
 
         private async Task<Repository> SetupECRRepository(string ecrRepositoryName)
@@ -268,7 +276,10 @@ namespace AWS.Deploy.Orchestration
             var result = await _commandLineWrapper.TryRunWithResult(dockerTagCommand);
 
             if (result.ExitCode != 0)
+            {
+                _interactiveService.LogErrorMessageLine("We were unable to do a docker tag.");
                 throw new DockerTagFailedException();
+            }
         }
 
         private async Task PushDockerImage(string targetTagName)
@@ -277,7 +288,10 @@ namespace AWS.Deploy.Orchestration
             var result = await _commandLineWrapper.TryRunWithResult(dockerPushCommand, redirectIO: false);
 
             if (result.ExitCode != 0)
+            {
+                _interactiveService.LogErrorMessageLine("We were unable to do a docker push.");
                 throw new DockerPushFailedException();
+            }
         }
     }
 }

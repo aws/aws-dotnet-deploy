@@ -46,14 +46,21 @@ namespace AWS.Deploy.Orchestration.CDK
         private readonly IPackageJsonGenerator _packageJsonGenerator;
         private readonly IFileManager _fileManager;
         private readonly IDirectoryManager _directoryManager;
+        private readonly IOrchestratorInteractiveService _interactiveService;
         private const string _packageJsonFileName = "package.json";
 
-        public NPMPackageInitializer(ICommandLineWrapper commandLineWrapper, IPackageJsonGenerator packageJsonGenerator, IFileManager fileManager, IDirectoryManager directoryManager)
+        public NPMPackageInitializer(
+            ICommandLineWrapper commandLineWrapper,
+            IPackageJsonGenerator packageJsonGenerator,
+            IFileManager fileManager,
+            IDirectoryManager directoryManager,
+            IOrchestratorInteractiveService interactiveService)
         {
             _commandLineWrapper = commandLineWrapper;
             _packageJsonGenerator = packageJsonGenerator;
             _fileManager = fileManager;
             _directoryManager = directoryManager;
+            _interactiveService = interactiveService;
         }
 
         public bool IsInitialized(string workingDirectory)
@@ -78,7 +85,8 @@ namespace AWS.Deploy.Orchestration.CDK
             }
             catch (Exception exception)
             {
-                throw new PackageJsonFileException($"Failed to write {_packageJsonFileName} at {packageJsonFilePath}", exception);
+                _interactiveService.LogErrorMessageLine($"Failed to write {_packageJsonFileName} at {packageJsonFilePath}");
+                throw new PackageJsonFileException(exception);
             }
 
             try
@@ -88,7 +96,8 @@ namespace AWS.Deploy.Orchestration.CDK
             }
             catch (Exception exception)
             {
-                throw new NPMCommandFailedException($"Failed to install npm packages at {workingDirectory}", exception);
+                _interactiveService.LogErrorMessageLine($"Failed to install npm packages at {workingDirectory}");
+                throw new NPMCommandFailedException(exception);
             }
         }
     }

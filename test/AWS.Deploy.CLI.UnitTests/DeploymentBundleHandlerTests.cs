@@ -24,18 +24,19 @@ namespace AWS.Deploy.CLI.UnitTests
         private readonly TestToolCommandLineWrapper _commandLineWrapper;
         private readonly TestDirectoryManager _directoryManager;
         private readonly ProjectDefinitionParser _projectDefinitionParser;
+        private readonly TestToolOrchestratorInteractiveService _interactiveService;
 
         public DeploymentBundleHandlerTests()
         {
             var awsResourceQueryer = new TestToolAWSResourceQueryer();
-            var interactiveService = new TestToolOrchestratorInteractiveService();
+            _interactiveService = new TestToolOrchestratorInteractiveService();
             var zipFileManager = new TestZipFileManager();
             
             _commandLineWrapper = new TestToolCommandLineWrapper();
             _directoryManager = new TestDirectoryManager();
             _projectDefinitionParser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
             
-            _deploymentBundleHandler = new DeploymentBundleHandler(_commandLineWrapper, awsResourceQueryer, interactiveService, _directoryManager, zipFileManager);
+            _deploymentBundleHandler = new DeploymentBundleHandler(_commandLineWrapper, awsResourceQueryer, _interactiveService, _directoryManager, zipFileManager);
         }
 
         [Fact]
@@ -153,7 +154,7 @@ namespace AWS.Deploy.CLI.UnitTests
                 ProjectDefinition = await parser.Parse(fullPath)
             };
 
-            return new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, session);
+            return new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, session, _interactiveService);
         }
 
         [Fact]
@@ -166,7 +167,7 @@ namespace AWS.Deploy.CLI.UnitTests
                 ProjectDefinition = await _projectDefinitionParser.Parse(projectPath)
             };
 
-            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, session);
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, session, _interactiveService);
 
             var recommendations = await engine.ComputeRecommendations();
             var recommendation = recommendations.FirstOrDefault(x => x.Recipe.DeploymentBundle.Equals(DeploymentBundleTypes.Container));
@@ -187,7 +188,7 @@ namespace AWS.Deploy.CLI.UnitTests
                 ProjectDefinition = await _projectDefinitionParser.Parse(projectPath)
             };
 
-            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, session);
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, session, _interactiveService);
 
             var recommendations = await engine.ComputeRecommendations();
             var recommendation = recommendations.FirstOrDefault(x => x.Recipe.DeploymentBundle.Equals(DeploymentBundleTypes.Container));

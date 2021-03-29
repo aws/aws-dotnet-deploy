@@ -21,7 +21,7 @@ namespace AWS.Deploy.DockerEngine
 
             if (string.IsNullOrWhiteSpace(template))
             {
-                throw new DockerEngineException($"The DockerEngine could not find the embedded config file responsible for mapping projects to Docker images.");
+                throw new DockerEngineException();
             }
 
             return template;
@@ -36,7 +36,7 @@ namespace AWS.Deploy.DockerEngine
 
             if (string.IsNullOrWhiteSpace(template))
             {
-                throw new DockerFileTemplateException("The Dockerfile template for the project was not found.");
+                throw new DockerFileTemplateException();
             }
 
             return template;
