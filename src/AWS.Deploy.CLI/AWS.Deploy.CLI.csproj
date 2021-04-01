@@ -7,7 +7,7 @@
     <IsPackable>true</IsPackable>
     <PackAsTool>true</PackAsTool>
     <Description>Opinionated tooling that simplifies deployment of .NET applications with minimum AWS knowledge.</Description>
-    <VersionPrefix>0.4.2</VersionPrefix>
+    <VersionPrefix>0.4.3</VersionPrefix>
     <Product>AWS .NET deployment tool</Product>
     <PackageId>AWS.Deploy.CLI</PackageId>
     <PackageTags>AWS;Amazon;ElasticBeanstalk;ECS;Deploy</PackageTags>
