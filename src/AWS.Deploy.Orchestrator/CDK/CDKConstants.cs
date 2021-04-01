@@ -25,6 +25,6 @@ namespace AWS.Deploy.Orchestrator.CDK
         /// Currently the version is hardcoded by design.
         /// In coming iterations, this will be dynamically calculated based on the package references used in the CDK App csproj files.
         /// </remarks>
-        public static readonly Version MinimumCDKVersion = Version.Parse("1.89.0");
+        public static readonly Version MinimumCDKVersion = Version.Parse("1.95.2");
     }
 }
