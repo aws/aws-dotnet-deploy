@@ -159,7 +159,7 @@ namespace AWS.Deploy.CLI.UnitTests
         [Fact]
         public async Task DockerExecutionDirectory_SolutionLevel()
         {
-            var projectPath = SystemIOUtilities.ResolvePath("docker\\WebAppWithSolutionParentLevel\\WebAppWithSolutionParentLevel");
+            var projectPath = SystemIOUtilities.ResolvePath(Path.Combine("docker", "WebAppWithSolutionParentLevel", "WebAppWithSolutionParentLevel"));
 
             var session =  new OrchestratorSession
             {
@@ -180,7 +180,7 @@ namespace AWS.Deploy.CLI.UnitTests
         [Fact]
         public async Task DockerExecutionDirectory_DockerfileLevel()
         {
-            var projectPath = SystemIOUtilities.ResolvePath("docker\\WebAppNoSolution");
+            var projectPath = SystemIOUtilities.ResolvePath(Path.Combine("docker", "WebAppNoSolution"));
 
             var session =  new OrchestratorSession
             {
