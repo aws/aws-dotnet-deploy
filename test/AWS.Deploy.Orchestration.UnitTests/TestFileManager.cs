@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using AWS.Deploy.Common.IO;
@@ -42,10 +44,12 @@ namespace AWS.Deploy.Orchestration.UnitTests
         /// Adds a virtual csproj file with valid xml contents
         /// </summary>
         /// <returns>
-        /// Returns <paramref name="fullPath"/>
+        /// Returns the correct full path for <paramref name="relativePath"/>
         /// </returns>
-        public static string AddEmptyProjectFile(this TestFileManager fileManager, string fullPath)
+        public static string AddEmptyProjectFile(this TestFileManager fileManager, string relativePath)
         {
+            relativePath = relativePath.Replace('\\', Path.DirectorySeparatorChar);
+            var fullPath = Path.Join(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "c:\\" : "/", relativePath);
             fileManager.InMemoryStore.Add(fullPath, "<Project Sdk=\"Microsoft.NET.Sdk\"></Project>");
 
             return fullPath;
