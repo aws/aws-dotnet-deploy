@@ -107,8 +107,7 @@ namespace AWS.Deploy.CLI
                         AWSRegion = awsRegion,
                         AWSAccountId = callerIdentity.Account,
                         ProjectDefinition = projectDefinition,
-                        SystemCapabilities = systemCapabilities,
-                        CdkManager = cdkManager
+                        SystemCapabilities = systemCapabilities
                     };
 
                     var awsResourceQueryer = new AWSResourceQueryer(awsClientFactory);
@@ -119,6 +118,7 @@ namespace AWS.Deploy.CLI
                         toolInteractiveService,
                         orchestratorInteractiveService,
                         new CdkProjectHandler(orchestratorInteractiveService, commandLineWrapper),
+                        cdkManager,
                         new DeploymentBundleHandler(commandLineWrapper, awsResourceQueryer, orchestratorInteractiveService, directoryManager, zipFileManager),
                         new DockerEngine.DockerEngine(projectDefinition),
                         awsResourceQueryer,
