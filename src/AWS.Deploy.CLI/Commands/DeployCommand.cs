@@ -12,6 +12,7 @@ using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.DockerEngine;
 using AWS.Deploy.Orchestration;
+using AWS.Deploy.Orchestration.CDK;
 using AWS.Deploy.Recipes;
 using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.Utilities;
@@ -23,6 +24,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly IToolInteractiveService _toolInteractiveService;
         private readonly IOrchestratorInteractiveService _orchestratorInteractiveService;
         private readonly ICdkProjectHandler _cdkProjectHandler;
+        private readonly ICDKManager _cdkManager;
         private readonly IDeploymentBundleHandler _deploymentBundleHandler;
         private readonly IDockerEngine _dockerEngine;
         private readonly IAWSResourceQueryer _awsResourceQueryer;
@@ -38,6 +40,7 @@ namespace AWS.Deploy.CLI.Commands
             IToolInteractiveService toolInteractiveService,
             IOrchestratorInteractiveService orchestratorInteractiveService,
             ICdkProjectHandler cdkProjectHandler,
+            ICDKManager cdkManager,
             IDeploymentBundleHandler deploymentBundleHandler,
             IDockerEngine dockerEngine,
             IAWSResourceQueryer awsResourceQueryer,
@@ -60,6 +63,7 @@ namespace AWS.Deploy.CLI.Commands
             _cloudApplicationNameGenerator = cloudApplicationNameGenerator;
             _consoleUtilities = consoleUtilities;
             _session = session;
+            _cdkManager = cdkManager;
         }
 
         public async Task ExecuteAsync(string stackName, bool saveCdkProject)
@@ -69,6 +73,7 @@ namespace AWS.Deploy.CLI.Commands
                     _session,
                     _orchestratorInteractiveService,
                     _cdkProjectHandler,
+                    _cdkManager,
                     _awsResourceQueryer,
                     _deploymentBundleHandler,
                     _dockerEngine,
