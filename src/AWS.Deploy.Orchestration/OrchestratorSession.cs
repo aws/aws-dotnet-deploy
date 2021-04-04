@@ -4,7 +4,6 @@
 using System.Threading.Tasks;
 using Amazon.Runtime;
 using AWS.Deploy.Common;
-using AWS.Deploy.Orchestration.CDK;
 
 namespace AWS.Deploy.Orchestration
 {
@@ -22,6 +21,5 @@ namespace AWS.Deploy.Orchestration
         /// </remarks>
         public Task<SystemCapabilities> SystemCapabilities { get; set; }
         public string AWSAccountId { get; set; }
-        public CDKManager CdkManager { get; set; }
     }
 }

@@ -20,6 +20,7 @@ namespace AWS.Deploy.Orchestration
         private const string REPLACE_TOKEN_LATEST_DOTNET_BEANSTALK_PLATFORM_ARN = "{LatestDotnetBeanstalkPlatformArn}";
 
         private readonly ICdkProjectHandler _cdkProjectHandler;
+        private readonly ICDKManager _cdkManager;
         private readonly IOrchestratorInteractiveService _interactiveService;
         private readonly IAWSResourceQueryer _awsResourceQueryer;
         private readonly IDeploymentBundleHandler _deploymentBundleHandler;
@@ -32,6 +33,7 @@ namespace AWS.Deploy.Orchestration
             OrchestratorSession session,
             IOrchestratorInteractiveService interactiveService,
             ICdkProjectHandler cdkProjectHandler,
+            ICDKManager cdkManager,
             IAWSResourceQueryer awsResourceQueryer,
             IDeploymentBundleHandler deploymentBundleHandler,
             IDockerEngine dockerEngine,
@@ -40,6 +42,7 @@ namespace AWS.Deploy.Orchestration
             _session = session;
             _interactiveService = interactiveService;
             _cdkProjectHandler = cdkProjectHandler;
+            _cdkManager = cdkManager;
             _awsResourceQueryer = awsResourceQueryer;
             _deploymentBundleHandler = deploymentBundleHandler;
             _dockerEngine = dockerEngine;
@@ -71,7 +74,7 @@ namespace AWS.Deploy.Orchestration
             if (recommendation.Recipe.DeploymentType == DeploymentTypes.CdkProject)
             {
                 _interactiveService.LogMessageLine("AWS CDK is being configured.");
-                await _session.CdkManager.EnsureCompatibleCDKExists(CDKConstants.DeployToolWorkspaceDirectoryRoot, CDKConstants.MinimumCDKVersion);
+                await _cdkManager.EnsureCompatibleCDKExists(CDKConstants.DeployToolWorkspaceDirectoryRoot, CDKConstants.MinimumCDKVersion);
             }
 
             switch (recommendation.Recipe.DeploymentType)
