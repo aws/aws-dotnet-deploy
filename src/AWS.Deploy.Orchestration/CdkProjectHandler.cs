@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
@@ -27,6 +29,12 @@ namespace AWS.Deploy.Orchestration
 
         public async Task CreateCdkDeployment(OrchestratorSession session, CloudApplication cloudApplication, Recommendation recommendation)
         {
+            var recipeInfo = $"{recommendation.Recipe.Id}_{recommendation.Recipe.Version}";
+            var environmentVariables = new Dictionary<string, string>
+            {
+                { EnvironmentVariableKeys.AWS_EXECUTION_ENV, recipeInfo }
+            };
+
             // Create a new temporary CDK project for a new deployment
             _interactiveService.LogMessageLine($"Generating a {recommendation.Recipe.Name} CDK Project");
             var cdkProjectPath = await CreateCdkProjectForDeployment(recommendation, session);
@@ -46,7 +54,9 @@ namespace AWS.Deploy.Orchestration
 
             // Handover to CDK command line tool
             // Use a CDK Context parameter to specify the settings file that has been serialized.
-            await _commandLineWrapper.Run( $"npx cdk deploy --require-approval never -c {CloudFormationIdentifierConstants.SETTINGS_PATH_CDK_CONTEXT_PARAMETER}=\"{appSettingsFilePath}\"", cdkProjectPath);
+            await _commandLineWrapper.Run( $"npx cdk deploy --require-approval never -c {CloudFormationIdentifierConstants.SETTINGS_PATH_CDK_CONTEXT_PARAMETER}=\"{appSettingsFilePath}\"",
+                workingDirectory: cdkProjectPath,
+                environmentVariables: environmentVariables);
         }
 
         private async Task<string> CreateCdkProjectForDeployment(Recommendation recommendation, OrchestratorSession session)

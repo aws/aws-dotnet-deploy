@@ -21,6 +21,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
             bool streamOutputToInteractiveService = true,
             Action<TryRunResult> onComplete = null,
             bool redirectIO = true,
+            IDictionary<string, string> environmentVariables = null,
             CancellationToken cancelToken = default)
         {
             Commands.Add((command, workingDirectory, streamOutputToInteractiveService));
