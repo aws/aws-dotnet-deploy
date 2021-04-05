@@ -222,7 +222,6 @@ namespace AWS.Deploy.CLI
         /// </summary>
         private static void SetExecutionEnvironment()
         {
-            const string envName = "AWS_EXECUTION_ENV";
             const string awsDotnetDeployCLI = "aws-dotnet-deploy-cli";
 
             var assemblyVersion = typeof(Program).Assembly
@@ -233,14 +232,14 @@ namespace AWS.Deploy.CLI
             var envValue = new StringBuilder();
 
             // If there is an existing execution environment variable add this tool as a suffix.
-            if(!string.IsNullOrEmpty(Environment.GetEnvironmentVariable(envName)))
+            if(!string.IsNullOrEmpty(Environment.GetEnvironmentVariable(EnvironmentVariableKeys.AWS_EXECUTION_ENV)))
             {
-                envValue.Append($"{Environment.GetEnvironmentVariable(envName)}_");
+                envValue.Append($"{Environment.GetEnvironmentVariable(EnvironmentVariableKeys.AWS_EXECUTION_ENV)}_");
             }
 
             envValue.Append($"{awsDotnetDeployCLI}_{assemblyVersion?.InformationalVersion}");
 
-            Environment.SetEnvironmentVariable(envName, envValue.ToString());
+            Environment.SetEnvironmentVariable(EnvironmentVariableKeys.AWS_EXECUTION_ENV, envValue.ToString());
         }
     }
 }

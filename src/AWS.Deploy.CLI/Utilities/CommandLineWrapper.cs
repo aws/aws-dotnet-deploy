@@ -2,12 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Amazon.Runtime;
+using AWS.Deploy.Common;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.Utilities;
 
@@ -36,6 +38,7 @@ namespace AWS.Deploy.CLI.Utilities
             bool streamOutputToInteractiveService = true,
             Action<TryRunResult> onComplete = null,
             bool redirectIO = true,
+            IDictionary<string, string> environmentVariables = null,
             CancellationToken cancelToken = default)
         {
             StringBuilder strOutput = new StringBuilder();
@@ -64,6 +67,8 @@ namespace AWS.Deploy.CLI.Utilities
             processStartInfo.EnvironmentVariables["AWS_ACCESS_KEY_ID"] = credentials.AccessKey;
             processStartInfo.EnvironmentVariables["AWS_SECRET_ACCESS_KEY"] = credentials.SecretKey;
             processStartInfo.EnvironmentVariables["AWS_REGION"] = _awsRegion;
+
+            UpdateEnvironmentVariables(processStartInfo, environmentVariables);
 
             if (credentials.UseToken)
             {
@@ -112,6 +117,48 @@ namespace AWS.Deploy.CLI.Utilities
 
                 onComplete(result);
             }
+        }
+
+        private static void UpdateEnvironmentVariables(ProcessStartInfo processStartInfo, IDictionary<string, string> environmentVariables)
+        {
+            if (environmentVariables == null)
+            {
+                return;
+            }
+
+            foreach (var (key, value) in environmentVariables)
+            {
+                if (key == EnvironmentVariableKeys.AWS_EXECUTION_ENV)
+                {
+                    var awsExecutionEnvValue = BuildAWSExecutionEnvValue(processStartInfo, value);
+                    processStartInfo.EnvironmentVariables[key] = awsExecutionEnvValue;
+                }
+                else
+                {
+                    processStartInfo.EnvironmentVariables[key] = value;
+                }
+            }
+        }
+
+        private static string BuildAWSExecutionEnvValue(ProcessStartInfo processStartInfo, string awsExecutionEnv)
+        {
+            var awsExecutionEnvBuilder = new StringBuilder();
+            if (processStartInfo.EnvironmentVariables.ContainsKey(EnvironmentVariableKeys.AWS_EXECUTION_ENV)
+                && !string.IsNullOrEmpty(processStartInfo.EnvironmentVariables[EnvironmentVariableKeys.AWS_EXECUTION_ENV]))
+            {
+                awsExecutionEnvBuilder.Append(processStartInfo.EnvironmentVariables[EnvironmentVariableKeys.AWS_EXECUTION_ENV]);
+            }
+
+            if (!string.IsNullOrEmpty(awsExecutionEnv))
+            {
+                if (awsExecutionEnvBuilder.Length != 0)
+                {
+                    awsExecutionEnvBuilder.Append("_");
+                }
+                awsExecutionEnvBuilder.Append(awsExecutionEnv);
+            }
+
+            return awsExecutionEnvBuilder.ToString();
         }
 
         private string GetSystemShell()
