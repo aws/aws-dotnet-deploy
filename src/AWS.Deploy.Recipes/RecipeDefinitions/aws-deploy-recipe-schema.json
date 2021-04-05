@@ -29,7 +29,7 @@
         "Id": {
             "type": "string",
             "title": "Unique ID for the recipe",
-            "description": "The unqiue id for the recipe. This value should never been change once the recipe is released because it will be stored in user config files.",
+            "description": "The unique id for the recipe. This value should never been change once the recipe is released because it will be stored in user config files.",
             "minLength": 1
         },
         "Name": {
@@ -87,6 +87,9 @@
         },
         "OptionSettings": {
             "$ref": "#/definitions/OptionSettings"
+        },
+        "Validators": {
+            "$ref": "#/definitions/Validators"
         }
     },
     "definitions": {
@@ -279,7 +282,38 @@
                 }
             }
         },
-
+        "Validators": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "ValidatorType": {
+                        "type": "string",
+                        "enum": [
+                            "FargateTaskSizeCpuMemoryLimits"
+                        ]
+                    }
+                },
+                "allOf": [
+                    {
+                        "if": {
+                            "properties": { "ValidatorType": { "const": "FargateTaskSizeCpuMemoryLimits" } }
+                        },
+                        "then": {
+                            "properties": {
+                                "Configuration": {
+                                    "properties": {
+                                        "InvalidCpuValueValidationFailedMessage": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        },
         "OptionSettings": {
             "type": "array",
             "items": { "$ref": "#/definitions/OptionSetting" }
@@ -402,6 +436,81 @@
                         "ServicePrincipal": {
                             "type": [ "string", "null" ]
                         }
+                    }
+                },
+                "Validators": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "ValidatorType": {
+                                "type": "string",
+                                "enum": [
+                                    "Range",
+                                    "Regex",
+                                    "Required"
+                                ]
+                            }
+                        },
+                        "allOf": [
+                            {
+                                "if": {
+                                    "properties": { "ValidatorType": { "const": "Range" } }
+                                },
+                                "then": {
+                                    "properties": {
+                                        "Configuration": {
+                                            "properties": {
+                                                "Min": {
+                                                    "type": "integer"
+                                                },
+                                                "Max": {
+                                                    "type": "integer"
+                                                },
+                                                "ValidationFailedMessage": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "if": {
+                                    "properties": { "ValidatorType": { "const": "Regex" } }
+                                },
+                                "then": {
+                                    "properties": {
+                                        "Configuration": {
+                                            "properties": {
+                                                "Regex": {
+                                                    "type": "string"
+                                                },
+                                                "ValidationFailedMessage": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "if": {
+                                    "properties": { "ValidatorType": { "const": "Required" } }
+                                },
+                                "then": {
+                                    "properties": {
+                                        "Configuration": {
+                                            "properties": {
+                                                "ValidationFailedMessage": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        ]
                     }
                 }
             }

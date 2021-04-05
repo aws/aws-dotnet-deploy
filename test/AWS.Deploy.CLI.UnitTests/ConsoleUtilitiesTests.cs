@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections.Generic;
+using System.Net.Http;
 using Should;
 using AWS.Deploy.Common;
 using Xunit;

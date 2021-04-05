@@ -4,6 +4,7 @@
 using System;
 using System.Reflection;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.Recipes.Validation;
 
 namespace AWS.Deploy.Common
 {
@@ -106,6 +107,14 @@ namespace AWS.Deploy.Common
     public class FailedToCreateDeploymentBundleException : Exception
     {
         public FailedToCreateDeploymentBundleException(string message, Exception innerException = null) : base(message, innerException) { }
+    }
+
+    /// <summary>
+    /// Thrown if <see cref="OptionSettingItem.SetValueOverride"/> is given an invalid value.
+    /// </summary>
+    public class ValidationFailedException : Exception
+    {
+        public ValidationResult ValidationResult { get; set; }
     }
 
     /// <summary>

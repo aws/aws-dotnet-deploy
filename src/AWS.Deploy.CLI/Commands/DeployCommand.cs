@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using AWS.Deploy.CLI.Commands.TypeHints;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.Recipes.Validation;
 using AWS.Deploy.DockerEngine;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.CDK;
@@ -338,7 +339,27 @@ namespace AWS.Deploy.CLI.Commands
                 // deploy case, nothing more to configure
                 if (string.IsNullOrEmpty(input))
                 {
-                    return;
+                    var validatorFailedResults =
+                        recommendation.Recipe
+                            .BuildValidators()
+                            .Select(validator => validator.Validate(recommendation.Recipe, _session))
+                            .Where(x => !x.IsValid)
+                            .ToList();
+
+                    if (!validatorFailedResults.Any())
+                    {
+                        // validation successful
+                        // deployment configured
+                        return;
+                    }
+
+                    _toolInteractiveService.WriteLine();
+                    _toolInteractiveService.WriteLine("Recipe Configuration needs to be adjusted before it can be deployed:");
+                    foreach (var result in validatorFailedResults)
+                        _toolInteractiveService.WriteLine($" - {result.ValidationFailedMessage}");
+
+                    _toolInteractiveService.WriteLine();
+                    _toolInteractiveService.WriteLine("Please adjust your settings");
                 }
 
                 // configure option setting
@@ -349,7 +370,7 @@ namespace AWS.Deploy.CLI.Commands
                     await ConfigureDeployment(recommendation, optionSettings[selectedNumber - 1]);
                 }
 
-                _toolInteractiveService.WriteLine(string.Empty);
+                _toolInteractiveService.WriteLine();
             }
         }
 
@@ -425,7 +446,16 @@ namespace AWS.Deploy.CLI.Commands
 
             if (!Equals(settingValue, currentValue) && settingValue != null)
             {
-                setting.SetValueOverride(settingValue);
+                try
+                {
+                    setting.SetValueOverride(settingValue);
+                }
+                catch (ValidationFailedException ex)
+                {
+                    _toolInteractiveService.WriteErrorLine(
+                        $"Value [{settingValue}] is not valid: {ex.ValidationResult.ValidationFailedMessage}");
+                }
+                
             }
         }
 

@@ -65,7 +65,10 @@
 
     ],
 
-
+    "Validators": [
+        {
+            "ValidatorType": "FargateTaskSizeCpuMemoryLimits"
+        }],
 
     "OptionSettings": [
         {
@@ -135,7 +138,16 @@
             "Type": "Int",
             "DefaultValue": 3,
             "AdvancedSetting": false,
-            "Updatable": true
+            "Updatable": true,
+            "Validators": [
+                {
+                    "ValidatorType": "Range",
+                    "Configuration" : {
+                        "Min": 1,
+                        "Max": 5000
+                    }
+                }
+            ]
         },
         {
             "Id": "ApplicationIAMRole",

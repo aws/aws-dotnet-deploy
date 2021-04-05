@@ -1,8 +1,10 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using AWS.Deploy.Common.Recipes.Validation;
 using Newtonsoft.Json;
 
 namespace AWS.Deploy.Common.Recipes
@@ -12,7 +14,7 @@ namespace AWS.Deploy.Common.Recipes
     {
         private object _valueOverride;
 
-        public T GetValue<T>(IDictionary<string, string> replacementTokens, bool ignoreDefaultValue = false, IDictionary<string, bool> displayableOptionSettings = null)
+        public T GetValue<T>(IDictionary<string, string> replacementTokens = null, bool ignoreDefaultValue = false, IDictionary<string, bool> displayableOptionSettings = null)
         {
             var value = GetValue(replacementTokens, ignoreDefaultValue, displayableOptionSettings);
             if (value == null)
@@ -23,8 +25,10 @@ namespace AWS.Deploy.Common.Recipes
             return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(value));
         }
 
-        public object GetValue(IDictionary<string, string> replacementTokens, bool ignoreDefaultValue = false, IDictionary<string, bool> displayableOptionSettings = null)
+        public object GetValue(IDictionary<string, string> replacementTokens = null, bool ignoreDefaultValue = false, IDictionary<string, bool> displayableOptionSettings = null)
         {
+            replacementTokens ??= new Dictionary<string, string>();
+
             if (_valueOverride != null)
             {
                 return _valueOverride;
@@ -97,8 +101,25 @@ namespace AWS.Deploy.Common.Recipes
             return DefaultValue;
         }
 
+        /// <summary>
+        /// Assigns this Item a new value.
+        /// </summary>
+        /// <exception cref="ValidationFailedException">
+        /// Thrown if one or more <see cref="Validators"/> determine
+        /// <paramref name="valueOverride"/> is not valid.
+        /// </exception>
         public void SetValueOverride(object valueOverride)
         {
+            foreach (var validator in this.BuildValidators())
+            {
+                var result = validator.Validate(valueOverride);
+                if (!result.IsValid)
+                    throw new ValidationFailedException
+                    {
+                        ValidationResult = result
+                    };
+            }
+
             if (valueOverride is bool || valueOverride is int || valueOverride is long)
             {
                 _valueOverride = valueOverride;
