@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -32,6 +33,14 @@ namespace AWS.Deploy.Orchestration.Utilities
         /// By default, <see cref="Process.StandardInput"/>, <see cref="Process.StandardOutput"/> and <see cref="Process.StandardError"/> will be redirected.
         /// Set this to false to avoid redirection.
         /// </param>
+        /// <param name="environmentVariables">
+        /// <see cref="command"/> is executed as a child process of running process which inherits the parent process's environment variables.
+        /// <see cref="environmentVariables"/> allows to add (replace if exists) extra environment variables to the child process.
+        /// <remarks>
+        /// AWS Execution Environment string to append in AWS_EXECUTION_ENV env var.
+        /// AWS SDK calls made while executing <see cref="command"/> will have User-Agent string containing
+        /// </remarks>
+        /// </param>
         /// <param name="cancelToken">
         /// <see cref="CancellationToken"/>
         /// </param>
@@ -41,6 +50,7 @@ namespace AWS.Deploy.Orchestration.Utilities
             bool streamOutputToInteractiveService = true,
             Action<TryRunResult> onComplete = null,
             bool redirectIO = true,
+            IDictionary<string, string> environmentVariables = null,
             CancellationToken cancelToken = default);
     }
 
@@ -69,6 +79,14 @@ namespace AWS.Deploy.Orchestration.Utilities
         /// By default, <see cref="Process.StandardInput"/>, <see cref="Process.StandardOutput"/> and <see cref="Process.StandardError"/> will be redirected.
         /// Set this to false to avoid redirection.
         /// </param>
+        /// <param name="environmentVariables">
+        /// <see cref="command"/> is executed as a child process of running process which inherits the parent process's environment variables.
+        /// <see cref="environmentVariables"/> allows to add (replace if exists) extra environment variables to the child process.
+        /// <remarks>
+        /// AWS Execution Environment string to append in AWS_EXECUTION_ENV env var.
+        /// AWS SDK calls made while executing <see cref="command"/> will have User-Agent string containing
+        /// </remarks>
+        /// </param>
         /// <param name="cancelToken">
         /// <see cref="CancellationToken"/>
         /// </param>
@@ -78,6 +96,7 @@ namespace AWS.Deploy.Orchestration.Utilities
             string workingDirectory = "",
             bool streamOutputToInteractiveService = false,
             bool redirectIO = true,
+            IDictionary<string, string> environmentVariables = null,
             CancellationToken cancelToken = default)
         {
             var result = new TryRunResult();
@@ -88,7 +107,8 @@ namespace AWS.Deploy.Orchestration.Utilities
                 streamOutputToInteractiveService,
                 onComplete: runResult => result = runResult,
                 redirectIO: redirectIO,
-                cancelToken);
+                environmentVariables: environmentVariables,
+                cancelToken: cancelToken);
 
             return result;
         }
