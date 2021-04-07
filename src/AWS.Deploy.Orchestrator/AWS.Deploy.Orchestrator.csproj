@@ -5,6 +5,7 @@
     <LangVersion>Latest</LangVersion>
     <AssemblyName>AWS.Deploy.Orchestrator</AssemblyName>
     <RootNamespace>AWS.Deploy.Orchestrator</RootNamespace>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>

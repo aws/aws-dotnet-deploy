@@ -15,6 +15,7 @@
     <RootNamespace>AWS.Deploy.CLI</RootNamespace>
     <LangVersion>Latest</LangVersion>
     <PackageIcon>icon.png</PackageIcon>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
