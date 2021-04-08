@@ -167,8 +167,8 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var interactiveServices = new TestToolInteractiveServiceImpl(new List<string> { string.Empty });
             var consoleUtilities = new ConsoleUtilities(interactiveServices);
-            var selectedValue = consoleUtilities.AskYesNoQuestion("Do you want to deploy", ConsoleUtilities.YesNo.Yes);
-            Assert.Equal(ConsoleUtilities.YesNo.Yes, selectedValue);
+            var selectedValue = consoleUtilities.AskYesNoQuestion("Do you want to deploy", YesNo.Yes);
+            Assert.Equal(YesNo.Yes, selectedValue);
 
             Assert.Contains("(default y)", interactiveServices.OutputMessages[0]);
         }
@@ -178,8 +178,8 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var interactiveServices = new TestToolInteractiveServiceImpl(new List<string> { "n" });
             var consoleUtilities = new ConsoleUtilities(interactiveServices);
-            var selectedValue = consoleUtilities.AskYesNoQuestion("Do you want to deploy", ConsoleUtilities.YesNo.Yes);
-            Assert.Equal(ConsoleUtilities.YesNo.No, selectedValue);
+            var selectedValue = consoleUtilities.AskYesNoQuestion("Do you want to deploy", YesNo.Yes);
+            Assert.Equal(YesNo.No, selectedValue);
         }
 
         [Fact]
@@ -188,7 +188,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var interactiveServices = new TestToolInteractiveServiceImpl(new List<string> { "n" });
             var consoleUtilities = new ConsoleUtilities(interactiveServices);
             var selectedValue = consoleUtilities.AskYesNoQuestion("Do you want to deploy");
-            Assert.Equal(ConsoleUtilities.YesNo.No, selectedValue);
+            Assert.Equal(YesNo.No, selectedValue);
 
             Assert.DoesNotContain("(default:", interactiveServices.OutputMessages[0]);
         }
@@ -198,8 +198,8 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var interactiveServices = new TestToolInteractiveServiceImpl(new List<string> { "q", "n" });
             var consoleUtilities = new ConsoleUtilities(interactiveServices);
-            var selectedValue = consoleUtilities.AskYesNoQuestion("Do you want to deploy", ConsoleUtilities.YesNo.Yes);
-            Assert.Equal(ConsoleUtilities.YesNo.No, selectedValue);
+            var selectedValue = consoleUtilities.AskYesNoQuestion("Do you want to deploy", YesNo.Yes);
+            Assert.Equal(YesNo.No, selectedValue);
 
             interactiveServices.OutputContains("Invalid option.");
         }

@@ -9,7 +9,7 @@ namespace AWS.Deploy.CLI
     {
         private readonly bool _diagnosticLoggingEnabled;
 
-        public ConsoleInteractiveServiceImpl(bool diagnosticLoggingEnabled)
+        public ConsoleInteractiveServiceImpl(bool diagnosticLoggingEnabled = false)
         {
             _diagnosticLoggingEnabled = diagnosticLoggingEnabled;
         }
@@ -18,6 +18,8 @@ namespace AWS.Deploy.CLI
         {
             return Console.ReadLine();
         }
+
+        public bool Diagnostics { get; set; }
 
         public void WriteDebugLine(string message)
         {

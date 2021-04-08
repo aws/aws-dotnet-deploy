@@ -52,6 +52,12 @@ namespace AWS.Deploy.Orchestration.Utilities
             bool redirectIO = true,
             IDictionary<string, string> environmentVariables = null,
             CancellationToken cancelToken = default);
+
+        /// <summary>
+        /// Configure the child process that executes the command passed as parameter in <see cref="Run"/> method.
+        /// </summary>
+        /// <param name="processStartInfoAction">Child process <see cref="Action{T}"/> that executes the command</param>
+        void ConfigureProcess(Action<ProcessStartInfo> processStartInfoAction);
     }
 
     public static class CommandLineWrapperExtensions

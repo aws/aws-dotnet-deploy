@@ -29,7 +29,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
     {
         private readonly Dictionary<OptionSettingTypeHint, ITypeHintCommand> _commands;
 
-        public TypeHintCommandFactory(IToolInteractiveService toolInteractiveService, IAWSResourceQueryer awsResourceQueryer, ConsoleUtilities consoleUtilities)
+        public TypeHintCommandFactory(IToolInteractiveService toolInteractiveService, IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities)
         {
             _commands = new Dictionary<OptionSettingTypeHint, ITypeHintCommand>
             {

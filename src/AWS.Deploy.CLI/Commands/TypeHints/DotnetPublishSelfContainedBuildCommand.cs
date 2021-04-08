@@ -9,9 +9,9 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 {
     public class DotnetPublishSelfContainedBuildCommand : ITypeHintCommand
     {
-        private readonly ConsoleUtilities _consoleUtilities;
+        private readonly IConsoleUtilities _consoleUtilities;
 
-        public DotnetPublishSelfContainedBuildCommand(ConsoleUtilities consoleUtilities)
+        public DotnetPublishSelfContainedBuildCommand(IConsoleUtilities consoleUtilities)
         {
             _consoleUtilities = consoleUtilities;
         }
@@ -19,8 +19,8 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         public Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var answer = _consoleUtilities.AskYesNoQuestion(string.Empty, recommendation.GetOptionSettingValue<string>(optionSetting));
-            recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild = answer == ConsoleUtilities.YesNo.Yes;
-            var result = answer == ConsoleUtilities.YesNo.Yes ? "true" : "false";
+            recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild = answer == YesNo.Yes;
+            var result = answer == YesNo.Yes ? "true" : "false";
             return Task.FromResult<object>(result);
         }
     }
