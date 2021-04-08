@@ -13,9 +13,9 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
     {
         private readonly IToolInteractiveService _toolInteractiveService;
         private readonly IAWSResourceQueryer _awsResourceQueryer;
-        private readonly ConsoleUtilities _consoleUtilities;
+        private readonly IConsoleUtilities _consoleUtilities;
 
-        public EC2KeyPairCommand(IToolInteractiveService toolInteractiveService, IAWSResourceQueryer awsResourceQueryer, ConsoleUtilities consoleUtilities)
+        public EC2KeyPairCommand(IToolInteractiveService toolInteractiveService, IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities)
         {
             _toolInteractiveService = toolInteractiveService;
             _awsResourceQueryer = awsResourceQueryer;
@@ -59,7 +59,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                     _toolInteractiveService.WriteLine("You are required to specify a directory to save the key pair private key.");
 
                     var answer = _consoleUtilities.AskYesNoQuestion("Do you want to continue?", "false");
-                    if (answer == ConsoleUtilities.YesNo.No)
+                    if (answer == YesNo.No)
                         continue;
 
                     _toolInteractiveService.WriteLine(string.Empty);

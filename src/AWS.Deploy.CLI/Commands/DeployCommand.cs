@@ -33,7 +33,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly ITypeHintCommandFactory _typeHintCommandFactory;
         private readonly ICloudApplicationNameGenerator _cloudApplicationNameGenerator;
 
-        private readonly ConsoleUtilities _consoleUtilities;
+        private readonly IConsoleUtilities _consoleUtilities;
         private readonly OrchestratorSession _session;
 
         public DeployCommand(
@@ -48,7 +48,7 @@ namespace AWS.Deploy.CLI.Commands
             IDeployedApplicationQueryer deployedApplicationQueryer,
             ITypeHintCommandFactory typeHintCommandFactory,
             ICloudApplicationNameGenerator cloudApplicationNameGenerator,
-            ConsoleUtilities consoleUtilities,
+            IConsoleUtilities consoleUtilities,
             OrchestratorSession session)
         {
             _toolInteractiveService = toolInteractiveService;
@@ -97,7 +97,7 @@ namespace AWS.Deploy.CLI.Commands
                 throw new InvalidCliArgumentException();
             }
 
-            var cloudApplicationName = 
+            var cloudApplicationName =
                 !string.IsNullOrEmpty(stackName)
                 ? stackName
                 : AskUserForCloudApplicationName(_session.ProjectDefinition, deployedApplications);
@@ -260,7 +260,7 @@ namespace AWS.Deploy.CLI.Commands
 
             var result = _consoleUtilities.AskYesNoQuestion(message);
 
-            return result == ConsoleUtilities.YesNo.Yes;
+            return result == YesNo.Yes;
         }
 
         private async Task CreateDeploymentBundle(Orchestrator orchestrator, Recommendation selectedRecommendation, CloudApplication cloudApplication)
@@ -271,7 +271,7 @@ namespace AWS.Deploy.CLI.Commands
                 {
                     _toolInteractiveService.WriteLine(string.Empty);
                     var answer = _consoleUtilities.AskYesNoQuestion("Do you want to go back and modify the current configuration?", "true");
-                    if (answer == ConsoleUtilities.YesNo.Yes)
+                    if (answer == YesNo.Yes)
                     {
                         var dockerExecutionDirectory =
                         _consoleUtilities.AskUserForValue(
@@ -414,7 +414,7 @@ namespace AWS.Deploy.CLI.Commands
                             break;
                         case OptionSettingValueType.Bool:
                             var answer = _consoleUtilities.AskYesNoQuestion(string.Empty, recommendation.GetOptionSettingValue(setting).ToString());
-                            settingValue = answer == ConsoleUtilities.YesNo.Yes ? "true" : "false";
+                            settingValue = answer == YesNo.Yes ? "true" : "false";
                             break;
                         case OptionSettingValueType.Object:
                             foreach (var childSetting in setting.ChildOptionSettings)

@@ -14,9 +14,9 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
     public class BeanstalkApplicationCommand : ITypeHintCommand
     {
         private readonly IAWSResourceQueryer _awsResourceQueryer;
-        private readonly ConsoleUtilities _consoleUtilities;
+        private readonly IConsoleUtilities _consoleUtilities;
 
-        public BeanstalkApplicationCommand(IAWSResourceQueryer awsResourceQueryer, ConsoleUtilities consoleUtilities)
+        public BeanstalkApplicationCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities)
         {
             _awsResourceQueryer = awsResourceQueryer;
             _consoleUtilities = consoleUtilities;

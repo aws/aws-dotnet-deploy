@@ -11,13 +11,21 @@ using System.IO;
 
 namespace AWS.Deploy.CLI
 {
-    public class AWSUtilities
+    public interface IAWSUtilities
+    {
+        Task<AWSCredentials> ResolveAWSCredentials(string profileName, string lastUsedProfileName);
+        string ResolveAWSRegion(string region, string lastRegionUsed);
+    }
+
+    public class AWSUtilities : IAWSUtilities
     {
         private readonly IToolInteractiveService _toolInteractiveService;
+        private readonly IConsoleUtilities _consoleUtilities;
 
-        public AWSUtilities(IToolInteractiveService toolInteractiveService)
+        public AWSUtilities(IToolInteractiveService toolInteractiveService, IConsoleUtilities consoleUtilities)
         {
             _toolInteractiveService = toolInteractiveService;
+            _consoleUtilities = consoleUtilities;
         }
 
         public async Task<AWSCredentials> ResolveAWSCredentials(string profileName, string lastUsedProfileName)
@@ -67,8 +75,7 @@ namespace AWS.Deploy.CLI
                 throw new NoAWSCredentialsFoundException();
             }
 
-            var consoleUtilities = new ConsoleUtilities(_toolInteractiveService);
-            var selectedProfileName = consoleUtilities.AskUserToChoose(sharedCredentials.ListProfileNames(), "Select AWS Credentials Profile", null);
+            var selectedProfileName = _consoleUtilities.AskUserToChoose(sharedCredentials.ListProfileNames(), "Select AWS Credentials Profile", null);
 
             if (!chain.TryGetAWSCredentials(selectedProfileName, out credentials) ||
                 !(await CanLoadCredentials(credentials)))
@@ -123,8 +130,7 @@ namespace AWS.Deploy.CLI
                 availableRegions.Add($"{value.SystemName} ({value.DisplayName})");
             }
 
-            var consoleUtilities = new ConsoleUtilities(_toolInteractiveService);
-            var selectedRegion = consoleUtilities.AskUserToChoose(availableRegions, "Select AWS Region", null);
+            var selectedRegion = _consoleUtilities.AskUserToChoose(availableRegions, "Select AWS Region", null);
 
             // Strip display name
             selectedRegion = selectedRegion.Substring(0, selectedRegion.IndexOf('(') - 1).Trim();

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using AWS.Deploy.Orchestration.Utilities;
@@ -70,5 +71,7 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
 
             return Task.CompletedTask;
         }
+
+        public void ConfigureProcess(Action<ProcessStartInfo> processStartInfoAction) => throw new NotImplementedException();
     }
 }

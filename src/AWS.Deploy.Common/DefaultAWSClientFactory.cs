@@ -1,6 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using Amazon;
 using Amazon.Extensions.NETCore.Setup;
 using Amazon.Runtime;
@@ -9,18 +10,18 @@ namespace AWS.Deploy.Common
 {
     public class DefaultAWSClientFactory : IAWSClientFactory
     {
-        private readonly AWSCredentials _credentials;
-        private readonly string _region;
+        private Action<AWSOptions> _awsOptionsAction;
 
-        public DefaultAWSClientFactory(AWSCredentials credentials, string region)
+        public void ConfigureAWSOptions(Action<AWSOptions> awsOptionsAction)
         {
-            _credentials = credentials;
-            _region = region;
+            _awsOptionsAction = awsOptionsAction;
         }
 
         public T GetAWSClient<T>() where T : IAmazonService
         {
-            var awsOptions = new AWSOptions { Credentials = _credentials, Region = RegionEndpoint.GetBySystemName(_region) };
+            var awsOptions = new AWSOptions();
+
+            _awsOptionsAction?.Invoke(awsOptions);
 
             return awsOptions.CreateServiceClient<T>();
         }

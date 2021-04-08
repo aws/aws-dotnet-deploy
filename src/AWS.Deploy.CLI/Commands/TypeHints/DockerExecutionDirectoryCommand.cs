@@ -10,9 +10,9 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 {
     public class DockerExecutionDirectoryCommand : ITypeHintCommand
     {
-        private readonly ConsoleUtilities _consoleUtilities;
+        private readonly IConsoleUtilities _consoleUtilities;
 
-        public DockerExecutionDirectoryCommand(ConsoleUtilities consoleUtilities)
+        public DockerExecutionDirectoryCommand(IConsoleUtilities consoleUtilities)
         {
             _consoleUtilities = consoleUtilities;
         }

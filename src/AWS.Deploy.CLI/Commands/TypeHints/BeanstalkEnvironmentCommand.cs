@@ -12,9 +12,9 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
     public class BeanstalkEnvironmentCommand : ITypeHintCommand
     {
         private readonly IAWSResourceQueryer _awsResourceQueryer;
-        private readonly ConsoleUtilities _consoleUtilities;
+        private readonly IConsoleUtilities _consoleUtilities;
 
-        public BeanstalkEnvironmentCommand(IAWSResourceQueryer awsResourceQueryer, ConsoleUtilities consoleUtilities)
+        public BeanstalkEnvironmentCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities)
         {
             _awsResourceQueryer = awsResourceQueryer;
             _consoleUtilities = consoleUtilities;
