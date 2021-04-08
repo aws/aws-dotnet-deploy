@@ -16,6 +16,8 @@ using Amazon.ElasticBeanstalk;
 using Amazon.ElasticBeanstalk.Model;
 using Amazon.IdentityManagement;
 using Amazon.IdentityManagement.Model;
+using Amazon.SecurityToken;
+using Amazon.SecurityToken.Model;
 using AWS.Deploy.Common;
 
 namespace AWS.Deploy.Orchestration.Data
@@ -35,6 +37,7 @@ namespace AWS.Deploy.Orchestration.Data
         Task<List<Repository>> GetECRRepositories(List<string> repositoryNames);
         Task<Repository> CreateECRRepository(string repositoryName);
         Task<List<Stack>> GetCloudFormationStacks();
+        Task<GetCallerIdentityResponse> GetCallerIdentity();
     }
 
     public class AWSResourceQueryer : IAWSResourceQueryer
@@ -243,6 +246,12 @@ namespace AWS.Deploy.Orchestration.Data
         {
             using var cloudFormationClient = _awsClientFactory.GetAWSClient<Amazon.CloudFormation.IAmazonCloudFormation>();
             return await cloudFormationClient.Paginators.DescribeStacks(new DescribeStacksRequest()).Stacks.ToListAsync();
+        }
+
+        public async Task<GetCallerIdentityResponse> GetCallerIdentity()
+        {
+            using var stsClient = _awsClientFactory.GetAWSClient<IAmazonSecurityTokenService>();
+            return await stsClient.GetCallerIdentityAsync(new GetCallerIdentityRequest());
         }
     }
 }

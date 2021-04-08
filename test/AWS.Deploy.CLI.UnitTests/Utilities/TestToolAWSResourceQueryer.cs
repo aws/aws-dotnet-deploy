@@ -9,6 +9,7 @@ using Amazon.EC2.Model;
 using Amazon.ECR.Model;
 using Amazon.ElasticBeanstalk.Model;
 using Amazon.IdentityManagement.Model;
+using Amazon.SecurityToken.Model;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.Data;
 
@@ -19,6 +20,7 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
         public Task<string> CreateEC2KeyPair(string keyName, string saveLocation) => throw new NotImplementedException();
         public Task<Repository> CreateECRRepository(string repositoryName) => throw new NotImplementedException();
         public Task<List<Stack>> GetCloudFormationStacks() => throw new NotImplementedException();
+        public Task<GetCallerIdentityResponse> GetCallerIdentity() => throw new NotImplementedException();
 
         public Task<List<AuthorizationData>> GetECRAuthorizationToken()
         {

@@ -3,6 +3,7 @@
 
 using System;
 using System.Linq;
+using Amazon.Extensions.NETCore.Setup;
 using Amazon.Runtime;
 using AWS.Deploy.Common;
 
@@ -31,6 +32,8 @@ namespace AWS.Deploy.CLI.UnitTests
                     $"I have the following clients: {string.Join(",", _clients.Select(x => x.GetType().Name))}");
 
             return match;
-        } 
+        }
+
+        public void ConfigureAWSOptions(Action<AWSOptions> awsOptionsAction) => throw new NotImplementedException();
     }
 }

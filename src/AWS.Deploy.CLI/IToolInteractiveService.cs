@@ -10,6 +10,7 @@ namespace AWS.Deploy.CLI
         void WriteErrorLine(string message);
 
         string ReadLine();
+        bool Diagnostics { get; set; }
     }
 
     public static class ToolInteractiveServiceExtensions

@@ -22,14 +22,14 @@ namespace AWS.Deploy.CLI.Commands
         private readonly IAWSClientFactory _awsClientFactory;
         private readonly IToolInteractiveService _interactiveService;
         private readonly IAmazonCloudFormation _cloudFormationClient;
-        private readonly ConsoleUtilities _consoleUtilities;
+        private readonly IConsoleUtilities _consoleUtilities;
 
-        public DeleteDeploymentCommand(IAWSClientFactory awsClientFactory, IToolInteractiveService interactiveService)
+        public DeleteDeploymentCommand(IAWSClientFactory awsClientFactory, IToolInteractiveService interactiveService, IConsoleUtilities consoleUtilities)
         {
             _awsClientFactory = awsClientFactory;
             _interactiveService = interactiveService;
+            _consoleUtilities = consoleUtilities;
             _cloudFormationClient = _awsClientFactory.GetAWSClient<IAmazonCloudFormation>();
-            _consoleUtilities = new ConsoleUtilities(interactiveService);
         }
 
         /// <summary>
@@ -45,14 +45,14 @@ namespace AWS.Deploy.CLI.Commands
                 return;
             }
 
-            var confirmDelete = _consoleUtilities.AskYesNoQuestion($"Are you sure you want to delete {stackName}?", ConsoleUtilities.YesNo.No);
-            if (confirmDelete == ConsoleUtilities.YesNo.No)
+            var confirmDelete = _consoleUtilities.AskYesNoQuestion($"Are you sure you want to delete {stackName}?", YesNo.No);
+            if (confirmDelete == YesNo.No)
             {
                 return;
             }
 
             _interactiveService.WriteLine($"{stackName}: deleting...");
-            var monitor = new StackEventMonitor(stackName, _awsClientFactory, _interactiveService);
+            var monitor = new StackEventMonitor(stackName, _awsClientFactory, _consoleUtilities);
 
             try
             {

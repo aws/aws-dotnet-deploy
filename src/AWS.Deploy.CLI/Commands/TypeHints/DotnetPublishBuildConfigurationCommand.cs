@@ -9,9 +9,9 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 {
     public class DotnetPublishBuildConfigurationCommand : ITypeHintCommand
     {
-        private readonly ConsoleUtilities _consoleUtilities;
+        private readonly IConsoleUtilities _consoleUtilities;
 
-        public DotnetPublishBuildConfigurationCommand(ConsoleUtilities consoleUtilities)
+        public DotnetPublishBuildConfigurationCommand(IConsoleUtilities consoleUtilities)
         {
             _consoleUtilities = consoleUtilities;
         }

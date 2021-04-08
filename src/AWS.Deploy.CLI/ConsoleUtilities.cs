@@ -9,7 +9,29 @@ using AWS.Deploy.Common;
 
 namespace AWS.Deploy.CLI
 {
-    public class ConsoleUtilities
+    public enum YesNo
+    {
+        Yes = 1,
+        No = 0
+    }
+
+    public interface IConsoleUtilities
+    {
+        Recommendation AskToChooseRecommendation(IList<Recommendation> recommendations);
+        string AskUserToChoose(IList<string> values, string title, string defaultValue);
+        T AskUserToChoose<T>(IList<T> options, string title, T defaultValue)
+            where T : IUserInputOption;
+        void DisplayRow((string, int)[] row);
+        UserResponse<string> AskUserToChooseOrCreateNew(IEnumerable<string> options, string title, bool askNewName = true, string defaultNewName = "", bool canBeEmpty = false);
+        UserResponse<T> AskUserToChooseOrCreateNew<T>(IEnumerable<T> options, string title, UserInputConfiguration<T> userInputConfiguration);
+        string AskUserForValue(string message, string defaultValue, bool allowEmpty, string resetValue = "", params Func<string, string>[] validators);
+        string AskForEC2KeyPairSaveDirectory(string projectPath);
+        YesNo AskYesNoQuestion(string question, string defaultValue);
+        YesNo AskYesNoQuestion(string question, YesNo? defaultValue = default);
+        void DisplayValues(Dictionary<string, object> objectValues, string indent);
+    }
+
+    public class ConsoleUtilities : IConsoleUtilities
     {
         private readonly IToolInteractiveService _interactiveService;
 
@@ -17,12 +39,6 @@ namespace AWS.Deploy.CLI
         {
             _interactiveService = interactiveService;
         }
-
-        public enum YesNo
-        {
-            Yes = 1,
-            No = 0
-        };
 
         public Recommendation AskToChooseRecommendation(IList<Recommendation> recommendations)
         {
@@ -298,7 +314,7 @@ namespace AWS.Deploy.CLI
                         _interactiveService.WriteLine("EC2 Key Pair is a private secret key and it is recommended to not save the key in the project directory where it could be checked into source control.");
 
                         var verification = AskYesNoQuestion("Are you sure you want to use your project directory?", "false");
-                        if (verification == ConsoleUtilities.YesNo.No)
+                        if (verification == YesNo.No)
                         {
                             _interactiveService.WriteLine(string.Empty);
                             _interactiveService.WriteLine("Please enter a valid directory:");
