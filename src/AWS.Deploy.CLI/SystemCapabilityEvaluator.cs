@@ -19,12 +19,10 @@ namespace AWS.Deploy.CLI
     internal class SystemCapabilityEvaluator : ISystemCapabilityEvaluator
     {
         private readonly ICommandLineWrapper _commandLineWrapper;
-        private readonly CDKManager _cdkManager;
 
-        public SystemCapabilityEvaluator(ICommandLineWrapper commandLineWrapper, CDKManager cdkManager)
+        public SystemCapabilityEvaluator(ICommandLineWrapper commandLineWrapper)
         {
             _commandLineWrapper = commandLineWrapper;
-            _cdkManager = cdkManager;
         }
 
         public async Task<SystemCapabilities> Evaluate()

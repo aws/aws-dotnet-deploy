@@ -52,6 +52,8 @@ namespace AWS.Deploy.CLI.UnitTests
             return line;
         }
 
+        public bool Diagnostics { get; set; }
+
         public bool OutputContains(string subString)
         {
             foreach (var message in OutputMessages)

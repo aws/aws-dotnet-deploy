@@ -10,9 +10,9 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 {
     public class DockerBuildArgsCommand : ITypeHintCommand
     {
-        private readonly ConsoleUtilities _consoleUtilities;
+        private readonly IConsoleUtilities _consoleUtilities;
 
-        public DockerBuildArgsCommand(ConsoleUtilities consoleUtilities)
+        public DockerBuildArgsCommand(IConsoleUtilities consoleUtilities)
         {
             _consoleUtilities = consoleUtilities;
         }

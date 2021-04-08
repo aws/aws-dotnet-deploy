@@ -18,17 +18,12 @@ namespace AWS.Deploy.CLI.Utilities
     public class CommandLineWrapper : ICommandLineWrapper
     {
         private readonly IOrchestratorInteractiveService _interactiveService;
-        private readonly AWSCredentials _awsCredentials;
-        private readonly string _awsRegion;
+        private Action<ProcessStartInfo> _processStartInfoAction;
 
         public CommandLineWrapper(
-            IOrchestratorInteractiveService interactiveService,
-            AWSCredentials awsCredentials,
-            string awsRegion)
+            IOrchestratorInteractiveService interactiveService)
         {
             _interactiveService = interactiveService;
-            _awsCredentials = awsCredentials;
-            _awsRegion = awsRegion;
         }
 
         /// <inheritdoc />
@@ -43,7 +38,6 @@ namespace AWS.Deploy.CLI.Utilities
         {
             StringBuilder strOutput = new StringBuilder();
             StringBuilder strError = new StringBuilder();
-            var credentials = await _awsCredentials.GetCredentialsAsync();
 
             var processStartInfo = new ProcessStartInfo
             {
@@ -62,18 +56,7 @@ namespace AWS.Deploy.CLI.Utilities
                 WorkingDirectory = workingDirectory
             };
 
-            // environment variables could already be set at the machine level,
-            // use this syntax to make sure we don't create duplicate entries
-            processStartInfo.EnvironmentVariables["AWS_ACCESS_KEY_ID"] = credentials.AccessKey;
-            processStartInfo.EnvironmentVariables["AWS_SECRET_ACCESS_KEY"] = credentials.SecretKey;
-            processStartInfo.EnvironmentVariables["AWS_REGION"] = _awsRegion;
-
-            UpdateEnvironmentVariables(processStartInfo, environmentVariables);
-
-            if (credentials.UseToken)
-            {
-                processStartInfo.EnvironmentVariables["AWS_SESSION_TOKEN"] = credentials.Token;
-            }
+            _processStartInfoAction?.Invoke(processStartInfo);
 
             var process = Process.Start(processStartInfo);
             if (null == process)
@@ -155,10 +138,16 @@ namespace AWS.Deploy.CLI.Utilities
                 {
                     awsExecutionEnvBuilder.Append("_");
                 }
+
                 awsExecutionEnvBuilder.Append(awsExecutionEnv);
             }
 
             return awsExecutionEnvBuilder.ToString();
+        }
+
+        public void ConfigureProcess(Action<ProcessStartInfo> processStartInfoAction)
+        {
+            _processStartInfoAction = processStartInfoAction;
         }
 
         private string GetSystemShell()

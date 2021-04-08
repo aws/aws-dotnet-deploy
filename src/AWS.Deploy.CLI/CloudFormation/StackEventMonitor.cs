@@ -30,14 +30,14 @@ namespace AWS.Deploy.CLI.CloudFormation
         private DateTime _startTime;
         private readonly IAmazonCloudFormation _cloudFormationClient;
         private readonly HashSet<string> _processedEventIds = new HashSet<string>();
-        private readonly ConsoleUtilities _consoleUtilities;
+        private readonly IConsoleUtilities _consoleUtilities;
 
-        public StackEventMonitor(string stackName, IAWSClientFactory awsClientFactory, IToolInteractiveService interactiveService)
+        public StackEventMonitor(string stackName, IAWSClientFactory awsClientFactory, IConsoleUtilities consoleUtilities)
         {
             _stackName = stackName;
+            _consoleUtilities = consoleUtilities;
 
             _cloudFormationClient = awsClientFactory.GetAWSClient<IAmazonCloudFormation>();
-            _consoleUtilities = new ConsoleUtilities(interactiveService);
         }
 
         /// <summary>

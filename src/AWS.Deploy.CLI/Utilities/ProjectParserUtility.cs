@@ -12,7 +12,12 @@ namespace AWS.Deploy.CLI.Utilities
     /// Sits on top of <see cref="IProjectDefinitionParser"/> and adds UI specific logic
     /// for error handling.
     /// </summary>
-    public class ProjectParserUtility
+    public interface IProjectParserUtility
+    {
+        Task<ProjectDefinition> Parse(string projectPath);
+    }
+
+    public class ProjectParserUtility : IProjectParserUtility
     {
         private readonly IToolInteractiveService _toolInteractiveService;
         private readonly IProjectDefinitionParser _projectDefinitionParser;
