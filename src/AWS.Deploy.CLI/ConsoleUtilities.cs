@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using AWS.Deploy.Common;
 
 namespace AWS.Deploy.CLI
@@ -432,6 +433,35 @@ namespace AWS.Deploy.CLI
 
                 _interactiveService.WriteLine($"Invalid option. The selected option should be between 1 and {options.Count}.");
             }
+        }
+
+        public string ReadSecretFromConsole()
+        {
+            var code = new StringBuilder();
+            while (true)
+            {
+                ConsoleKeyInfo i = _interactiveService.ReadKey(true);
+                if (i.Key == ConsoleKey.Enter)
+                {
+                    break;
+                }
+                else if (i.Key == ConsoleKey.Backspace)
+                {
+                    if (code.Length > 0)
+                    {
+                        code.Remove(code.Length - 1, 1);
+                        _interactiveService.Write("\b \b");
+                    }
+                }
+                // i.Key > 31: Skip the initial ascii control characters like ESC and tab. The space character is 32.
+                // KeyChar == '\u0000' if the key pressed does not correspond to a printable character, e.g. F1, Pause-Break, etc
+                else if ((int)i.Key > 31 && i.KeyChar != '\u0000')
+                {
+                    code.Append(i.KeyChar);
+                    _interactiveService.Write("*");
+                }
+            }
+            return code.ToString().Trim();
         }
     }
 }
