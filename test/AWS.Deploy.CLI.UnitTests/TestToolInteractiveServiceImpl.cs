@@ -66,5 +66,30 @@ namespace AWS.Deploy.CLI.UnitTests
 
             return false;
         }
+
+        public void Write(string message)
+        {
+            OutputMessages.Add(message);
+        }
+
+        public void QueueConsoleInfos(params ConsoleKey[] keys)
+        {
+            foreach(var key in keys)
+            {
+                InputConsoleKeyInfos.Enqueue(new ConsoleKeyInfo(key.ToString()[0], key, false, false, false));
+            }
+        }
+
+        public Queue<ConsoleKeyInfo> InputConsoleKeyInfos { get; } = new Queue<ConsoleKeyInfo>();
+        public ConsoleKeyInfo ReadKey(bool intercept)
+        {
+            if(InputConsoleKeyInfos.Count == 0)
+            {
+                throw new Exception("No queued console key infos");
+            }
+
+            return InputConsoleKeyInfos.Dequeue();
+        }
     }
 }
+
