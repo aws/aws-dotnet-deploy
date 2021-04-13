@@ -10,6 +10,7 @@ using Amazon.CloudFormation;
 using Amazon.CloudFormation.Model;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.DockerEngine;
 using AWS.Deploy.Orchestrator.CDK;
 using AWS.Deploy.Orchestrator.Data;
 using AWS.Deploy.Orchestrator.Utilities;
@@ -194,10 +195,10 @@ namespace AWS.Deploy.Orchestrator
             }
             catch(IOException)
             {
-                throw new NoDeploymentBundleDefinitionsFoundException();
+                throw new NoDeploymentBundleDefinitionsFoundException("Failed to find a deployment bundle definition");
             }
 
-            throw new NoDeploymentBundleDefinitionsFoundException();
+            throw new NoDeploymentBundleDefinitionsFoundException("Failed to find a deployment bundle definition");
         }
 
         public async Task<bool> CreateContainerDeploymentBundle(CloudApplication cloudApplication, Recommendation recommendation)
@@ -209,7 +210,14 @@ namespace AWS.Deploy.Orchestrator
             if (!recommendation.ProjectDefinition.HasDockerFile)
             {
                 _interactiveService.LogMessageLine("Generating Dockerfile...");
-                dockerEngine.GenerateDockerFile();
+                try
+                {
+                    dockerEngine.GenerateDockerFile();
+                }
+                catch(DockerEngineExceptionBase ex)
+                {
+                    throw new FailedToGenerateDockerFileException("Failed to generate a docker file", ex);
+                }
             }
 
             dockerEngine.DetermineDockerExecutionDirectory(recommendation);

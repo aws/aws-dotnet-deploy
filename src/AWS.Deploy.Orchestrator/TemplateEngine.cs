@@ -75,7 +75,7 @@ namespace AWS.Deploy.Orchestrator
             }
             catch
             {
-                throw new TemplateGenerationFailedException();
+                throw new TemplateGenerationFailedException("Failed to generate CDK project from template");
             }
         }
 
@@ -87,7 +87,7 @@ namespace AWS.Deploy.Orchestrator
             }
             catch(Exception e)
             {
-                throw new DefaultTemplateInstallationFailedException(e);
+                throw new DefaultTemplateInstallationFailedException("Failed to install the default template that is required to the generate the CDK project", e);
             }
         }
 

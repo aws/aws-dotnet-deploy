@@ -18,13 +18,13 @@ namespace AWS.Deploy.Common
         public string Path { get; set; }
     }
 
+    /// <summary>
+    /// Throw if the user attempts to deploy a <see cref="RecipeDefinition"/> but the recipe definition is invalid
+    /// </summary>
     [AWSDeploymentExpectedException]
     public class InvalidRecipeDefinitionException : Exception
     {
-        public InvalidRecipeDefinitionException(string message) : base(message)
-        {
-
-        }
+        public InvalidRecipeDefinitionException(string message, Exception innerException = null) : base(message, innerException) { }
     }
 
     /// <summary>
@@ -33,7 +33,10 @@ namespace AWS.Deploy.Common
     /// but NodeJs/NPM could not be detected.
     /// </summary>
     [AWSDeploymentExpectedException]
-    public class MissingNodeJsException : Exception {}
+    public class MissingNodeJsException : Exception
+    {
+        public MissingNodeJsException(string message, Exception innerException = null) : base(message, innerException) { }
+    }
 
     /// <summary>
     /// Throw if the user attempts to deploy a <see cref="RecipeDefinition"/>
@@ -41,7 +44,10 @@ namespace AWS.Deploy.Common
     /// but Docker could not be detected.
     /// </summary>
     [AWSDeploymentExpectedException]
-    public class MissingDockerException : Exception {}
+    public class MissingDockerException : Exception
+    {
+        public MissingDockerException(string message, Exception innerException = null) : base(message, innerException) { }
+    }
 
     /// <summary>
     /// Throw if the user attempts to deploy a <see cref="RecipeDefinition"/>
@@ -49,21 +55,30 @@ namespace AWS.Deploy.Common
     /// but Docker is not running in linux mode.
     /// </summary>
     [AWSDeploymentExpectedException]
-    public class DockerContainerTypeException : Exception { }
+    public class DockerContainerTypeException : Exception
+    {
+        public DockerContainerTypeException(string message, Exception innerException = null) : base(message, innerException) { }
+    }
 
     /// <summary>
     /// Throw if Recommendation Engine is unable to generate
     /// recommendations for a given target context
     /// </summary>
     [AWSDeploymentExpectedException]
-    public class FailedToGenerateAnyRecommendations : Exception {}
+    public class FailedToGenerateAnyRecommendations : Exception
+    {
+        public FailedToGenerateAnyRecommendations(string message, Exception innerException = null) : base(message, innerException) { }
+    }
 
     /// <summary>
     /// Throw if a value is set that is not part of the allowed values
     /// of an option setting item
     /// </summary>
     [AWSDeploymentExpectedException]
-    public class InvalidOverrideValueException : Exception { }
+    public class InvalidOverrideValueException : Exception
+    {
+        public InvalidOverrideValueException(string message, Exception innerException = null) : base(message, innerException) { }
+    }
 
     /// <summary>
     /// Throw if there is a parse error reading the existing Cloud Application's metadata
@@ -71,10 +86,7 @@ namespace AWS.Deploy.Common
     [AWSDeploymentExpectedException]
     public class ParsingExistingCloudApplicationMetadataException : Exception
     {
-        public ParsingExistingCloudApplicationMetadataException(string message, Exception inner) : base(message, inner)
-        {
-
-        }
+        public ParsingExistingCloudApplicationMetadataException(string message, Exception innerException = null) : base(message, innerException) { }
     }
     
     /// <summary>
@@ -82,7 +94,10 @@ namespace AWS.Deploy.Common
     /// the deployment bundle.
     /// </summary>
     [AWSDeploymentExpectedException]
-    public class FailedToCreateDeploymentBundleException : Exception {}
+    public class FailedToCreateDeploymentBundleException : Exception
+    {
+        public FailedToCreateDeploymentBundleException(string message, Exception innerException = null) : base(message, innerException) { }
+    }
 
     /// <summary>
     /// Indicates a specific strongly typed Exception can be anticipated.
@@ -112,7 +127,6 @@ namespace AWS.Deploy.Common
                 return string.Empty;
 
             return $"{Environment.NewLine}{e.Message}{Environment.NewLine}{e.StackTrace}{PrettyPrint(e.InnerException)}";
-
         }
     }
 }

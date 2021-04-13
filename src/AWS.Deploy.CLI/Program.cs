@@ -120,8 +120,8 @@ namespace AWS.Deploy.CLI
                 }
                 catch (Exception e) when (e.IsAWSDeploymentExpectedException())
                 {
-                    // helpful error message should have already been presented to the user,
                     // bail out with an non-zero return code.
+                    toolInteractiveService.WriteErrorLine(e.Message);
                     return CommandReturnCodes.USER_ERROR;
                 }
                 catch (Exception e)

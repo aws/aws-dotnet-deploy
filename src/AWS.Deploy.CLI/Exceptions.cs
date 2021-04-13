@@ -16,9 +16,7 @@ namespace AWS.Deploy.CLI
     [AWSDeploymentExpectedException ]
     public class FailedToDeleteException : Exception
     {
-        public FailedToDeleteException(string message) : base(message)
-        {
-        }
+        public FailedToDeleteException(string message, Exception innerException = null) : base(message, innerException) { }
     }
 
     /// <summary>
@@ -28,8 +26,6 @@ namespace AWS.Deploy.CLI
     [AWSDeploymentExpectedException]
     public class FailedToFindDeployableTargetException : Exception
     {
-        public FailedToFindDeployableTargetException(Exception innerException = null) : base(string.Empty, innerException)
-        {
-        }
+        public FailedToFindDeployableTargetException(string message, Exception innerException = null) : base(message, innerException) { }
     }
 }
