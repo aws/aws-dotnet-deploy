@@ -46,5 +46,15 @@ namespace AWS.Deploy.CLI
         {
             Console.WriteLine(message);
         }
+
+        public void Write(string message)
+        {
+            Console.Write(message);
+        }
+
+        public ConsoleKeyInfo ReadKey(bool intercept)
+        {
+            return Console.ReadKey(intercept);
+        }
     }
 }

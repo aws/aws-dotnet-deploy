@@ -5,6 +5,9 @@ using System.Collections.Generic;
 using Should;
 using AWS.Deploy.Common;
 using Xunit;
+using Amazon.Runtime;
+using AWS.Deploy.CLI.Utilities;
+using System;
 
 namespace AWS.Deploy.CLI.UnitTests
 {
@@ -212,6 +215,56 @@ namespace AWS.Deploy.CLI.UnitTests
             consoleUtilities.DisplayRow(new[] { ("Hello", 10), ("World", 20) });
 
             Assert.Equal("Hello      | World               ", interactiveServices.OutputMessages[0]);
+        }
+
+        [Fact]
+        public void GetMFACode()
+        {
+            var options = new AssumeRoleAWSCredentialsOptions
+            {
+                MfaSerialNumber = "serial-number",
+                ExternalId = "external-id"
+            };
+
+            var interactiveServices = new TestToolInteractiveServiceImpl();
+            interactiveServices.QueueConsoleInfos(ConsoleKey.A, ConsoleKey.B, ConsoleKey.C, ConsoleKey.Enter);
+
+            var callback = new AssumeRoleMfaTokenCodeCallback(interactiveServices, options);
+            var code = callback.Execute();
+
+            Assert.Equal("ABC", code);
+            Assert.Empty(interactiveServices.InputConsoleKeyInfos);
+            Assert.Equal(5, interactiveServices.OutputMessages.Count);
+            Assert.StartsWith("Enter", interactiveServices.OutputMessages[1]);
+            Assert.Equal("*", interactiveServices.OutputMessages[2]);
+            Assert.Equal("*", interactiveServices.OutputMessages[3]);
+            Assert.Equal("*", interactiveServices.OutputMessages[4]);
+        }
+
+        [Fact]
+        public void GetMFACodeWithBackspace()
+        {
+            var options = new AssumeRoleAWSCredentialsOptions
+            {
+                MfaSerialNumber = "serial-number",
+                ExternalId = "external-id"
+            };
+
+            var interactiveServices = new TestToolInteractiveServiceImpl();
+            interactiveServices.QueueConsoleInfos(ConsoleKey.A, ConsoleKey.B, ConsoleKey.C, ConsoleKey.Backspace, ConsoleKey.D, ConsoleKey.Enter);
+
+            var callback = new AssumeRoleMfaTokenCodeCallback(interactiveServices, options);
+            var code = callback.Execute();
+
+            Assert.Equal("ABD", code);
+            Assert.Empty(interactiveServices.InputConsoleKeyInfos);
+            Assert.Equal(7, interactiveServices.OutputMessages.Count);
+            Assert.StartsWith("Enter", interactiveServices.OutputMessages[1]);
+            Assert.Equal("*", interactiveServices.OutputMessages[2]);
+            Assert.Equal("*", interactiveServices.OutputMessages[3]);
+            Assert.Equal("*", interactiveServices.OutputMessages[4]);
+            Assert.Equal("\b \b", interactiveServices.OutputMessages[5]);
+            Assert.Equal("*", interactiveServices.OutputMessages[6]);
         }
 
         private class OptionItem
