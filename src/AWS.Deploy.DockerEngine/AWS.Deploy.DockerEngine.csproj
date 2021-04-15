@@ -4,6 +4,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>AWS.Deploy.DockerEngine</RootNamespace>
     <AssemblyName>AWS.Deploy.DockerEngine</AssemblyName>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>

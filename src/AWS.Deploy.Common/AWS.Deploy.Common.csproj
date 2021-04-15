@@ -5,6 +5,7 @@
     <LangVersion>Latest</LangVersion>
     <AssemblyName>AWS.Deploy.Common</AssemblyName>
     <RootNamespace>AWS.Deploy.Common</RootNamespace>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>

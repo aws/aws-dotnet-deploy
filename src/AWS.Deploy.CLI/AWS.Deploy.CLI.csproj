@@ -16,6 +16,7 @@
     <LangVersion>Latest</LangVersion>
     <PackageIcon>icon.png</PackageIcon>
     <PackageProjectUrl>https://github.com/aws/aws-dotnet-deploy</PackageProjectUrl>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
