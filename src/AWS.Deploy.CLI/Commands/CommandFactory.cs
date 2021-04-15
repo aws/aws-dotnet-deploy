@@ -165,7 +165,13 @@ namespace AWS.Deploy.CLI.Commands
                 }
                 catch (Exception e) when (e.IsAWSDeploymentExpectedException())
                 {
-                    // helpful error message should have already been presented to the user,
+                    if (diagnostics)
+                        _toolInteractiveService.WriteErrorLine(e.PrettyPrint());
+                    else
+                    {
+                        _toolInteractiveService.WriteErrorLine(string.Empty);
+                        _toolInteractiveService.WriteErrorLine(e.Message);
+                    }
                     // bail out with an non-zero return code.
                     return CommandReturnCodes.USER_ERROR;
                 }
@@ -194,22 +200,46 @@ namespace AWS.Deploy.CLI.Commands
             };
             deleteCommand.Handler = CommandHandler.Create<string, string, string, string, bool>(async (profile, region, projectPath, deploymentName, diagnostics) =>
             {
-                _toolInteractiveService.Diagnostics = diagnostics;
-
-                var previousSettings = PreviousDeploymentSettings.ReadSettings(projectPath, null);
-
-                var awsCredentials = await _awsUtilities.ResolveAWSCredentials(profile, previousSettings.Profile);
-                var awsRegion = _awsUtilities.ResolveAWSRegion(region, previousSettings.Region);
-
-                _awsClientFactory.ConfigureAWSOptions(awsOption =>
+                try
                 {
-                    awsOption.Credentials = awsCredentials;
-                    awsOption.Region = RegionEndpoint.GetBySystemName(awsRegion);
-                });
+                    _toolInteractiveService.Diagnostics = diagnostics;
 
-                await new DeleteDeploymentCommand(_awsClientFactory, _toolInteractiveService, _consoleUtilities).ExecuteAsync(deploymentName);
+                    var previousSettings = PreviousDeploymentSettings.ReadSettings(projectPath, null);
 
-                return CommandReturnCodes.SUCCESS;
+                    var awsCredentials = await _awsUtilities.ResolveAWSCredentials(profile, previousSettings.Profile);
+                    var awsRegion = _awsUtilities.ResolveAWSRegion(region, previousSettings.Region);
+
+                    _awsClientFactory.ConfigureAWSOptions(awsOption =>
+                    {
+                        awsOption.Credentials = awsCredentials;
+                        awsOption.Region = RegionEndpoint.GetBySystemName(awsRegion);
+                    });
+
+                    await new DeleteDeploymentCommand(_awsClientFactory, _toolInteractiveService, _consoleUtilities).ExecuteAsync(deploymentName);
+
+                    return CommandReturnCodes.SUCCESS;
+                }
+                catch (Exception e) when (e.IsAWSDeploymentExpectedException())
+                {
+                    if (diagnostics)
+                        _toolInteractiveService.WriteErrorLine(e.PrettyPrint());
+                    else
+                    {
+                        _toolInteractiveService.WriteErrorLine(string.Empty);
+                        _toolInteractiveService.WriteErrorLine(e.Message);
+                    }
+                    // bail out with an non-zero return code.
+                    return CommandReturnCodes.USER_ERROR;
+                }
+                catch (Exception e)
+                {
+                    // This is a bug
+                    _toolInteractiveService.WriteErrorLine(
+                        "Unhandled exception.  This is a bug.  Please copy the stack trace below and file a bug at https://github.com/aws/aws-dotnet-deploy. " +
+                        e.PrettyPrint());
+
+                    return CommandReturnCodes.UNHANDLED_EXCEPTION;
+                }
             });
             return deleteCommand;
         }
@@ -225,22 +255,42 @@ namespace AWS.Deploy.CLI.Commands
             };
             listCommand.Handler = CommandHandler.Create<string, string, string, bool>(async (profile, region, projectPath, diagnostics) =>
             {
-                _toolInteractiveService.Diagnostics = diagnostics;
-
-                var previousSettings = PreviousDeploymentSettings.ReadSettings(projectPath, null);
-
-                var awsCredentials = await _awsUtilities.ResolveAWSCredentials(profile, previousSettings.Profile);
-                var awsRegion = _awsUtilities.ResolveAWSRegion(region, previousSettings.Region);
-
-                _awsClientFactory.ConfigureAWSOptions(awsOptions =>
+                try
                 {
-                    awsOptions.Credentials = awsCredentials;
-                    awsOptions.Region = RegionEndpoint.GetBySystemName(awsRegion);
-                });
+                    _toolInteractiveService.Diagnostics = diagnostics;
 
-                var listDeploymentsCommand = new ListDeploymentsCommand(_toolInteractiveService, _deployedApplicationQueryer);
+                    var previousSettings = PreviousDeploymentSettings.ReadSettings(projectPath, null);
 
-                await listDeploymentsCommand.ExecuteAsync();
+                    var awsCredentials = await _awsUtilities.ResolveAWSCredentials(profile, previousSettings.Profile);
+                    var awsRegion = _awsUtilities.ResolveAWSRegion(region, previousSettings.Region);
+
+                    _awsClientFactory.ConfigureAWSOptions(awsOptions =>
+                    {
+                        awsOptions.Credentials = awsCredentials;
+                        awsOptions.Region = RegionEndpoint.GetBySystemName(awsRegion);
+                    });
+
+                    var listDeploymentsCommand = new ListDeploymentsCommand(_toolInteractiveService, _deployedApplicationQueryer);
+
+                    await listDeploymentsCommand.ExecuteAsync();
+                }
+                catch (Exception e) when (e.IsAWSDeploymentExpectedException())
+                {
+                    if (diagnostics)
+                        _toolInteractiveService.WriteErrorLine(e.PrettyPrint());
+                    else
+                    {
+                        _toolInteractiveService.WriteErrorLine(string.Empty);
+                        _toolInteractiveService.WriteErrorLine(e.Message);
+                    }
+                }
+                catch (Exception e)
+                {
+                    // This is a bug
+                    _toolInteractiveService.WriteErrorLine(
+                        "Unhandled exception.  This is a bug.  Please copy the stack trace below and file a bug at https://github.com/aws/aws-dotnet-deploy. " +
+                        e.PrettyPrint());
+                }
             });
             return listCommand;
         }

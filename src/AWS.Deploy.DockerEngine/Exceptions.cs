@@ -5,24 +5,23 @@ using System;
 
 namespace AWS.Deploy.DockerEngine
 {
-    public class DockerFileTemplateException : Exception
+    public class DockerFileTemplateException : DockerEngineExceptionBase
     {
-        public DockerFileTemplateException(string message) : base(message)
-        {
-        }
+        public DockerFileTemplateException(string message) : base(message) { }
     }
 
-    public class DockerEngineException : Exception
+    public class DockerEngineException : DockerEngineExceptionBase
     {
-        public DockerEngineException(string message) : base(message)
-        {
-        }
+        public DockerEngineException(string message) : base(message) { }
     }
 
-    public class UnknownDockerImageException : Exception
+    public class UnknownDockerImageException : DockerEngineExceptionBase
     {
-        public UnknownDockerImageException(string message) : base(message)
-        {
-        }
+        public UnknownDockerImageException(string message) : base(message) { }
+    }
+
+    public class DockerEngineExceptionBase : Exception
+    {
+        public DockerEngineExceptionBase(string message) : base(message) { }
     }
 }

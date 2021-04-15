@@ -42,15 +42,15 @@ namespace AWS.Deploy.CLI.Utilities
             catch (ProjectFileNotFoundException ex)
             {
                 var files = _directoryManager.GetFiles(projectPath, "*.sln");
+                var errorMessage = string.Empty;
 
                 if (files.Any())
-                    _toolInteractiveService.WriteErrorLine(
-                        "This directory contains a solution file, but the tool requires a project file. " +
-                        "Please run the tool from the directory that contains a .csproj/.fsproj or provide a path to the .csproj/.fsproj via --project-path flag.");
+                    errorMessage =  "This directory contains a solution file, but the tool requires a project file. " +
+                    "Please run the tool from the directory that contains a .csproj/.fsproj or provide a path to the .csproj/.fsproj via --project-path flag.";
                 else
-                    _toolInteractiveService.WriteErrorLine($"A project was not found at the path {projectPath}");
+                    errorMessage = $"A project was not found at the path {projectPath}";
 
-                throw new FailedToFindDeployableTargetException(ex);
+                throw new FailedToFindDeployableTargetException(errorMessage, ex);
             }
         }
     }
