@@ -6,8 +6,14 @@ using AWS.Deploy.Common;
 
 namespace AWS.Deploy.CLI
 {
+    /// <summary>
+    /// Throw if no AWS credentials were found.
+    /// </summary>
     [AWSDeploymentExpectedException]
-    public class NoAWSCredentialsFoundException : Exception { }
+    public class NoAWSCredentialsFoundException : Exception
+    {
+        public NoAWSCredentialsFoundException(string message, Exception innerException = null) : base(message, innerException) { }
+    }
 
     /// <summary>
     /// Throw if Delete Command is unable to delete
@@ -16,9 +22,7 @@ namespace AWS.Deploy.CLI
     [AWSDeploymentExpectedException ]
     public class FailedToDeleteException : Exception
     {
-        public FailedToDeleteException(string message) : base(message)
-        {
-        }
+        public FailedToDeleteException(string message, Exception innerException = null) : base(message, innerException) { }
     }
 
     /// <summary>
@@ -28,8 +32,6 @@ namespace AWS.Deploy.CLI
     [AWSDeploymentExpectedException]
     public class FailedToFindDeployableTargetException : Exception
     {
-        public FailedToFindDeployableTargetException(Exception innerException = null) : base(string.Empty, innerException)
-        {
-        }
+        public FailedToFindDeployableTargetException(string message, Exception innerException = null) : base(message, innerException) { }
     }
 }
