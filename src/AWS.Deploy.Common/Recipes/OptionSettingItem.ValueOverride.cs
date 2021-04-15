@@ -107,7 +107,7 @@ namespace AWS.Deploy.Common.Recipes
                 else
                 {
                     if (AllowedValues != null && AllowedValues.Count > 0 && !AllowedValues.Contains(valueOverrideString))
-                        throw new InvalidOverrideValueException();
+                        throw new InvalidOverrideValueException("Invalid value for option setting item");
                     _valueOverride = valueOverrideString;
                 }
             }

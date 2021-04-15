@@ -111,10 +111,10 @@ namespace AWS.Deploy.Orchestration
             }
             catch(IOException)
             {
-                throw new NoDeploymentBundleDefinitionsFoundException();
+                throw new NoDeploymentBundleDefinitionsFoundException("Failed to find a deployment bundle definition");
             }
 
-            throw new NoDeploymentBundleDefinitionsFoundException();
+            throw new NoDeploymentBundleDefinitionsFoundException("Failed to find a deployment bundle definition");
         }
 
         public async Task<bool> CreateContainerDeploymentBundle(CloudApplication cloudApplication, Recommendation recommendation)
@@ -122,7 +122,14 @@ namespace AWS.Deploy.Orchestration
             if (!recommendation.ProjectDefinition.HasDockerFile)
             {
                 _interactiveService.LogMessageLine("Generating Dockerfile...");
-                _dockerEngine.GenerateDockerFile();
+                try
+                {
+                    _dockerEngine.GenerateDockerFile();
+                }
+                catch (DockerEngineExceptionBase ex)
+                {
+                    throw new FailedToGenerateDockerFileException("Failed to generate a docker file", ex);
+                }
             }
 
             _dockerEngine.DetermineDockerExecutionDirectory(recommendation);
