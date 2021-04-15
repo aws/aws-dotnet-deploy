@@ -83,9 +83,7 @@ namespace AWS.Deploy.CLI.Commands
             var recommendations = await orchestrator.GenerateDeploymentRecommendations();
             if (recommendations.Count == 0)
             {
-                _toolInteractiveService.WriteLine();
-                _toolInteractiveService.WriteErrorLine("The project you are trying to deploy is currently not supported.");
-                throw new FailedToGenerateAnyRecommendations();
+                throw new FailedToGenerateAnyRecommendations("The project you are trying to deploy is currently not supported.");
             }
 
             // Look to see if there are any existing deployed applications using any of the compatible recommendations.
@@ -94,7 +92,7 @@ namespace AWS.Deploy.CLI.Commands
             if (!string.IsNullOrEmpty(stackName) && !_cloudApplicationNameGenerator.IsValidName(stackName))
             {
                 PrintInvalidStackNameMessage();
-                throw new InvalidCliArgumentException();
+                throw new InvalidCliArgumentException("Found invalid CLI arguments");
             }
 
             var cloudApplicationName =
@@ -154,22 +152,19 @@ namespace AWS.Deploy.CLI.Commands
             if (selectedRecommendation.Recipe.DeploymentType == DeploymentTypes.CdkProject &&
                 !systemCapabilities.NodeJsMinVersionInstalled)
             {
-                _toolInteractiveService.WriteErrorLine("The selected deployment option requires Node.js 10.3 or later, which was not detected.  Please install Node.js: https://nodejs.org/en/download/");
-                throw new MissingNodeJsException();
+                throw new MissingNodeJsException("The selected deployment option requires Node.js 10.3 or later, which was not detected.  Please install Node.js: https://nodejs.org/en/download/");
             }
 
             if (selectedRecommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.Container)
             {
                 if (!systemCapabilities.DockerInfo.DockerInstalled)
                 {
-                    _toolInteractiveService.WriteErrorLine("The selected deployment option requires Docker, which was not detected. Please install and start the appropriate version of Docker for you OS: https://docs.docker.com/engine/install/");
-                    throw new MissingDockerException();
+                    throw new MissingDockerException("The selected deployment option requires Docker, which was not detected. Please install and start the appropriate version of Docker for you OS: https://docs.docker.com/engine/install/");
                 }
 
                 if (!systemCapabilities.DockerInfo.DockerContainerType.Equals("linux", StringComparison.OrdinalIgnoreCase))
                 {
-                    _toolInteractiveService.WriteErrorLine("The deployment tool requires Docker to be running in linux mode. Please switch Docker to linux mode to continue.");
-                    throw new DockerContainerTypeException();
+                    throw new DockerContainerTypeException("The deployment tool requires Docker to be running in linux mode. Please switch Docker to linux mode to continue.");
                 }
             }
 
@@ -286,8 +281,7 @@ namespace AWS.Deploy.CLI.Commands
                     }
                     else
                     {
-                        _toolInteractiveService.WriteLine(string.Empty);
-                        throw new FailedToCreateDeploymentBundleException();
+                        throw new FailedToCreateDeploymentBundleException("Failed to create a deployment bundle");
                     }
                 }
             }
@@ -295,7 +289,7 @@ namespace AWS.Deploy.CLI.Commands
             {
                 var dotnetPublishDeploymentBundleResult = await orchestrator.CreateDotnetPublishDeploymentBundle(selectedRecommendation);
                 if (!dotnetPublishDeploymentBundleResult)
-                    throw new FailedToCreateDeploymentBundleException();
+                    throw new FailedToCreateDeploymentBundleException("Failed to create a deployment bundle");
             }
         }
 

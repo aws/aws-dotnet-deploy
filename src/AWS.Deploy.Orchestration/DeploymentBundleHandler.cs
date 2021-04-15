@@ -235,7 +235,7 @@ namespace AWS.Deploy.Orchestration
             var authorizationTokens = await _awsResourceQueryer.GetECRAuthorizationToken();
 
             if (authorizationTokens.Count == 0)
-                throw new DockerLoginFailedException();
+                throw new DockerLoginFailedException("Failed to login to Docker");
 
             var authTokenBytes = Convert.FromBase64String(authorizationTokens[0].AuthorizationToken);
             var authToken = Encoding.UTF8.GetString(authTokenBytes);
@@ -245,7 +245,7 @@ namespace AWS.Deploy.Orchestration
             var result = await _commandLineWrapper.TryRunWithResult(dockerLoginCommand);
 
             if (result.ExitCode != 0)
-                throw new DockerLoginFailedException();
+                throw new DockerLoginFailedException("Failed to login to Docker");
         }
 
         private async Task<Repository> SetupECRRepository(string ecrRepositoryName)
@@ -268,7 +268,7 @@ namespace AWS.Deploy.Orchestration
             var result = await _commandLineWrapper.TryRunWithResult(dockerTagCommand);
 
             if (result.ExitCode != 0)
-                throw new DockerTagFailedException();
+                throw new DockerTagFailedException("Failed to tag Docker image");
         }
 
         private async Task PushDockerImage(string targetTagName)
@@ -277,7 +277,7 @@ namespace AWS.Deploy.Orchestration
             var result = await _commandLineWrapper.TryRunWithResult(dockerPushCommand, redirectIO: false);
 
             if (result.ExitCode != 0)
-                throw new DockerPushFailedException();
+                throw new DockerPushFailedException("Failed to push Docker Image");
         }
     }
 }
