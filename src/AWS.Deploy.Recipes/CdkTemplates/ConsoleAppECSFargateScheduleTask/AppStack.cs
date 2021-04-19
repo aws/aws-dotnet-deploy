@@ -10,6 +10,7 @@ using Amazon.CDK.AWS.IAM;
 using AWS.Deploy.Recipes.CDK.Common;
 using System.IO;
 using System.Collections.Generic;
+using Amazon.CDK.AWS.Logs;
 using ConsoleAppECSFargateScheduleTask.Configurations;
 using Protocol = Amazon.CDK.AWS.ECS.Protocol;
 using Schedule = Amazon.CDK.AWS.ApplicationAutoScaling.Schedule;
