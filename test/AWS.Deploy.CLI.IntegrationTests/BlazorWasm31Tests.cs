@@ -15,6 +15,7 @@ using Xunit;
 
 namespace AWS.Deploy.CLI.IntegrationTests
 {
+    [Collection("Blazor WASM with .NET Core 3.1 Target Framework")]
     public class BlazorWasm31Tests
     {
         private readonly HttpHelper _httpHelper;

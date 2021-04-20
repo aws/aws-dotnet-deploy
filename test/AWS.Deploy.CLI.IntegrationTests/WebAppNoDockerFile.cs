@@ -13,6 +13,7 @@ using Environment = System.Environment;
 
 namespace AWS.Deploy.CLI.IntegrationTests
 {
+    [Collection("ASP .NET Core app in Beanstalk")]
     public class WebAppNoDockerFileTest
     {
         private readonly HttpHelper _httpHelper;
@@ -62,7 +63,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             var applicationUrl = deployStdOut.First(line => line.StartsWith($"{stackName}.EndpointURL"))
                 .Split("=")[1]
                 .Trim();
-            Assert.True(await _httpHelper.IsSuccessStatusCode(applicationUrl));
+            Assert.True(await _httpHelper.IsSuccessStatusCode(applicationUrl), applicationUrl);
 
             await toolInteractiveService.StdInWriter.WriteAsync("y");
             await toolInteractiveService.StdInWriter.FlushAsync();

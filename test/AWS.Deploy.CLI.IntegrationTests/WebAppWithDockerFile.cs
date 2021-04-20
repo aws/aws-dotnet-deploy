@@ -17,6 +17,7 @@ using Task = System.Threading.Tasks.Task;
 
 namespace AWS.Deploy.CLI.IntegrationTests
 {
+    [Collection("ASP .NET Core app in ECS Fargate")]
     public class WebAppWithDockerFileTest
     {
         private readonly HttpHelper _httpHelper;
@@ -74,7 +75,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             var applicationUrl = deployStdOut.First(line => line.StartsWith($"{stackName}.FargateServiceServiceURL"))
                 .Split("=")[1]
                 .Trim();
-            Assert.True(await _httpHelper.IsSuccessStatusCode(applicationUrl));
+            Assert.True(await _httpHelper.IsSuccessStatusCode(applicationUrl), applicationUrl);
 
             await toolInteractiveService.StdInWriter.WriteAsync("y");
             await toolInteractiveService.StdInWriter.FlushAsync();

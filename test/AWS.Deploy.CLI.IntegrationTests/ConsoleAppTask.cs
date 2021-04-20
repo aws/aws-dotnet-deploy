@@ -17,6 +17,7 @@ using Xunit;
 
 namespace AWS.Deploy.CLI.IntegrationTests
 {
+    [Collection("Console App running as Scheduled Task")]
     public class ConsoleAppTaskTest
     {
         private readonly HttpHelper _httpHelper;
@@ -70,7 +71,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
             var logGroup = await _ecsHelper.GetLogGroup(stackName);
             var logMessages = await _cloudWatchLogsHelper.GetLogMessages(logGroup);
-            Assert.Contains(logMessages, message => message.Equals("Hello World!"));
+            Assert.Contains("Hello World!", logMessages);
 
             await toolInteractiveService.StdInWriter.WriteAsync("y");
             await toolInteractiveService.StdInWriter.FlushAsync();
