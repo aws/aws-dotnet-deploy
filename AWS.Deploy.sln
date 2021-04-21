@@ -56,6 +56,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ContosoUniversity", "testap
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ContosoUniversityBackendService", "testapps\ContosoUniversityBackendService\ContosoUniversityBackendService.csproj", "{AC7B0880-00CB-41E0-996C-B4C99103CEF9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AWS.Deploy.CLI.IntegrationTests", "test\AWS.Deploy.CLI.IntegrationTests\AWS.Deploy.CLI.IntegrationTests.csproj", "{001A0CE1-CCCE-4006-8CAC-AD18E37060A3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -134,6 +136,10 @@ Global
 		{AC7B0880-00CB-41E0-996C-B4C99103CEF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AC7B0880-00CB-41E0-996C-B4C99103CEF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AC7B0880-00CB-41E0-996C-B4C99103CEF9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{001A0CE1-CCCE-4006-8CAC-AD18E37060A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{001A0CE1-CCCE-4006-8CAC-AD18E37060A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{001A0CE1-CCCE-4006-8CAC-AD18E37060A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{001A0CE1-CCCE-4006-8CAC-AD18E37060A3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -158,6 +164,7 @@ Global
 		{4AD9D400-3F3D-4076-B34C-0F88576C1889} = {BD466B5C-D8B0-4069-98A9-6DC8F01FA757}
 		{6EDCA334-3317-44A4-A017-2A8D810EE7A7} = {C3A0C716-BDEA-4393-B223-AF8F8531522A}
 		{AC7B0880-00CB-41E0-996C-B4C99103CEF9} = {C3A0C716-BDEA-4393-B223-AF8F8531522A}
+		{001A0CE1-CCCE-4006-8CAC-AD18E37060A3} = {BD466B5C-D8B0-4069-98A9-6DC8F01FA757}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5A4B2863-1763-4496-B122-651A38A4F5D7}
