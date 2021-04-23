@@ -52,7 +52,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.Services
             Console.WriteLine(message);
             Debug.WriteLine(message);
 
-            // Save BaseStream position, it must be only only modified the consumer of StdOutReader
+            // Save BaseStream position, it must be only modified the consumer of StdOutReader
             // After writing to the BaseStream, we will reset it to the original position.
             var stdOutReaderPosition = StdOutReader.BaseStream.Position;
 
@@ -75,7 +75,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.Services
             Console.WriteLine(message);
             Debug.WriteLine(message);
 
-            // Save BaseStream position, it must be only only modified the consumer of StdErrorReader
+            // Save BaseStream position, it must be only modified the consumer of StdErrorReader
             // After writing to the BaseStream, we will reset it to the original position.
             var stdErrorReaderPosition = StdErrorReader.BaseStream.Position;
 
