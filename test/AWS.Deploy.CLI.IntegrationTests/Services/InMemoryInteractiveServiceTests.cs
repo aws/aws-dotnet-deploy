@@ -1,12 +1,27 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using Xunit;
 
 namespace AWS.Deploy.CLI.IntegrationTests.Services
 {
     public class InMemoryInteractiveServiceTests
     {
+        [Fact]
+        public void Write()
+        {
+            var service = new InMemoryInteractiveService();
+
+            service.Write("Hello");
+
+            Assert.Equal("Hello", service.StdOutReader.ReadToEnd());
+
+            service.Write("World");
+
+            Assert.Equal("World", service.StdOutReader.ReadToEnd());
+        }
+
         [Fact]
         public void WriteLine()
         {
@@ -73,6 +88,30 @@ namespace AWS.Deploy.CLI.IntegrationTests.Services
             Assert.Equal("Line 4", service.ReadLine());
             Assert.Equal("Line 5", service.ReadLine());
             Assert.Equal("Line 6", service.ReadLine());
+        }
+
+        [Fact]
+        public void ReadKey()
+        {
+            var service = new InMemoryInteractiveService();
+
+            service.StdInWriter.Write(ConsoleKey.A);
+            service.StdInWriter.Write(ConsoleKey.B);
+            service.StdInWriter.Write(ConsoleKey.C);
+            service.StdInWriter.Flush();
+
+            Assert.Equal(ConsoleKey.A, service.ReadKey(false).Key);
+            Assert.Equal(ConsoleKey.B, service.ReadKey(false).Key);
+            Assert.Equal(ConsoleKey.C, service.ReadKey(false).Key);
+
+            service.StdInWriter.Write(ConsoleKey.D);
+            service.StdInWriter.Write(ConsoleKey.E);
+            service.StdInWriter.Write(ConsoleKey.F);
+            service.StdInWriter.Flush();
+
+            Assert.Equal(ConsoleKey.D, service.ReadKey(false).Key);
+            Assert.Equal(ConsoleKey.E, service.ReadKey(false).Key);
+            Assert.Equal(ConsoleKey.F, service.ReadKey(false).Key);
         }
     }
 }
