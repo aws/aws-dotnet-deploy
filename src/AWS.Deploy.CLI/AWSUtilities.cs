@@ -8,6 +8,7 @@ using Amazon.Runtime;
 using Amazon.Runtime.CredentialManagement;
 using Amazon.EC2.Model;
 using System.IO;
+using AWS.Deploy.CLI.Utilities;
 
 namespace AWS.Deploy.CLI
 {
@@ -30,36 +31,36 @@ namespace AWS.Deploy.CLI
 
         public async Task<AWSCredentials> ResolveAWSCredentials(string profileName, string lastUsedProfileName)
         {
-            AWSCredentials credentials;
 
+
+            async Task<AWSCredentials> Resolve()
+            {
             var chain = new CredentialProfileStoreChain();
 
-            if (!string.IsNullOrEmpty(profileName))
+                if (!string.IsNullOrEmpty(profileName) && chain.TryGetAWSCredentials(profileName, out var profileCredentials) &&
+                    // Skip checking CanLoadCredentials for AssumeRoleAWSCredentials because it might require an MFA token and the callback hasn't been setup yet.
+                    (profileCredentials is AssumeRoleAWSCredentials || await CanLoadCredentials(profileCredentials)))
             {
-                if (chain.TryGetAWSCredentials(profileName, out credentials) &&
-                    await CanLoadCredentials(credentials))
-                {
                     _toolInteractiveService.WriteLine($"Configuring AWS Credentials from Profile {profileName}.");
-                    return credentials;
+                    return profileCredentials;
                 }
-            }
 
             if (!string.IsNullOrEmpty(lastUsedProfileName) &&
-                chain.TryGetAWSCredentials(lastUsedProfileName, out credentials) &&
-                await CanLoadCredentials(credentials))
+                    chain.TryGetAWSCredentials(lastUsedProfileName, out var lastUsedCredentials) &&
+                    await CanLoadCredentials(lastUsedCredentials))
             {
                 _toolInteractiveService.WriteLine($"Configuring AWS Credentials with previous configured profile value {lastUsedProfileName}.");
-                return credentials;
+                    return lastUsedCredentials;
             }
 
             try
             {
-                credentials = FallbackCredentialsFactory.GetCredentials();
+                    var fallbackCredentials = FallbackCredentialsFactory.GetCredentials();
 
-                if (await CanLoadCredentials(credentials))
+                    if (await CanLoadCredentials(fallbackCredentials))
                 {
                     _toolInteractiveService.WriteLine("Configuring AWS Credentials using AWS SDK credential search.");
-                    return credentials;
+                        return fallbackCredentials;
                 }
             }
             catch (AmazonServiceException)
@@ -77,11 +78,22 @@ namespace AWS.Deploy.CLI
 
             var selectedProfileName = _consoleUtilities.AskUserToChoose(sharedCredentials.ListProfileNames(), "Select AWS Credentials Profile", null);
 
-            if (!chain.TryGetAWSCredentials(selectedProfileName, out credentials) ||
-                !(await CanLoadCredentials(credentials)))
+                if (chain.TryGetAWSCredentials(selectedProfileName, out var selectedProfileCredentials) &&
+                    (await CanLoadCredentials(selectedProfileCredentials)))
             {
+                    return selectedProfileCredentials;
+                }
+
                 _toolInteractiveService.WriteErrorLine($"Unable to create AWS credentials for profile {selectedProfileName}.");
                 throw new NoAWSCredentialsFoundException();
+            }
+
+            var credentials = await Resolve();
+
+            if (credentials is AssumeRoleAWSCredentials assumeRoleAWSCredentials)
+            {
+                var assumeOptions = assumeRoleAWSCredentials.Options;
+                assumeOptions.MfaTokenCodeCallback = new AssumeRoleMfaTokenCodeCallback(_toolInteractiveService, assumeOptions).Execute;
             }
 
             return credentials;
