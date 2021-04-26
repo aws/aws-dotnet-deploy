@@ -200,6 +200,63 @@
             "DefaultValue": "{LatestDotnetBeanstalkPlatformArn}",
             "AdvancedSetting": true,
             "Updatable": false
+        },
+        {
+            "Id": "ElasticBeanstalkManagedPlatformUpdates",
+            "Name": "Managed Platform Updates",
+            "Description": "Enable managed platform updates to apply platform updates automatically during a weekly maintenance window that you choose. Your application stays available during the update process.",
+            "Type": "Object",
+            "AdvancedSetting": true,
+            "Updatable": true,
+            "ChildOptionSettings": [
+                {
+                    "Id": "ManagedActionsEnabled",
+                    "Name": "Enable Managed Platform Updates",
+                    "Description": "Do you want to enable Managed Platform Updates?",
+                    "Type": "Bool",
+                    "DefaultValue": true,
+                    "AdvancedSetting": true,
+                    "Updatable": true
+                },
+                {
+                    "Id": "PreferredStartTime",
+                    "Name": "Preferred Start Time",
+                    "Description": "Configure a maintenance window for managed actions in UTC. Valid values are Day and time in the 'day:hour:minute' format. For example, 'Sun:00:00'.",
+                    "Type": "String",
+                    "DefaultValue": "Sun:00:00",
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "ElasticBeanstalkManagedPlatformUpdates.ManagedActionsEnabled",
+                            "Value": true
+                        }
+                    ]
+                },
+                {
+                    "Id": "UpdateLevel",
+                    "Name": "Update Level",
+                    "Description": "The highest level of update to apply with managed platform updates. Platforms are versioned major.minor.patch. For example, 2.0.8 has a major version of 2, a minor version of 0, and a patch version of 8.",
+                    "Type": "String",
+                    "DefaultValue": "minor",
+                    "AllowedValues": [
+                        "minor",
+                        "patch"
+                    ],
+                    "ValueMapping": {
+                        "minor": "Minor",
+                        "patch": "Patch"
+                    },
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "ElasticBeanstalkManagedPlatformUpdates.ManagedActionsEnabled",
+                            "Value": true
+                        }
+                    ]
+                }
+            ]
         }
     ]
 }

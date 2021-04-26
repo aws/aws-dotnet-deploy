@@ -88,8 +88,47 @@ namespace AspNetAppElasticBeanstalkLinux
                         Namespace = "aws:elasticbeanstalk:environment",
                         OptionName =  "EnvironmentType",
                         Value = settings.EnvironmentType
+                   },
+                   new CfnEnvironment.OptionSettingProperty
+                   {
+                        Namespace = "aws:elasticbeanstalk:managedactions",
+                        OptionName = "ManagedActionsEnabled",
+                        Value = settings.ElasticBeanstalkManagedPlatformUpdates.ManagedActionsEnabled.ToString().ToLower()
                    }
                 };
+
+            if (settings.ElasticBeanstalkManagedPlatformUpdates.ManagedActionsEnabled)
+            {
+                var beanstalkrole = new Role(this, "BeanstalkServiceRole", new RoleProps
+                {
+                    AssumedBy = new ServicePrincipal("elasticbeanstalk.amazonaws.com"),
+                    ManagedPolicies = new[]
+                    {
+                        ManagedPolicy.FromAwsManagedPolicyName("AWSElasticBeanstalkManagedUpdatesCustomerRolePolicy")
+                    }
+                });
+
+                optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
+                {
+                    Namespace = "aws:elasticbeanstalk:environment",
+                    OptionName = "ServiceRole",
+                    Value = beanstalkrole.RoleArn
+                });
+
+                optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
+                {
+                    Namespace = "aws:elasticbeanstalk:managedactions",
+                    OptionName = "PreferredStartTime",
+                    Value = settings.ElasticBeanstalkManagedPlatformUpdates.PreferredStartTime
+                });
+
+                optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
+                {
+                    Namespace = "aws:elasticbeanstalk:managedactions:platformupdate",
+                    OptionName = "UpdateLevel",
+                    Value = settings.ElasticBeanstalkManagedPlatformUpdates.UpdateLevel
+                });
+            }
 
             if(!string.IsNullOrEmpty(settings.InstanceType))
             {
