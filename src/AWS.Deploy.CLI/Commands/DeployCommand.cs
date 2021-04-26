@@ -413,7 +413,8 @@ namespace AWS.Deploy.CLI.Commands
                         case OptionSettingValueType.Object:
                             foreach (var childSetting in setting.ChildOptionSettings)
                             {
-                                await ConfigureDeployment(recommendation, childSetting);
+                                if (recommendation.IsOptionSettingDisplayable(childSetting))
+                                    await ConfigureDeployment(recommendation, childSetting);
                             }
                             break;
                         default:
@@ -464,7 +465,14 @@ namespace AWS.Deploy.CLI.Commands
 
             if (objectValues != null)
             {
-                _consoleUtilities.DisplayValues(objectValues, "\t");
+                var displayableValues = new Dictionary<string, object>();
+                foreach (var child in optionSetting.ChildOptionSettings)
+                {
+                    if (!objectValues.ContainsKey(child.Id))
+                        continue;
+                    displayableValues.Add(child.Name, objectValues[child.Id]);
+                }
+                _consoleUtilities.DisplayValues(displayableValues, "\t");
             }
         }
     }

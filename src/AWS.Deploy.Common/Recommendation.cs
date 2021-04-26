@@ -107,12 +107,28 @@ namespace AWS.Deploy.Common
 
         public T GetOptionSettingValue<T>(OptionSettingItem optionSetting, bool ignoreDefaultValue = false)
         {
-            return optionSetting.GetValue<T>(_replacementTokens, ignoreDefaultValue);
+            var displayableOptionSettings = new Dictionary<string, bool>();
+            if (optionSetting.Type == OptionSettingValueType.Object)
+            {
+                foreach (var childOptionSetting in optionSetting.ChildOptionSettings)
+                {
+                    displayableOptionSettings.Add(childOptionSetting.Id, IsOptionSettingDisplayable(childOptionSetting));
+                }
+            }
+            return optionSetting.GetValue<T>(_replacementTokens, ignoreDefaultValue, displayableOptionSettings);
         }
 
         public object GetOptionSettingValue(OptionSettingItem optionSetting, bool ignoreDefaultValue = false)
         {
-            return optionSetting.GetValue(_replacementTokens, ignoreDefaultValue);
+            var displayableOptionSettings = new Dictionary<string, bool>();
+            if (optionSetting.Type == OptionSettingValueType.Object)
+            {
+                foreach (var childOptionSetting in optionSetting.ChildOptionSettings)
+                {
+                    displayableOptionSettings.Add(childOptionSetting.Id, IsOptionSettingDisplayable(childOptionSetting));
+                }
+            }
+            return optionSetting.GetValue(_replacementTokens, ignoreDefaultValue, displayableOptionSettings);
         }
 
         public T GetOptionSettingDefaultValue<T>(OptionSettingItem optionSetting)
