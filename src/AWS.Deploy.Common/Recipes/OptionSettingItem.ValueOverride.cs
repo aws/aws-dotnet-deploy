@@ -12,9 +12,9 @@ namespace AWS.Deploy.Common.Recipes
     {
         private object _valueOverride;
 
-        public T GetValue<T>(IDictionary<string, string> replacementTokens, bool ignoreDefaultValue = false)
+        public T GetValue<T>(IDictionary<string, string> replacementTokens, bool ignoreDefaultValue = false, IDictionary<string, bool> displayableOptionSettings = null)
         {
-            var value = GetValue(replacementTokens, ignoreDefaultValue);
+            var value = GetValue(replacementTokens, ignoreDefaultValue, displayableOptionSettings);
             if (value == null)
             {
                 return default;
@@ -23,7 +23,7 @@ namespace AWS.Deploy.Common.Recipes
             return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(value));
         }
 
-        public object GetValue(IDictionary<string, string> replacementTokens, bool ignoreDefaultValue = false)
+        public object GetValue(IDictionary<string, string> replacementTokens, bool ignoreDefaultValue = false, IDictionary<string, bool> displayableOptionSettings = null)
         {
             if (_valueOverride != null)
             {
@@ -36,6 +36,15 @@ namespace AWS.Deploy.Common.Recipes
                 foreach (var childOptionSetting in ChildOptionSettings)
                 {
                     var childValue = childOptionSetting.GetValue(replacementTokens, ignoreDefaultValue);
+
+                    if (
+                        displayableOptionSettings != null &&
+                        displayableOptionSettings.TryGetValue(childOptionSetting.Id, out bool isDisplayable))
+                    {
+                        if (!isDisplayable)
+                            continue;
+                    }
+
                     if (childValue != null)
                     {
                         objectValue[childOptionSetting.Id] = childValue;
