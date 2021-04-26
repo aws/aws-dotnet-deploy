@@ -44,5 +44,10 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
         /// The EC2 Key Pair used for the Beanstalk Application.
         /// </summary>
         public string EC2KeyPair { get; set; }
+
+        /// <summary>
+        /// Specifies whether to enable or disable Managed Platform Updates.
+        /// </summary>
+        public ElasticBeanstalkManagedPlatformUpdatesConfiguration ElasticBeanstalkManagedPlatformUpdates { get; set; }
     }
 }
