@@ -34,8 +34,6 @@ namespace AWS.Deploy.Orchestration.Utilities
 
         public async Task<List<CloudApplication>> GetExistingDeployedApplications(List<Recommendation> compatibleRecommendations = null)
         {
-            compatibleRecommendations ??= new List<Recommendation>();
-
             var stacks = await _awsResourceQueryer.GetCloudFormationStacks();
             var apps = new List<CloudApplication>();
 
@@ -68,7 +66,9 @@ namespace AWS.Deploy.Orchestration.Utilities
                 // If a list of compatible recommendations was given then skip existing applications that were used with a
                 // recipe that is not compatible.
                 var recipeId = deployTag.Value;
-                if (!compatibleRecommendations.Any(rec => string.Equals(rec.Recipe.Id, recipeId)))
+                if (
+                    compatibleRecommendations != null &&
+                    !compatibleRecommendations.Any(rec => string.Equals(rec.Recipe.Id, recipeId)))
                 {
                     continue;
                 }
