@@ -77,8 +77,7 @@
     </Task>
   </UsingTask>
 
-<!-- TODO: we need to find a better fix for execute SetupLocalCache than skipping in Release configuration -->
-<Target Name="SetupNuGetCache" AfterTargets="Pack" Condition=" '$(Configuration)' != 'Release' ">
+<Target Name="SetupNuGetCache" AfterTargets="Pack">
 
   <SetupLocalCache NuGetPackage="$(OutputPath)..\$(PackageId).$(PackageVersion).nupkg"/>
 
