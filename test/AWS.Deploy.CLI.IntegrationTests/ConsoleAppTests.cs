@@ -80,6 +80,14 @@ namespace AWS.Deploy.CLI.IntegrationTests
             var logMessages = await _cloudWatchLogsHelper.GetLogMessages(logGroup);
             Assert.Contains("Hello World!", logMessages);
 
+            // list
+            var listArgs = new[] { "list-deployments" };
+            await _app.Run(listArgs);
+
+            // Verify stack exists in list of deployments
+            var listDeployStdOut = _interactiveService.StdOutReader.ReadAllLines();
+            Assert.Contains(listDeployStdOut, (deployment) => _stackName.Equals(deployment));
+
             // Arrange input for delete
             await _interactiveService.StdInWriter.WriteAsync("y"); // Confirm delete
             await _interactiveService.StdInWriter.FlushAsync();

@@ -77,6 +77,14 @@ namespace AWS.Deploy.CLI.IntegrationTests
             // URL could take few more minutes to come live, therefore, we want to wait and keep trying for a specified timeout
             await _httpHelper.WaitUntilSuccessStatusCode(applicationUrl, TimeSpan.FromSeconds(5), TimeSpan.FromMinutes(5));
 
+            // list
+            var listArgs = new[] { "list-deployments" };
+            await _app.Run(listArgs);
+
+            // Verify stack exists in list of deployments
+            var listDeployStdOut = _interactiveService.StdOutReader.ReadAllLines();
+            Assert.Contains(listDeployStdOut, (deployment) => _stackName.Equals(deployment));
+
             // Arrange input for delete
             await _interactiveService.StdInWriter.WriteAsync("y"); // Confirm delete
             await _interactiveService.StdInWriter.FlushAsync();
