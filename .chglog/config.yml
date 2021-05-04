@@ -5,18 +5,29 @@ info:
   repository_url: https://github.com/aws/aws-dotnet-deploy
 options:
   commits:
-    # filters:
-    #   Type:
-    #     - feat
-    #     - fix
-    #     - perf
-    #     - refactor
+    filters:
+      Type:
+        - feat
+        - fix
+        - docs
+        - style
+        - refactor
+        - perf
+        - test
+        - build
+        - ci
+        - chore
   commit_groups:
     title_maps:
       feat: Features
       fix: Bug Fixes
-      perf: Performance Improvements
+      docs: Documentation
+      style: Style
       refactor: Code Refactoring
+      perf: Performance Improvements
+      test: Testing
+      build: Build System or External Dependencies
+      ci: CI Configuration Changes
       chore: Chore
   header:
     pattern: "^(\\w*)\\:\\s(.*)$"
