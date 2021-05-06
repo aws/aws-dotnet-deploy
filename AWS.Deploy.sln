@@ -56,7 +56,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ContosoUniversity", "testap
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ContosoUniversityBackendService", "testapps\ContosoUniversityBackendService\ContosoUniversityBackendService.csproj", "{AC7B0880-00CB-41E0-996C-B4C99103CEF9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AWS.Deploy.CLI.IntegrationTests", "test\AWS.Deploy.CLI.IntegrationTests\AWS.Deploy.CLI.IntegrationTests.csproj", "{001A0CE1-CCCE-4006-8CAC-AD18E37060A3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AWS.Deploy.CLI.IntegrationTests", "test\AWS.Deploy.CLI.IntegrationTests\AWS.Deploy.CLI.IntegrationTests.csproj", "{001A0CE1-CCCE-4006-8CAC-AD18E37060A3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AWS.Deploy.ServerMode.Client", "src\AWS.Deploy.ServerMode.Client\AWS.Deploy.ServerMode.Client.csproj", "{1B171F48-D200-407D-A9F2-179E2A602821}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AWS.Deploy.ServerMode.ClientGenerator", "src\AWS.Deploy.ServerMode.ClientGenerator\AWS.Deploy.ServerMode.ClientGenerator.csproj", "{C533AA26-797A-4A41-BA28-2364B66DAA5F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -140,6 +144,14 @@ Global
 		{001A0CE1-CCCE-4006-8CAC-AD18E37060A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{001A0CE1-CCCE-4006-8CAC-AD18E37060A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{001A0CE1-CCCE-4006-8CAC-AD18E37060A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B171F48-D200-407D-A9F2-179E2A602821}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B171F48-D200-407D-A9F2-179E2A602821}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B171F48-D200-407D-A9F2-179E2A602821}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B171F48-D200-407D-A9F2-179E2A602821}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C533AA26-797A-4A41-BA28-2364B66DAA5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C533AA26-797A-4A41-BA28-2364B66DAA5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C533AA26-797A-4A41-BA28-2364B66DAA5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C533AA26-797A-4A41-BA28-2364B66DAA5F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -165,6 +177,8 @@ Global
 		{6EDCA334-3317-44A4-A017-2A8D810EE7A7} = {C3A0C716-BDEA-4393-B223-AF8F8531522A}
 		{AC7B0880-00CB-41E0-996C-B4C99103CEF9} = {C3A0C716-BDEA-4393-B223-AF8F8531522A}
 		{001A0CE1-CCCE-4006-8CAC-AD18E37060A3} = {BD466B5C-D8B0-4069-98A9-6DC8F01FA757}
+		{1B171F48-D200-407D-A9F2-179E2A602821} = {11C7056E-93C1-408B-BD87-5270595BBE0E}
+		{C533AA26-797A-4A41-BA28-2364B66DAA5F} = {11C7056E-93C1-408B-BD87-5270595BBE0E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5A4B2863-1763-4496-B122-651A38A4F5D7}

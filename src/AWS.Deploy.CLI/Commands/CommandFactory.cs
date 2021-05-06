@@ -95,6 +95,7 @@ namespace AWS.Deploy.CLI.Commands
             rootCommand.Add(BuildDeployCommand());
             rootCommand.Add(BuildListCommand());
             rootCommand.Add(BuildDeleteCommand());
+            rootCommand.Add(BuildServerModeCommand());
 
             return rootCommand;
         }
@@ -293,6 +294,47 @@ namespace AWS.Deploy.CLI.Commands
                 }
             });
             return listCommand;
+        }
+
+        private Command BuildServerModeCommand()
+        {
+            var serverModeCommand = new Command(
+                "server-mode",
+                "Launches the tool in a server mode for IDEs like Visual Studio to integrate with.")
+            {
+                new Option<int>(new []{"--port"}, description: "Port the server mode will listen to."),
+                new Option<int>(new []{"--parent-pid"}, description: "The ID of the process that is launching server mode. Server mode will exit when the parent pid terminates."),
+                _optionDiagnosticLogging
+            };
+            serverModeCommand.Handler = CommandHandler.Create<int, int?, bool>(async (port, parentPid, diagnostics) =>
+            {
+                try
+                {
+                    var toolInteractiveService = new ConsoleInteractiveServiceImpl(diagnostics);
+                    var serverMode = new ServerModeCommand(toolInteractiveService, port, parentPid);
+
+                    await serverMode.ExecuteAsync();
+                }
+                catch (Exception e) when (e.IsAWSDeploymentExpectedException())
+                {
+                    if (diagnostics)
+                        _toolInteractiveService.WriteErrorLine(e.PrettyPrint());
+                    else
+                    {
+                        _toolInteractiveService.WriteErrorLine(string.Empty);
+                        _toolInteractiveService.WriteErrorLine(e.Message);
+                    }
+                }
+                catch (Exception e)
+                {
+                    // This is a bug
+                    _toolInteractiveService.WriteErrorLine(
+                        "Unhandled exception.  This is a bug.  Please copy the stack trace below and file a bug at https://github.com/aws/aws-dotnet-deploy. " +
+                        e.PrettyPrint());
+                }
+            });
+
+            return serverModeCommand;
         }
     }
 }

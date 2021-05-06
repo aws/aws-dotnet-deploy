@@ -12,6 +12,7 @@ using AWS.Deploy.Orchestration.CDK;
 using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.Utilities;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace AWS.Deploy.CLI.Extensions
 {
@@ -22,36 +23,35 @@ namespace AWS.Deploy.CLI.Extensions
         /// It is safer to use singleton instances for dependencies because every command (ex. deploy, list-deployments) run as a separate instance.
         /// </summary>
         /// <param name="serviceCollection"><see cref="IServiceCollection"/> instance that holds the app dependencies.</param>
-        public static void AddCustomServices(this IServiceCollection serviceCollection)
+        /// <param name="lifetime"></param>
+        public static void AddCustomServices(this IServiceCollection serviceCollection, ServiceLifetime lifetime = ServiceLifetime.Singleton)
         {
-            // dependencies that are required in various part of the app
-            serviceCollection.AddSingleton<IAWSClientFactory, DefaultAWSClientFactory>();
-            serviceCollection.AddSingleton<IAWSResourceQueryer, AWSResourceQueryer>();
-            serviceCollection.AddSingleton<IAWSUtilities, AWSUtilities>();
-            serviceCollection.AddSingleton<ICDKInstaller, CDKInstaller>();
-            serviceCollection.AddSingleton<ICDKManager, CDKManager>();
-            serviceCollection.AddSingleton<ICdkProjectHandler, CdkProjectHandler>();
-            serviceCollection.AddSingleton<ICloudApplicationNameGenerator, CloudApplicationNameGenerator>();
-            serviceCollection.AddSingleton<ICommandLineWrapper, CommandLineWrapper>();
-            serviceCollection.AddSingleton<IConsoleUtilities, ConsoleUtilities>();
-            serviceCollection.AddSingleton<IDeployedApplicationQueryer, DeployedApplicationQueryer>();
-            serviceCollection.AddSingleton<IDeploymentBundleHandler, DeploymentBundleHandler>();
-            serviceCollection.AddSingleton<IDirectoryManager, DirectoryManager>();
-            serviceCollection.AddSingleton<IFileManager, FileManager>();
-            serviceCollection.AddSingleton<INPMPackageInitializer, NPMPackageInitializer>();
-            serviceCollection.AddSingleton<IOrchestratorInteractiveService, ConsoleOrchestratorLogger>();
-            serviceCollection.AddSingleton<IPackageJsonGenerator, PackageJsonGenerator>();
-            serviceCollection.AddSingleton<IProjectDefinitionParser, ProjectDefinitionParser>();
-            serviceCollection.AddSingleton<IProjectParserUtility, ProjectParserUtility>();
-            serviceCollection.AddSingleton<ISystemCapabilityEvaluator, SystemCapabilityEvaluator>();
-            serviceCollection.AddSingleton<ITemplateMetadataReader, TemplateMetadataReader>();
-            serviceCollection.AddSingleton<IToolInteractiveService, ConsoleInteractiveServiceImpl>();
-            serviceCollection.AddSingleton<ITypeHintCommandFactory, TypeHintCommandFactory>();
-            serviceCollection.AddSingleton<IZipFileManager, ZipFileManager>();
-            serviceCollection.AddSingleton<ICommandFactory, CommandFactory>();
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(IAWSClientFactory), typeof(DefaultAWSClientFactory), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(IAWSResourceQueryer), typeof(AWSResourceQueryer), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(IAWSUtilities), typeof(AWSUtilities), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICDKInstaller), typeof(CDKInstaller), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICDKManager), typeof(CDKManager), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICdkProjectHandler), typeof(CdkProjectHandler), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICloudApplicationNameGenerator), typeof(CloudApplicationNameGenerator), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICommandLineWrapper), typeof(CommandLineWrapper), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(IConsoleUtilities), typeof(ConsoleUtilities), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(IDeployedApplicationQueryer), typeof(DeployedApplicationQueryer), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(IDeploymentBundleHandler), typeof(DeploymentBundleHandler), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(IDirectoryManager), typeof(DirectoryManager), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(IFileManager), typeof(FileManager), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(INPMPackageInitializer), typeof(NPMPackageInitializer), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(IOrchestratorInteractiveService), typeof(ConsoleOrchestratorLogger), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(IProjectDefinitionParser), typeof(ProjectDefinitionParser), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(IProjectParserUtility), typeof(ProjectParserUtility), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(ISystemCapabilityEvaluator), typeof(SystemCapabilityEvaluator), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(ITemplateMetadataReader), typeof(TemplateMetadataReader), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(IToolInteractiveService), typeof(ConsoleInteractiveServiceImpl), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(ITypeHintCommandFactory), typeof(TypeHintCommandFactory), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(IZipFileManager), typeof(ZipFileManager), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICommandFactory), typeof(CommandFactory), lifetime));
 
             var packageJsonTemplate = typeof(PackageJsonGenerator).Assembly.ReadEmbeddedFile(PackageJsonGenerator.TemplateIdentifier);
-            serviceCollection.AddSingleton<IPackageJsonGenerator>(new PackageJsonGenerator(packageJsonTemplate));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(IPackageJsonGenerator), (serviceProvider) => new PackageJsonGenerator(packageJsonTemplate), lifetime));
 
             // required to run the application
             serviceCollection.AddSingleton<App>();
