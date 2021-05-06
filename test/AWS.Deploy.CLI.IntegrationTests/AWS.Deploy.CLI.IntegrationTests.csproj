@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\AWS.Deploy.CLI\AWS.Deploy.CLI.csproj" />
+    <ProjectReference Include="..\..\src\AWS.Deploy.ServerMode.Client\AWS.Deploy.ServerMode.Client.csproj" />
   </ItemGroup>
 
   <ItemGroup>

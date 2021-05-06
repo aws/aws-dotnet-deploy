@@ -18,12 +18,21 @@ namespace AWS.Deploy.CLI.Utilities
     public class CommandLineWrapper : ICommandLineWrapper
     {
         private readonly IOrchestratorInteractiveService _interactiveService;
+        private readonly bool _useSeparateWindow;
         private Action<ProcessStartInfo> _processStartInfoAction;
 
         public CommandLineWrapper(
             IOrchestratorInteractiveService interactiveService)
         {
             _interactiveService = interactiveService;
+        }
+
+        public CommandLineWrapper(
+            IOrchestratorInteractiveService interactiveService,
+            bool useSeparateWindow)
+            : this(interactiveService)
+        {
+            _useSeparateWindow = useSeparateWindow;
         }
 
         /// <inheritdoc />
@@ -55,6 +64,14 @@ namespace AWS.Deploy.CLI.Utilities
                 CreateNoWindow = redirectIO,
                 WorkingDirectory = workingDirectory
             };
+
+            // If the command output is not being redirected check to see if
+            // the output should go to a separate console window. This is important when run from
+            // an IDE which won't have a console window by default.
+            if (!streamOutputToInteractiveService && !redirectIO)
+            {
+                processStartInfo.UseShellExecute = _useSeparateWindow;
+            }
 
             _processStartInfoAction?.Invoke(processStartInfo);
 
