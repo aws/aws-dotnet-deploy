@@ -5,7 +5,7 @@ namespace AWS.Deploy.CLI.TypeHintResponses
 {
     /// <summary>
     /// The <see cref="ECSClusterTypeHintResponse"/> class encapsulates
-    /// <see cref="OptionSettingTypeHint.ECSCluster"/> type hint response
+    /// <see cref="AWS.Deploy.Common.Recipes.OptionSettingTypeHint.ECSCluster"/> type hint response
     /// </summary>
     public class ECSClusterTypeHintResponse : IDisplayable
     {
