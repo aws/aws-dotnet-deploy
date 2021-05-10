@@ -17,5 +17,11 @@ namespace AWS.Deploy.Common
         public DeploymentBundleTypes Type { get; set; }
 
         public List<OptionSettingItem> Parameters { get; set; }
+
+        public DeploymentBundleDefinition(DeploymentBundleTypes type, List<OptionSettingItem> parameters)
+        {
+            Type = type;
+            Parameters = parameters;
+        }
     }
 }

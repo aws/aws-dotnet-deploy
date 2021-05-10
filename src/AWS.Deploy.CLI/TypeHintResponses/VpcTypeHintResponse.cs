@@ -18,11 +18,21 @@ namespace AWS.Deploy.CLI.TypeHintResponses
         public bool CreateNew { get;set; }
         public string VpcId { get; set; }
 
+        public VpcTypeHintResponse(
+            bool isDefault,
+            bool createNew,
+            string vpcId)
+        {
+            IsDefault = isDefault;
+            CreateNew = createNew;
+            VpcId = vpcId;
+        }
+
         public string ToDisplayString()
         {
             if (CreateNew)
                 return Constants.CREATE_NEW_LABEL;
-            
+
             return $"{VpcId}{(IsDefault ? Constants.DEFAULT_LABEL : "")}";
         }
     }

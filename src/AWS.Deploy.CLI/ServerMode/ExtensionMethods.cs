@@ -16,7 +16,7 @@ namespace AWS.Deploy.CLI.ServerMode
         /// Create an AWSCredentials object from the key information set as claims on the current request's ClaimsPrincipal.
         /// </summary>
         /// <param name="user"></param>
-        public static AWSCredentials ToAWSCredentials(this ClaimsPrincipal user)
+        public static AWSCredentials? ToAWSCredentials(this ClaimsPrincipal user)
         {
             var awsAccessKeyId = user.Claims.FirstOrDefault(x => string.Equals(x.Type, AwsCredentialsAuthenticationHandler.ClaimAwsAccessKeyId))?.Value;
             var awsSecretKey = user.Claims.FirstOrDefault(x => string.Equals(x.Type, AwsCredentialsAuthenticationHandler.ClaimAwsSecretKey))?.Value;

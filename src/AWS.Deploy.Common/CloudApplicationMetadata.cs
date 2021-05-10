@@ -26,5 +26,11 @@ namespace AWS.Deploy.Common
         /// All of the settings configured for the deployment of the application with the recipe.
         /// </summary>
         public IDictionary<string, object> Settings { get; set; } = new Dictionary<string, object>();
+
+        public CloudApplicationMetadata(string recipeId, string recipeVersion)
+        {
+            RecipeId = recipeId;
+            RecipeVersion = recipeVersion;
+        }
     }
 }

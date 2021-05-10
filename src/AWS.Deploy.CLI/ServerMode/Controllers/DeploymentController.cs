@@ -62,18 +62,20 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         [Authorize]
         public async Task<IActionResult> StartDeploymentSession(StartDeploymentSessionInput input)
         {
-            var output = new StartDeploymentSessionOutput
-            {
-                SessionId = Guid.NewGuid().ToString()
-            };
+            var output = new StartDeploymentSessionOutput(
+                Guid.NewGuid().ToString()
+                );
 
-            var state = new SessionState
-            {
-                SessionId = output.SessionId,
-                ProjectPath = input.ProjectPath,
-                AWSRegion = input.AWSRegion
-            };
-            state.ProjectDefinition = await _projectParserUtility.Parse(state.ProjectPath);
+            var serviceProvider = CreateSessionServiceProvider(output.SessionId, input.AWSRegion);
+            var awsResourceQueryer = serviceProvider.GetRequiredService<IAWSResourceQueryer>();
+
+            var state = new SessionState(
+                output.SessionId,
+                input.ProjectPath,
+                input.AWSRegion,
+                (await awsResourceQueryer.GetCallerIdentity()).Account,
+                await _projectParserUtility.Parse(input.ProjectPath)
+                );
 
             _stateServer.Save(output.SessionId, state);
 
@@ -115,12 +117,11 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             state.NewRecommendations = await orchestrator.GenerateDeploymentRecommendations();
             foreach (var recommendation in state.NewRecommendations)
             {
-                output.Recommendations.Add(new RecommendationSummary
-                {
-                    Name = recommendation.Name,
-                    Description = recommendation.Description,
-                    RecipeId = recommendation.Recipe.Id
-                });
+                output.Recommendations.Add(new RecommendationSummary(
+                    recommendation.Recipe.Id,
+                    recommendation.Name,
+                    recommendation.Description
+                    ));
             }
 
             return Ok(output);
@@ -155,11 +156,9 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
             foreach(var deployment in state.ExistingDeployments)
             {
-                output.ExistingDeployments.Add(new ExistingDeploymentSummary
-                {
-                    Name = deployment.Name,
-                    RecipeId = deployment.RecipeId
-                });
+                output.ExistingDeployments.Add(new ExistingDeploymentSummary(
+                    deployment.Name,
+                    deployment.RecipeId));
             }
 
             return Ok(output);
@@ -179,7 +178,8 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 return NotFound($"Session ID {sessionId} not found.");
             }
 
-            if(!string.IsNullOrEmpty(input.NewDeploymentRecipeId))
+            if(!string.IsNullOrEmpty(input.NewDeploymentRecipeId) &&
+               !string.IsNullOrEmpty(input.NewDeploymentName))
             {
                 state.SelectedRecommendation = state.NewRecommendations.FirstOrDefault(x => string.Equals(input.NewDeploymentRecipeId, x.Recipe.Id));
                 if(state.SelectedRecommendation == null)
@@ -221,9 +221,9 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         /// Begin execution of the deployment.
         /// </summary>
         [HttpPost("session/<sessionId>/execute")]
-        [SwaggerOperation(OperationId = "StartDeployment")]        
+        [SwaggerOperation(OperationId = "StartDeployment")]
         [Authorize]
-        public async Task<IActionResult> StartDeployment(string sessionId)
+        public IActionResult StartDeployment(string sessionId)
         {
             var state = _stateServer.Get(sessionId);
             if (state == null)
@@ -232,10 +232,11 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             }
 
             var serviceProvider = CreateSessionServiceProvider(state);
-            var awsResourceQueryer = serviceProvider.GetRequiredService<IAWSResourceQueryer>();
-            state.AWSAccountId = (await awsResourceQueryer.GetCallerIdentity()).Account;
 
             var orchestrator = CreateOrchestrator(state, serviceProvider);
+
+            if (state.SelectedRecommendation == null)
+                throw new SelectedRecommendationIsNullException("The selected recommendation is null or invalid.");
 
             var task = new DeployRecommendationTask(orchestrator, state.ApplicationDetails, state.SelectedRecommendation);
             state.DeploymentTask = task.Execute();
@@ -274,7 +275,12 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
         private IServiceProvider CreateSessionServiceProvider(SessionState state)
         {
-            var interactiveServices = new SessionOrchestratorInteractiveService(state.SessionId, _hubContext);
+            return CreateSessionServiceProvider(state.SessionId, state.AWSRegion);
+        }
+
+        private IServiceProvider CreateSessionServiceProvider(string sessionId, string awsRegion)
+        {
+            var interactiveServices = new SessionOrchestratorInteractiveService(sessionId, _hubContext);
             var services = new ServiceCollection();
             services.AddSingleton<IOrchestratorInteractiveService>(interactiveServices);
             services.AddSingleton<ICommandLineWrapper>(services => new CommandLineWrapper(interactiveServices, true));
@@ -286,26 +292,25 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             awsClientFactory.ConfigureAWSOptions(awsOptions =>
             {
                 awsOptions.Credentials = awsCredentials;
-                awsOptions.Region = RegionEndpoint.GetBySystemName(state.AWSRegion);
+                awsOptions.Region = RegionEndpoint.GetBySystemName(awsRegion);
             });
 
             return serviceProvider;
         }
 
-        private Orchestrator CreateOrchestrator(SessionState state, IServiceProvider serviceProvider = null, AWSCredentials awsCredentials = null)
+        private Orchestrator CreateOrchestrator(SessionState state, IServiceProvider? serviceProvider = null, AWSCredentials? awsCredentials = null)
         {
             if(serviceProvider == null)
             {
                 serviceProvider = CreateSessionServiceProvider(state);
             }
 
-            var session = new OrchestratorSession
-            {
-                AWSRegion = state.AWSRegion,
-                AWSAccountId = state.AWSAccountId,
-                ProjectDefinition = state.ProjectDefinition,
-                AWSCredentials = awsCredentials ?? HttpContext.User.ToAWSCredentials()
-            };
+            var session = new OrchestratorSession(
+                state.ProjectDefinition,
+                awsCredentials ?? HttpContext.User.ToAWSCredentials() ??
+                    throw new FailedToRetrieveAWSCredentialsException("The tool was not able to retrieve the AWS Credentials."),
+                state.AWSRegion,
+                state.AWSAccountId);
 
             return new Orchestrator(
                                     session,

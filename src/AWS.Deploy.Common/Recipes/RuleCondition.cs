@@ -13,12 +13,12 @@ namespace AWS.Deploy.Common.Recipes
         /// <summary>
         /// The value to check for. Used by the MSProjectSdkAttribute test
         /// </summary>
-        public string Value { get; set; }
+        public string? Value { get; set; }
 
         /// <summary>
         /// The name of the ms property for tests. Used by the MSProperty and MSPropertyExists
         /// </summary>
-        public string PropertyName { get; set; }
+        public string? PropertyName { get; set; }
 
         /// <summary>
         /// The list of allowed values to check for. Used by the MSProperty test
@@ -28,11 +28,11 @@ namespace AWS.Deploy.Common.Recipes
         /// <summary>
         /// The name of file to search for. Used by the FileExists test.
         /// </summary>
-        public string FileName { get; set; }
+        public string? FileName { get; set; }
 
         /// <summary>
         /// The name of a NuGet package for tests. Used to see if projects are taking dependencies on specific packages.
         /// </summary>
-        public string NuGetPackageName { get; set; }
+        public string? NuGetPackageName { get; set; }
     }
 }

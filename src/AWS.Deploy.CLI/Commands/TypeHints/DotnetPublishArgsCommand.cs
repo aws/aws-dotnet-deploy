@@ -21,9 +21,9 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             var settingValue = _consoleUtilities
                 .AskUserForValue(
                     string.Empty,
-                    recommendation.GetOptionSettingValue(optionSetting).ToString(),
+                    recommendation.GetOptionSettingValue<string>(optionSetting),
                     allowEmpty: true,
-                    resetValue: recommendation.GetOptionSettingDefaultValue<string>(optionSetting),
+                    resetValue: recommendation.GetOptionSettingDefaultValue<string>(optionSetting) ?? "",
                     // validators:
                     publishArgs =>
                         (publishArgs.Contains("-o ") || publishArgs.Contains("--output "))

@@ -22,7 +22,7 @@ namespace AWS.Deploy.Common.Recipes
         /// The id of the parent option setting. This is used for tooling that wants to look up the existing resources for a setting based on the TypeHint but needs
         /// to know the parent AWS resource. For example if listing the available Beanstalk environments the listing should be for the environments of the Beanstalk application.
         /// </summary>
-        public string ParentSettingId { get; set; }
+        public string? ParentSettingId { get; set; }
 
         /// <summary>
         /// The display friendly name of the setting.
@@ -49,7 +49,7 @@ namespace AWS.Deploy.Common.Recipes
         /// <summary>
         /// The default value used for the recipe if the user doesn't override the value.
         /// </summary>
-        public object DefaultValue { get; set; }
+        public object? DefaultValue { get; set; }
 
         /// <summary>
         /// UI can use this to reduce the amount of settings to show to the user when confirming the recommendation. This can make it so the user sees only the most important settings
@@ -89,12 +89,19 @@ namespace AWS.Deploy.Common.Recipes
         /// </summary>
         public Dictionary<string, object> TypeHintData { get; set; } = new ();
 
+        public OptionSettingItem(string id, string name, string description)
+        {
+            Id = id;
+            Name = name;
+            Description = description;
+        }
+
         /// <summary>
         /// Helper method to get strongly type <see cref="TypeHintData"/>.
         /// </summary>
         /// <typeparam name="T">Type of the type hint data</typeparam>
         /// <returns>Returns strongly type type hint data. Returns default value if <see cref="TypeHintData"/> is empty.</returns>
-        public T GetTypeHintData<T>()
+        public T? GetTypeHintData<T>()
         {
             if (!TypeHintData.Any())
             {

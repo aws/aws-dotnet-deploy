@@ -30,11 +30,7 @@ namespace AWS.Deploy.CLI
             var dockerTask = HasDockerInstalledAndRunning();
             var nodeTask = HasMinVersionNodeJs();
 
-            var capabilities = new SystemCapabilities
-            {
-                DockerInfo = await dockerTask,
-                NodeJsMinVersionInstalled = await nodeTask,
-            };
+            var capabilities = new SystemCapabilities(await nodeTask, await dockerTask);
 
             return capabilities;
         }
@@ -51,14 +47,14 @@ namespace AWS.Deploy.CLI
                 onComplete: proc =>
                 {
                     processExitCode = proc.ExitCode;
-                    containerType = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? proc.StandardOut.TrimEnd('\n') : "linux";
+                    containerType = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ?
+                        proc.StandardOut?.TrimEnd('\n') ??
+                            throw new DockerInfoException("Failed to check if Docker is running in Windows or Linux container mode.") :
+                        "linux";
                 });
 
-            var dockerInfo = new DockerInfo
-            {
-                DockerInstalled = processExitCode == 0,
-                DockerContainerType = containerType
-            };
+            var dockerInfo = new DockerInfo(processExitCode == 0, containerType);
+
             return dockerInfo;
         }
 
@@ -71,7 +67,7 @@ namespace AWS.Deploy.CLI
             // run node --version to get the version
             var result = await _commandLineWrapper.TryRunWithResult("node --version");
 
-            var versionString = result.StandardOut;
+            var versionString = result.StandardOut ?? "";
 
             if (versionString.StartsWith("v", StringComparison.OrdinalIgnoreCase))
                 versionString = versionString.Substring(1, versionString.Length - 1);

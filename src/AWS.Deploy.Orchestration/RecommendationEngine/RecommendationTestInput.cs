@@ -26,5 +26,15 @@ namespace AWS.Deploy.Orchestration.RecommendationEngine
         /// potential tests to check for AWS resources in the account being deployed to.
         /// </summary>
         public OrchestratorSession Session { get; set; }
+
+        public RecommendationTestInput(
+            RuleTest test,
+            ProjectDefinition projectDefinition,
+            OrchestratorSession session)
+        {
+            Test = test;
+            ProjectDefinition = projectDefinition;
+            Session = session;
+        }
     }
 }

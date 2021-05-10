@@ -12,7 +12,7 @@ namespace AWS.Deploy.CLI.ServerMode.Services
     {
         private readonly IDictionary<string, SessionState> _store = new ConcurrentDictionary<string, SessionState>();
 
-        public SessionState Get(string id)
+        public SessionState? Get(string id)
         {
             if(_store.TryGetValue(id, out var state))
             {

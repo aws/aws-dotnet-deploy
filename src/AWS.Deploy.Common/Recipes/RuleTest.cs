@@ -17,5 +17,13 @@ namespace AWS.Deploy.Common.Recipes
         /// The conditions for the tests
         /// </summary>
         public RuleCondition Condition { get; set; }
+
+        public RuleTest(
+            string type,
+            RuleCondition condition)
+        {
+            Type = type;
+            Condition = condition;
+        }
     }
 }

@@ -57,7 +57,7 @@ namespace AWS.Deploy.Common
             _replacementTokens[REPLACE_TOKEN_PROJECT_NAME] = name;
         }
 
-        public void ApplyPreviousSettings(IDictionary<string, object> previousSettings)
+        public void ApplyPreviousSettings(IDictionary<string, object>? previousSettings)
         {
             if (previousSettings == null)
                 return;
@@ -80,17 +80,20 @@ namespace AWS.Deploy.Common
 
         /// <summary>
         /// Interactively traverses given json path and returns target option setting.
-        /// Returns null if there is no <see cref="OptionSettingItem" /> that matches <paramref name="jsonPath"/> />
+        /// Throws exception if there is no <see cref="OptionSettingItem" /> that matches <paramref name="jsonPath"/> />
         /// </summary>
         /// <param name="jsonPath">
         /// Dot (.) separated key values string pointing to an option setting.
         /// Read more <see href="https://tools.ietf.org/id/draft-goessner-dispatch-jsonpath-00.html"/>
         /// </param>
-        /// <returns>Option setting at the json path. Returns null if, there doesn't exist an option setting.</returns>
-        public OptionSettingItem GetOptionSetting(string jsonPath)
+        /// <returns>Option setting at the json path. Throws <see cref="OptionSettingItemDoesNotExistException"/> if there doesn't exist an option setting.</returns>
+        public OptionSettingItem GetOptionSetting(string? jsonPath)
         {
+            if (string.IsNullOrEmpty(jsonPath))
+                throw new OptionSettingItemDoesNotExistException("The Option Setting Item you are looking for does not exist.");
+
             var ids = jsonPath.Split('.');
-            OptionSettingItem optionSetting = null;
+            OptionSettingItem? optionSetting = null;
 
             foreach (var id in ids)
             {
@@ -98,14 +101,14 @@ namespace AWS.Deploy.Common
                 optionSetting = optionSettings.FirstOrDefault(os => os.Id.Equals(id));
                 if (optionSetting == null)
                 {
-                    return null;
+                    throw new OptionSettingItemDoesNotExistException("The Option Setting Item you are looking for does not exist.");
                 }
             }
 
-            return optionSetting;
+            return optionSetting!;
         }
 
-        public T GetOptionSettingValue<T>(OptionSettingItem optionSetting, bool ignoreDefaultValue = false)
+        public T GetOptionSettingValue<T>(OptionSettingItem optionSetting)
         {
             var displayableOptionSettings = new Dictionary<string, bool>();
             if (optionSetting.Type == OptionSettingValueType.Object)
@@ -115,10 +118,10 @@ namespace AWS.Deploy.Common
                     displayableOptionSettings.Add(childOptionSetting.Id, IsOptionSettingDisplayable(childOptionSetting));
                 }
             }
-            return optionSetting.GetValue<T>(_replacementTokens, ignoreDefaultValue, displayableOptionSettings);
+            return optionSetting.GetValue<T>(_replacementTokens, displayableOptionSettings);
         }
 
-        public object GetOptionSettingValue(OptionSettingItem optionSetting, bool ignoreDefaultValue = false)
+        public object GetOptionSettingValue(OptionSettingItem optionSetting)
         {
             var displayableOptionSettings = new Dictionary<string, bool>();
             if (optionSetting.Type == OptionSettingValueType.Object)
@@ -128,15 +131,15 @@ namespace AWS.Deploy.Common
                     displayableOptionSettings.Add(childOptionSetting.Id, IsOptionSettingDisplayable(childOptionSetting));
                 }
             }
-            return optionSetting.GetValue(_replacementTokens, ignoreDefaultValue, displayableOptionSettings);
+            return optionSetting.GetValue(_replacementTokens, displayableOptionSettings);
         }
 
-        public T GetOptionSettingDefaultValue<T>(OptionSettingItem optionSetting)
+        public T? GetOptionSettingDefaultValue<T>(OptionSettingItem optionSetting)
         {
             return optionSetting.GetDefaultValue<T>(_replacementTokens);
         }
 
-        public object GetOptionSettingDefaultValue(OptionSettingItem optionSetting)
+        public object? GetOptionSettingDefaultValue(OptionSettingItem optionSetting)
         {
             return optionSetting.GetDefaultValue(_replacementTokens);
         }
@@ -157,7 +160,11 @@ namespace AWS.Deploy.Common
             foreach (var dependency in optionSetting.DependsOn)
             {
                 var dependsOnOptionSetting = GetOptionSetting(dependency.Id);
-                if (dependsOnOptionSetting != null && !GetOptionSettingValue(dependsOnOptionSetting).Equals(dependency.Value))
+                var dependsOnOptionSettingValue = GetOptionSettingValue(dependsOnOptionSetting);
+                if (
+                    dependsOnOptionSetting != null &&
+                    dependsOnOptionSettingValue != null &&
+                    !dependsOnOptionSettingValue.Equals(dependency.Value))
                 {
                     return false;
                 }

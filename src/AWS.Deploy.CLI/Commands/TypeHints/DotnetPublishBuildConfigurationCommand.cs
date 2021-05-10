@@ -23,7 +23,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                     string.Empty,
                     recommendation.GetOptionSettingValue<string>(optionSetting),
                     allowEmpty: false,
-                    resetValue: recommendation.GetOptionSettingDefaultValue<string>(optionSetting));
+                    resetValue: recommendation.GetOptionSettingDefaultValue<string>(optionSetting) ?? "");
             recommendation.DeploymentBundle.DotnetPublishBuildConfiguration = settingValue;
             return Task.FromResult<object>(settingValue);
         }

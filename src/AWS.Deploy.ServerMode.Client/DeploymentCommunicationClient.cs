@@ -17,11 +17,11 @@ namespace AWS.Deploy.ServerMode.Client
         private bool _initialized = false;
         private readonly HubConnection _connection;
 
-        public Action<string> ReceiveLogDebugLine { get; set; }
-        public Action<string> ReceiveLogErrorMessageLine { get; set; }
-        public Action<string> ReceiveLogMessageLineAction { get; set; }
+        public Action<string>? ReceiveLogDebugLine { get; set; }
+        public Action<string>? ReceiveLogErrorMessageLine { get; set; }
+        public Action<string>? ReceiveLogMessageLineAction { get; set; }
 
-        public Action<string> ReceiveLogAllLogAction { get; set; }
+        public Action<string>? ReceiveLogAllLogAction { get; set; }
 
         public DeploymentCommunicationClient(string baseUrl)
         {

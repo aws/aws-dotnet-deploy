@@ -27,7 +27,7 @@ namespace AWS.Deploy.CLI
         /// <summary>
         /// The current value for the option setting.
         /// </summary>
-        public object CurrentValue;
+        public object? CurrentValue;
 
         /// <summary>
         /// If true, ask for the new name
@@ -61,5 +61,15 @@ namespace AWS.Deploy.CLI
         /// then an "Empty" option will be added to the list of valid options.
         /// </summary>
         public bool EmptyOption { get; set; }
+
+        public UserInputConfiguration(
+            Func<T, string> displaySelector,
+            Func<T, bool> defaultSelector,
+            string defaultNewName = "")
+        {
+            DisplaySelector = displaySelector;
+            DefaultSelector = defaultSelector;
+            DefaultNewName = defaultNewName;
+        }
     }
 }

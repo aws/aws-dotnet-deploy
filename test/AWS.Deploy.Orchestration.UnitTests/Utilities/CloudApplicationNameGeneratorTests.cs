@@ -69,7 +69,7 @@ namespace AWS.Deploy.Orchestration.UnitTests.Utilities
         {
             // ARRANGE
             var projectPath = _fakeFileManager.AddEmptyProjectFile($"c:\\{projectFile}");
-            
+
             var projectDefinition = await _projectDefinitionParser.Parse(projectPath);
 
             var existingApplication = new List<CloudApplication>();
@@ -91,15 +91,12 @@ namespace AWS.Deploy.Orchestration.UnitTests.Utilities
             var expectedRecommendation = $"{projectFile}1";
 
             var projectPath = _fakeFileManager.AddEmptyProjectFile($"c:\\{projectFile}.csproj");
-            
+
             var projectDefinition = await _projectDefinitionParser.Parse(projectPath);
 
             var existingApplication = new List<CloudApplication>
             {
-                new CloudApplication
-                {
-                    Name = projectFile
-                }
+                new CloudApplication(projectFile, string.Empty)
             };
 
             // ACT

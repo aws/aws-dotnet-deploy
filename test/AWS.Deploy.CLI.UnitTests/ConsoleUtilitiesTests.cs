@@ -36,12 +36,12 @@ namespace AWS.Deploy.CLI.UnitTests
                 "CustomNewIdentifier"
             });
             var consoleUtilities = new ConsoleUtilities(interactiveServices);
-            var userInputConfiguration = new UserInputConfiguration<OptionItem>
+            var userInputConfiguration = new UserInputConfiguration<OptionItem>(
+                option => option.DisplayName,
+                option => option.Identifier.Equals("Identifier2"),
+                "NewIdentifier")
             {
-                DisplaySelector = option => option.DisplayName,
-                DefaultSelector = option => option.Identifier.Equals("Identifier2"),
-                AskNewName = true,
-                DefaultNewName = "NewIdentifier"
+                AskNewName = true
             };
             var userResponse = consoleUtilities.AskUserToChooseOrCreateNew(_options, "Title", userInputConfiguration);
 
@@ -67,12 +67,12 @@ namespace AWS.Deploy.CLI.UnitTests
                 "1"
             });
             var consoleUtilities = new ConsoleUtilities(interactiveServices);
-            var userInputConfiguration = new UserInputConfiguration<OptionItem>
+            var userInputConfiguration = new UserInputConfiguration<OptionItem>(
+                option => option.DisplayName,
+                option => option.Identifier.Equals("Identifier2"),
+                "NewIdentifier")
             {
-                DisplaySelector = option => option.DisplayName,
-                DefaultSelector = option => option.Identifier.Equals("Identifier2"),
-                AskNewName = true,
-                DefaultNewName = "NewIdentifier"
+                AskNewName = true
             };
             var userResponse = consoleUtilities.AskUserToChooseOrCreateNew(_options, "Title", userInputConfiguration);
 

@@ -24,7 +24,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                     string.Empty,
                     recommendation.GetOptionSettingValue<string>(optionSetting),
                     allowEmpty: true,
-                    resetValue: recommendation.GetOptionSettingDefaultValue<string>(optionSetting),
+                    resetValue: recommendation.GetOptionSettingDefaultValue<string>(optionSetting) ?? "",
                     // validators:
                     executionDirectory => ValidateExecutionDirectory(executionDirectory));
 

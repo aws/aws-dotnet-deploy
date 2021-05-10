@@ -29,11 +29,9 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             var existingRoles = await _awsResourceQueryer.ListOfIAMRoles(typeHintData?.ServicePrincipal);
             var currentTypeHintResponse = recommendation.GetOptionSettingValue<IAMRoleTypeHintResponse>(optionSetting);
 
-            var userInputConfiguration = new UserInputConfiguration<Role>
-            {
-                DisplaySelector = role => role.RoleName,
-                DefaultSelector = role => currentTypeHintResponse.RoleArn?.Equals(role.Arn) ?? false,
-            };
+            var userInputConfiguration = new UserInputConfiguration<Role>(
+                role => role.RoleName,
+                role => currentTypeHintResponse.RoleArn?.Equals(role.Arn) ?? false);
 
             var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(existingRoles ,"Select an IAM role", userInputConfiguration);
 

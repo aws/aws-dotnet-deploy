@@ -14,5 +14,10 @@ namespace AWS.Deploy.Common.TypeHintData
         /// ServicePrincipal to filter IAM roles.
         /// </summary>
         public string ServicePrincipal { get; set; }
+
+        public IAMRoleTypeHintData(string servicePrincipal)
+        {
+            ServicePrincipal = servicePrincipal;
+        }
     }
 }

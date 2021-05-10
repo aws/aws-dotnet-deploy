@@ -9,15 +9,15 @@ namespace AWS.Deploy.Common.IO
     {
         DirectoryInfo CreateDirectory(string path);
         bool Exists(string path);
-        string[] GetFiles(string projectPath, string searchPattern = null);
+        string[] GetFiles(string projectPath, string? searchPattern = null);
     }
 
     public class DirectoryManager : IDirectoryManager
     {
         public DirectoryInfo CreateDirectory(string path) => Directory.CreateDirectory(path);
-        
+
         public bool Exists(string path) => Directory.Exists(path);
 
-        public string[] GetFiles(string path, string searchPattern = null) => Directory.GetFiles(path, searchPattern ?? "*");
+        public string[] GetFiles(string path, string? searchPattern = null) => Directory.GetFiles(path, searchPattern ?? "*");
     }
 }

@@ -19,6 +19,6 @@ namespace AWS.Deploy.Common.Recipes
         /// The effect of the rule based on whether the test pass or not. If the effect is not defined
         /// the effect is the Include option matches the result of the test passing.
         /// </summary>
-        public RuleEffect Effect { get; set; }
+        public RuleEffect? Effect { get; set; }
     }
 }

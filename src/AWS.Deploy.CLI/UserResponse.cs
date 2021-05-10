@@ -19,12 +19,12 @@ namespace AWS.Deploy.CLI
         /// If set, the user has chosen to create a new resource with a custom name.
         /// <see cref="CreateNew"/> must be true.
         /// </summary>
-        public string NewName { get; set; }
+        public string? NewName { get; set; }
 
         /// <summary>
         /// If set, customer has chosen an existing option from the list of options shown.
         /// </summary>
-        public T SelectedOption { get; set; }
+        public T? SelectedOption { get; set; }
 
         /// <summary>
         /// If set, customer has chosen empty option.

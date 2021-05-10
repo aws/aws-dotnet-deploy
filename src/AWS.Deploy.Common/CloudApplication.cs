@@ -32,5 +32,11 @@ namespace AWS.Deploy.Common
         /// </summary>
         /// <returns></returns>
         public override string ToString() => Name;
+
+        public CloudApplication(string name, string recipeId)
+        {
+            Name = name;
+            RecipeId = recipeId;
+        }
     }
 }

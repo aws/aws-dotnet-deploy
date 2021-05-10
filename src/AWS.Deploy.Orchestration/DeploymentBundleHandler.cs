@@ -62,7 +62,7 @@ namespace AWS.Deploy.Orchestration
             var result = await _commandLineWrapper.TryRunWithResult(dockerBuildCommand, dockerExecutionDirectory, redirectIO: false);
             if (result.ExitCode != 0)
             {
-                throw new DockerBuildFailedException(result.StandardError);
+                throw new DockerBuildFailedException(result.StandardError ?? "");
             }
 
             return imageTag;
@@ -117,7 +117,7 @@ namespace AWS.Deploy.Orchestration
             var result = await _commandLineWrapper.TryRunWithResult(publishCommand, redirectIO: false);
             if (result.ExitCode != 0)
             {
-                throw new DotnetPublishFailedException(result.StandardError);
+                throw new DotnetPublishFailedException(result.StandardError ?? "");
             }
 
             var zipFilePath = $"{publishDirectoryInfo.FullName}.zip";

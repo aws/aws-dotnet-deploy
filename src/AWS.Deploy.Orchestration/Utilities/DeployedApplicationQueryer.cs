@@ -20,7 +20,7 @@ namespace AWS.Deploy.Orchestration.Utilities
         /// If <paramref name="compatibleRecommendations"/> has any values that only existing applications that were deployed with any of the recipes
         /// identified by the recommendations will be returned.
         /// </summary>
-        Task<List<CloudApplication>> GetExistingDeployedApplications(IList<Recommendation> compatibleRecommendations = null);
+        Task<List<CloudApplication>> GetExistingDeployedApplications(IList<Recommendation>? compatibleRecommendations = null);
     }
 
     public class DeployedApplicationQueryer : IDeployedApplicationQueryer
@@ -32,7 +32,7 @@ namespace AWS.Deploy.Orchestration.Utilities
             _awsResourceQueryer = awsResourceQueryer;
         }
 
-        public async Task<List<CloudApplication>> GetExistingDeployedApplications(IList<Recommendation> compatibleRecommendations = null)
+        public async Task<List<CloudApplication>> GetExistingDeployedApplications(IList<Recommendation>? compatibleRecommendations = null)
         {
             var stacks = await _awsResourceQueryer.GetCloudFormationStacks();
             var apps = new List<CloudApplication>();
@@ -73,11 +73,7 @@ namespace AWS.Deploy.Orchestration.Utilities
                     continue;
                 }
 
-                apps.Add(new CloudApplication
-                {
-                    Name = stack.StackName,
-                    RecipeId = recipeId
-                });
+                apps.Add(new CloudApplication(stack.StackName, recipeId));
             }
 
             return apps;

@@ -40,5 +40,30 @@ namespace AspNetAppEcsFargate.Configurations
 
         /// <inheritdoc cref="FargateTaskDefinitionProps.MemoryLimitMiB"/>
         public double? TaskMemory { get; set; }
+
+        /// A parameterless constructor is needed for <see cref="Microsoft.Extensions.Configuration.ConfigurationBuilder"/>
+        /// or the classes will fail to initialize.
+        /// The warnings are disabled since a parameterless constructor will allow non-nullable properties to be initialized with null values.
+#nullable disable warnings
+        public Configuration()
+        {
+
+        }
+#nullable restore warnings
+
+        public Configuration(
+            IAMRoleConfiguration applicationIAMRole,
+            string ecsServiceName,
+            ECSClusterConfiguration ecsCluster,
+            VpcConfiguration vpc,
+            string additionalECSServiceSecurityGroups
+            )
+        {
+            ApplicationIAMRole = applicationIAMRole;
+            ECSServiceName = ecsServiceName;
+            ECSCluster = ecsCluster;
+            Vpc = vpc;
+            AdditionalECSServiceSecurityGroups = additionalECSServiceSecurityGroups;
+        }
     }
 }

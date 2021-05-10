@@ -11,6 +11,11 @@ namespace AWS.Deploy.CLI.ServerMode.Models
     {
         public string SessionId { get; set; }
 
-        public string DefaultDeploymentName { get; set; }
+        public string? DefaultDeploymentName { get; set; }
+
+        public StartDeploymentSessionOutput(string sessionId)
+        {
+            SessionId = sessionId;
+        }
     }
 }

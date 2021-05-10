@@ -14,24 +14,27 @@ namespace AWS.Deploy.Orchestration
         public string Build(CloudApplication cloudApplication, Recommendation recommendation)
         {
             // General Settings
-            var appSettingsContainer = new RecipeConfiguration<Dictionary<string, object>>()
+            var appSettingsContainer = new RecipeConfiguration<Dictionary<string, object>>(
+                cloudApplication.StackName,
+                new FileInfo(recommendation.ProjectPath).Directory.FullName,
+                recommendation.Recipe.Id,
+                recommendation.Recipe.Version,
+                new ()
+                )
             {
-                StackName = cloudApplication.StackName,
-                ProjectPath = new FileInfo(recommendation.ProjectPath).Directory.FullName,
                 ECRRepositoryName = recommendation.DeploymentBundle.ECRRepositoryName ?? "",
                 ECRImageTag = recommendation.DeploymentBundle.ECRImageTag ?? "",
                 DotnetPublishZipPath = recommendation.DeploymentBundle.DotnetPublishZipPath ?? "",
-                DotnetPublishOutputDirectory = recommendation.DeploymentBundle.DotnetPublishOutputDirectory ?? "",
-                Settings = new Dictionary<string, object>()
+                DotnetPublishOutputDirectory = recommendation.DeploymentBundle.DotnetPublishOutputDirectory ?? ""
             };
-
-            appSettingsContainer.RecipeId = recommendation.Recipe.Id;
-            appSettingsContainer.RecipeVersion = recommendation.Recipe.Version;
 
             // Option Settings
             foreach (var optionSetting in recommendation.Recipe.OptionSettings)
             {
-                appSettingsContainer.Settings[optionSetting.Id] = recommendation.GetOptionSettingValue(optionSetting);
+                var optionSettingValue = recommendation.GetOptionSettingValue(optionSetting);
+
+                if (optionSettingValue != null)
+                    appSettingsContainer.Settings[optionSetting.Id] = optionSettingValue;
             }
 
             return JsonConvert.SerializeObject(appSettingsContainer, Formatting.Indented);

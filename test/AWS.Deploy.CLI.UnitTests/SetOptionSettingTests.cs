@@ -3,6 +3,8 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Amazon.Runtime;
 using AWS.Deploy.CLI.UnitTests.Utilities;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
@@ -10,6 +12,7 @@ using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.RecommendationEngine;
 using AWS.Deploy.Recipes;
+using Moq;
 using Xunit;
 
 namespace AWS.Deploy.CLI.UnitTests
@@ -24,10 +27,18 @@ namespace AWS.Deploy.CLI.UnitTests
             var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
 
             var parser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
-
-            var session =  new OrchestratorSession
+            var awsCredentials = new Mock<AWSCredentials>();
+            var systemCapabilities = new Mock<SystemCapabilities>(
+                It.IsAny<bool>(),
+                It.IsAny<DockerInfo>());
+            var session =  new OrchestratorSession(
+                parser.Parse(projectPath).Result,
+                awsCredentials.Object,
+                "us-west-2",
+                "123456789012")
             {
-                ProjectDefinition = parser.Parse(projectPath).Result
+                SystemCapabilities = Task.FromResult(systemCapabilities.Object),
+                AWSProfileName = "default"
             };
 
             var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, session);

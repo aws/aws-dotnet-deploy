@@ -48,9 +48,9 @@ namespace AWS.Deploy.Orchestration.Utilities
             string command,
             string workingDirectory = "",
             bool streamOutputToInteractiveService = true,
-            Action<TryRunResult> onComplete = null,
+            Action<TryRunResult>? onComplete = null,
             bool redirectIO = true,
-            IDictionary<string, string> environmentVariables = null,
+            IDictionary<string, string>? environmentVariables = null,
             CancellationToken cancelToken = default);
 
         /// <summary>
@@ -102,7 +102,7 @@ namespace AWS.Deploy.Orchestration.Utilities
             string workingDirectory = "",
             bool streamOutputToInteractiveService = false,
             bool redirectIO = true,
-            IDictionary<string, string> environmentVariables = null,
+            IDictionary<string, string>? environmentVariables = null,
             CancellationToken cancelToken = default)
         {
             var result = new TryRunResult();
@@ -131,12 +131,12 @@ namespace AWS.Deploy.Orchestration.Utilities
         /// <summary>
         /// Fully read <see cref="Process.StandardOutput"/>
         /// </summary>
-        public string StandardOut { get; set; }
+        public string? StandardOut { get; set; }
 
         /// <summary>
         /// Fully read <see cref="Process.StandardError"/>
         /// </summary>
-        public string StandardError { get; set; }
+        public string? StandardError { get; set; }
 
         /// <summary>
         /// Fully read <see cref="Process.ExitCode"/>

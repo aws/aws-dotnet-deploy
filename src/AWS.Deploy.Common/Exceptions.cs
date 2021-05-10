@@ -24,7 +24,7 @@ namespace AWS.Deploy.Common
     [AWSDeploymentExpectedException]
     public class InvalidCliArgumentException : Exception
     {
-        public InvalidCliArgumentException(string message, Exception innerException = null) : base(message, innerException) { }
+        public InvalidCliArgumentException(string message, Exception? innerException = null) : base(message, innerException) { }
     }
 
     /// <summary>
@@ -33,7 +33,16 @@ namespace AWS.Deploy.Common
     [AWSDeploymentExpectedException]
     public class InvalidRecipeDefinitionException : Exception
     {
-        public InvalidRecipeDefinitionException(string message, Exception innerException = null) : base(message, innerException) { }
+        public InvalidRecipeDefinitionException(string message, Exception? innerException = null) : base(message, innerException) { }
+    }
+
+    /// <summary>
+    /// Throw if the user attempts to deploy a <see cref="ProjectDefinition"/> but the project definition is invalid
+    /// </summary>
+    [AWSDeploymentExpectedException]
+    public class InvalidProjectDefinitionException : Exception
+    {
+        public InvalidProjectDefinitionException(string message, Exception? innerException = null) : base(message, innerException) { }
     }
 
     /// <summary>
@@ -44,7 +53,7 @@ namespace AWS.Deploy.Common
     [AWSDeploymentExpectedException]
     public class MissingNodeJsException : Exception
     {
-        public MissingNodeJsException(string message, Exception innerException = null) : base(message, innerException) { }
+        public MissingNodeJsException(string message, Exception? innerException = null) : base(message, innerException) { }
     }
 
     /// <summary>
@@ -55,7 +64,7 @@ namespace AWS.Deploy.Common
     [AWSDeploymentExpectedException]
     public class MissingDockerException : Exception
     {
-        public MissingDockerException(string message, Exception innerException = null) : base(message, innerException) { }
+        public MissingDockerException(string message, Exception? innerException = null) : base(message, innerException) { }
     }
 
     /// <summary>
@@ -66,7 +75,7 @@ namespace AWS.Deploy.Common
     [AWSDeploymentExpectedException]
     public class DockerContainerTypeException : Exception
     {
-        public DockerContainerTypeException(string message, Exception innerException = null) : base(message, innerException) { }
+        public DockerContainerTypeException(string message, Exception? innerException = null) : base(message, innerException) { }
     }
 
     /// <summary>
@@ -76,7 +85,7 @@ namespace AWS.Deploy.Common
     [AWSDeploymentExpectedException]
     public class FailedToGenerateAnyRecommendations : Exception
     {
-        public FailedToGenerateAnyRecommendations(string message, Exception innerException = null) : base(message, innerException) { }
+        public FailedToGenerateAnyRecommendations(string message, Exception? innerException = null) : base(message, innerException) { }
     }
 
     /// <summary>
@@ -86,7 +95,7 @@ namespace AWS.Deploy.Common
     [AWSDeploymentExpectedException]
     public class InvalidOverrideValueException : Exception
     {
-        public InvalidOverrideValueException(string message, Exception innerException = null) : base(message, innerException) { }
+        public InvalidOverrideValueException(string message, Exception? innerException = null) : base(message, innerException) { }
     }
 
     /// <summary>
@@ -95,9 +104,9 @@ namespace AWS.Deploy.Common
     [AWSDeploymentExpectedException]
     public class ParsingExistingCloudApplicationMetadataException : Exception
     {
-        public ParsingExistingCloudApplicationMetadataException(string message, Exception innerException = null) : base(message, innerException) { }
+        public ParsingExistingCloudApplicationMetadataException(string message, Exception? innerException = null) : base(message, innerException) { }
     }
-    
+
     /// <summary>
     /// Throw if Orchestrator is unable to create
     /// the deployment bundle.
@@ -105,7 +114,16 @@ namespace AWS.Deploy.Common
     [AWSDeploymentExpectedException]
     public class FailedToCreateDeploymentBundleException : Exception
     {
-        public FailedToCreateDeploymentBundleException(string message, Exception innerException = null) : base(message, innerException) { }
+        public FailedToCreateDeploymentBundleException(string message, Exception? innerException = null) : base(message, innerException) { }
+    }
+
+    /// <summary>
+    /// Throw if Option Setting Item does not exist
+    /// </summary>
+    [AWSDeploymentExpectedException]
+    public class OptionSettingItemDoesNotExistException : Exception
+    {
+        public OptionSettingItemDoesNotExistException(string message, Exception? innerException = null) : base(message, innerException) { }
     }
 
     /// <summary>
@@ -130,7 +148,7 @@ namespace AWS.Deploy.Common
             null != e?.GetType()
                 .GetCustomAttribute(typeof(AWSDeploymentExpectedExceptionAttribute), inherit: true);
 
-        public static string PrettyPrint(this Exception e)
+        public static string PrettyPrint(this Exception? e)
         {
             if (null == e)
                 return string.Empty;

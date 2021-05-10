@@ -29,9 +29,8 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
             var vpcs = await _awsResourceQueryer.GetListOfVpcs();
 
-            var userInputConfig = new UserInputConfiguration<Vpc>
-            {
-                DisplaySelector = vpc =>
+            var userInputConfig = new UserInputConfiguration<Vpc>(
+                vpc =>
                 {
                     var name = vpc.Tags?.FirstOrDefault(x => x.Key == "Name")?.Value ?? string.Empty;
                     var namePart =
@@ -46,23 +45,21 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
                     return $"{vpc.VpcId}{namePart}{isDefaultPart}";
                 },
-                DefaultSelector = vpc =>
+                vpc =>
                     !string.IsNullOrEmpty(currentVpcTypeHintResponse?.VpcId)
                         ? vpc.VpcId == currentVpcTypeHintResponse.VpcId
-                        : vpc.IsDefault
-            };
+                        : vpc.IsDefault);
 
             var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(
                 vpcs,
                 "Select a VPC",
                 userInputConfig);
 
-            return new VpcTypeHintResponse
-            {
-                IsDefault = userResponse.SelectedOption?.IsDefault == true,
-                CreateNew = userResponse.CreateNew,
-                VpcId = userResponse.SelectedOption?.VpcId ?? ""
-            };
+            return new VpcTypeHintResponse(
+                userResponse.SelectedOption?.IsDefault == true,
+                userResponse.CreateNew,
+                userResponse.SelectedOption?.VpcId ?? ""
+                );
         }
     }
 }

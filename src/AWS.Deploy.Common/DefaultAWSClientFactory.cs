@@ -10,7 +10,7 @@ namespace AWS.Deploy.Common
 {
     public class DefaultAWSClientFactory : IAWSClientFactory
     {
-        private Action<AWSOptions> _awsOptionsAction;
+        private Action<AWSOptions>? _awsOptionsAction;
 
         public void ConfigureAWSOptions(Action<AWSOptions> awsOptionsAction)
         {

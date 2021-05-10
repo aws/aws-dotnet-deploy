@@ -32,8 +32,9 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 options: environments.Select(env => env.EnvironmentName),
                 title: "Select Elastic Beanstalk environment to deploy to:",
                 askNewName: true,
-                defaultNewName: currentValue.ToString());
-            return userResponse.SelectedOption ?? userResponse.NewName;
+                defaultNewName: currentValue.ToString() ?? "");
+            return userResponse.SelectedOption ?? userResponse.NewName
+                ?? throw new UserPromptForNameReturnedNullException("The user response for a new environment name was null.");
         }
     }
 }

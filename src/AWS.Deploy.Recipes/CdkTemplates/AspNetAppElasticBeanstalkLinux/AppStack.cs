@@ -16,17 +16,20 @@ namespace AspNetAppElasticBeanstalkLinux
         private const string ENVIRONMENTTYPE_SINGLEINSTANCE = "SingleInstance";
         private const string ENVIRONMENTTYPE_LOADBALANCED = "LoadBalanced";
 
-        internal AppStack(Construct scope, RecipeConfiguration<Configuration> recipeConfiguration, IStackProps props = null)
+        internal AppStack(Construct scope, RecipeConfiguration<Configuration> recipeConfiguration, IStackProps? props = null)
             : base(scope, recipeConfiguration.StackName, props)
         {
             var settings = recipeConfiguration.Settings;
+
+            if (string.IsNullOrEmpty(recipeConfiguration.DotnetPublishZipPath))
+                throw new InvalidOrMissingConfigurationException("The provided path containing the dotnet publish zip file is null or empty.");
 
             var asset = new Asset(this, "Asset", new AssetProps
             {
                 Path = recipeConfiguration.DotnetPublishZipPath
             });
 
-            CfnApplication application = null;
+            CfnApplication? application = null;
 
             // Create an app version from the S3 asset defined above
             // The S3 "putObject" will occur first before CF generates the template
@@ -67,6 +70,9 @@ namespace AspNetAppElasticBeanstalkLinux
             }
             else
             {
+                if (string.IsNullOrEmpty(settings.ApplicationIAMRole.RoleArn))
+                    throw new InvalidOrMissingConfigurationException("The provided Application IAM Role ARN is null or empty.");
+
                 role = Role.FromRoleArn(this, "Role", settings.ApplicationIAMRole.RoleArn);
             }
 

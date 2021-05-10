@@ -14,9 +14,9 @@ namespace AWS.Deploy.Orchestration.CDK
     {
         public bool Success { get; }
 
-        public TResult Result { get; }
+        public TResult? Result { get; }
 
-        public TryGetResult(TResult result, bool success)
+        public TryGetResult(TResult? result, bool success)
         {
             Result = result;
             Success = success;

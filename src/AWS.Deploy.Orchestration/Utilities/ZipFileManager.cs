@@ -92,7 +92,7 @@ namespace AWS.Deploy.Orchestration.Utilities
         /// </summary>
         /// <param name="command">The command to search for in the path</param>
         /// <returns>The full path to the command if found otherwise it will return null</returns>
-        private string FindExecutableInPath(string command)
+        private string? FindExecutableInPath(string command)
         {
             if (File.Exists(command))
                 return Path.GetFullPath(command);
@@ -106,7 +106,7 @@ namespace AWS.Deploy.Orchestration.Utilities
                 return x;
             };
 
-            var envPath = Environment.GetEnvironmentVariable("PATH");
+            var envPath = Environment.GetEnvironmentVariable("PATH") ?? "";
             foreach (var path in envPath.Split(Path.PathSeparator))
             {
                 try
