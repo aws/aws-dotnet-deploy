@@ -19,7 +19,7 @@ namespace AWS.Deploy.CLI.Utilities
     {
         private readonly IOrchestratorInteractiveService _interactiveService;
         private readonly bool _useSeparateWindow;
-        private Action<ProcessStartInfo> _processStartInfoAction;
+        private Action<ProcessStartInfo>? _processStartInfoAction;
 
         public CommandLineWrapper(
             IOrchestratorInteractiveService interactiveService)
@@ -40,9 +40,9 @@ namespace AWS.Deploy.CLI.Utilities
             string command,
             string workingDirectory = "",
             bool streamOutputToInteractiveService = true,
-            Action<TryRunResult> onComplete = null,
+            Action<TryRunResult>? onComplete = null,
             bool redirectIO = true,
-            IDictionary<string, string> environmentVariables = null,
+            IDictionary<string, string>? environmentVariables = null,
             CancellationToken cancelToken = default)
         {
             StringBuilder strOutput = new StringBuilder();
@@ -119,7 +119,7 @@ namespace AWS.Deploy.CLI.Utilities
             }
         }
 
-        private static void UpdateEnvironmentVariables(ProcessStartInfo processStartInfo, IDictionary<string, string> environmentVariables)
+        private static void UpdateEnvironmentVariables(ProcessStartInfo processStartInfo, IDictionary<string, string>? environmentVariables)
         {
             if (environmentVariables == null)
             {
@@ -162,7 +162,7 @@ namespace AWS.Deploy.CLI.Utilities
             return awsExecutionEnvBuilder.ToString();
         }
 
-        public void ConfigureProcess(Action<ProcessStartInfo> processStartInfoAction)
+        public void ConfigureProcess(Action<ProcessStartInfo>? processStartInfoAction)
         {
             _processStartInfoAction = processStartInfoAction;
         }
@@ -170,10 +170,10 @@ namespace AWS.Deploy.CLI.Utilities
         private string GetSystemShell()
         {
             if (TryGetEnvironmentVariable("COMSPEC", out var comspec))
-                return comspec;
+                return comspec!;
 
             if (TryGetEnvironmentVariable("SHELL", out var shell))
-                return shell;
+                return shell!;
 
             // fall back to defaults
             return RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
@@ -181,7 +181,7 @@ namespace AWS.Deploy.CLI.Utilities
                 : "/bin/sh";
         }
 
-        private bool TryGetEnvironmentVariable(string variable, out string value)
+        private bool TryGetEnvironmentVariable(string variable, out string? value)
         {
             value = Environment.GetEnvironmentVariable(variable);
 

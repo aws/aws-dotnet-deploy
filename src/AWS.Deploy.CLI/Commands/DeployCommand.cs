@@ -102,7 +102,7 @@ namespace AWS.Deploy.CLI.Commands
 
             var deployedApplication = deployedApplications.FirstOrDefault(x => string.Equals(x.Name, cloudApplicationName));
 
-            Recommendation selectedRecommendation = null;
+            Recommendation? selectedRecommendation = null;
 
             _toolInteractiveService.WriteLine();
 
@@ -174,10 +174,7 @@ namespace AWS.Deploy.CLI.Commands
 
             await ConfigureDeployment(selectedRecommendation, configurableOptionSettings, false);
 
-            var cloudApplication = new CloudApplication
-            {
-                Name = cloudApplicationName
-            };
+            var cloudApplication = new CloudApplication(cloudApplicationName);
 
             if (!ConfirmDeployment(selectedRecommendation))
             {
@@ -232,7 +229,8 @@ namespace AWS.Deploy.CLI.Commands
                     cloudApplicationName = userResponse.SelectedOption ?? userResponse.NewName;
                 }
 
-                if (_cloudApplicationNameGenerator.IsValidName(cloudApplicationName))
+                if (!string.IsNullOrEmpty(cloudApplicationName) &&
+                    _cloudApplicationNameGenerator.IsValidName(cloudApplicationName))
                     return cloudApplicationName;
 
                 PrintInvalidStackNameMessage();
@@ -358,7 +356,7 @@ namespace AWS.Deploy.CLI.Commands
         {
             var value = recommendation.GetOptionSettingValue(optionSetting);
 
-            Type typeHintResponseType = null;
+            Type? typeHintResponseType = null;
             if (optionSetting.Type == OptionSettingValueType.Object)
             {
                 var typeHintResponseTypeFullName = $"AWS.Deploy.CLI.TypeHintResponses.{optionSetting.TypeHint}TypeHintResponse";
@@ -374,14 +372,14 @@ namespace AWS.Deploy.CLI.Commands
             _toolInteractiveService.WriteLine($"{setting.Name}:");
             _toolInteractiveService.WriteLine($"{setting.Description}");
 
-            var currentValue = recommendation.GetOptionSettingValue(setting);
-            object settingValue = null;
+            object currentValue = recommendation.GetOptionSettingValue(setting);
+            object? settingValue = null;
             if (setting.AllowedValues?.Count > 0)
             {
-                var userInputConfig = new UserInputConfiguration<string>
+                var userInputConfig = new UserInputConfiguration<string>(
+                    x => setting.ValueMapping.ContainsKey(x) ? setting.ValueMapping[x] : x,
+                    x => x.Equals(currentValue))
                 {
-                    DisplaySelector = x => setting.ValueMapping.ContainsKey(x) ? setting.ValueMapping[x] : x,
-                    DefaultSelector = x => x.Equals(currentValue),
                     CreateNew = false
                 };
 
@@ -404,7 +402,7 @@ namespace AWS.Deploy.CLI.Commands
                     {
                         case OptionSettingValueType.String:
                         case OptionSettingValueType.Int:
-                            settingValue = _consoleUtilities.AskUserForValue(string.Empty, currentValue?.ToString(), allowEmpty: true, resetValue: recommendation.GetOptionSettingDefaultValue<string>(setting));
+                            settingValue = _consoleUtilities.AskUserForValue(string.Empty, currentValue.ToString() ?? "", allowEmpty: true, resetValue: recommendation.GetOptionSettingDefaultValue<string>(setting) ?? "");
                             break;
                         case OptionSettingValueType.Bool:
                             var answer = _consoleUtilities.AskYesNoQuestion(string.Empty, recommendation.GetOptionSettingValue(setting).ToString());
@@ -434,18 +432,18 @@ namespace AWS.Deploy.CLI.Commands
         /// This allows to use a generic implementation to display Object type option setting values without casting the response to
         /// the specific TypeHintResponse type.
         /// </summary>
-        private void DisplayValue(Recommendation recommendation, OptionSettingItem optionSetting, int optionSettingNumber, int optionSettingsCount, Type typeHintResponseType, DisplayOptionSettingsMode mode)
+        private void DisplayValue(Recommendation recommendation, OptionSettingItem optionSetting, int optionSettingNumber, int optionSettingsCount, Type? typeHintResponseType, DisplayOptionSettingsMode mode)
         {
-            object displayValue = null;
-            Dictionary<string, object> objectValues = null;
+            object? displayValue = null;
+            Dictionary<string, object>? objectValues = null;
             if (typeHintResponseType != null)
             {
                 var methodInfo = typeof(Recommendation)
-                    .GetMethod(nameof(Recommendation.GetOptionSettingValue), 1, new[] { typeof(OptionSettingItem), typeof(bool) });
+                    .GetMethod(nameof(Recommendation.GetOptionSettingValue), 1, new[] { typeof(OptionSettingItem) });
                 var genericMethodInfo = methodInfo?.MakeGenericMethod(typeHintResponseType);
-                var response = genericMethodInfo?.Invoke(recommendation, new object[] { optionSetting, false });
+                var response = genericMethodInfo?.Invoke(recommendation, new object[] { optionSetting });
 
-                displayValue = ((IDisplayable)response)?.ToDisplayString();
+                displayValue = ((IDisplayable?)response)?.ToDisplayString();
             }
             else
             {

@@ -6,6 +6,6 @@ namespace AWS.Deploy.Common
     public interface IUserInputOption
     {
         string Name { get; }
-        string Description { get; }
+        string? Description { get; }
     }
 }

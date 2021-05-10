@@ -12,7 +12,7 @@ namespace AWS.Deploy.CLI
     [AWSDeploymentExpectedException]
     public class NoAWSCredentialsFoundException : Exception
     {
-        public NoAWSCredentialsFoundException(string message, Exception innerException = null) : base(message, innerException) { }
+        public NoAWSCredentialsFoundException(string message, Exception? innerException = null) : base(message, innerException) { }
     }
 
     /// <summary>
@@ -22,7 +22,7 @@ namespace AWS.Deploy.CLI
     [AWSDeploymentExpectedException ]
     public class FailedToDeleteException : Exception
     {
-        public FailedToDeleteException(string message, Exception innerException = null) : base(message, innerException) { }
+        public FailedToDeleteException(string message, Exception? innerException = null) : base(message, innerException) { }
     }
 
     /// <summary>
@@ -32,6 +32,24 @@ namespace AWS.Deploy.CLI
     [AWSDeploymentExpectedException]
     public class FailedToFindDeployableTargetException : Exception
     {
-        public FailedToFindDeployableTargetException(string message, Exception innerException = null) : base(message, innerException) { }
+        public FailedToFindDeployableTargetException(string message, Exception? innerException = null) : base(message, innerException) { }
+    }
+
+    /// <summary>
+    /// Throw if docker info failed to return output.
+    /// </summary>
+    [AWSDeploymentExpectedException]
+    public class DockerInfoException : Exception
+    {
+        public DockerInfoException(string message, Exception? innerException = null) : base(message, innerException) { }
+    }
+
+    /// <summary>
+    /// Throw if prompting the user for a name returns a null value.
+    /// </summary>
+    [AWSDeploymentExpectedException]
+    public class UserPromptForNameReturnedNullException : Exception
+    {
+        public UserPromptForNameReturnedNullException(string message, Exception? innerException = null) : base(message, innerException) { }
     }
 }

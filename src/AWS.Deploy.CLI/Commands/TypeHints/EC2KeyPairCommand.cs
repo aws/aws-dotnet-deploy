@@ -27,10 +27,11 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             var currentValue = recommendation.GetOptionSettingValue(optionSetting);
             var keyPairs = await _awsResourceQueryer.ListOfEC2KeyPairs();
 
-            var userInputConfiguration = new UserInputConfiguration<KeyPairInfo>
+            var userInputConfiguration = new UserInputConfiguration<KeyPairInfo>(
+                kp => kp.KeyName,
+                kp => kp.KeyName.Equals(currentValue)
+                )
             {
-                DisplaySelector = kp => kp.KeyName,
-                DefaultSelector = kp => kp.KeyName.Equals(currentValue),
                 AskNewName = true,
                 EmptyOption = true,
                 CurrentValue = currentValue
@@ -73,7 +74,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 break;
             }
 
-            return settingValue;
+            return settingValue ?? "";
         }
     }
 }

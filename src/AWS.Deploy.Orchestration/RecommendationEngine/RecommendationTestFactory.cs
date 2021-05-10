@@ -17,6 +17,8 @@ namespace AWS.Deploy.Orchestration.RecommendationEngine
                  .GetTypes()
                  .Where(x => !x.IsAbstract && x.IsSubclassOf(typeof(BaseRecommendationTest)))
                  .Select(x => Activator.CreateInstance(x) as BaseRecommendationTest)
+                 .Where(x => x != null)
+                 .Select(x => x!)
                  .ToDictionary(x => x.Name);
         }
     }

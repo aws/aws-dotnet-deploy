@@ -57,7 +57,7 @@ namespace AWS.Deploy.DockerEngine
             }
 
             var dockerFile = new DockerFile(imageMapping, projectFileName, _project.AssemblyName);
-            var projectDirectory = Path.GetDirectoryName(_projectPath);
+            var projectDirectory = Path.GetDirectoryName(_projectPath) ?? "";
             var projectList = GetProjectList();
             dockerFile.WriteDockerFile(projectDirectory, projectList);
         }
@@ -65,7 +65,7 @@ namespace AWS.Deploy.DockerEngine
         /// <summary>
         /// Retrieves a list of projects from a solution file
         /// </summary>
-        private List<string> GetProjectsFromSolutionFile(string solutionFile)
+        private List<string>? GetProjectsFromSolutionFile(string solutionFile)
         {
             var projectFileName = Path.GetFileName(_projectPath);
             if (string.IsNullOrWhiteSpace(solutionFile) ||
@@ -94,7 +94,7 @@ namespace AWS.Deploy.DockerEngine
         /// <summary>
         /// Finds the project solution file (if one exists) and retrieves a list of projects that are part of one solution
         /// </summary>
-        private List<string> GetProjectList()
+        private List<string>? GetProjectList()
         {
             var projectDirectory = Directory.GetParent(_projectPath);
 
@@ -142,20 +142,20 @@ namespace AWS.Deploy.DockerEngine
             if (string.IsNullOrEmpty(recommendation.DeploymentBundle.DockerExecutionDirectory))
             {
                 var projectFilename = Path.GetFileName(recommendation.ProjectPath);
-                var dockerFilePath = Path.Combine(Path.GetDirectoryName(recommendation.ProjectPath), "Dockerfile");
+                var dockerFilePath = Path.Combine(Path.GetDirectoryName(recommendation.ProjectPath) ?? "", "Dockerfile");
                 if (File.Exists(dockerFilePath))
                 {
                     using (var stream = File.OpenRead(dockerFilePath))
                     using (var reader = new StreamReader(stream))
                     {
-                        string line;
+                        string? line;
                         while ((line = reader.ReadLine()) != null)
                         {
                             var noSpaceLine = line.Replace(" ", "");
 
                             if (noSpaceLine.StartsWith("COPY") && (noSpaceLine.EndsWith(".sln./") || (projectFilename != null && noSpaceLine.Contains("/" + projectFilename))))
                             {
-                                recommendation.DeploymentBundle.DockerExecutionDirectory = Path.GetDirectoryName(recommendation.ProjectDefinition.ProjectSolutionPath);
+                                recommendation.DeploymentBundle.DockerExecutionDirectory = Path.GetDirectoryName(recommendation.ProjectDefinition.ProjectSolutionPath) ??  "";
                             }
                         }
                     }

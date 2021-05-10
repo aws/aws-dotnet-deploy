@@ -34,7 +34,7 @@ namespace AWS.Deploy.Common.Recipes
         /// A runtime property set when the recipe definition is loaded to the location of the definition. This property is used to find
         /// other assets like the CDK template project in relation to the recipe definition.
         /// </summary>
-        public string RecipePath { get; set; }
+        public string? RecipePath { get; set; }
 
         /// <summary>
         /// The name of the AWS service the recipe deploys to. This is used for display purposes back to the user to inform then what AWS service the project
@@ -45,7 +45,7 @@ namespace AWS.Deploy.Common.Recipes
         /// <summary>
         /// Confirmation messages to display to the user before performing deployment.
         /// </summary>
-        public DeploymentConfirmationType DeploymentConfirmation { get; set; }
+        public DeploymentConfirmationType? DeploymentConfirmation { get; set; }
 
         /// <summary>
         /// The type of deployment to perform. This controls what other tool to use to perform the deployment. For example a value of `CdkProject` means that CDK should
@@ -83,6 +83,27 @@ namespace AWS.Deploy.Common.Recipes
         /// </summary>
         public int RecipePriority { get; set; }
 
+        public RecipeDefinition(
+            string id,
+            string version,
+            string name,
+            DeploymentTypes deploymentType,
+            DeploymentBundleTypes deploymentBundle,
+            string cdkProjectTemplate,
+            string cdkProjectTemplateId,
+            string description,
+            string targetService)
+        {
+            Id = id;
+            Version = version;
+            Name = name;
+            DeploymentType = deploymentType;
+            DeploymentBundle = deploymentBundle;
+            CdkProjectTemplate = cdkProjectTemplate;
+            CdkProjectTemplateId = cdkProjectTemplateId;
+            Description = description;
+            TargetService = targetService;
+        }
         public override string ToString()
         {
             return $"{Name} ({Id})";

@@ -26,22 +26,20 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             var clusters = await _awsResourceQueryer.ListOfECSClusters();
             var currentTypeHintResponse = recommendation.GetOptionSettingValue<ECSClusterTypeHintResponse>(optionSetting);
 
-            var userInputConfiguration = new UserInputConfiguration<Cluster>
+            var userInputConfiguration = new UserInputConfiguration<Cluster>(
+                cluster => cluster.ClusterName,
+                cluster => cluster.ClusterArn.Equals(currentTypeHintResponse?.ClusterArn),
+                currentTypeHintResponse.NewClusterName)
             {
-                DisplaySelector = cluster => cluster.ClusterName,
-                DefaultSelector = cluster => cluster.ClusterArn.Equals(currentTypeHintResponse?.ClusterArn),
-                AskNewName = true,
-                DefaultNewName = currentTypeHintResponse.NewClusterName
+                AskNewName = true
             };
 
             var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(clusters, "Select ECS cluster to deploy to:", userInputConfiguration);
 
-            return new ECSClusterTypeHintResponse
-            {
-                CreateNew = userResponse.CreateNew,
-                ClusterArn = userResponse.SelectedOption?.ClusterArn ?? string.Empty,
-                NewClusterName = userResponse.NewName
-            };
+            return new ECSClusterTypeHintResponse(
+                userResponse.CreateNew,
+                userResponse.SelectedOption?.ClusterArn ?? string.Empty,
+                userResponse.NewName ?? string.Empty);
         }
     }
 }

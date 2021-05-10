@@ -19,7 +19,7 @@ namespace AWS.Deploy.DockerEngine
         private readonly string _projectName;
         private readonly string _assemblyName;
 
-        public DockerFile(ImageMapping imageMapping, string projectName, string assemblyName)
+        public DockerFile(ImageMapping imageMapping, string projectName, string? assemblyName)
         {
             if (imageMapping == null)
             {
@@ -44,7 +44,7 @@ namespace AWS.Deploy.DockerEngine
         /// <summary>
         /// Writes a docker file based on project information
         /// </summary>
-        public void WriteDockerFile(string projectDirectory, List<string> projectList)
+        public void WriteDockerFile(string projectDirectory, List<string>? projectList)
         {
             var dockerFileTemplate = ProjectUtilities.ReadTemplate();
             var projects = "";

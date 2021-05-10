@@ -33,7 +33,7 @@ namespace AWS.Deploy.Orchestration.Utilities
         private readonly IFileManager _fileManager;
         private readonly IDirectoryManager _directoryManager;
         /// <summary>
-        /// https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-using-console-create-stack-parameters.html 
+        /// https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-using-console-create-stack-parameters.html
         /// </summary>
         private readonly Regex _validatorRegex = new ("^[a-zA-Z][a-zA-Z0-9-]{0,127}$", RegexOptions.Compiled);
 
@@ -49,9 +49,9 @@ namespace AWS.Deploy.Orchestration.Utilities
             var recommendedPrefix = "deployment";
 
             if (_fileManager.Exists(target.ProjectPath))
-                recommendedPrefix = Path.GetFileNameWithoutExtension(target.ProjectPath);
+                recommendedPrefix = Path.GetFileNameWithoutExtension(target.ProjectPath) ?? "";
             else if (_directoryManager.Exists(target.ProjectPath))
-                recommendedPrefix = Path.GetDirectoryName(target.ProjectPath);
+                recommendedPrefix = Path.GetDirectoryName(target.ProjectPath) ?? "";
 
             // sanitize recommendation
             recommendedPrefix =

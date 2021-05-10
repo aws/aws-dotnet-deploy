@@ -10,20 +10,16 @@ namespace AWS.Deploy.Common.Recipes
     /// <see cref="GetValue{T}"/>, <see cref="GetValue"/> and <see cref="SetValueOverride"/> methods
     public partial class OptionSettingItem
     {
-        private object _valueOverride;
+        private object? _valueOverride = null;
 
-        public T GetValue<T>(IDictionary<string, string> replacementTokens, bool ignoreDefaultValue = false, IDictionary<string, bool> displayableOptionSettings = null)
+        public T GetValue<T>(IDictionary<string, string> replacementTokens, IDictionary<string, bool>? displayableOptionSettings = null)
         {
-            var value = GetValue(replacementTokens, ignoreDefaultValue, displayableOptionSettings);
-            if (value == null)
-            {
-                return default;
-            }
+            var value = GetValue(replacementTokens, displayableOptionSettings);
 
             return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(value));
         }
 
-        public object GetValue(IDictionary<string, string> replacementTokens, bool ignoreDefaultValue = false, IDictionary<string, bool> displayableOptionSettings = null)
+        public object GetValue(IDictionary<string, string> replacementTokens, IDictionary<string, bool>? displayableOptionSettings = null)
         {
             if (_valueOverride != null)
             {
@@ -35,7 +31,7 @@ namespace AWS.Deploy.Common.Recipes
                 var objectValue = new Dictionary<string, object>();
                 foreach (var childOptionSetting in ChildOptionSettings)
                 {
-                    var childValue = childOptionSetting.GetValue(replacementTokens, ignoreDefaultValue);
+                    var childValue = childOptionSetting.GetValue(replacementTokens);
 
                     if (
                         displayableOptionSettings != null &&
@@ -45,22 +41,14 @@ namespace AWS.Deploy.Common.Recipes
                             continue;
                     }
 
-                    if (childValue != null)
-                    {
-                        objectValue[childOptionSetting.Id] = childValue;
-                    }
+                    objectValue[childOptionSetting.Id] = childValue;
                 }
-                return objectValue.Any() ? objectValue : null;
-            }
-
-            if (ignoreDefaultValue)
-            {
-                return null;
+                return objectValue;
             }
 
             if (DefaultValue == null)
             {
-                return null;
+                return string.Empty;
             }
 
             if (DefaultValue is string defaultValueString)
@@ -71,7 +59,7 @@ namespace AWS.Deploy.Common.Recipes
             return DefaultValue;
         }
 
-        public T GetDefaultValue<T>(IDictionary<string, string> replacementTokens)
+        public T? GetDefaultValue<T>(IDictionary<string, string> replacementTokens)
         {
             var value = GetDefaultValue(replacementTokens);
             if (value == null)
@@ -82,7 +70,7 @@ namespace AWS.Deploy.Common.Recipes
             return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(value));
         }
 
-        public object GetDefaultValue(IDictionary<string, string> replacementTokens)
+        public object? GetDefaultValue(IDictionary<string, string> replacementTokens)
         {
             if (DefaultValue == null)
             {

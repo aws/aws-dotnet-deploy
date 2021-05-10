@@ -64,12 +64,15 @@ namespace AWS.Deploy.Orchestration.Utilities
                 var root = (YamlMappingNode)yamlMetadata.Documents[0].RootNode;
                 var metadataNode = (YamlMappingNode)root.Children[new YamlScalarNode("Metadata")];
 
-                var cloudApplicationMetadata = new CloudApplicationMetadata();
-                cloudApplicationMetadata.RecipeId = ((YamlScalarNode)metadataNode.Children[new YamlScalarNode(CloudFormationIdentifierConstants.STACK_METADATA_RECIPE_ID)]).Value;
-                cloudApplicationMetadata.RecipeVersion = ((YamlScalarNode)metadataNode.Children[new YamlScalarNode(CloudFormationIdentifierConstants.STACK_METADATA_RECIPE_VERSION)]).Value;
+                var cloudApplicationMetadata = new CloudApplicationMetadata(
+                    ((YamlScalarNode)metadataNode.Children[new YamlScalarNode(CloudFormationIdentifierConstants.STACK_METADATA_RECIPE_ID)]).Value ??
+                        throw new Exception("Error parsing existing application's metadata to retrieve Recipe ID."),
+                    ((YamlScalarNode)metadataNode.Children[new YamlScalarNode(CloudFormationIdentifierConstants.STACK_METADATA_RECIPE_VERSION)]).Value ??
+                        throw new Exception("Error parsing existing application's metadata to retrieve Recipe Version.")
+                    );
 
                 var jsonString = ((YamlScalarNode)metadataNode.Children[new YamlScalarNode(CloudFormationIdentifierConstants.STACK_METADATA_SETTINGS)]).Value;
-                cloudApplicationMetadata.Settings = JsonConvert.DeserializeObject<IDictionary<string, object>>(jsonString);
+                cloudApplicationMetadata.Settings = JsonConvert.DeserializeObject<IDictionary<string, object>>(jsonString ?? "");
 
                 return cloudApplicationMetadata;
             }
@@ -89,7 +92,7 @@ namespace AWS.Deploy.Orchestration.Utilities
             var builder = new StringBuilder();
             bool inMetadata = false;
             using var reader = new StringReader(templateBody);
-            string line;
+            string? line;
             while((line = reader.ReadLine()) != null)
             {
                 if(!inMetadata)

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Amazon.Runtime;
 using AWS.Deploy.CLI.TypeHintResponses;
 using AWS.Deploy.CLI.UnitTests.Utilities;
 using AWS.Deploy.Common;
@@ -12,6 +13,7 @@ using AWS.Deploy.Common.IO;
 using AWS.Deploy.Recipes;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.RecommendationEngine;
+using Moq;
 using Newtonsoft.Json;
 using Xunit;
 using Assert = Should.Core.Assertions.Assert;
@@ -25,11 +27,17 @@ namespace AWS.Deploy.CLI.UnitTests
             var fullPath = SystemIOUtilities.ResolvePath(testProjectName);
 
             var parser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
-
-            var session =  new OrchestratorSession
-            {
-                ProjectDefinition = await parser.Parse(fullPath)
-            };
+            var awsCredentials = new Mock<AWSCredentials>();
+            var systemCapabilities = new Mock<SystemCapabilities>(
+                It.IsAny<bool>(),
+                It.IsAny<DockerInfo>());
+            var session =  new OrchestratorSession(
+                await parser.Parse(fullPath),
+                "default",
+                awsCredentials.Object,
+                "us-west-2",
+                Task.FromResult(systemCapabilities.Object),
+                "123456789012");
 
             return new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, session);
         }
@@ -67,8 +75,8 @@ namespace AWS.Deploy.CLI.UnitTests
         }
 
         [Theory]
-        [InlineData(true, false, null)]
-        [InlineData(false, true, null)]
+        [InlineData(true, false, "")]
+        [InlineData(false, true, "")]
         [InlineData(false, false, "vpc_id")]
         public async Task ApplyVpcPreviousSettings(bool isDefault, bool createNew, string vpcId)
         {
@@ -78,7 +86,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var fargateRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_ASPNET_CORE_FARGATE_RECIPE_ID);
 
-            var vpcIdValue = vpcId == null ? "null" : $"\"{vpcId}\"";
+            var vpcIdValue = string.IsNullOrEmpty(vpcId) ? "\"\"" : $"\"{vpcId}\"";
 
             var serializedSettings = @$"
             {{

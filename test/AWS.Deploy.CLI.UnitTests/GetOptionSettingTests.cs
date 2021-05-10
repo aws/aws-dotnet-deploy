@@ -4,12 +4,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Amazon.Runtime;
 using AWS.Deploy.CLI.UnitTests.Utilities;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.RecommendationEngine;
 using AWS.Deploy.Recipes;
+using Moq;
 using Xunit;
 
 namespace AWS.Deploy.CLI.UnitTests
@@ -21,11 +23,17 @@ namespace AWS.Deploy.CLI.UnitTests
             var fullPath = SystemIOUtilities.ResolvePath(testProjectName);
 
             var parser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
-
-            var session =  new OrchestratorSession
-            {
-                ProjectDefinition = await parser.Parse(fullPath)
-            };
+            var awsCredentials = new Mock<AWSCredentials>();
+            var systemCapabilities = new Mock<SystemCapabilities>(
+                It.IsAny<bool>(),
+                It.IsAny<DockerInfo>());
+            var session =  new OrchestratorSession(
+                await parser.Parse(fullPath),
+                "default",
+                awsCredentials.Object,
+                "us-west-2",
+                Task.FromResult(systemCapabilities.Object),
+                "123456789012");
 
             return new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, session);
         }
@@ -37,7 +45,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var engine = await BuildRecommendationEngine("WebAppNoDockerFile");
 
             var recommendations = await engine.ComputeRecommendations();
-            
+
             var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
 
             var optionSetting = beanstalkRecommendation.GetOptionSetting(jsonPath);
@@ -56,9 +64,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
 
-            var optionSetting = beanstalkRecommendation.GetOptionSetting(jsonPath);
-
-            Assert.Null(optionSetting);
+            Assert.Throws<OptionSettingItemDoesNotExistException>(() => beanstalkRecommendation.GetOptionSetting(jsonPath));
         }
 
         [Theory]

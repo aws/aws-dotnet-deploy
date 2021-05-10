@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Amazon.Runtime;
 using AWS.Deploy.CLI.TypeHintResponses;
 using AWS.Deploy.CLI.UnitTests.Utilities;
 using AWS.Deploy.Common;
@@ -12,6 +13,7 @@ using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.RecommendationEngine;
 using AWS.Deploy.Recipes;
+using Moq;
 using Should;
 using Xunit;
 
@@ -19,18 +21,25 @@ namespace AWS.Deploy.CLI.UnitTests
 {
     public class RecommendationTests
     {
+        private OrchestratorSession _session;
         private async Task<RecommendationEngine> BuildRecommendationEngine(string testProjectName)
         {
             var fullPath = SystemIOUtilities.ResolvePath(testProjectName);
 
             var parser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
+            var awsCredentials = new Mock<AWSCredentials>();
+            var systemCapabilities = new Mock<SystemCapabilities>(
+                It.IsAny<bool>(),
+                It.IsAny<DockerInfo>());
+            _session =  new OrchestratorSession(
+                await parser.Parse(fullPath),
+                "default",
+                awsCredentials.Object,
+                "us-west-2",
+                Task.FromResult(systemCapabilities.Object),
+                "123456789012");
 
-            var session =  new OrchestratorSession
-            {
-                ProjectDefinition = await parser.Parse(fullPath)
-            };
-
-            return new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, session);
+            return new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, _session);
         }
 
         [Fact]
@@ -110,7 +119,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
             var environmentTypeOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("EnvironmentType"));
 
-            Assert.Equal("SingleInstance", beanstalkRecommendation.GetOptionSettingValue(environmentTypeOptionSetting, false));
+            Assert.Equal("SingleInstance", beanstalkRecommendation.GetOptionSettingValue(environmentTypeOptionSetting));
         }
 
         [Fact]
@@ -122,7 +131,7 @@ namespace AWS.Deploy.CLI.UnitTests
             });
 
             var consoleUtilities = new ConsoleUtilities(interactiveServices);
-            
+
             var engine = await BuildRecommendationEngine("WebAppNoDockerFile");
 
             var recommendations = await engine.ComputeRecommendations();
@@ -135,7 +144,7 @@ namespace AWS.Deploy.CLI.UnitTests
             desiredCountOptionSetting.SetValueOverride(2);
 
             Assert.Equal(2, fargateRecommendation.GetOptionSettingValue<int>(desiredCountOptionSetting));
-            
+
             desiredCountOptionSetting.SetValueOverride(consoleUtilities.AskUserForValue("Title", "2", true, originalDefaultValue.ToString()));
 
             Assert.Equal(originalDefaultValue, fargateRecommendation.GetOptionSettingValue<int>(desiredCountOptionSetting));
@@ -178,7 +187,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
             var applicationIAMRoleOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("ApplicationIAMRole"));
 
-            var iamRoleTypeHintResponse = beanstalkRecommendation.GetOptionSettingValue<IAMRoleTypeHintResponse>(applicationIAMRoleOptionSetting, false);
+            var iamRoleTypeHintResponse = beanstalkRecommendation.GetOptionSettingValue<IAMRoleTypeHintResponse>(applicationIAMRoleOptionSetting);
 
             Assert.Null(iamRoleTypeHintResponse.RoleArn);
             Assert.True(iamRoleTypeHintResponse.CreateNew);
@@ -194,7 +203,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
             var applicationIAMRoleOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("ApplicationIAMRole"));
 
-            Assert.Null(beanstalkRecommendation.GetOptionSettingValue(applicationIAMRoleOptionSetting, true));
+            Assert.Null(beanstalkRecommendation.GetOptionSettingDefaultValue(applicationIAMRoleOptionSetting));
         }
 
         [Fact]
@@ -208,7 +217,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var environmentTypeOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("EnvironmentType"));
 
             environmentTypeOptionSetting.SetValueOverride("LoadBalanced");
-            Assert.Equal("LoadBalanced", beanstalkRecommendation.GetOptionSettingValue(environmentTypeOptionSetting, false));
+            Assert.Equal("LoadBalanced", beanstalkRecommendation.GetOptionSettingValue(environmentTypeOptionSetting));
         }
 
         [Fact]
@@ -223,7 +232,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             applicationIAMRoleOptionSetting.SetValueOverride(new IAMRoleTypeHintResponse {CreateNew = false, RoleArn = "role_arn"});
 
-            var iamRoleTypeHintResponse = beanstalkRecommendation.GetOptionSettingValue<IAMRoleTypeHintResponse>(applicationIAMRoleOptionSetting, false);
+            var iamRoleTypeHintResponse = beanstalkRecommendation.GetOptionSettingValue<IAMRoleTypeHintResponse>(applicationIAMRoleOptionSetting);
 
             Assert.Equal("role_arn", iamRoleTypeHintResponse.RoleArn);
             Assert.False(iamRoleTypeHintResponse.CreateNew);
@@ -248,7 +257,15 @@ namespace AWS.Deploy.CLI.UnitTests
         [MemberData(nameof(ShouldIncludeTestCases))]
         public void ShouldIncludeTests(RuleEffect effect, bool testPass, bool expectedResult)
         {
-            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, new OrchestratorSession());
+            var awsCredentials = new Mock<AWSCredentials>();
+            var session =  new OrchestratorSession(
+                null,
+                "default",
+                awsCredentials.Object,
+                "us-west-2",
+                null,
+                "123456789012");
+            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, session);
 
             Assert.Equal(expectedResult, engine.ShouldInclude(effect, testPass));
         }
@@ -344,36 +361,30 @@ namespace AWS.Deploy.CLI.UnitTests
         public async Task PackageReferenceTest()
         {
             var projectPath = SystemIOUtilities.ResolvePath("MessageProcessingApp");
-            
+
             var projectDefinition = await new ProjectDefinitionParser(new FileManager(), new DirectoryManager()).Parse(projectPath);
 
             var test = new NuGetPackageReferenceTest();
 
-            Assert.True(await test.Execute(new RecommendationTestInput
-            {
-                Test = new RuleTest
-                {
-                    Type = test.Name,
-                    Condition = new RuleCondition
+            Assert.True(await test.Execute(new RecommendationTestInput(
+                new RuleTest(
+                    test.Name,
+                    new RuleCondition
                     {
                         NuGetPackageName = "AWSSDK.SQS"
-                    }                    
-                },
-                ProjectDefinition = projectDefinition
-            }));
+                    }),
+                projectDefinition,
+                _session)));
 
-            Assert.False(await test.Execute(new RecommendationTestInput
-            {
-                Test = new RuleTest
-                {
-                    Type = test.Name,
-                    Condition = new RuleCondition
+            Assert.False(await test.Execute(new RecommendationTestInput(
+                new RuleTest(
+                    test.Name,
+                    new RuleCondition
                     {
                         NuGetPackageName = "AWSSDK.S3"
-                    }
-                },
-                ProjectDefinition = projectDefinition
-            }));
+                    }),
+                projectDefinition,
+                _session)));
         }
     }
 }

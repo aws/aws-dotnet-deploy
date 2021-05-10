@@ -13,6 +13,16 @@ namespace AWS.Deploy.CLI.TypeHintResponses
         public string ClusterArn { get; set; }
         public string NewClusterName { get; set; }
 
+        public ECSClusterTypeHintResponse(
+            bool createNew,
+            string clusterArn,
+            string newClusterName)
+        {
+            CreateNew = createNew;
+            ClusterArn = clusterArn;
+            NewClusterName = newClusterName;
+        }
+
         public string ToDisplayString()
         {
             if (CreateNew)

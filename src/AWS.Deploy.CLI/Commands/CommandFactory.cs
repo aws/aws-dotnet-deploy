@@ -133,15 +133,13 @@ namespace AWS.Deploy.CLI.Commands
 
                     var callerIdentity = await _awsResourceQueryer.GetCallerIdentity();
 
-                    var session = new OrchestratorSession
-                    {
-                        AWSProfileName = profile,
-                        AWSCredentials = awsCredentials,
-                        AWSRegion = awsRegion,
-                        AWSAccountId = callerIdentity.Account,
-                        ProjectDefinition = projectDefinition,
-                        SystemCapabilities = systemCapabilities
-                    };
+                    var session = new OrchestratorSession(
+                        projectDefinition,
+                        profile,
+                        awsCredentials,
+                        awsRegion,
+                        systemCapabilities,
+                        callerIdentity.Account);
 
                     var dockerEngine = new DockerEngine.DockerEngine(projectDefinition);
 

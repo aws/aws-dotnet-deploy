@@ -34,7 +34,10 @@ namespace AWS.Deploy.Orchestration
         public async Task GenerateCDKProjectFromTemplate(Recommendation recommendation, OrchestratorSession session, string outputDirectory)
         {
             //The location of the base template that will be installed into the templating engine
-            var cdkProjectTemplateDirectory = Path.Combine(Path.GetDirectoryName(recommendation.Recipe.RecipePath), recommendation.Recipe.CdkProjectTemplate);
+            var cdkProjectTemplateDirectory = Path.Combine(
+                Path.GetDirectoryName(recommendation.Recipe.RecipePath) ??
+                    throw new InvalidRecipePathException($"The following RecipePath is invalid as we could not retrieve the parent directory: {recommendation.Recipe.RecipePath}"),
+                recommendation.Recipe.CdkProjectTemplate);
 
             //Installing the base template into the templating engine to make it available for generation
             InstallTemplates(cdkProjectTemplateDirectory);
@@ -65,7 +68,7 @@ namespace AWS.Deploy.Orchestration
             {
                 var currentValue = recommendation.GetOptionSettingValue(option);
                 if (currentValue != null)
-                    templateParameters[option.Id] = currentValue.ToString();
+                    templateParameters[option.Id] = currentValue?.ToString() ?? "";
             }
 
             try

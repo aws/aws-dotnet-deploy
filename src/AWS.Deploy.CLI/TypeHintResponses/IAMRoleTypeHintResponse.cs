@@ -11,9 +11,9 @@ namespace AWS.Deploy.CLI.TypeHintResponses
     /// </summary>
     public class IAMRoleTypeHintResponse : IDisplayable
     {
-        public string RoleArn { get; set; }
+        public string? RoleArn { get; set; }
         public bool CreateNew { get; set; }
 
-        public string ToDisplayString() => CreateNew ? Constants.CREATE_NEW_LABEL : RoleArn;
+        public string ToDisplayString() => CreateNew ? Constants.CREATE_NEW_LABEL : RoleArn ?? "";
     }
 }

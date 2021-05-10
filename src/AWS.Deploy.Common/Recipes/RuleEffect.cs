@@ -11,12 +11,12 @@ namespace AWS.Deploy.Common.Recipes
         /// <summary>
         /// The effects to run if all the test pass.
         /// </summary>
-        public EffectOptions Pass { get; set; }
+        public EffectOptions? Pass { get; set; }
 
         /// <summary>
         /// The effects to run if all the test fail.
         /// </summary>
-        public EffectOptions Fail { get; set; }
+        public EffectOptions? Fail { get; set; }
     }
 
 }

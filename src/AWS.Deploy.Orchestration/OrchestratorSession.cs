@@ -21,5 +21,21 @@ namespace AWS.Deploy.Orchestration
         /// </remarks>
         public Task<SystemCapabilities> SystemCapabilities { get; set; }
         public string AWSAccountId { get; set; }
+
+        public OrchestratorSession(
+            ProjectDefinition projectDefinition,
+            string awsProfileName,
+            AWSCredentials awsCredentials,
+            string awsRegion,
+            Task<SystemCapabilities> systemCapabilities,
+            string awsAccountId)
+        {
+            ProjectDefinition = projectDefinition;
+            AWSProfileName = awsProfileName;
+            AWSCredentials = awsCredentials;
+            AWSRegion = awsRegion;
+            SystemCapabilities = systemCapabilities;
+            AWSAccountId = awsAccountId;
+        }
     }
 }

@@ -1,6 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.\r
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -59,22 +60,21 @@ namespace AWS.Deploy.Common
             var xmlProjectFile = new XmlDocument();
             xmlProjectFile.LoadXml(await _fileManager.ReadAllTextAsync(projectPath));
 
-            var projectDefinition =  new ProjectDefinition
-            {
-                Contents = xmlProjectFile,
-                ProjectPath = projectPath,
-                ProjectSolutionPath = await GetProjectSolutionFile(projectPath)
-            };
-            
+            var projectDefinition =  new ProjectDefinition(
+                xmlProjectFile,
+                projectPath,
+                await GetProjectSolutionFile(projectPath),
+                xmlProjectFile.DocumentElement?.Attributes["Sdk"]?.Value ??
+                    throw new InvalidProjectDefinitionException(
+                        "The project file that is being referenced does not contain and 'Sdk' attribute.")
+                );
+
             var targetFramework = xmlProjectFile.GetElementsByTagName("TargetFramework");
             if (targetFramework.Count > 0)
             {
                 projectDefinition.TargetFramework = targetFramework[0].InnerText;
             }
-            
-            projectDefinition.SdkType = xmlProjectFile.DocumentElement.Attributes["Sdk"]?.Value;
 
-            
             var assemblyName = xmlProjectFile.GetElementsByTagName("AssemblyName");
             if (assemblyName.Count > 0)
             {
@@ -91,7 +91,7 @@ namespace AWS.Deploy.Common
         private async Task<string> GetProjectSolutionFile(string projectPath)
         {
             var projectDirectory = Directory.GetParent(projectPath);
-            
+
             while (projectDirectory != null)
             {
                 var files = _directoryManager.GetFiles(projectDirectory.FullName, "*.sln");

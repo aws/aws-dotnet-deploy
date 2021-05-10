@@ -26,16 +26,16 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             var currentValue = recommendation.GetOptionSettingValue(optionSetting);
             var platformArns = await _awsResourceQueryer.GetElasticBeanstalkPlatformArns();
 
-            var userInputConfiguration = new UserInputConfiguration<PlatformSummary>
+            var userInputConfiguration = new UserInputConfiguration<PlatformSummary>(
+                platform => $"{platform.PlatformBranchName} v{platform.PlatformVersion}",
+                platform => platform.PlatformArn.Equals(currentValue))
             {
-                DisplaySelector = platform => $"{platform.PlatformBranchName} v{platform.PlatformVersion}",
-                DefaultSelector = platform => platform.PlatformArn.Equals(currentValue),
                 CreateNew = false
             };
 
             var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(platformArns, "Select the Platform to use:", userInputConfiguration);
 
-            return userResponse.SelectedOption?.PlatformArn;
+            return userResponse.SelectedOption?.PlatformArn!;
         }
     }
 }
