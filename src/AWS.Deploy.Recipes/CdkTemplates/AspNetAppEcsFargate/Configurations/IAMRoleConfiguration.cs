@@ -14,6 +14,6 @@ namespace AspNetAppEcsFargate.Configurations
         /// If <see cref="CreateNew"/> is false,
         /// then use an existing IAM role by referencing through <see cref="RoleArn"/>
         /// </summary>
-        public string RoleArn { get; set; }
+        public string? RoleArn { get; set; }
     }
 }

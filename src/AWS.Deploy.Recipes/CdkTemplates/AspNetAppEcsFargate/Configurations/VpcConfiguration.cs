@@ -20,5 +20,25 @@ namespace AspNetAppEcsFargate.Configurations
         /// then use an existing VPC by referencing through <see cref="VpcId"/>
         /// </summary>
         public string VpcId { get; set; }
+
+        /// A parameterless constructor is needed for <see cref="Microsoft.Extensions.Configuration.ConfigurationBuilder"/>
+        /// or the classes will fail to initialize.
+        /// The warnings are disabled since a parameterless constructor will allow non-nullable properties to be initialized with null values.
+#nullable disable warnings
+        public VpcConfiguration()
+        {
+
+        }
+#nullable restore warnings
+
+        public VpcConfiguration(
+            bool isDefault,
+            bool createNew,
+            string vpcId)
+        {
+            IsDefault = isDefault;
+            CreateNew = createNew;
+            VpcId = vpcId;
+        }
     }
 }

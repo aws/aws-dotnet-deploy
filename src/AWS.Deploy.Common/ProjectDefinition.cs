@@ -28,7 +28,7 @@ namespace AWS.Deploy.Common
         /// The Solution file path of the project.
         /// </summary>
         public string ProjectSolutionPath { get;set; }
-        
+
         /// <summary>
         /// Value of the Sdk property of the root project element in a .csproj
         /// </summary>
@@ -37,26 +37,42 @@ namespace AWS.Deploy.Common
         /// <summary>
         /// Value of the TargetFramework property of the project
         /// </summary>
-        public string TargetFramework { get; set; }
+        public string? TargetFramework { get; set; }
 
         /// <summary>
         /// Value of the AssemblyName property of the project
         /// </summary>
-        public string AssemblyName { get; set; }
+        public string? AssemblyName { get; set; }
 
         /// <summary>
         /// True if we found a docker file corresponding to the .csproj
         /// </summary>
         public bool HasDockerFile => CheckIfDockerFileExists(ProjectPath);
 
-        public string GetMSPropertyValue(string propertyName)
+        public ProjectDefinition(
+            XmlDocument contents,
+            string projectPath,
+            string projectSolutionPath,
+            string sdkType)
         {
+            Contents = contents;
+            ProjectPath = projectPath;
+            ProjectSolutionPath = projectSolutionPath;
+            SdkType = sdkType;
+        }
+
+        public string? GetMSPropertyValue(string? propertyName)
+        {
+            if (string.IsNullOrEmpty(propertyName))
+                return null;
             var propertyValue = Contents.SelectSingleNode($"//PropertyGroup/{propertyName}")?.InnerText;
             return propertyValue;
         }
 
-        public string GetPackageReferenceVersion(string packageName)
+        public string? GetPackageReferenceVersion(string? packageName)
         {
+            if (string.IsNullOrEmpty(packageName))
+                return null;
             var packageReference = Contents.SelectSingleNode($"//ItemGroup/PackageReference[@Include='{packageName}']") as XmlElement;
             return packageReference?.GetAttribute("Version");
         }

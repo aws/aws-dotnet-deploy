@@ -10,5 +10,11 @@ namespace AWS.Deploy.Common.Recipes
     public class DeploymentConfirmationType
     {
         public string DefaultMessage { get; set; }
+
+        public DeploymentConfirmationType(
+            string defaultMessage)
+        {
+            DefaultMessage = defaultMessage;
+        }
     }
 }

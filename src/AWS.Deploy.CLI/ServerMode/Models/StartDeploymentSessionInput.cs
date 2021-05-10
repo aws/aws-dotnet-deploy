@@ -11,5 +11,13 @@ namespace AWS.Deploy.CLI.ServerMode.Models
     {
         public string AWSRegion { get; set; }
         public string ProjectPath { get; set; }
+
+        public StartDeploymentSessionInput(
+            string awsRegion,
+            string projectPath)
+        {
+            AWSRegion = awsRegion;
+            ProjectPath = projectPath;
+        }
     }
 }

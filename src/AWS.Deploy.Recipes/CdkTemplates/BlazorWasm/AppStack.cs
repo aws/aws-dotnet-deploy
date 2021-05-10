@@ -10,7 +10,7 @@ namespace BlazorWasm
 {
     public class AppStack : Stack
     {
-        internal AppStack(Construct scope, RecipeConfiguration<Configuration> recipeConfiguration, IStackProps props = null)
+        internal AppStack(Construct scope, RecipeConfiguration<Configuration> recipeConfiguration, IStackProps? props = null)
             : base(scope, recipeConfiguration.StackName, props)
         {
             var bucketProps = new BucketProps
@@ -43,6 +43,9 @@ namespace BlazorWasm
             }
 
             var bucket = new Bucket(this, "BlazorHost", bucketProps);
+
+            if (string.IsNullOrEmpty(recipeConfiguration.DotnetPublishOutputDirectory))
+                throw new InvalidOrMissingConfigurationException("The provided path containing the dotnet publish output is null or empty.");
 
             new BucketDeployment(this, "BlazorDeployment", new BucketDeploymentProps
             {

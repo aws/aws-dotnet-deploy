@@ -22,14 +22,29 @@ namespace AWS.Deploy.CLI.ServerMode
 
         public ProjectDefinition ProjectDefinition { get; set; }
 
-        public IList<Recommendation> NewRecommendations { get; set; }
+        public IList<Recommendation>? NewRecommendations { get; set; }
 
-        public IList<CloudApplication> ExistingDeployments { get; set; }
+        public IList<CloudApplication>? ExistingDeployments { get; set; }
 
-        public Recommendation SelectedRecommendation { get; set; }
+        public Recommendation? SelectedRecommendation { get; set; }
 
-        public CloudApplication ApplicationDetails { get; } = new CloudApplication();
+        public CloudApplication ApplicationDetails { get; } = new CloudApplication(string.Empty, string.Empty);
 
-        public Task DeploymentTask { get; set; }
+        public Task? DeploymentTask { get; set; }
+
+        public SessionState(
+            string sessionId,
+            string projectPath,
+            string awsRegion,
+            string awsAccountId,
+            ProjectDefinition projectDefinition
+        )
+        {
+            SessionId = sessionId;
+            ProjectPath = projectPath;
+            AWSRegion = awsRegion;
+            AWSAccountId = awsAccountId;
+            ProjectDefinition = projectDefinition;
+        }
     }
 }

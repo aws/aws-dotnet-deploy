@@ -1,10 +1,12 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Amazon.Runtime;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.CLI.UnitTests.Utilities;
 using AWS.Deploy.Common;
@@ -24,18 +26,30 @@ namespace AWS.Deploy.CLI.UnitTests
         private readonly TestToolCommandLineWrapper _commandLineWrapper;
         private readonly TestDirectoryManager _directoryManager;
         private readonly ProjectDefinitionParser _projectDefinitionParser;
+        private readonly RecipeDefinition _recipeDefinition;
 
         public DeploymentBundleHandlerTests()
         {
             var awsResourceQueryer = new TestToolAWSResourceQueryer();
             var interactiveService = new TestToolOrchestratorInteractiveService();
             var zipFileManager = new TestZipFileManager();
-            
+
             _commandLineWrapper = new TestToolCommandLineWrapper();
             _directoryManager = new TestDirectoryManager();
             _projectDefinitionParser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
-            
+
             _deploymentBundleHandler = new DeploymentBundleHandler(_commandLineWrapper, awsResourceQueryer, interactiveService, _directoryManager, zipFileManager);
+
+            _recipeDefinition = new Mock<RecipeDefinition>(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<DeploymentTypes>(),
+                It.IsAny<DeploymentBundleTypes>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>()).Object;
         }
 
         [Fact]
@@ -43,10 +57,10 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var projectPath = SystemIOUtilities.ResolvePath("ConsoleAppTask");
             var project = await _projectDefinitionParser.Parse(projectPath);
-            var recipeDefinition = new Mock<RecipeDefinition>();
-            var recommendation = new Recommendation(recipeDefinition.Object, project, 100, new Dictionary<string, string>());
 
-            var cloudApplication = new CloudApplication { Name = "ConsoleAppTask" };
+            var recommendation = new Recommendation(_recipeDefinition, project, 100, new Dictionary<string, string>());
+
+            var cloudApplication = new CloudApplication("ConsoleAppTask", String.Empty);
             var result = await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation);
 
             var dockerFile = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(recommendation.ProjectPath)), "Dockerfile");
@@ -63,12 +77,11 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var projectPath = SystemIOUtilities.ResolvePath("ConsoleAppTask");
             var project = await _projectDefinitionParser.Parse(projectPath);
-            var recipeDefinition = new Mock<RecipeDefinition>();
-            var recommendation = new Recommendation(recipeDefinition.Object, project, 100, new Dictionary<string, string>());
+            var recommendation = new Recommendation(_recipeDefinition, project, 100, new Dictionary<string, string>());
 
             recommendation.DeploymentBundle.DockerExecutionDirectory = projectPath;
 
-            var cloudApplication = new CloudApplication { Name = "ConsoleAppTask" };
+            var cloudApplication = new CloudApplication("ConsoleAppTask", String.Empty);
             var result = await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation);
 
             var dockerFile = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(recommendation.ProjectPath)), "Dockerfile");
@@ -84,10 +97,9 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var projectPath = SystemIOUtilities.ResolvePath("ConsoleAppTask");
             var project = await _projectDefinitionParser.Parse(projectPath);
-            var recipeDefinition = new Mock<RecipeDefinition>();
-            var recommendation = new Recommendation(recipeDefinition.Object, project, 100, new Dictionary<string, string>());
+            var recommendation = new Recommendation(_recipeDefinition, project, 100, new Dictionary<string, string>());
 
-            var cloudApplication = new CloudApplication { Name = "ConsoleAppTask" };
+            var cloudApplication = new CloudApplication("ConsoleAppTask", String.Empty);
             await _deploymentBundleHandler.PushDockerImageToECR(cloudApplication, recommendation, "ConsoleAppTask:latest");
 
             Assert.Equal(cloudApplication.StackName.ToLower(), recommendation.DeploymentBundle.ECRRepositoryName);
@@ -98,8 +110,7 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var projectPath = SystemIOUtilities.ResolvePath("ConsoleAppTask");
             var project = await _projectDefinitionParser.Parse(projectPath);
-            var recipeDefinition = new Mock<RecipeDefinition>();
-            var recommendation = new Recommendation(recipeDefinition.Object, project, 100, new Dictionary<string, string>());
+            var recommendation = new Recommendation(_recipeDefinition, project, 100, new Dictionary<string, string>());
 
             recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild = false;
             recommendation.DeploymentBundle.DotnetPublishBuildConfiguration = "Release";
@@ -122,8 +133,7 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var projectPath = SystemIOUtilities.ResolvePath("ConsoleAppTask");
             var project = await _projectDefinitionParser.Parse(projectPath);
-            var recipeDefinition = new Mock<RecipeDefinition>();
-            var recommendation = new Recommendation(recipeDefinition.Object, project, 100, new Dictionary<string, string>());
+            var recommendation = new Recommendation(_recipeDefinition, project, 100, new Dictionary<string, string>());
 
             recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild = true;
             recommendation.DeploymentBundle.DotnetPublishBuildConfiguration = "Release";
@@ -147,10 +157,18 @@ namespace AWS.Deploy.CLI.UnitTests
             var fullPath = SystemIOUtilities.ResolvePath(testProjectName);
 
             var parser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
-
-            var session =  new OrchestratorSession
+            var awsCredentials = new Mock<AWSCredentials>();
+            var systemCapabilities = new Mock<SystemCapabilities>(
+                It.IsAny<bool>(),
+                It.IsAny<DockerInfo>());
+            var session =  new OrchestratorSession(
+                await parser.Parse(fullPath),
+                awsCredentials.Object,
+                "us-west-2",
+                "123456789012")
             {
-                ProjectDefinition = await parser.Parse(fullPath)
+                SystemCapabilities = Task.FromResult(systemCapabilities.Object),
+                AWSProfileName = "default"
             };
 
             return new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, session);
@@ -159,43 +177,31 @@ namespace AWS.Deploy.CLI.UnitTests
         [Fact]
         public async Task DockerExecutionDirectory_SolutionLevel()
         {
-            var projectPath = SystemIOUtilities.ResolvePath(Path.Combine("docker", "WebAppWithSolutionParentLevel", "WebAppWithSolutionParentLevel"));
-
-            var session =  new OrchestratorSession
-            {
-                ProjectDefinition = await _projectDefinitionParser.Parse(projectPath)
-            };
-
-            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, session);
+            var projectPath = Path.Combine("docker", "WebAppWithSolutionParentLevel", "WebAppWithSolutionParentLevel");
+            var engine = await BuildRecommendationEngine(projectPath);
 
             var recommendations = await engine.ComputeRecommendations();
             var recommendation = recommendations.FirstOrDefault(x => x.Recipe.DeploymentBundle.Equals(DeploymentBundleTypes.Container));
 
-            var cloudApplication = new CloudApplication { Name = "WebAppWithSolutionParentLevel" };
+            var cloudApplication = new CloudApplication("WebAppWithSolutionParentLevel", String.Empty);
             var result = await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation);
 
-            Assert.Equal(Directory.GetParent(projectPath).FullName, recommendation.DeploymentBundle.DockerExecutionDirectory);
+            Assert.Equal(Directory.GetParent(SystemIOUtilities.ResolvePath(projectPath)).FullName, recommendation.DeploymentBundle.DockerExecutionDirectory);
         }
 
         [Fact]
         public async Task DockerExecutionDirectory_DockerfileLevel()
         {
-            var projectPath = SystemIOUtilities.ResolvePath(Path.Combine("docker", "WebAppNoSolution"));
-
-            var session =  new OrchestratorSession
-            {
-                ProjectDefinition = await _projectDefinitionParser.Parse(projectPath)
-            };
-
-            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, session);
+            var projectPath = Path.Combine("docker", "WebAppNoSolution");
+            var engine = await BuildRecommendationEngine(projectPath);
 
             var recommendations = await engine.ComputeRecommendations();
             var recommendation = recommendations.FirstOrDefault(x => x.Recipe.DeploymentBundle.Equals(DeploymentBundleTypes.Container));
 
-            var cloudApplication = new CloudApplication { Name = "WebAppNoSolution" };
+            var cloudApplication = new CloudApplication("WebAppNoSolution", String.Empty);
             var result = await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation);
 
-            Assert.Equal(Path.GetFullPath(projectPath), recommendation.DeploymentBundle.DockerExecutionDirectory);
+            Assert.Equal(Path.GetFullPath(SystemIOUtilities.ResolvePath(projectPath)), recommendation.DeploymentBundle.DockerExecutionDirectory);
         }
     }
 }

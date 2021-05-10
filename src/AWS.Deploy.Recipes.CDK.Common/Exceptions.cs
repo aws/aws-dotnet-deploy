@@ -13,4 +13,14 @@ namespace AWS.Deploy.Recipes.CDK.Common
         {
         }
     }
+
+    /// <summary>
+    /// The exception is thrown if an invalid configuration setting is passed to the CDK template project.
+    /// </summary>
+    public class InvalidOrMissingConfigurationException : Exception
+    {
+        public InvalidOrMissingConfigurationException(string message) : base(message)
+        {
+        }
+    }
 }

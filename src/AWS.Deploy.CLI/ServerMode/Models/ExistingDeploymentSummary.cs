@@ -13,5 +13,14 @@ namespace AWS.Deploy.CLI.ServerMode.Models
         public string Name { get; set; }
 
         public string RecipeId { get; set; }
+
+        public ExistingDeploymentSummary(
+            string name,
+            string recipeId
+        )
+        {
+            Name = name;
+            RecipeId = recipeId;
+        }
     }
 }

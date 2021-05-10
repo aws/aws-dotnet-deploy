@@ -14,6 +14,14 @@ namespace AWS.Deploy.CLI.TypeHintResponses
         public bool CreateNew { get; set; }
         public string ApplicationName { get; set; }
 
+        public BeanstalkApplicationTypeHintResponse(
+            bool createNew,
+            string applicationName)
+        {
+            CreateNew = createNew;
+            ApplicationName = applicationName;
+        }
+
         public string ToDisplayString() => ApplicationName;
     }
 }

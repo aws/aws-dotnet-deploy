@@ -118,9 +118,9 @@ namespace AWS.Deploy.CLI.Commands
             throw new FailedToDeleteException($"Failed to delete {stackName} stack: {stack.StackStatus}");
         }
 
-        private async Task<Stack> StabilizeStack(string stackName)
+        private async Task<Stack?> StabilizeStack(string stackName)
         {
-            Stack stack;
+            Stack? stack;
             do
             {
                 stack = await GetStackAsync(stackName);
@@ -134,7 +134,7 @@ namespace AWS.Deploy.CLI.Commands
             return stack;
         }
 
-        private async Task<Stack> GetStackAsync(string stackName)
+        private async Task<Stack?> GetStackAsync(string stackName)
         {
             try
             {

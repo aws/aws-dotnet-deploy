@@ -43,7 +43,7 @@ namespace AWS.Deploy.Orchestration.RecommendationEngine
             }
         }
 
-        public async Task<List<Recommendation>> ComputeRecommendations(Dictionary<string, string> additionalReplacements = null)
+        public async Task<List<Recommendation>> ComputeRecommendations(Dictionary<string, string>? additionalReplacements = null)
         {
             additionalReplacements ??= new Dictionary<string, string>();
 
@@ -82,7 +82,7 @@ namespace AWS.Deploy.Orchestration.RecommendationEngine
             var availableTests = RecommendationTestFactory.LoadAvailableTests();
             var results = new RulesResult {Include = true };
 
-            foreach (var rule in rules)
+            foreach (var rule in rules!)
             {
                 var allTestPass = true;
                 foreach (var test in rule.Tests)
@@ -92,12 +92,11 @@ namespace AWS.Deploy.Orchestration.RecommendationEngine
                         throw new InvalidRecipeDefinitionException($"Invalid test type [{test.Type}] found in rule.");
                     }
 
-                    var input = new RecommendationTestInput
-                    {
-                        Test = test,
-                        ProjectDefinition = _orchestratorSession.ProjectDefinition,
-                        Session = _orchestratorSession
-                    };
+                    var input = new RecommendationTestInput(
+                        test,
+                        _orchestratorSession.ProjectDefinition,
+                        _orchestratorSession);
+
                     allTestPass &= await testInstance.Execute(input);
 
                     if (!allTestPass)
@@ -120,7 +119,7 @@ namespace AWS.Deploy.Orchestration.RecommendationEngine
             return results;
         }
 
-        public bool ShouldInclude(RuleEffect effect, bool testPass)
+        public bool ShouldInclude(RuleEffect? effect, bool testPass)
         {
             // Get either the pass or fail effect options.
             var effectOptions = GetEffectOptions(effect, testPass);
@@ -139,7 +138,7 @@ namespace AWS.Deploy.Orchestration.RecommendationEngine
             return testPass;
         }
 
-        private EffectOptions GetEffectOptions(RuleEffect effect, bool testPass)
+        private EffectOptions? GetEffectOptions(RuleEffect? effect, bool testPass)
         {
             if (effect == null)
             {

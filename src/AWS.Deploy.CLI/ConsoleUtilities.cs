@@ -19,7 +19,7 @@ namespace AWS.Deploy.CLI
     public interface IConsoleUtilities
     {
         Recommendation AskToChooseRecommendation(IList<Recommendation> recommendations);
-        string AskUserToChoose(IList<string> values, string title, string defaultValue);
+        string AskUserToChoose(IList<string> values, string title, string? defaultValue);
         T AskUserToChoose<T>(IList<T> options, string title, T defaultValue)
             where T : IUserInputOption;
         void DisplayRow((string, int)[] row);
@@ -27,7 +27,7 @@ namespace AWS.Deploy.CLI
         UserResponse<T> AskUserToChooseOrCreateNew<T>(IEnumerable<T> options, string title, UserInputConfiguration<T> userInputConfiguration);
         string AskUserForValue(string message, string defaultValue, bool allowEmpty, string resetValue = "", params Func<string, string>[] validators);
         string AskForEC2KeyPairSaveDirectory(string projectPath);
-        YesNo AskYesNoQuestion(string question, string defaultValue);
+        YesNo AskYesNoQuestion(string question, string? defaultValue);
         YesNo AskYesNoQuestion(string question, YesNo? defaultValue = default);
         void DisplayValues(Dictionary<string, object> objectValues, string indent);
     }
@@ -73,7 +73,7 @@ namespace AWS.Deploy.CLI
             return ReadOptionFromUser(recommendations, 1);
         }
 
-        public string AskUserToChoose(IList<string> values, string title, string defaultValue)
+        public string AskUserToChoose(IList<string> values, string title, string? defaultValue)
         {
             var options = new List<UserInputOption>();
             foreach (var value in values)
@@ -81,10 +81,12 @@ namespace AWS.Deploy.CLI
                 options.Add(new UserInputOption(value));
             }
 
-            return AskUserToChoose(options, title, new UserInputOption(defaultValue))?.Name;
+            UserInputOption? defaultOption = defaultValue != null ? new UserInputOption(defaultValue) : null;
+
+            return AskUserToChoose(options, title, defaultOption).Name;
         }
 
-        public T AskUserToChoose<T>(IList<T> options, string title, T defaultValue)
+        public T AskUserToChoose<T>(IList<T> options, string title, T? defaultValue)
             where T : IUserInputOption
         {
             if (!string.IsNullOrEmpty(title))
@@ -170,12 +172,12 @@ namespace AWS.Deploy.CLI
 
         public UserResponse<string> AskUserToChooseOrCreateNew(IEnumerable<string> options, string title, bool askNewName = true, string defaultNewName = "", bool canBeEmpty = false)
         {
-            var configuration = new UserInputConfiguration<string>
+            var configuration = new UserInputConfiguration<string>(
+                option => option,
+                option => option.Contains(option),
+                defaultNewName)
             {
-                DisplaySelector = option => option,
-                DefaultSelector = option => option.Contains(option),
                 AskNewName = askNewName,
-                DefaultNewName = defaultNewName,
                 CanBeEmpty = canBeEmpty
             };
 
@@ -257,7 +259,7 @@ namespace AWS.Deploy.CLI
             prompt += "): ";
             _interactiveService.WriteLine(prompt);
 
-            string userValue = null;
+            string? userValue = null;
             while (true)
             {
                 var line = _interactiveService.ReadLine()?.Trim() ?? "";
@@ -334,7 +336,7 @@ namespace AWS.Deploy.CLI
             }
         }
 
-        public YesNo AskYesNoQuestion(string question, string defaultValue)
+        public YesNo AskYesNoQuestion(string question, string? defaultValue)
         {
             if (bool.TryParse(defaultValue, out var result))
                 return AskYesNoQuestion(question, result ? YesNo.Yes : YesNo.No);

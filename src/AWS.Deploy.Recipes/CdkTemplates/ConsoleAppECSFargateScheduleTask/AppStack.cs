@@ -18,7 +18,7 @@ namespace ConsoleAppECSFargateScheduleTask
 {
     public class AppStack : Stack
     {
-        internal AppStack(Construct scope, RecipeConfiguration<Configuration> recipeConfiguration, IStackProps props = null)
+        internal AppStack(Construct scope, RecipeConfiguration<Configuration> recipeConfiguration, IStackProps? props = null)
             : base(scope, recipeConfiguration.StackName, props)
         {
             var settings = recipeConfiguration.Settings;
@@ -76,6 +76,9 @@ namespace ConsoleAppECSFargateScheduleTask
             }
             else
             {
+                if (string.IsNullOrEmpty(settings.ApplicationIAMRole.RoleArn))
+                    throw new InvalidOrMissingConfigurationException("The provided Application IAM Role ARN is null or empty.");
+
                 taskRole = Role.FromRoleArn(this, "TaskRole", settings.ApplicationIAMRole.RoleArn, new FromRoleArnOptions {
                     Mutable = false
                 });
@@ -93,6 +96,9 @@ namespace ConsoleAppECSFargateScheduleTask
                 StreamPrefix = recipeConfiguration.StackName
             });
 
+            if (string.IsNullOrEmpty(recipeConfiguration.ECRRepositoryName))
+                throw new InvalidOrMissingConfigurationException("The provided ECR Repository Name is null or empty.");
+
             var ecrRepository = Repository.FromRepositoryName(this, "ECRRepository", recipeConfiguration.ECRRepositoryName);
             taskDefinition.AddContainer("Container", new ContainerDefinitionOptions
             {
@@ -100,7 +106,7 @@ namespace ConsoleAppECSFargateScheduleTask
                 Logging = logging
             });
 
-            SubnetSelection subnetSelection = null;
+            SubnetSelection? subnetSelection = null;
             if (settings.Vpc.IsDefault)
             {
                 subnetSelection = new SubnetSelection

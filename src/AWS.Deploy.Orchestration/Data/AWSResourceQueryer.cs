@@ -26,10 +26,10 @@ namespace AWS.Deploy.Orchestration.Data
     {
         Task<List<Cluster>> ListOfECSClusters();
         Task<List<ApplicationDescription>> ListOfElasticBeanstalkApplications();
-        Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(string applicationName);
+        Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(string? applicationName);
         Task<List<KeyPairInfo>> ListOfEC2KeyPairs();
         Task<string> CreateEC2KeyPair(string keyName, string saveLocation);
-        Task<List<Role>> ListOfIAMRoles(string servicePrincipal);
+        Task<List<Role>> ListOfIAMRoles(string? servicePrincipal);
         Task<List<Vpc>> GetListOfVpcs();
         Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns();
         Task<PlatformSummary> GetLatestElasticBeanstalkPlatformArn();
@@ -73,10 +73,14 @@ namespace AWS.Deploy.Orchestration.Data
             return applications.Applications;
         }
 
-        public async Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(string applicationName)
+        public async Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(string? applicationName)
         {
             var beanstalkClient = _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>();
             var environments = new List<EnvironmentDescription>();
+
+            if (string.IsNullOrEmpty(applicationName))
+                return environments;
+
             var request = new DescribeEnvironmentsRequest
             {
                 ApplicationName = applicationName
@@ -115,7 +119,7 @@ namespace AWS.Deploy.Orchestration.Data
             return response.KeyPair.KeyName;
         }
 
-        public async Task<List<Role>> ListOfIAMRoles(string servicePrincipal)
+        public async Task<List<Role>> ListOfIAMRoles(string? servicePrincipal)
         {
             var identityManagementServiceClient = _awsClientFactory.GetAWSClient<IAmazonIdentityManagementService>();
 
@@ -132,9 +136,11 @@ namespace AWS.Deploy.Orchestration.Data
             return roles;
         }
 
-        private static bool AssumeRoleServicePrincipalSelector(Role role, string servicePrincipal)
+        private static bool AssumeRoleServicePrincipalSelector(Role role, string? servicePrincipal)
         {
-            return !string.IsNullOrEmpty(role.AssumeRolePolicyDocument) && role.AssumeRolePolicyDocument.Contains(servicePrincipal);
+            return !string.IsNullOrEmpty(role.AssumeRolePolicyDocument) &&
+                   !string.IsNullOrEmpty(servicePrincipal) &&
+                   role.AssumeRolePolicyDocument.Contains(servicePrincipal);
         }
 
         public async Task<List<Vpc>> GetListOfVpcs()

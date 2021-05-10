@@ -10,10 +10,10 @@ namespace AWS.Deploy.Orchestration
     {
         public const string DEFAULT_FILE_NAME = "aws-netsuite-deployment.json";
 
-        public string Profile { get; set; }
-        public string Region { get; set; }
+        public string? Profile { get; set; }
+        public string? Region { get; set; }
 
-        public static PreviousDeploymentSettings ReadSettings(string projectPath, string configFile)
+        public static PreviousDeploymentSettings ReadSettings(string projectPath, string? configFile)
         {
             var fullPath = GetFullConfigFilePath(projectPath, configFile);
             if (!File.Exists(fullPath))
@@ -38,7 +38,7 @@ namespace AWS.Deploy.Orchestration
             File.WriteAllText(filePath, json);
         }
 
-        public static string GetFullConfigFilePath(string projectPath, string configFile)
+        public static string GetFullConfigFilePath(string projectPath, string? configFile)
         {
             var fullPath = string.IsNullOrEmpty(configFile) ? Path.Combine(projectPath, DEFAULT_FILE_NAME) : Path.Combine(projectPath, configFile);
             return fullPath;

@@ -9,10 +9,10 @@ namespace AWS.Deploy.CLI.ServerMode.Models
 {
     public class SetDeploymentTargetInput
     {
-        public string NewDeploymentName { get; set; }
+        public string? NewDeploymentName { get; set; }
 
-        public string NewDeploymentRecipeId { get; set; }
+        public string? NewDeploymentRecipeId { get; set; }
 
-        public string ExistingDeploymentName { get; set; }
+        public string? ExistingDeploymentName { get; set; }
     }
 }

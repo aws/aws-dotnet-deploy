@@ -27,10 +27,11 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             var currentValue = recommendation.GetOptionSettingValue(optionSetting);
             var keyPairs = await _awsResourceQueryer.ListOfEC2KeyPairs();
 
-            var userInputConfiguration = new UserInputConfiguration<KeyPairInfo>
+            var userInputConfiguration = new UserInputConfiguration<KeyPairInfo>(
+                kp => kp.KeyName,
+                kp => kp.KeyName.Equals(currentValue)
+                )
             {
-                DisplaySelector = kp => kp.KeyName,
-                DefaultSelector = kp => kp.KeyName.Equals(currentValue),
                 AskNewName = true,
                 EmptyOption = true,
                 CurrentValue = currentValue
@@ -49,7 +50,8 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 }
                 else
                 {
-                    settingValue = userResponse.SelectedOption?.KeyName ?? userResponse.NewName;
+                    settingValue = userResponse.SelectedOption?.KeyName ?? userResponse.NewName ??
+                        throw new UserPromptForNameReturnedNullException("The user prompt for a new EC2 Key Pair name was null or empty.");
                 }
 
                 if (userResponse.CreateNew && !string.IsNullOrEmpty(userResponse.NewName))
@@ -73,7 +75,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 break;
             }
 
-            return settingValue;
+            return settingValue ?? "";
         }
     }
 }

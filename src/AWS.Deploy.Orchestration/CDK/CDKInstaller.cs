@@ -80,7 +80,7 @@ namespace AWS.Deploy.Orchestration.CDK
              * C:\Users\user\AppData\Roaming\npm
              * `-- aws-cdk@0.0.0
              */
-            var standardOut = result.StandardOut;
+            var standardOut = result.StandardOut ?? "";
             var lines = standardOut.Split('\n'); // Environment.NewLine doesn't work here.
             if (lines.Length < 2)
             {

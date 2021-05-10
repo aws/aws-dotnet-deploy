@@ -19,7 +19,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
     public interface ITypeHintCommandFactory
     {
-        ITypeHintCommand GetCommand(OptionSettingTypeHint typeHint);
+        ITypeHintCommand? GetCommand(OptionSettingTypeHint typeHint);
     }
 
     /// <summary>
@@ -48,7 +48,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             };
         }
 
-        public ITypeHintCommand GetCommand(OptionSettingTypeHint typeHint)
+        public ITypeHintCommand? GetCommand(OptionSettingTypeHint typeHint)
         {
             if (!_commands.ContainsKey(typeHint))
             {

@@ -10,5 +10,13 @@ namespace AWS.Deploy.Common.Recipes
     {
         public string Id { get; set; }
         public object Value { get; set; }
+
+        public PropertyDependency(
+            string id,
+            object value)
+        {
+            Id = id;
+            Value = value;
+        }
     }
 }
