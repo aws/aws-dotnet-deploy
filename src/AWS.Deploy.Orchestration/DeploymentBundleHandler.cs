@@ -76,7 +76,7 @@ namespace AWS.Deploy.Orchestration
             await InitiateDockerLogin();
 
             var tagSuffix = sourceTag.Split(":")[1];
-            var repository = await SetupECRRepository(cloudApplication.StackName.ToLower());
+            var repository = await SetupECRRepository(cloudApplication.StackName.ToLower(), recommendation.Recipe.Id);
             var targetTag = $"{repository.RepositoryUri}:{tagSuffix}";
 
             await TagDockerImage(sourceTag, targetTag);
@@ -248,9 +248,9 @@ namespace AWS.Deploy.Orchestration
                 throw new DockerLoginFailedException("Failed to login to Docker");
         }
 
-        private async Task<Repository> SetupECRRepository(string ecrRepositoryName)
+        private async Task<Repository> SetupECRRepository(string repositoryName, string recipeId)
         {
-            var existingRepositories = await _awsResourceQueryer.GetECRRepositories(new List<string> { ecrRepositoryName });
+            var existingRepositories = await _awsResourceQueryer.GetECRRepositories(new List<string> { repositoryName });
 
             if (existingRepositories.Count == 1)
             {
@@ -258,7 +258,7 @@ namespace AWS.Deploy.Orchestration
             }
             else
             {
-                return await _awsResourceQueryer.CreateECRRepository(ecrRepositoryName);
+                return await _awsResourceQueryer.CreateECRRepository(repositoryName, recipeId);
             }
         }
 

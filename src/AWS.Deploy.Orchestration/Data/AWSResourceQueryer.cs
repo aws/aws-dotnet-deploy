@@ -19,6 +19,10 @@ using Amazon.IdentityManagement.Model;
 using Amazon.SecurityToken;
 using Amazon.SecurityToken.Model;
 using AWS.Deploy.Common;
+using AWS.Deploy.Recipes.CDK.Common;
+using ListTagsForResourceRequest = Amazon.ECR.Model.ListTagsForResourceRequest;
+using Tag = Amazon.ECR.Model.Tag;
+using Task = System.Threading.Tasks.Task;
 
 namespace AWS.Deploy.Orchestration.Data
 {
@@ -35,7 +39,9 @@ namespace AWS.Deploy.Orchestration.Data
         Task<PlatformSummary> GetLatestElasticBeanstalkPlatformArn();
         Task<List<AuthorizationData>> GetECRAuthorizationToken();
         Task<List<Repository>> GetECRRepositories(List<string> repositoryNames);
-        Task<Repository> CreateECRRepository(string repositoryName);
+        Task DeleteECRRepository(string repositoryName);
+        Task<Repository> CreateECRRepository(string repositoryName, string recipeId);
+        Task<List<Tag>> ListTagsForECRResource(string resourceArn);
         Task<List<Stack>> GetCloudFormationStacks();
         Task<GetCallerIdentityResponse> GetCallerIdentity();
     }
@@ -228,18 +234,60 @@ namespace AWS.Deploy.Orchestration.Data
             }
         }
 
-        public async Task<Repository> CreateECRRepository(string repositoryName)
+        public async Task DeleteECRRepository(string repositoryName)
+        {
+            var ecrClient = _awsClientFactory.GetAWSClient<IAmazonECR>();
+
+            var request = new DeleteRepositoryRequest
+            {
+                RepositoryName = repositoryName,
+                Force = true
+            };
+
+            try
+            {
+                await ecrClient.DeleteRepositoryAsync(request);
+            }
+            catch (RepositoryNotFoundException)
+            {
+                // Repository does not exit, no action required.
+            }
+        }
+
+        public async Task<Repository> CreateECRRepository(string repositoryName, string recipeId)
         {
             var ecrClient = _awsClientFactory.GetAWSClient<IAmazonECR>();
 
             var request = new CreateRepositoryRequest
             {
-                RepositoryName = repositoryName
+                RepositoryName = repositoryName,
+                Tags = new List<Tag>
+                {
+                    new()
+                    {
+                        Key = CloudFormationIdentifierConstants.STACK_TAG,
+                        Value = recipeId
+                    }
+                }
             };
 
             var response = await ecrClient.CreateRepositoryAsync(request);
 
             return response.Repository;
+        }
+
+        public async Task<List<Tag>> ListTagsForECRResource(string resourceArn)
+        {
+            var ecrClient = _awsClientFactory.GetAWSClient<IAmazonECR>();
+
+            var request = new ListTagsForResourceRequest
+            {
+                ResourceArn = resourceArn
+            };
+
+            var response = await ecrClient.ListTagsForResourceAsync(request);
+
+            return response.Tags;
         }
 
         public async Task<List<Stack>> GetCloudFormationStacks()

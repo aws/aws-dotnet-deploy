@@ -215,7 +215,8 @@ namespace AWS.Deploy.CLI.Commands
                         awsOption.Region = RegionEndpoint.GetBySystemName(awsRegion);
                     });
 
-                    await new DeleteDeploymentCommand(_awsClientFactory, _toolInteractiveService, _consoleUtilities).ExecuteAsync(deploymentName);
+                    await new DeleteDeploymentCommand(_awsClientFactory, _toolInteractiveService, _consoleUtilities, _awsResourceQueryer)
+                        .ExecuteAsync(deploymentName);
 
                     return CommandReturnCodes.SUCCESS;
                 }

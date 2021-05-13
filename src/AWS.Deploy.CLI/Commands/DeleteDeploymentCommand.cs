@@ -2,13 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Amazon.CloudFormation;
 using Amazon.CloudFormation.Model;
+using Amazon.ECR.Model;
 using AWS.Deploy.CLI.CloudFormation;
 using AWS.Deploy.Common;
+using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Recipes.CDK.Common;
+using Tag = Amazon.ECR.Model.Tag;
 
 namespace AWS.Deploy.CLI.Commands
 {
@@ -23,12 +27,17 @@ namespace AWS.Deploy.CLI.Commands
         private readonly IToolInteractiveService _interactiveService;
         private readonly IAmazonCloudFormation _cloudFormationClient;
         private readonly IConsoleUtilities _consoleUtilities;
+        private readonly IAWSResourceQueryer _awsResourceQueryer;
 
-        public DeleteDeploymentCommand(IAWSClientFactory awsClientFactory, IToolInteractiveService interactiveService, IConsoleUtilities consoleUtilities)
+        public DeleteDeploymentCommand(IAWSClientFactory awsClientFactory,
+            IToolInteractiveService interactiveService,
+            IConsoleUtilities consoleUtilities,
+            IAWSResourceQueryer awsResourceQueryer)
         {
             _awsClientFactory = awsClientFactory;
             _interactiveService = interactiveService;
             _consoleUtilities = consoleUtilities;
+            _awsResourceQueryer = awsResourceQueryer;
             _cloudFormationClient = _awsClientFactory.GetAWSClient<IAmazonCloudFormation>();
         }
 
@@ -65,6 +74,18 @@ namespace AWS.Deploy.CLI.Commands
                 // Monitor updates the stdout with current status of the CloudFormation stack
                 var _ = monitor.StartAsync();
 
+                // delete the ECR repository if exists for a container based deployment
+                // repository must be tagged with deploy tool tag
+                var repository = await GetECRRepository(stackName.ToLower());
+                if (repository != null)
+                {
+                    var tags = await _awsResourceQueryer.ListTagsForECRResource(repository.RepositoryArn);
+                    if (tags.Any(tag => tag.Key.Equals(CloudFormationIdentifierConstants.STACK_TAG)))
+                    {
+                        await _awsResourceQueryer.DeleteECRRepository(repository.RepositoryName);
+                    }
+                }
+
                 await WaitForStackDelete(stackName);
                 _interactiveService.WriteLine($"{stackName}: deleted");
             }
@@ -77,6 +98,21 @@ namespace AWS.Deploy.CLI.Commands
                 // Stop monitoring CloudFormation stack status once the deletion operation finishes
                 monitor.Stop();
             }
+        }
+
+        private async Task<Repository> GetECRRepository(string ecrRepositoryName)
+        {
+            var existingRepositories = await _awsResourceQueryer.GetECRRepositories(new List<string>
+            {
+                ecrRepositoryName
+            });
+
+            if (existingRepositories.Count == 1)
+            {
+                return existingRepositories[0];
+            }
+
+            return null;
         }
 
         private async Task<bool> CanDeleteAsync(string stackName)

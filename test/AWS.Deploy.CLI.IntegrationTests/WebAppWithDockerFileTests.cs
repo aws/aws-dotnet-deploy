@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Amazon.CloudFormation;
+using Amazon.ECR;
 using Amazon.ECS;
 using Amazon.ECS.Model;
 using AWS.Deploy.CLI.Extensions;
@@ -27,6 +28,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
         private readonly InMemoryInteractiveService _interactiveService;
         private bool _isDisposed;
         private string _stackName;
+        private readonly ECRHelper _ecrHelper;
 
         public WebAppWithDockerFileTests()
         {
@@ -37,6 +39,9 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
             var ecsClient = new AmazonECSClient();
             _ecsHelper = new ECSHelper(ecsClient);
+
+            var ecrClient = new AmazonECRClient();
+            _ecrHelper = new ECRHelper(ecrClient);
 
             var serviceCollection = new ServiceCollection();
 
@@ -101,6 +106,9 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
             // Verify application is delete
             Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName));
+
+            // Verify resources created outside CDK are deleted
+            Assert.True(await _ecrHelper.IsRepositoryDeleted(_stackName.ToLower()));
         }
 
         public void Dispose()
@@ -119,6 +127,12 @@ namespace AWS.Deploy.CLI.IntegrationTests
                 if (!isStackDeleted)
                 {
                     _cloudFormationHelper.DeleteStack(_stackName).GetAwaiter().GetResult();
+                }
+
+                var isRepositoryDeleted = _ecrHelper.IsRepositoryDeleted(_stackName.ToLower()).GetAwaiter().GetResult();
+                if (!isRepositoryDeleted)
+                {
+                    _ecrHelper.DeleteRepository(_stackName).GetAwaiter().GetResult();
                 }
             }
 

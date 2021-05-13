@@ -12,13 +12,16 @@ using Amazon.IdentityManagement.Model;
 using Amazon.SecurityToken.Model;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.Data;
+using Tag = Amazon.ECR.Model.Tag;
 
 namespace AWS.Deploy.CLI.UnitTests.Utilities
 {
     public class TestToolAWSResourceQueryer : IAWSResourceQueryer
     {
         public Task<string> CreateEC2KeyPair(string keyName, string saveLocation) => throw new NotImplementedException();
-        public Task<Repository> CreateECRRepository(string repositoryName) => throw new NotImplementedException();
+        public Task DeleteECRRepository(string repositoryName) => throw new NotImplementedException();
+        public Task<Repository> CreateECRRepository(string name, string recipeId) => throw new NotImplementedException();
+        public Task<List<Tag>> ListTagsForECRResource(string resourceArn) => throw new NotImplementedException();
         public Task<List<Stack>> GetCloudFormationStacks() => throw new NotImplementedException();
         public Task<GetCallerIdentityResponse> GetCallerIdentity() => throw new NotImplementedException();
 
