@@ -135,11 +135,13 @@ namespace AWS.Deploy.CLI.Commands
 
                     var session = new OrchestratorSession(
                         projectDefinition,
-                        profile,
                         awsCredentials,
                         awsRegion,
-                        systemCapabilities,
-                        callerIdentity.Account);
+                        callerIdentity.Account)
+                    {
+                        SystemCapabilities = systemCapabilities,
+                        AWSProfileName = profile
+                    };
 
                     var dockerEngine = new DockerEngine.DockerEngine(projectDefinition);
 

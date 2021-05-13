@@ -96,7 +96,7 @@ namespace AWS.Deploy.Orchestration.UnitTests.Utilities
 
             var existingApplication = new List<CloudApplication>
             {
-                new CloudApplication(projectFile)
+                new CloudApplication(projectFile, string.Empty)
             };
 
             // ACT

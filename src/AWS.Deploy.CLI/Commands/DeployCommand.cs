@@ -148,6 +148,9 @@ namespace AWS.Deploy.CLI.Commands
             // Apply the user enter project name to the recommendation so that any default settings based on project name are applied.
             selectedRecommendation.OverrideProjectName(cloudApplicationName);
 
+            if (_session.SystemCapabilities == null)
+                throw new SystemCapabilitiesNotProvidedException("The system capabilities were not provided.");
+
             var systemCapabilities = await _session.SystemCapabilities;
             if (selectedRecommendation.Recipe.DeploymentType == DeploymentTypes.CdkProject &&
                 !systemCapabilities.NodeJsMinVersionInstalled)
@@ -174,7 +177,7 @@ namespace AWS.Deploy.CLI.Commands
 
             await ConfigureDeployment(selectedRecommendation, configurableOptionSettings, false);
 
-            var cloudApplication = new CloudApplication(cloudApplicationName);
+            var cloudApplication = new CloudApplication(cloudApplicationName, string.Empty);
 
             if (!ConfirmDeployment(selectedRecommendation))
             {

@@ -10,7 +10,7 @@ namespace AWS.Deploy.Orchestration
     public class OrchestratorSession
     {
         public ProjectDefinition ProjectDefinition { get; set; }
-        public string AWSProfileName { get; set; }
+        public string? AWSProfileName { get; set; }
         public AWSCredentials AWSCredentials { get; set; }
         public string AWSRegion { get; set; }
         /// <remarks>
@@ -19,22 +19,18 @@ namespace AWS.Deploy.Orchestration
         /// <para />
         /// It's safe to repeatedly await this property; evaluation will only be done once.
         /// </remarks>
-        public Task<SystemCapabilities> SystemCapabilities { get; set; }
+        public Task<SystemCapabilities>? SystemCapabilities { get; set; }
         public string AWSAccountId { get; set; }
 
         public OrchestratorSession(
             ProjectDefinition projectDefinition,
-            string awsProfileName,
             AWSCredentials awsCredentials,
             string awsRegion,
-            Task<SystemCapabilities> systemCapabilities,
             string awsAccountId)
         {
             ProjectDefinition = projectDefinition;
-            AWSProfileName = awsProfileName;
             AWSCredentials = awsCredentials;
             AWSRegion = awsRegion;
-            SystemCapabilities = systemCapabilities;
             AWSAccountId = awsAccountId;
         }
     }

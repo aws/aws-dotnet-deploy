@@ -33,11 +33,13 @@ namespace AWS.Deploy.CLI.UnitTests
                 It.IsAny<DockerInfo>());
             var session =  new OrchestratorSession(
                 parser.Parse(projectPath).Result,
-                "default",
                 awsCredentials.Object,
                 "us-west-2",
-                Task.FromResult(systemCapabilities.Object),
-                "123456789012");
+                "123456789012")
+            {
+                SystemCapabilities = Task.FromResult(systemCapabilities.Object),
+                AWSProfileName = "default"
+            };
 
             var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, session);
             var recommendations = engine.ComputeRecommendations().GetAwaiter().GetResult();

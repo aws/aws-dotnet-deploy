@@ -1,6 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -59,7 +60,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var recommendation = new Recommendation(_recipeDefinition, project, 100, new Dictionary<string, string>());
 
-            var cloudApplication = new CloudApplication("ConsoleAppTask");
+            var cloudApplication = new CloudApplication("ConsoleAppTask", String.Empty);
             var result = await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation);
 
             var dockerFile = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(recommendation.ProjectPath)), "Dockerfile");
@@ -80,7 +81,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             recommendation.DeploymentBundle.DockerExecutionDirectory = projectPath;
 
-            var cloudApplication = new CloudApplication("ConsoleAppTask");
+            var cloudApplication = new CloudApplication("ConsoleAppTask", String.Empty);
             var result = await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation);
 
             var dockerFile = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(recommendation.ProjectPath)), "Dockerfile");
@@ -98,7 +99,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var project = await _projectDefinitionParser.Parse(projectPath);
             var recommendation = new Recommendation(_recipeDefinition, project, 100, new Dictionary<string, string>());
 
-            var cloudApplication = new CloudApplication("ConsoleAppTask");
+            var cloudApplication = new CloudApplication("ConsoleAppTask", String.Empty);
             await _deploymentBundleHandler.PushDockerImageToECR(cloudApplication, recommendation, "ConsoleAppTask:latest");
 
             Assert.Equal(cloudApplication.StackName.ToLower(), recommendation.DeploymentBundle.ECRRepositoryName);
@@ -162,11 +163,13 @@ namespace AWS.Deploy.CLI.UnitTests
                 It.IsAny<DockerInfo>());
             var session =  new OrchestratorSession(
                 await parser.Parse(fullPath),
-                "default",
                 awsCredentials.Object,
                 "us-west-2",
-                Task.FromResult(systemCapabilities.Object),
-                "123456789012");
+                "123456789012")
+            {
+                SystemCapabilities = Task.FromResult(systemCapabilities.Object),
+                AWSProfileName = "default"
+            };
 
             return new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, session);
         }
@@ -180,7 +183,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var recommendations = await engine.ComputeRecommendations();
             var recommendation = recommendations.FirstOrDefault(x => x.Recipe.DeploymentBundle.Equals(DeploymentBundleTypes.Container));
 
-            var cloudApplication = new CloudApplication("WebAppWithSolutionParentLevel");
+            var cloudApplication = new CloudApplication("WebAppWithSolutionParentLevel", String.Empty);
             var result = await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation);
 
             Assert.Equal(Directory.GetParent(SystemIOUtilities.ResolvePath(projectPath)).FullName, recommendation.DeploymentBundle.DockerExecutionDirectory);
@@ -195,7 +198,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var recommendations = await engine.ComputeRecommendations();
             var recommendation = recommendations.FirstOrDefault(x => x.Recipe.DeploymentBundle.Equals(DeploymentBundleTypes.Container));
 
-            var cloudApplication = new CloudApplication("WebAppNoSolution");
+            var cloudApplication = new CloudApplication("WebAppNoSolution", String.Empty);
             var result = await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation);
 
             Assert.Equal(Path.GetFullPath(SystemIOUtilities.ResolvePath(projectPath)), recommendation.DeploymentBundle.DockerExecutionDirectory);

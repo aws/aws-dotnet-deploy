@@ -52,4 +52,13 @@ namespace AWS.Deploy.CLI
     {
         public UserPromptForNameReturnedNullException(string message, Exception? innerException = null) : base(message, innerException) { }
     }
+
+    /// <summary>
+    /// Throw if the system capabilities were not provided.
+    /// </summary>
+    [AWSDeploymentExpectedException]
+    public class SystemCapabilitiesNotProvidedException : Exception
+    {
+        public SystemCapabilitiesNotProvidedException(string message, Exception? innerException = null) : base(message, innerException) { }
+    }
 }

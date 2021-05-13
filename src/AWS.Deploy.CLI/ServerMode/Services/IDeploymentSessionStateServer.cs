@@ -9,7 +9,7 @@ namespace AWS.Deploy.CLI.ServerMode.Services
 {
     public interface IDeploymentSessionStateServer
     {
-        SessionState Get(string id);
+        SessionState? Get(string id);
 
         void Save(string id, SessionState state);
 

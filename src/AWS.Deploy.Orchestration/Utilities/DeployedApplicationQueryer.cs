@@ -73,10 +73,7 @@ namespace AWS.Deploy.Orchestration.Utilities
                     continue;
                 }
 
-                apps.Add(new CloudApplication(stack.StackName)
-                {
-                    RecipeId = recipeId
-                });
+                apps.Add(new CloudApplication(stack.StackName, recipeId));
             }
 
             return apps;
