@@ -28,7 +28,7 @@ namespace AWS.Deploy.Orchestration.Data
         Task<List<ApplicationDescription>> ListOfElasticBeanstalkApplications();
         Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(string? applicationName);
         Task<List<KeyPairInfo>> ListOfEC2KeyPairs();
-        Task<string> CreateEC2KeyPair(string? keyName, string saveLocation);
+        Task<string> CreateEC2KeyPair(string keyName, string saveLocation);
         Task<List<Role>> ListOfIAMRoles(string? servicePrincipal);
         Task<List<Vpc>> GetListOfVpcs();
         Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns();
@@ -106,7 +106,7 @@ namespace AWS.Deploy.Orchestration.Data
             return response.KeyPairs;
         }
 
-        public async Task<string> CreateEC2KeyPair(string? keyName, string saveLocation)
+        public async Task<string> CreateEC2KeyPair(string keyName, string saveLocation)
         {
             var ec2Client = _awsClientFactory.GetAWSClient<IAmazonEC2>();
 

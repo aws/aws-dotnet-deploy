@@ -67,8 +67,7 @@ namespace AWS.Deploy.Orchestration
             foreach(var option in recommendation.Recipe.OptionSettings)
             {
                 var currentValue = recommendation.GetOptionSettingValue(option);
-                if (currentValue != null)
-                    templateParameters[option.Id] = currentValue?.ToString() ?? "";
+                templateParameters[option.Id] = currentValue?.ToString() ?? "";
             }
 
             try

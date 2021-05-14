@@ -50,7 +50,8 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 }
                 else
                 {
-                    settingValue = userResponse.SelectedOption?.KeyName ?? userResponse.NewName;
+                    settingValue = userResponse.SelectedOption?.KeyName ?? userResponse.NewName ??
+                        throw new UserPromptForNameReturnedNullException("The user prompt for a new EC2 Key Pair name was null or empty.");
                 }
 
                 if (userResponse.CreateNew && !string.IsNullOrEmpty(userResponse.NewName))
