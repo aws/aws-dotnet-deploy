@@ -9,6 +9,8 @@ using System.Net.Http.Headers;
 using Amazon.Runtime;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Security.Cryptography;
+using System.IO;
 
 namespace AWS.Deploy.ServerMode.Client
 {
@@ -30,11 +32,13 @@ namespace AWS.Deploy.ServerMode.Client
     /// </summary>
     public class ServerModeHttpClientAuthorizationHandler : HttpClientHandler
     {
-        readonly Func<Task<AWSCredentials>> _credentialsGenerator;
+        private readonly Func<Task<AWSCredentials>> _credentialsGenerator;
+        private readonly Aes? _aes;
 
-        internal ServerModeHttpClientAuthorizationHandler(Func<Task<AWSCredentials>> credentialsGenerator)
+        internal ServerModeHttpClientAuthorizationHandler(Func<Task<AWSCredentials>> credentialsGenerator, Aes? aes = null)
         {
             _credentialsGenerator = credentialsGenerator;
+            _aes = aes;
         }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -43,13 +47,13 @@ namespace AWS.Deploy.ServerMode.Client
             if(awsCreds != null)
             {
                 var immutableCredentials = await awsCreds.GetCredentialsAsync();
-                AddAuthorizationHeader(request, immutableCredentials);
+                AddAuthorizationHeader(request, immutableCredentials, _aes);
             }
 
             return await base.SendAsync(request, cancellationToken);
         }
 
-        public static void AddAuthorizationHeader(HttpRequestMessage request, ImmutableCredentials credentials)
+        public static void AddAuthorizationHeader(HttpRequestMessage request, ImmutableCredentials credentials, Aes? aes = null)
         {
             var authParameters = new Dictionary<string, string>
             {
@@ -63,7 +67,25 @@ namespace AWS.Deploy.ServerMode.Client
             }
 
             var json = Newtonsoft.Json.JsonConvert.SerializeObject(authParameters);
-            var base64 = Convert.ToBase64String(UTF8Encoding.UTF8.GetBytes(json));
+            string base64;
+            if(aes != null)
+            {
+                var encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
+
+                using var inputStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+                using var outputStream = new MemoryStream();
+                using (var encryptStream = new CryptoStream(outputStream, encryptor, CryptoStreamMode.Write))
+                {
+                    inputStream.CopyTo(encryptStream);
+                }
+
+                base64 = Convert.ToBase64String(outputStream.ToArray());
+            }
+            else
+            {
+                base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
+            }
+
             request.Headers.Authorization = new AuthenticationHeaderValue("aws-deploy-tool-server-mode", base64);
         }
     }
@@ -73,9 +95,9 @@ namespace AWS.Deploy.ServerMode.Client
     /// </summary>
     public static class ServerModeHttpClientFactory
     {
-        public static ServerModeHttpClient ConstructHttpClient(Func<Task<AWSCredentials>> credentialsGenerator)
+        public static ServerModeHttpClient ConstructHttpClient(Func<Task<AWSCredentials>> credentialsGenerator, Aes? aes = null)
         {
-            return new ServerModeHttpClient(new ServerModeHttpClientAuthorizationHandler(credentialsGenerator));
+            return new ServerModeHttpClient(new ServerModeHttpClientAuthorizationHandler(credentialsGenerator, aes));
         }
     }
 }

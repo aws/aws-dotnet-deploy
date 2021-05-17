@@ -15,7 +15,7 @@ namespace AWS.Deploy.ServerMode.ClientGenerator
         {
             // Start up the server mode to make the swagger.json file available.
             var portNumber = 5678;
-            var serverCommand = new ServerModeCommand(new ConsoleInteractiveServiceImpl(), portNumber, null);
+            var serverCommand = new ServerModeCommand(new ConsoleInteractiveServiceImpl(), portNumber, null, false);
             var cancelSource = new CancellationTokenSource();
             _ = serverCommand.ExecuteAsync(cancelSource.Token);
             try

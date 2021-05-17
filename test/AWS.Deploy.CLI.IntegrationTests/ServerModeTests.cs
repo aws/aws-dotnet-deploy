@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,8 +18,11 @@ using AWS.Deploy.CLI.Commands;
 using AWS.Deploy.CLI.Extensions;
 using AWS.Deploy.CLI.IntegrationTests.Extensions;
 using AWS.Deploy.CLI.IntegrationTests.Helpers;
+using AWS.Deploy.CLI.IntegrationTests.Services;
+using AWS.Deploy.CLI.ServerMode;
 using AWS.Deploy.ServerMode.Client;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace AWS.Deploy.CLI.IntegrationTests
@@ -61,7 +65,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             var portNumber = 4000;
             using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ResolveCredentials);
 
-            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null);
+            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, false);
             var cancelSource = new CancellationTokenSource();
 
             var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
@@ -90,6 +94,61 @@ namespace AWS.Deploy.CLI.IntegrationTests
         }
 
         [Fact]
+        public async Task GetRecommendationsWithEncryptedCredentials()
+        {
+            var projectPath = Path.GetFullPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
+            var portNumber = 4000;
+
+            var aes = Aes.Create();
+            aes.GenerateKey();
+            aes.GenerateIV();
+
+            using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ResolveCredentials, aes);
+
+            InMemoryInteractiveService interactiveService = new InMemoryInteractiveService();
+            var keyInfo = new EncryptionKeyInfo
+            {
+                Version = EncryptionKeyInfo.VERSION_1_0,
+                Key = Convert.ToBase64String(aes.Key),
+                IV = Convert.ToBase64String(aes.IV)
+            };
+            var keyInfoStdin = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(keyInfo)));
+            await interactiveService.StdInWriter.WriteAsync(keyInfoStdin);
+            await interactiveService.StdInWriter.FlushAsync();
+
+            var serverCommand = new ServerModeCommand(interactiveService, portNumber, null, true);
+            var cancelSource = new CancellationTokenSource();
+
+            var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
+            try
+            {
+                var restClient = new RestAPIClient($"http://localhost:{portNumber}/", httpClient);
+                await WaitTillServerModeReady(restClient);
+
+                var startSessionOutput = await restClient.StartDeploymentSessionAsync(new StartDeploymentSessionInput
+                {
+                    AwsRegion = _awsRegion,
+                    ProjectPath = projectPath
+                });
+
+                var sessionId = startSessionOutput.SessionId;
+                Assert.NotNull(sessionId);
+
+                var getRecommendationOutput = await restClient.GetRecommendationsAsync(sessionId);
+                Assert.NotEmpty(getRecommendationOutput.Recommendations);
+                Assert.Equal("AspNetAppElasticBeanstalkLinux", getRecommendationOutput.Recommendations.FirstOrDefault().RecipeId);
+
+                var listDeployStdOut = interactiveService.StdOutReader.ReadAllLines();
+                Assert.Contains("Waiting on encryption key info from stdin", listDeployStdOut);
+                Assert.Contains("Encryption provider enabled", listDeployStdOut);
+            }
+            finally
+            {
+                cancelSource.Cancel();
+            }
+        }
+
+        [Fact]
         public async Task WebFargateDeploymentNoConfigChanges()
         {
             _stackName = "ServerModeWebFargate-" + DateTime.UtcNow.Ticks;
@@ -98,7 +157,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             var portNumber = 4001;
             using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ResolveCredentials);
 
-            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null);
+            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, false);
             var cancelSource = new CancellationTokenSource();
 
             var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
