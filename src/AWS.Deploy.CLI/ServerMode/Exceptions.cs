@@ -23,4 +23,13 @@ namespace AWS.Deploy.CLI.ServerMode
     {
         public FailedToRetrieveAWSCredentialsException(string message, Exception? innerException = null) : base(message, innerException) { }
     }
+
+    /// <summary>
+    /// Throw if encryption key info passed in through stdin is invalid.
+    /// </summary>
+    [AWSDeploymentExpectedException]
+    public class InvalidEncryptionKeyInfoException : Exception
+    {
+        public InvalidEncryptionKeyInfoException(string message, Exception? innerException = null) : base(message, innerException) { }
+    }
 }

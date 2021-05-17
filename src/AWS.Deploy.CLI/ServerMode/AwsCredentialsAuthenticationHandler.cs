@@ -14,6 +14,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
+using AWS.Deploy.CLI.ServerMode.Services;
+
 namespace AWS.Deploy.CLI.ServerMode
 {
     public class AwsCredentialsAuthenticationSchemeOptions
@@ -31,13 +33,17 @@ namespace AWS.Deploy.CLI.ServerMode
         public const string ClaimAwsSecretKey = "awsSecretKey";
         public const string ClaimAwsSessionToken = "awsSessionToken";
 
+        private readonly IEncryptionProvider _encryptionProvider;
+
         public AwsCredentialsAuthenticationHandler(
             IOptionsMonitor<AwsCredentialsAuthenticationSchemeOptions> options,
             ILoggerFactory logger,
             UrlEncoder encoder,
-            ISystemClock clock)
+            ISystemClock clock,
+            IEncryptionProvider encryptionProvider)
             : base(options, logger, encoder, clock)
         {
+            _encryptionProvider = encryptionProvider;
         }
 
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -47,10 +53,10 @@ namespace AWS.Deploy.CLI.ServerMode
                 return Task.FromResult(AuthenticateResult.Fail("Missing Authorization header"));
             }
 
-            return Task.FromResult(ProcessAuthorizationHeader(value));
+            return Task.FromResult(ProcessAuthorizationHeader(value, _encryptionProvider));
         }
 
-        public static AuthenticateResult ProcessAuthorizationHeader(string authorizationHeaderValue)
+        public static AuthenticateResult ProcessAuthorizationHeader(string authorizationHeaderValue, IEncryptionProvider encryptionProvider)
         {
             var tokens = authorizationHeaderValue.Split(' ');
             if (tokens.Length != 2)
@@ -65,7 +71,9 @@ namespace AWS.Deploy.CLI.ServerMode
             try
             {
                 var base64Bytes = Convert.FromBase64String(tokens[1]);
-                var json = Encoding.UTF8.GetString(base64Bytes);
+
+                var decryptedBytes = encryptionProvider.Decrypt(base64Bytes);
+                var json = Encoding.UTF8.GetString(decryptedBytes);
 
                 var authParameters = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
 
