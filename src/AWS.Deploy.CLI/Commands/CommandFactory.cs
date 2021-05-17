@@ -304,14 +304,15 @@ namespace AWS.Deploy.CLI.Commands
             {
                 new Option<int>(new []{"--port"}, description: "Port the server mode will listen to."),
                 new Option<int>(new []{"--parent-pid"}, description: "The ID of the process that is launching server mode. Server mode will exit when the parent pid terminates."),
+                new Option<bool>(new []{"--encryption-keyinfo-stdin"}, description: "If set the cli reads encryption key info from stdin to use for decryption."),
                 _optionDiagnosticLogging
             };
-            serverModeCommand.Handler = CommandHandler.Create<int, int?, bool>(async (port, parentPid, diagnostics) =>
+            serverModeCommand.Handler = CommandHandler.Create<int, int?, bool, bool>(async (port, parentPid, encryptionKeyInfoStdIn, diagnostics) =>
             {
                 try
                 {
                     var toolInteractiveService = new ConsoleInteractiveServiceImpl(diagnostics);
-                    var serverMode = new ServerModeCommand(toolInteractiveService, port, parentPid);
+                    var serverMode = new ServerModeCommand(toolInteractiveService, port, parentPid, encryptionKeyInfoStdIn);
 
                     await serverMode.ExecuteAsync();
                 }
