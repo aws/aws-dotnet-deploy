@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Security.Cryptography;
 using System.IO;
+using System.Globalization;
 
 namespace AWS.Deploy.ServerMode.Client
 {
@@ -58,7 +59,9 @@ namespace AWS.Deploy.ServerMode.Client
             var authParameters = new Dictionary<string, string>
             {
                 {"awsAccessKeyId", credentials.AccessKey },
-                {"awsSecretKey", credentials.SecretKey }
+                {"awsSecretKey", credentials.SecretKey },
+                {"requestId", Guid.NewGuid().ToString() },
+                {"issueDate", DateTime.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss.fffzzz", DateTimeFormatInfo.InvariantInfo) }
             };
 
             if(!string.IsNullOrEmpty(credentials.Token))
