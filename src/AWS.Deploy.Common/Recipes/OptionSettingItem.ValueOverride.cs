@@ -1,8 +1,10 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using AWS.Deploy.Common.Recipes.Validation;
 using Newtonsoft.Json;
 
 namespace AWS.Deploy.Common.Recipes
@@ -85,8 +87,30 @@ namespace AWS.Deploy.Common.Recipes
             return DefaultValue;
         }
 
+        /// <summary>
+        /// Assigns a value to the OptionSettingItem.
+        /// </summary>
+        /// <exception cref="ValidationFailedException">
+        /// Thrown if one or more <see cref="Validators"/> determine
+        /// <paramref name="valueOverride"/> is not valid.
+        /// </exception>
         public void SetValueOverride(object valueOverride)
         {
+            var isValid = true;
+            var validationFailedMessage = string.Empty;
+            foreach (var validator in this.BuildValidators())
+            {
+                var result = validator.Validate(valueOverride);
+                if (!result.IsValid)
+                {
+                    isValid = false;
+                    validationFailedMessage += result.ValidationFailedMessage + Environment.NewLine;
+                }
+            }
+
+            if (!isValid)
+                throw new ValidationFailedException(validationFailedMessage.Trim());
+
             if (valueOverride is bool || valueOverride is int || valueOverride is long)
             {
                 _valueOverride = valueOverride;
