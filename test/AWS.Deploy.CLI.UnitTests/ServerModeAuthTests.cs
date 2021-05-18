@@ -19,6 +19,7 @@ using Newtonsoft.Json;
 using AWS.Deploy.CLI.Commands;
 using AWS.Deploy.CLI.UnitTests.Utilities;
 using System.Threading;
+using System.Globalization;
 
 namespace AWS.Deploy.CLI.UnitTests
 {
@@ -120,7 +121,7 @@ namespace AWS.Deploy.CLI.UnitTests
         }
 
         [Fact]
-        public void PassCredentialsEncrypted()
+        public void AuthPassCredentialsEncrypted()
         {
             var aes = Aes.Create();
 
@@ -154,7 +155,43 @@ namespace AWS.Deploy.CLI.UnitTests
         }
 
         [Fact]
-        public async Task MissingEncryptionInfoVersion()
+        public void AuthMissingIssueDate()
+        {
+            var authValue = MockAuthorizationHeaderValue("access", "secret", null, null);
+            var authResults = AwsCredentialsAuthenticationHandler.ProcessAuthorizationHeader(authValue, new NoEncryptionProvider());
+            Assert.False(authResults.Succeeded);
+            Assert.Equal($"Authorization header missing {AwsCredentialsAuthenticationHandler.ClaimAwsIssueDate} property", authResults.Failure.Message);
+        }
+
+        [Fact]
+        public void AuthExpiredIssueDate()
+        {
+            var authValue = MockAuthorizationHeaderValue("access", "secret", null, DateTime.UtcNow.AddMinutes(-5));
+            var authResults = AwsCredentialsAuthenticationHandler.ProcessAuthorizationHeader(authValue, new NoEncryptionProvider());
+            Assert.False(authResults.Succeeded);
+            Assert.Equal("Issue date has expired", authResults.Failure.Message);
+        }
+
+        [Fact]
+        public void AuthFutureIssueDate()
+        {
+            var authValue = MockAuthorizationHeaderValue("access", "secret", null, DateTime.UtcNow.AddMinutes(5));
+            var authResults = AwsCredentialsAuthenticationHandler.ProcessAuthorizationHeader(authValue, new NoEncryptionProvider());
+            Assert.False(authResults.Succeeded);
+            Assert.Equal("Issue date invalid set in the future", authResults.Failure.Message);
+        }
+
+        [Fact]
+        public void AuthInvalidFormatForIssueDate()
+        {
+            var authValue = MockAuthorizationHeaderValue("access", "secret", null, "not a date");
+            var authResults = AwsCredentialsAuthenticationHandler.ProcessAuthorizationHeader(authValue, new NoEncryptionProvider());
+            Assert.False(authResults.Succeeded);
+            Assert.Equal("Failed to parse issue date", authResults.Failure.Message);
+        }
+
+        [Fact]
+        public async Task AuthMissingEncryptionInfoVersion()
         {
             InMemoryInteractiveService interactiveService = new InMemoryInteractiveService();
 
@@ -192,11 +229,11 @@ namespace AWS.Deploy.CLI.UnitTests
             }
 
             Assert.NotNull(actualException);
-            Assert.Equal("Missing require \"Version\" property in encryption key info", actualException.Message);
+            Assert.Equal("Missing required \"Version\" property in encryption key info", actualException.Message);
         }
 
         [Fact]
-        public async Task EncryptionWithInvalidVersion()
+        public async Task AuthEncryptionWithInvalidVersion()
         {
             InMemoryInteractiveService interactiveService = new InMemoryInteractiveService();
 
@@ -236,6 +273,103 @@ namespace AWS.Deploy.CLI.UnitTests
 
             Assert.NotNull(actualException);
             Assert.Equal("Unsupported encryption key info not-valid", actualException.Message);
+        }
+
+        [Fact]
+        public void AuthMissingRequestId()
+        {
+            var authParameters = new Dictionary<string, string>
+            {
+                {"awsAccessKeyId", "accessKey" },
+                {"awsSecretKey", "secretKey" },
+                {"issueDate", DateTime.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss.fffzzz", DateTimeFormatInfo.InvariantInfo) }
+            };
+
+            var results = AwsCredentialsAuthenticationHandler.ValidateAuthParameters(authParameters);
+            Assert.False(results.Succeeded);
+            Assert.Equal($"Authorization header missing {AwsCredentialsAuthenticationHandler.ClaimAwsRequestId} property", results.Failure.Message);
+        }
+
+        [Fact]
+        public void AuthAttemptReplayRequestId()
+        {
+            var authParameters = new Dictionary<string, string>
+            {
+                {"awsAccessKeyId", "accessKey" },
+                {"awsSecretKey", "secretKey" },
+                {"requestId", Guid.NewGuid().ToString() },
+                {"issueDate", DateTime.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss.fffzzz", DateTimeFormatInfo.InvariantInfo) }
+            };
+
+            var results = AwsCredentialsAuthenticationHandler.ValidateAuthParameters(authParameters);
+            Assert.Null(results);
+
+            results = AwsCredentialsAuthenticationHandler.ValidateAuthParameters(authParameters);
+            Assert.False(results.Succeeded);
+            Assert.Equal($"Value for authorization header has already been used", results.Failure.Message);
+        }
+
+        [Fact]
+        public void AuthExpiredRequestIdAreClearedFromCache()
+        {
+            Dictionary<string, string> GenerateAuthParameters()
+            {
+                return new Dictionary<string, string>
+                {
+                    {"awsAccessKeyId", "accessKey" },
+                    {"awsSecretKey", "secretKey" },
+                    {"requestId", Guid.NewGuid().ToString() },
+                    {"issueDate", DateTime.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss.fffzzz", DateTimeFormatInfo.InvariantInfo) }
+                };
+            }
+
+            var request1 = GenerateAuthParameters();
+            AwsCredentialsAuthenticationHandler.ValidateAuthParameters(request1);
+            Assert.Contains(request1["requestId"], AwsCredentialsAuthenticationHandler.ProcessRequestIds);
+
+            var request2 = GenerateAuthParameters();
+            AwsCredentialsAuthenticationHandler.ValidateAuthParameters(request2);
+            Assert.Contains(request1["requestId"], AwsCredentialsAuthenticationHandler.ProcessRequestIds);
+            Assert.Contains(request2["requestId"], AwsCredentialsAuthenticationHandler.ProcessRequestIds);
+
+            Thread.Sleep(AwsCredentialsAuthenticationHandler.MaxIssueDateDuration.Add(TimeSpan.FromSeconds(3)));
+
+            var request3 = GenerateAuthParameters();
+            AwsCredentialsAuthenticationHandler.ValidateAuthParameters(request3);
+            Assert.DoesNotContain(request1["requestId"], AwsCredentialsAuthenticationHandler.ProcessRequestIds);
+            Assert.DoesNotContain(request2["requestId"], AwsCredentialsAuthenticationHandler.ProcessRequestIds);
+            Assert.Contains(request3["requestId"], AwsCredentialsAuthenticationHandler.ProcessRequestIds);
+        }
+
+        private string MockAuthorizationHeaderValue(string accessKey, string secretKey, string sessionToken, object issueDate)
+        {
+            var authParameters = new Dictionary<string, string>
+            {
+                {AwsCredentialsAuthenticationHandler.ClaimAwsAccessKeyId, accessKey },
+                {AwsCredentialsAuthenticationHandler.ClaimAwsSecretKey, secretKey },
+                {AwsCredentialsAuthenticationHandler.ClaimAwsRequestId, Guid.NewGuid().ToString() }
+            };
+
+            if (!string.IsNullOrEmpty(sessionToken))
+            {
+                authParameters[AwsCredentialsAuthenticationHandler.ClaimAwsSessionToken] = sessionToken;
+            }
+
+            if (issueDate != null)
+            {
+                if(issueDate is DateTime)
+                {
+                    authParameters[AwsCredentialsAuthenticationHandler.ClaimAwsIssueDate] = ((DateTime)issueDate).ToString("yyyy-MM-dd'T'HH:mm:ss.fffzzz", DateTimeFormatInfo.InvariantInfo);
+                }
+                else
+                {
+                    authParameters[AwsCredentialsAuthenticationHandler.ClaimAwsIssueDate] = issueDate.ToString();
+                }
+            }
+
+            var json = Newtonsoft.Json.JsonConvert.SerializeObject(authParameters);
+            var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
+            return AwsCredentialsAuthenticationHandler.SchemaName + " " + base64;
         }
     }
 }
