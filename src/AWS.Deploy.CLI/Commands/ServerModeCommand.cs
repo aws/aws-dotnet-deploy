@@ -75,11 +75,10 @@ namespace AWS.Deploy.CLI.Commands
                         encryptionProvider = new AesEncryptionProvider(aes);
                         break;
                     case null:
-                        throw new InvalidEncryptionKeyInfoException("Missing require \"Version\" property in encryption key info");
+                        throw new InvalidEncryptionKeyInfoException("Missing required \"Version\" property in encryption key info");
                     default:
                         throw new InvalidEncryptionKeyInfoException($"Unsupported encryption key info {keyInfo.Version}");
                 }
-
 
                 _interactiveService.WriteLine("Encryption provider enabled");
             }
