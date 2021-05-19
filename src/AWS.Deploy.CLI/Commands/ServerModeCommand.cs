@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
-using System.Collections.Generic;
 using System.Security.Cryptography;
-using System.Text;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using AWS.Deploy.CLI.ServerMode;
@@ -48,8 +47,38 @@ namespace AWS.Deploy.CLI.Commands
 
             var host = builder.Build();
 
-            await host.RunAsync(cancellationToken); 
-         }
+            if (_parentPid == null)
+            {
+                await host.RunAsync(cancellationToken);
+            }
+            else
+            {
+                var monitorTask = WaitOnParentPid(cancellationToken);
+                var webTask = host.RunAsync(cancellationToken);
+
+                //This call will wait until one of the tasks completes.
+                //The monitor task will complete if a parent pid is not found.
+                await Task.WhenAny(monitorTask, webTask);
+
+                //The monitor task is expected to complete only when a parent pid is not found.
+                if (monitorTask.IsCompleted && monitorTask.Result)
+                {
+                    _interactiveService.WriteLine(string.Empty);
+                    _interactiveService.WriteLine("The parent process is no longer running.");
+                    _interactiveService.WriteLine("Server mode is shutting down...");
+                    await host.StopAsync(cancellationToken);
+                }
+
+                //If the web task completes with a fault because an exception was thrown,
+                //We need to capture the inner exception and rethrow it so it can bubble up to the end user.
+                if (webTask.IsCompleted && webTask.IsFaulted)
+                {
+                    var innerException = webTask.Exception?.InnerException;
+                    if (innerException != null)
+                        throw innerException;
+                }
+            }
+        }
 
         private IEncryptionProvider CreateEncryptionProvider()
         {
@@ -90,6 +119,25 @@ namespace AWS.Deploy.CLI.Commands
             }
 
             return encryptionProvider;
+        }
+
+        private async Task<bool> WaitOnParentPid(CancellationToken token)
+        {
+            if (_parentPid == null)
+                return true;
+
+            while (true)
+            {
+                try
+                {
+                    Process.GetProcessById((int)_parentPid);
+                    await Task.Delay(1000, token);
+                }
+                catch
+                {
+                    return true;
+                }
+            }
         }
     }
 }
