@@ -20,6 +20,7 @@ using AWS.Deploy.CLI.Commands;
 using AWS.Deploy.CLI.UnitTests.Utilities;
 using System.Threading;
 using System.Globalization;
+using AWS.Deploy.CLI.IntegrationTests.Services;
 
 namespace AWS.Deploy.CLI.UnitTests
 {
