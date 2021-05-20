@@ -315,6 +315,8 @@ namespace AWS.Deploy.CLI.Commands
                     var serverMode = new ServerModeCommand(toolInteractiveService, port, parentPid, encryptionKeyInfoStdIn);
 
                     await serverMode.ExecuteAsync();
+
+                    return CommandReturnCodes.SUCCESS;
                 }
                 catch (Exception e) when (e.IsAWSDeploymentExpectedException())
                 {
@@ -325,6 +327,14 @@ namespace AWS.Deploy.CLI.Commands
                         _toolInteractiveService.WriteErrorLine(string.Empty);
                         _toolInteractiveService.WriteErrorLine(e.Message);
                     }
+
+                    if (e is TcpPortInUseException)
+                    {
+                        return CommandReturnCodes.TCP_PORT_ERROR;
+                    }
+
+                    // bail out with an non-zero return code.
+                    return CommandReturnCodes.USER_ERROR;
                 }
                 catch (Exception e)
                 {
@@ -332,6 +342,8 @@ namespace AWS.Deploy.CLI.Commands
                     _toolInteractiveService.WriteErrorLine(
                         "Unhandled exception.  This is a bug.  Please copy the stack trace below and file a bug at https://github.com/aws/aws-dotnet-deploy. " +
                         e.PrettyPrint());
+
+                    return CommandReturnCodes.UNHANDLED_EXCEPTION;
                 }
             });
 

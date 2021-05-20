@@ -29,5 +29,10 @@ namespace AWS.Deploy.CLI
         /// decorated with <see cref="AWSDeploymentExpectedExceptionAttribute"/>
         /// </summary>
         public const int USER_ERROR = 1;
+        /// <summary>
+        /// A command could not finish because of a problem
+        /// using a TCP port that is already in use.
+        /// </summary>
+        public const int TCP_PORT_ERROR = -100;
     }
 }

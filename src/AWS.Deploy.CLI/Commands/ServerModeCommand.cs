@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.NetworkInformation;
 using System.Security.Cryptography;
 using System.Diagnostics;
 using System.Threading;
@@ -33,6 +36,9 @@ namespace AWS.Deploy.CLI.Commands
             _interactiveService.WriteLine("Server mode is an experimental feature being developed to allow communication between this CLI and the AWS Toolkit for Visual Studio. Expect behavior changes and API changes as server mode is being developed.");
 
             IEncryptionProvider encryptionProvider = CreateEncryptionProvider();
+
+            if (IsPortInUse(_port))
+                throw new TcpPortInUseException("The port you have selected is currently in use by another process.");
 
             var url = $"http://localhost:{_port}";
 
@@ -138,6 +144,14 @@ namespace AWS.Deploy.CLI.Commands
                     return true;
                 }
             }
+        }
+        
+        private bool IsPortInUse(int port)
+        {
+            var ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
+            var listeners = ipGlobalProperties.GetActiveTcpListeners();
+
+            return listeners.Any(x => x.Port == port);
         }
     }
 }
