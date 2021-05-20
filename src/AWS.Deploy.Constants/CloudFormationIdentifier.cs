@@ -1,13 +1,10 @@
-// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-// SPDX-License-Identifier: Apache-2.0
-
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace AWS.Deploy.Recipes.CDK.Common
+namespace AWS.Deploy.Constants
 {
-    public static class CloudFormationIdentifierConstants
+    public static class CloudFormationIdentifier
     {
         /// <summary>
         /// The CDK context parameter name used to pass in the location of the AWS .NET deployment tool's settings file.

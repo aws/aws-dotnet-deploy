@@ -196,22 +196,22 @@ namespace AWS.Deploy.CLI
             else
             {
                 if (userInputConfiguration.CurrentValue != null && string.IsNullOrEmpty(userInputConfiguration.CurrentValue.ToString()))
-                    defaultValue = Constants.EMPTY_LABEL;
+                    defaultValue = Constants.CLI.EMPTY_LABEL;
                 else
-                    defaultValue = userInputConfiguration.CreateNew ? Constants.CREATE_NEW_LABEL : userInputConfiguration.DisplaySelector(options.FirstOrDefault());
+                    defaultValue = userInputConfiguration.CreateNew ? Constants.CLI.CREATE_NEW_LABEL : userInputConfiguration.DisplaySelector(options.FirstOrDefault());
             }
 
             if (optionStrings.Any())
             {
                 var displayOptionStrings = new List<string>(optionStrings);
                 if (userInputConfiguration.EmptyOption)
-                    displayOptionStrings.Insert(0, Constants.EMPTY_LABEL);
+                    displayOptionStrings.Insert(0, Constants.CLI.EMPTY_LABEL);
                 if (userInputConfiguration.CreateNew)
-                    displayOptionStrings.Add(Constants.CREATE_NEW_LABEL);
+                    displayOptionStrings.Add(Constants.CLI.CREATE_NEW_LABEL);
 
                 var selectedString = AskUserToChoose(displayOptionStrings, title, defaultValue);
 
-                if (selectedString == Constants.EMPTY_LABEL)
+                if (selectedString == Constants.CLI.EMPTY_LABEL)
                 {
                     return new UserResponse<T>
                     {
@@ -219,7 +219,7 @@ namespace AWS.Deploy.CLI
                     };
                 }
 
-                if (selectedString != Constants.CREATE_NEW_LABEL)
+                if (selectedString != Constants.CLI.CREATE_NEW_LABEL)
                 {
                     var selectedOption = options.FirstOrDefault(option => userInputConfiguration.DisplaySelector(option) == selectedString);
                     return new UserResponse<T>

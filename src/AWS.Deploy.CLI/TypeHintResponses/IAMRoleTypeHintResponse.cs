@@ -14,6 +14,6 @@ namespace AWS.Deploy.CLI.TypeHintResponses
         public string? RoleArn { get; set; }
         public bool CreateNew { get; set; }
 
-        public string ToDisplayString() => CreateNew ? Constants.CREATE_NEW_LABEL : RoleArn ?? "";
+        public string ToDisplayString() => CreateNew ? Constants.CLI.CREATE_NEW_LABEL : RoleArn ?? "";
     }
 }
