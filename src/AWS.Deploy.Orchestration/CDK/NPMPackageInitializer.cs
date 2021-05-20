@@ -6,6 +6,7 @@ using System.IO;
 using System.Threading.Tasks;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Orchestration.Utilities;
+using AWS.Deploy.Shell;
 
 namespace AWS.Deploy.Orchestration.CDK
 {
@@ -42,15 +43,15 @@ namespace AWS.Deploy.Orchestration.CDK
 
     public class NPMPackageInitializer : INPMPackageInitializer
     {
-        private readonly ICommandLineWrapper _commandLineWrapper;
+        private readonly ICommandRunner _commandRunner;
         private readonly IPackageJsonGenerator _packageJsonGenerator;
         private readonly IFileManager _fileManager;
         private readonly IDirectoryManager _directoryManager;
         private const string _packageJsonFileName = "package.json";
 
-        public NPMPackageInitializer(ICommandLineWrapper commandLineWrapper, IPackageJsonGenerator packageJsonGenerator, IFileManager fileManager, IDirectoryManager directoryManager)
+        public NPMPackageInitializer(ICommandRunner commandRunner, IPackageJsonGenerator packageJsonGenerator, IFileManager fileManager, IDirectoryManager directoryManager)
         {
-            _commandLineWrapper = commandLineWrapper;
+            _commandRunner = commandRunner;
             _packageJsonGenerator = packageJsonGenerator;
             _fileManager = fileManager;
             _directoryManager = directoryManager;
@@ -84,7 +85,7 @@ namespace AWS.Deploy.Orchestration.CDK
             try
             {
                 // Install node packages specified in package.json file
-                await _commandLineWrapper.Run("npm install", workingDirectory, false);
+                await _commandRunner.Run("npm install", workingDirectory, false);
             }
             catch (Exception exception)
             {

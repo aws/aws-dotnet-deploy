@@ -3,7 +3,9 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using AWS.Deploy.CLI.Common.UnitTests;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.Orchestration.CDK;
 using Xunit;
@@ -12,7 +14,7 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
 {
     public class NPMPackageInitializerTests
     {
-        private readonly TestCommandLineWrapper _testCommandLineWrapper;
+        private readonly TestCommandRunner _testCommandRunner;
         private readonly INPMPackageInitializer _npmPackageInitializer;
         private readonly TestFileManager _fileManager;
         private readonly TestDirectoryManager _directoryManager;
@@ -46,9 +48,9 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
         {
             _fileManager = new TestFileManager();
             _directoryManager = new TestDirectoryManager();
-            _testCommandLineWrapper = new TestCommandLineWrapper();
+            _testCommandRunner = new TestCommandRunner();
             var packageJsonGenerator = new PackageJsonGenerator(_packageJsonTemplate);
-            _npmPackageInitializer = new NPMPackageInitializer(_testCommandLineWrapper, packageJsonGenerator, _fileManager, _directoryManager);
+            _npmPackageInitializer = new NPMPackageInitializer(_testCommandRunner, packageJsonGenerator, _fileManager, _directoryManager);
         }
 
         [Fact]
@@ -82,7 +84,10 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
             // Assert: verify initialized package.json
             var actualPackageJsonContent = await _fileManager.ReadAllTextAsync(Path.Combine(_workingDirectory, _packageJsonFileName));
             Assert.Equal(_packageJsonContent, actualPackageJsonContent);
-            Assert.Contains(("npm install", _workingDirectory, false), _testCommandLineWrapper.Commands);
+            var npmInstallCommand = _testCommandRunner.CommandsToExecute.First(command => command.Command.Equals("npm install"));
+            Assert.Equal(_workingDirectory, npmInstallCommand.WorkingDirectory);
+            Assert.Equal(_workingDirectory, npmInstallCommand.WorkingDirectory);
+            Assert.False(npmInstallCommand.StreamOutputToInteractiveService);
             Assert.True(_directoryManager.Exists(_workingDirectory));
         }
     }

@@ -26,10 +26,13 @@
     <ProjectReference Include="..\AWS.Deploy.Recipes.CDK.Common\AWS.Deploy.Recipes.CDK.Common.csproj" />
     <ProjectReference Include="..\AWS.Deploy.Recipes\AWS.Deploy.Recipes.csproj" />
     <ProjectReference Include="..\AWS.Deploy.DockerEngine\AWS.Deploy.DockerEngine.csproj" />
+    <ProjectReference Include="..\AWS.Deploy.Shell\AWS.Deploy.Shell.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="CDK\package.json.template" />
   </ItemGroup>
+
+  <Import Project="..\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems" Label="Shared" />
 
 </Project>

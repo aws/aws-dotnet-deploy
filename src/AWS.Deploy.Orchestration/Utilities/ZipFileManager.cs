@@ -8,6 +8,7 @@ using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using AWS.Deploy.Shell;
 
 namespace AWS.Deploy.Orchestration.Utilities
 {
@@ -18,11 +19,11 @@ namespace AWS.Deploy.Orchestration.Utilities
 
     public class ZipFileManager : IZipFileManager
     {
-        private readonly ICommandLineWrapper _commandLineWrapper;
+        private readonly ICommandRunner _commandRunner;
 
-        public ZipFileManager(ICommandLineWrapper commandLineWrapper)
+        public ZipFileManager(ICommandRunner commandRunner)
         {
-            _commandLineWrapper = commandLineWrapper;
+            _commandRunner = commandRunner;
         }
 
         public async Task CreateFromDirectory(string sourceDirectoryName, string destinationArchiveFileName)
@@ -56,7 +57,7 @@ namespace AWS.Deploy.Orchestration.Utilities
             }
 
             var command = $"{zipCLI} {args}";
-            var result = await _commandLineWrapper.TryRunWithResult(command, sourceDirectoryName);
+            var result = await _commandRunner.TryRunWithResult(command, sourceDirectoryName);
             if (result.ExitCode != 0)
                 throw new FailedToCreateZipFileException("\"zip\" utility program has failed to create a zip archive.");
         }

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.CDK;
 using AWS.Deploy.Orchestration.Utilities;
+using AWS.Deploy.Shell;
 
 namespace AWS.Deploy.CLI
 {
@@ -18,11 +19,11 @@ namespace AWS.Deploy.CLI
 
     internal class SystemCapabilityEvaluator : ISystemCapabilityEvaluator
     {
-        private readonly ICommandLineWrapper _commandLineWrapper;
+        private readonly ICommandRunner _commandRunner;
 
-        public SystemCapabilityEvaluator(ICommandLineWrapper commandLineWrapper)
+        public SystemCapabilityEvaluator(ICommandRunner commandRunner)
         {
-            _commandLineWrapper = commandLineWrapper;
+            _commandRunner = commandRunner;
         }
 
         public async Task<SystemCapabilities> Evaluate()
@@ -41,7 +42,7 @@ namespace AWS.Deploy.CLI
             var containerType = "";
             var command = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "docker info -f \"{{.OSType}}\"" : "docker info";
 
-            await _commandLineWrapper.Run(
+            await _commandRunner.Run(
                 command,
                 streamOutputToInteractiveService: false,
                 onComplete: proc =>
@@ -65,7 +66,7 @@ namespace AWS.Deploy.CLI
         private async Task<bool> HasMinVersionNodeJs()
         {
             // run node --version to get the version
-            var result = await _commandLineWrapper.TryRunWithResult("node --version");
+            var result = await _commandRunner.TryRunWithResult("node --version");
 
             var versionString = result.StandardOut ?? "";
 

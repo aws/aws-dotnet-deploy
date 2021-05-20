@@ -8,29 +8,24 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Amazon.Runtime;
-using AWS.Deploy.Common;
-using AWS.Deploy.Orchestration;
-using AWS.Deploy.Orchestration.Utilities;
+using AWS.Deploy.Constants;
 
-namespace AWS.Deploy.CLI.Utilities
+namespace AWS.Deploy.Shell
 {
-    public class CommandLineWrapper : ICommandLineWrapper
+    public class CommandRunner : ICommandRunner
     {
-        private readonly IOrchestratorInteractiveService _interactiveService;
+        public ICommandRunnerDelegate? Delegate { get; set; }
         private readonly bool _useSeparateWindow;
-        private Action<ProcessStartInfo>? _processStartInfoAction;
 
-        public CommandLineWrapper(
-            IOrchestratorInteractiveService interactiveService)
+        public CommandRunner(ICommandRunnerDelegate commandRunnerDelegate)
         {
-            _interactiveService = interactiveService;
+            Delegate = commandRunnerDelegate;
         }
 
-        public CommandLineWrapper(
-            IOrchestratorInteractiveService interactiveService,
+        public CommandRunner(
+            ICommandRunnerDelegate commandRunnerDelegate,
             bool useSeparateWindow)
-            : this(interactiveService)
+            : this(commandRunnerDelegate)
         {
             _useSeparateWindow = useSeparateWindow;
         }
@@ -45,8 +40,8 @@ namespace AWS.Deploy.CLI.Utilities
             IDictionary<string, string>? environmentVariables = null,
             CancellationToken cancelToken = default)
         {
-            StringBuilder strOutput = new StringBuilder();
-            StringBuilder strError = new StringBuilder();
+            var strOutput = new StringBuilder();
+            var strError = new StringBuilder();
 
             var processStartInfo = new ProcessStartInfo
             {
@@ -73,7 +68,9 @@ namespace AWS.Deploy.CLI.Utilities
                 processStartInfo.UseShellExecute = _useSeparateWindow;
             }
 
-            _processStartInfoAction?.Invoke(processStartInfo);
+            Delegate?.BeforeStart.Invoke(processStartInfo);
+
+            UpdateEnvironmentVariables(processStartInfo, environmentVariables);
 
             var process = Process.Start(processStartInfo);
             if (null == process)
@@ -81,12 +78,16 @@ namespace AWS.Deploy.CLI.Utilities
 
             if (redirectIO && streamOutputToInteractiveService)
             {
-                process.OutputDataReceived += (sender, e) => {
-                    _interactiveService.LogMessageLine(e.Data);
-                    strOutput.Append(e.Data); };
-                process.ErrorDataReceived += (sender, e) => {
-                    _interactiveService.LogMessageLine(e.Data);
-                    strError.Append(e.Data); };
+                process.OutputDataReceived += (sender, e) =>
+                {
+                    Delegate?.OutputDataReceived(processStartInfo, e.Data);
+                    strOutput.Append(e.Data);
+                };
+                process.ErrorDataReceived += (sender, e) =>
+                {
+                    Delegate?.ErrorDataReceived(processStartInfo, e.Data);
+                    strError.Append(e.Data);
+                };
                 process.BeginOutputReadLine();
                 process.BeginErrorReadLine();
             }
@@ -128,7 +129,7 @@ namespace AWS.Deploy.CLI.Utilities
 
             foreach (var (key, value) in environmentVariables)
             {
-                if (key == EnvironmentVariableKeys.AWS_EXECUTION_ENV)
+                if (key == EnvironmentVariable.Keys.AWS_EXECUTION_ENV)
                 {
                     var awsExecutionEnvValue = BuildAWSExecutionEnvValue(processStartInfo, value);
                     processStartInfo.EnvironmentVariables[key] = awsExecutionEnvValue;
@@ -143,10 +144,10 @@ namespace AWS.Deploy.CLI.Utilities
         private static string BuildAWSExecutionEnvValue(ProcessStartInfo processStartInfo, string awsExecutionEnv)
         {
             var awsExecutionEnvBuilder = new StringBuilder();
-            if (processStartInfo.EnvironmentVariables.ContainsKey(EnvironmentVariableKeys.AWS_EXECUTION_ENV)
-                && !string.IsNullOrEmpty(processStartInfo.EnvironmentVariables[EnvironmentVariableKeys.AWS_EXECUTION_ENV]))
+            if (processStartInfo.EnvironmentVariables.ContainsKey(EnvironmentVariable.Keys.AWS_EXECUTION_ENV)
+                && !string.IsNullOrEmpty(processStartInfo.EnvironmentVariables[EnvironmentVariable.Keys.AWS_EXECUTION_ENV]))
             {
-                awsExecutionEnvBuilder.Append(processStartInfo.EnvironmentVariables[EnvironmentVariableKeys.AWS_EXECUTION_ENV]);
+                awsExecutionEnvBuilder.Append(processStartInfo.EnvironmentVariables[EnvironmentVariable.Keys.AWS_EXECUTION_ENV]);
             }
 
             if (!string.IsNullOrEmpty(awsExecutionEnv))
@@ -160,11 +161,6 @@ namespace AWS.Deploy.CLI.Utilities
             }
 
             return awsExecutionEnvBuilder.ToString();
-        }
-
-        public void ConfigureProcess(Action<ProcessStartInfo>? processStartInfoAction)
-        {
-            _processStartInfoAction = processStartInfoAction;
         }
 
         private string GetSystemShell()

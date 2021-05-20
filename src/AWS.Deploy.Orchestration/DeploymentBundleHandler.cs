@@ -12,6 +12,7 @@ using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.Utilities;
+using AWS.Deploy.Shell;
 
 namespace AWS.Deploy.Orchestration
 {
@@ -24,20 +25,20 @@ namespace AWS.Deploy.Orchestration
 
     public class DeploymentBundleHandler : IDeploymentBundleHandler
     {
-        private readonly ICommandLineWrapper _commandLineWrapper;
+        private readonly ICommandRunner _commandRunner;
         private readonly IAWSResourceQueryer _awsResourceQueryer;
         private readonly IOrchestratorInteractiveService _interactiveService;
         private readonly IDirectoryManager _directoryManager;
         private readonly IZipFileManager _zipFileManager;
 
         public DeploymentBundleHandler(
-            ICommandLineWrapper commandLineWrapper,
+            ICommandRunner commandRunner,
             IAWSResourceQueryer awsResourceQueryer,
             IOrchestratorInteractiveService interactiveService,
             IDirectoryManager directoryManager,
             IZipFileManager zipFileManager)
         {
-            _commandLineWrapper = commandLineWrapper;
+            _commandRunner = commandRunner;
             _awsResourceQueryer = awsResourceQueryer;
             _interactiveService = interactiveService;
             _directoryManager = directoryManager;
@@ -59,7 +60,7 @@ namespace AWS.Deploy.Orchestration
 
             recommendation.DeploymentBundle.DockerExecutionDirectory = dockerExecutionDirectory;
 
-            var result = await _commandLineWrapper.TryRunWithResult(dockerBuildCommand, dockerExecutionDirectory, redirectIO: false);
+            var result = await _commandRunner.TryRunWithResult(dockerBuildCommand, dockerExecutionDirectory, redirectIO: false);
             if (result.ExitCode != 0)
             {
                 throw new DockerBuildFailedException(result.StandardError ?? "");
@@ -114,7 +115,7 @@ namespace AWS.Deploy.Orchestration
                 publishCommand += " --self-contained true";
             }
 
-            var result = await _commandLineWrapper.TryRunWithResult(publishCommand, redirectIO: false);
+            var result = await _commandRunner.TryRunWithResult(publishCommand, redirectIO: false);
             if (result.ExitCode != 0)
             {
                 throw new DotnetPublishFailedException(result.StandardError ?? "");
@@ -242,7 +243,7 @@ namespace AWS.Deploy.Orchestration
             var decodedTokens = authToken.Split(':');
 
             var dockerLoginCommand = $"docker login --username {decodedTokens[0]} --password {decodedTokens[1]} {authorizationTokens[0].ProxyEndpoint}";
-            var result = await _commandLineWrapper.TryRunWithResult(dockerLoginCommand);
+            var result = await _commandRunner.TryRunWithResult(dockerLoginCommand);
 
             if (result.ExitCode != 0)
                 throw new DockerLoginFailedException("Failed to login to Docker");
@@ -265,7 +266,7 @@ namespace AWS.Deploy.Orchestration
         private async Task TagDockerImage(string sourceTagName, string targetTagName)
         {
             var dockerTagCommand = $"docker tag {sourceTagName} {targetTagName}";
-            var result = await _commandLineWrapper.TryRunWithResult(dockerTagCommand);
+            var result = await _commandRunner.TryRunWithResult(dockerTagCommand);
 
             if (result.ExitCode != 0)
                 throw new DockerTagFailedException("Failed to tag Docker image");
@@ -274,7 +275,7 @@ namespace AWS.Deploy.Orchestration
         private async Task PushDockerImage(string targetTagName)
         {
             var dockerPushCommand = $"docker push {targetTagName}";
-            var result = await _commandLineWrapper.TryRunWithResult(dockerPushCommand, redirectIO: false);
+            var result = await _commandRunner.TryRunWithResult(dockerPushCommand, redirectIO: false);
 
             if (result.ExitCode != 0)
                 throw new DockerPushFailedException("Failed to push Docker Image");

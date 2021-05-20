@@ -64,8 +64,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AWS.Deploy.ServerMode.Clien
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "AWS.Deploy.Constants", "src\AWS.Deploy.Constants\AWS.Deploy.Constants.shproj", "{F2266C44-C8C5-45AD-AA9B-44F8825BDF63}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AWS.Deploy.Shell", "src\AWS.Deploy.Shell\AWS.Deploy.Shell.csproj", "{C21619CF-FED7-4C24-95D8-DF65113BE7D0}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		src\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems*{3f7a5ca6-7178-4dbf-8dad-6a63684c7a8e}*SharedItemsImports = 5
+		src\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems*{5f8ec972-781d-4a82-a73f-36a97281b0d5}*SharedItemsImports = 5
+		src\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems*{8a351cc0-70c0-4412-b45e-358606251512}*SharedItemsImports = 5
+		src\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems*{c21619cf-fed7-4c24-95d8-df65113be7d0}*SharedItemsImports = 5
 		src\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems*{f2266c44-c8c5-45ad-aa9b-44f8825bdf63}*SharedItemsImports = 13
 		src\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems*{fae4d4c5-9107-4622-a050-e30cc70be754}*SharedItemsImports = 5
 	EndGlobalSection
@@ -158,6 +164,10 @@ Global
 		{C533AA26-797A-4A41-BA28-2364B66DAA5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C533AA26-797A-4A41-BA28-2364B66DAA5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C533AA26-797A-4A41-BA28-2364B66DAA5F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C21619CF-FED7-4C24-95D8-DF65113BE7D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C21619CF-FED7-4C24-95D8-DF65113BE7D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C21619CF-FED7-4C24-95D8-DF65113BE7D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C21619CF-FED7-4C24-95D8-DF65113BE7D0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -186,6 +196,7 @@ Global
 		{1B171F48-D200-407D-A9F2-179E2A602821} = {11C7056E-93C1-408B-BD87-5270595BBE0E}
 		{C533AA26-797A-4A41-BA28-2364B66DAA5F} = {11C7056E-93C1-408B-BD87-5270595BBE0E}
 		{F2266C44-C8C5-45AD-AA9B-44F8825BDF63} = {11C7056E-93C1-408B-BD87-5270595BBE0E}
+		{C21619CF-FED7-4C24-95D8-DF65113BE7D0} = {11C7056E-93C1-408B-BD87-5270595BBE0E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5A4B2863-1763-4496-B122-651A38A4F5D7}

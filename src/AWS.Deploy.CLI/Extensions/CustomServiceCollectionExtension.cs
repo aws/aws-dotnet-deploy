@@ -11,6 +11,7 @@ using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.CDK;
 using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.Utilities;
+using AWS.Deploy.Shell;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -33,7 +34,8 @@ namespace AWS.Deploy.CLI.Extensions
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICDKManager), typeof(CDKManager), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICdkProjectHandler), typeof(CdkProjectHandler), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICloudApplicationNameGenerator), typeof(CloudApplicationNameGenerator), lifetime));
-            serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICommandLineWrapper), typeof(CommandLineWrapper), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICommandRunnerDelegate), typeof(ConsoleOrchestratorLogger), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICommandRunner), typeof(CommandRunner), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IConsoleUtilities), typeof(ConsoleUtilities), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IDeployedApplicationQueryer), typeof(DeployedApplicationQueryer), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IDeploymentBundleHandler), typeof(DeploymentBundleHandler), lifetime));

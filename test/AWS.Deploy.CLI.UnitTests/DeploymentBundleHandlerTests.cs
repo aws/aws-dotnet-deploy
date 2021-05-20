@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Amazon.Runtime;
+using AWS.Deploy.CLI.Common.UnitTests;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.CLI.UnitTests.Utilities;
 using AWS.Deploy.Common;
@@ -23,7 +24,7 @@ namespace AWS.Deploy.CLI.UnitTests
     public class DeploymentBundleHandlerTests
     {
         private readonly DeploymentBundleHandler _deploymentBundleHandler;
-        private readonly TestToolCommandLineWrapper _commandLineWrapper;
+        private readonly TestCommandRunner _commandRunner;
         private readonly TestDirectoryManager _directoryManager;
         private readonly ProjectDefinitionParser _projectDefinitionParser;
         private readonly RecipeDefinition _recipeDefinition;
@@ -34,11 +35,11 @@ namespace AWS.Deploy.CLI.UnitTests
             var interactiveService = new TestToolOrchestratorInteractiveService();
             var zipFileManager = new TestZipFileManager();
 
-            _commandLineWrapper = new TestToolCommandLineWrapper();
+            _commandRunner = new TestCommandRunner();
             _directoryManager = new TestDirectoryManager();
             _projectDefinitionParser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
 
-            _deploymentBundleHandler = new DeploymentBundleHandler(_commandLineWrapper, awsResourceQueryer, interactiveService, _directoryManager, zipFileManager);
+            _deploymentBundleHandler = new DeploymentBundleHandler(_commandRunner, awsResourceQueryer, interactiveService, _directoryManager, zipFileManager);
 
             _recipeDefinition = new Mock<RecipeDefinition>(
                 It.IsAny<string>(),
@@ -67,9 +68,9 @@ namespace AWS.Deploy.CLI.UnitTests
             var dockerExecutionDirectory = Directory.GetParent(Path.GetFullPath(recommendation.ProjectPath)).Parent.Parent;
 
             Assert.Equal($"docker build -t {result} -f \"{dockerFile}\" .",
-                _commandLineWrapper.CommandsToExecute.First().Command);
+                _commandRunner.CommandsToExecute.First().Command);
             Assert.Equal(dockerExecutionDirectory.FullName,
-                _commandLineWrapper.CommandsToExecute.First().WorkingDirectory);
+                _commandRunner.CommandsToExecute.First().WorkingDirectory);
         }
 
         [Fact]
@@ -87,9 +88,9 @@ namespace AWS.Deploy.CLI.UnitTests
             var dockerFile = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(recommendation.ProjectPath)), "Dockerfile");
 
             Assert.Equal($"docker build -t {result} -f \"{dockerFile}\" .",
-                _commandLineWrapper.CommandsToExecute.First().Command);
+                _commandRunner.CommandsToExecute.First().Command);
             Assert.Equal(projectPath,
-                _commandLineWrapper.CommandsToExecute.First().WorkingDirectory);
+                _commandRunner.CommandsToExecute.First().WorkingDirectory);
         }
 
         [Fact]
@@ -125,7 +126,7 @@ namespace AWS.Deploy.CLI.UnitTests
                 " " +
                 " --nologo";
 
-            Assert.Equal(expectedCommand, _commandLineWrapper.CommandsToExecute.First().Command);
+            Assert.Equal(expectedCommand, _commandRunner.CommandsToExecute.First().Command);
         }
 
         [Fact]
@@ -149,7 +150,7 @@ namespace AWS.Deploy.CLI.UnitTests
                 " --nologo" +
                 " --self-contained true";
 
-            Assert.Equal(expectedCommand, _commandLineWrapper.CommandsToExecute.First().Command);
+            Assert.Equal(expectedCommand, _commandRunner.CommandsToExecute.First().Command);
         }
 
         private async Task<RecommendationEngine> BuildRecommendationEngine(string testProjectName)

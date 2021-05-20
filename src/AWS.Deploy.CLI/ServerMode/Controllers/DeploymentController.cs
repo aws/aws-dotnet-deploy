@@ -27,6 +27,7 @@ using AWS.Deploy.CLI.Extensions;
 using AWS.Deploy.Orchestration.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Amazon.Runtime;
+using AWS.Deploy.Shell;
 
 namespace AWS.Deploy.CLI.ServerMode.Controllers
 {
@@ -283,7 +284,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             var interactiveServices = new SessionOrchestratorInteractiveService(sessionId, _hubContext);
             var services = new ServiceCollection();
             services.AddSingleton<IOrchestratorInteractiveService>(interactiveServices);
-            services.AddSingleton<ICommandLineWrapper>(services => new CommandLineWrapper(interactiveServices, true));
+            services.AddSingleton<ICommandRunner>(services => new CommandRunner(interactiveServices, true));
             services.AddCustomServices();
             var serviceProvider = services.BuildServiceProvider();
 

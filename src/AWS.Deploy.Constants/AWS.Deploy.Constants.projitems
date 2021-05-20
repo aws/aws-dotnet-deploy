@@ -12,5 +12,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)CDK.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CLI.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CloudFormationIdentifier.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EnvironmentVariable.cs" />
   </ItemGroup>
 </Project>

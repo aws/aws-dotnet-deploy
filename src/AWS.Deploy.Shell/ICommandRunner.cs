@@ -7,10 +7,15 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AWS.Deploy.Orchestration.Utilities
+namespace AWS.Deploy.Shell
 {
-    public interface ICommandLineWrapper
+    public interface ICommandRunner
     {
+        /// <summary>
+        /// Delegate for handling events that occurs during executing <see cref="Run"/> method.
+        /// </summary>
+        public ICommandRunnerDelegate? Delegate { get; set; }
+
         /// <summary>
         /// Forks a new shell process and executes <paramref name="command"/>.
         /// </summary>
@@ -22,18 +27,18 @@ namespace AWS.Deploy.Orchestration.Utilities
         /// the current OS
         /// </param>
         /// <param name="streamOutputToInteractiveService">
-        /// By default standard out/error will be piped to a <see cref="IOrchestratorInteractiveService"/>.
+        /// By default standard out/error will be piped to a <see cref="ICommandRunnerDelegate"/>.
         /// Set this to false to disable sending output.
         /// </param>
         /// <param name="onComplete">
-        /// Async callback to inspect/manipulate the completed <see cref="Process"/>.  Useful
-        /// if you need to get an exit code or <see cref="Process.StandardOutput"/>.
+        /// Async callback to inspect/manipulate the completed <see cref="Process.StandardOutput"/>.  Useful
+        /// if you need to get an exit code or <see cref="Process"/>.
         /// </param>
         /// <param name="redirectIO">
-        /// By default, <see cref="Process.StandardInput"/>, <see cref="Process.StandardOutput"/> and <see cref="Process.StandardError"/> will be redirected.
+        /// By default, <see cref="Process"/>, <see cref="Process"/> and <see cref="Process"/> will be redirected.
         /// Set this to false to avoid redirection.
         /// </param>
-        /// <param name="environmentVariables">
+        /// <param name="command">
         /// <see cref="command"/> is executed as a child process of running process which inherits the parent process's environment variables.
         /// <see cref="environmentVariables"/> allows to add (replace if exists) extra environment variables to the child process.
         /// <remarks>
@@ -42,7 +47,7 @@ namespace AWS.Deploy.Orchestration.Utilities
         /// </remarks>
         /// </param>
         /// <param name="cancelToken">
-        /// <see cref="CancellationToken"/>
+        /// <see cref="ICommandRunnerDelegate"/>
         /// </param>
         public Task Run(
             string command,
@@ -52,23 +57,17 @@ namespace AWS.Deploy.Orchestration.Utilities
             bool redirectIO = true,
             IDictionary<string, string>? environmentVariables = null,
             CancellationToken cancelToken = default);
-
-        /// <summary>
-        /// Configure the child process that executes the command passed as parameter in <see cref="Run"/> method.
-        /// </summary>
-        /// <param name="processStartInfoAction">Child process <see cref="Action{T}"/> that executes the command</param>
-        void ConfigureProcess(Action<ProcessStartInfo> processStartInfoAction);
     }
 
-    public static class CommandLineWrapperExtensions
+    public static class commandRunnerExtensions
     {
         /// <summary>
-        /// Convenience extension to <see cref="ICommandLineWrapper.Run"/>
+        /// Convenience extension to <see cref="ICommandRunner.Run"/>
         /// that returns a <see cref="TryRunWithResult"/> with the full contents
         /// of <see cref="Process.StandardError"/> and <see cref="Process.StandardOutput"/>
         /// </summary>
-        /// <param name="commandLineWrapper">
-        /// See <see cref="ICommandLineWrapper"/>
+        /// <param name="commandRunner">
+        /// See <see cref="ICommandRunner"/>
         /// </param>
         /// <param name="command">
         /// Shell script to execute
@@ -78,7 +77,7 @@ namespace AWS.Deploy.Orchestration.Utilities
         /// the current OS
         /// </param>
         /// <param name="streamOutputToInteractiveService">
-        /// By default standard out/error will be piped to a <see cref="IOrchestratorInteractiveService"/>.
+        /// By default standard out/error will be piped to a <see cref="ICommandRunnerDelegate"/>.
         /// Set this to false to disable sending output.
         /// </param>
         /// <param name="redirectIO">
@@ -97,7 +96,7 @@ namespace AWS.Deploy.Orchestration.Utilities
         /// <see cref="CancellationToken"/>
         /// </param>
         public static async Task<TryRunResult> TryRunWithResult(
-            this ICommandLineWrapper commandLineWrapper,
+            this ICommandRunner commandRunner,
             string command,
             string workingDirectory = "",
             bool streamOutputToInteractiveService = false,
@@ -107,7 +106,7 @@ namespace AWS.Deploy.Orchestration.Utilities
         {
             var result = new TryRunResult();
 
-            await commandLineWrapper.Run(
+            await commandRunner.Run(
                 command,
                 workingDirectory,
                 streamOutputToInteractiveService,

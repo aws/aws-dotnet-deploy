@@ -14,6 +14,7 @@ using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.CDK;
 using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.Utilities;
+using AWS.Deploy.Shell;
 
 namespace AWS.Deploy.CLI.Commands
 {
@@ -39,7 +40,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly IAWSClientFactory _awsClientFactory;
         private readonly IAWSResourceQueryer _awsResourceQueryer;
         private readonly IProjectParserUtility _projectParserUtility;
-        private readonly ICommandLineWrapper _commandLineWrapper;
+        private readonly ICommandRunner _commandRunner;
         private readonly ICdkProjectHandler _cdkProjectHandler;
         private readonly IDeploymentBundleHandler _deploymentBundleHandler;
         private readonly ITemplateMetadataReader _templateMetadataReader;
@@ -57,7 +58,7 @@ namespace AWS.Deploy.CLI.Commands
             IAWSClientFactory awsClientFactory,
             IAWSResourceQueryer awsResourceQueryer,
             IProjectParserUtility projectParserUtility,
-            ICommandLineWrapper commandLineWrapper,
+            ICommandRunner commandRunner,
             ICdkProjectHandler cdkProjectHandler,
             IDeploymentBundleHandler deploymentBundleHandler,
             ITemplateMetadataReader templateMetadataReader,
@@ -74,7 +75,7 @@ namespace AWS.Deploy.CLI.Commands
             _awsClientFactory = awsClientFactory;
             _awsResourceQueryer = awsResourceQueryer;
             _projectParserUtility = projectParserUtility;
-            _commandLineWrapper = commandLineWrapper;
+            _commandRunner = commandRunner;
             _cdkProjectHandler = cdkProjectHandler;
             _deploymentBundleHandler = deploymentBundleHandler;
             _templateMetadataReader = templateMetadataReader;
@@ -124,7 +125,7 @@ namespace AWS.Deploy.CLI.Commands
                     var awsCredentials = await _awsUtilities.ResolveAWSCredentials(profile, previousSettings.Profile);
                     var awsRegion = _awsUtilities.ResolveAWSRegion(region, previousSettings.Region);
 
-                    _commandLineWrapper.RegisterAWSContext(awsCredentials, awsRegion);
+                    _commandRunner.RegisterAWSContext(awsCredentials, awsRegion);
                     _awsClientFactory.RegisterAWSContext(awsCredentials, awsRegion);
 
                     var systemCapabilities = _systemCapabilityEvaluator.Evaluate();
@@ -210,6 +211,8 @@ namespace AWS.Deploy.CLI.Commands
                     var awsCredentials = await _awsUtilities.ResolveAWSCredentials(profile, previousSettings.Profile);
                     var awsRegion = _awsUtilities.ResolveAWSRegion(region, previousSettings.Region);
 
+                    _commandRunner.RegisterAWSContext(awsCredentials, awsRegion);
+
                     _awsClientFactory.ConfigureAWSOptions(awsOption =>
                     {
                         awsOption.Credentials = awsCredentials;
@@ -264,6 +267,8 @@ namespace AWS.Deploy.CLI.Commands
 
                     var awsCredentials = await _awsUtilities.ResolveAWSCredentials(profile, previousSettings.Profile);
                     var awsRegion = _awsUtilities.ResolveAWSRegion(region, previousSettings.Region);
+
+                    _commandRunner.RegisterAWSContext(awsCredentials, awsRegion);
 
                     _awsClientFactory.ConfigureAWSOptions(awsOptions =>
                     {

@@ -5,6 +5,7 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using AWS.Deploy.Orchestration.Utilities;
+using AWS.Deploy.Shell;
 
 namespace AWS.Deploy.Orchestration.CDK
 {
@@ -37,11 +38,11 @@ namespace AWS.Deploy.Orchestration.CDK
 
     public class CDKInstaller : ICDKInstaller
     {
-        private readonly ICommandLineWrapper _commandLineWrapper;
+        private readonly ICommandRunner _commandRunner;
 
-        public CDKInstaller(ICommandLineWrapper commandLineWrapper)
+        public CDKInstaller(ICommandRunner commandRunner)
         {
-            _commandLineWrapper = commandLineWrapper;
+            _commandRunner = commandRunner;
         }
 
         public Task<TryGetResult<Version>> GetGlobalVersion()
@@ -66,7 +67,7 @@ namespace AWS.Deploy.Orchestration.CDK
 
             try
             {
-                result = await _commandLineWrapper.TryRunWithResult(command.ToString(), workingDirectory, false);
+                result = await _commandRunner.TryRunWithResult(command.ToString(), workingDirectory, false);
             }
             catch (Exception exception)
             {
@@ -128,7 +129,7 @@ namespace AWS.Deploy.Orchestration.CDK
 
         public async Task Install(string workingDirectory, Version version)
         {
-            await _commandLineWrapper.Run($"npm install aws-cdk@{version}", workingDirectory, false);
+            await _commandRunner.Run($"npm install aws-cdk@{version}", workingDirectory, false);
         }
     }
 }
