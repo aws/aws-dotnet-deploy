@@ -34,7 +34,7 @@ namespace AWS.Deploy.Recipes.CDK.Common
         /// <returns></returns>
         private static string DetermineAWSDeployToolSettingsFile(App app)
         {
-            var settingsPath = app.Node.TryGetContext(CloudFormationIdentifierConstants.SETTINGS_PATH_CDK_CONTEXT_PARAMETER)?.ToString();
+            var settingsPath = app.Node.TryGetContext(Constants.CloudFormationIdentifier.SETTINGS_PATH_CDK_CONTEXT_PARAMETER)?.ToString();
 
             if (string.IsNullOrEmpty(settingsPath))
             {

@@ -4,9 +4,9 @@
 using System;
 using System.IO;
 
-namespace AWS.Deploy.Orchestration.CDK
+namespace AWS.Deploy.Constants
 {
-    public static class CDKConstants
+    public static class CDK
     {
         /// <summary>
         /// Deployment tool workspace directory to create CDK app during the deployment.

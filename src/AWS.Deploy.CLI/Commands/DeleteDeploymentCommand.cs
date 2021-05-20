@@ -88,7 +88,7 @@ namespace AWS.Deploy.CLI.Commands
                 return false;
             }
 
-            var canDelete = stack.Tags.Any(tag => tag.Key.Equals(CloudFormationIdentifierConstants.STACK_TAG));
+            var canDelete = stack.Tags.Any(tag => tag.Key.Equals(Constants.CloudFormationIdentifier.STACK_TAG));
             if (!canDelete)
             {
                 _interactiveService.WriteErrorLine("Only stacks that were deployed with this tool can be deleted.");

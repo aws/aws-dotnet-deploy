@@ -65,13 +65,13 @@ namespace AWS.Deploy.Orchestration.Utilities
                 var metadataNode = (YamlMappingNode)root.Children[new YamlScalarNode("Metadata")];
 
                 var cloudApplicationMetadata = new CloudApplicationMetadata(
-                    ((YamlScalarNode)metadataNode.Children[new YamlScalarNode(CloudFormationIdentifierConstants.STACK_METADATA_RECIPE_ID)]).Value ??
+                    ((YamlScalarNode)metadataNode.Children[new YamlScalarNode(Constants.CloudFormationIdentifier.STACK_METADATA_RECIPE_ID)]).Value ??
                         throw new Exception("Error parsing existing application's metadata to retrieve Recipe ID."),
-                    ((YamlScalarNode)metadataNode.Children[new YamlScalarNode(CloudFormationIdentifierConstants.STACK_METADATA_RECIPE_VERSION)]).Value ??
+                    ((YamlScalarNode)metadataNode.Children[new YamlScalarNode(Constants.CloudFormationIdentifier.STACK_METADATA_RECIPE_VERSION)]).Value ??
                         throw new Exception("Error parsing existing application's metadata to retrieve Recipe Version.")
                     );
 
-                var jsonString = ((YamlScalarNode)metadataNode.Children[new YamlScalarNode(CloudFormationIdentifierConstants.STACK_METADATA_SETTINGS)]).Value;
+                var jsonString = ((YamlScalarNode)metadataNode.Children[new YamlScalarNode(Constants.CloudFormationIdentifier.STACK_METADATA_SETTINGS)]).Value;
                 cloudApplicationMetadata.Settings = JsonConvert.DeserializeObject<IDictionary<string, object>>(jsonString ?? "");
 
                 return cloudApplicationMetadata;
