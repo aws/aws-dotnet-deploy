@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <None Include="..\..\LICENSE" Pack="true" PackagePath="" />
-    <None Include="..\..\NOTICE" Pack="true"  PackagePath="" />
+    <None Include="..\..\NOTICE" Pack="true" PackagePath="" />
     <None Include="..\..\THIRD_PARTY_LICENSES" Pack="true" PackagePath="" />
   </ItemGroup>
 
@@ -26,16 +26,13 @@
     <None Include="..\..\icon.png" Pack="true" PackagePath="" />
   </ItemGroup>
 
-  <UsingTask
-    TaskName="SetupLocalCache"
-    TaskFactory="RoslynCodeTaskFactory"
-    AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" >
+  <UsingTask TaskName="SetupLocalCache" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
     <ParameterGroup>
       <NuGetPackage ParameterType="System.String" Required="true" />
     </ParameterGroup>
     <Task>
-      <Using Namespace="System"/>
-      <Using Namespace="System.IO"/>
+      <Using Namespace="System" />
+      <Using Namespace="System.IO" />
       <Code Type="Fragment" Language="cs">
         <![CDATA[
 
@@ -79,8 +76,10 @@
 
 <Target Name="SetupNuGetCache" AfterTargets="Pack">
 
-  <SetupLocalCache NuGetPackage="$(OutputPath)..\$(PackageId).$(PackageVersion).nupkg"/>
+  <SetupLocalCache NuGetPackage="$(OutputPath)..\$(PackageId).$(PackageVersion).nupkg" />
 
 </Target>
+
+<Import Project="..\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems" Label="Shared" />
 
 </Project>

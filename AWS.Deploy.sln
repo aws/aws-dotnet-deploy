@@ -62,7 +62,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AWS.Deploy.ServerMode.Clien
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AWS.Deploy.ServerMode.ClientGenerator", "src\AWS.Deploy.ServerMode.ClientGenerator\AWS.Deploy.ServerMode.ClientGenerator.csproj", "{C533AA26-797A-4A41-BA28-2364B66DAA5F}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "AWS.Deploy.Constants", "src\AWS.Deploy.Constants\AWS.Deploy.Constants.shproj", "{F2266C44-C8C5-45AD-AA9B-44F8825BDF63}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		src\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems*{f2266c44-c8c5-45ad-aa9b-44f8825bdf63}*SharedItemsImports = 13
+		src\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems*{fae4d4c5-9107-4622-a050-e30cc70be754}*SharedItemsImports = 5
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -179,6 +185,7 @@ Global
 		{001A0CE1-CCCE-4006-8CAC-AD18E37060A3} = {BD466B5C-D8B0-4069-98A9-6DC8F01FA757}
 		{1B171F48-D200-407D-A9F2-179E2A602821} = {11C7056E-93C1-408B-BD87-5270595BBE0E}
 		{C533AA26-797A-4A41-BA28-2364B66DAA5F} = {11C7056E-93C1-408B-BD87-5270595BBE0E}
+		{F2266C44-C8C5-45AD-AA9B-44F8825BDF63} = {11C7056E-93C1-408B-BD87-5270595BBE0E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5A4B2863-1763-4496-B122-651A38A4F5D7}

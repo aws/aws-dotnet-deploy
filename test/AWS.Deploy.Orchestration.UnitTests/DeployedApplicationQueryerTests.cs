@@ -31,10 +31,10 @@ namespace AWS.Deploy.Orchestration.UnitTests
         {
             var stack = new Stack {
                 Tags = new List<Tag>() { new Tag {
-                    Key = CloudFormationIdentifierConstants.STACK_TAG,
+                    Key = Constants.CloudFormationIdentifier.STACK_TAG,
                     Value = "AspNetAppEcsFargate"
                 } },
-                Description = CloudFormationIdentifierConstants.STACK_DESCRIPTION_PREFIX,
+                Description = Constants.CloudFormationIdentifier.STACK_DESCRIPTION_PREFIX,
                 StackStatus = StackStatus.CREATE_COMPLETE,
                 StackName = "Stack1"
             };
@@ -58,10 +58,10 @@ namespace AWS.Deploy.Orchestration.UnitTests
             var stack = new Stack
             {
                 Tags = new List<Tag>() { new Tag {
-                    Key = CloudFormationIdentifierConstants.STACK_TAG,
+                    Key = Constants.CloudFormationIdentifier.STACK_TAG,
                     Value = "AspNetAppEcsFargate"
                 } },
-                Description = CloudFormationIdentifierConstants.STACK_DESCRIPTION_PREFIX,
+                Description = Constants.CloudFormationIdentifier.STACK_DESCRIPTION_PREFIX,
                 StackStatus = StackStatus.CREATE_COMPLETE,
                 StackName = "Stack1"
             };
@@ -77,17 +77,17 @@ namespace AWS.Deploy.Orchestration.UnitTests
         }
 
         [Theory]
-        [InlineData("", CloudFormationIdentifierConstants.STACK_DESCRIPTION_PREFIX, "CREATE_COMPLETE")]
+        [InlineData("", Constants.CloudFormationIdentifier.STACK_DESCRIPTION_PREFIX, "CREATE_COMPLETE")]
         [InlineData("AspNetAppEcsFargate", "", "CREATE_COMPLETE")]
-        [InlineData("AspNetAppEcsFargate", CloudFormationIdentifierConstants.STACK_DESCRIPTION_PREFIX, "DELETE_IN_PROGRESS")]
-        [InlineData("AspNetAppEcsFargate", CloudFormationIdentifierConstants.STACK_DESCRIPTION_PREFIX, "ROLLBACK_COMPLETE")]
+        [InlineData("AspNetAppEcsFargate", Constants.CloudFormationIdentifier.STACK_DESCRIPTION_PREFIX, "DELETE_IN_PROGRESS")]
+        [InlineData("AspNetAppEcsFargate", Constants.CloudFormationIdentifier.STACK_DESCRIPTION_PREFIX, "ROLLBACK_COMPLETE")]
         public async Task GetExistingDeployedApplications_InvalidConfigurations(string recipeId, string stackDecription, string deploymentStatus)
         {
             var tags = new List<Tag>();
             if (!string.IsNullOrEmpty(recipeId))
                 tags.Add(new Tag
                 {
-                    Key = CloudFormationIdentifierConstants.STACK_TAG,
+                    Key = Constants.CloudFormationIdentifier.STACK_TAG,
                     Value = "AspNetAppEcsFargate"
                 });
 

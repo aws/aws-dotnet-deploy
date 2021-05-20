@@ -24,7 +24,7 @@ namespace AWS.Deploy.Recipes.CDK.Common
         public static void RegisterStack<C>(Stack stack, RecipeConfiguration<C> recipeConfiguration)
         {
             // Set the AWS .NET deployment tool tag which also identifies the recipe used.
-            stack.Tags.SetTag(CloudFormationIdentifierConstants.STACK_TAG, $"{recipeConfiguration.RecipeId}");
+            stack.Tags.SetTag(Constants.CloudFormationIdentifier.STACK_TAG, $"{recipeConfiguration.RecipeId}");
 
             // Serializes all AWS .NET deployment tool settings.
             var json = JsonSerializer.Serialize(recipeConfiguration.Settings, new JsonSerializerOptions { WriteIndented = false });
@@ -40,9 +40,9 @@ namespace AWS.Deploy.Recipes.CDK.Common
             }
 
             // Save the settings, recipe id and version as metadata to the CloudFormation template.
-            metadata[CloudFormationIdentifierConstants.STACK_METADATA_SETTINGS] = json;
-            metadata[CloudFormationIdentifierConstants.STACK_METADATA_RECIPE_ID] = recipeConfiguration.RecipeId;
-            metadata[CloudFormationIdentifierConstants.STACK_METADATA_RECIPE_VERSION] = recipeConfiguration.RecipeVersion;
+            metadata[Constants.CloudFormationIdentifier.STACK_METADATA_SETTINGS] = json;
+            metadata[Constants.CloudFormationIdentifier.STACK_METADATA_RECIPE_ID] = recipeConfiguration.RecipeId;
+            metadata[Constants.CloudFormationIdentifier.STACK_METADATA_RECIPE_VERSION] = recipeConfiguration.RecipeVersion;
 
             // For the CDK to pick up the changes to the metadata .NET Dictionary you have to reassign the Metadata property.
             stack.TemplateOptions.Metadata = metadata;
@@ -52,11 +52,11 @@ namespace AWS.Deploy.Recipes.CDK.Common
             // is added to the description.
             if (string.IsNullOrEmpty(stack.TemplateOptions.Description))
             {
-                stack.TemplateOptions.Description = CloudFormationIdentifierConstants.STACK_DESCRIPTION_PREFIX;
+                stack.TemplateOptions.Description = Constants.CloudFormationIdentifier.STACK_DESCRIPTION_PREFIX;
             }
             else
             {
-                stack.TemplateOptions.Description = $"{CloudFormationIdentifierConstants.STACK_DESCRIPTION_PREFIX}: {stack.TemplateOptions.Description}";
+                stack.TemplateOptions.Description = $"{Constants.CloudFormationIdentifier.STACK_DESCRIPTION_PREFIX}: {stack.TemplateOptions.Description}";
             }
         }
     }

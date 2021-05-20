@@ -48,7 +48,7 @@ namespace AWS.Deploy.CLI.UnitTests
             Assert.True(interactiveServices.OutputContains("Title"));
             Assert.True(interactiveServices.OutputContains("1: Option1"));
             Assert.True(interactiveServices.OutputContains("2: Option2"));
-            Assert.True(interactiveServices.OutputContains($"3: {CLI.Constants.CREATE_NEW_LABEL}"));
+            Assert.True(interactiveServices.OutputContains($"3: {Deploy.Constants.CLI.CREATE_NEW_LABEL}"));
 
             Assert.Null(userResponse.SelectedOption);
 
