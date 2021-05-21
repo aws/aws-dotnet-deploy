@@ -14,7 +14,7 @@ namespace AWS.Deploy.Shell
         /// <summary>
         /// Delegate for handling events that occurs during executing <see cref="Run"/> method.
         /// </summary>
-        public ICommandRunnerDelegate? Delegate { get; set; }
+        ICommandRunnerDelegate? Delegate { get; set; }
 
         /// <summary>
         /// Forks a new shell process and executes <paramref name="command"/>.
@@ -49,7 +49,7 @@ namespace AWS.Deploy.Shell
         /// <param name="cancelToken">
         /// <see cref="ICommandRunnerDelegate"/>
         /// </param>
-        public Task Run(
+        Task Run(
             string command,
             string workingDirectory = "",
             bool streamOutputToInteractiveService = true,
