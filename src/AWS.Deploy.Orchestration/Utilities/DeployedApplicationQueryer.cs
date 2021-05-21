@@ -40,13 +40,13 @@ namespace AWS.Deploy.Orchestration.Utilities
             foreach (var stack in stacks)
             {
                 // Check to see if stack has AWS .NET deployment tool tag and the stack is not deleted or in the process of being deleted.
-                var deployTag = stack.Tags.FirstOrDefault(tags => string.Equals(tags.Key, CloudFormationIdentifierConstants.STACK_TAG));
+                var deployTag = stack.Tags.FirstOrDefault(tags => string.Equals(tags.Key, Constants.CloudFormationIdentifier.STACK_TAG));
 
                 // Skip stacks that don't have AWS .NET deployment tool tag
                 if (deployTag == null ||
 
                     // Skip stacks does not have AWS .NET deployment tool description prefix. (This is filter out stacks that have the tag propagated to it like the Beanstalk stack)
-                    (stack.Description == null || !stack.Description.StartsWith(CloudFormationIdentifierConstants.STACK_DESCRIPTION_PREFIX)) ||
+                    (stack.Description == null || !stack.Description.StartsWith(Constants.CloudFormationIdentifier.STACK_DESCRIPTION_PREFIX)) ||
 
                     // Skip tags that are deleted or in the process of being deleted
                     stack.StackStatus.ToString().StartsWith("DELETE"))

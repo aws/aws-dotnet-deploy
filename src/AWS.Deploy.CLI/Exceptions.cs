@@ -61,4 +61,13 @@ namespace AWS.Deploy.CLI
     {
         public SystemCapabilitiesNotProvidedException(string message, Exception? innerException = null) : base(message, innerException) { }
     }
+
+    /// <summary>
+    /// Throw if TCP port is in use by another process.
+    /// </summary>
+    [AWSDeploymentExpectedException]
+    public class TcpPortInUseException : Exception
+    {
+        public TcpPortInUseException(string message, Exception? innerException = null) : base(message, innerException) { }
+    }
 }

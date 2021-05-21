@@ -31,9 +31,9 @@ namespace AWS.Deploy.CLI.TypeHintResponses
         public string ToDisplayString()
         {
             if (CreateNew)
-                return Constants.CREATE_NEW_LABEL;
+                return Constants.CLI.CREATE_NEW_LABEL;
 
-            return $"{VpcId}{(IsDefault ? Constants.DEFAULT_LABEL : "")}";
+            return $"{VpcId}{(IsDefault ? Constants.CLI.DEFAULT_LABEL : "")}";
         }
     }
 }
