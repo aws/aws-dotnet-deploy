@@ -12,7 +12,6 @@
     <PackageTags>AWS;Amazon;ElasticBeanstalk;ECS;Deploy</PackageTags>
     <AssemblyName>AWS.Deploy.CLI</AssemblyName>
     <RootNamespace>AWS.Deploy.CLI</RootNamespace>
-    <LangVersion>Latest</LangVersion>
     <PackageIcon>icon.png</PackageIcon>
     <PackageProjectUrl>https://github.com/aws/aws-dotnet-deploy</PackageProjectUrl>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
