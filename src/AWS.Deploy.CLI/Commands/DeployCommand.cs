@@ -155,7 +155,7 @@ namespace AWS.Deploy.CLI.Commands
             if (selectedRecommendation.Recipe.DeploymentType == DeploymentTypes.CdkProject &&
                 !systemCapabilities.NodeJsMinVersionInstalled)
             {
-                throw new MissingNodeJsException("The selected deployment option requires Node.js 10.3 or later, which was not detected.  Please install Node.js: https://nodejs.org/en/download/");
+                throw new MissingNodeJsException("The selected deployment uses the AWS CDK, which requires version of Node.js higher than your current installation. The latest LTS version of Node.js is recommended and can be installed from https://nodejs.org/en/download/. Specifically, AWS CDK requires 10.3+ to work properly.");
             }
 
             if (selectedRecommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.Container)
