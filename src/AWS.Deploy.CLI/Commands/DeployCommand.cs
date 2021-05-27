@@ -175,7 +175,8 @@ namespace AWS.Deploy.CLI.Commands
 
             var configurableOptionSettings = selectedRecommendation.Recipe.OptionSettings.Union(deploymentBundleDefinition.Parameters);
 
-            await ConfigureDeployment(selectedRecommendation, configurableOptionSettings, false);
+            if (!_toolInteractiveService.DisableInteractive)
+                await ConfigureDeployment(selectedRecommendation, configurableOptionSettings, false);
 
             var cloudApplication = new CloudApplication(cloudApplicationName, string.Empty);
 

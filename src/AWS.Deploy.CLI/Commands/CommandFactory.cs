@@ -29,6 +29,7 @@ namespace AWS.Deploy.CLI.Commands
         private static readonly Option<string> _optionProjectPath = new("--project-path", () => Directory.GetCurrentDirectory(), "Path to the project to deploy.");
         private static readonly Option<string> _optionStackName = new("--stack-name", "Name the AWS stack to deploy your application to.");
         private static readonly Option<bool> _optionDiagnosticLogging = new(new []{"-d", "--diagnostics"}, "Enable diagnostic output.");
+        private static readonly Option<bool> _optionDisableInteractive = new(new []{ "--disable-interactive" }, "Disable interactivity to redeploy without any prompts for user input.");
 
         private readonly IToolInteractiveService _toolInteractiveService;
         private readonly IOrchestratorInteractiveService _orchestratorInteractiveService;
@@ -111,14 +112,16 @@ namespace AWS.Deploy.CLI.Commands
                 _optionProjectPath,
                 _optionStackName,
                 _optionDiagnosticLogging,
+                _optionDisableInteractive
             };
 
-            deployCommand.Handler = CommandHandler.Create<string, string, string, string, bool, bool>(async (profile, region, projectPath, stackName, saveCdkProject, diagnostics) =>
+            deployCommand.Handler = CommandHandler.Create<string, string, string, string, bool, bool, bool>(async (profile, region, projectPath, stackName, saveCdkProject, diagnostics, disableInteractive) =>
             {
                 try
                 {
                     _toolInteractiveService.Diagnostics = diagnostics;
-
+                    _toolInteractiveService.DisableInteractive = disableInteractive;
+                    
                     var previousSettings = PreviousDeploymentSettings.ReadSettings(projectPath, null);
 
                     var awsCredentials = await _awsUtilities.ResolveAWSCredentials(profile, previousSettings.Profile);

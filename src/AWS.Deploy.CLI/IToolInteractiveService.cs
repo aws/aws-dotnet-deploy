@@ -14,6 +14,7 @@ namespace AWS.Deploy.CLI
 
         string ReadLine();
         bool Diagnostics { get; set; }
+        bool DisableInteractive { get; set; }
         ConsoleKeyInfo ReadKey(bool intercept);
     }
 
