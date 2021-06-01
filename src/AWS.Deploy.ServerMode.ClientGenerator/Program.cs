@@ -29,6 +29,7 @@ namespace AWS.Deploy.ServerMode.ClientGenerator
                 var settings = new CSharpClientGeneratorSettings
                 {
                     ClassName = "RestAPIClient",
+                    GenerateClientInterfaces = true,
                     CSharpGeneratorSettings =
                     {
                         Namespace = "AWS.Deploy.ServerMode.Client",

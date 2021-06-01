@@ -10,7 +10,20 @@ using Microsoft.Extensions.Logging;
 
 namespace AWS.Deploy.ServerMode.Client
 {
-    public class DeploymentCommunicationClient : IDisposable
+    public interface IDeploymentCommunicationClient : IDisposable
+    {
+        Action<string>? ReceiveLogDebugLine { get; set; }
+
+        Action<string>? ReceiveLogErrorMessageLine { get; set; }
+
+        Action<string>? ReceiveLogMessageLineAction { get; set; }
+
+        Action<string>? ReceiveLogAllLogAction { get; set; }
+
+        Task JoinSession(string sessionId);
+    }
+
+    public class DeploymentCommunicationClient : IDeploymentCommunicationClient
     {
         private bool _disposedValue;
 

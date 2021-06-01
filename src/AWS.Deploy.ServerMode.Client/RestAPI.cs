@@ -16,7 +16,100 @@ namespace AWS.Deploy.ServerMode.Client
     using System = global::System;
     
     [System.CodeDom.Compiler.GeneratedCode("NSwag", "13.10.9.0 (NJsonSchema v10.4.1.0 (Newtonsoft.Json v12.0.0.0))")]
-    public partial class RestAPIClient 
+    public partial interface IRestAPIClient
+    {
+        /// <summary>Start a deployment session. A session id will be generated. This session id needs to be passed in future API calls to configure and execute deployment.</summary>
+        /// <returns>Success</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<StartDeploymentSessionOutput> StartDeploymentSessionAsync(StartDeploymentSessionInput body);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>Start a deployment session. A session id will be generated. This session id needs to be passed in future API calls to configure and execute deployment.</summary>
+        /// <returns>Success</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<StartDeploymentSessionOutput> StartDeploymentSessionAsync(StartDeploymentSessionInput body, System.Threading.CancellationToken cancellationToken);
+    
+        /// <summary>Closes the deployment session. This removes any session state for the session id.</summary>
+        /// <returns>Success</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task CloseDeploymentSessionAsync(string sessionId);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>Closes the deployment session. This removes any session state for the session id.</summary>
+        /// <returns>Success</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task CloseDeploymentSessionAsync(string sessionId, System.Threading.CancellationToken cancellationToken);
+    
+        /// <summary>Set the target recipe and name for the deployment.</summary>
+        /// <returns>Success</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task SetDeploymentTargetAsync(string sessionId, SetDeploymentTargetInput body);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>Set the target recipe and name for the deployment.</summary>
+        /// <returns>Success</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task SetDeploymentTargetAsync(string sessionId, SetDeploymentTargetInput body, System.Threading.CancellationToken cancellationToken);
+    
+        /// <summary>Gets the list of compatible deployments for the session's project. The list is ordered with the first recommendation in the list being the most compatible recommendation.</summary>
+        /// <returns>Success</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetRecommendationsOutput> GetRecommendationsAsync(string sessionId);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>Gets the list of compatible deployments for the session's project. The list is ordered with the first recommendation in the list being the most compatible recommendation.</summary>
+        /// <returns>Success</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetRecommendationsOutput> GetRecommendationsAsync(string sessionId, System.Threading.CancellationToken cancellationToken);
+    
+        /// <summary>Gets the list of existing deployments that are compatible with the session's project.</summary>
+        /// <returns>Success</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetExistingDeploymentsOutput> GetExistingDeploymentsAsync(string sessionId);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>Gets the list of existing deployments that are compatible with the session's project.</summary>
+        /// <returns>Success</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetExistingDeploymentsOutput> GetExistingDeploymentsAsync(string sessionId, System.Threading.CancellationToken cancellationToken);
+    
+        /// <summary>Begin execution of the deployment.</summary>
+        /// <returns>Success</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task StartDeploymentAsync(string sessionId);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>Begin execution of the deployment.</summary>
+        /// <returns>Success</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task StartDeploymentAsync(string sessionId, System.Threading.CancellationToken cancellationToken);
+    
+        /// <summary>Gets the status of the deployment.</summary>
+        /// <returns>Success</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetDeploymentStatusOutput> GetDeploymentStatusAsync(string sessionId);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>Gets the status of the deployment.</summary>
+        /// <returns>Success</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetDeploymentStatusOutput> GetDeploymentStatusAsync(string sessionId, System.Threading.CancellationToken cancellationToken);
+    
+        /// <summary>Gets the health of the deployment tool. Use this API after starting the command line to see if the tool is ready to handle requests.</summary>
+        /// <returns>Success</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<HealthStatusOutput> HealthAsync();
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>Gets the health of the deployment tool. Use this API after starting the command line to see if the tool is ready to handle requests.</summary>
+        /// <returns>Success</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<HealthStatusOutput> HealthAsync(System.Threading.CancellationToken cancellationToken);
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NSwag", "13.10.9.0 (NJsonSchema v10.4.1.0 (Newtonsoft.Json v12.0.0.0))")]
+    public partial class RestAPIClient : IRestAPIClient
     {
         private string _baseUrl = "";
         private ServerModeHttpClient _httpClient;
