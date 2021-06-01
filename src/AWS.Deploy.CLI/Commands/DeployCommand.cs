@@ -66,7 +66,7 @@ namespace AWS.Deploy.CLI.Commands
             _cdkManager = cdkManager;
         }
 
-        public async Task ExecuteAsync(string stackName, bool saveCdkProject)
+        public async Task ExecuteAsync(string stackName, bool saveCdkProject, UserDeploymentSettings? userDeploymentSettings = null)
         {
             var orchestrator =
                 new Orchestrator(
@@ -95,10 +95,9 @@ namespace AWS.Deploy.CLI.Commands
                 throw new InvalidCliArgumentException("Found invalid CLI arguments");
             }
 
-            var cloudApplicationName =
-                !string.IsNullOrEmpty(stackName)
-                ? stackName
-                : AskUserForCloudApplicationName(_session.ProjectDefinition, deployedApplications);
+            _toolInteractiveService.WriteLine();
+
+            var cloudApplicationName = GetCloudApplicationName(stackName, userDeploymentSettings, deployedApplications);
 
             var deployedApplication = deployedApplications.FirstOrDefault(x => string.Equals(x.Name, cloudApplicationName));
 
@@ -142,7 +141,7 @@ namespace AWS.Deploy.CLI.Commands
             }
             else
             {
-                selectedRecommendation = _consoleUtilities.AskToChooseRecommendation(recommendations);
+                selectedRecommendation = GetSelectedRecommendation(userDeploymentSettings, recommendations);
             }
 
             // Apply the user enter project name to the recommendation so that any default settings based on project name are applied.
@@ -175,6 +174,11 @@ namespace AWS.Deploy.CLI.Commands
 
             var configurableOptionSettings = selectedRecommendation.Recipe.OptionSettings.Union(deploymentBundleDefinition.Parameters);
 
+            if (userDeploymentSettings != null)
+            {
+                ConfigureDeployment(selectedRecommendation, configurableOptionSettings, userDeploymentSettings);
+            }
+
             await ConfigureDeployment(selectedRecommendation, configurableOptionSettings, false);
 
             var cloudApplication = new CloudApplication(cloudApplicationName, string.Empty);
@@ -187,6 +191,67 @@ namespace AWS.Deploy.CLI.Commands
             await CreateDeploymentBundle(orchestrator, selectedRecommendation, cloudApplication);
 
             await orchestrator.DeployRecommendation(cloudApplication, selectedRecommendation);
+        }
+
+        private void ConfigureDeployment(Recommendation recommendation, IEnumerable<OptionSettingItem> configurableOptionSettings, UserDeploymentSettings userDeploymentSettings)
+        {
+            var optionSettings =
+                configurableOptionSettings
+                    .Where(x => (!recommendation.IsExistingCloudApplication || x.Updatable))
+                    .ToArray();
+
+            foreach (var config in userDeploymentSettings.OptionSettingConfigs)
+            {
+                var ids = config.Key.Split(".");
+                if (ids.Length == 0 || ids.Length > 2)
+                    throw new InvalidUserDeploymentSettingsException($"The option setting config Id '{config.Key}' is not a valid option setting item Id.");
+
+                var optionSetting = optionSettings.FirstOrDefault(x => x.Id.Equals(ids[0]));
+
+                if (optionSetting == null)
+                    throw new InvalidUserDeploymentSettingsException($"The option setting config Id '{config.Key}' is not a valid option setting item Id.");
+
+                if (ids.Length == 1)
+                    optionSetting.SetValueOverride(config.Value);
+                else if (ids.Length == 2)
+                {
+                    var childSetting =
+                        optionSetting.ChildOptionSettings.FirstOrDefault(x => x.Id.Equals(ids[1]));
+
+                    if (childSetting == null)
+                        throw new InvalidUserDeploymentSettingsException($"The option setting config Id '{config.Key}' is not a valid option setting item Id.");
+
+                    childSetting.SetValueOverride(config.Value);
+                }
+            }
+        }
+
+        private string GetCloudApplicationName(string? stackName, UserDeploymentSettings? userDeploymentSettings, List<CloudApplication> deployedApplications)
+        {
+            if (!string.IsNullOrEmpty(stackName))
+                return stackName;
+
+            if (userDeploymentSettings == null ||
+                string.IsNullOrEmpty(userDeploymentSettings.StackName))
+                return AskUserForCloudApplicationName(_session.ProjectDefinition, deployedApplications);
+
+            _toolInteractiveService.WriteLine($"Configuring Stack Name with specified value '{userDeploymentSettings.StackName}'.");
+            return userDeploymentSettings.StackName;
+        }
+
+        private Recommendation GetSelectedRecommendation(UserDeploymentSettings? userDeploymentSettings, List<Recommendation> recommendations)
+        {
+            if (userDeploymentSettings == null ||
+                string.IsNullOrEmpty(userDeploymentSettings.SelectedRecipeId))
+                return _consoleUtilities.AskToChooseRecommendation(recommendations);
+
+            Recommendation? selectedRecommendation = recommendations.FirstOrDefault(x => x.Recipe.Id.Equals(userDeploymentSettings.SelectedRecipeId));
+
+            if (selectedRecommendation == null)
+                throw new InvalidUserDeploymentSettingsException($"The user deployment settings provided contains an invalid value for the property '{nameof(userDeploymentSettings.SelectedRecipeId)}'.");
+
+            _toolInteractiveService.WriteLine($"Configuring Recommendation with specified value '{selectedRecommendation.Name}'.");
+            return selectedRecommendation;
         }
 
         private string AskUserForCloudApplicationName(ProjectDefinition project, List<CloudApplication> existingApplications)
