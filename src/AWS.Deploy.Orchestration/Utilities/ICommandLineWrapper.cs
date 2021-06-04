@@ -51,7 +51,8 @@ namespace AWS.Deploy.Orchestration.Utilities
             Action<TryRunResult>? onComplete = null,
             bool redirectIO = true,
             IDictionary<string, string>? environmentVariables = null,
-            CancellationToken cancelToken = default);
+            CancellationToken cancelToken = default,
+            bool needAwsCredentials = false);
 
         /// <summary>
         /// Configure the child process that executes the command passed as parameter in <see cref="Run"/> method.
@@ -103,7 +104,8 @@ namespace AWS.Deploy.Orchestration.Utilities
             bool streamOutputToInteractiveService = false,
             bool redirectIO = true,
             IDictionary<string, string>? environmentVariables = null,
-            CancellationToken cancelToken = default)
+            CancellationToken cancelToken = default,
+            bool needAwsCredentials = false)
         {
             var result = new TryRunResult();
 
@@ -114,7 +116,8 @@ namespace AWS.Deploy.Orchestration.Utilities
                 onComplete: runResult => result = runResult,
                 redirectIO: redirectIO,
                 environmentVariables: environmentVariables,
-                cancelToken: cancelToken);
+                cancelToken: cancelToken,
+                needAwsCredentials: needAwsCredentials);
 
             return result;
         }

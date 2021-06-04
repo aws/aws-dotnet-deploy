@@ -43,7 +43,8 @@ namespace AWS.Deploy.CLI.Utilities
             Action<TryRunResult>? onComplete = null,
             bool redirectIO = true,
             IDictionary<string, string>? environmentVariables = null,
-            CancellationToken cancelToken = default)
+            CancellationToken cancelToken = default,
+            bool needAwsCredentials = false)
         {
             StringBuilder strOutput = new StringBuilder();
             StringBuilder strError = new StringBuilder();
@@ -74,7 +75,9 @@ namespace AWS.Deploy.CLI.Utilities
             }
 
             UpdateEnvironmentVariables(processStartInfo, environmentVariables);
-            _processStartInfoAction?.Invoke(processStartInfo);
+
+            if (needAwsCredentials)
+                _processStartInfoAction?.Invoke(processStartInfo);
 
             var process = Process.Start(processStartInfo);
             if (null == process)

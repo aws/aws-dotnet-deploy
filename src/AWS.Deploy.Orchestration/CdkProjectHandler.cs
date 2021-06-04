@@ -50,13 +50,15 @@ namespace AWS.Deploy.Orchestration
             _interactiveService.LogMessageLine("Starting deployment of CDK Project");
 
             // Ensure region is bootstrapped
-            await _commandLineWrapper.Run($"npx cdk bootstrap aws://{session.AWSAccountId}/{session.AWSRegion}");
+            await _commandLineWrapper.Run($"npx cdk bootstrap aws://{session.AWSAccountId}/{session.AWSRegion}",
+                needAwsCredentials: true);
 
             // Handover to CDK command line tool
             // Use a CDK Context parameter to specify the settings file that has been serialized.
             await _commandLineWrapper.Run( $"npx cdk deploy --require-approval never -c {Constants.CloudFormationIdentifier.SETTINGS_PATH_CDK_CONTEXT_PARAMETER}=\"{appSettingsFilePath}\"",
                 workingDirectory: cdkProjectPath,
-                environmentVariables: environmentVariables);
+                environmentVariables: environmentVariables,
+                needAwsCredentials: true);
         }
 
         private async Task<string> CreateCdkProjectForDeployment(Recommendation recommendation, OrchestratorSession session)

@@ -23,7 +23,8 @@ namespace AWS.Deploy.Orchestration.UnitTests
             Action<TryRunResult> onComplete = null,
             bool redirectIO = true,
             IDictionary<string, string> environmentVariables = null,
-            CancellationToken cancelToken = default)
+            CancellationToken cancelToken = default,
+            bool needAwsCredentials = false)
         {
             Commands.Add((command, workingDirectory, streamOutputToInteractiveService));
             onComplete?.Invoke(Results.Last());
