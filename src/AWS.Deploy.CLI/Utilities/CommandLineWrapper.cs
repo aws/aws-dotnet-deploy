@@ -73,6 +73,7 @@ namespace AWS.Deploy.CLI.Utilities
                 processStartInfo.UseShellExecute = _useSeparateWindow;
             }
 
+            UpdateEnvironmentVariables(processStartInfo, environmentVariables);
             _processStartInfoAction?.Invoke(processStartInfo);
 
             var process = Process.Start(processStartInfo);
