@@ -128,4 +128,22 @@ namespace AWS.Deploy.Orchestration
     {
         public InvalidRecipePathException(string message, Exception? innerException = null) : base(message, innerException) { }
     }
+
+    /// <summary>
+    /// Exception thrown if Solution Path contains an invalid path
+    /// </summary>
+    [AWSDeploymentExpectedException]
+    public class InvalidSolutionPathException : Exception
+    {
+        public InvalidSolutionPathException(string message, Exception? innerException = null) : base(message, innerException) { }
+    }
+
+    /// <summary>
+    /// Exception thrown if AWS Deploy Recipes CDK Common Product Version is invalid.
+    /// </summary>
+    [AWSDeploymentExpectedException]
+    public class InvalidAWSDeployRecipesCDKCommonVersionException : Exception
+    {
+        public InvalidAWSDeployRecipesCDKCommonVersionException(string message, Exception? innerException = null) : base(message, innerException) { }
+    }
 }

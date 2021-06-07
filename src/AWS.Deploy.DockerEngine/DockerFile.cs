@@ -63,7 +63,7 @@ namespace AWS.Deploy.DockerEngine
                     projects += $"COPY [\"{projectList[i]}\", \"{projectList[i].Substring(0, projectList[i].LastIndexOf("/") + 1)}\"]" + (i < projectList.Count - 1 ? Environment.NewLine : "");
                 }
 
-                projectPath = projectList.Where(x => x.EndsWith(_projectName)).FirstOrDefault();
+                projectPath = projectList.First(x => x.EndsWith(_projectName));
                 if (projectPath.LastIndexOf("/") > -1)
                 {
                     projectFolder = projectPath.Substring(0, projectPath.LastIndexOf("/"));

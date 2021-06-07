@@ -23,17 +23,17 @@ namespace AWS.Deploy.CLI.ServerMode.Services
             _hubContext = hubContext;
         }
 
-        public void LogDebugLine(string message)
+        public void LogDebugLine(string? message)
         {
             _hubContext.Clients.Group(_sessionId).OnLogDebugLine(message);
         }
 
-        public void LogErrorMessageLine(string message)
+        public void LogErrorMessageLine(string? message)
         {
             _hubContext.Clients.Group(_sessionId).OnLogErrorMessageLine(message);
         }
 
-        public void LogMessageLine(string message)
+        public void LogMessageLine(string? message)
         {
             _hubContext.Clients.Group(_sessionId).OnLogMessageLine(message);
         }

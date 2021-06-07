@@ -127,6 +127,15 @@ namespace AWS.Deploy.Common
     }
 
     /// <summary>
+    /// Exception thrown if Project Path contains an invalid path
+    /// </summary>
+    [AWSDeploymentExpectedException]
+    public class InvalidProjectPathException : Exception
+    {
+        public InvalidProjectPathException(string message, Exception? innerException = null) : base(message, innerException) { }
+    }
+
+    /// <summary>
     /// Indicates a specific strongly typed Exception can be anticipated.
     /// Whoever throws this error should also present the user with helpful information
     /// on what wrong and how to fix it.  This is the preferred UX.

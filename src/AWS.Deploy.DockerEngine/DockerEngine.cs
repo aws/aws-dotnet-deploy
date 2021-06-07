@@ -126,9 +126,12 @@ namespace AWS.Deploy.DockerEngine
         {
             var content = ProjectUtilities.ReadDockerFileConfig();
             var definitions = JsonConvert.DeserializeObject<List<ImageDefinition>>(content);
-            var mappings = definitions.Where(x => x.SdkType.Equals(_project.SdkType)).FirstOrDefault();
+            var mappings = definitions.FirstOrDefault(x => x.SdkType.Equals(_project.SdkType));
+            if (mappings == null)
+                throw new UnsupportedProjectException($"The project with SDK Type {_project.SdkType} is not supported.");
 
-            return mappings.ImageMapping.FirstOrDefault(x => x.TargetFramework.Equals(_project.TargetFramework));
+            return mappings.ImageMapping.FirstOrDefault(x => x.TargetFramework.Equals(_project.TargetFramework))
+                ?? throw new UnsupportedProjectException($"The project with Target Framework {_project.TargetFramework} is not supported.");
         }
 
         /// <summary>

@@ -181,7 +181,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             if(!string.IsNullOrEmpty(input.NewDeploymentRecipeId) &&
                !string.IsNullOrEmpty(input.NewDeploymentName))
             {
-                state.SelectedRecommendation = state.NewRecommendations.FirstOrDefault(x => string.Equals(input.NewDeploymentRecipeId, x.Recipe.Id));
+                state.SelectedRecommendation = state.NewRecommendations?.FirstOrDefault(x => string.Equals(input.NewDeploymentRecipeId, x.Recipe.Id));
                 if(state.SelectedRecommendation == null)
                 {
                     return NotFound($"Recommendation {input.NewDeploymentRecipeId} not found.");
@@ -195,13 +195,13 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 var serviceProvider = CreateSessionServiceProvider(state);
                 var templateMetadataReader = serviceProvider.GetRequiredService<ITemplateMetadataReader>();
 
-                var existingDeployment = state.ExistingDeployments.FirstOrDefault(x => string.Equals(input.ExistingDeploymentName, x.Name));
+                var existingDeployment = state.ExistingDeployments?.FirstOrDefault(x => string.Equals(input.ExistingDeploymentName, x.Name));
                 if (existingDeployment == null)
                 {
                     return NotFound($"Existing deployment {input.ExistingDeploymentName} not found.");
                 }
 
-                state.SelectedRecommendation = state.NewRecommendations.FirstOrDefault(x => string.Equals(existingDeployment.RecipeId, x.Recipe.Id));
+                state.SelectedRecommendation = state.NewRecommendations?.FirstOrDefault(x => string.Equals(existingDeployment.RecipeId, x.Recipe.Id));
                 if (state.SelectedRecommendation == null)
                 {
                     return NotFound($"Recommendation {input.NewDeploymentRecipeId} used in existing deployment {existingDeployment.RecipeId} not found.");

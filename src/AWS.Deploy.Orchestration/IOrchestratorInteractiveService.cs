@@ -5,10 +5,10 @@ namespace AWS.Deploy.Orchestration
 {
     public interface IOrchestratorInteractiveService
     {
-        void LogErrorMessageLine(string message);
+        void LogErrorMessageLine(string? message);
 
-        void LogMessageLine(string message);
+        void LogMessageLine(string? message);
 
-        void LogDebugLine(string message);
+        void LogDebugLine(string? message);
     }
 }

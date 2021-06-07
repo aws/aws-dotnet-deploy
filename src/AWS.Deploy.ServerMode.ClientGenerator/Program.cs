@@ -55,10 +55,16 @@ namespace AWS.Deploy.ServerMode.ClientGenerator
         {
             var dir = new DirectoryInfo(Directory.GetCurrentDirectory());
 
-            while (!string.Equals(dir.Name, "src"))
+            while (!string.Equals(dir?.Name, "src"))
             {
+                if (dir == null)
+                    break;
+
                 dir = dir.Parent;
             }
+
+            if (dir == null)
+                throw new Exception("Could not determine file path of current directory.");
 
             return Path.Combine(dir.FullName, "AWS.Deploy.ServerMode.Client", codeFile);
         }
