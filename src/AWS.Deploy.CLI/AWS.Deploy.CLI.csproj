@@ -16,6 +16,7 @@
     <PackageProjectUrl>https://github.com/aws/aws-dotnet-deploy</PackageProjectUrl>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1570;1591</NoWarn>
+    <RollForward>Major</RollForward>
   </PropertyGroup>
 
   <ItemGroup>

@@ -72,13 +72,13 @@ namespace AWS.Deploy.Common
             var targetFramework = xmlProjectFile.GetElementsByTagName("TargetFramework");
             if (targetFramework.Count > 0)
             {
-                projectDefinition.TargetFramework = targetFramework[0].InnerText;
+                projectDefinition.TargetFramework = targetFramework[0]?.InnerText;
             }
 
             var assemblyName = xmlProjectFile.GetElementsByTagName("AssemblyName");
             if (assemblyName.Count > 0)
             {
-                projectDefinition.AssemblyName = (string.IsNullOrWhiteSpace(assemblyName[0].InnerText) ? Path.GetFileNameWithoutExtension(projectPath) : assemblyName[0].InnerText);
+                projectDefinition.AssemblyName = (string.IsNullOrWhiteSpace(assemblyName[0]?.InnerText) ? Path.GetFileNameWithoutExtension(projectPath) : assemblyName[0]?.InnerText);
             }
             else
             {

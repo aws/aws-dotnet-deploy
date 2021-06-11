@@ -7,10 +7,10 @@ namespace AWS.Deploy.CLI
 {
     public interface IToolInteractiveService
     {
-        void Write(string message);
-        void WriteLine(string message);
-        void WriteDebugLine(string message);
-        void WriteErrorLine(string message);
+        void Write(string? message);
+        void WriteLine(string? message);
+        void WriteDebugLine(string? message);
+        void WriteErrorLine(string? message);
 
         string ReadLine();
         bool Diagnostics { get; set; }

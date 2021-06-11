@@ -10,7 +10,7 @@ namespace AWS.Deploy.Recipes
         public static string FindDeploymentBundleDefinitionPath()
         {
             var assemblyPath = typeof(DeploymentBundleDefinitionLocator).Assembly.Location;
-            var deploymentBundleDefinitionPath = Path.Combine(Directory.GetParent(assemblyPath).FullName, "DeploymentBundleDefinitions");
+            var deploymentBundleDefinitionPath = Path.Combine(Directory.GetParent(assemblyPath)!.FullName, "DeploymentBundleDefinitions");
             return deploymentBundleDefinitionPath;
         }
     }

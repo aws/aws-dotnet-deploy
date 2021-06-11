@@ -24,4 +24,9 @@ namespace AWS.Deploy.DockerEngine
     {
         public DockerEngineExceptionBase(string message) : base(message) { }
     }
+
+    public class UnsupportedProjectException : DockerEngineExceptionBase
+    {
+        public UnsupportedProjectException(string message) : base(message) { }
+    }
 }

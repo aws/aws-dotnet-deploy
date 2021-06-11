@@ -13,10 +13,14 @@ namespace AWS.Deploy.Orchestration
     {
         public string Build(CloudApplication cloudApplication, Recommendation recommendation)
         {
+            var projectPath = new FileInfo(recommendation.ProjectPath).Directory?.FullName;
+            if (string.IsNullOrEmpty(projectPath))
+                throw new InvalidProjectPathException("The project path provided is invalid.");
+
             // General Settings
             var appSettingsContainer = new RecipeConfiguration<Dictionary<string, object>>(
                 cloudApplication.StackName,
-                new FileInfo(recommendation.ProjectPath).Directory.FullName,
+                projectPath,
                 recommendation.Recipe.Id,
                 recommendation.Recipe.Version,
                 new ()

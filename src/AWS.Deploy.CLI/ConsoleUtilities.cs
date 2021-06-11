@@ -198,7 +198,7 @@ namespace AWS.Deploy.CLI
                 if (userInputConfiguration.CurrentValue != null && string.IsNullOrEmpty(userInputConfiguration.CurrentValue.ToString()))
                     defaultValue = Constants.CLI.EMPTY_LABEL;
                 else
-                    defaultValue = userInputConfiguration.CreateNew ? Constants.CLI.CREATE_NEW_LABEL : userInputConfiguration.DisplaySelector(options.FirstOrDefault());
+                    defaultValue = userInputConfiguration.CreateNew || !options.Any() ? Constants.CLI.CREATE_NEW_LABEL : userInputConfiguration.DisplaySelector(options.First());
             }
 
             if (optionStrings.Any())
@@ -306,12 +306,14 @@ namespace AWS.Deploy.CLI
             while (true)
             {
                 var keyPairDirectory = _interactiveService.ReadLine();
-                if (Directory.Exists(keyPairDirectory))
+                if (keyPairDirectory != null &&
+                    Directory.Exists(keyPairDirectory))
                 {
                     var projectFolder = new FileInfo(projectPath).Directory;
                     var keyPairDirectoryInfo = new DirectoryInfo(keyPairDirectory);
 
-                    if (projectFolder.FullName.Equals(keyPairDirectoryInfo.FullName))
+                    if (projectFolder != null &&
+                        projectFolder.FullName.Equals(keyPairDirectoryInfo.FullName))
                     {
                         _interactiveService.WriteLine(string.Empty);
                         _interactiveService.WriteLine("EC2 Key Pair is a private secret key and it is recommended to not save the key in the project directory where it could be checked into source control.");

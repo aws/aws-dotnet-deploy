@@ -112,6 +112,10 @@ namespace AWS.Deploy.CLI.Commands
                 var existingCloudApplicationMetadata = await _templateMetadataReader.LoadCloudApplicationMetadata(deployedApplication.Name);
 
                 selectedRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, deployedApplication.RecipeId, StringComparison.InvariantCultureIgnoreCase));
+
+                if (selectedRecommendation == null)
+                    throw new FailedToCompatibleRecipeException("A compatible recipe was not found for the deployed application.");
+
                 selectedRecommendation.ApplyPreviousSettings(existingCloudApplicationMetadata.Settings);
 
                 var header = $"Loading {deployedApplication.Name} settings:";

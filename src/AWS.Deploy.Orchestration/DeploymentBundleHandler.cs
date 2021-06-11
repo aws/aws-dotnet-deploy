@@ -138,7 +138,9 @@ namespace AWS.Deploy.Orchestration
         private string GetDockerExecutionDirectory(Recommendation recommendation)
         {
             var dockerExecutionDirectory = recommendation.DeploymentBundle.DockerExecutionDirectory;
-            var dockerFileDirectory = new FileInfo(recommendation.ProjectPath).Directory.FullName;
+            var dockerFileDirectory = new FileInfo(recommendation.ProjectPath).Directory?.FullName;
+            if (dockerFileDirectory == null)
+                throw new InvalidProjectPathException("The project path is invalid.");
             var projectSolutionPath = GetProjectSolutionFile(recommendation.ProjectPath);
 
             if (string.IsNullOrEmpty(dockerExecutionDirectory))
@@ -149,7 +151,8 @@ namespace AWS.Deploy.Orchestration
                 }
                 else
                 {
-                    dockerExecutionDirectory = new FileInfo(projectSolutionPath).Directory.FullName;
+                    var projectSolutionDirectory = new FileInfo(projectSolutionPath).Directory?.FullName;
+                    dockerExecutionDirectory = projectSolutionDirectory ?? throw new InvalidSolutionPathException("The solution path is invalid.");
                 }
             }
 
@@ -158,7 +161,9 @@ namespace AWS.Deploy.Orchestration
 
         private string GetDockerFilePath(Recommendation recommendation)
         {
-            var dockerFileDirectory = new FileInfo(recommendation.ProjectPath).Directory.FullName;
+            var dockerFileDirectory = new FileInfo(recommendation.ProjectPath).Directory?.FullName;
+            if (dockerFileDirectory == null)
+                throw new InvalidProjectPathException("The project path is invalid.");
 
             return Path.Combine(dockerFileDirectory, "Dockerfile");
         }
