@@ -103,6 +103,55 @@ namespace AWS.Deploy.CLI.IntegrationTests
             Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName), $"{_stackName} still exists.");
         }
 
+        [Fact]
+        public async Task AppRunnerDeployment()
+        {
+            _stackName = $"WebAppWithDockerFile{Guid.NewGuid().ToString().Split('-').Last()}";
+
+            // Arrange input for deploy
+            await _interactiveService.StdInWriter.WriteAsync("2" + Environment.NewLine); // Select App Runner recommendation
+            await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Select default option settings
+            await _interactiveService.StdInWriter.FlushAsync();
+
+            // Deploy
+            var projectPath = Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj");
+            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--stack-name", _stackName };
+            await _app.Run(deployArgs);
+
+            // Verify application is deployed and running
+            Assert.Equal(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
+
+            var deployStdOut = _interactiveService.StdOutReader.ReadAllLines();
+
+            var applicationUrl = deployStdOut.First(line => line.StartsWith($"{_stackName}.EndpointURL"))
+                .Split("=")[1]
+                .Trim();
+
+            Assert.Contains("awsapprunner", applicationUrl);
+
+            // URL could take few more minutes to come live, therefore, we want to wait and keep trying for a specified timeout
+            await _httpHelper.WaitUntilSuccessStatusCode(applicationUrl, TimeSpan.FromSeconds(5), TimeSpan.FromMinutes(5));
+
+            // list
+            var listArgs = new[] { "list-deployments" };
+            await _app.Run(listArgs);
+
+            // Verify stack exists in list of deployments
+            var listDeployStdOut = _interactiveService.StdOutReader.ReadAllLines();
+            Assert.Contains(listDeployStdOut, (deployment) => _stackName.Equals(deployment));
+
+            // Arrange input for delete
+            await _interactiveService.StdInWriter.WriteAsync("y"); // Confirm delete
+            await _interactiveService.StdInWriter.FlushAsync();
+            var deleteArgs = new[] { "delete-deployment", _stackName };
+
+            // Delete
+            await _app.Run(deleteArgs);
+
+            // Verify application is delete
+            Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName));
+        }
+
         public void Dispose()
         {
             Dispose(true);

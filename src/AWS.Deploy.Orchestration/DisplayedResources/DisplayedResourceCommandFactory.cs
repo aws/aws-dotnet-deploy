@@ -25,6 +25,7 @@ namespace AWS.Deploy.Orchestration.DisplayedResources
     /// </summary>
     public class DisplayedResourceCommandFactory : IDisplayedResourceCommandFactory
     {
+        private const string RESOURCE_TYPE_APPRUNNER_SERVICE = "AWS::AppRunner::Service";
         private const string RESOURCE_TYPE_ELASTICBEANSTALK_ENVIRONMENT = "AWS::ElasticBeanstalk::Environment";
         private const string RESOURCE_TYPE_ELASTICLOADBALANCINGV2_LOADBALANCER = "AWS::ElasticLoadBalancingV2::LoadBalancer";
         private const string RESOURCE_TYPE_S3_BUCKET = "AWS::S3::Bucket";
@@ -36,6 +37,7 @@ namespace AWS.Deploy.Orchestration.DisplayedResources
         {
             _resources = new Dictionary<string, IDisplayedResourceCommand>
             {
+                { RESOURCE_TYPE_APPRUNNER_SERVICE, new AppRunnerServiceResource(awsResourceQueryer) },
                 { RESOURCE_TYPE_ELASTICBEANSTALK_ENVIRONMENT, new ElasticBeanstalkEnvironmentResource(awsResourceQueryer) },
                 { RESOURCE_TYPE_ELASTICLOADBALANCINGV2_LOADBALANCER, new ElasticLoadBalancerResource(awsResourceQueryer) },
                 { RESOURCE_TYPE_S3_BUCKET, new S3BucketResource(awsResourceQueryer) },

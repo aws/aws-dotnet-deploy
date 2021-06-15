@@ -31,6 +31,7 @@ namespace AWS.Deploy.Orchestration.Data
 {
     public interface IAWSResourceQueryer
     {
+        Task<Amazon.AppRunner.Model.Service> DescribeAppRunnerService(string serviceArn);
         Task<List<StackResource>> DescribeCloudFormationResources(string stackName);
         Task<EnvironmentDescription> DescribeElasticBeanstalkEnvironment(string environmentId);
         Task<Amazon.ElasticLoadBalancingV2.Model.LoadBalancer> DescribeElasticLoadBalancer(string loadBalancerArn);
@@ -60,6 +61,23 @@ namespace AWS.Deploy.Orchestration.Data
         public AWSResourceQueryer(IAWSClientFactory awsClientFactory)
         {
             _awsClientFactory = awsClientFactory;
+        }
+
+        public async Task<Amazon.AppRunner.Model.Service> DescribeAppRunnerService(string serviceArn)
+        {
+            var appRunnerClient = _awsClientFactory.GetAWSClient<Amazon.AppRunner.IAmazonAppRunner>();
+
+            var service = (await appRunnerClient.DescribeServiceAsync(new Amazon.AppRunner.Model.DescribeServiceRequest
+            {
+                ServiceArn = serviceArn
+            })).Service;
+
+            if (service == null)
+            {
+                throw new AWSResourceNotFoundException($"The AppRunner service '{serviceArn}' does not exist.");
+            }
+
+            return service;
         }
 
         public async Task<List<StackResource>> DescribeCloudFormationResources(string stackName)

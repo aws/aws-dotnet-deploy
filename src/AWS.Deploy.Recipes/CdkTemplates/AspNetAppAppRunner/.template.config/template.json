@@ -1,0 +1,24 @@
+{
+    "author": "AWS",
+    "classifications": [
+        "AWS",
+        ".NET Deployment Tool"
+    ],
+    "name": "ASP.NET Template CDK Project for AWS App Runner",
+    "identity": "AWS.Deploy.Recipes.AspNetAppAppRunner",
+    "shortName": "netdeploy.AspNetAppAppRunner",
+    "tags": {
+        "language": "C#",
+        "type": "project"
+    },
+    "sourceName": "AspNetAppAppRunner",
+    "preferNameDirectory": true,
+    "symbols": {
+        "AWSDeployRecipesCDKCommonVersion": {
+            "type": "parameter",
+            "description": "The version number of AWS.Deploy.Recipes.CDK.Common to use",
+            "replaces": "AWSDeployRecipesCDKCommonVersion",
+            "datatype": "string"
+        }
+    }
+}

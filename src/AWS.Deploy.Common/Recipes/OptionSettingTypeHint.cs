@@ -19,6 +19,7 @@ namespace AWS.Deploy.Common.Recipes
         DotnetPublishBuildConfiguration,
         DotnetPublishAdditionalBuildArguments,
         DockerExecutionDirectory,
-        DockerBuildArgs
+        DockerBuildArgs,
+        AppRunnerService
     };
 }

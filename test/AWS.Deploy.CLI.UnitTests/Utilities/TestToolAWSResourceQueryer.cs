@@ -19,6 +19,8 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
 {
     public class TestToolAWSResourceQueryer : IAWSResourceQueryer
     {
+        public Task<Amazon.AppRunner.Model.Service> DescribeAppRunnerService(string serviceArn) => throw new NotImplementedException();
+
         public Task<string> CreateEC2KeyPair(string keyName, string saveLocation) => throw new NotImplementedException();
         public Task<Repository> CreateECRRepository(string repositoryName) => throw new NotImplementedException();
         public Task<List<Stack>> GetCloudFormationStacks() => throw new NotImplementedException();
