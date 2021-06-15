@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -27,9 +27,9 @@
 
   <ItemGroup>
     <!-- CDK Construct Library dependencies -->
-    <PackageReference Include="Amazon.CDK" Version="1.95.2" />
-    <PackageReference Include="Amazon.CDK.AWS.ElasticBeanstalk" Version="1.95.2" />
-    <PackageReference Include="Amazon.CDK.AWS.S3.Assets" Version="1.95.2" />
+    <PackageReference Include="Amazon.CDK" Version="1.107.0" />
+    <PackageReference Include="Amazon.CDK.AWS.ElasticBeanstalk" Version="1.107.0" />
+    <PackageReference Include="Amazon.CDK.AWS.S3.Assets" Version="1.107.0" />
 
     <PackageReference Include="AWSSDK.ElasticBeanstalk" Version="3.5.0.9" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.7" />

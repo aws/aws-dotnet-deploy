@@ -7,8 +7,8 @@
     "DeploymentBundle": "Container",
     "CdkProjectTemplate": "../CdkTemplates/AspNetAppEcsFargate",
     "CdkProjectTemplateId": "netdeploy.AspNetAppEcsFargate",
-    "Description": "ASP.NET Core applications built as a container and deployed to Amazon Elastic Container Service (Amazon ECS) with compute power managed by AWS Fargate compute engine. Recommended for applications that can be deployed as a container image. If your project does not contain a Dockerfile, one will be generated for the project.",
-    "ShortDescription": "ASP.NET Core deployed to Amazon Elastic Container Service (Amazon ECS).",
+    "Description": "ASP.NET Core application built as a container and deployed to Amazon Elastic Container Service (Amazon ECS) with compute power managed by AWS Fargate compute engine. Recommended for applications that can be deployed as a container image. If your project does not contain a Dockerfile, one will be generated for the project.",
+    "ShortDescription": "ASP.NET Core application deployed to Amazon Elastic Container Service (Amazon ECS).",
     "TargetService": "Amazon Elastic Container Service",
 
     "DisplayedResources": [
@@ -84,7 +84,8 @@
     "Validators": [
         {
             "ValidatorType": "FargateTaskSizeCpuMemoryLimits"
-        }],
+        }
+    ],
 
     "OptionSettings": [
         {
@@ -115,7 +116,7 @@
                     "Validators": [
                         {
                             "ValidatorType": "Regex",
-                            "Configuration" : {
+                            "Configuration": {
                                 "Regex": "arn:[^:]+:ecs:[^:]*:[0-9]{12}:cluster/.+",
                                 "AllowEmptyString": true,
                                 "ValidationFailedMessage": "Invalid cluster Arn. The ARN should contain the arn:[PARTITION]:ecs namespace, followed by the Region of the cluster, the AWS account ID of the cluster owner, the cluster namespace, and then the cluster name. For example, arn:aws:ecs:region:012345678910:cluster/test. For more information visit https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_Cluster.html"
@@ -140,7 +141,7 @@
                     "Validators": [
                         {
                             "ValidatorType": "Regex",
-                            "Configuration" : {
+                            "Configuration": {
                                 "Regex": "^([A-Za-z0-9_-]{1,255})$",
                                 "AllowEmptyString": true,
                                 "ValidationFailedMessage": "Invalid cluster name. The cluster name can only contain letters (case-sensitive), numbers, hyphens, underscores and can't be longer than 255 character in length."
@@ -169,7 +170,7 @@
             "Validators": [
                 {
                     "ValidatorType": "Regex",
-                    "Configuration" : {
+                    "Configuration": {
                         "Regex": "^([A-Za-z0-9_-]{1,255})$",
                         "ValidationFailedMessage": "Invalid service name. The service name can only contain letters (case-sensitive), numbers, hyphens, underscores and can't be longer than 255 character in length."
                     }
@@ -187,7 +188,7 @@
             "Validators": [
                 {
                     "ValidatorType": "Range",
-                    "Configuration" : {
+                    "Configuration": {
                         "Min": 1,
                         "Max": 5000
                     }
@@ -225,7 +226,7 @@
                     "Validators": [
                         {
                             "ValidatorType": "Regex",
-                            "Configuration" : {
+                            "Configuration": {
                                 "Regex": "arn:.+:iam::[0-9]{12}:.+",
                                 "AllowEmptyString": true,
                                 "ValidationFailedMessage": "Invalid IAM Role ARN. The ARN should contain the arn:[PARTITION]:iam namespace, followed by the account ID, and then the resource path. For example - arn:aws:iam::123456789012:role/S3Access is a valid IAM Role ARN. For more information visit https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-arns"
@@ -285,7 +286,7 @@
                     "Validators": [
                         {
                             "ValidatorType": "Regex",
-                            "Configuration" : {
+                            "Configuration": {
                                 "Regex": "^vpc-([0-9a-f]{8}|[0-9a-f]{17})$",
                                 "AllowEmptyString": true,
                                 "ValidationFailedMessage": "Invalid VPC ID. The VPC ID must start with the \"vpc-\" prefix, followed by either 8 or 17 characters consisting of digits and letters(lower-case) from a to f. For example vpc-abc88de9 is a valid VPC ID."

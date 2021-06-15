@@ -17,6 +17,7 @@
     <PackageReference Include="AWSSDK.IdentityManagement" Version="3.7.2.25" />
     <PackageReference Include="AWSSDK.CloudFormation" Version="3.7.3.12" />
     <PackageReference Include="AWSSDK.S3" Version="3.7.1.17" />
+    <PackageReference Include="AWSSDK.AppRunner" Version="3.7.0.24" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="5.0.0" />
     <PackageReference Include="Microsoft.TemplateEngine.IDE" Version="5.0.1" />
     <PackageReference Include="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="5.0.1" />
