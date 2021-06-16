@@ -134,9 +134,9 @@
                         {
                             "ValidatorType": "Regex",
                             "Configuration" : {
-                                "Regex": "^([A-Za-z0-9-]{1,255})$",
+                                "Regex": "^([A-Za-z0-9_-]{1,255})$",
                                 "AllowEmptyString": true,
-                                "ValidationFailedMessage": "Invalid cluster name. The cluster name can only contain letters (case-sensitive), numbers, hyphens and can't be longer than 255 character in length."
+                                "ValidationFailedMessage": "Invalid cluster name. The cluster name can only contain letters (case-sensitive), numbers, hyphens, underscores and can't be longer than 255 character in length."
                             }
                         }
                     ],
