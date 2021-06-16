@@ -65,7 +65,10 @@
 
     ],
 
-
+    "Validators": [
+        {
+            "ValidatorType": "FargateTaskSizeCpuMemoryLimits"
+        }],
 
     "OptionSettings": [
         {
@@ -93,6 +96,16 @@
                     "Type": "String",
                     "AdvancedSetting": false,
                     "Updatable": false,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration" : {
+                                "Regex": "arn:[^:]+:ecs:[^:]*:[0-9]{12}:cluster/.+",
+                                "AllowEmptyString": true,
+                                "ValidationFailedMessage": "Invalid cluster Arn. The ARN should contain the arn:[PARTITION]:ecs namespace, followed by the Region of the cluster, the AWS account ID of the cluster owner, the cluster namespace, and then the cluster name. For example, arn:aws:ecs:region:012345678910:cluster/test. For more information visit https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_Cluster.html"
+                            }
+                        }
+                    ],
                     "DependsOn": [
                         {
                             "Id": "ECSCluster.CreateNew",
@@ -108,6 +121,16 @@
                     "DefaultValue": "{ProjectName}",
                     "AdvancedSetting": false,
                     "Updatable": false,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration" : {
+                                "Regex": "^([A-Za-z0-9-]{1,255})$",
+                                "AllowEmptyString": true,
+                                "ValidationFailedMessage": "Invalid cluster name. The cluster name can only contain letters (case-sensitive), numbers, hyphens and can't be longer than 255 character in length."
+                            }
+                        }
+                    ],
                     "DependsOn": [
                         {
                             "Id": "ECSCluster.CreateNew",
@@ -126,7 +149,16 @@
             "TypeHint": "ECSService",
             "DefaultValue": "{ProjectName}-service",
             "AdvancedSetting": false,
-            "Updatable": false
+            "Updatable": false,
+            "Validators": [
+                {
+                    "ValidatorType": "Regex",
+                    "Configuration" : {
+                        "Regex": "^([A-Za-z0-9_-]{1,255})$",
+                        "ValidationFailedMessage": "Invalid service name. The service name can only contain letters (case-sensitive), numbers, hyphens, underscores and can't be longer than 255 character in length."
+                    }
+                }
+            ]
         },
         {
             "Id": "DesiredCount",
@@ -135,7 +167,16 @@
             "Type": "Int",
             "DefaultValue": 3,
             "AdvancedSetting": false,
-            "Updatable": true
+            "Updatable": true,
+            "Validators": [
+                {
+                    "ValidatorType": "Range",
+                    "Configuration" : {
+                        "Min": 1,
+                        "Max": 5000
+                    }
+                }
+            ]
         },
         {
             "Id": "ApplicationIAMRole",
@@ -165,6 +206,16 @@
                     "Type": "String",
                     "AdvancedSetting": false,
                     "Updatable": false,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration" : {
+                                "Regex": "arn:.+:iam::[0-9]{12}:.+",
+                                "AllowEmptyString": true,
+                                "ValidationFailedMessage": "Invalid IAM Role ARN. The ARN should contain the arn:[PARTITION]:iam namespace, followed by the account ID, and then the resource path. For example - arn:aws:iam::123456789012:role/S3Access is a valid IAM Role ARN. For more information visit https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-arns"
+                            }
+                        }
+                    ],
                     "DependsOn": [
                         {
                             "Id": "ApplicationIAMRole.CreateNew",
@@ -215,6 +266,16 @@
                     "DefaultValue": null,
                     "AdvancedSetting": false,
                     "Updatable": false,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration" : {
+                                "Regex": "^vpc-([0-9a-f]{8}|[0-9a-f]{17})$",
+                                "AllowEmptyString": true,
+                                "ValidationFailedMessage": "Invalid VPC ID. The VPC ID must start with the \"vpc-\" prefix, followed by either 8 or 17 characters consisting of digits and letters(lower-case) from a to f. For example vpc-abc88de9 is a valid VPC ID."
+                            }
+                        }
+                    ],
                     "DependsOn": [
                         {
                             "Id": "Vpc.IsDefault",

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace AWS.Deploy.Constants
 {
-    public static class CloudFormationIdentifier
+    internal static class CloudFormationIdentifier
     {
         /// <summary>
         /// The CDK context parameter name used to pass in the location of the AWS .NET deployment tool's settings file.

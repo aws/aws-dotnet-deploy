@@ -46,7 +46,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
         [Theory]
         [InlineData(true, null)]
-        [InlineData(false, "role_arn")]
+        [InlineData(false, "arn:aws:iam::123456789012:group/Developers")]
         public async Task ApplyApplicationIAMRolePreviousSettings(bool createNew, string roleArn)
         {
             var engine = await BuildRecommendationEngine("WebAppNoDockerFile");
@@ -79,7 +79,7 @@ namespace AWS.Deploy.CLI.UnitTests
         [Theory]
         [InlineData(true, false, "")]
         [InlineData(false, true, "")]
-        [InlineData(false, false, "vpc_id")]
+        [InlineData(false, false, "vpc-88888888")]
         public async Task ApplyVpcPreviousSettings(bool isDefault, bool createNew, string vpcId)
         {
             var engine = await BuildRecommendationEngine("WebAppWithDockerFile");

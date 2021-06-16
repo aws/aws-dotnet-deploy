@@ -4,10 +4,11 @@
 using System.Threading.Tasks;
 using Amazon.Runtime;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.Recipes.Validation;
 
 namespace AWS.Deploy.Orchestration
 {
-    public class OrchestratorSession
+    public class OrchestratorSession : IDeployToolValidationContext
     {
         public ProjectDefinition ProjectDefinition { get; set; }
         public string? AWSProfileName { get; set; }

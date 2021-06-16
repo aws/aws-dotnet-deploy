@@ -20,4 +20,6 @@
       <ProjectReference Include="..\AWS.Deploy.CLI.Common.UnitTests\AWS.Deploy.CLI.Common.UnitTests.csproj" />
     </ItemGroup>
 
+    <Import Project="..\..\src\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems" Label="Shared" />
+
 </Project>
