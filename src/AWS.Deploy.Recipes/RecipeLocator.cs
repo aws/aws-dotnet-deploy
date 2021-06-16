@@ -10,7 +10,7 @@ namespace AWS.Deploy.Recipes
         public static string FindRecipeDefinitionsPath()
         {
             var assemblyPath = typeof(RecipeLocator).Assembly.Location;
-            var recipePath = Path.Combine(Directory.GetParent(assemblyPath).FullName, "RecipeDefinitions");
+            var recipePath = Path.Combine(Directory.GetParent(assemblyPath)!.FullName, "RecipeDefinitions");
             return recipePath;
         }
     }

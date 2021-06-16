@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections.Generic;
+using AWS.Deploy.Common.Recipes.Validation;
 
 namespace AWS.Deploy.Common.Recipes
 {
@@ -78,6 +79,11 @@ namespace AWS.Deploy.Common.Recipes
         /// </summary>
         public List<OptionSettingItem> OptionSettings { get; set; } = new ();
 
+        /// <summary>
+        /// List of all validators that should be run against this recipe before deploying.
+        /// </summary>
+        public List<RecipeValidatorConfig> Validators { get; set; } = new ();
+        
         /// <summary>
         /// The priority of the recipe. The highest priority is the top choice for deploying to.
         /// </summary>

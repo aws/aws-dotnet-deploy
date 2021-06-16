@@ -16,18 +16,18 @@ namespace AWS.Deploy.CLI
 
         public string ReadLine()
         {
-            return Console.ReadLine();
+            return Console.ReadLine() ?? string.Empty;
         }
 
         public bool Diagnostics { get; set; }
 
-        public void WriteDebugLine(string message)
+        public void WriteDebugLine(string? message)
         {
             if (_diagnosticLoggingEnabled)
                 Console.WriteLine($"DEBUG: {message}");
         }
 
-        public void WriteErrorLine(string message)
+        public void WriteErrorLine(string? message)
         {
             var color = Console.ForegroundColor;
 
@@ -42,12 +42,12 @@ namespace AWS.Deploy.CLI
             }
         }
 
-        public void WriteLine(string message)
+        public void WriteLine(string? message)
         {
             Console.WriteLine(message);
         }
 
-        public void Write(string message)
+        public void Write(string? message)
         {
             Console.Write(message);
         }

@@ -232,11 +232,12 @@ namespace AWS.Deploy.CLI.UnitTests
             var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
             var applicationIAMRoleOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("ApplicationIAMRole"));
 
-            applicationIAMRoleOptionSetting.SetValueOverride(new IAMRoleTypeHintResponse {CreateNew = false, RoleArn = "role_arn"});
+            applicationIAMRoleOptionSetting.SetValueOverride(new IAMRoleTypeHintResponse {CreateNew = false,
+                RoleArn = "arn:aws:iam::123456789012:group/Developers" });
 
             var iamRoleTypeHintResponse = beanstalkRecommendation.GetOptionSettingValue<IAMRoleTypeHintResponse>(applicationIAMRoleOptionSetting);
 
-            Assert.Equal("role_arn", iamRoleTypeHintResponse.RoleArn);
+            Assert.Equal("arn:aws:iam::123456789012:group/Developers", iamRoleTypeHintResponse.RoleArn);
             Assert.False(iamRoleTypeHintResponse.CreateNew);
         }
 

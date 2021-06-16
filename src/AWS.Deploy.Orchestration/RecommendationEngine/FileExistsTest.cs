@@ -16,6 +16,11 @@ namespace AWS.Deploy.Orchestration.RecommendationEngine
         public override Task<bool> Execute(RecommendationTestInput input)
         {
             var directory = Path.GetDirectoryName(input.ProjectDefinition.ProjectPath);
+
+            if (directory == null ||
+                input.Test.Condition.FileName == null)
+                return Task.FromResult(false);
+
             var result = (Directory.GetFiles(directory, input.Test.Condition.FileName).Length == 1);
             return Task.FromResult(result);
         }

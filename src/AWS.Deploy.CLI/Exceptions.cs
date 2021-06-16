@@ -70,4 +70,13 @@ namespace AWS.Deploy.CLI
     {
         public TcpPortInUseException(string message, Exception? innerException = null) : base(message, innerException) { }
     }
+
+    /// <summary>
+    /// Throw if unable to find a compatible recipe.
+    /// </summary>
+    [AWSDeploymentExpectedException]
+    public class FailedToCompatibleRecipeException : Exception
+    {
+        public FailedToCompatibleRecipeException(string message, Exception? innerException = null) : base(message, innerException) { }
+    }
 }

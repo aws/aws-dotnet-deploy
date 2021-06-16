@@ -4,7 +4,7 @@ using System.Text;
 
 namespace AWS.Deploy.Constants
 {
-    public static class CLI
+    internal static class CLI
     {
         public const string CREATE_NEW_LABEL = "*** Create new ***";
         public const string DEFAULT_LABEL = "*** Default ***";

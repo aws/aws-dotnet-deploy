@@ -4,6 +4,7 @@
 using System;
 using System.Reflection;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.Recipes.Validation;
 
 namespace AWS.Deploy.Common
 {
@@ -124,6 +125,29 @@ namespace AWS.Deploy.Common
     public class OptionSettingItemDoesNotExistException : Exception
     {
         public OptionSettingItemDoesNotExistException(string message, Exception? innerException = null) : base(message, innerException) { }
+    }
+
+    [AWSDeploymentExpectedException]
+    public class InvalidValidatorTypeException : Exception
+    {
+        public InvalidValidatorTypeException(string? message, Exception? innerException = null) : base(message, innerException) { }
+    }
+
+    /// <summary>
+    /// Thrown if <see cref="OptionSettingItem.SetValueOverride"/> is given an invalid value.
+    /// </summary>
+    public class ValidationFailedException : Exception
+    {
+        public ValidationFailedException(string? message, Exception? innerException = null) : base(message, innerException) { }
+    }
+
+    /// <summary>
+    /// Exception thrown if Project Path contains an invalid path
+    /// </summary>
+    [AWSDeploymentExpectedException]
+    public class InvalidProjectPathException : Exception
+    {
+        public InvalidProjectPathException(string message, Exception? innerException = null) : base(message, innerException) { }
     }
 
     /// <summary>

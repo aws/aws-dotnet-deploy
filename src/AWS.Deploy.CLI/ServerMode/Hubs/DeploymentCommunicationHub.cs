@@ -12,9 +12,9 @@ namespace AWS.Deploy.CLI.ServerMode.Hubs
     public interface IDeploymentCommunicationHub
     {
         Task JoinSession(string sessionId);
-        Task OnLogDebugLine(string logs);
-        Task OnLogErrorMessageLine(string logs);
-        Task OnLogMessageLine(string logs);
+        Task OnLogDebugLine(string? logs);
+        Task OnLogErrorMessageLine(string? logs);
+        Task OnLogMessageLine(string? logs);
     }
 
     public class DeploymentCommunicationHub : Hub<IDeploymentCommunicationHub>

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AWS.Deploy.Common.Recipes.Validation;
 using Newtonsoft.Json;
 
 namespace AWS.Deploy.Common.Recipes
@@ -62,6 +63,11 @@ namespace AWS.Deploy.Common.Recipes
         /// </summary>
         public bool Updatable { get; set; }
 
+        /// <summary>
+        /// List of all validators that should be run when configuring this OptionSettingItem.
+        /// </summary>
+        public List<OptionSettingItemValidatorConfig> Validators { get; set; } = new ();
+        
         /// <summary>
         /// The allowed values for the setting.
         /// </summary>

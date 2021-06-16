@@ -77,7 +77,16 @@
                     "Type": "String",
                     "DefaultValue": "{ProjectName}",
                     "AdvancedSetting": false,
-                    "Updatable": false
+                    "Updatable": false,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration" : {
+                                "Regex": "^[^/]{1,100}$",
+                                "ValidationFailedMessage": "Invalid Application Name. The Application name can contain up to 100 Unicode characters, not including forward slash (/)."
+                            }
+                        }
+                    ]
                 }
             ]
         },
@@ -90,7 +99,16 @@
             "TypeHint": "BeanstalkEnvironment",
             "DefaultValue": "{ProjectName}-dev",
             "AdvancedSetting": false,
-            "Updatable": false
+            "Updatable": false,
+            "Validators": [
+                {
+                    "ValidatorType": "Regex",
+                    "Configuration" : {
+                        "Regex": "^[a-zA-Z0-9][a-zA-Z0-9-]{2,38}[a-zA-Z0-9]$",
+                        "ValidationFailedMessage": "Invalid Environment Name. The Environment Name Must be from 4 to 40 characters in length. The name can contain only letters, numbers, and hyphens. It can't start or end with a hyphen."
+                    }
+                }
+            ]
         },
         {
             "Id": "InstanceType",
@@ -177,6 +195,16 @@
                             "Id": "ApplicationIAMRole.CreateNew",
                             "Value": false
                         }
+                    ],
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration" : {
+                                "Regex": "arn:.+:iam::[0-9]{12}:.+",
+                                "AllowEmptyString": true,
+                                "ValidationFailedMessage": "Invalid IAM Role ARN. The ARN should contain the arn:[PARTITION]:iam namespace, followed by the account ID, and then the resource path. For example - arn:aws:iam::123456789012:role/S3Access is a valid IAM Role ARN. For more information visit https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-arns"
+                            }
+                        }
                     ]
                 }
             ]
@@ -189,7 +217,17 @@
             "TypeHint": "EC2KeyPair",
             "DefaultValue": "",
             "AdvancedSetting": true,
-            "Updatable": false
+            "Updatable": false,
+            "Validators": [
+                {
+                    "ValidatorType": "Regex",
+                    "Configuration" : {
+                        "Regex": "^(?! ).+(?<! )$",
+                        "AllowEmptyString": true,
+                        "ValidationFailedMessage": "Invalid EC2KeyPair. The EC2KeyPair can conatin all ASCII characters but without leading and trailing spaces"
+                    }
+                }
+            ]
         },
         {
             "Id": "ElasticBeanstalkPlatformArn",
@@ -199,7 +237,16 @@
             "TypeHint": "DotnetBeanstalkPlatformArn",
             "DefaultValue": "{LatestDotnetBeanstalkPlatformArn}",
             "AdvancedSetting": true,
-            "Updatable": false
+            "Updatable": false,
+            "Validators": [
+                {
+                    "ValidatorType": "Regex",
+                    "Configuration" : {
+                        "Regex": "arn:[^:]+:elasticbeanstalk:[^:]*:[0-9]{12}:platform/.+",
+                        "ValidationFailedMessage": "Invalid ElasticBeanstalkPlatform Arn. The ARN should contain the arn:[PARTITION]:elasticbeanstalk namespace, followed by the region, the account ID, and then the resource path. For example - arn:aws:elasticbeanstalk:us-east-2:123456789012:platform/MyPlatform/1.0 is a valid Arn. For more information visit https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/AWSHowTo.iam.policies.arn.html"
+                    }
+                }
+            ]
         },
         {
             "Id": "ElasticBeanstalkManagedPlatformUpdates",
