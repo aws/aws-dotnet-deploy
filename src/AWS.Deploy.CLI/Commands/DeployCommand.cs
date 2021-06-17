@@ -115,7 +115,7 @@ namespace AWS.Deploy.CLI.Commands
                 selectedRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, deployedApplication.RecipeId, StringComparison.InvariantCultureIgnoreCase));
 
                 if (selectedRecommendation == null)
-                    throw new FailedToCompatibleRecipeException("A compatible recipe was not found for the deployed application.");
+                    throw new FailedToFindCompatibleRecipeException("A compatible recipe was not found for the deployed application.");
 
                 selectedRecommendation.ApplyPreviousSettings(existingCloudApplicationMetadata.Settings);
 
