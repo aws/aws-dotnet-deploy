@@ -57,7 +57,8 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
             Action<TryRunResult> onComplete = null,
             bool redirectIO = true,
             IDictionary<string, string> environmentVariables = null,
-            CancellationToken cancelToken = default)
+            CancellationToken cancelToken = default,
+            bool needAwsCredentials = false)
         {
             CommandsToExecute.Add(new CommandLineRunObject
             {
