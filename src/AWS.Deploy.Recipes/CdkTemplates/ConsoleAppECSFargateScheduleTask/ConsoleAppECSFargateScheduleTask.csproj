@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <RollForward>Major</RollForward>
 
     <!-- The value "AWSDeployRecipesCDKCommonVersion" is replaced by the project template system. -->
     <RecipeCDKCommonVersion>AWSDeployRecipesCDKCommonVersion</RecipeCDKCommonVersion>
