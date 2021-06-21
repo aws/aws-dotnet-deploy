@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\AWS.Deploy.CLI\AWS.Deploy.CLI.csproj" />
+    <ProjectReference Include="..\..\src\AWS.Deploy.Common\AWS.Deploy.Common.csproj" />
     <ProjectReference Include="..\..\src\AWS.Deploy.ServerMode.Client\AWS.Deploy.ServerMode.Client.csproj" />
     <ProjectReference Include="..\AWS.Deploy.CLI.Common.UnitTests\AWS.Deploy.CLI.Common.UnitTests.csproj" />
   </ItemGroup>

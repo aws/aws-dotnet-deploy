@@ -14,6 +14,7 @@ using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.CDK;
 using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.Utilities;
+using AWS.Deploy.CLI.Commands.CommandHandlerInput;
 
 namespace AWS.Deploy.CLI.Commands
 {
@@ -29,6 +30,8 @@ namespace AWS.Deploy.CLI.Commands
         private static readonly Option<string> _optionProjectPath = new("--project-path", () => Directory.GetCurrentDirectory(), "Path to the project to deploy.");
         private static readonly Option<string> _optionStackName = new("--stack-name", "Name the AWS stack to deploy your application to.");
         private static readonly Option<bool> _optionDiagnosticLogging = new(new []{"-d", "--diagnostics"}, "Enable diagnostic output.");
+        private static readonly Option<string> _optionApply = new("--apply", "Path to the deployment settings file to be applied.");
+        private static readonly Option<bool> _optionDisableInteractive = new(new []{"-s", "--silent" }, "Disable interactivity to deploy without any prompts for user input.");
 
         private readonly IToolInteractiveService _toolInteractiveService;
         private readonly IOrchestratorInteractiveService _orchestratorInteractiveService;
@@ -110,26 +113,31 @@ namespace AWS.Deploy.CLI.Commands
                 _optionRegion,
                 _optionProjectPath,
                 _optionStackName,
+                _optionApply,
                 _optionDiagnosticLogging,
+                _optionDisableInteractive
             };
 
-            deployCommand.Handler = CommandHandler.Create<string, string, string, string, bool, bool>(async (profile, region, projectPath, stackName, saveCdkProject, diagnostics) =>
+            deployCommand.Handler = CommandHandler.Create(async (DeployCommandHandlerInput input) =>
             {
                 try
                 {
-                    _toolInteractiveService.Diagnostics = diagnostics;
+                    _toolInteractiveService.Diagnostics = input.Diagnostics;
+                    _toolInteractiveService.DisableInteractive = input.Silent;
+                    
+                    var userDeploymentSettings = !string.IsNullOrEmpty(input.Apply)
+                        ? UserDeploymentSettings.ReadSettings(input.Apply)
+                        : null;
 
-                    var previousSettings = PreviousDeploymentSettings.ReadSettings(projectPath, null);
-
-                    var awsCredentials = await _awsUtilities.ResolveAWSCredentials(profile, previousSettings.Profile);
-                    var awsRegion = _awsUtilities.ResolveAWSRegion(region, previousSettings.Region);
+                    var awsCredentials = await _awsUtilities.ResolveAWSCredentials(input.Profile ?? userDeploymentSettings?.AWSProfile);
+                    var awsRegion = _awsUtilities.ResolveAWSRegion(input.Region ?? userDeploymentSettings?.AWSRegion);
 
                     _commandLineWrapper.RegisterAWSContext(awsCredentials, awsRegion);
                     _awsClientFactory.RegisterAWSContext(awsCredentials, awsRegion);
 
                     var systemCapabilities = _systemCapabilityEvaluator.Evaluate();
 
-                    var projectDefinition = await _projectParserUtility.Parse(projectPath);
+                    var projectDefinition = await _projectParserUtility.Parse(input.ProjectPath ?? "");
 
                     var callerIdentity = await _awsResourceQueryer.GetCallerIdentity();
 
@@ -140,7 +148,7 @@ namespace AWS.Deploy.CLI.Commands
                         callerIdentity.Account)
                     {
                         SystemCapabilities = systemCapabilities,
-                        AWSProfileName = profile
+                        AWSProfileName = input.Profile ?? userDeploymentSettings?.AWSProfile ?? null
                     };
 
                     var dockerEngine = new DockerEngine.DockerEngine(projectDefinition);
@@ -160,13 +168,13 @@ namespace AWS.Deploy.CLI.Commands
                         _consoleUtilities,
                         session);
 
-                    await deploy.ExecuteAsync(stackName, saveCdkProject);
+                    await deploy.ExecuteAsync(input.StackName ?? "", input.SaveCdkProject, userDeploymentSettings);
 
                     return CommandReturnCodes.SUCCESS;
                 }
                 catch (Exception e) when (e.IsAWSDeploymentExpectedException())
                 {
-                    if (diagnostics)
+                    if (input.Diagnostics)
                         _toolInteractiveService.WriteErrorLine(e.PrettyPrint());
                     else
                     {
@@ -199,16 +207,14 @@ namespace AWS.Deploy.CLI.Commands
                 _optionDiagnosticLogging,
                 new Argument("deployment-name")
             };
-            deleteCommand.Handler = CommandHandler.Create<string, string, string, string, bool>(async (profile, region, projectPath, deploymentName, diagnostics) =>
+            deleteCommand.Handler = CommandHandler.Create(async (DeleteCommandHandlerInput input) =>
             {
                 try
                 {
-                    _toolInteractiveService.Diagnostics = diagnostics;
+                    _toolInteractiveService.Diagnostics = input.Diagnostics;
 
-                    var previousSettings = PreviousDeploymentSettings.ReadSettings(projectPath, null);
-
-                    var awsCredentials = await _awsUtilities.ResolveAWSCredentials(profile, previousSettings.Profile);
-                    var awsRegion = _awsUtilities.ResolveAWSRegion(region, previousSettings.Region);
+                    var awsCredentials = await _awsUtilities.ResolveAWSCredentials(input.Profile);
+                    var awsRegion = _awsUtilities.ResolveAWSRegion(input.Region);
 
                     _awsClientFactory.ConfigureAWSOptions(awsOption =>
                     {
@@ -216,13 +222,20 @@ namespace AWS.Deploy.CLI.Commands
                         awsOption.Region = RegionEndpoint.GetBySystemName(awsRegion);
                     });
 
-                    await new DeleteDeploymentCommand(_awsClientFactory, _toolInteractiveService, _consoleUtilities).ExecuteAsync(deploymentName);
+                    if (string.IsNullOrEmpty(input.DeploymentName))
+                    {
+                        _toolInteractiveService.WriteErrorLine(string.Empty);
+                        _toolInteractiveService.WriteErrorLine("Deployment name cannot be empty. Please provide a valid deployment name and try again.");
+                        return CommandReturnCodes.USER_ERROR;
+                    }
+
+                    await new DeleteDeploymentCommand(_awsClientFactory, _toolInteractiveService, _consoleUtilities).ExecuteAsync(input.DeploymentName);
 
                     return CommandReturnCodes.SUCCESS;
                 }
                 catch (Exception e) when (e.IsAWSDeploymentExpectedException())
                 {
-                    if (diagnostics)
+                    if (input.Diagnostics)
                         _toolInteractiveService.WriteErrorLine(e.PrettyPrint());
                     else
                     {
@@ -254,16 +267,14 @@ namespace AWS.Deploy.CLI.Commands
                 _optionProjectPath,
                 _optionDiagnosticLogging
             };
-            listCommand.Handler = CommandHandler.Create<string, string, string, bool>(async (profile, region, projectPath, diagnostics) =>
+            listCommand.Handler = CommandHandler.Create(async (ListCommandHandlerInput input) =>
             {
                 try
                 {
-                    _toolInteractiveService.Diagnostics = diagnostics;
+                    _toolInteractiveService.Diagnostics = input.Diagnostics;
 
-                    var previousSettings = PreviousDeploymentSettings.ReadSettings(projectPath, null);
-
-                    var awsCredentials = await _awsUtilities.ResolveAWSCredentials(profile, previousSettings.Profile);
-                    var awsRegion = _awsUtilities.ResolveAWSRegion(region, previousSettings.Region);
+                    var awsCredentials = await _awsUtilities.ResolveAWSCredentials(input.Profile);
+                    var awsRegion = _awsUtilities.ResolveAWSRegion(input.Region);
 
                     _awsClientFactory.ConfigureAWSOptions(awsOptions =>
                     {
@@ -277,7 +288,7 @@ namespace AWS.Deploy.CLI.Commands
                 }
                 catch (Exception e) when (e.IsAWSDeploymentExpectedException())
                 {
-                    if (diagnostics)
+                    if (input.Diagnostics)
                         _toolInteractiveService.WriteErrorLine(e.PrettyPrint());
                     else
                     {
@@ -307,12 +318,12 @@ namespace AWS.Deploy.CLI.Commands
                 new Option<bool>(new []{"--encryption-keyinfo-stdin"}, description: "If set the cli reads encryption key info from stdin to use for decryption."),
                 _optionDiagnosticLogging
             };
-            serverModeCommand.Handler = CommandHandler.Create<int, int?, bool, bool>(async (port, parentPid, encryptionKeyInfoStdIn, diagnostics) =>
+            serverModeCommand.Handler = CommandHandler.Create(async (ServerModeCommandHandlerInput input) =>
             {
                 try
                 {
-                    var toolInteractiveService = new ConsoleInteractiveServiceImpl(diagnostics);
-                    var serverMode = new ServerModeCommand(toolInteractiveService, port, parentPid, encryptionKeyInfoStdIn);
+                    var toolInteractiveService = new ConsoleInteractiveServiceImpl(input.Diagnostics);
+                    var serverMode = new ServerModeCommand(toolInteractiveService, input.Port, input.ParentPid, input.EncryptionKeyInfoStdIn);
 
                     await serverMode.ExecuteAsync();
 
@@ -320,7 +331,7 @@ namespace AWS.Deploy.CLI.Commands
                 }
                 catch (Exception e) when (e.IsAWSDeploymentExpectedException())
                 {
-                    if (diagnostics)
+                    if (input.Diagnostics)
                         _toolInteractiveService.WriteErrorLine(e.PrettyPrint());
                     else
                     {

@@ -81,6 +81,8 @@ namespace AWS.Deploy.CLI.UnitTests
         }
 
         public Queue<ConsoleKeyInfo> InputConsoleKeyInfos { get; } = new Queue<ConsoleKeyInfo>();
+        public bool DisableInteractive { get; set; }
+
         public ConsoleKeyInfo ReadKey(bool intercept)
         {
             if(InputConsoleKeyInfos.Count == 0)

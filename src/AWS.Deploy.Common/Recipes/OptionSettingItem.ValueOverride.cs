@@ -107,9 +107,12 @@ namespace AWS.Deploy.Common.Recipes
                     validationFailedMessage += result.ValidationFailedMessage + Environment.NewLine;
                 }
             }
-
             if (!isValid)
                 throw new ValidationFailedException(validationFailedMessage.Trim());
+
+            if (AllowedValues != null && AllowedValues.Count > 0 && valueOverride != null &&
+                !AllowedValues.Contains(valueOverride.ToString() ?? ""))
+                throw new InvalidOverrideValueException($"Invalid value for option setting item: {Id}");
 
             if (valueOverride is bool || valueOverride is int || valueOverride is long)
             {
@@ -127,8 +130,6 @@ namespace AWS.Deploy.Common.Recipes
                 }
                 else
                 {
-                    if (AllowedValues != null && AllowedValues.Count > 0 && !AllowedValues.Contains(valueOverrideString))
-                        throw new InvalidOverrideValueException("Invalid value for option setting item");
                     _valueOverride = valueOverrideString;
                 }
             }

@@ -14,8 +14,8 @@ namespace AWS.Deploy.CLI
 {
     public interface IAWSUtilities
     {
-        Task<AWSCredentials> ResolveAWSCredentials(string profileName, string? lastUsedProfileName);
-        string ResolveAWSRegion(string region, string? lastRegionUsed);
+        Task<AWSCredentials> ResolveAWSCredentials(string? profileName, string? lastUsedProfileName = null);
+        string ResolveAWSRegion(string? region, string? lastRegionUsed = null);
     }
 
     public class AWSUtilities : IAWSUtilities
@@ -29,10 +29,8 @@ namespace AWS.Deploy.CLI
             _consoleUtilities = consoleUtilities;
         }
 
-        public async Task<AWSCredentials> ResolveAWSCredentials(string profileName, string? lastUsedProfileName)
+        public async Task<AWSCredentials> ResolveAWSCredentials(string? profileName, string? lastUsedProfileName = null)
         {
-
-
             async Task<AWSCredentials> Resolve()
             {
             var chain = new CredentialProfileStoreChain();
@@ -113,7 +111,7 @@ namespace AWS.Deploy.CLI
             }
         }
 
-        public string ResolveAWSRegion(string region, string? lastRegionUsed)
+        public string ResolveAWSRegion(string? region, string? lastRegionUsed = null)
         {
             if (!string.IsNullOrEmpty(region))
             {

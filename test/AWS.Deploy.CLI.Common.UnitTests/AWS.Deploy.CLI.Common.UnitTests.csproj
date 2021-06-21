@@ -8,6 +8,24 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="ConfigFileDeployment\TestFiles\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="ConfigFileDeployment\TestFiles\**">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit" Version="2.4.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\AWS.Deploy.CLI\AWS.Deploy.CLI.csproj" />
     <ProjectReference Include="..\..\src\AWS.Deploy.Common\AWS.Deploy.Common.csproj" />
   </ItemGroup>
