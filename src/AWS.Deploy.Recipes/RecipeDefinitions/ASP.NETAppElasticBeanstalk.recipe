@@ -242,8 +242,8 @@
                 {
                     "ValidatorType": "Regex",
                     "Configuration" : {
-                        "Regex": "arn:[^:]+:elasticbeanstalk:[^:]*:[0-9]{12}:platform/.+",
-                        "ValidationFailedMessage": "Invalid ElasticBeanstalkPlatform Arn. The ARN should contain the arn:[PARTITION]:elasticbeanstalk namespace, followed by the region, the account ID, and then the resource path. For example - arn:aws:elasticbeanstalk:us-east-2:123456789012:platform/MyPlatform/1.0 is a valid Arn. For more information visit https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/AWSHowTo.iam.policies.arn.html"
+                        "Regex": "arn:[^:]+:elasticbeanstalk:[^:]+:[^:]*:platform/.+",
+                        "ValidationFailedMessage": "Invalid ElasticBeanstalkPlatform Arn. The ARN should contain the arn:[PARTITION]:elasticbeanstalk namespace, followed by the region, an optional account ID, and then the resource path. For example - arn:aws:elasticbeanstalk:us-east-2:123456789012:platform/MyPlatform/1.0 is a valid Arn. For more information visit https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/AWSHowTo.iam.policies.arn.html"
                     }
                 }
             ]
