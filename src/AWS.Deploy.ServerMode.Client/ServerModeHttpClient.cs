@@ -61,7 +61,7 @@ namespace AWS.Deploy.ServerMode.Client
                 {"awsAccessKeyId", credentials.AccessKey },
                 {"awsSecretKey", credentials.SecretKey },
                 {"requestId", Guid.NewGuid().ToString() },
-                {"issueDate", DateTime.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss.fffzzz", DateTimeFormatInfo.InvariantInfo) }
+                {"issueDate", DateTime.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss.fffZ", DateTimeFormatInfo.InvariantInfo) }
             };
 
             if(!string.IsNullOrEmpty(credentials.Token))
