@@ -65,16 +65,16 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         }
 
         [Theory]
-        [InlineData("arn:aws:elasticbeanstalk::123456789012:platform/MyPlatform", true)]
-        [InlineData("arn:aws-cn:elasticbeanstalk::123456789012:platform/MyPlatform", true)]
-        [InlineData("arn:aws:elasticbeanstalk::123456789012:platform/MyPlatform/v1.0", true)]
-        [InlineData("arn:aws:elasticbeanstalk::123456789012:platform/", false)] //no resource path
-        [InlineData("arn:aws:elasticbeanstack::123456789012:platform/MyPlatform", false)] //Typo elasticbeanstack instead of elasticbeanstalk
-        [InlineData("arn:aws:elasticbeanstalk::1234567890121234:platform/MyPlatform", false)] //invalid account ID
+        [InlineData("arn:aws:elasticbeanstalk:us-east-1:123456789012:platform/MyPlatform", true)]
+        [InlineData("arn:aws-cn:elasticbeanstalk:us-west-1:123456789012:platform/MyPlatform", true)]
+        [InlineData("arn:aws:elasticbeanstalk:eu-west-1:123456789012:platform/MyPlatform/v1.0", true)]
+        [InlineData("arn:aws:elasticbeanstalk:us-west-2::platform/MyPlatform/v1.0", true)]
+        [InlineData("arn:aws:elasticbeanstalk:us-east-1:123456789012:platform/", false)] //no resource path
+        [InlineData("arn:aws:elasticbeanstack:eu-west-1:123456789012:platform/MyPlatform", false)] //Typo elasticbeanstack instead of elasticbeanstalk
         public void ElasticBeanstalkPlatformArnValidationTest(string value, bool isValid)
         {
             var optionSettingItem = new OptionSettingItem("id", "name", "description");
-            optionSettingItem.Validators.Add(GetRegexValidatorConfig("arn:[^:]+:elasticbeanstalk:[^:]*:[0-9]{12}:platform/.+"));
+            optionSettingItem.Validators.Add(GetRegexValidatorConfig("arn:[^:]+:elasticbeanstalk:[^:]+:[^:]*:platform/.+"));
             Validate(optionSettingItem, value, isValid);
         }
 
