@@ -34,6 +34,20 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             return Task.FromResult<object>(settingValue);
         }
 
+        /// <summary>
+        /// This method will be invoked to set the Docker build arguments in the deployment bundle
+        /// when it is specified as part of the user provided configuration file.
+        /// </summary>
+        /// <param name="recommendation">The selected recommendation settings used for deployment <see cref="Recommendation"/></param>
+        /// <param name="dockerBuildArgs">Arguments to be passed when performing a Docker build</param>
+        public void OverrideValue(Recommendation recommendation, string dockerBuildArgs)
+        {
+            var resultString = ValidateBuildArgs(dockerBuildArgs);
+            if (!string.IsNullOrEmpty(resultString))
+                throw new InvalidOverrideValueException(resultString);
+            recommendation.DeploymentBundle.DockerBuildArgs = dockerBuildArgs;
+        }
+
         private string ValidateBuildArgs(string buildArgs)
         {
             var argsList = buildArgs.Split(",");

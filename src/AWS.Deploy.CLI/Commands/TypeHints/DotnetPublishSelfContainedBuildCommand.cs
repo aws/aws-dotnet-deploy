@@ -23,5 +23,16 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             var result = answer == YesNo.Yes ? "true" : "false";
             return Task.FromResult<object>(result);
         }
+
+        /// <summary>
+        /// This method will be invoked to indiciate if this is a self-contained build in the deployment bundle
+        /// when it is specified as part of the user provided configuration file.
+        /// </summary>
+        /// <param name="recommendation">The selected recommendation settings used for deployment <see cref="Recommendation"/></param>
+        /// <param name="publishSelfContainedBuild">The user specified value to indicate if this is a self-contained build.</param>
+        public void OverrideValue(Recommendation recommendation, bool publishSelfContainedBuild)
+        {
+            recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild = publishSelfContainedBuild;
+        }
     }
 }

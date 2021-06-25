@@ -90,7 +90,8 @@ namespace AWS.Deploy.Common
         public OptionSettingItem GetOptionSetting(string? jsonPath)
         {
             if (string.IsNullOrEmpty(jsonPath))
-                throw new OptionSettingItemDoesNotExistException("The Option Setting Item you are looking for does not exist.");
+                throw new OptionSettingItemDoesNotExistException($"The Option Setting Item {jsonPath} does not exist as part of the" +
+                    $" {Recipe.Name} recipe");
 
             var ids = jsonPath.Split('.');
             OptionSettingItem? optionSetting = null;
@@ -101,7 +102,8 @@ namespace AWS.Deploy.Common
                 optionSetting = optionSettings.FirstOrDefault(os => os.Id.Equals(id));
                 if (optionSetting == null)
                 {
-                    throw new OptionSettingItemDoesNotExistException("The Option Setting Item you are looking for does not exist.");
+                    throw new OptionSettingItemDoesNotExistException($"The Option Setting Item {jsonPath} does not exist as part of the" +
+                    $" {Recipe.Name} recipe");
                 }
             }
 

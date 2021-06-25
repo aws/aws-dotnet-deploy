@@ -136,6 +136,7 @@ namespace AWS.Deploy.Common
     /// <summary>
     /// Thrown if <see cref="OptionSettingItem.SetValueOverride"/> is given an invalid value.
     /// </summary>
+    [AWSDeploymentExpectedException]
     public class ValidationFailedException : Exception
     {
         public ValidationFailedException(string? message, Exception? innerException = null) : base(message, innerException) { }
@@ -148,6 +149,14 @@ namespace AWS.Deploy.Common
     public class InvalidProjectPathException : Exception
     {
         public InvalidProjectPathException(string message, Exception? innerException = null) : base(message, innerException) { }
+    }
+    
+    /// Throw if an invalid <see cref="UserDeploymentSettings"/> is used.
+    /// </summary>
+    [AWSDeploymentExpectedException]
+    public class InvalidUserDeploymentSettingsException : Exception
+    {
+        public InvalidUserDeploymentSettingsException(string message, Exception? innerException = null) : base(message, innerException) { }
     }
 
     /// <summary>
