@@ -27,6 +27,7 @@ using AWS.Deploy.CLI.Extensions;
 using AWS.Deploy.Orchestration.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Amazon.Runtime;
+using AWS.Deploy.Common.Recipes;
 
 namespace AWS.Deploy.CLI.ServerMode.Controllers
 {
@@ -125,6 +126,59 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             }
 
             return Ok(output);
+        }
+
+        /// <summary>
+        /// Gets the list of updatable option setting items for the selected recommendation.
+        /// </summary>
+        [HttpGet("session/<sessionId>/settings")]
+        [SwaggerOperation(OperationId = "GetConfigSettings")]
+        [SwaggerResponse(200, type: typeof(GetOptionSettingsOutput))]
+        [Authorize]
+        public IActionResult GetConfigSettings(string sessionId)
+        {
+            var state = _stateServer.Get(sessionId);
+            if (state == null)
+            {
+                return NotFound($"Session ID {sessionId} not found.");
+            }
+
+            if (state.SelectedRecommendation == null)
+            {
+                return NotFound($"A deployment target is not set for Session ID {sessionId}.");
+            }
+
+            var orchestrator = CreateOrchestrator(state);
+
+            var deploymentBundleDefinition = orchestrator.GetDeploymentBundleDefinition(state.SelectedRecommendation);
+
+            var configurableOptionSettings = state.SelectedRecommendation.Recipe.OptionSettings.Union(deploymentBundleDefinition.Parameters);
+
+            var output = new GetOptionSettingsOutput();
+            output.OptionSettings = ListOptionSettingSummary(state.SelectedRecommendation, configurableOptionSettings);
+
+            return Ok(output);
+        }
+
+        private List<OptionSettingItemSummary> ListOptionSettingSummary(Recommendation recommendation, IEnumerable<OptionSettingItem> configurableOptionSettings)
+        {
+            var optionSettingItems = new List<OptionSettingItemSummary>();
+
+            foreach (var setting in configurableOptionSettings)
+            {
+                var settingSummary = new OptionSettingItemSummary(setting.Id, setting.Name, setting.Description, setting.Type.ToString())
+                {
+                    TypeHint = setting.TypeHint?.ToString(),
+                    Value = recommendation.GetOptionSettingValue(setting),
+                    Advanced = setting.AdvancedSetting,
+                    Updatable = (!recommendation.IsExistingCloudApplication || setting.Updatable) && recommendation.IsOptionSettingDisplayable(setting),
+                    ChildOptionSettings = ListOptionSettingSummary(recommendation, setting.ChildOptionSettings)
+                };
+
+                optionSettingItems.Add(settingSummary);
+            }
+
+            return optionSettingItems;
         }
 
         /// <summary>
