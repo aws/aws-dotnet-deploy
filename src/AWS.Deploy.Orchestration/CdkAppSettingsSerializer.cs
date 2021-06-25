@@ -11,7 +11,7 @@ namespace AWS.Deploy.Orchestration
 {
     public class CdkAppSettingsSerializer
     {
-        public string Build(CloudApplication cloudApplication, Recommendation recommendation)
+        public string Build(CloudApplication cloudApplication, Recommendation recommendation, OrchestratorSession session)
         {
             var projectPath = new FileInfo(recommendation.ProjectPath).Directory?.FullName;
             if (string.IsNullOrEmpty(projectPath))
@@ -23,6 +23,8 @@ namespace AWS.Deploy.Orchestration
                 projectPath,
                 recommendation.Recipe.Id,
                 recommendation.Recipe.Version,
+                session.AWSAccountId,
+                session.AWSRegion,
                 new ()
                 )
             {

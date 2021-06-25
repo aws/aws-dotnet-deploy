@@ -40,7 +40,7 @@ namespace AWS.Deploy.Orchestration
             var cdkProjectPath = await CreateCdkProjectForDeployment(recommendation, session);
 
             // Write required configuration in appsettings.json
-            var appSettingsBody = _appSettingsBuilder.Build(cloudApplication, recommendation);
+            var appSettingsBody = _appSettingsBuilder.Build(cloudApplication, recommendation, session);
             var appSettingsFilePath = Path.Combine(cdkProjectPath, "appsettings.json");
             using (var appSettingsFile = new StreamWriter(appSettingsFilePath))
             {

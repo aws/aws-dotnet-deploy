@@ -14,18 +14,6 @@
     "sourceName": "ConsoleAppEcsFargateService",
     "preferNameDirectory": true,
     "symbols": {
-        "AWSAccountId": {
-            "type": "parameter",
-            "description": "Specifies the AWS Account ID",
-            "replaces": "AWSAccountId",
-            "datatype": "string"
-        },
-        "AWSRegion": {
-            "type": "parameter",
-            "description": "Specifies the AWS Region",
-            "replaces": "AWSRegion",
-            "datatype": "string"
-        },
         "AWSDeployRecipesCDKCommonVersion": {
             "type": "parameter",
             "description": "The version number of AWS.Deploy.Recipes.CDK.Common to use",
