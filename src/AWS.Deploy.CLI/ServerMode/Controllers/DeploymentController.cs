@@ -182,6 +182,46 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         }
 
         /// <summary>
+        /// Applies a value for a list of option setting items on the selected recommendation.
+        /// Option setting updates are provided as Key Value pairs with the Key being the JSON path to the leaf node.
+        /// Only primitive data types are supported for Value updates. The Value is a string value which will be parsed as its corresponding data type.
+        /// </summary>
+        [HttpPut("session/<sessionId>/settings")]
+        [SwaggerOperation(OperationId = "ApplyConfigSettings")]
+        [SwaggerResponse(200, type: typeof(ApplyConfigSettingsOutput))]
+        [Authorize]
+        public IActionResult ApplyConfigSettings(string sessionId, [FromBody] ApplyConfigSettingsInput input)
+        {
+            var state = _stateServer.Get(sessionId);
+            if (state == null)
+            {
+                return NotFound($"Session ID {sessionId} not found.");
+            }
+
+            if (state.SelectedRecommendation == null)
+            {
+                return NotFound($"A deployment target is not set for Session ID {sessionId}.");
+            }
+
+            var output = new ApplyConfigSettingsOutput();
+
+            foreach (var updatedSetting in input.UpdatedSettings)
+            {
+                try
+                {
+                    var setting = state.SelectedRecommendation.GetOptionSetting(updatedSetting.Key);
+                    setting.SetValueOverride(updatedSetting.Value);
+                }
+                catch (Exception ex)
+                {
+                    output.FailedConfigUpdates.Add(updatedSetting.Key, ex.Message);
+                }
+            }
+
+            return Ok(output);
+        }
+        
+        /// <summary>
         /// Gets the list of existing deployments that are compatible with the session's project.
         /// </summary>
         [HttpGet("session/<sessionId>/deployments")]
