@@ -1,0 +1,24 @@
+{
+    "StackName": "EcsFargateAppStack",
+    "RecipeId": "AspNetAppEcsFargate",
+    "OptionSettingsConfig":{
+        "ECSCluster": 
+        {
+            "CreateNew": true,
+            "NewClusterName": "MyNewCluster"
+        },
+        "ECSServiceName": "MyNewService",
+        "DesiredCount": 3,
+        "ApplicationIAMRole": 
+        {
+            "CreateNew": true
+        },
+        "Vpc": 
+        {
+            "IsDefault": true
+        },
+        "AdditionalECSServiceSecurityGroups": "",
+        "TaskCpu": 256,
+        "TaskMemory": 512
+    }
+  }

@@ -75,8 +75,8 @@ namespace AWS.Deploy.CLI
     /// Throw if unable to find a compatible recipe.
     /// </summary>
     [AWSDeploymentExpectedException]
-    public class FailedToCompatibleRecipeException : Exception
+    public class FailedToFindCompatibleRecipeException : Exception
     {
-        public FailedToCompatibleRecipeException(string message, Exception? innerException = null) : base(message, innerException) { }
+        public FailedToFindCompatibleRecipeException(string message, Exception? innerException = null) : base(message, innerException) { }
     }
 }

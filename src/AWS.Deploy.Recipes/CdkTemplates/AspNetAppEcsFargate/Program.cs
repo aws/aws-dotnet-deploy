@@ -23,8 +23,8 @@ namespace AspNetAppEcsFargate
             {
                 Env = new Environment
                 {
-                    Account = "AWSAccountId",
-                    Region = "AWSRegion"
+                    Account = recipeConfiguration.AWSAccountId,
+                    Region = recipeConfiguration.AWSRegion
                 }
             }), recipeConfiguration);
 

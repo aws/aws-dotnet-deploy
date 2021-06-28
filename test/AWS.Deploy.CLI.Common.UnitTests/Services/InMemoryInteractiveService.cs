@@ -134,6 +134,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.Services
         }
 
         public bool Diagnostics { get; set; }
+        public bool DisableInteractive { get; set; }
 
         public ConsoleKeyInfo ReadKey(bool intercept)
         {

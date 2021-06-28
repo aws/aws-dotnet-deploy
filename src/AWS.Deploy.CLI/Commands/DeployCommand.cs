@@ -67,7 +67,7 @@ namespace AWS.Deploy.CLI.Commands
             _cdkManager = cdkManager;
         }
 
-        public async Task ExecuteAsync(string stackName, bool saveCdkProject)
+        public async Task ExecuteAsync(string stackName, bool saveCdkProject, UserDeploymentSettings? userDeploymentSettings = null)
         {
             var orchestrator =
                 new Orchestrator(
@@ -96,10 +96,9 @@ namespace AWS.Deploy.CLI.Commands
                 throw new InvalidCliArgumentException("Found invalid CLI arguments");
             }
 
-            var cloudApplicationName =
-                !string.IsNullOrEmpty(stackName)
-                ? stackName
-                : AskUserForCloudApplicationName(_session.ProjectDefinition, deployedApplications);
+            _toolInteractiveService.WriteLine();
+
+            var cloudApplicationName = GetCloudApplicationName(stackName, userDeploymentSettings, deployedApplications);
 
             var deployedApplication = deployedApplications.FirstOrDefault(x => string.Equals(x.Name, cloudApplicationName));
 
@@ -115,7 +114,14 @@ namespace AWS.Deploy.CLI.Commands
                 selectedRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, deployedApplication.RecipeId, StringComparison.InvariantCultureIgnoreCase));
 
                 if (selectedRecommendation == null)
-                    throw new FailedToCompatibleRecipeException("A compatible recipe was not found for the deployed application.");
+                    throw new FailedToFindCompatibleRecipeException("A compatible recipe was not found for the deployed application.");
+
+                if (userDeploymentSettings != null && !string.IsNullOrEmpty(userDeploymentSettings.RecipeId))
+                {
+                    if (!string.Equals(userDeploymentSettings.RecipeId, selectedRecommendation.Recipe.Id, StringComparison.InvariantCultureIgnoreCase))
+                        throw new InvalidUserDeploymentSettingsException("The recipe ID specified as part of the deployment configuration file" +
+                            " does not match the original recipe used to deploy the application stack.");
+                }
 
                 selectedRecommendation.ApplyPreviousSettings(existingCloudApplicationMetadata.Settings);
 
@@ -147,7 +153,7 @@ namespace AWS.Deploy.CLI.Commands
             }
             else
             {
-                selectedRecommendation = _consoleUtilities.AskToChooseRecommendation(recommendations);
+                selectedRecommendation = GetSelectedRecommendation(userDeploymentSettings, recommendations);
             }
 
             // Apply the user enter project name to the recommendation so that any default settings based on project name are applied.
@@ -180,7 +186,15 @@ namespace AWS.Deploy.CLI.Commands
 
             var configurableOptionSettings = selectedRecommendation.Recipe.OptionSettings.Union(deploymentBundleDefinition.Parameters);
 
-            await ConfigureDeployment(selectedRecommendation, configurableOptionSettings, false);
+            if (userDeploymentSettings != null)
+            {
+                ConfigureDeployment(selectedRecommendation, deploymentBundleDefinition, userDeploymentSettings);
+            }
+            
+            if (!_toolInteractiveService.DisableInteractive)
+            {
+                await ConfigureDeployment(selectedRecommendation, configurableOptionSettings, false);
+            } 
 
             var cloudApplication = new CloudApplication(cloudApplicationName, string.Empty);
 
@@ -192,6 +206,126 @@ namespace AWS.Deploy.CLI.Commands
             await CreateDeploymentBundle(orchestrator, selectedRecommendation, cloudApplication);
 
             await orchestrator.DeployRecommendation(cloudApplication, selectedRecommendation);
+        }
+
+        /// <summary>
+        /// This method is used to set the values for Option Setting Items when a deployment is being performed using a user specifed config file.
+        /// </summary>
+        /// <param name="recommendation">The selected recommendation settings used for deployment <see cref="Recommendation"/></param>
+        /// <param name="deploymentBundleDefinition">The container for the deployment bundle used by an application. <see cref="DeploymentBundleDefinition"/></param>
+        /// <param name="userDeploymentSettings">The deserialized object from the user provided config file. <see cref="UserDeploymentSettings"></param>
+        private void ConfigureDeployment(Recommendation recommendation, DeploymentBundleDefinition deploymentBundleDefinition, UserDeploymentSettings userDeploymentSettings)
+        {
+            foreach (var entry in userDeploymentSettings.LeafOptionSettingItems)
+            {
+                var optionSettingJsonPath = entry.Key;
+                var optionSettingValue = entry.Value;
+
+                var isPartOfDeploymentBundle = true;
+                var optionSetting = deploymentBundleDefinition.Parameters.FirstOrDefault(x => x.Id.Equals(optionSettingJsonPath));
+                if (optionSetting == null)
+                {
+                    optionSetting = recommendation.GetOptionSetting(optionSettingJsonPath);
+                    isPartOfDeploymentBundle = false;
+                }
+                    
+                if (!recommendation.IsExistingCloudApplication || optionSetting.Updatable)
+                {
+                    object settingValue;
+                    try
+                    {
+                        switch (optionSetting.Type)
+                        {
+                            case OptionSettingValueType.String:
+                                settingValue = optionSettingValue;
+                                break;
+                            case OptionSettingValueType.Int:
+                                settingValue = int.Parse(optionSettingValue);
+                                break;
+                            case OptionSettingValueType.Bool:
+                                settingValue = bool.Parse(optionSettingValue);
+                                break;
+                            default:
+                                throw new InvalidOverrideValueException($"Invalid value {optionSettingValue} for option setting item {optionSettingJsonPath}");
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        throw new InvalidOverrideValueException($"Invalid value {optionSettingValue} for option setting item {optionSettingJsonPath}");
+                    }
+                    
+                    optionSetting.SetValueOverride(settingValue);
+
+                    if (isPartOfDeploymentBundle)
+                        SetDeploymentBundleOptionSetting(recommendation, optionSetting.Id, settingValue);
+                }
+            }
+        }
+
+        private void SetDeploymentBundleOptionSetting(Recommendation recommendation, string optionSettingId, object settingValue)
+        {
+            switch (optionSettingId)
+            {
+                case "DockerExecutionDirectory":
+                    new DockerExecutionDirectoryCommand(_consoleUtilities).OverrideValue(recommendation, settingValue.ToString() ?? "");
+                    break;
+                case "DockerBuildArgs":
+                    new DockerBuildArgsCommand(_consoleUtilities).OverrideValue(recommendation, settingValue.ToString() ?? "");
+                    break;
+                case "DotnetBuildConfiguration":
+                    new DotnetPublishBuildConfigurationCommand(_consoleUtilities).Overridevalue(recommendation, settingValue.ToString() ?? "");
+                    break;
+                case "DotnetPublishArgs":
+                    new DotnetPublishArgsCommand(_consoleUtilities).OverrideValue(recommendation, settingValue.ToString() ?? "");
+                    break;
+                case "SelfContainedBuild":
+                    new DotnetPublishSelfContainedBuildCommand(_consoleUtilities).OverrideValue(recommendation, (bool)settingValue);
+                    break;
+                default:
+                    throw new OptionSettingItemDoesNotExistException($"The Option Setting Item { optionSettingId } does not exist.");
+            }
+        }
+
+        private string GetCloudApplicationName(string? stackName, UserDeploymentSettings? userDeploymentSettings, List<CloudApplication> deployedApplications)
+        {
+            if (!string.IsNullOrEmpty(stackName))
+                return stackName;
+
+            if (userDeploymentSettings == null || string.IsNullOrEmpty(userDeploymentSettings.StackName))
+            {
+                if (_toolInteractiveService.DisableInteractive)
+                {
+                    var message = "The \"--silent\" CLI argument can only be used if a CDK stack name is provided either via the CLI argument \"--stack-name\" or through a deployment-settings file. " +
+                    "Please provide a stack name and try again";
+                    throw new InvalidCliArgumentException(message);
+                }
+                return AskUserForCloudApplicationName(_session.ProjectDefinition, deployedApplications);
+            }
+            
+            _toolInteractiveService.WriteLine($"Configuring Stack Name with specified value '{userDeploymentSettings.StackName}'.");
+            return userDeploymentSettings.StackName;
+        }
+
+        private Recommendation GetSelectedRecommendation(UserDeploymentSettings? userDeploymentSettings, List<Recommendation> recommendations)
+        {
+            if (userDeploymentSettings == null || string.IsNullOrEmpty(userDeploymentSettings.RecipeId))
+            {
+                if (_toolInteractiveService.DisableInteractive)
+                {
+                    var message = "The \"--silent\" CLI argument can only be used if a deployment recipe is specified as part of the deployement-settings file. " +
+                    "Please provide a deployment recipe and try again";
+                    throw new InvalidCliArgumentException(message);
+                }
+                return _consoleUtilities.AskToChooseRecommendation(recommendations);
+            }
+
+            Recommendation? selectedRecommendation = recommendations.FirstOrDefault(x => x.Recipe.Id.Equals(userDeploymentSettings.RecipeId));
+
+            if (selectedRecommendation == null)
+                throw new InvalidUserDeploymentSettingsException($"The user deployment settings provided contains an invalid value for the property '{nameof(userDeploymentSettings.RecipeId)}'.");
+
+            _toolInteractiveService.WriteLine($"Configuring Recommendation with specified value '{selectedRecommendation.Name}'.");
+            return selectedRecommendation;
         }
 
         private string AskUserForCloudApplicationName(ProjectDefinition project, List<CloudApplication> existingApplications)
@@ -270,6 +404,14 @@ namespace AWS.Deploy.CLI.Commands
             {
                 while (!await orchestrator.CreateContainerDeploymentBundle(cloudApplication, selectedRecommendation))
                 {
+                    if (_toolInteractiveService.DisableInteractive)
+                    {
+                        var errorMessage = "Failed to build Docker Image." + Environment.NewLine;
+                        errorMessage += "Docker builds usually fail due to executing them from a working directory that is incompatible with the Dockerfile." + Environment.NewLine;
+                        errorMessage += "Specify a valid Docker execution directory as part of the deployment settings file and try again.";
+                        throw new DockerBuildFailedException(errorMessage);
+                    }
+                        
                     _toolInteractiveService.WriteLine(string.Empty);
                     var answer = _consoleUtilities.AskYesNoQuestion("Do you want to go back and modify the current configuration?", "true");
                     if (answer == YesNo.Yes)

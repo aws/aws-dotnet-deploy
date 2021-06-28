@@ -32,10 +32,24 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             return Task.FromResult<object>(settingValue);
         }
 
+        /// <summary>
+        /// This method will be invoked to set the Docker execution directory in the deployment bundle
+        /// when it is specified as part of the user provided configuration file.
+        /// </summary>
+        /// <param name="recommendation">The selected recommendation settings used for deployment <see cref="Recommendation"/></param>
+        /// <param name="executionDirectory">The directory specified for Docker execution.</param>
+        public void OverrideValue(Recommendation recommendation, string executionDirectory)
+        {
+            var resultString = ValidateExecutionDirectory(executionDirectory);
+            if (!string.IsNullOrEmpty(resultString))
+                throw new InvalidOverrideValueException(resultString);
+            recommendation.DeploymentBundle.DockerExecutionDirectory = executionDirectory;
+        }
+
         private string ValidateExecutionDirectory(string executionDirectory)
         {
             if (!string.IsNullOrEmpty(executionDirectory) && !Directory.Exists(executionDirectory))
-                return "The directory you specified does not exist.";
+                return "The directory specified for Docker execution does not exist.";
             else
                 return "";
         }

@@ -20,6 +20,7 @@ namespace AWS.Deploy.CLI
         }
 
         public bool Diagnostics { get; set; }
+        public bool DisableInteractive { get; set; }
 
         public void WriteDebugLine(string? message)
         {
