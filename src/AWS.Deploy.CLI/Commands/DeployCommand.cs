@@ -354,7 +354,8 @@ namespace AWS.Deploy.CLI.Commands
                         _consoleUtilities.AskUserForValue(
                             title,
                             defaultName,
-                            allowEmpty: false);
+                            allowEmpty: false,
+                            defaultAskValuePrompt: Constants.CLI.PROMPT_NEW_STACK_NAME);
                 }
                 else
                 {
@@ -366,7 +367,10 @@ namespace AWS.Deploy.CLI.Commands
                             existingApplications.Select(x => x.Name),
                             title,
                             askNewName: true,
-                            defaultNewName: defaultName);
+                            defaultNewName: defaultName,
+                            defaultChoosePrompt: Constants.CLI.PROMPT_CHOOSE_STACK_NAME,
+                            defaultCreateNewPrompt: Constants.CLI.PROMPT_NEW_STACK_NAME,
+                            defaultCreateNewLabel: Constants.CLI.CREATE_NEW_STACK_LABEL) ;
 
                     cloudApplicationName = userResponse.SelectedOption ?? userResponse.NewName;
                 }
@@ -382,8 +386,8 @@ namespace AWS.Deploy.CLI.Commands
         private void PrintInvalidStackNameMessage()
         {
             _toolInteractiveService.WriteLine();
-            _toolInteractiveService.WriteLine(
-                "Invalid stack name.  A stack name can contain only alphanumeric characters (case-sensitive) and hyphens. " +
+            _toolInteractiveService.WriteErrorLine(
+                "Invalid stack name. A stack name can contain only alphanumeric characters (case-sensitive) and hyphens. " +
                 "It must start with an alphabetic character and can't be longer than 128 characters");
         }
 
