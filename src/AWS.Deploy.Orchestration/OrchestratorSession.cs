@@ -8,6 +8,10 @@ using AWS.Deploy.Common.Recipes.Validation;
 
 namespace AWS.Deploy.Orchestration
 {
+    /// <summary>
+    /// The Orchestrator session holds the relevant metadata about the project that needs to be deployed
+    /// and also contains information about the AWS account and region used for deployment.
+    /// </summary>
     public class OrchestratorSession : IDeployToolValidationContext
     {
         public ProjectDefinition ProjectDefinition { get; set; }
