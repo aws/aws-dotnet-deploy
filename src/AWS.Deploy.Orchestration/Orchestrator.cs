@@ -15,6 +15,11 @@ using Newtonsoft.Json;
 
 namespace AWS.Deploy.Orchestration
 {
+    /// <summary>
+    /// The Orchestrator holds all the metadata that the CLI and the AWS toolkit for Visual studio interact with to perform a deployment.
+    /// It is responsible for generating deployment recommendations, creating deployment bundles and also acts as a mediator
+    /// between the client UI and the CDK.
+    /// </summary>
     public class Orchestrator
     {
         private const string REPLACE_TOKEN_LATEST_DOTNET_BEANSTALK_PLATFORM_ARN = "{LatestDotnetBeanstalkPlatformArn}";

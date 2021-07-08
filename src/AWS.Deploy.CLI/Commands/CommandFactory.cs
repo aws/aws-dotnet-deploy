@@ -168,7 +168,7 @@ namespace AWS.Deploy.CLI.Commands
                         _consoleUtilities,
                         session);
 
-                    await deploy.ExecuteAsync(input.StackName ?? "", input.SaveCdkProject, userDeploymentSettings);
+                    await deploy.ExecuteAsync(input.StackName ?? "", userDeploymentSettings);
 
                     return CommandReturnCodes.SUCCESS;
                 }
