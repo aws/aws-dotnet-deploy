@@ -59,31 +59,27 @@ namespace AWS.Deploy.CLI.Commands
             }
             else
             {
-                var monitorTask = WaitOnParentPid(cancellationToken);
-                var webTask = host.RunAsync(cancellationToken);
-
-                //This call will wait until one of the tasks completes.
-                //The monitor task will complete if a parent pid is not found.
-                await Task.WhenAny(monitorTask, webTask);
-
-                //The monitor task is expected to complete only when a parent pid is not found.
-                if (monitorTask.IsCompleted && monitorTask.Result)
+                try
                 {
-                    _interactiveService.WriteLine(string.Empty);
-                    _interactiveService.WriteLine("The parent process is no longer running.");
-                    _interactiveService.WriteLine("Server mode is shutting down...");
-                    await host.StopAsync(cancellationToken);
+                    var process = Process.GetProcessById((int)_parentPid);
+                    process.EnableRaisingEvents = true;
+                    process.Exited += async (sender, args) => { await ShutDownHost(host, cancellationToken); };
+                }
+                catch (Exception)
+                {
+                    return;
                 }
 
-                //If the web task completes with a fault because an exception was thrown,
-                //We need to capture the inner exception and rethrow it so it can bubble up to the end user.
-                if (webTask.IsCompleted && webTask.IsFaulted)
-                {
-                    var innerException = webTask.Exception?.InnerException;
-                    if (innerException != null)
-                        throw innerException;
-                }
+                await host.RunAsync(cancellationToken);
             }
+        }
+
+        private async Task ShutDownHost(IWebHost host, CancellationToken cancellationToken)
+        {
+            _interactiveService.WriteLine(string.Empty);
+            _interactiveService.WriteLine("The parent process is no longer running.");
+            _interactiveService.WriteLine("Server mode is shutting down...");
+            await host.StopAsync(cancellationToken);
         }
 
         private IEncryptionProvider CreateEncryptionProvider()
@@ -127,25 +123,6 @@ namespace AWS.Deploy.CLI.Commands
             return encryptionProvider;
         }
 
-        private async Task<bool> WaitOnParentPid(CancellationToken token)
-        {
-            if (_parentPid == null)
-                return true;
-
-            while (true)
-            {
-                try
-                {
-                    Process.GetProcessById((int)_parentPid);
-                    await Task.Delay(1000, token);
-                }
-                catch
-                {
-                    return true;
-                }
-            }
-        }
-        
         private bool IsPortInUse(int port)
         {
             var ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
