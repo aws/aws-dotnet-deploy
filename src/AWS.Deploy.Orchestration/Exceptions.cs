@@ -94,6 +94,15 @@ namespace AWS.Deploy.Orchestration
     }
 
     /// <summary>
+    /// Exception is thrown if we cannot retrieve recipe definitions
+    /// </summary>
+    [AWSDeploymentExpectedException]
+    public class NoRecipeDefinitionsFoundException : Exception
+    {
+        public NoRecipeDefinitionsFoundException(string message, Exception? innerException = null) : base(message, innerException) { }
+    }
+
+    /// <summary>
     /// Exception is thrown if dotnet publish attempt failed
     /// </summary>
     [AWSDeploymentExpectedException]
