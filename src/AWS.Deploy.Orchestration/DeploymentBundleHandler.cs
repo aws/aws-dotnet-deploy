@@ -56,6 +56,9 @@ namespace AWS.Deploy.Orchestration
             var buildArgs = GetDockerBuildArgs(recommendation);
 
             var dockerBuildCommand = $"docker build -t {imageTag} -f \"{dockerFile}\"{buildArgs} .";
+            _interactiveService.LogMessageLine($"Docker Execution Directory: {Path.GetFullPath(dockerExecutionDirectory)}");
+            _interactiveService.LogMessageLine($"Docker Build Command: {dockerBuildCommand}");
+
 
             recommendation.DeploymentBundle.DockerExecutionDirectory = dockerExecutionDirectory;
 
