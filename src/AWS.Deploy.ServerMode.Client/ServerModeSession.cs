@@ -66,6 +66,7 @@ namespace AWS.Deploy.ServerMode.Client
         private readonly CommandLineWrapper _commandLineWrapper;
         private readonly HttpClientHandler _httpClientHandler;
         private readonly TimeSpan _serverTimeout;
+        private readonly string _deployToolPath;
 
         private string? _baseUrl;
         private Aes? _aes;
@@ -83,12 +84,13 @@ namespace AWS.Deploy.ServerMode.Client
             }
         }
 
-        public ServerModeSession(int startPort = 10000, int endPort = 10100, bool diagnosticLoggingEnabled = false)
+        public ServerModeSession(int startPort = 10000, int endPort = 10100, string deployToolPath = "", bool diagnosticLoggingEnabled = false)
             : this(new CommandLineWrapper(diagnosticLoggingEnabled),
                 new HttpClientHandler(),
                 TimeSpan.FromSeconds(60),
                 startPort,
-                endPort)
+                endPort,
+                deployToolPath)
         {
         }
 
@@ -96,17 +98,28 @@ namespace AWS.Deploy.ServerMode.Client
             HttpClientHandler httpClientHandler,
             TimeSpan serverTimeout,
             int startPort = 10000,
-            int endPort = 10100)
+            int endPort = 10100,
+            string deployToolPath = "")
         {
             _startPort = startPort;
             _endPort = endPort;
             _commandLineWrapper = commandLineWrapper;
             _httpClientHandler = httpClientHandler;
             _serverTimeout = serverTimeout;
+            _deployToolPath = deployToolPath;
         }
 
         public async Task Start(CancellationToken cancellationToken)
         {
+            var deployToolRoot = "dotnet aws";
+            if (!string.IsNullOrEmpty(_deployToolPath))
+            {
+                if (!File.Exists(_deployToolPath))
+                    throw new InvalidAssemblyReferenceException("The specified assembly location is invalid.");
+
+                deployToolRoot = $"dotnet {_deployToolPath}";
+            }
+
             var currentProcessId = Process.GetCurrentProcess().Id;
 
             for (var port = _startPort; port <= _endPort; port++)
@@ -122,7 +135,7 @@ namespace AWS.Deploy.ServerMode.Client
 
                 var keyInfoStdin = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(keyInfo)));
 
-                var command = $"dotnet aws server-mode --port {port} --parent-pid {currentProcessId} --encryption-keyinfo-stdin";
+                var command = $"{deployToolRoot} server-mode --port {port} --parent-pid {currentProcessId} --encryption-keyinfo-stdin";
                 var startServerTask = _commandLineWrapper.Run(command, keyInfoStdin);
 
                 _baseUrl = $"http://localhost:{port}";
