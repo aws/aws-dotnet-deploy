@@ -25,8 +25,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                     recommendation.GetOptionSettingValue<string>(optionSetting),
                     allowEmpty: true,
                     resetValue: recommendation.GetOptionSettingDefaultValue<string>(optionSetting) ?? "",
-                    // validators:
-                    executionDirectory => ValidateExecutionDirectory(executionDirectory));
+                    validators: executionDirectory => ValidateExecutionDirectory(executionDirectory));
 
             recommendation.DeploymentBundle.DockerExecutionDirectory = settingValue;
             return Task.FromResult<object>(settingValue);

@@ -25,8 +25,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                     recommendation.GetOptionSettingValue<string>(optionSetting),
                     allowEmpty: true,
                     resetValue: recommendation.GetOptionSettingDefaultValue<string>(optionSetting) ?? "",
-                    // validators:
-                    publishArgs => ValidateDotnetPublishArgs(publishArgs))     
+                    validators: publishArgs => ValidateDotnetPublishArgs(publishArgs))     
                 .ToString()
                 .Replace("\"", "\"\"");
 

@@ -67,10 +67,37 @@ namespace AWS.Deploy.CLI.Commands
             _cdkManager = cdkManager;
         }
 
-        public async Task ExecuteAsync(string stackName, bool saveCdkProject, UserDeploymentSettings? userDeploymentSettings = null)
+        public async Task ExecuteAsync(string stackName, UserDeploymentSettings? userDeploymentSettings = null)
         {
-            var orchestrator =
-                new Orchestrator(
+            var (orchestrator, selectedRecommendation, cloudApplication) = await InitializeDeployment(stackName, userDeploymentSettings);
+
+            // Verify Docker installation and minimum NodeJS version.
+            await EvaluateSystemCapabilities(_session, selectedRecommendation);
+
+            // Configure option settings.
+            await ConfigureDeployment(cloudApplication, orchestrator, selectedRecommendation, userDeploymentSettings);
+
+            if (!ConfirmDeployment(selectedRecommendation))
+            {
+                return;
+            }
+
+            await CreateDeploymentBundle(orchestrator, selectedRecommendation, cloudApplication);
+
+            await orchestrator.DeployRecommendation(cloudApplication, selectedRecommendation);
+        }
+
+        /// <summary>
+        /// Initiates a deployment or a re-deployment.
+        /// If a new Cloudformation stack name is selected, then a fresh deployment is initiated with the user-selected deployment recipe.
+        /// If an existing Cloudformation stack name is selected, then a re-deployment is initiated with the same deployment recipe.
+        /// </summary>
+        /// <param name="stackName">The stack name provided via the --stack-name CLI argument</param>
+        /// <param name="userDeploymentSettings">The deserialized object from the user provided config file.<see cref="UserDeploymentSettings"/></param>
+        /// <returns>A tuple consisting of the Orchestrator object, Selected Recommendation, Cloud Application metadata.</returns>
+        public async Task<(Orchestrator, Recommendation, CloudApplication)> InitializeDeployment(string stackName, UserDeploymentSettings? userDeploymentSettings)
+        {
+            var orchestrator = new Orchestrator(
                     _session,
                     _orchestratorInteractiveService,
                     _cdkProjectHandler,
@@ -81,84 +108,36 @@ namespace AWS.Deploy.CLI.Commands
                     new[] { RecipeLocator.FindRecipeDefinitionsPath() });
 
             // Determine what recommendations are possible for the project.
-            var recommendations = await orchestrator.GenerateDeploymentRecommendations();
-            if (recommendations.Count == 0)
-            {
-                throw new FailedToGenerateAnyRecommendations("The project you are trying to deploy is currently not supported.");
-            }
+            var recommendations = await GenerateDeploymentRecommendations(orchestrator);
 
             // Look to see if there are any existing deployed applications using any of the compatible recommendations.
             var deployedApplications = await _deployedApplicationQueryer.GetExistingDeployedApplications(recommendations);
 
-            if (!string.IsNullOrEmpty(stackName) && !_cloudApplicationNameGenerator.IsValidName(stackName))
-            {
-                PrintInvalidStackNameMessage();
-                throw new InvalidCliArgumentException("Found invalid CLI arguments");
-            }
-
-            _toolInteractiveService.WriteLine();
-
+            // Get Cloudformation stack name.
             var cloudApplicationName = GetCloudApplicationName(stackName, userDeploymentSettings, deployedApplications);
 
+            // Find existing application with the same CloudFormation stack name.
             var deployedApplication = deployedApplications.FirstOrDefault(x => string.Equals(x.Name, cloudApplicationName));
 
             Recommendation? selectedRecommendation = null;
-
-            _toolInteractiveService.WriteLine();
-
-            // If using a previous deployment preset settings for deployment based on last deployment.
             if (deployedApplication != null)
-            {
-                var existingCloudApplicationMetadata = await _templateMetadataReader.LoadCloudApplicationMetadata(deployedApplication.Name);
-
-                selectedRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, deployedApplication.RecipeId, StringComparison.InvariantCultureIgnoreCase));
-
-                if (selectedRecommendation == null)
-                    throw new FailedToFindCompatibleRecipeException("A compatible recipe was not found for the deployed application.");
-
-                if (userDeploymentSettings != null && !string.IsNullOrEmpty(userDeploymentSettings.RecipeId))
-                {
-                    if (!string.Equals(userDeploymentSettings.RecipeId, selectedRecommendation.Recipe.Id, StringComparison.InvariantCultureIgnoreCase))
-                        throw new InvalidUserDeploymentSettingsException("The recipe ID specified as part of the deployment configuration file" +
-                            " does not match the original recipe used to deploy the application stack.");
-                }
-
-                selectedRecommendation.ApplyPreviousSettings(existingCloudApplicationMetadata.Settings);
-
-                var header = $"Loading {deployedApplication.Name} settings:";
-
-                _toolInteractiveService.WriteLine(header);
-                _toolInteractiveService.WriteLine(new string('-', header.Length));
-                var optionSettings =
-                    selectedRecommendation
-                        .Recipe
-                        .OptionSettings
-                        .Where(x =>
-                            {
-                                if (!selectedRecommendation.IsOptionSettingDisplayable(x))
-                                    return false;
-
-                                var value = selectedRecommendation.GetOptionSettingValue(x);
-                                if (value == null || value.ToString() == string.Empty || object.Equals(value, x.DefaultValue))
-                                    return false;
-
-                                return true;
-                            })
-                        .ToArray();
-
-                foreach (var setting in optionSettings)
-                {
-                    DisplayOptionSetting(selectedRecommendation, setting, -1, optionSettings.Length, DisplayOptionSettingsMode.Readonly);
-                }
-            }
+                // preset settings for deployment based on last deployment.
+                selectedRecommendation = await GetSelectedRecommendationFromPreviousDeployment(recommendations, deployedApplication, userDeploymentSettings);
             else
-            {
                 selectedRecommendation = GetSelectedRecommendation(userDeploymentSettings, recommendations);
-            }
 
-            // Apply the user enter project name to the recommendation so that any default settings based on project name are applied.
-            selectedRecommendation.OverrideProjectName(cloudApplicationName);
+            var cloudApplication = new CloudApplication(cloudApplicationName, selectedRecommendation.Recipe.Id);
 
+            return (orchestrator, selectedRecommendation, cloudApplication);
+        }
+
+        /// <summary>
+        /// Checks if the system meets all the necessary requirements for deployment.
+        /// </summary>
+        /// <param name="session">Holds metadata about the deployment project and the AWS account used for deployment.<see cref="OrchestratorSession"/></param>
+        /// <param name="selectedRecommendation">The selected recommendation settings used for deployment.<see cref="Recommendation"/></param>
+        public async Task EvaluateSystemCapabilities(OrchestratorSession session, Recommendation selectedRecommendation)
+        {
             if (_session.SystemCapabilities == null)
                 throw new SystemCapabilitiesNotProvidedException("The system capabilities were not provided.");
 
@@ -181,6 +160,19 @@ namespace AWS.Deploy.CLI.Commands
                     throw new DockerContainerTypeException("The deployment tool requires Docker to be running in linux mode. Please switch Docker to linux mode to continue.");
                 }
             }
+        }
+
+        /// <summary>
+        /// Configure option setings using the CLI or a user provided configuration file.
+        /// </summary>
+        /// <param name="cloudApplication"><see cref="CloudApplication"/></param>
+        /// <param name="orchestrator"><see cref="Orchestrator"/></param>
+        /// <param name="selectedRecommendation"><see cref="Recommendation"/></param>
+        /// <param name="userDeploymentSettings"><see cref="UserDeploymentSettings"/></param>
+        public async Task ConfigureDeployment(CloudApplication cloudApplication, Orchestrator orchestrator, Recommendation selectedRecommendation, UserDeploymentSettings? userDeploymentSettings)
+        {
+            // Apply the user entered project name to the recommendation so that any default settings based on project name are applied.
+            selectedRecommendation.OverrideProjectName(cloudApplication.Name);
 
             var deploymentBundleDefinition = orchestrator.GetDeploymentBundleDefinition(selectedRecommendation);
 
@@ -188,24 +180,70 @@ namespace AWS.Deploy.CLI.Commands
 
             if (userDeploymentSettings != null)
             {
-                ConfigureDeployment(selectedRecommendation, deploymentBundleDefinition, userDeploymentSettings);
+                ConfigureDeploymentFromConfigFile(selectedRecommendation, deploymentBundleDefinition, userDeploymentSettings);
             }
-            
+
             if (!_toolInteractiveService.DisableInteractive)
             {
-                await ConfigureDeployment(selectedRecommendation, configurableOptionSettings, false);
-            } 
+                await ConfigureDeploymentFromCli(selectedRecommendation, configurableOptionSettings, false);
+            }
+        }
 
-            var cloudApplication = new CloudApplication(cloudApplicationName, string.Empty);
-
-            if (!ConfirmDeployment(selectedRecommendation))
+        private async Task<List<Recommendation>> GenerateDeploymentRecommendations(Orchestrator orchestrator)
+        {
+            var recommendations = await orchestrator.GenerateDeploymentRecommendations();
+            if (recommendations.Count == 0)
             {
-                return;
+                throw new FailedToGenerateAnyRecommendations("The project you are trying to deploy is currently not supported.");
+            }
+            return recommendations;
+        }
+
+        private async Task<Recommendation> GetSelectedRecommendationFromPreviousDeployment(List<Recommendation> recommendations, CloudApplication deployedApplication, UserDeploymentSettings? userDeploymentSettings)
+        {
+            var existingCloudApplicationMetadata = await _templateMetadataReader.LoadCloudApplicationMetadata(deployedApplication.Name);
+
+            var selectedRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, deployedApplication.RecipeId, StringComparison.InvariantCultureIgnoreCase));
+
+            if (selectedRecommendation == null)
+                throw new FailedToFindCompatibleRecipeException("A compatible recipe was not found for the deployed application.");
+
+            if (userDeploymentSettings != null && !string.IsNullOrEmpty(userDeploymentSettings.RecipeId))
+            {
+                if (!string.Equals(userDeploymentSettings.RecipeId, selectedRecommendation.Recipe.Id, StringComparison.InvariantCultureIgnoreCase))
+                    throw new InvalidUserDeploymentSettingsException("The recipe ID specified as part of the deployment configuration file" +
+                        " does not match the original recipe used to deploy the application stack.");
             }
 
-            await CreateDeploymentBundle(orchestrator, selectedRecommendation, cloudApplication);
+            selectedRecommendation.ApplyPreviousSettings(existingCloudApplicationMetadata.Settings);
 
-            await orchestrator.DeployRecommendation(cloudApplication, selectedRecommendation);
+            var header = $"Loading {deployedApplication.Name} settings:";
+
+            _toolInteractiveService.WriteLine(header);
+            _toolInteractiveService.WriteLine(new string('-', header.Length));
+            var optionSettings =
+                selectedRecommendation
+                    .Recipe
+                    .OptionSettings
+                    .Where(x =>
+                    {
+                        if (!selectedRecommendation.IsOptionSettingDisplayable(x))
+                            return false;
+
+                        var value = selectedRecommendation.GetOptionSettingValue(x);
+                        if (value == null || value.ToString() == string.Empty || object.Equals(value, x.DefaultValue))
+                            return false;
+
+                        return true;
+                    })
+                    .ToArray();
+
+            foreach (var setting in optionSettings)
+            {
+                DisplayOptionSetting(selectedRecommendation, setting, -1, optionSettings.Length, DisplayOptionSettingsMode.Readonly);
+            }
+
+            return selectedRecommendation;
         }
 
         /// <summary>
@@ -213,8 +251,8 @@ namespace AWS.Deploy.CLI.Commands
         /// </summary>
         /// <param name="recommendation">The selected recommendation settings used for deployment <see cref="Recommendation"/></param>
         /// <param name="deploymentBundleDefinition">The container for the deployment bundle used by an application. <see cref="DeploymentBundleDefinition"/></param>
-        /// <param name="userDeploymentSettings">The deserialized object from the user provided config file. <see cref="UserDeploymentSettings"></param>
-        private void ConfigureDeployment(Recommendation recommendation, DeploymentBundleDefinition deploymentBundleDefinition, UserDeploymentSettings userDeploymentSettings)
+        /// <param name="userDeploymentSettings">The deserialized object from the user provided config file. <see cref="UserDeploymentSettings"/></param>
+        private void ConfigureDeploymentFromConfigFile(Recommendation recommendation, DeploymentBundleDefinition deploymentBundleDefinition, UserDeploymentSettings userDeploymentSettings)
         {
             foreach (var entry in userDeploymentSettings.LeafOptionSettingItems)
             {
@@ -260,6 +298,27 @@ namespace AWS.Deploy.CLI.Commands
                         SetDeploymentBundleOptionSetting(recommendation, optionSetting.Id, settingValue);
                 }
             }
+
+            var validatorFailedResults =
+                        recommendation.Recipe
+                            .BuildValidators()
+                            .Select(validator => validator.Validate(recommendation.Recipe, _session))
+                            .Where(x => !x.IsValid)
+                            .ToList();
+
+            if (!validatorFailedResults.Any())
+            {
+                // validation successful
+                // deployment configured
+                return;
+            }
+
+            var errorMessage = "The deployment configuration needs to be adjusted before it can be deployed:" + Environment.NewLine;
+            foreach (var result in validatorFailedResults)
+            {
+                errorMessage += result.ValidationFailedMessage + Environment.NewLine;
+            }
+            throw new InvalidUserDeploymentSettingsException(errorMessage.Trim());
         }
 
         private void SetDeploymentBundleOptionSetting(Recommendation recommendation, string optionSettingId, object settingValue)
@@ -288,22 +347,32 @@ namespace AWS.Deploy.CLI.Commands
 
         private string GetCloudApplicationName(string? stackName, UserDeploymentSettings? userDeploymentSettings, List<CloudApplication> deployedApplications)
         {
+            // validate the stackName provided by the --stack-name cli argument if present.
             if (!string.IsNullOrEmpty(stackName))
-                return stackName;
-
-            if (userDeploymentSettings == null || string.IsNullOrEmpty(userDeploymentSettings.StackName))
             {
-                if (_toolInteractiveService.DisableInteractive)
-                {
-                    var message = "The \"--silent\" CLI argument can only be used if a CDK stack name is provided either via the CLI argument \"--stack-name\" or through a deployment-settings file. " +
-                    "Please provide a stack name and try again";
-                    throw new InvalidCliArgumentException(message);
-                }
-                return AskUserForCloudApplicationName(_session.ProjectDefinition, deployedApplications);
+                if (_cloudApplicationNameGenerator.IsValidName(stackName))
+                    return stackName;
+
+                PrintInvalidStackNameMessage();
+                throw new InvalidCliArgumentException("Found invalid CLI arguments");
             }
-            
-            _toolInteractiveService.WriteLine($"Configuring Stack Name with specified value '{userDeploymentSettings.StackName}'.");
-            return userDeploymentSettings.StackName;
+
+            if (userDeploymentSettings != null && !string.IsNullOrEmpty(userDeploymentSettings.StackName))
+            {
+                if (_cloudApplicationNameGenerator.IsValidName(userDeploymentSettings.StackName))
+                    return userDeploymentSettings.StackName;
+
+                PrintInvalidStackNameMessage();
+                throw new InvalidUserDeploymentSettingsException("Please provide a valid stack name and try again.");
+            }
+
+            if (_toolInteractiveService.DisableInteractive)
+            {
+                var message = "The \"--silent\" CLI argument can only be used if a CDK stack name is provided either via the CLI argument \"--stack-name\" or through a deployment-settings file. " +
+                "Please provide a stack name and try again";
+                throw new InvalidCliArgumentException(message);
+            }
+            return AskUserForCloudApplicationName(_session.ProjectDefinition, deployedApplications);
         }
 
         private Recommendation GetSelectedRecommendation(UserDeploymentSettings? userDeploymentSettings, List<Recommendation> recommendations)
@@ -324,6 +393,7 @@ namespace AWS.Deploy.CLI.Commands
             if (selectedRecommendation == null)
                 throw new InvalidUserDeploymentSettingsException($"The user deployment settings provided contains an invalid value for the property '{nameof(userDeploymentSettings.RecipeId)}'.");
 
+            _toolInteractiveService.WriteLine();
             _toolInteractiveService.WriteLine($"Configuring Recommendation with specified value '{selectedRecommendation.Name}'.");
             return selectedRecommendation;
         }
@@ -354,7 +424,8 @@ namespace AWS.Deploy.CLI.Commands
                         _consoleUtilities.AskUserForValue(
                             title,
                             defaultName,
-                            allowEmpty: false);
+                            allowEmpty: false,
+                            defaultAskValuePrompt: Constants.CLI.PROMPT_NEW_STACK_NAME);
                 }
                 else
                 {
@@ -366,7 +437,10 @@ namespace AWS.Deploy.CLI.Commands
                             existingApplications.Select(x => x.Name),
                             title,
                             askNewName: true,
-                            defaultNewName: defaultName);
+                            defaultNewName: defaultName,
+                            defaultChoosePrompt: Constants.CLI.PROMPT_CHOOSE_STACK_NAME,
+                            defaultCreateNewPrompt: Constants.CLI.PROMPT_NEW_STACK_NAME,
+                            defaultCreateNewLabel: Constants.CLI.CREATE_NEW_STACK_LABEL) ;
 
                     cloudApplicationName = userResponse.SelectedOption ?? userResponse.NewName;
                 }
@@ -382,8 +456,8 @@ namespace AWS.Deploy.CLI.Commands
         private void PrintInvalidStackNameMessage()
         {
             _toolInteractiveService.WriteLine();
-            _toolInteractiveService.WriteLine(
-                "Invalid stack name.  A stack name can contain only alphanumeric characters (case-sensitive) and hyphens. " +
+            _toolInteractiveService.WriteErrorLine(
+                "Invalid stack name. A stack name can contain only alphanumeric characters (case-sensitive) and hyphens. " +
                 "It must start with an alphabetic character and can't be longer than 128 characters");
         }
 
@@ -441,7 +515,7 @@ namespace AWS.Deploy.CLI.Commands
             }
         }
 
-        private async Task ConfigureDeployment(Recommendation recommendation, IEnumerable<OptionSettingItem> configurableOptionSettings, bool showAdvancedSettings)
+        private async Task ConfigureDeploymentFromCli(Recommendation recommendation, IEnumerable<OptionSettingItem> configurableOptionSettings, bool showAdvancedSettings)
         {
             _toolInteractiveService.WriteLine(string.Empty);
 
@@ -514,7 +588,7 @@ namespace AWS.Deploy.CLI.Commands
                     selectedNumber >= 1 &&
                     selectedNumber <= optionSettings.Length)
                 {
-                    await ConfigureDeployment(recommendation, optionSettings[selectedNumber - 1]);
+                    await ConfigureDeploymentFromCli(recommendation, optionSettings[selectedNumber - 1]);
                 }
 
                 _toolInteractiveService.WriteLine();
@@ -536,7 +610,7 @@ namespace AWS.Deploy.CLI.Commands
             DisplayValue(recommendation, optionSetting, optionSettingNumber, optionSettingsCount, typeHintResponseType, mode);
         }
 
-        private async Task ConfigureDeployment(Recommendation recommendation, OptionSettingItem setting)
+        private async Task ConfigureDeploymentFromCli(Recommendation recommendation, OptionSettingItem setting)
         {
             _toolInteractiveService.WriteLine(string.Empty);
             _toolInteractiveService.WriteLine($"{setting.Name}:");
@@ -582,7 +656,7 @@ namespace AWS.Deploy.CLI.Commands
                             foreach (var childSetting in setting.ChildOptionSettings)
                             {
                                 if (recommendation.IsOptionSettingDisplayable(childSetting))
-                                    await ConfigureDeployment(recommendation, childSetting);
+                                    await ConfigureDeploymentFromCli(recommendation, childSetting);
                             }
                             break;
                         default:
@@ -602,7 +676,7 @@ namespace AWS.Deploy.CLI.Commands
                     _toolInteractiveService.WriteErrorLine(
                         $"Value [{settingValue}] is not valid: {ex.Message}");
 
-                    await ConfigureDeployment(recommendation, setting);
+                    await ConfigureDeploymentFromCli(recommendation, setting);
                 }
             }
         }
