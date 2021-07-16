@@ -16,8 +16,8 @@ namespace AWS.Deploy.Orchestration
     {
         public ProjectDefinition ProjectDefinition { get; set; }
         public string? AWSProfileName { get; set; }
-        public AWSCredentials AWSCredentials { get; set; }
-        public string AWSRegion { get; set; }
+        public AWSCredentials? AWSCredentials { get; set; }
+        public string? AWSRegion { get; set; }
         /// <remarks>
         /// Calculating the current <see cref="SystemCapabilities"/> can take several seconds
         /// and is not needed immediately so it is run as a background Task.
@@ -25,7 +25,7 @@ namespace AWS.Deploy.Orchestration
         /// It's safe to repeatedly await this property; evaluation will only be done once.
         /// </remarks>
         public Task<SystemCapabilities>? SystemCapabilities { get; set; }
-        public string AWSAccountId { get; set; }
+        public string? AWSAccountId { get; set; }
 
         public OrchestratorSession(
             ProjectDefinition projectDefinition,
@@ -37,6 +37,11 @@ namespace AWS.Deploy.Orchestration
             AWSCredentials = awsCredentials;
             AWSRegion = awsRegion;
             AWSAccountId = awsAccountId;
+        }
+
+        public OrchestratorSession(ProjectDefinition projectDefinition)
+        {
+            ProjectDefinition = projectDefinition;
         }
     }
 }

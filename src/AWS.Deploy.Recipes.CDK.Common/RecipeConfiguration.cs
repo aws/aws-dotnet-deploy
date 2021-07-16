@@ -59,12 +59,12 @@ namespace AWS.Deploy.Recipes.CDK.Common
         /// <summary>
         /// The Region used during deployment. 
         /// </summary>
-        public string AWSRegion { get; set; }
+        public string? AWSRegion { get; set; }
 
         /// <summary>
         /// The account ID used during deployment.
         /// </summary>
-        public string AWSAccountId { get; set; }
+        public string? AWSAccountId { get; set; }
 
         /// A parameterless constructor is needed for <see cref="Microsoft.Extensions.Configuration.ConfigurationBuilder"/>
         /// or the classes will fail to initialize.
@@ -77,7 +77,7 @@ namespace AWS.Deploy.Recipes.CDK.Common
 #nullable restore warnings
 
         public RecipeConfiguration(string stackName, string projectPath, string recipeId, string recipeVersion,
-             string awsAccountId, string awsRegion,  T settings)
+             string? awsAccountId, string? awsRegion,  T settings)
         {
             StackName = stackName;
             ProjectPath = projectPath;

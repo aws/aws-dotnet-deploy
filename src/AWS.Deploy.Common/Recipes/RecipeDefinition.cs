@@ -62,12 +62,12 @@ namespace AWS.Deploy.Common.Recipes
         /// <summary>
         /// The location of the CDK project template relative from the recipe definition file.
         /// </summary>
-        public string CdkProjectTemplate { get; set; }
+        public string? CdkProjectTemplate { get; set; }
 
         /// <summary>
         /// The ID of the CDK project template for the template generator.
         /// </summary>
-        public string CdkProjectTemplateId { get; set; }
+        public string? CdkProjectTemplateId { get; set; }
 
         /// <summary>
         /// The rules used by the recommendation engine to determine if the recipe definition is compatible with the project.
