@@ -18,6 +18,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
         private readonly App _app;
         private readonly InMemoryInteractiveService _interactiveService;
         private readonly string _targetApplicationProjectPath;
+        private readonly string _deploymentManifestFilePath;
 
         private bool _isDisposed;
         private string _saveDirectoryPath;
@@ -38,6 +39,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             Assert.NotNull(_interactiveService);
 
             _targetApplicationProjectPath = Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj");
+            _deploymentManifestFilePath = Path.Combine("testapps", "WebAppWithDockerFile", "aws-deployments.json");
         }
 
         [Fact]
@@ -64,11 +66,16 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             Assert.True(File.Exists(Path.Combine(_saveDirectoryPath, "cdk.json")));
             Assert.True(Directory.EnumerateFiles(_saveDirectoryPath, "*.recipe").Any());
 
-            // Delete save directory
-            Directory.Delete(_saveDirectoryPath, true);
+            // Verify deployment-manifest file is generated
+            Assert.True(File.Exists(_deploymentManifestFilePath));
 
-            // Verify directory is deleted
+            // Delete generated artifacts
+            Directory.Delete(_saveDirectoryPath, true);
+            File.Delete(_deploymentManifestFilePath);
+
+            // Verify artifacts are deleted
             Assert.False(Directory.Exists(_saveDirectoryPath));
+            Assert.False(File.Exists(_deploymentManifestFilePath));
         }
 
         [Fact]
@@ -96,11 +103,16 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             Assert.True(File.Exists(Path.Combine(_saveDirectoryPath, "cdk.json")));
             Assert.True(Directory.EnumerateFiles(_saveDirectoryPath, "*.recipe").Any());
 
-            // Delete save directory
-            Directory.Delete(_saveDirectoryPath, true);
+            // Verify deployment-manifest file is generated
+            Assert.True(File.Exists(_deploymentManifestFilePath));
 
-            // Verify directory is deleted
+            // Delete generated artifacts
+            Directory.Delete(_saveDirectoryPath, true);
+            File.Delete(_deploymentManifestFilePath);
+
+            // Verify artifacts are deleted
             Assert.False(Directory.Exists(_saveDirectoryPath));
+            Assert.False(File.Exists(_deploymentManifestFilePath));
         }
 
         [Fact]
@@ -149,11 +161,11 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 
             if (disposing)
             {
-                var directoryExists = Directory.Exists(_saveDirectoryPath);
-                if (directoryExists)
-                {
+                if (Directory.Exists(_saveDirectoryPath))
                     Directory.Delete(_saveDirectoryPath, true);
-                }
+
+                if (File.Exists(_deploymentManifestFilePath))
+                    File.Delete(_deploymentManifestFilePath);
             }
 
             _isDisposed = true;

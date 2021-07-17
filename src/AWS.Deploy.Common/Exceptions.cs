@@ -167,6 +167,14 @@ namespace AWS.Deploy.Common
     {
         public NoDeploymentBundleDefinitionsFoundException(string message, Exception? innerException = null) : base(message, innerException) { }
     }
+    
+    /// Exception thrown if a failure occured while trying to update the deployment manifest file.
+    /// </summary>
+    [AWSDeploymentExpectedException]
+    public class FailedToUpdateDeploymentManifestFileException : Exception
+    {
+        public FailedToUpdateDeploymentManifestFileException(string message, Exception? innerException = null) : base(message, innerException) { }
+    }
 
     /// <summary>
     /// Indicates a specific strongly typed Exception can be anticipated.
