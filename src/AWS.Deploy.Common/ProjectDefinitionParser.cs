@@ -33,10 +33,18 @@ namespace AWS.Deploy.Common
             _directoryManager = directoryManager;
         }
 
+        /// <summary>
+        /// This method parses the target application project and sets the
+        /// appropriate metadata as part of the <see cref="ProjectDefinition"/>
+        /// </summary>
+        /// <param name="projectPath">The project path can be an absolute or a relative path to the
+        /// target application project directory or the application project file.</param>
+        /// <returns><see cref="ProjectDefinition"/></returns>
         public async Task<ProjectDefinition> Parse(string projectPath)
         {
             if (_directoryManager.Exists(projectPath))
             {
+                projectPath = _directoryManager.GetDirectoryInfo(projectPath).FullName;
                 var files = _directoryManager.GetFiles(projectPath, "*.csproj");
                 if (files.Length == 1)
                 {
