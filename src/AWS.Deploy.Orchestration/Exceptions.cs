@@ -86,15 +86,6 @@ namespace AWS.Deploy.Orchestration
     }
 
     /// <summary>
-    /// Exception is thrown if we cannot retrieve deployment bundle definitions
-    /// </summary>
-    [AWSDeploymentExpectedException]
-    public class NoDeploymentBundleDefinitionsFoundException : Exception
-    {
-        public NoDeploymentBundleDefinitionsFoundException(string message, Exception? innerException = null) : base(message, innerException) { }
-    }
-
-    /// <summary>
     /// Exception is thrown if we cannot retrieve recipe definitions
     /// </summary>
     [AWSDeploymentExpectedException]

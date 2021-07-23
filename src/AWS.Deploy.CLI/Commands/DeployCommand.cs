@@ -174,13 +174,11 @@ namespace AWS.Deploy.CLI.Commands
             // Apply the user entered project name to the recommendation so that any default settings based on project name are applied.
             selectedRecommendation.OverrideProjectName(cloudApplication.Name);
 
-            var deploymentBundleDefinition = orchestrator.GetDeploymentBundleDefinition(selectedRecommendation);
-
-            var configurableOptionSettings = selectedRecommendation.Recipe.OptionSettings.Union(deploymentBundleDefinition.Parameters);
+            var configurableOptionSettings = selectedRecommendation.GetConfigurableOptionSettingItems();
 
             if (userDeploymentSettings != null)
             {
-                ConfigureDeploymentFromConfigFile(selectedRecommendation, deploymentBundleDefinition, userDeploymentSettings);
+                ConfigureDeploymentFromConfigFile(selectedRecommendation, userDeploymentSettings);
             }
 
             if (!_toolInteractiveService.DisableInteractive)
@@ -250,23 +248,16 @@ namespace AWS.Deploy.CLI.Commands
         /// This method is used to set the values for Option Setting Items when a deployment is being performed using a user specifed config file.
         /// </summary>
         /// <param name="recommendation">The selected recommendation settings used for deployment <see cref="Recommendation"/></param>
-        /// <param name="deploymentBundleDefinition">The container for the deployment bundle used by an application. <see cref="DeploymentBundleDefinition"/></param>
         /// <param name="userDeploymentSettings">The deserialized object from the user provided config file. <see cref="UserDeploymentSettings"/></param>
-        private void ConfigureDeploymentFromConfigFile(Recommendation recommendation, DeploymentBundleDefinition deploymentBundleDefinition, UserDeploymentSettings userDeploymentSettings)
+        private void ConfigureDeploymentFromConfigFile(Recommendation recommendation, UserDeploymentSettings userDeploymentSettings)
         {
             foreach (var entry in userDeploymentSettings.LeafOptionSettingItems)
             {
                 var optionSettingJsonPath = entry.Key;
                 var optionSettingValue = entry.Value;
 
-                var isPartOfDeploymentBundle = true;
-                var optionSetting = deploymentBundleDefinition.Parameters.FirstOrDefault(x => x.Id.Equals(optionSettingJsonPath));
-                if (optionSetting == null)
-                {
-                    optionSetting = recommendation.GetOptionSetting(optionSettingJsonPath);
-                    isPartOfDeploymentBundle = false;
-                }
-                    
+                var optionSetting = recommendation.GetOptionSetting(optionSettingJsonPath);
+
                 if (!recommendation.IsExistingCloudApplication || optionSetting.Updatable)
                 {
                     object settingValue;
@@ -291,11 +282,10 @@ namespace AWS.Deploy.CLI.Commands
                     {
                         throw new InvalidOverrideValueException($"Invalid value {optionSettingValue} for option setting item {optionSettingJsonPath}");
                     }
-                    
+
                     optionSetting.SetValueOverride(settingValue);
 
-                    if (isPartOfDeploymentBundle)
-                        SetDeploymentBundleOptionSetting(recommendation, optionSetting.Id, settingValue);
+                    SetDeploymentBundleOptionSetting(recommendation, optionSetting.Id, settingValue);
                 }
             }
 
@@ -341,7 +331,7 @@ namespace AWS.Deploy.CLI.Commands
                     new DotnetPublishSelfContainedBuildCommand(_consoleUtilities).OverrideValue(recommendation, (bool)settingValue);
                     break;
                 default:
-                    throw new OptionSettingItemDoesNotExistException($"The Option Setting Item { optionSettingId } does not exist.");
+                    return;
             }
         }
 
@@ -485,7 +475,7 @@ namespace AWS.Deploy.CLI.Commands
                         errorMessage += "Specify a valid Docker execution directory as part of the deployment settings file and try again.";
                         throw new DockerBuildFailedException(errorMessage);
                     }
-                        
+
                     _toolInteractiveService.WriteLine(string.Empty);
                     var answer = _consoleUtilities.AskYesNoQuestion("Do you want to go back and modify the current configuration?", "true");
                     if (answer == YesNo.Yes)
