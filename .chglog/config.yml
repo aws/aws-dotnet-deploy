@@ -17,7 +17,20 @@ options:
         - build
         - ci
         - chore
+    sort_by: Subject
   commit_groups:
+    sort_by: Custom
+    title_order:
+      - feat
+      - fix
+      - docs
+      - style
+      - refactor
+      - perf
+      - test
+      - build
+      - ci
+      - chore
     title_maps:
       feat: Features
       fix: Bug Fixes
