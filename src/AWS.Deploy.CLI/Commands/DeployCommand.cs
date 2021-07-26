@@ -215,7 +215,7 @@ namespace AWS.Deploy.CLI.Commands
                         " does not match the original recipe used to deploy the application stack.");
             }
 
-            selectedRecommendation.ApplyPreviousSettings(existingCloudApplicationMetadata.Settings);
+            selectedRecommendation = selectedRecommendation.ApplyPreviousSettings(existingCloudApplicationMetadata.Settings);
 
             var header = $"Loading {deployedApplication.Name} settings:";
 

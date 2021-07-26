@@ -302,7 +302,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 }
 
                 var existingCloudApplicationMetadata = await templateMetadataReader.LoadCloudApplicationMetadata(input.ExistingDeploymentName);
-                state.SelectedRecommendation.ApplyPreviousSettings(existingCloudApplicationMetadata.Settings);
+                state.SelectedRecommendation = state.SelectedRecommendation.ApplyPreviousSettings(existingCloudApplicationMetadata.Settings);
 
                 state.ApplicationDetails.Name = input.ExistingDeploymentName;
                 state.ApplicationDetails.RecipeId = existingDeployment.RecipeId;

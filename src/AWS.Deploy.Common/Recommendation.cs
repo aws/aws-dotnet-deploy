@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using AWS.Deploy.Common.Extensions;
 using AWS.Deploy.Common.Recipes;
 
 namespace AWS.Deploy.Common
@@ -32,6 +33,7 @@ namespace AWS.Deploy.Common
 
         public Recommendation(RecipeDefinition recipe, ProjectDefinition projectDefinition, int computedPriority, Dictionary<string, string> additionalReplacements)
         {
+            additionalReplacements ??= new Dictionary<string, string>();
             Recipe = recipe;
 
             ComputedPriority = computedPriority;
@@ -57,19 +59,20 @@ namespace AWS.Deploy.Common
             _replacementTokens[REPLACE_TOKEN_PROJECT_NAME] = name;
         }
 
-        public void ApplyPreviousSettings(IDictionary<string, object>? previousSettings)
+        public Recommendation ApplyPreviousSettings(IDictionary<string, object> previousSettings)
         {
-            if (previousSettings == null)
-                return;
+            var recommendation = this.DeepCopy();
 
-            ApplyPreviousSettings(Recipe.OptionSettings, previousSettings);
+            ApplyPreviousSettings(recommendation, previousSettings);
+
+            return recommendation;
         }
 
-        private void ApplyPreviousSettings(IEnumerable<OptionSettingItem> optionSettings, IDictionary<string, object> previousSettings)
+        private void ApplyPreviousSettings(Recommendation recommendation, IDictionary<string, object> previousSettings)
         {
-            IsExistingCloudApplication = true;
+            recommendation.IsExistingCloudApplication = true;
 
-            foreach (var optionSetting in optionSettings)
+            foreach (var optionSetting in recommendation.Recipe.OptionSettings)
             {
                 if (previousSettings.TryGetValue(optionSetting.Id, out var value))
                 {
