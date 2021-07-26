@@ -86,6 +86,9 @@ namespace AWS.Deploy.Common
 
         public IEnumerable<OptionSettingItem> GetConfigurableOptionSettingItems()
         {
+            if (DeploymentBundleSettings == null)
+                return Recipe.OptionSettings;
+
             return Recipe.OptionSettings.Union(DeploymentBundleSettings);
         }
 
