@@ -120,35 +120,6 @@ namespace AWS.Deploy.Orchestration
             }
         }
 
-        public DeploymentBundleDefinition GetDeploymentBundleDefinition(Recommendation recommendation)
-        {
-            var deploymentBundleDefinitionsPath = DeploymentBundleDefinitionLocator.FindDeploymentBundleDefinitionPath();
-
-            try
-            {
-                foreach (var deploymentBundleFile in Directory.GetFiles(deploymentBundleDefinitionsPath, "*.deploymentbundle", SearchOption.TopDirectoryOnly))
-                {
-                    try
-                    {
-                        var content = File.ReadAllText(deploymentBundleFile);
-                        var definition = JsonConvert.DeserializeObject<DeploymentBundleDefinition>(content);
-                        if (definition.Type.Equals(recommendation.Recipe.DeploymentBundle))
-                            return definition;
-                    }
-                    catch (Exception e)
-                    {
-                        throw new Exception($"Failed to Deserialize Deployment Bundle [{deploymentBundleFile}]: {e.Message}", e);
-                    }
-                }
-            }
-            catch(IOException)
-            {
-                throw new NoDeploymentBundleDefinitionsFoundException("Failed to find a deployment bundle definition");
-            }
-
-            throw new NoDeploymentBundleDefinitionsFoundException("Failed to find a deployment bundle definition");
-        }
-
         public async Task<bool> CreateContainerDeploymentBundle(CloudApplication cloudApplication, Recommendation recommendation)
         {
             if (_interactiveService == null)

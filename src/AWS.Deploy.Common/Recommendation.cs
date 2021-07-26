@@ -29,9 +29,11 @@ namespace AWS.Deploy.Common
 
         public DeploymentBundle DeploymentBundle { get; }
 
+        private readonly List<OptionSettingItem> DeploymentBundleSettings = new ();
+
         private readonly Dictionary<string, string> _replacementTokens = new();
 
-        public Recommendation(RecipeDefinition recipe, ProjectDefinition projectDefinition, int computedPriority, Dictionary<string, string> additionalReplacements)
+        public Recommendation(RecipeDefinition recipe, ProjectDefinition projectDefinition, List<OptionSettingItem> deploymentBundleSettings, int computedPriority, Dictionary<string, string> additionalReplacements)
         {
             additionalReplacements ??= new Dictionary<string, string>();
             Recipe = recipe;
@@ -40,6 +42,7 @@ namespace AWS.Deploy.Common
 
             ProjectDefinition = projectDefinition;
             DeploymentBundle = new DeploymentBundle();
+            DeploymentBundleSettings = deploymentBundleSettings;
 
             _replacementTokens[REPLACE_TOKEN_PROJECT_NAME] = Path.GetFileNameWithoutExtension(projectDefinition.ProjectPath);
 
@@ -81,6 +84,11 @@ namespace AWS.Deploy.Common
             }
         }
 
+        public IEnumerable<OptionSettingItem> GetConfigurableOptionSettingItems()
+        {
+            return Recipe.OptionSettings.Union(DeploymentBundleSettings);
+        }
+
         /// <summary>
         /// Interactively traverses given json path and returns target option setting.
         /// Throws exception if there is no <see cref="OptionSettingItem" /> that matches <paramref name="jsonPath"/> />
@@ -101,7 +109,7 @@ namespace AWS.Deploy.Common
 
             foreach (var id in ids)
             {
-                var optionSettings = optionSetting?.ChildOptionSettings ?? Recipe.OptionSettings;
+                var optionSettings = optionSetting?.ChildOptionSettings ?? GetConfigurableOptionSettingItems();
                 optionSetting = optionSettings.FirstOrDefault(os => os.Id.Equals(id));
                 if (optionSetting == null)
                 {

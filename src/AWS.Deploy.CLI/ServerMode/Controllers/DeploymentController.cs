@@ -150,9 +150,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
             var orchestrator = CreateOrchestrator(state);
 
-            var deploymentBundleDefinition = orchestrator.GetDeploymentBundleDefinition(state.SelectedRecommendation);
-
-            var configurableOptionSettings = state.SelectedRecommendation.Recipe.OptionSettings.Union(deploymentBundleDefinition.Parameters);
+            var configurableOptionSettings = state.SelectedRecommendation.GetConfigurableOptionSettingItems();
 
             var output = new GetOptionSettingsOutput();
             output.OptionSettings = ListOptionSettingSummary(state.SelectedRecommendation, configurableOptionSettings);
@@ -220,7 +218,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
             return Ok(output);
         }
-        
+
         /// <summary>
         /// Gets the list of existing deployments that are compatible with the session's project.
         /// </summary>
