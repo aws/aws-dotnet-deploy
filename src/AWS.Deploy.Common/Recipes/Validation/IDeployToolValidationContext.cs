@@ -16,6 +16,6 @@ namespace AWS.Deploy.Common.Recipes.Validation
     public interface IDeployToolValidationContext
     {
         ProjectDefinition ProjectDefinition { get; }
-        string AWSRegion { get; }
+        string? AWSRegion { get; }
     }
 }

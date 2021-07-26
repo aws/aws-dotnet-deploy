@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Recipes;
 using Newtonsoft.Json;
 
 namespace AWS.Deploy.Orchestration.RecommendationEngine
@@ -64,11 +65,41 @@ namespace AWS.Deploy.Orchestration.RecommendationEngine
                     continue;
                 }
 
-                recommendations.Add(new Recommendation(potentialRecipe, _orchestratorSession.ProjectDefinition, priority, additionalReplacements));
+                var deploymentBundleSettings = GetDeploymentBundleSettings(potentialRecipe.DeploymentBundle);
+                recommendations.Add(new Recommendation(potentialRecipe, _orchestratorSession.ProjectDefinition, deploymentBundleSettings, priority, additionalReplacements));
             }
 
             recommendations = recommendations.OrderByDescending(recommendation => recommendation.ComputedPriority).ToList();
             return recommendations;
+        }
+
+        public List<OptionSettingItem> GetDeploymentBundleSettings(DeploymentBundleTypes deploymentBundleTypes)
+        {
+            var deploymentBundleDefinitionsPath = DeploymentBundleDefinitionLocator.FindDeploymentBundleDefinitionPath();
+
+            try
+            {
+                foreach (var deploymentBundleFile in Directory.GetFiles(deploymentBundleDefinitionsPath, "*.deploymentbundle", SearchOption.TopDirectoryOnly))
+                {
+                    try
+                    {
+                        var content = File.ReadAllText(deploymentBundleFile);
+                        var definition = JsonConvert.DeserializeObject<DeploymentBundleDefinition>(content);
+                        if (definition.Type.Equals(deploymentBundleTypes))
+                            return definition.Parameters;
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exception($"Failed to Deserialize Deployment Bundle [{deploymentBundleFile}]: {e.Message}", e);
+                    }
+                }
+            }
+            catch(IOException)
+            {
+                throw new NoDeploymentBundleDefinitionsFoundException("Failed to find a deployment bundle definition");
+            }
+
+            throw new NoDeploymentBundleDefinitionsFoundException("Failed to find a deployment bundle definition");
         }
 
         public async Task<RulesResult> EvaluateRules(IList<RecommendationRuleItem> rules)

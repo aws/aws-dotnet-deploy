@@ -58,7 +58,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var projectPath = SystemIOUtilities.ResolvePath("ConsoleAppTask");
             var project = await _projectDefinitionParser.Parse(projectPath);
 
-            var recommendation = new Recommendation(_recipeDefinition, project, 100, new Dictionary<string, string>());
+            var recommendation = new Recommendation(_recipeDefinition, project, new List<OptionSettingItem>(), 100, new Dictionary<string, string>());
 
             var cloudApplication = new CloudApplication("ConsoleAppTask", String.Empty);
             var result = await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation);
@@ -77,7 +77,7 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var projectPath = SystemIOUtilities.ResolvePath("ConsoleAppTask");
             var project = await _projectDefinitionParser.Parse(projectPath);
-            var recommendation = new Recommendation(_recipeDefinition, project, 100, new Dictionary<string, string>());
+            var recommendation = new Recommendation(_recipeDefinition, project, new List<OptionSettingItem>(), 100, new Dictionary<string, string>());
 
             recommendation.DeploymentBundle.DockerExecutionDirectory = projectPath;
 
@@ -97,7 +97,7 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var projectPath = SystemIOUtilities.ResolvePath("ConsoleAppTask");
             var project = await _projectDefinitionParser.Parse(projectPath);
-            var recommendation = new Recommendation(_recipeDefinition, project, 100, new Dictionary<string, string>());
+            var recommendation = new Recommendation(_recipeDefinition, project, new List<OptionSettingItem>(), 100, new Dictionary<string, string>());
 
             var cloudApplication = new CloudApplication("ConsoleAppTask", String.Empty);
             await _deploymentBundleHandler.PushDockerImageToECR(cloudApplication, recommendation, "ConsoleAppTask:latest");
@@ -110,7 +110,7 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var projectPath = SystemIOUtilities.ResolvePath("ConsoleAppTask");
             var project = await _projectDefinitionParser.Parse(projectPath);
-            var recommendation = new Recommendation(_recipeDefinition, project, 100, new Dictionary<string, string>());
+            var recommendation = new Recommendation(_recipeDefinition, project, new List<OptionSettingItem>(), 100, new Dictionary<string, string>());
 
             recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild = false;
             recommendation.DeploymentBundle.DotnetPublishBuildConfiguration = "Release";
@@ -133,7 +133,7 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var projectPath = SystemIOUtilities.ResolvePath("ConsoleAppTask");
             var project = await _projectDefinitionParser.Parse(projectPath);
-            var recommendation = new Recommendation(_recipeDefinition, project, 100, new Dictionary<string, string>());
+            var recommendation = new Recommendation(_recipeDefinition, project, new List<OptionSettingItem>(), 100, new Dictionary<string, string>());
 
             recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild = true;
             recommendation.DeploymentBundle.DotnetPublishBuildConfiguration = "Release";

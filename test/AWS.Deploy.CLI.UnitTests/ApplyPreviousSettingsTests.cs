@@ -67,7 +67,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var settings = JsonConvert.DeserializeObject<Dictionary<string, object>>(serializedSettings);
 
-            beanstalkRecommendation.ApplyPreviousSettings(settings);
+            beanstalkRecommendation = beanstalkRecommendation.ApplyPreviousSettings(settings);
 
             var applicationIAMRoleOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("ApplicationIAMRole"));
             var typeHintResponse = beanstalkRecommendation.GetOptionSettingValue<IAMRoleTypeHintResponse>(applicationIAMRoleOptionSetting);
@@ -101,7 +101,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var settings = JsonConvert.DeserializeObject<Dictionary<string, object>>(serializedSettings);
 
-            fargateRecommendation.ApplyPreviousSettings(settings);
+            fargateRecommendation = fargateRecommendation.ApplyPreviousSettings(settings);
 
             var vpcOptionSetting = fargateRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("Vpc"));
 

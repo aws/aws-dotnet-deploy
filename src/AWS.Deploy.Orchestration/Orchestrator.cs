@@ -24,15 +24,15 @@ namespace AWS.Deploy.Orchestration
     {
         private const string REPLACE_TOKEN_LATEST_DOTNET_BEANSTALK_PLATFORM_ARN = "{LatestDotnetBeanstalkPlatformArn}";
 
-        private readonly ICdkProjectHandler _cdkProjectHandler;
-        private readonly ICDKManager _cdkManager;
-        private readonly IOrchestratorInteractiveService _interactiveService;
-        private readonly IAWSResourceQueryer _awsResourceQueryer;
-        private readonly IDeploymentBundleHandler _deploymentBundleHandler;
-        private readonly IDockerEngine _dockerEngine;
-        private readonly IList<string> _recipeDefinitionPaths;
+        private readonly ICdkProjectHandler? _cdkProjectHandler;
+        private readonly ICDKManager? _cdkManager;
+        private readonly IOrchestratorInteractiveService? _interactiveService;
+        private readonly IAWSResourceQueryer? _awsResourceQueryer;
+        private readonly IDeploymentBundleHandler? _deploymentBundleHandler;
+        private readonly IDockerEngine? _dockerEngine;
+        private readonly IList<string>? _recipeDefinitionPaths;
 
-        private readonly OrchestratorSession _session;
+        private readonly OrchestratorSession? _session;
 
         public Orchestrator(
             OrchestratorSession session,
@@ -54,9 +54,24 @@ namespace AWS.Deploy.Orchestration
             _recipeDefinitionPaths = recipeDefinitionPaths;
         }
 
-        public async Task<List<Recommendation>> GenerateDeploymentRecommendations()
+        public Orchestrator(OrchestratorSession session, IList<string> recipeDefinitionPaths)
         {
+            _session = session;
+            _recipeDefinitionPaths = recipeDefinitionPaths;
+        }
+
+        public async Task<List<Recommendation>> GenerateDeploymentRecommendations(bool forDeployment = true)
+        {
+            if (_recipeDefinitionPaths == null)
+                throw new InvalidOperationException($"{nameof(_recipeDefinitionPaths)} is null as part of the orchestartor object");
+            if (_session == null)
+                throw new InvalidOperationException($"{nameof(_session)} is null as part of the orchestartor object");
+
             var engine = new RecommendationEngine.RecommendationEngine(_recipeDefinitionPaths, _session);
+
+            if (!forDeployment)
+                return await engine.ComputeRecommendations();
+
             var additionalReplacements = await GetReplacements();
             return await engine.ComputeRecommendations(additionalReplacements);
         }
@@ -64,6 +79,9 @@ namespace AWS.Deploy.Orchestration
         public async Task<Dictionary<string, string>> GetReplacements()
         {
             var replacements = new Dictionary<string, string>();
+
+            if (_awsResourceQueryer == null)
+                throw new InvalidOperationException($"{nameof(_awsResourceQueryer)} is null as part of the Orchestrator object");
 
             var latestPlatform = await _awsResourceQueryer.GetLatestElasticBeanstalkPlatformArn();
             replacements[REPLACE_TOKEN_LATEST_DOTNET_BEANSTALK_PLATFORM_ARN] = latestPlatform.PlatformArn;
@@ -73,6 +91,15 @@ namespace AWS.Deploy.Orchestration
 
         public async Task DeployRecommendation(CloudApplication cloudApplication, Recommendation recommendation)
         {
+            if (_interactiveService == null)
+                throw new InvalidOperationException($"{nameof(_interactiveService)} is null as part of the orchestartor object");
+            if (_cdkManager == null)
+                throw new InvalidOperationException($"{nameof(_cdkManager)} is null as part of the orchestartor object");
+            if (_cdkProjectHandler == null)
+                throw new InvalidOperationException($"{nameof(_cdkProjectHandler)} is null as part of the orchestartor object");
+            if (_session == null)
+                throw new InvalidOperationException($"{nameof(_session)} is null as part of the orchestartor object");
+
             _interactiveService.LogMessageLine(string.Empty);
             _interactiveService.LogMessageLine($"Initiating deployment: {recommendation.Name}");
 
@@ -93,37 +120,15 @@ namespace AWS.Deploy.Orchestration
             }
         }
 
-        public DeploymentBundleDefinition GetDeploymentBundleDefinition(Recommendation recommendation)
-        {
-            var deploymentBundleDefinitionsPath = DeploymentBundleDefinitionLocator.FindDeploymentBundleDefinitionPath();
-
-            try
-            {
-                foreach (var deploymentBundleFile in Directory.GetFiles(deploymentBundleDefinitionsPath, "*.deploymentbundle", SearchOption.TopDirectoryOnly))
-                {
-                    try
-                    {
-                        var content = File.ReadAllText(deploymentBundleFile);
-                        var definition = JsonConvert.DeserializeObject<DeploymentBundleDefinition>(content);
-                        if (definition.Type.Equals(recommendation.Recipe.DeploymentBundle))
-                            return definition;
-                    }
-                    catch (Exception e)
-                    {
-                        throw new Exception($"Failed to Deserialize Deployment Bundle [{deploymentBundleFile}]: {e.Message}", e);
-                    }
-                }
-            }
-            catch(IOException)
-            {
-                throw new NoDeploymentBundleDefinitionsFoundException("Failed to find a deployment bundle definition");
-            }
-
-            throw new NoDeploymentBundleDefinitionsFoundException("Failed to find a deployment bundle definition");
-        }
-
         public async Task<bool> CreateContainerDeploymentBundle(CloudApplication cloudApplication, Recommendation recommendation)
         {
+            if (_interactiveService == null)
+                throw new InvalidOperationException($"{nameof(_recipeDefinitionPaths)} is null as part of the orchestartor object");
+            if (_dockerEngine == null)
+                throw new InvalidOperationException($"{nameof(_dockerEngine)} is null as part of the orchestartor object");
+            if (_deploymentBundleHandler == null)
+                throw new InvalidOperationException($"{nameof(_deploymentBundleHandler)} is null as part of the orchestartor object");
+
             if (!recommendation.ProjectDefinition.HasDockerFile)
             {
                 _interactiveService.LogMessageLine("Generating Dockerfile...");
@@ -159,6 +164,11 @@ namespace AWS.Deploy.Orchestration
 
         public async Task<bool> CreateDotnetPublishDeploymentBundle(Recommendation recommendation)
         {
+            if (_deploymentBundleHandler == null)
+                throw new InvalidOperationException($"{nameof(_deploymentBundleHandler)} is null as part of the orchestartor object");
+            if (_interactiveService == null)
+                throw new InvalidOperationException($"{nameof(_interactiveService)} is null as part of the orchestartor object");
+
             try
             {
                 await _deploymentBundleHandler.CreateDotnetPublishZip(recommendation);

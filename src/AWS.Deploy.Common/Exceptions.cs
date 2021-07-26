@@ -150,13 +150,30 @@ namespace AWS.Deploy.Common
     {
         public InvalidProjectPathException(string message, Exception? innerException = null) : base(message, innerException) { }
     }
-    
+
     /// Throw if an invalid <see cref="UserDeploymentSettings"/> is used.
     /// </summary>
     [AWSDeploymentExpectedException]
     public class InvalidUserDeploymentSettingsException : Exception
     {
         public InvalidUserDeploymentSettingsException(string message, Exception? innerException = null) : base(message, innerException) { }
+    }
+
+    /// <summary>
+    /// Exception is thrown if we cannot retrieve deployment bundle definitions
+    /// </summary>
+    [AWSDeploymentExpectedException]
+    public class NoDeploymentBundleDefinitionsFoundException : Exception
+    {
+        public NoDeploymentBundleDefinitionsFoundException(string message, Exception? innerException = null) : base(message, innerException) { }
+    }
+    
+    /// Exception thrown if a failure occured while trying to update the deployment manifest file.
+    /// </summary>
+    [AWSDeploymentExpectedException]
+    public class FailedToUpdateDeploymentManifestFileException : Exception
+    {
+        public FailedToUpdateDeploymentManifestFileException(string message, Exception? innerException = null) : base(message, innerException) { }
     }
 
     /// <summary>

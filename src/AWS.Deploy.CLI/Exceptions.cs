@@ -79,4 +79,13 @@ namespace AWS.Deploy.CLI
     {
         public FailedToFindCompatibleRecipeException(string message, Exception? innerException = null) : base(message, innerException) { }
     }
+
+    /// <summary>
+    /// Throw if the directory specified to save the CDK deployment project is invalid.
+    /// </summary>
+    [AWSDeploymentExpectedException]
+    public class InvalidSaveDirectoryForCdkProject : Exception
+    {
+        public InvalidSaveDirectoryForCdkProject(string message, Exception? innerException = null) : base(message, innerException) { }
+    }
 }

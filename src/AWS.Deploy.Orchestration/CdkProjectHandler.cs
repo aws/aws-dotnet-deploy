@@ -1,8 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.IO;
 using AWS.Deploy.Orchestration.CDK;
 using AWS.Deploy.Orchestration.Utilities;
 using AWS.Deploy.Recipes.CDK.Common;
@@ -12,6 +14,7 @@ namespace AWS.Deploy.Orchestration
     public interface ICdkProjectHandler
     {
         public Task CreateCdkDeployment(OrchestratorSession session, CloudApplication cloudApplication, Recommendation recommendation);
+        public Task<string> CreateCdkProjectForDeployment(Recommendation recommendation, OrchestratorSession session, string? saveDirectoryPath = null);
     }
 
     public class CdkProjectHandler : ICdkProjectHandler
@@ -19,12 +22,14 @@ namespace AWS.Deploy.Orchestration
         private readonly IOrchestratorInteractiveService _interactiveService;
         private readonly ICommandLineWrapper _commandLineWrapper;
         private readonly CdkAppSettingsSerializer _appSettingsBuilder;
+        private readonly IDirectoryManager _directoryManager;
 
         public CdkProjectHandler(IOrchestratorInteractiveService interactiveService, ICommandLineWrapper commandLineWrapper)
         {
             _interactiveService = interactiveService;
             _commandLineWrapper = commandLineWrapper;
             _appSettingsBuilder = new CdkAppSettingsSerializer();
+            _directoryManager = new DirectoryManager();
         }
 
         public async Task CreateCdkDeployment(OrchestratorSession session, CloudApplication cloudApplication, Recommendation recommendation)
@@ -61,18 +66,32 @@ namespace AWS.Deploy.Orchestration
                 needAwsCredentials: true);
         }
 
-        private async Task<string> CreateCdkProjectForDeployment(Recommendation recommendation, OrchestratorSession session)
+        public async Task<string> CreateCdkProjectForDeployment(Recommendation recommendation, OrchestratorSession session, string? saveCdkDirectoryPath = null)
         {
-            var tempDirectoryPath =
+            string? assemblyName;
+            if (string.IsNullOrEmpty(saveCdkDirectoryPath))
+            {
+                saveCdkDirectoryPath =
                 Path.Combine(
                     Constants.CDK.ProjectsDirectory,
                     Path.GetFileNameWithoutExtension(Path.GetRandomFileName()));
-            Directory.CreateDirectory(tempDirectoryPath);
+
+                assemblyName = recommendation.ProjectDefinition.AssemblyName;
+            }
+            else
+            {
+                assemblyName = _directoryManager.GetDirectoryInfo(saveCdkDirectoryPath).Name;
+            }
+
+            if (string.IsNullOrEmpty(assemblyName))
+                throw new ArgumentNullException("The assembly name for the CDK deployment project cannot be null");
+           
+            _directoryManager.CreateDirectory(saveCdkDirectoryPath);
 
             var templateEngine = new TemplateEngine();
-            await templateEngine.GenerateCDKProjectFromTemplate(recommendation, session, tempDirectoryPath);
+            await templateEngine.GenerateCDKProjectFromTemplate(recommendation, session, saveCdkDirectoryPath, assemblyName);
 
-            return tempDirectoryPath;
+            return saveCdkDirectoryPath;
         }
     }
 }

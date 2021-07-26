@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using AWS.Deploy.Common.Extensions;
 using AWS.Deploy.Common.Recipes;
 
 namespace AWS.Deploy.Common
@@ -28,16 +29,20 @@ namespace AWS.Deploy.Common
 
         public DeploymentBundle DeploymentBundle { get; }
 
+        private readonly List<OptionSettingItem> DeploymentBundleSettings = new ();
+
         private readonly Dictionary<string, string> _replacementTokens = new();
 
-        public Recommendation(RecipeDefinition recipe, ProjectDefinition projectDefinition, int computedPriority, Dictionary<string, string> additionalReplacements)
+        public Recommendation(RecipeDefinition recipe, ProjectDefinition projectDefinition, List<OptionSettingItem> deploymentBundleSettings, int computedPriority, Dictionary<string, string> additionalReplacements)
         {
+            additionalReplacements ??= new Dictionary<string, string>();
             Recipe = recipe;
 
             ComputedPriority = computedPriority;
 
             ProjectDefinition = projectDefinition;
             DeploymentBundle = new DeploymentBundle();
+            DeploymentBundleSettings = deploymentBundleSettings;
 
             _replacementTokens[REPLACE_TOKEN_PROJECT_NAME] = Path.GetFileNameWithoutExtension(projectDefinition.ProjectPath);
 
@@ -57,25 +62,34 @@ namespace AWS.Deploy.Common
             _replacementTokens[REPLACE_TOKEN_PROJECT_NAME] = name;
         }
 
-        public void ApplyPreviousSettings(IDictionary<string, object>? previousSettings)
+        public Recommendation ApplyPreviousSettings(IDictionary<string, object> previousSettings)
         {
-            if (previousSettings == null)
-                return;
+            var recommendation = this.DeepCopy();
 
-            ApplyPreviousSettings(Recipe.OptionSettings, previousSettings);
+            ApplyPreviousSettings(recommendation, previousSettings);
+
+            return recommendation;
         }
 
-        private void ApplyPreviousSettings(IEnumerable<OptionSettingItem> optionSettings, IDictionary<string, object> previousSettings)
+        private void ApplyPreviousSettings(Recommendation recommendation, IDictionary<string, object> previousSettings)
         {
-            IsExistingCloudApplication = true;
+            recommendation.IsExistingCloudApplication = true;
 
-            foreach (var optionSetting in optionSettings)
+            foreach (var optionSetting in recommendation.Recipe.OptionSettings)
             {
                 if (previousSettings.TryGetValue(optionSetting.Id, out var value))
                 {
                     optionSetting.SetValueOverride(value);
                 }
             }
+        }
+
+        public IEnumerable<OptionSettingItem> GetConfigurableOptionSettingItems()
+        {
+            if (DeploymentBundleSettings == null)
+                return Recipe.OptionSettings;
+
+            return Recipe.OptionSettings.Union(DeploymentBundleSettings);
         }
 
         /// <summary>
@@ -98,7 +112,7 @@ namespace AWS.Deploy.Common
 
             foreach (var id in ids)
             {
-                var optionSettings = optionSetting?.ChildOptionSettings ?? Recipe.OptionSettings;
+                var optionSettings = optionSetting?.ChildOptionSettings ?? GetConfigurableOptionSettingItems();
                 optionSetting = optionSettings.FirstOrDefault(os => os.Id.Equals(id));
                 if (optionSetting == null)
                 {
