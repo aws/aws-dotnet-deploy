@@ -40,5 +40,8 @@ namespace AWS.Deploy.CLI.Common.UnitTests.IO
 
         public bool IsEmpty(string path) =>
             throw new NotImplementedException("If your test needs this method, you'll need to implement this.");
+
+        public string GetRelativePath(string referenceFullPath, string targetFullPath) =>
+            throw new NotImplementedException("If your test needs this method, you'll need to implement this.");
     }
 }

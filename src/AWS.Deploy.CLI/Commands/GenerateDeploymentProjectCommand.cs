@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.DeploymentManifest;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestration;
@@ -28,6 +29,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly IDirectoryManager _directoryManager;
         private readonly IFileManager _fileManager;
         private readonly OrchestratorSession _session;
+        private readonly IDeploymentManifestEngine _deploymentManifestEngine;
         private readonly string _targetApplicationFullPath;
         
         public GenerateDeploymentProjectCommand(
@@ -38,6 +40,7 @@ namespace AWS.Deploy.CLI.Commands
             IDirectoryManager directoryManager,
             IFileManager fileManager,
             OrchestratorSession session,
+            IDeploymentManifestEngine deploymentManifestEngine,
             string targetApplicationFullPath)
         {
             _toolInteractiveService = toolInteractiveService;
@@ -47,6 +50,7 @@ namespace AWS.Deploy.CLI.Commands
             _directoryManager = directoryManager;
             _fileManager = fileManager;
             _session = session;
+            _deploymentManifestEngine = deploymentManifestEngine;
             _targetApplicationFullPath = targetApplicationFullPath;
         }
 
@@ -73,7 +77,8 @@ namespace AWS.Deploy.CLI.Commands
             {
                 if (newDirectoryCreated)
                     _directoryManager.Delete(saveCdkDirectoryPath);
-                throw new InvalidSaveDirectoryForCdkProject(errorMessage);
+                errorMessage = $"Failed to generate deployment project.{Environment.NewLine}{errorMessage}";
+                throw new InvalidSaveDirectoryForCdkProject(errorMessage.Trim());
             }
             
             var directoryUnderSourceControl = await IsDirectoryUnderSourceControl(saveCdkDirectoryPath);
@@ -98,9 +103,11 @@ namespace AWS.Deploy.CLI.Commands
             await _cdkProjectHandler.CreateCdkProjectForDeployment(selectedRecommendation, _session, saveCdkDirectoryPath);
             await GenerateDeploymentRecipeSnapShot(selectedRecommendation, saveCdkDirectoryPath, projectDisplayName);
 
-            var saveCdkDirectoryInfo = _directoryManager.GetDirectoryInfo(saveCdkDirectoryPath);
+            var saveCdkDirectoryFullPath = _directoryManager.GetDirectoryInfo(saveCdkDirectoryPath).FullName;
             _toolInteractiveService.WriteLine();
-            _toolInteractiveService.WriteLine($"The CDK deployment project is saved at: {saveCdkDirectoryInfo.FullName}");
+            _toolInteractiveService.WriteLine($"The CDK deployment project is saved at: {saveCdkDirectoryFullPath}");
+
+            await _deploymentManifestEngine.UpdateDeploymentManifestFile(saveCdkDirectoryFullPath, _targetApplicationFullPath);
         }
 
         /// <summary>

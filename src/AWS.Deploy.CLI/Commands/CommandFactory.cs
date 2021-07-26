@@ -16,6 +16,7 @@ using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.Utilities;
 using AWS.Deploy.CLI.Commands.CommandHandlerInput;
 using AWS.Deploy.Common.IO;
+using AWS.Deploy.Common.DeploymentManifest;
 
 namespace AWS.Deploy.CLI.Commands
 {
@@ -52,6 +53,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly IDeployedApplicationQueryer _deployedApplicationQueryer;
         private readonly ITypeHintCommandFactory _typeHintCommandFactory;
         private readonly IConsoleUtilities _consoleUtilities;
+        private readonly IDeploymentManifestEngine _deploymentManifestEngine;
 
         public CommandFactory(
             IToolInteractiveService toolInteractiveService,
@@ -69,7 +71,8 @@ namespace AWS.Deploy.CLI.Commands
             ITemplateMetadataReader templateMetadataReader,
             IDeployedApplicationQueryer deployedApplicationQueryer,
             ITypeHintCommandFactory typeHintCommandFactory,
-            IConsoleUtilities consoleUtilities)
+            IConsoleUtilities consoleUtilities,
+            IDeploymentManifestEngine deploymentManifestEngine)
         {
             _toolInteractiveService = toolInteractiveService;
             _orchestratorInteractiveService = orchestratorInteractiveService;
@@ -87,6 +90,7 @@ namespace AWS.Deploy.CLI.Commands
             _deployedApplicationQueryer = deployedApplicationQueryer;
             _typeHintCommandFactory = typeHintCommandFactory;
             _consoleUtilities = consoleUtilities;
+            _deploymentManifestEngine = deploymentManifestEngine;
         }
 
         public Command BuildRootCommand()
@@ -352,6 +356,7 @@ namespace AWS.Deploy.CLI.Commands
                         new DirectoryManager(),
                         new FileManager(),
                         session,
+                        _deploymentManifestEngine,
                         targetApplicationFullPath);
 
                     await generateDeploymentProject.ExecuteAsync(saveDirectory, projectDisplayName);
@@ -360,7 +365,6 @@ namespace AWS.Deploy.CLI.Commands
                 }
                 catch (Exception e) when (e.IsAWSDeploymentExpectedException())
                 {
-                    _toolInteractiveService.WriteErrorLine("Failed to generate deployment project.");
                     if (input.Diagnostics)
                         _toolInteractiveService.WriteErrorLine(e.PrettyPrint());
                     else
