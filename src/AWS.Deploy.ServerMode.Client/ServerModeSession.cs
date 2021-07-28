@@ -117,7 +117,7 @@ namespace AWS.Deploy.ServerMode.Client
                 if (!File.Exists(_deployToolPath))
                     throw new InvalidAssemblyReferenceException("The specified assembly location is invalid.");
 
-                deployToolRoot = $"dotnet {_deployToolPath}";
+                deployToolRoot = _deployToolPath;
             }
 
             var currentProcessId = Process.GetCurrentProcess().Id;
