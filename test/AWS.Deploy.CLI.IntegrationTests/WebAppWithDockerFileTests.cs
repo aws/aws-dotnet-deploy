@@ -17,7 +17,6 @@ using Task = System.Threading.Tasks.Task;
 
 namespace AWS.Deploy.CLI.IntegrationTests
 {
-    [Collection("Serial")]
     public class WebAppWithDockerFileTests : IDisposable
     {
         private readonly HttpHelper _httpHelper;

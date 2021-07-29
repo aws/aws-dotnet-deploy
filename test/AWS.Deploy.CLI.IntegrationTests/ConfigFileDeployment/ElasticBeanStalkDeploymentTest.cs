@@ -17,7 +17,6 @@ using Environment = System.Environment;
 
 namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
 {
-    [Collection("Serial")]
     public class ElasticBeanStalkDeploymentTest : IDisposable
     {
         private readonly HttpHelper _httpHelper;

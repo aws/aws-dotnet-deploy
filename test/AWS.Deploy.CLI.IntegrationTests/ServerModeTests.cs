@@ -27,7 +27,6 @@ using Xunit;
 
 namespace AWS.Deploy.CLI.IntegrationTests
 {
-    [Collection("Serial")]
     public class ServerModeTests : IDisposable
     {
         private bool _isDisposed;
@@ -165,7 +164,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             {
                 var baseUrl = $"http://localhost:{portNumber}/";
                 var restClient = new RestAPIClient(baseUrl, httpClient);
-                
+
                 await WaitTillServerModeReady(restClient);
 
                 var startSessionOutput = await restClient.StartDeploymentSessionAsync(new StartDeploymentSessionInput
