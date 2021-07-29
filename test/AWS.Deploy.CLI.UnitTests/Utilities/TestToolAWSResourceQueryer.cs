@@ -5,10 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Amazon.CloudFormation.Model;
+using Amazon.CloudWatchEvents.Model;
 using Amazon.EC2.Model;
 using Amazon.ECR.Model;
 using Amazon.ElasticBeanstalk.Model;
 using Amazon.IdentityManagement.Model;
+using Amazon.S3;
 using Amazon.SecurityToken.Model;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.Data;
@@ -54,5 +56,12 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
         public Task<List<ApplicationDescription>> ListOfElasticBeanstalkApplications() => throw new NotImplementedException();
         public Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(string applicationName) => throw new NotImplementedException();
         public Task<List<Role>> ListOfIAMRoles(string servicePrincipal) => throw new NotImplementedException();
+        public Task<List<StackResource>> DescribeCloudFormationResources(string stackName) => throw new NotImplementedException();
+        public Task<EnvironmentDescription> DescribeElasticBeanstalkEnvironment(string environmentId) => throw new NotImplementedException();
+        public Task<Amazon.ElasticLoadBalancingV2.Model.LoadBalancer> DescribeElasticLoadBalancer(string loadBalancerArn) => throw new NotImplementedException();
+        public Task<S3Region> GetS3BucketLocation(string bucketName) => throw new NotImplementedException();
+        public Task<List<Amazon.ElasticLoadBalancingV2.Model.Listener>> DescribeElasticLoadBalancerListeners(string loadBalancerArn) => throw new NotImplementedException();
+        public Task<DescribeRuleResponse> DescribeCloudWatchRule(string ruleName) => throw new NotImplementedException();
+        Task<string> IAWSResourceQueryer.GetS3BucketLocation(string bucketName) => throw new NotImplementedException();
     }
 }

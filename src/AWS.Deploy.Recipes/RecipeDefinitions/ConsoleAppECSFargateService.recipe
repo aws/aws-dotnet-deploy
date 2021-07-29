@@ -10,6 +10,21 @@
     "Description": "Deploy a console application as a service to Amazon Elastic Container Service (Amazon ECS). Recommended for applications that can be deployed as a container image. If your project does not contain a Dockerfile, one will be generated for the project.",
     "TargetService": "Amazon Elastic Container Service",
 
+    "DisplayedResources": [
+        {
+            "LogicalId": "ClusterEB0386A7",
+            "Description": "ECS Cluster"
+        },
+        {
+            "LogicalId": "FargateServiceAC2B3B85",
+            "Description": "ECS Service"
+        },
+        {
+            "LogicalId": "TaskDefinitionB36D86D9",
+            "Description": "ECS Task Definition"
+        }
+    ],
+
     "RecipePriority": 110,
     "RecommendationRules": [
         {

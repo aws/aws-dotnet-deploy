@@ -68,6 +68,9 @@
             "description": "The description of the recipe",
             "minLength": 1
         },
+        "DisplayedResources": {
+            "$ref": "#/definitions/DisplayedResources"
+        },
         "TargetService": {
             "type": "string",
             "title": "AWS Target Service",
@@ -93,6 +96,30 @@
         }
     },
     "definitions": {
+
+        "DisplayedResources": {
+            "type": "array",
+            "description": "The list of DisplayedResources that lists logical CloudFormation IDs with a description.",
+            "items": { "$ref": "#/definitions/DisplayedResource" }
+        },
+
+        "DisplayedResource": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "The logical CloudFormation IDs with a description for CloudFormation resources.",
+            "properties": {
+                "LogicalId": {
+                    "type": "string",
+                    "title": "Logical Id",
+                    "description": "The CloudFormation ID that represents a resource."
+                },
+                "Description": {
+                    "type": "string",
+                    "title": "Description",
+                    "description": "The Description gives context to the metadata of the CloudFormation resource."
+                }
+            }
+        },
 
         "DeploymentConfirmation": {
             "type": "object",

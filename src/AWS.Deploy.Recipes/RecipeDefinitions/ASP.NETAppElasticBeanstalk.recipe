@@ -10,6 +10,13 @@
     "Description": "Deploy an ASP.NET Core application to AWS Elastic Beanstalk. Recommended for applications that are not set up to be deployed as containers.",
     "TargetService": "AWS Elastic Beanstalk",
 
+    "DisplayedResources": [
+        {
+            "LogicalId": "Environment",
+            "Description": "Application Endpoint"
+        }
+    ],
+
     "RecipePriority": 100,
     "RecommendationRules": [
         {
