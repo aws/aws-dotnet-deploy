@@ -16,7 +16,6 @@ using static System.Net.WebRequestMethods;
 
 namespace AWS.Deploy.CLI.IntegrationTests
 {
-    [Collection("Serial")]
     public class BlazorWasmTests : IDisposable
     {
         private readonly HttpHelper _httpHelper;

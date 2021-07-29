@@ -17,7 +17,6 @@ using Xunit;
 
 namespace AWS.Deploy.CLI.IntegrationTests
 {
-    [Collection("Serial")]
     public class ConsoleAppTests : IDisposable
     {
         private readonly CloudFormationHelper _cloudFormationHelper;

@@ -18,7 +18,6 @@ using Task = System.Threading.Tasks.Task;
 
 namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
 {
-    [Collection("Serial")]
     public class ECSFargateDeploymentTest : IDisposable
     {
         private readonly HttpHelper _httpHelper;

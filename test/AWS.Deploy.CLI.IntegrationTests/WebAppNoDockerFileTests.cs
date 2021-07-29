@@ -16,7 +16,6 @@ using Environment = System.Environment;
 
 namespace AWS.Deploy.CLI.IntegrationTests
 {
-    [Collection("Serial")]
     public class WebAppNoDockerFileTests : IDisposable
     {
         private readonly HttpHelper _httpHelper;
