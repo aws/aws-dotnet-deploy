@@ -40,6 +40,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 selectedRecipeDefinition.Version,
                 selectedRecipeDefinition.Name,
                 selectedRecipeDefinition.Description,
+                selectedRecipeDefinition.ShortDescription,
                 selectedRecipeDefinition.TargetService,
                 selectedRecipeDefinition.DeploymentType.ToString(),
                 selectedRecipeDefinition.DeploymentBundle.ToString()

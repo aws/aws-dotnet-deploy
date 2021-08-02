@@ -7,7 +7,8 @@
     "DeploymentBundle": "DotnetPublishZipFile",
     "CdkProjectTemplate": "../CdkTemplates/BlazorWasm",
     "CdkProjectTemplateId": "netdeploy.BlazorWasm",
-    "Description": "Deploy a Blazor WebAssembly application to an Amazon S3 bucket. The Amazon S3 bucket created during deployment will be configured for web hosting and its contents will be open to the public with read access.",
+    "Description": "Blazor WebAssembly application hosted in an Amazon S3 bucket. The Amazon S3 bucket created during deployment will be configured for web hosting and its contents will be open to the public with read access.",
+    "ShortDescription": "Blazor WebAssembly application hosted in an Amazon S3 bucket.",
     "TargetService": "Amazon S3",
 
     "DisplayedResources": [

@@ -55,7 +55,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             var allValidators = Enum.GetValues(typeof(RecipeValidatorList));
 
             var recipeDefinition = new RecipeDefinition("id", "version", "name",
-                DeploymentTypes.CdkProject, DeploymentBundleTypes.Container, "template", "templateId", "description", "targetService")
+                DeploymentTypes.CdkProject, DeploymentBundleTypes.Container, "template", "templateId", "description", "shortDescription", "targetService")
             {
                 Validators =
                     allValidators
