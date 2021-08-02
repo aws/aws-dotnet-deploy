@@ -60,10 +60,14 @@ namespace AWS.Deploy.Orchestration
 
             // Handover to CDK command line tool
             // Use a CDK Context parameter to specify the settings file that has been serialized.
-            await _commandLineWrapper.Run( $"npx cdk deploy --require-approval never -c {Constants.CloudFormationIdentifier.SETTINGS_PATH_CDK_CONTEXT_PARAMETER}=\"{appSettingsFilePath}\"",
+            var cdkDeploy = await _commandLineWrapper.TryRunWithResult( $"npx cdk deploy --require-approval never -c {Constants.CloudFormationIdentifier.SETTINGS_PATH_CDK_CONTEXT_PARAMETER}=\"{appSettingsFilePath}\"",
                 workingDirectory: cdkProjectPath,
                 environmentVariables: environmentVariables,
-                needAwsCredentials: true);
+                needAwsCredentials: true,
+                streamOutputToInteractiveService: true);
+
+            if (cdkDeploy.ExitCode != 0)
+                throw new FailedToDeployCDKAppException("We had an issue deploying your application to AWS. Check the deployment output for more details.");
         }
 
         public async Task<string> CreateCdkProjectForDeployment(Recommendation recommendation, OrchestratorSession session, string? saveCdkDirectoryPath = null)
