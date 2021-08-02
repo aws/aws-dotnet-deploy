@@ -224,7 +224,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             {
                 DeploymentStatus status = (await restApiClient.GetDeploymentStatusAsync(sessionId)).Status; ;
                 return status != DeploymentStatus.Executing;
-            }, TimeSpan.FromSeconds(1), TimeSpan.FromMinutes(10));
+            }, TimeSpan.FromSeconds(1), TimeSpan.FromMinutes(15));
 
             return (await restApiClient.GetDeploymentStatusAsync(sessionId)).Status;
         }
