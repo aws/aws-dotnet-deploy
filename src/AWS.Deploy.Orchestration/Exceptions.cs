@@ -147,4 +147,13 @@ namespace AWS.Deploy.Orchestration
     {
         public InvalidAWSDeployRecipesCDKCommonVersionException(string message, Exception? innerException = null) : base(message, innerException) { }
     }
+
+    /// <summary>
+    /// Exception thrown if the 'cdk deploy' command failed.
+    /// </summary>
+    [AWSDeploymentExpectedException]
+    public class FailedToDeployCDKAppException : Exception
+    {
+        public FailedToDeployCDKAppException(string message, Exception? innerException = null) : base(message, innerException) { }
+    }
 }
