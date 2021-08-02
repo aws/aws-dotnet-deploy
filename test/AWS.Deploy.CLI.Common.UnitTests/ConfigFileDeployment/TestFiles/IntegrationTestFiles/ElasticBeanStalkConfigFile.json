@@ -1,14 +1,14 @@
 {
-    "StackName": "ElasticBeanStalkAppStack",
+    "StackName": "ElasticBeanStalk{Suffix}",
     "RecipeId": "AspNetAppElasticBeanstalkLinux",
     "OptionSettingsConfig":
     {
-        "BeanstalkApplication": 
+        "BeanstalkApplication":
         {
             "CreateNew": true,
-            "ApplicationName": "MyApplication"
+            "ApplicationName": "MyApplication{Suffix}"
         },
-        "EnvironmentName": "MyEnvironment",
+        "EnvironmentName": "MyEnvironment{Suffix}",
         "EnvironmentType": "LoadBalanced",
         "LoadBalancerType": "application",
         "ApplicationIAMRole":

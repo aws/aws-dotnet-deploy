@@ -96,7 +96,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             await _app.Run(deleteArgs);
 
             // Verify application is delete
-            Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName));
+            Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName), $"{_stackName} still exists.");
         }
 
         public void Dispose()
