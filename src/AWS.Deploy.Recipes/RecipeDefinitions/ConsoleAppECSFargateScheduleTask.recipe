@@ -7,7 +7,8 @@
     "DeploymentBundle": "Container",
     "CdkProjectTemplate": "../CdkTemplates/ConsoleAppECSFargateScheduleTask",
     "CdkProjectTemplateId": "netdeploy.ConsoleAppECSFargateScheduleTask",
-    "Description": "Deploy a console application as a scheduled task to Amazon Elastic Container Service (Amazon ECS). Recommended for applications that can be deployed as a container image. If your project does not contain a Dockerfile, one will be generated for the project.",
+    "Description": "Console application deployed as a scheduled task to Amazon Elastic Container Service (Amazon ECS). Recommended for applications that can be deployed as a container image. If your project does not contain a Dockerfile, one will be generated for the project.",
+    "ShortDescription": "Console application deployed as a scheduled task to Amazon Elastic Container Service (Amazon ECS).",
     "TargetService": "Amazon Elastic Container Service",
 
     "DisplayedResources": [

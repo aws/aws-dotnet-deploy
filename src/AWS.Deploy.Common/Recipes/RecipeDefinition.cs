@@ -32,6 +32,11 @@ namespace AWS.Deploy.Common.Recipes
         public string Description { get; set; }
 
         /// <summary>
+        /// Short Description of the recipe informing the user what this recipe does and why it is recommended.
+        /// </summary>
+        public string ShortDescription { get; set; }
+
+        /// <summary>
         /// A runtime property set when the recipe definition is loaded to the location of the definition. This property is used to find
         /// other assets like the CDK template project in relation to the recipe definition.
         /// </summary>
@@ -103,6 +108,7 @@ namespace AWS.Deploy.Common.Recipes
             string cdkProjectTemplate,
             string cdkProjectTemplateId,
             string description,
+            string shortDescription,
             string targetService)
         {
             Id = id;
@@ -113,6 +119,7 @@ namespace AWS.Deploy.Common.Recipes
             CdkProjectTemplate = cdkProjectTemplate;
             CdkProjectTemplateId = cdkProjectTemplateId;
             Description = description;
+            ShortDescription = shortDescription;
             TargetService = targetService;
         }
         public override string ToString()

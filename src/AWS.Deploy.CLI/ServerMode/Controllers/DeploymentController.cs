@@ -122,7 +122,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 output.Recommendations.Add(new RecommendationSummary(
                     recommendation.Recipe.Id,
                     recommendation.Name,
-                    recommendation.Description
+                    recommendation.ShortDescription
                     ));
             }
 

@@ -49,6 +49,7 @@ namespace AWS.Deploy.CLI.UnitTests
                 It.IsAny<string>(),
                 It.IsAny<string>(),
                 It.IsAny<string>(),
+                It.IsAny<string>(),
                 It.IsAny<string>()).Object;
         }
 

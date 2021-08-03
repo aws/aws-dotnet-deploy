@@ -27,6 +27,8 @@ namespace AWS.Deploy.Common
 
         public string Description => Recipe.Description;
 
+        public string ShortDescription => Recipe.ShortDescription;
+
         public DeploymentBundle DeploymentBundle { get; }
 
         private readonly List<OptionSettingItem> DeploymentBundleSettings = new ();
