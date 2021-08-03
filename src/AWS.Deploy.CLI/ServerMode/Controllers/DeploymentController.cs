@@ -28,6 +28,7 @@ using AWS.Deploy.Orchestration.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Amazon.Runtime;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Orchestration.DisplayedResources;
 
 namespace AWS.Deploy.CLI.ServerMode.Controllers
 {
@@ -361,6 +362,40 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 output.Status = DeploymentStatus.Error;
             else
                 output.Status = DeploymentStatus.Executing;
+
+            return Ok(output);
+        }
+
+        /// <summary>
+        /// Gets information about the displayed resources defined in the recipe definition.
+        /// </summary>
+        [HttpGet("session/<sessionId>/details")]
+        [SwaggerOperation(OperationId = "GetDeploymentDetails")]
+        [SwaggerResponse(200, type: typeof(GetDeploymentDetailsOutput))]
+        [Authorize]
+        public async Task<IActionResult> GetDeploymentDetails(string sessionId)
+        {
+            var state = _stateServer.Get(sessionId);
+            if (state == null)
+            {
+                return NotFound($"Session ID {sessionId} not found.");
+            }
+
+            var serviceProvider = CreateSessionServiceProvider(state);
+            var displayedResourcesHandler = serviceProvider.GetRequiredService<IDisplayedResourcesHandler>();
+
+            if (state.SelectedRecommendation == null)
+            {
+                return NotFound($"A deployment target is not set for Session ID {sessionId}.");
+            }
+
+            var displayedResources = await displayedResourcesHandler.GetDeploymentOutputs(state.ApplicationDetails, state.SelectedRecommendation);
+
+            var output = new GetDeploymentDetailsOutput(
+                state.ApplicationDetails.StackName,
+                displayedResources
+                    .Select(x => new DisplayedResourceSummary(x.Id, x.Description, x.Type, x.Data))
+                    .ToList());
 
             return Ok(output);
         }

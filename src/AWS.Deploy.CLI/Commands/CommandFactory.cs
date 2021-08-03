@@ -17,6 +17,7 @@ using AWS.Deploy.Orchestration.Utilities;
 using AWS.Deploy.CLI.Commands.CommandHandlerInput;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.DeploymentManifest;
+using AWS.Deploy.Orchestration.DisplayedResources;
 
 namespace AWS.Deploy.CLI.Commands
 {
@@ -52,6 +53,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly ITemplateMetadataReader _templateMetadataReader;
         private readonly IDeployedApplicationQueryer _deployedApplicationQueryer;
         private readonly ITypeHintCommandFactory _typeHintCommandFactory;
+        private readonly IDisplayedResourcesHandler _displayedResourceHandler;
         private readonly IConsoleUtilities _consoleUtilities;
         private readonly IDeploymentManifestEngine _deploymentManifestEngine;
 
@@ -71,6 +73,7 @@ namespace AWS.Deploy.CLI.Commands
             ITemplateMetadataReader templateMetadataReader,
             IDeployedApplicationQueryer deployedApplicationQueryer,
             ITypeHintCommandFactory typeHintCommandFactory,
+            IDisplayedResourcesHandler displayedResourceHandler,
             IConsoleUtilities consoleUtilities,
             IDeploymentManifestEngine deploymentManifestEngine)
         {
@@ -89,6 +92,7 @@ namespace AWS.Deploy.CLI.Commands
             _templateMetadataReader = templateMetadataReader;
             _deployedApplicationQueryer = deployedApplicationQueryer;
             _typeHintCommandFactory = typeHintCommandFactory;
+            _displayedResourceHandler = displayedResourceHandler;
             _consoleUtilities = consoleUtilities;
             _deploymentManifestEngine = deploymentManifestEngine;
         }
@@ -172,6 +176,7 @@ namespace AWS.Deploy.CLI.Commands
                         _templateMetadataReader,
                         _deployedApplicationQueryer,
                         _typeHintCommandFactory,
+                        _displayedResourceHandler,
                         _cloudApplicationNameGenerator,
                         _consoleUtilities,
                         session);

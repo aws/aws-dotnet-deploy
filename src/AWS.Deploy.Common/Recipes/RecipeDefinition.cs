@@ -44,6 +44,11 @@ namespace AWS.Deploy.Common.Recipes
         public string TargetService { get; set; }
 
         /// <summary>
+        /// The list of DisplayedResources that lists logical CloudFormation IDs with a description.
+        /// </summary>
+        public List<DisplayedResource>? DisplayedResources { get; set; }
+
+        /// <summary>
         /// Confirmation messages to display to the user before performing deployment.
         /// </summary>
         public DeploymentConfirmationType? DeploymentConfirmation { get; set; }

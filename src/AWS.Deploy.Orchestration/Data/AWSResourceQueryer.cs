@@ -1,11 +1,15 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Amazon.CloudFormation;
 using Amazon.CloudFormation.Model;
+using Amazon.CloudWatchEvents;
+using Amazon.CloudWatchEvents.Model;
 using Amazon.EC2;
 using Amazon.EC2.Model;
 using Amazon.ECR;
@@ -14,8 +18,11 @@ using Amazon.ECS;
 using Amazon.ECS.Model;
 using Amazon.ElasticBeanstalk;
 using Amazon.ElasticBeanstalk.Model;
+using Amazon.ElasticLoadBalancingV2;
+using Amazon.ElasticLoadBalancingV2.Model;
 using Amazon.IdentityManagement;
 using Amazon.IdentityManagement.Model;
+using Amazon.S3;
 using Amazon.SecurityToken;
 using Amazon.SecurityToken.Model;
 using AWS.Deploy.Common;
@@ -24,6 +31,12 @@ namespace AWS.Deploy.Orchestration.Data
 {
     public interface IAWSResourceQueryer
     {
+        Task<List<StackResource>> DescribeCloudFormationResources(string stackName);
+        Task<EnvironmentDescription> DescribeElasticBeanstalkEnvironment(string environmentId);
+        Task<Amazon.ElasticLoadBalancingV2.Model.LoadBalancer> DescribeElasticLoadBalancer(string loadBalancerArn);
+        Task<List<Amazon.ElasticLoadBalancingV2.Model.Listener>> DescribeElasticLoadBalancerListeners(string loadBalancerArn);
+        Task<DescribeRuleResponse> DescribeCloudWatchRule(string ruleName);
+        Task<string> GetS3BucketLocation(string bucketName);
         Task<List<Cluster>> ListOfECSClusters();
         Task<List<ApplicationDescription>> ListOfElasticBeanstalkApplications();
         Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(string? applicationName);
@@ -47,6 +60,103 @@ namespace AWS.Deploy.Orchestration.Data
         public AWSResourceQueryer(IAWSClientFactory awsClientFactory)
         {
             _awsClientFactory = awsClientFactory;
+        }
+
+        public async Task<List<StackResource>> DescribeCloudFormationResources(string stackName)
+        {
+            var cfClient = _awsClientFactory.GetAWSClient<IAmazonCloudFormation>();
+            var resources = await cfClient.DescribeStackResourcesAsync(new DescribeStackResourcesRequest { StackName = stackName });
+
+            return resources.StackResources;
+        }
+
+        public async Task<EnvironmentDescription> DescribeElasticBeanstalkEnvironment(string environmentId)
+        {
+            var beanstalkClient = _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>();
+
+            var environment = await beanstalkClient.DescribeEnvironmentsAsync(new DescribeEnvironmentsRequest {
+                EnvironmentNames = new List<string> { environmentId }
+            });
+
+            if (!environment.Environments.Any())
+            {
+                throw new AWSResourceNotFoundException($"The elastic beanstalk environment '{environmentId}' does not exist.");
+            }
+
+            return environment.Environments.First();
+        }
+
+        public async Task<Amazon.ElasticLoadBalancingV2.Model.LoadBalancer> DescribeElasticLoadBalancer(string loadBalancerArn)
+        {
+            var elasticLoadBalancingClient = _awsClientFactory.GetAWSClient<IAmazonElasticLoadBalancingV2>();
+
+            var loadBalancers = await elasticLoadBalancingClient.DescribeLoadBalancersAsync(new DescribeLoadBalancersRequest
+            {
+                LoadBalancerArns = new List<string> { loadBalancerArn }
+            });
+
+            if (!loadBalancers.LoadBalancers.Any())
+            {
+                throw new AWSResourceNotFoundException($"The load balancer '{loadBalancerArn}' does not exist.");
+            }
+
+            return loadBalancers.LoadBalancers.First();
+        }
+
+        public async Task<List<Amazon.ElasticLoadBalancingV2.Model.Listener>> DescribeElasticLoadBalancerListeners(string loadBalancerArn)
+        {
+            var elasticLoadBalancingClient = _awsClientFactory.GetAWSClient<IAmazonElasticLoadBalancingV2>();
+
+            var listeners = await elasticLoadBalancingClient.DescribeListenersAsync(new DescribeListenersRequest
+            {
+                LoadBalancerArn = loadBalancerArn
+            });
+
+            if (!listeners.Listeners.Any())
+            {
+                throw new AWSResourceNotFoundException($"The load balancer '{loadBalancerArn}' does not have any listeners.");
+            }
+
+            return listeners.Listeners;
+        }
+
+        public async Task<DescribeRuleResponse> DescribeCloudWatchRule(string ruleName)
+        {
+            var cloudWatchEventsClient = _awsClientFactory.GetAWSClient<IAmazonCloudWatchEvents>();
+
+            var rule = await cloudWatchEventsClient.DescribeRuleAsync(new DescribeRuleRequest
+            {
+                Name = ruleName
+            });
+
+            if (rule == null)
+            {
+                throw new AWSResourceNotFoundException($"The CloudWatch rule'{ruleName}' does not exist.");
+            }
+
+            return rule;
+        }
+
+        public async Task<string> GetS3BucketLocation(string bucketName)
+        {
+            if (string.IsNullOrEmpty(bucketName))
+            {
+                throw new ArgumentNullException($"The bucket name is null or empty.");
+            }
+
+            var s3Client = _awsClientFactory.GetAWSClient<IAmazonS3>();
+
+            var location = await s3Client.GetBucketLocationAsync(bucketName);
+
+            var region = "";
+            if (location.Location.Equals(S3Region.USEast1))
+                region = "us-east-1";
+            else if (location.Location.Equals(S3Region.EUWest1))
+                region = "eu-west-1";
+            else
+                region = location.Location;
+
+            return region;
         }
 
         public async Task<List<Cluster>> ListOfECSClusters()
