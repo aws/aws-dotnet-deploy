@@ -1,0 +1,286 @@
+{
+    "$schema": "./aws-deploy-recipe-schema.json",
+    "Id": "AspNetAppAppRunner",
+    "Version": "0.1.0",
+    "Name": "ASP.NET Core App to AWS App Runner",
+    "DeploymentType": "CdkProject",
+    "DeploymentBundle": "Container",
+    "CdkProjectTemplate": "../CdkTemplates/AspNetAppAppRunner",
+    "CdkProjectTemplateId": "netdeploy.AspNetAppAppRunner",
+    "ShortDescription": "ASP.NET Core application deployed to AWS App Runner",
+    "Description": "ASP.NET Core applications built as a container image and deployed to AWS App Runner, a fully management environment as a container image. If your project does not contain a Dockerfile, one will be generated for the project.",
+    "TargetService": "AWS App Runner",
+
+    "DisplayedResources": [
+        {
+            "LogicalId": "AppRunnerService",
+            "Description": "Application Endpoint"
+        }
+    ],
+
+    "RecipePriority": 105,
+    "RecommendationRules": [
+        {
+            "Tests": [
+                {
+                    "Type": "MSProjectSdkAttribute",
+                    "Condition": {
+                        "Value": "Microsoft.NET.Sdk.Web"
+                    }
+                },
+                {
+                    "Type": "MSProperty",
+                    "Condition": {
+                        "PropertyName": "TargetFramework",
+                        "AllowedValues": [ "netcoreapp2.1", "netcoreapp3.1", "net5.0", "net6.0" ]
+                    }
+                }
+            ]
+        },
+
+        {
+            "Tests": [
+                {
+                    "Type": "FileExists",
+                    "Condition": {
+                        "FileName": "Dockerfile"
+                    }
+                }
+            ],
+            "Effect": {
+                "Fail": {
+                    "PriorityAdjustment": -55,
+                    "Include": true
+                }
+            }
+        },
+
+
+        {
+            "Tests": [
+                {
+                    "Type": "MSPropertyExists",
+                    "Condition": {
+                        "PropertyName": "AWSProjectType"
+                    }
+                }
+            ],
+            "Effect": {
+                "Pass": { "Include": false },
+                "Fail": { "Include": true }
+            }
+        }
+
+    ],
+
+    "OptionSettings": [
+        {
+            "Id": "ServiceName",
+            "Name": "Service Name",
+            "Description": "The name of the AWS App Runner service.",
+            "Type": "String",
+            "TypeHint": "AppRunnerService",
+            "AdvancedSetting": false,
+            "Updatable": false,
+            "DefaultValue": "{ProjectName}-service"
+        },
+        {
+            "Id": "Port",
+            "Name": "Port",
+            "Description": "The port the container is listening for requests on.",
+            "Type": "Int",
+            "DefaultValue": "80",
+            "AdvancedSetting": false,
+            "Updatable": true
+        },
+        {
+            "Id": "StartCommand",
+            "Name": "Start Command",
+            "Description": "Override the start command from the image's default start command.",
+            "Type": "String",
+            "AdvancedSetting": true,
+            "Updatable": true
+        },
+        {
+            "Id": "ApplicationIAMRole",
+            "Name": "Application IAM Role",
+            "Description": "The Identity and Access Management (IAM) role that provides AWS credentials to the application to access AWS services.",
+            "Type": "Object",
+            "TypeHint": "IAMRole",
+            "TypeHintData": {
+                "ServicePrincipal": "tasks.apprunner.amazonaws.com"
+            },
+            "AdvancedSetting": false,
+            "Updatable": false,
+            "ChildOptionSettings": [
+                {
+                    "Id": "CreateNew",
+                    "Name": "Create New Role",
+                    "Description": "Do you want to create a new role?",
+                    "Type": "Bool",
+                    "DefaultValue": true,
+                    "AdvancedSetting": false,
+                    "Updatable": false
+                },
+                {
+                    "Id": "RoleArn",
+                    "Name": "Existing Role ARN",
+                    "Description": "The ARN of the existing role to use.",
+                    "Type": "String",
+                    "AdvancedSetting": false,
+                    "Updatable": false,
+                    "DependsOn": [
+                        {
+                            "Id": "ApplicationIAMRole.CreateNew",
+                            "Value": false
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Id": "ServiceAccessIAMRole",
+            "Name": "Service Access IAM Role",
+            "Description": "The Identity and Access Management (IAM) role that provides gives the AWS App Runner service access to pull the container image from ECR.",
+            "Type": "Object",
+            "TypeHint": "IAMRole",
+            "TypeHintData": {
+                "ServicePrincipal": "build.apprunner.amazonaws.com"
+            },
+            "AdvancedSetting": true,
+            "Updatable": false,
+            "ChildOptionSettings": [
+                {
+                    "Id": "CreateNew",
+                    "Name": "Create New Role",
+                    "Description": "Do you want to create a new role?",
+                    "Type": "Bool",
+                    "DefaultValue": true,
+                    "AdvancedSetting": false,
+                    "Updatable": false
+                },
+                {
+                    "Id": "RoleArn",
+                    "Name": "Existing Role ARN",
+                    "Description": "The ARN of the existing role to use.",
+                    "Type": "String",
+                    "AdvancedSetting": false,
+                    "Updatable": false,
+                    "DependsOn": [
+                        {
+                            "Id": "ServiceAccessIAMRole.CreateNew",
+                            "Value": false
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Id": "Cpu",
+            "Name": "CPU",
+            "Description": "The number of CPU units reserved for each instance of your App Runner service.",
+            "Type": "String",
+            "AdvancedSetting": false,
+            "Updatable": true,
+            "DefaultValue": "1024",
+            "AllowedValues": [
+                "1024",
+                "2048"
+            ],
+            "ValueMapping": {
+                "1024": "1 vCPU",
+                "2048": "2 vCPU"
+            }
+        },
+        {
+            "Id": "Memory",
+            "Name": "Memory",
+            "Description": "The amount of memory reserved for each instance of your App Runner service.",
+            "Type": "String",
+            "AdvancedSetting": false,
+            "Updatable": true,
+            "DefaultValue": "2048",
+            "AllowedValues": [
+                "2048",
+                "3072",
+                "4096"
+            ],
+            "ValueMapping": {
+                "2048": "2 GB",
+                "3072": "3 GB",
+                "4096": "4 GB"
+            }
+        },
+        {
+            "Id": "EncryptionKmsKey",
+            "Name": "Encryption KMS Key",
+            "Description": "The ARN of the KMS key that's used for encryption of application logs.",
+            "Type": "String",
+            "AdvancedSetting": true,
+            "Updatable": false
+        },
+        {
+            "Id": "HealthCheckProtocol",
+            "Name": "Health Check Protocol",
+            "Description": "The IP protocol that App Runner uses to perform health checks for your service.",
+            "Type": "String",
+            "DefaultValue": "TCP",
+            "AdvancedSetting": true,
+            "Updatable": true,
+            "AllowedValues": [
+                "HTTP",
+                "TCP"
+            ]
+        },
+        {
+            "Id": "HealthCheckPath",
+            "Name": "Health Check Path",
+            "Description": "The URL that health check requests are sent to.",
+            "Type": "String",
+            "AdvancedSetting": true,
+            "Updatable": true,
+            "DependsOn": [
+                {
+                    "Id": "HealthCheckProtocol",
+                    "Value": "HTTP"
+                }
+            ]
+        },
+        {
+            "Id": "HealthCheckInterval",
+            "Name": "Health Check Interval",
+            "Description": "The time interval, in seconds, between health checks.",
+            "Type": "Int",
+            "DefaultValue": 5,
+            "AdvancedSetting": true,
+            "Updatable": true
+        },
+        {
+            "Id": "HealthCheckTimeout",
+            "Name": "Health Check Timeout",
+            "Description": "The time, in seconds, to wait for a health check response before deciding it failed.",
+            "Type": "Int",
+            "DefaultValue": 2,
+            "AdvancedSetting": true,
+            "Updatable": true
+        },
+        {
+            "Id": "HealthCheckHealthyThreshold",
+            "Name": "Health Check Healthy Threshold",
+            "Description": "The number of consecutive checks that must succeed before App Runner decides that the service is healthy.",
+            "Type": "Int",
+            "DefaultValue": 3,
+            "AdvancedSetting": true,
+            "Updatable": true
+        },
+        {
+            "Id": "HealthCheckUnhealthyThreshold",
+            "Name": "Health Check Unhealthy Threshold",
+            "Description": "The number of consecutive checks that must fail before App Runner decides that the service is unhealthy.",
+            "Type": "Int",
+            "DefaultValue": 3,
+            "AdvancedSetting": true,
+            "Updatable": true
+        }
+    ]
+}

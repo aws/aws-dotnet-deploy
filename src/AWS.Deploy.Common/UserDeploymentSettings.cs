@@ -30,7 +30,7 @@ namespace AWS.Deploy.Common
         /// <summary>
         /// Reads the User Deployment Settings file and deserializes it into a <see cref="UserDeploymentSettings"/> object.
         /// </summary>
-        /// <exception cref="InvalidUserDeploymentSettingsException">Thrown if an error occured while reading or deserializing the User Deployment Settings file.</exception>
+        /// <exception cref="InvalidUserDeploymentSettingsException">Thrown if an error occurred while reading or deserializing the User Deployment Settings file.</exception>
         public static UserDeploymentSettings? ReadSettings(string filePath)
         {
             try
