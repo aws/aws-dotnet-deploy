@@ -16,7 +16,7 @@ using Environment = System.Environment;
 
 namespace AWS.Deploy.CLI.IntegrationTests
 {
-    [Collection("Serial")]
+    [Collection("WebAppNoDockerFile")]
     public class WebAppNoDockerFileTests : IDisposable
     {
         private readonly HttpHelper _httpHelper;
@@ -92,7 +92,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             await _app.Run(deleteArgs);
 
             // Verify application is delete
-            Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName));
+            Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName), $"{_stackName} still exists.");
         }
 
         public void Dispose()

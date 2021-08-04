@@ -28,6 +28,7 @@ using AWS.Deploy.Orchestration.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Amazon.Runtime;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Orchestration.DisplayedResources;
 
 namespace AWS.Deploy.CLI.ServerMode.Controllers
 {
@@ -121,7 +122,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 output.Recommendations.Add(new RecommendationSummary(
                     recommendation.Recipe.Id,
                     recommendation.Name,
-                    recommendation.Description
+                    recommendation.ShortDescription
                     ));
             }
 
@@ -365,6 +366,40 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             return Ok(output);
         }
 
+        /// <summary>
+        /// Gets information about the displayed resources defined in the recipe definition.
+        /// </summary>
+        [HttpGet("session/<sessionId>/details")]
+        [SwaggerOperation(OperationId = "GetDeploymentDetails")]
+        [SwaggerResponse(200, type: typeof(GetDeploymentDetailsOutput))]
+        [Authorize]
+        public async Task<IActionResult> GetDeploymentDetails(string sessionId)
+        {
+            var state = _stateServer.Get(sessionId);
+            if (state == null)
+            {
+                return NotFound($"Session ID {sessionId} not found.");
+            }
+
+            var serviceProvider = CreateSessionServiceProvider(state);
+            var displayedResourcesHandler = serviceProvider.GetRequiredService<IDisplayedResourcesHandler>();
+
+            if (state.SelectedRecommendation == null)
+            {
+                return NotFound($"A deployment target is not set for Session ID {sessionId}.");
+            }
+
+            var displayedResources = await displayedResourcesHandler.GetDeploymentOutputs(state.ApplicationDetails, state.SelectedRecommendation);
+
+            var output = new GetDeploymentDetailsOutput(
+                state.ApplicationDetails.StackName,
+                displayedResources
+                    .Select(x => new DisplayedResourceSummary(x.Id, x.Description, x.Type, x.Data))
+                    .ToList());
+
+            return Ok(output);
+        }
+
         private IServiceProvider CreateSessionServiceProvider(SessionState state)
         {
             return CreateSessionServiceProvider(state.SessionId, state.AWSRegion);
@@ -372,15 +407,27 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
         private IServiceProvider CreateSessionServiceProvider(string sessionId, string awsRegion)
         {
+            var awsCredentials = HttpContext.User.ToAWSCredentials();
+            if(awsCredentials == null)
+            {
+                throw new FailedToRetrieveAWSCredentialsException("AWS credentials are missing for the current session.");
+            }
+
             var interactiveServices = new SessionOrchestratorInteractiveService(sessionId, _hubContext);
             var services = new ServiceCollection();
             services.AddSingleton<IOrchestratorInteractiveService>(interactiveServices);
-            services.AddSingleton<ICommandLineWrapper>(services => new CommandLineWrapper(interactiveServices, true));
+            services.AddSingleton<ICommandLineWrapper>(services =>
+            {
+                var wrapper = new CommandLineWrapper(interactiveServices, true);
+                wrapper.RegisterAWSContext(awsCredentials, awsRegion);
+                return wrapper;
+            });
+
             services.AddCustomServices();
             var serviceProvider = services.BuildServiceProvider();
 
             var awsClientFactory = serviceProvider.GetRequiredService<IAWSClientFactory>();
-            var awsCredentials = HttpContext.User.ToAWSCredentials();
+            
             awsClientFactory.ConfigureAWSOptions(awsOptions =>
             {
                 awsOptions.Credentials = awsCredentials;

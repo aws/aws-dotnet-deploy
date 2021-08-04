@@ -17,6 +17,7 @@ using AWS.Deploy.Orchestration.CDK;
 using AWS.Deploy.Recipes;
 using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.Utilities;
+using AWS.Deploy.Orchestration.DisplayedResources;
 
 namespace AWS.Deploy.CLI.Commands
 {
@@ -32,6 +33,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly ITemplateMetadataReader _templateMetadataReader;
         private readonly IDeployedApplicationQueryer _deployedApplicationQueryer;
         private readonly ITypeHintCommandFactory _typeHintCommandFactory;
+        private readonly IDisplayedResourcesHandler _displayedResourcesHandler;
         private readonly ICloudApplicationNameGenerator _cloudApplicationNameGenerator;
 
         private readonly IConsoleUtilities _consoleUtilities;
@@ -48,6 +50,7 @@ namespace AWS.Deploy.CLI.Commands
             ITemplateMetadataReader templateMetadataReader,
             IDeployedApplicationQueryer deployedApplicationQueryer,
             ITypeHintCommandFactory typeHintCommandFactory,
+            IDisplayedResourcesHandler displayedResourcesHandler,
             ICloudApplicationNameGenerator cloudApplicationNameGenerator,
             IConsoleUtilities consoleUtilities,
             OrchestratorSession session)
@@ -61,6 +64,7 @@ namespace AWS.Deploy.CLI.Commands
             _templateMetadataReader = templateMetadataReader;
             _deployedApplicationQueryer = deployedApplicationQueryer;
             _typeHintCommandFactory = typeHintCommandFactory;
+            _displayedResourcesHandler = displayedResourcesHandler;
             _cloudApplicationNameGenerator = cloudApplicationNameGenerator;
             _consoleUtilities = consoleUtilities;
             _session = session;
@@ -85,6 +89,25 @@ namespace AWS.Deploy.CLI.Commands
             await CreateDeploymentBundle(orchestrator, selectedRecommendation, cloudApplication);
 
             await orchestrator.DeployRecommendation(cloudApplication, selectedRecommendation);
+
+            var displayedResources = await _displayedResourcesHandler.GetDeploymentOutputs(cloudApplication, selectedRecommendation);
+            DisplayOutputResources(displayedResources);
+        }
+
+        private void DisplayOutputResources(List<DisplayedResourceItem> displayedResourceItems)
+        {
+            _toolInteractiveService.WriteLine("Resources");
+            _toolInteractiveService.WriteLine("---------");
+            foreach (var resource in displayedResourceItems)
+            {
+                _toolInteractiveService.WriteLine($"{resource.Description}:");
+                _toolInteractiveService.WriteLine($"\t{nameof(resource.Id)}: {resource.Id}");
+                _toolInteractiveService.WriteLine($"\t{nameof(resource.Type)}: {resource.Type}");
+                foreach (var resourceKey in resource.Data.Keys)
+                {
+                    _toolInteractiveService.WriteLine($"\t{resourceKey}: {resource.Data[resourceKey]}");
+                }
+            }
         }
 
         /// <summary>

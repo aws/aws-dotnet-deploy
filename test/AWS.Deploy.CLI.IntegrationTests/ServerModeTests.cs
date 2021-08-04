@@ -27,7 +27,7 @@ using Xunit;
 
 namespace AWS.Deploy.CLI.IntegrationTests
 {
-    [Collection("Serial")]
+    [Collection("WebAppWithDockerFile")]
     public class ServerModeTests : IDisposable
     {
         private bool _isDisposed;
@@ -151,7 +151,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
         [Fact]
         public async Task WebFargateDeploymentNoConfigChanges()
         {
-            _stackName = "ServerModeWebFargate-" + DateTime.UtcNow.Ticks;
+            _stackName = $"ServerModeWebFargate{Guid.NewGuid().ToString().Split('-').Last()}";
 
             var projectPath = Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj");
             var portNumber = 4001;
@@ -165,7 +165,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             {
                 var baseUrl = $"http://localhost:{portNumber}/";
                 var restClient = new RestAPIClient(baseUrl, httpClient);
-                
+
                 await WaitTillServerModeReady(restClient);
 
                 var startSessionOutput = await restClient.StartDeploymentSessionAsync(new StartDeploymentSessionInput
@@ -225,7 +225,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             {
                 DeploymentStatus status = (await restApiClient.GetDeploymentStatusAsync(sessionId)).Status; ;
                 return status != DeploymentStatus.Executing;
-            }, TimeSpan.FromSeconds(1), TimeSpan.FromMinutes(10));
+            }, TimeSpan.FromSeconds(1), TimeSpan.FromMinutes(15));
 
             return (await restApiClient.GetDeploymentStatusAsync(sessionId)).Status;
         }

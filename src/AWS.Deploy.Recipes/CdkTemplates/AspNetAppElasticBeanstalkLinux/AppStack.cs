@@ -179,11 +179,6 @@ namespace AspNetAppElasticBeanstalkLinux
                 // This line is critical - reference the label created in this same stack
                 VersionLabel = applicationVersion.Ref,
             });
-
-            var output = new CfnOutput(this, "EndpointURL", new CfnOutputProps
-            {
-                Value = $"http://{environment.AttrEndpointUrl}/"
-            });
         }
     }
 }

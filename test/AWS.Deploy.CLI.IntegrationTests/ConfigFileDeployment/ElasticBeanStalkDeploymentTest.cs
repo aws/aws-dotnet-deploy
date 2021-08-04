@@ -17,7 +17,7 @@ using Environment = System.Environment;
 
 namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
 {
-    [Collection("Serial")]
+    [Collection("WebAppNoDockerFile")]
     public class ElasticBeanStalkDeploymentTest : IDisposable
     {
         private readonly HttpHelper _httpHelper;
@@ -43,6 +43,9 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
             _configFilePath = Path.Combine("ConfigFileDeployment", "TestFiles", "IntegrationTestFiles", "ElasticBeanStalkConfigFile.json");
+
+            ConfigFileHelper.ReplacePlaceholders(_configFilePath);
+
             var userDeploymentSettings = UserDeploymentSettings.ReadSettings(_configFilePath);
 
             _stackName = userDeploymentSettings.StackName;
@@ -92,7 +95,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
             await _app.Run(deleteArgs);
 
             // Verify application is delete
-            Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName));
+            Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName), $"{_stackName} still exists.");
         }
 
         public void Dispose()
