@@ -407,15 +407,27 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
         private IServiceProvider CreateSessionServiceProvider(string sessionId, string awsRegion)
         {
+            var awsCredentials = HttpContext.User.ToAWSCredentials();
+            if(awsCredentials == null)
+            {
+                throw new FailedToRetrieveAWSCredentialsException("AWS credentials are missing for the current session.");
+            }
+
             var interactiveServices = new SessionOrchestratorInteractiveService(sessionId, _hubContext);
             var services = new ServiceCollection();
             services.AddSingleton<IOrchestratorInteractiveService>(interactiveServices);
-            services.AddSingleton<ICommandLineWrapper>(services => new CommandLineWrapper(interactiveServices, true));
+            services.AddSingleton<ICommandLineWrapper>(services =>
+            {
+                var wrapper = new CommandLineWrapper(interactiveServices, true);
+                wrapper.RegisterAWSContext(awsCredentials, awsRegion);
+                return wrapper;
+            });
+
             services.AddCustomServices();
             var serviceProvider = services.BuildServiceProvider();
 
             var awsClientFactory = serviceProvider.GetRequiredService<IAWSClientFactory>();
-            var awsCredentials = HttpContext.User.ToAWSCredentials();
+            
             awsClientFactory.ConfigureAWSOptions(awsOptions =>
             {
                 awsOptions.Credentials = awsCredentials;
