@@ -71,12 +71,6 @@ namespace AWS.Deploy.Orchestration
                                                       ?? throw new InvalidAWSDeployRecipesCDKCommonVersionException("The version number of the AWS.Deploy.Recipes.CDK.Common package is invalid.") }
             };
 
-            foreach(var option in recommendation.Recipe.OptionSettings)
-            {
-                var currentValue = recommendation.GetOptionSettingValue(option);
-                templateParameters[option.Id] = currentValue?.ToString() ?? "";
-            }
-
             try
             {
                 //Generate the CDK project using the installed template into the output directory

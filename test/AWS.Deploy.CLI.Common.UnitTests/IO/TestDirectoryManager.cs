@@ -18,6 +18,12 @@ namespace AWS.Deploy.CLI.Common.UnitTests.IO
             return new DirectoryInfo(path);
         }
 
+        public DirectoryInfo GetDirectoryInfo(string path) => new DirectoryInfo(path);
+
+        public string GetRelativePath(string referenceFullPath, string targetFullPath) => Path.GetRelativePath(referenceFullPath, targetFullPath);
+
+        public string GetAbsolutePath(string referenceFullPath, string targetRelativePath) => Path.GetFullPath(targetRelativePath, referenceFullPath);
+
         public void Delete(string path, bool recursive = false) =>
             throw new NotImplementedException("If your test needs this method, you'll need to implement this.");
 
@@ -32,16 +38,10 @@ namespace AWS.Deploy.CLI.Common.UnitTests.IO
         public string[] GetDirectories(string path, string searchPattern = null, SearchOption searchOption = SearchOption.TopDirectoryOnly) =>
             throw new NotImplementedException("If your test needs this method, you'll need to implement this.");
 
-        public DirectoryInfo GetDirectoryInfo(string path) =>
-            throw new NotImplementedException("If your test needs this method, you'll need to implement this.");
-
         public string[] GetFiles(string path, string searchPattern = null, SearchOption searchOption = SearchOption.TopDirectoryOnly) =>
             throw new NotImplementedException("If your test needs this method, you'll need to implement this.");
 
         public bool IsEmpty(string path) =>
-            throw new NotImplementedException("If your test needs this method, you'll need to implement this.");
-
-        public string GetRelativePath(string referenceFullPath, string targetFullPath) =>
             throw new NotImplementedException("If your test needs this method, you'll need to implement this.");
     }
 }

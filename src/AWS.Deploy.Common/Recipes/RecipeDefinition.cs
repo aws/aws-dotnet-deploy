@@ -3,6 +3,8 @@
 
 using System.Collections.Generic;
 using AWS.Deploy.Common.Recipes.Validation;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace AWS.Deploy.Common.Recipes
 {
@@ -62,11 +64,13 @@ namespace AWS.Deploy.Common.Recipes
         /// The type of deployment to perform. This controls what other tool to use to perform the deployment. For example a value of `CdkProject` means that CDK should
         /// be used to perform the deployment.
         /// </summary>
+        [JsonConverter(typeof(StringEnumConverter))]
         public DeploymentTypes DeploymentType { get; set; }
 
         /// <summary>
         /// The type of deployment bundle the project should be converted into before deploying. For example turning the project into a build container or a zip file of the build binaries.
         /// </summary>
+        [JsonConverter(typeof(StringEnumConverter))]
         public DeploymentBundleTypes DeploymentBundle { get; set; }
 
         /// <summary>
@@ -98,6 +102,11 @@ namespace AWS.Deploy.Common.Recipes
         /// The priority of the recipe. The highest priority is the top choice for deploying to.
         /// </summary>
         public int RecipePriority { get; set; }
+
+        /// <summary>
+        /// Flag to indicate if this recipe is generated while saving a deployment project.
+        /// </summary>
+        public bool PersistedDeploymentProject { get; set; }
 
         public RecipeDefinition(
             string id,

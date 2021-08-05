@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AWS.Deploy.Common.Recipes.Validation;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace AWS.Deploy.Common.Recipes
 {
@@ -39,12 +40,14 @@ namespace AWS.Deploy.Common.Recipes
         /// The type of primitive value expected for this setting.
         /// For example String, Int
         /// </summary>
+        [JsonConverter(typeof(StringEnumConverter))]
         public OptionSettingValueType Type { get; set; }
 
         /// <summary>
         /// Hint the the UI what type of setting this is optionally add additional UI features to select a value.
         /// For example a value of BeanstalkApplication tells the UI it can display the list of available Beanstalk applications for the user to pick from.
         /// </summary>
+        [JsonConverter(typeof(StringEnumConverter))]
         public OptionSettingTypeHint? TypeHint { get; set; }
 
         /// <summary>

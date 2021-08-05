@@ -17,5 +17,6 @@ namespace AWS.Deploy.CLI.Commands.CommandHandlerInput
         public string? Apply { get; set; }
         public bool Diagnostics { get; set; }
         public bool Silent { get; set; }
+        public string? DeploymentProject { get; set; }
     }
 }

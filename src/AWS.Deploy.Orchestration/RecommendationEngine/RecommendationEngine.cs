@@ -24,6 +24,8 @@ namespace AWS.Deploy.Orchestration.RecommendationEngine
 
             recipeDefinitionPaths ??= new List<string>();
 
+            var uniqueRecipeId = new HashSet<string>();
+
             foreach (var recommendationPath in recipeDefinitionPaths)
             {
                 foreach (var recipeFile in Directory.GetFiles(recommendationPath, "*.recipe", SearchOption.TopDirectoryOnly))
@@ -33,8 +35,11 @@ namespace AWS.Deploy.Orchestration.RecommendationEngine
                         var content = File.ReadAllText(recipeFile);
                         var definition = JsonConvert.DeserializeObject<RecipeDefinition>(content);
                         definition.RecipePath = recipeFile;
-
-                        _availableRecommendations.Add(definition);
+                        if (!uniqueRecipeId.Contains(definition.Id))
+                        {
+                            _availableRecommendations.Add(definition);
+                            uniqueRecipeId.Add(definition.Id);
+                        }
                     }
                     catch (Exception e)
                     {

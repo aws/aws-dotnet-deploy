@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
@@ -31,6 +32,7 @@ namespace AWS.Deploy.Orchestration
         private readonly IDeploymentBundleHandler? _deploymentBundleHandler;
         private readonly IDockerEngine? _dockerEngine;
         private readonly IList<string>? _recipeDefinitionPaths;
+        private readonly ICustomRecipeLocator? _customRecipeLocator;
 
         private readonly OrchestratorSession? _session;
 
@@ -42,6 +44,7 @@ namespace AWS.Deploy.Orchestration
             IAWSResourceQueryer awsResourceQueryer,
             IDeploymentBundleHandler deploymentBundleHandler,
             IDockerEngine dockerEngine,
+            ICustomRecipeLocator customRecipeLocator,
             IList<string> recipeDefinitionPaths)
         {
             _session = session;
@@ -51,6 +54,7 @@ namespace AWS.Deploy.Orchestration
             _awsResourceQueryer = awsResourceQueryer;
             _deploymentBundleHandler = deploymentBundleHandler;
             _dockerEngine = dockerEngine;
+            _customRecipeLocator = customRecipeLocator;
             _recipeDefinitionPaths = recipeDefinitionPaths;
         }
 
@@ -60,7 +64,24 @@ namespace AWS.Deploy.Orchestration
             _recipeDefinitionPaths = recipeDefinitionPaths;
         }
 
-        public async Task<List<Recommendation>> GenerateDeploymentRecommendations(bool forDeployment = true)
+        public async Task<List<Recommendation>> GenerateDeploymentRecommendations()
+        {
+            if (_recipeDefinitionPaths == null)
+                throw new InvalidOperationException($"{nameof(_recipeDefinitionPaths)} is null as part of the orchestartor object");
+            if (_session == null)
+                throw new InvalidOperationException($"{nameof(_session)} is null as part of the orchestartor object");
+
+            var targetApplicationFullPath = new DirectoryInfo(_session.ProjectDefinition.ProjectPath).FullName;
+            var solutionDirectoryPath = !string.IsNullOrEmpty(_session.ProjectDefinition.ProjectSolutionPath) ?
+                new DirectoryInfo(_session.ProjectDefinition.ProjectSolutionPath).Parent.FullName : string.Empty;
+
+            var customRecipePaths = await LocateCustomRecipePaths(targetApplicationFullPath, solutionDirectoryPath);
+            var engine = new RecommendationEngine.RecommendationEngine(_recipeDefinitionPaths.Union(customRecipePaths), _session);
+            var additionalReplacements = await GetReplacements();
+            return await engine.ComputeRecommendations(additionalReplacements);
+        }
+
+        public async Task<List<Recommendation>> GenerateRecommendationsToSaveDeploymentProject()
         {
             if (_recipeDefinitionPaths == null)
                 throw new InvalidOperationException($"{nameof(_recipeDefinitionPaths)} is null as part of the orchestartor object");
@@ -68,10 +89,17 @@ namespace AWS.Deploy.Orchestration
                 throw new InvalidOperationException($"{nameof(_session)} is null as part of the orchestartor object");
 
             var engine = new RecommendationEngine.RecommendationEngine(_recipeDefinitionPaths, _session);
+            return await engine.ComputeRecommendations();
+        }
 
-            if (!forDeployment)
-                return await engine.ComputeRecommendations();
+        public async Task<List<Recommendation>> GenerateRecommendationsFromSavedDeploymentProject(string deploymentProjectPath)
+        {
+            if (_session == null)
+                throw new InvalidOperationException($"{nameof(_session)} is null as part of the orchestartor object");
+            if (!Directory.Exists(deploymentProjectPath))
+                throw new InvalidCliArgumentException($"The path '{deploymentProjectPath}' does not exists on the file system. Please provide a valid deployment project path and try again.");
 
+            var engine = new RecommendationEngine.RecommendationEngine(new List<string> { deploymentProjectPath }, _session);
             var additionalReplacements = await GetReplacements();
             return await engine.ComputeRecommendations(additionalReplacements);
         }
@@ -187,6 +215,19 @@ namespace AWS.Deploy.Orchestration
             }
 
             return true;
+        }
+
+        private async Task<List<string>> LocateCustomRecipePaths(string targetApplicationFullPath, string solutionDirectoryPath)
+        {
+            if (_customRecipeLocator == null)
+                throw new InvalidOperationException($"{nameof(_customRecipeLocator)} is null as part of the orchestartor object");
+
+            var customRecipePaths = new List<string>();
+            foreach (var customRecipePath in await _customRecipeLocator.LocateCustomRecipePaths(targetApplicationFullPath, solutionDirectoryPath))
+            {
+                customRecipePaths.Add(customRecipePath);
+            }
+            return customRecipePaths;
         }
     }
 }

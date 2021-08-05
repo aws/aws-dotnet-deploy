@@ -22,6 +22,8 @@ namespace AWS.Deploy.CLI.Commands
     /// </summary>
     public class GenerateDeploymentProjectCommand
     {
+        private const int DEFAULT_PERSISTED_RECIPE_PRIORITY = 1000;
+
         private readonly IToolInteractiveService _toolInteractiveService;
         private readonly IConsoleUtilities _consoleUtilities;
         private readonly ICdkProjectHandler _cdkProjectHandler;
@@ -64,7 +66,7 @@ namespace AWS.Deploy.CLI.Commands
         public async Task ExecuteAsync(string saveCdkDirectoryPath, string projectDisplayName)
         {
             var orchestrator = new Orchestrator(_session, new[] { RecipeLocator.FindRecipeDefinitionsPath() });
-            var recommendations = await GenerateDeploymentRecommendations(orchestrator);
+            var recommendations = await GenerateRecommendationsToSaveDeploymentProject(orchestrator);
             var selectedRecommendation = _consoleUtilities.AskToChooseRecommendation(recommendations);
 
             if (string.IsNullOrEmpty(saveCdkDirectoryPath))
@@ -115,9 +117,9 @@ namespace AWS.Deploy.CLI.Commands
         /// </summary>
         /// <param name="orchestrator"><see cref="Orchestrator"/></param>
         /// <returns>A list of <see cref="Recommendation"/></returns>
-        private async Task<List<Recommendation>> GenerateDeploymentRecommendations(Orchestrator orchestrator)
+        private async Task<List<Recommendation>> GenerateRecommendationsToSaveDeploymentProject(Orchestrator orchestrator)
         {
-            var recommendations = await orchestrator.GenerateDeploymentRecommendations(forDeployment: false);
+            var recommendations = await orchestrator.GenerateRecommendationsToSaveDeploymentProject();
             if (recommendations.Count == 0)
             {
                 throw new FailedToGenerateAnyRecommendations("The project you are trying to deploy is currently not supported.");
@@ -230,8 +232,15 @@ namespace AWS.Deploy.CLI.Commands
             recipe.Name = recipeName;
             recipe.CdkProjectTemplateId = null;
             recipe.CdkProjectTemplate = null;
+            recipe.PersistedDeploymentProject = true;
+            recipe.RecipePriority = DEFAULT_PERSISTED_RECIPE_PRIORITY;
 
-            var recipeSnapshotBody = JsonConvert.SerializeObject(recipe, Formatting.Indented);
+            var recipeSnapshotBody = JsonConvert.SerializeObject(recipe, new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented,
+                NullValueHandling = NullValueHandling.Ignore,
+                ContractResolver = new SerializeRecipeContractResolver()
+            });
             await _fileManager.WriteAllTextAsync(recipeSnapshotFilePath, recipeSnapshotBody);
         }
     }
