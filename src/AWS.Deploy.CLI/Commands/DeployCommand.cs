@@ -360,6 +360,9 @@ namespace AWS.Deploy.CLI.Commands
                             case OptionSettingValueType.Bool:
                                 settingValue = bool.Parse(optionSettingValue);
                                 break;
+                            case OptionSettingValueType.Double:
+                                settingValue = double.Parse(optionSettingValue);
+                                break;
                             default:
                                 throw new InvalidOverrideValueException($"Invalid value {optionSettingValue} for option setting item {optionSettingJsonPath}");
                         }
@@ -733,6 +736,7 @@ namespace AWS.Deploy.CLI.Commands
                     {
                         case OptionSettingValueType.String:
                         case OptionSettingValueType.Int:
+                        case OptionSettingValueType.Double:
                             settingValue = _consoleUtilities.AskUserForValue(string.Empty, currentValue.ToString() ?? "", allowEmpty: true, resetValue: recommendation.GetOptionSettingDefaultValue<string>(setting) ?? "");
                             break;
                         case OptionSettingValueType.Bool:

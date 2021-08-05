@@ -75,9 +75,8 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
             var deployStdOut = _interactiveService.StdOutReader.ReadAllLines();
 
-            // Example: WebAppWithDockerFile3d078c3ca551.FargateServiceServiceURL47701F45 = http://WebAp-Farga-12O3W5VNB5OLC-166471465.us-west-2.elb.amazonaws.com
-            var applicationUrl = deployStdOut.First(line => line.StartsWith($"{_stackName}.FargateServiceServiceURL"))
-                .Split("=")[1]
+            var applicationUrl = deployStdOut.First(line => line.Trim().StartsWith("Endpoint:"))
+                .Split(" ")[1]
                 .Trim();
 
             // URL could take few more minutes to come live, therefore, we want to wait and keep trying for a specified timeout

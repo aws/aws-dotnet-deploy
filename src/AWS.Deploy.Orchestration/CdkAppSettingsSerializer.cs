@@ -18,7 +18,7 @@ namespace AWS.Deploy.Orchestration
                 throw new InvalidProjectPathException("The project path provided is invalid.");
 
             // General Settings
-            var appSettingsContainer = new RecipeConfiguration<Dictionary<string, object>>(
+            var appSettingsContainer = new RecipeProps<Dictionary<string, object>>(
                 cloudApplication.StackName,
                 projectPath,
                 recommendation.Recipe.Id,

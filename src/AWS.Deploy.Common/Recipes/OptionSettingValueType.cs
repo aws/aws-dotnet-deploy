@@ -7,6 +7,7 @@ namespace AWS.Deploy.Common.Recipes
     {
         String,
         Int,
+        Double,
         Bool,
         Object
     };

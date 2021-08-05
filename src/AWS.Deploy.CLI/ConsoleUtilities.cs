@@ -410,9 +410,9 @@ namespace AWS.Deploy.CLI
                         _interactiveService.WriteLine($"{indent}{key}: {stringValue}");
                     }
                 }
-                else if (value is bool boolValue)
+                else if(value != null)
                 {
-                    _interactiveService.WriteLine($"{indent}{key}: {boolValue}");
+                    _interactiveService.WriteLine($"{indent}{key}: {value}");
                 }
             }
         }
