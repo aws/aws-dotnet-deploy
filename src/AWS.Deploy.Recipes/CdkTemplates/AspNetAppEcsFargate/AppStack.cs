@@ -1,139 +1,59 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-using Amazon.CDK;
-using Amazon.CDK.AWS.EC2;
-using Amazon.CDK.AWS.ECS;
-using Amazon.CDK.AWS.ECS.Patterns;
-using Amazon.CDK.AWS.IAM;
-using AWS.Deploy.Recipes.CDK.Common;
-using AspNetAppEcsFargate.Configurations;
-using Protocol = Amazon.CDK.AWS.ECS.Protocol;
-using Amazon.CDK.AWS.ECR;
+using System;
 using System.Collections.Generic;
+using Amazon.CDK;
+using Amazon.CDK.AWS.ECS;
+using AWS.Deploy.Recipes.CDK.Common;
+
+using AspNetAppEcsFargate.Configurations;
 
 namespace AspNetAppEcsFargate
 {
     public class AppStack : Stack
     {
-        internal AppStack(Construct scope, RecipeConfiguration<Configuration> recipeConfiguration, IStackProps? props = null)
-            : base(scope, recipeConfiguration.StackName, props)
+        internal AppStack(Construct scope, IDeployToolStackProps<Configuration> props)
+            : base(scope, props.StackName, props)
         {
-            var settings = recipeConfiguration.Settings;
+            // Setup callback for generated construct to provide access to customize CDK properties before creating constructs.
+            CDKRecipeCustomizer<Recipe>.CustomizeCDKProps += CustomizeCDKProps;
 
-            IVpc vpc;
-            if (settings.Vpc.IsDefault)
-            {
-                vpc = Vpc.FromLookup(this, "Vpc", new VpcLookupOptions
-                {
-                    IsDefault = true
-                });
-            }
-            else if (settings.Vpc.CreateNew)
-            {
-                vpc = new Vpc(this, "Vpc", new VpcProps
-                {
-                    MaxAzs = 2
-                });
-            }
-            else
-            {
-                vpc = Vpc.FromLookup(this, "Vpc", new VpcLookupOptions
-                {
-                    VpcId = settings.Vpc.VpcId
-                });
-            }
+            // Create custom CDK constructs here that might need to be referenced in the CustomizeCDKProps. For example if
+            // creating a DynamoDB table construct and then later using the CDK construct reference in CustomizeCDKProps to
+            // pass the table name as an environment variable to the container image.
 
-            ICluster cluster;
-            if (settings.ECSCluster.CreateNew)
-            {
-                cluster = new Cluster(this, "Cluster", new ClusterProps
-                {
-                    Vpc = vpc,
-                    ClusterName = settings.ECSCluster.NewClusterName
-                });
-            }
-            else
-            {
-                cluster = Cluster.FromClusterAttributes(this, "Cluster", new ClusterAttributes
-                {
-                    ClusterArn = settings.ECSCluster.ClusterArn,
-                    ClusterName = ECSFargateUtilities.GetClusterNameFromArn(settings.ECSCluster.ClusterArn),
-                    SecurityGroups = new ISecurityGroup[0],
-                    Vpc = vpc
-                });
-            }
+            // Create the recipe defined CDK construct with all of its sub constructs.
+            var generatedRecipe = new Recipe(this, props.RecipeProps);
 
-            IRole taskRole;
-            if (settings.ApplicationIAMRole.CreateNew)
-            {
-                taskRole = new Role(this, "TaskRole", new RoleProps
-                {
-                    AssumedBy = new ServicePrincipal("ecs-tasks.amazonaws.com")
-                });
-            }
-            else
-            {
-                if (string.IsNullOrEmpty(settings.ApplicationIAMRole.RoleArn))
-                    throw new InvalidOrMissingConfigurationException("The provided Application IAM Role ARN is null or empty.");
+            // Create additional CDK constructs here. The recipe's constructs can be accessed as properties on
+            // the generatedRecipe variable.
+        }
 
-                taskRole = Role.FromRoleArn(this, "TaskRole", settings.ApplicationIAMRole.RoleArn, new FromRoleArnOptions {
-                    Mutable = false
-                });
-            }
+        public const string FakeConstant = "FakeConstant";
 
-            var taskDefinition = new FargateTaskDefinition(this, "TaskDefinition", new FargateTaskDefinitionProps
-            {
-                TaskRole = taskRole,
-                Cpu = settings.TaskCpu,
-                MemoryLimitMiB = settings.TaskMemory
-            });
+        /// <summary>
+        /// This method can be used to customize the properties for CDK constructs before creating the constructs.
+        ///
+        /// The pattern used in this method is to check to evnt.ResourceLogicalName to see if the CDK construct about to be created is one
+        /// you want to customize. If so cast the evnt.Props object to the CDK properties object and make the appropriate settings.
+        /// </summary>
+        /// <param name="evnt"></param>
+        private void CustomizeCDKProps(CustomizePropsEventArgs<Recipe> evnt)
+        {
+            // Example of how to customize the container image definition to include environment variables to the running applications.
+            // 
+            //if (string.Equals(evnt.ResourceLogicalName, nameof(evnt.Construct.AppContainerDefinition)))
+            //{
+            //    if(evnt.Props is ContainerDefinitionOptions props)
+            //    {
+            //        Console.WriteLine("Customizing AppContainerDefinition");
+            //        if (props.Environment == null)
+            //            props.Environment = new Dictionary<string, string>();
 
-            if (string.IsNullOrEmpty(recipeConfiguration.ECRRepositoryName))
-                throw new InvalidOrMissingConfigurationException("The provided ECR Repository Name is null or empty.");
-
-            var ecrRepository = Repository.FromRepositoryName(this, "ECRRepository", recipeConfiguration.ECRRepositoryName);
-            var container = taskDefinition.AddContainer("Container", new ContainerDefinitionOptions
-            {
-                Image = ContainerImage.FromEcrRepository(ecrRepository, recipeConfiguration.ECRImageTag)
-            });
-
-            container.AddPortMappings(new PortMapping
-            {
-                ContainerPort = 80,
-                Protocol = Protocol.TCP
-            });
-
-            var ecsLoadBalancerAccessSecurityGroup = new SecurityGroup(this, "WebAccessSecurityGroup", new SecurityGroupProps
-            {
-                Vpc = vpc,
-                SecurityGroupName = $"{recipeConfiguration.StackName}-ECSService"
-            });
-
-            var ecsServiceSecurityGroups = new List<ISecurityGroup>();
-            ecsServiceSecurityGroups.Add(ecsLoadBalancerAccessSecurityGroup);
-
-            if (!string.IsNullOrEmpty(settings.AdditionalECSServiceSecurityGroups))
-            {
-                var count = 1;
-                foreach (var securityGroupId in settings.AdditionalECSServiceSecurityGroups.Split(','))
-                {
-                    ecsServiceSecurityGroups.Add(SecurityGroup.FromSecurityGroupId(this, $"AdditionalGroup-{count++}", securityGroupId.Trim(), new SecurityGroupImportOptions
-                    {
-                        Mutable = false
-                    }));
-                }
-            }
-
-            new ApplicationLoadBalancedFargateService(this, "FargateService", new ApplicationLoadBalancedFargateServiceProps
-            {
-                Cluster = cluster,
-                TaskDefinition = taskDefinition,
-                DesiredCount = settings.DesiredCount,
-                ServiceName = settings.ECSServiceName,
-                AssignPublicIp = settings.Vpc.IsDefault,
-                SecurityGroups = ecsServiceSecurityGroups.ToArray()
-            });
+            //        props.Environment["EXAMPLE_ENV1"] = "EXAMPLE_VALUE1";
+            //    }
+            //}
         }
     }
 }

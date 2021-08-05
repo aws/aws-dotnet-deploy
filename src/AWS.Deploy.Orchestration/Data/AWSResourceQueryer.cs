@@ -52,6 +52,7 @@ namespace AWS.Deploy.Orchestration.Data
         Task<Repository> CreateECRRepository(string repositoryName);
         Task<List<Stack>> GetCloudFormationStacks();
         Task<GetCallerIdentityResponse> GetCallerIdentity();
+        Task<List<Amazon.ElasticLoadBalancingV2.Model.LoadBalancer>> ListOfLoadBalancers(LoadBalancerTypeEnum loadBalancerType);
     }
 
     public class AWSResourceQueryer : IAWSResourceQueryer
@@ -386,6 +387,23 @@ namespace AWS.Deploy.Orchestration.Data
         {
             using var stsClient = _awsClientFactory.GetAWSClient<IAmazonSecurityTokenService>();
             return await stsClient.GetCallerIdentityAsync(new GetCallerIdentityRequest());
+        }
+
+        public async Task<List<Amazon.ElasticLoadBalancingV2.Model.LoadBalancer>> ListOfLoadBalancers(Amazon.ElasticLoadBalancingV2.LoadBalancerTypeEnum loadBalancerType)
+        {
+            var client = _awsClientFactory.GetAWSClient<IAmazonElasticLoadBalancingV2>();
+
+            var loadBalancers = new List<Amazon.ElasticLoadBalancingV2.Model.LoadBalancer>();
+
+            await foreach(var loadBalancer in client.Paginators.DescribeLoadBalancers(new DescribeLoadBalancersRequest()).LoadBalancers)
+            {
+                if(loadBalancer.Type == loadBalancerType)
+                {
+                    loadBalancers.Add(loadBalancer);
+                }
+            }
+
+            return loadBalancers;
         }
     }
 }
