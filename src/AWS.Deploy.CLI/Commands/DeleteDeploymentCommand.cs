@@ -23,6 +23,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly IToolInteractiveService _interactiveService;
         private readonly IAmazonCloudFormation _cloudFormationClient;
         private readonly IConsoleUtilities _consoleUtilities;
+        private const int MAX_RETRIES = 4;
 
         public DeleteDeploymentCommand(IAWSClientFactory awsClientFactory, IToolInteractiveService interactiveService, IConsoleUtilities consoleUtilities)
         {
@@ -67,10 +68,6 @@ namespace AWS.Deploy.CLI.Commands
 
                 await WaitForStackDelete(stackName);
                 _interactiveService.WriteLine($"{stackName}: deleted");
-            }
-            catch (AmazonCloudFormationException)
-            {
-                throw new FailedToDeleteException($"Failed to delete {stackName} stack.");
             }
             finally
             {
@@ -136,19 +133,52 @@ namespace AWS.Deploy.CLI.Commands
 
         private async Task<Stack?> GetStackAsync(string stackName)
         {
-            try
-            {
-                var response = await _cloudFormationClient.DescribeStacksAsync(new DescribeStacksRequest
-                {
-                    StackName = stackName
-                });
+            var retryCount = 0;
+            var shouldRetry = false;
 
-                return response.Stacks.Count == 0 ? null : response.Stacks[0];
-            }
-            catch (AmazonCloudFormationException exception) when (exception.ErrorCode.Equals("ValidationError") && exception.Message.Equals($"Stack with id {stackName} does not exist"))
+            Stack? stack = null;
+            do
             {
-                return null;
+                var waitTime = GetWaitTime(retryCount);
+                try
+                {
+                    await Task.Delay(waitTime);
+
+                    var response = await _cloudFormationClient.DescribeStacksAsync(new DescribeStacksRequest
+                    {
+                        StackName = stackName
+                    });
+
+                    stack = response.Stacks.Count == 0 ? null : response.Stacks[0];
+                    shouldRetry = false;
+                }
+                catch (AmazonCloudFormationException exception) when (exception.ErrorCode.Equals("ValidationError") && exception.Message.Equals($"Stack with id {stackName} does not exist"))
+                {
+                    shouldRetry = false;
+                }
+                catch (AmazonCloudFormationException exception) when (exception.ErrorCode.Equals("ThrottlingException"))
+                {
+                    _interactiveService.WriteDebugLine(exception.PrettyPrint());
+                    shouldRetry = true;
+                }
+            } while (shouldRetry && retryCount++ < MAX_RETRIES);
+
+            return stack;
+        }
+
+        /// <summary>
+        /// Returns the next wait interval, in milliseconds, using an exponential backoff algorithm
+        /// Read more here https://docs.aws.amazon.com/general/latest/gr/api-retries.html
+        /// </summary>
+        /// <param name="retryCount"></param>
+        /// <returns></returns>
+        private static TimeSpan GetWaitTime(int retryCount) {
+            if (retryCount == 0) {
+                return TimeSpan.Zero;
             }
+
+            var waitTime = Math.Pow(2, retryCount) * 5;
+            return TimeSpan.FromSeconds(waitTime);
         }
     }
 }

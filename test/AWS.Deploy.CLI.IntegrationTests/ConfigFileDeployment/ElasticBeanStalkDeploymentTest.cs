@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Amazon.CloudFormation;
+using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.CLI.Extensions;
 using AWS.Deploy.CLI.IntegrationTests.Extensions;
 using AWS.Deploy.CLI.IntegrationTests.Helpers;
@@ -17,7 +18,6 @@ using Environment = System.Environment;
 
 namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
 {
-    [Collection("WebAppNoDockerFile")]
     public class ElasticBeanStalkDeploymentTest : IDisposable
     {
         private readonly HttpHelper _httpHelper;
@@ -25,8 +25,8 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
         private readonly App _app;
         private readonly InMemoryInteractiveService _interactiveService;
         private bool _isDisposed;
-        private readonly string _stackName;
-        private readonly string _configFilePath;
+        private string _stackName;
+        private readonly TestAppManager _testAppManager;
 
         public ElasticBeanStalkDeploymentTest()
         {
@@ -42,27 +42,28 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
-            _configFilePath = Path.Combine("ConfigFileDeployment", "TestFiles", "IntegrationTestFiles", "ElasticBeanStalkConfigFile.json");
-
-            ConfigFileHelper.ReplacePlaceholders(_configFilePath);
-
-            var userDeploymentSettings = UserDeploymentSettings.ReadSettings(_configFilePath);
-
-            _stackName = userDeploymentSettings.StackName;
-
             _app = serviceProvider.GetService<App>();
             Assert.NotNull(_app);
 
             _interactiveService = serviceProvider.GetService<InMemoryInteractiveService>();
             Assert.NotNull(_interactiveService);
+
+            _testAppManager = new TestAppManager();
         }
 
         [Fact]
         public async Task PerformDeployment()
         {
             // Deploy
-            var projectPath = Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj");
-            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--apply", _configFilePath, "--silent" };
+            var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
+            var configFilePath = Path.Combine(Directory.GetParent(projectPath).FullName, "ElasticBeanStalkConfigFile.json");
+            ConfigFileHelper.ReplacePlaceholders(configFilePath);
+
+            var userDeploymentSettings = UserDeploymentSettings.ReadSettings(configFilePath);
+
+            _stackName = userDeploymentSettings.StackName;
+
+            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--apply", configFilePath, "--silent" };
             await _app.Run(deployArgs);
 
             // Verify application is deployed and running
@@ -94,7 +95,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
             // Delete
             await _app.Run(deleteArgs);
 
-            // Verify application is delete
+            // Verify application is deleted
             Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName), $"{_stackName} still exists.");
         }
 

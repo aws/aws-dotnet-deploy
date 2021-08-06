@@ -1,101 +1,65 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-using System;
 using System.IO;
-using System.Linq;
-using AWS.Deploy.CLI.IntegrationTests.Extensions;
-using AWS.Deploy.CLI.IntegrationTests.Services;
+using AWS.Deploy.CLI.Common.UnitTests.IO;
+using AWS.Deploy.CLI.Utilities;
 using Xunit;
 using Task = System.Threading.Tasks.Task;
 
 namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 {
-    [Collection("SaveCdkDeploymentProjectTests")]
-    public class SaveCdkDeploymentProjectTests : IDisposable
+    public class SaveCdkDeploymentProjectTests 
     {
-        private readonly string _targetApplicationProjectPath;
-        private readonly string _deploymentManifestFilePath;
-        private readonly string _testArtifactsDirectoryPath;
-
-        private bool _isDisposed;
-        private string _saveDirectoryPath;
+        private readonly CommandLineWrapper _commandLineWrapper;
 
         public SaveCdkDeploymentProjectTests()
         {
-            var testAppsDirectoryPath = Utilities.ResolvePathToTestApps();
-            _targetApplicationProjectPath = Path.Combine(testAppsDirectoryPath, "WebAppWithDockerFile");
-            _deploymentManifestFilePath = Path.Combine(testAppsDirectoryPath, "WebAppWithDockerFile", "aws-deployments.json");
-            _testArtifactsDirectoryPath = Path.Combine(testAppsDirectoryPath, "TestArtifacts");
+            _commandLineWrapper = new CommandLineWrapper(new ConsoleOrchestratorLogger(new ConsoleInteractiveServiceImpl()));
         }
 
         [Fact]
         public async Task DefaultSaveDirectory()
         {
-            _saveDirectoryPath = _targetApplicationProjectPath + "CDK";
-            await Utilities.CreateCDKDeploymentProject(_targetApplicationProjectPath);
-            CleanUp();
+            var tempDirectoryPath = new TestAppManager().GetProjectPath(string.Empty);
+            await _commandLineWrapper.Run("git init", tempDirectoryPath);
+            var targetApplicationProjectPath = Path.Combine(tempDirectoryPath, "testapps", "WebAppWithDockerFile");
+
+            await Utilities.CreateCDKDeploymentProject(targetApplicationProjectPath);
         }
 
         [Fact]
         public async Task CustomSaveDirectory()
         {
-            _saveDirectoryPath = Path.Combine(_testArtifactsDirectoryPath, "MyCdkApp");
-            await Utilities.CreateCDKDeploymentProject(_targetApplicationProjectPath, _saveDirectoryPath);
-            CleanUp();
+            var tempDirectoryPath = new TestAppManager().GetProjectPath(string.Empty);
+            await _commandLineWrapper.Run("git init", tempDirectoryPath);
+            var targetApplicationProjectPath = Path.Combine(tempDirectoryPath, "testapps", "WebAppWithDockerFile");
+
+            var saveDirectoryPath = Path.Combine(tempDirectoryPath, "DeploymentProjects", "MyCdkApp");
+            await Utilities.CreateCDKDeploymentProject(targetApplicationProjectPath, saveDirectoryPath);
         }
 
         [Fact]
         public async Task InvalidSaveCdkDirectoryInsideProjectDirectory()
         {
-            
-            _saveDirectoryPath = Path.Combine(_targetApplicationProjectPath, "MyCdkApp");
-            await Utilities.CreateCDKDeploymentProject(_targetApplicationProjectPath, _saveDirectoryPath, false);
-            CleanUp();
+            var tempDirectoryPath = new TestAppManager().GetProjectPath(string.Empty);
+            await _commandLineWrapper.Run("git init", tempDirectoryPath);
+            var targetApplicationProjectPath = Path.Combine(tempDirectoryPath, "testapps", "WebAppWithDockerFile");
+
+            var saveDirectoryPath = Path.Combine(tempDirectoryPath, "testapps", "WebAppWithDockerFile", "MyCdkApp");
+            await Utilities.CreateCDKDeploymentProject(targetApplicationProjectPath, saveDirectoryPath, false);
         }
 
         [Fact]
         public async Task InvalidNonEmptySaveCdkDirectory()
         {
-            Directory.CreateDirectory(Path.Combine(_testArtifactsDirectoryPath, "MyCdkApp", "MyFolder"));
-            _saveDirectoryPath = Path.Combine(_testArtifactsDirectoryPath, "MyCdkApp");
-            await Utilities.CreateCDKDeploymentProject(_targetApplicationProjectPath, _saveDirectoryPath, false);
-            CleanUp();
-        }
+            var tempDirectoryPath = new TestAppManager().GetProjectPath(string.Empty);
+            await _commandLineWrapper.Run("git init", tempDirectoryPath);
+            var targetApplicationProjectPath = Path.Combine(tempDirectoryPath, "testapps", "WebAppWithDockerFile");
 
-        private void CleanUp()
-        {
-            if (Directory.Exists(_testArtifactsDirectoryPath))
-                Directory.Delete(_testArtifactsDirectoryPath, true);
-
-            if (File.Exists(_deploymentManifestFilePath))
-                File.Delete(_deploymentManifestFilePath);
-
-            if (Directory.Exists(_saveDirectoryPath))
-                Directory.Delete(_saveDirectoryPath, true);
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_isDisposed) return;
-
-            if (disposing)
-            {
-                CleanUp();
-            }
-
-            _isDisposed = true;
-        }
-
-        ~SaveCdkDeploymentProjectTests()
-        {
-            Dispose(false);
+            Directory.CreateDirectory(Path.Combine(tempDirectoryPath, "MyCdkApp", "MyFolder"));
+            var saveDirectoryPath = Path.Combine(tempDirectoryPath, "MyCdkApp");
+            await Utilities.CreateCDKDeploymentProject(targetApplicationProjectPath, saveDirectoryPath, false);
         }
     }
 }

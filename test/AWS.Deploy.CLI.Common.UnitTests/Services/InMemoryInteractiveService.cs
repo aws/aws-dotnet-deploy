@@ -121,6 +121,11 @@ namespace AWS.Deploy.CLI.IntegrationTests.Services
 
             var readLine = _stdInReader.ReadLine();
 
+            if (readLine == null)
+            {
+                throw new InvalidOperationException();
+            }
+
             // Save the BaseStream position for future reads.
             _stdInReaderPosition = _stdInReader.BaseStream.Position;
 

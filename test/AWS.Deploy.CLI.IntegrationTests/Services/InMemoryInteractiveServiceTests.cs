@@ -3,6 +3,7 @@
 
 using System;
 using Xunit;
+using Should;
 
 namespace AWS.Deploy.CLI.IntegrationTests.Services
 {
@@ -112,6 +113,13 @@ namespace AWS.Deploy.CLI.IntegrationTests.Services
             Assert.Equal(ConsoleKey.D, service.ReadKey(false).Key);
             Assert.Equal(ConsoleKey.E, service.ReadKey(false).Key);
             Assert.Equal(ConsoleKey.F, service.ReadKey(false).Key);
+        }
+
+        [Fact]
+        public void ReadLineSetToNull()
+        {
+            var service = new InMemoryInteractiveService();
+            Assert.Throws<InvalidOperationException>(() => service.ReadLine());
         }
     }
 }
