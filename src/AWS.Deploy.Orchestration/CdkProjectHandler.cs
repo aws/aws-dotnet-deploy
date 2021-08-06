@@ -40,10 +40,22 @@ namespace AWS.Deploy.Orchestration
                 { EnvironmentVariableKeys.AWS_EXECUTION_ENV, recipeInfo }
             };
 
-            // Create a new temporary CDK project for a new deployment
-            _interactiveService.LogMessageLine($"Generating a {recommendation.Recipe.Name} CDK Project");
-            var cdkProjectPath = await CreateCdkProjectForDeployment(recommendation, session);
+            string? cdkProjectPath;
+            if (recommendation.Recipe.PersistedDeploymentProject)
+            {
+                if (string.IsNullOrEmpty(recommendation.Recipe.RecipePath))
+                    throw new InvalidOperationException($"{nameof(recommendation.Recipe.RecipePath)} cannot be null");
 
+                // The CDK deployment project is already saved in the same directory.
+                cdkProjectPath = _directoryManager.GetDirectoryInfo(recommendation.Recipe.RecipePath).Parent.FullName;
+            }
+            else
+            {
+                // Create a new temporary CDK project for a new deployment
+                _interactiveService.LogMessageLine($"Generating a {recommendation.Recipe.Name} CDK Project");
+                cdkProjectPath = await CreateCdkProjectForDeployment(recommendation, session);
+            }
+            
             // Write required configuration in appsettings.json
             var appSettingsBody = _appSettingsBuilder.Build(cloudApplication, recommendation, session);
             var appSettingsFilePath = Path.Combine(cdkProjectPath, "appsettings.json");

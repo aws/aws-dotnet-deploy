@@ -5,6 +5,7 @@ using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
+using System.Collections.Generic;
 using Amazon;
 using AWS.Deploy.CLI.Commands.TypeHints;
 using AWS.Deploy.CLI.Utilities;
@@ -37,6 +38,7 @@ namespace AWS.Deploy.CLI.Commands
         private static readonly Option<bool> _optionDisableInteractive = new(new []{"-s", "--silent" }, "Disable interactivity to deploy without any prompts for user input.");
         private static readonly Option<string> _optionOutputDirectory = new(new[]{"-o", "--output"}, "Directory path in which the CDK deployment project will be saved.");
         private static readonly Option<string> _optionProjectDisplayName = new(new[] { "--project-display-name" }, "The name of the deployment project that will be displayed in the list of available deployment options.");
+        private static readonly Option<string> _optionDeploymentProject = new(new[] { "--deployment-project" }, "The absolute or relative path of the CDK project that will be used for deployment");
 
         private readonly IToolInteractiveService _toolInteractiveService;
         private readonly IOrchestratorInteractiveService _orchestratorInteractiveService;
@@ -56,6 +58,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly IDisplayedResourcesHandler _displayedResourceHandler;
         private readonly IConsoleUtilities _consoleUtilities;
         private readonly IDeploymentManifestEngine _deploymentManifestEngine;
+        private readonly ICustomRecipeLocator _customRecipeLocator;
 
         public CommandFactory(
             IToolInteractiveService toolInteractiveService,
@@ -75,7 +78,8 @@ namespace AWS.Deploy.CLI.Commands
             ITypeHintCommandFactory typeHintCommandFactory,
             IDisplayedResourcesHandler displayedResourceHandler,
             IConsoleUtilities consoleUtilities,
-            IDeploymentManifestEngine deploymentManifestEngine)
+            IDeploymentManifestEngine deploymentManifestEngine,
+            ICustomRecipeLocator customRecipeLocator)
         {
             _toolInteractiveService = toolInteractiveService;
             _orchestratorInteractiveService = orchestratorInteractiveService;
@@ -95,6 +99,7 @@ namespace AWS.Deploy.CLI.Commands
             _displayedResourceHandler = displayedResourceHandler;
             _consoleUtilities = consoleUtilities;
             _deploymentManifestEngine = deploymentManifestEngine;
+            _customRecipeLocator = customRecipeLocator;
         }
 
         public Command BuildRootCommand()
@@ -127,7 +132,8 @@ namespace AWS.Deploy.CLI.Commands
                 _optionStackName,
                 _optionApply,
                 _optionDiagnosticLogging,
-                _optionDisableInteractive
+                _optionDisableInteractive,
+                _optionDeploymentProject
             };
 
             deployCommand.Handler = CommandHandler.Create(async (DeployCommandHandlerInput input) =>
@@ -150,7 +156,7 @@ namespace AWS.Deploy.CLI.Commands
                     var systemCapabilities = _systemCapabilityEvaluator.Evaluate();
 
                     var projectDefinition = await _projectParserUtility.Parse(input.ProjectPath ?? "");
-
+                    
                     var callerIdentity = await _awsResourceQueryer.GetCallerIdentity();
 
                     var session = new OrchestratorSession(
@@ -179,9 +185,17 @@ namespace AWS.Deploy.CLI.Commands
                         _displayedResourceHandler,
                         _cloudApplicationNameGenerator,
                         _consoleUtilities,
+                        _customRecipeLocator,
                         session);
 
-                    await deploy.ExecuteAsync(input.StackName ?? "", userDeploymentSettings);
+                    var deploymentProjectPath = input.DeploymentProject ?? string.Empty;
+                    if (!string.IsNullOrEmpty(deploymentProjectPath))
+                    {
+                        var targetApplicationDirectoryPath = new DirectoryInfo(projectDefinition.ProjectPath).Parent!.FullName;
+                        deploymentProjectPath = Path.GetFullPath(deploymentProjectPath, targetApplicationDirectoryPath);
+                    }
+
+                    await deploy.ExecuteAsync(input.StackName ?? "", deploymentProjectPath, userDeploymentSettings);
 
                     return CommandReturnCodes.SUCCESS;
                 }
@@ -346,12 +360,18 @@ namespace AWS.Deploy.CLI.Commands
                     _toolInteractiveService.Diagnostics = input.Diagnostics;
                     var projectDefinition = await _projectParserUtility.Parse(input.ProjectPath ?? "");
 
-                    var saveDirectory = input.Output ?? "";
-                    var projectDisplayName = input.ProjectDisplayName ?? "";
+                    var saveDirectory = input.Output;
+                    var projectDisplayName = input.ProjectDisplayName;
 
                     OrchestratorSession session = new OrchestratorSession(projectDefinition);
 
-                    var targetApplicationFullPath = new DirectoryManager().GetDirectoryInfo(projectDefinition.ProjectPath).FullName;
+                    var targetApplicationFullPath = new DirectoryInfo(projectDefinition.ProjectPath).FullName;
+
+                    if (!string.IsNullOrEmpty(saveDirectory))
+                    {
+                        var targetApplicationDirectoryFullPath = new DirectoryInfo(targetApplicationFullPath).Parent!.FullName;
+                        saveDirectory = Path.GetFullPath(saveDirectory, targetApplicationDirectoryFullPath);
+                    }
 
                     var generateDeploymentProject = new GenerateDeploymentProjectCommand(
                         _toolInteractiveService,

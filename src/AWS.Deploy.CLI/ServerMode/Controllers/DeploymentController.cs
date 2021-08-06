@@ -5,8 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-
-using Amazon.Runtime.CredentialManagement;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
 using Amazon;
@@ -19,7 +17,6 @@ using AWS.Deploy.CLI.ServerMode.Tasks;
 using AWS.Deploy.CLI.ServerMode.Models;
 using AWS.Deploy.CLI.ServerMode.Services;
 using AWS.Deploy.Orchestration;
-
 using Swashbuckle.AspNetCore.Annotations;
 using AWS.Deploy.CLI.ServerMode.Hubs;
 using Microsoft.AspNetCore.SignalR;
@@ -459,6 +456,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                                     serviceProvider.GetRequiredService<IAWSResourceQueryer>(),
                                     serviceProvider.GetRequiredService<IDeploymentBundleHandler>(),
                                     new DockerEngine.DockerEngine(session.ProjectDefinition),
+                                    serviceProvider.GetRequiredService<ICustomRecipeLocator>(),
                                     new List<string> { RecipeLocator.FindRecipeDefinitionsPath() }
                                 );
         }

@@ -50,8 +50,12 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
             return Task.FromResult<List<Repository>>(new List<Repository>() { repository });
         }
 
+        public Task<PlatformSummary> GetLatestElasticBeanstalkPlatformArn()
+        {
+            return Task.FromResult(new PlatformSummary() { PlatformArn = string.Empty });
+        }
+
         public Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns() => throw new NotImplementedException();
-        public Task<PlatformSummary> GetLatestElasticBeanstalkPlatformArn() => throw new NotImplementedException();
         public Task<List<Vpc>> GetListOfVpcs() => throw new NotImplementedException();
         public Task<List<KeyPairInfo>> ListOfEC2KeyPairs() => throw new NotImplementedException();
         public Task<List<Amazon.ECS.Model.Cluster>> ListOfECSClusters() => throw new NotImplementedException();
