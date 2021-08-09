@@ -47,7 +47,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             var commandLineWrapper = new CommandLineWrapper(consoleOrchestratorLogger);
             _customRecipeLocator = new CustomRecipeLocator(deploymentManifestEngine, consoleOrchestratorLogger, commandLineWrapper, directoryManager);
 
-            var solutionPath = new ProjectDefinitionParser(fileManager, directoryManager).Parse(_webAppWithDockerFilePath).Result.ProjectSolutionPath;
+            var solutionPath = Path.Combine(testAppsDirectoryPath, "..", "AWS.Deploy.sln");
             _solutionDirectoryPath = directoryManager.GetDirectoryInfo(solutionPath).Parent.FullName;
         }
 
