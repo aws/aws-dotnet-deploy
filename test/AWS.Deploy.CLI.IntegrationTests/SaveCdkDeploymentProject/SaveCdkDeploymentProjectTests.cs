@@ -57,7 +57,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
         [Fact]
         public async Task InvalidNonEmptySaveCdkDirectory()
         {
-            Directory.CreateDirectory(Path.Combine(_testArtifactsDirectoryPath, "MyCdkAPP", "MyFolder"));
+            Directory.CreateDirectory(Path.Combine(_testArtifactsDirectoryPath, "MyCdkApp", "MyFolder"));
             _saveDirectoryPath = Path.Combine(_testArtifactsDirectoryPath, "MyCdkApp");
             await Utilities.CreateCDKDeploymentProject(_targetApplicationProjectPath, _saveDirectoryPath, false);
             CleanUp();
