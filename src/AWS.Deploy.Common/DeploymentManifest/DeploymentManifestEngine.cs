@@ -13,6 +13,7 @@ namespace AWS.Deploy.Common.DeploymentManifest
     public interface IDeploymentManifestEngine
     {
         Task UpdateDeploymentManifestFile(string saveCdkDirectoryFullPath, string targetApplicationFullPath);
+        Task<List<string>> GetRecipeDefinitionPaths(string targetApplicationFullPath);
     }
 
     /// <summary>
@@ -44,8 +45,12 @@ namespace AWS.Deploy.Common.DeploymentManifest
         {
             try
             {
+                if (!_directoryManager.Exists(saveCdkDirectoryFullPath))
+                    return;
+
                 var deploymentManifestFilePath = GetDeploymentManifestFilePath(targetApplicationFullPath);
-                var saveCdkDirectoryRelativePath = _directoryManager.GetRelativePath(targetApplicationFullPath, saveCdkDirectoryFullPath);
+                var targetApplicationDirectoryPath = _directoryManager.GetDirectoryInfo(targetApplicationFullPath).Parent.FullName;
+                var saveCdkDirectoryRelativePath = _directoryManager.GetRelativePath(targetApplicationDirectoryPath, saveCdkDirectoryFullPath);
 
                 DeploymentManifestModel deploymentManifestModel;
 
@@ -68,7 +73,37 @@ namespace AWS.Deploy.Common.DeploymentManifest
                 throw new FailedToUpdateDeploymentManifestFileException($"Failed to update the deployment manifest file " +
                     $"for the deployment project stored at '{saveCdkDirectoryFullPath}'", ex);
             }
-            
+        }
+
+        /// <summary>
+        /// This method deserializes the deployment-manifest file and returns a list of absolute paths of directories at which different CDK
+        /// deployment projects are stored. The custom recipe snapshots are stored in this directory.
+        /// <param name="targetApplicationFullPath">The absolute path to the target application csproj or fsproj file</param>
+        /// </summary>
+        /// <returns> A list containing absolute directory paths for CDK deployment projects.</returns>
+        public async Task<List<string>> GetRecipeDefinitionPaths(string targetApplicationFullPath)
+        {
+            var recipeDefinitionPaths = new List<string>();
+            var deploymentManifestFilePath = GetDeploymentManifestFilePath(targetApplicationFullPath);
+            var targetApplicationDirectoryPath = _directoryManager.GetDirectoryInfo(targetApplicationFullPath).Parent.FullName;
+
+            if (_fileManager.Exists(deploymentManifestFilePath))
+            {
+                var deploymentManifestModel = await ReadManifestFile(deploymentManifestFilePath);
+                foreach (var entry in deploymentManifestModel.DeploymentManifestEntries)
+                {
+                    var saveCdkDirectoryRelativePath = entry.SaveCdkDirectoryRelativePath;
+                    if (string.IsNullOrEmpty(saveCdkDirectoryRelativePath))
+                        continue;
+
+                    var saveCdkDirectoryAbsolutePath = _directoryManager.GetAbsolutePath(targetApplicationDirectoryPath, saveCdkDirectoryRelativePath);
+
+                    if (_directoryManager.Exists(saveCdkDirectoryAbsolutePath))
+                        recipeDefinitionPaths.Add(saveCdkDirectoryAbsolutePath);
+                }
+            }
+
+            return recipeDefinitionPaths;
         }
 
         /// <summary>
@@ -103,5 +138,7 @@ namespace AWS.Deploy.Common.DeploymentManifest
             var deploymentManifestFileFullPath = Path.Combine(projectDirectoryFullPath, DEPLOYMENT_MANIFEST_FILE_NAME);
             return deploymentManifestFileFullPath;
         }
+
+
     }
 }

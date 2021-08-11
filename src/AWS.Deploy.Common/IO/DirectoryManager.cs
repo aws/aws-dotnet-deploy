@@ -17,6 +17,7 @@ namespace AWS.Deploy.Common.IO
         bool ExistsInsideDirectory(string parentDirectoryPath, string childPath);
         void Delete(string path, bool recursive = false);
         string GetRelativePath(string referenceFullPath, string targetFullPath);
+        string GetAbsolutePath(string referenceFullPath, string targetRelativePath);
     }
 
     public class DirectoryManager : IDirectoryManager
@@ -45,5 +46,6 @@ namespace AWS.Deploy.Common.IO
         public void Delete(string path, bool recursive = false) => Directory.Delete(path, recursive);
 
         public string GetRelativePath(string referenceFullPath, string targetFullPath) => Path.GetRelativePath(referenceFullPath, targetFullPath);
+        public string GetAbsolutePath(string referenceFullPath, string targetRelativePath) => Path.GetFullPath(targetRelativePath, referenceFullPath);
     }
 }
