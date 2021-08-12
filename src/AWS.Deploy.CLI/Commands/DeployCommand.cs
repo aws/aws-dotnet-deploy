@@ -40,7 +40,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly ILocalUserSettingsEngine _localUserSettingsEngine;
         private readonly IConsoleUtilities _consoleUtilities;
         private readonly ICustomRecipeLocator _customRecipeLocator;
-
+        private readonly ISystemCapabilityEvaluator _systemCapabilityEvaluator;
         private readonly OrchestratorSession _session;
 
         public DeployCommand(
@@ -59,6 +59,7 @@ namespace AWS.Deploy.CLI.Commands
             ILocalUserSettingsEngine localUserSettingsEngine,
             IConsoleUtilities consoleUtilities,
             ICustomRecipeLocator customRecipeLocator,
+            ISystemCapabilityEvaluator systemCapabilityEvaluator,
             OrchestratorSession session)
         {
             _toolInteractiveService = toolInteractiveService;
@@ -77,6 +78,7 @@ namespace AWS.Deploy.CLI.Commands
             _session = session;
             _cdkManager = cdkManager;
             _customRecipeLocator = customRecipeLocator;
+            _systemCapabilityEvaluator = systemCapabilityEvaluator;
         }
 
         public async Task ExecuteAsync(string stackName, string deploymentProjectPath, UserDeploymentSettings? userDeploymentSettings = null)
@@ -84,7 +86,7 @@ namespace AWS.Deploy.CLI.Commands
             var (orchestrator, selectedRecommendation, cloudApplication) = await InitializeDeployment(stackName, userDeploymentSettings, deploymentProjectPath);
 
             // Verify Docker installation and minimum NodeJS version.
-            await EvaluateSystemCapabilities(_session, selectedRecommendation);
+            await EvaluateSystemCapabilities(selectedRecommendation);
 
             // Configure option settings.
             await ConfigureDeployment(cloudApplication, orchestrator, selectedRecommendation, userDeploymentSettings);
@@ -189,32 +191,18 @@ namespace AWS.Deploy.CLI.Commands
         /// <summary>
         /// Checks if the system meets all the necessary requirements for deployment.
         /// </summary>
-        /// <param name="session">Holds metadata about the deployment project and the AWS account used for deployment.<see cref="OrchestratorSession"/></param>
         /// <param name="selectedRecommendation">The selected recommendation settings used for deployment.<see cref="Recommendation"/></param>
-        public async Task EvaluateSystemCapabilities(OrchestratorSession session, Recommendation selectedRecommendation)
+        public async Task EvaluateSystemCapabilities(Recommendation selectedRecommendation)
         {
-            if (_session.SystemCapabilities == null)
-                throw new SystemCapabilitiesNotProvidedException("The system capabilities were not provided.");
-
-            var systemCapabilities = await _session.SystemCapabilities;
-            if (selectedRecommendation.Recipe.DeploymentType == DeploymentTypes.CdkProject &&
-                !systemCapabilities.NodeJsMinVersionInstalled)
+            var systemCapabilities = await _systemCapabilityEvaluator.EvaluateSystemCapabilities(selectedRecommendation);
+            var missingCapabilitiesMessage = "";
+            foreach (var capability in systemCapabilities)
             {
-                throw new MissingNodeJsException("The selected deployment uses the AWS CDK, which requires version of Node.js higher than your current installation. The latest LTS version of Node.js is recommended and can be installed from https://nodejs.org/en/download/. Specifically, AWS CDK requires 10.3+ to work properly.");
+                missingCapabilitiesMessage = $"{missingCapabilitiesMessage}{capability.GetMessage()}{Environment.NewLine}";
             }
 
-            if (selectedRecommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.Container)
-            {
-                if (!systemCapabilities.DockerInfo.DockerInstalled)
-                {
-                    throw new MissingDockerException("The selected deployment option requires Docker, which was not detected. Please install and start the appropriate version of Docker for you OS: https://docs.docker.com/engine/install/");
-                }
-
-                if (!systemCapabilities.DockerInfo.DockerContainerType.Equals("linux", StringComparison.OrdinalIgnoreCase))
-                {
-                    throw new DockerContainerTypeException("The deployment tool requires Docker to be running in linux mode. Please switch Docker to linux mode to continue.");
-                }
-            }
+            if (systemCapabilities.Any())
+                throw new MissingSystemCapabilityException(missingCapabilitiesMessage);
         }
 
         /// <summary>

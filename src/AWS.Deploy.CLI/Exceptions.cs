@@ -36,15 +36,6 @@ namespace AWS.Deploy.CLI
     }
 
     /// <summary>
-    /// Throw if docker info failed to return output.
-    /// </summary>
-    [AWSDeploymentExpectedException]
-    public class DockerInfoException : Exception
-    {
-        public DockerInfoException(string message, Exception? innerException = null) : base(message, innerException) { }
-    }
-
-    /// <summary>
     /// Throw if prompting the user for a name returns a null value.
     /// </summary>
     [AWSDeploymentExpectedException]

@@ -175,11 +175,21 @@ namespace AWS.Deploy.Orchestration
         public InvalidLocalUserSettingsFileException(string message, Exception? innerException = null) : base(message, innerException) { }
     }
 
+    /// <summary>
     /// Exception thrown if a failure occured while trying to update the Local User Settings file.
     /// </summary>
     [AWSDeploymentExpectedException]
     public class FailedToUpdateLocalUserSettingsFileException : Exception
     {
         public FailedToUpdateLocalUserSettingsFileException(string message, Exception? innerException = null) : base(message, innerException) { }
+    }
+
+    /// <summary>
+    /// Throw if docker info failed to return output.
+    /// </summary>
+    [AWSDeploymentExpectedException]
+    public class DockerInfoException : Exception
+    {
+        public DockerInfoException(string message, Exception? innerException = null) : base(message, innerException) { }
     }
 }

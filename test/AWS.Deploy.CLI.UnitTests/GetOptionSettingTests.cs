@@ -24,16 +24,12 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var parser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
             var awsCredentials = new Mock<AWSCredentials>();
-            var systemCapabilities = new Mock<SystemCapabilities>(
-                It.IsAny<bool>(),
-                It.IsAny<DockerInfo>());
             var session =  new OrchestratorSession(
                 await parser.Parse(fullPath),
                 awsCredentials.Object,
                 "us-west-2",
                 "123456789012")
             {
-                SystemCapabilities = Task.FromResult(systemCapabilities.Object),
                 AWSProfileName = "default"
             };
 
