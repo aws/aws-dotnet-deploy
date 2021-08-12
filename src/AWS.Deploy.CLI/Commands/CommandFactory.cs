@@ -173,8 +173,6 @@ namespace AWS.Deploy.CLI.Commands
                     _commandLineWrapper.RegisterAWSContext(awsCredentials, awsRegion);
                     _awsClientFactory.RegisterAWSContext(awsCredentials, awsRegion);
 
-                    var systemCapabilities = _systemCapabilityEvaluator.Evaluate();
-
                     var projectDefinition = await _projectParserUtility.Parse(input.ProjectPath ?? "");
 
                     var callerIdentity = await _awsResourceQueryer.GetCallerIdentity();
@@ -185,7 +183,6 @@ namespace AWS.Deploy.CLI.Commands
                         awsRegion,
                         callerIdentity.Account)
                     {
-                        SystemCapabilities = systemCapabilities,
                         AWSProfileName = input.Profile ?? userDeploymentSettings?.AWSProfile ?? null
                     };
 
@@ -207,6 +204,7 @@ namespace AWS.Deploy.CLI.Commands
                         _localUserSettingsEngine,
                         _consoleUtilities,
                         _customRecipeLocator,
+                        _systemCapabilityEvaluator,
                         session);
 
                     var deploymentProjectPath = input.DeploymentProject ?? string.Empty;

@@ -47,36 +47,12 @@ namespace AWS.Deploy.Common
     }
 
     /// <summary>
-    /// Throw if the user attempts to deploy a <see cref="RecipeDefinition"/>
-    /// that uses <see cref="DeploymentTypes.CdkProject"/>
-    /// but NodeJs/NPM could not be detected.
+    /// Thrown if there is a missing System Capability.
     /// </summary>
     [AWSDeploymentExpectedException]
-    public class MissingNodeJsException : Exception
+    public class MissingSystemCapabilityException : Exception
     {
-        public MissingNodeJsException(string message, Exception? innerException = null) : base(message, innerException) { }
-    }
-
-    /// <summary>
-    /// Throw if the user attempts to deploy a <see cref="RecipeDefinition"/>
-    /// that requires <see cref="DeploymentBundleTypes.Container"/>
-    /// but Docker could not be detected.
-    /// </summary>
-    [AWSDeploymentExpectedException]
-    public class MissingDockerException : Exception
-    {
-        public MissingDockerException(string message, Exception? innerException = null) : base(message, innerException) { }
-    }
-
-    /// <summary>
-    /// Throw if the user attempts to deploy a <see cref="RecipeDefinition"/>
-    /// that requires <see cref="DeploymentBundleTypes.Container"/>
-    /// but Docker is not running in linux mode.
-    /// </summary>
-    [AWSDeploymentExpectedException]
-    public class DockerContainerTypeException : Exception
-    {
-        public DockerContainerTypeException(string message, Exception? innerException = null) : base(message, innerException) { }
+        public MissingSystemCapabilityException(string message, Exception? innerException = null) : base(message, innerException) { }
     }
 
     /// <summary>

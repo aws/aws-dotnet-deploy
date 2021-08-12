@@ -313,6 +313,41 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         }
 
         /// <summary>
+        /// Checks the missing System Capabilities for a given session.
+        /// </summary>
+        [HttpPost("session/<sessionId>/compatiblity")]
+        [SwaggerOperation(OperationId = "GetCompatibility")]
+        [SwaggerResponse(200, type: typeof(GetCompatibilityOutput))]
+        [Authorize]
+        public async Task<IActionResult> GetCompatibility(string sessionId)
+        {
+            var state = _stateServer.Get(sessionId);
+            if (state == null)
+            {
+                return NotFound($"Session ID {sessionId} not found.");
+            }
+
+            if (state.SelectedRecommendation == null)
+            {
+                return NotFound($"A deployment target is not set for Session ID {sessionId}.");
+            }
+
+            var output = new GetCompatibilityOutput();
+            var serviceProvider = CreateSessionServiceProvider(state);
+            var systemCapabilityEvaluator = serviceProvider.GetRequiredService<ISystemCapabilityEvaluator>();
+
+            var capabilities = await systemCapabilityEvaluator.EvaluateSystemCapabilities(state.SelectedRecommendation);
+
+            output.Capabilities = capabilities.Select(x => new SystemCapabilitySummary(x.Name, x.Installed, x.Available)
+            {
+                InstallationUrl = x.InstallationUrl,
+                Message = x.Message
+            }).ToList();
+
+            return Ok(output);
+        }
+
+        /// <summary>
         /// Begin execution of the deployment.
         /// </summary>
         [HttpPost("session/<sessionId>/execute")]

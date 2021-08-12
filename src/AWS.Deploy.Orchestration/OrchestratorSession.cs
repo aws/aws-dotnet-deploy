@@ -18,13 +18,6 @@ namespace AWS.Deploy.Orchestration
         public string? AWSProfileName { get; set; }
         public AWSCredentials? AWSCredentials { get; set; }
         public string? AWSRegion { get; set; }
-        /// <remarks>
-        /// Calculating the current <see cref="SystemCapabilities"/> can take several seconds
-        /// and is not needed immediately so it is run as a background Task.
-        /// <para />
-        /// It's safe to repeatedly await this property; evaluation will only be done once.
-        /// </remarks>
-        public Task<SystemCapabilities>? SystemCapabilities { get; set; }
         public string? AWSAccountId { get; set; }
 
         public OrchestratorSession(
