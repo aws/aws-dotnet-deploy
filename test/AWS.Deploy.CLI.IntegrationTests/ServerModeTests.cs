@@ -15,6 +15,7 @@ using Amazon.ECS;
 using Amazon.Runtime;
 using Amazon.Runtime.CredentialManagement;
 using AWS.Deploy.CLI.Commands;
+using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.CLI.Extensions;
 using AWS.Deploy.CLI.IntegrationTests.Extensions;
 using AWS.Deploy.CLI.IntegrationTests.Helpers;
@@ -27,7 +28,6 @@ using Xunit;
 
 namespace AWS.Deploy.CLI.IntegrationTests
 {
-    [Collection("WebAppWithDockerFile")]
     public class ServerModeTests : IDisposable
     {
         private bool _isDisposed;
@@ -36,6 +36,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
         private readonly CloudFormationHelper _cloudFormationHelper;
 
         private readonly string _awsRegion;
+        private readonly TestAppManager _testAppManager;
 
         public ServerModeTests()
         {
@@ -50,6 +51,8 @@ namespace AWS.Deploy.CLI.IntegrationTests
             _serviceProvider = serviceCollection.BuildServiceProvider();
 
             _awsRegion = "us-west-2";
+
+            _testAppManager = new TestAppManager();
         }
 
         public Task<AWSCredentials> ResolveCredentials()
@@ -61,7 +64,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
         [Fact]
         public async Task GetRecommendations()
         {
-            var projectPath = Path.GetFullPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
+            var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
             var portNumber = 4000;
             using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ResolveCredentials);
 
@@ -96,7 +99,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
         [Fact]
         public async Task GetRecommendationsWithEncryptedCredentials()
         {
-            var projectPath = Path.GetFullPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
+            var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
             var portNumber = 4000;
 
             var aes = Aes.Create();
@@ -153,7 +156,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
         {
             _stackName = $"ServerModeWebFargate{Guid.NewGuid().ToString().Split('-').Last()}";
 
-            var projectPath = Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj");
+            var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
             var portNumber = 4001;
             using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ResolveCredentials);
 

@@ -26,6 +26,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 
             // Arrange input for saving the CDK deployment project
             await interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Select default recommendation
+            await interactiveService.StdInWriter.FlushAsync();
 
             string[] deployArgs;
             // default save directory
@@ -98,16 +99,6 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             stdOut.ShouldContain(successMessage);
 
             VerifyCreatedArtifacts(targetApplicationPath, saveDirectoryPath);
-        }
-
-        public static string ResolvePathToTestApps()
-        {
-            var testsPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            while (testsPath != null && !string.Equals(new DirectoryInfo(testsPath).Name, "test", StringComparison.OrdinalIgnoreCase))
-            {
-                testsPath = Directory.GetParent(testsPath).FullName;
-            }
-            return new DirectoryInfo(Path.Combine(testsPath, "..", "testapps")).FullName;
         }
 
         private static (App app, InMemoryInteractiveService interactiveService) GetAppServiceProvider()

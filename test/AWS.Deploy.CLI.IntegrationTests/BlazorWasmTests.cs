@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Amazon.CloudFormation;
+using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.CLI.Extensions;
 using AWS.Deploy.CLI.IntegrationTests.Extensions;
 using AWS.Deploy.CLI.IntegrationTests.Helpers;
@@ -24,6 +25,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
         private readonly App _app;
         private string _stackName;
         private bool _isDisposed;
+        private readonly TestAppManager _testAppManager;
 
         public BlazorWasmTests()
         {
@@ -44,6 +46,8 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
             _interactiveService = serviceProvider.GetService<InMemoryInteractiveService>();
             Assert.NotNull(_interactiveService);
+
+            _testAppManager = new TestAppManager();
         }
 
         [Theory]
@@ -60,7 +64,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             await _interactiveService.StdInWriter.FlushAsync();
 
             // Deploy
-            var deployArgs = new[] { "deploy", "--project-path", Path.Combine(components), "--stack-name", _stackName };
+            var deployArgs = new[] { "deploy", "--project-path", _testAppManager.GetProjectPath(Path.Combine(components)), "--stack-name", _stackName };
             await _app.Run(deployArgs);
 
             // Verify application is deployed and running
@@ -92,7 +96,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             // Delete
             await _app.Run(deleteArgs);
 
-            // Verify application is delete
+            // Verify application is deleted
             Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName), $"{_stackName} still exists.");
         }
 
