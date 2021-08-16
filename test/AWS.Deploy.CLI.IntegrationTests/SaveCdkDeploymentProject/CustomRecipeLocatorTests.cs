@@ -9,119 +9,78 @@ using AWS.Deploy.Orchestration;
 using Xunit;
 using Task = System.Threading.Tasks.Task;
 using Should;
-using System;
-using AWS.Deploy.Common;
+using AWS.Deploy.CLI.Common.UnitTests.IO;
 
 namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 {
-    [Collection("SaveCdkDeploymentProjectTests")]
-    public class CustomRecipeLocatorTests : IDisposable
+    public class CustomRecipeLocatorTests
     {
-        private readonly string _webAppWithDockerFilePath;
-        private readonly string _webAppWithNoDockerFilePath;
-        private readonly string _webAppWithDockerCsproj;
-        private readonly string _webAppNoDockerCsproj;
-        private readonly string _testArtifactsDirectoryPath;
-        private readonly string _solutionDirectoryPath;
-        private readonly ICustomRecipeLocator _customRecipeLocator;
-
-        private bool _isDisposed;
+        private readonly CommandLineWrapper _commandLineWrapper;
 
         public CustomRecipeLocatorTests()
         {
-            var testAppsDirectoryPath = Utilities.ResolvePathToTestApps();
-            
-            _webAppWithDockerFilePath = Path.Combine(testAppsDirectoryPath, "WebAppWithDockerFile");
-            _webAppWithNoDockerFilePath = Path.Combine(testAppsDirectoryPath, "WebAppNoDockerFile");
+            _commandLineWrapper = new CommandLineWrapper(new ConsoleOrchestratorLogger(new ConsoleInteractiveServiceImpl()));
+        }
 
-            _webAppWithDockerCsproj = Path.Combine(_webAppWithDockerFilePath, "WebAppWithDockerFile.csproj");
-            _webAppNoDockerCsproj = Path.Combine(_webAppWithNoDockerFilePath, "WebAppNoDockerFile.csproj");
-            
-            _testArtifactsDirectoryPath = Path.Combine(testAppsDirectoryPath, "TestArtifacts");
+        [Fact]
+        public async Task LocateCustomRecipePathsWithManifestFile()
+        {
+            var tempDirectoryPath = new TestAppManager().GetProjectPath(string.Empty);
+            var webAppWithDockerFilePath = Path.Combine(tempDirectoryPath, "testapps", "WebAppWithDockerFile");
+            var webAppWithDockerCsproj = Path.Combine(webAppWithDockerFilePath, "WebAppWithDockerFile.csproj");
+            var solutionDirectoryPath = tempDirectoryPath;
+            var customRecipeLocator = BuildCustomRecipeLocator();
+            await _commandLineWrapper.Run("git init", tempDirectoryPath);
 
+            // ARRANGE - Create 2 CDK deployment projects that contain the custom recipe snapshot
+            await Utilities.CreateCDKDeploymentProject(webAppWithDockerFilePath, Path.Combine(tempDirectoryPath, "MyCdkApp1"));
+            await Utilities.CreateCDKDeploymentProject(webAppWithDockerFilePath, Path.Combine(tempDirectoryPath, "MyCdkApp2"));
+
+            // ACT - Fetch custom recipes corresponding to the same target application that has a deployment-manifest file.
+            var customRecipePaths = await customRecipeLocator.LocateCustomRecipePaths(webAppWithDockerCsproj, solutionDirectoryPath);
+
+            // ASSERT
+            File.Exists(Path.Combine(webAppWithDockerFilePath, "aws-deployments.json")).ShouldBeTrue();
+            customRecipePaths.Count.ShouldEqual(2);
+            customRecipePaths.ShouldContain(Path.Combine(tempDirectoryPath, "MyCdkApp1"));
+            customRecipePaths.ShouldContain(Path.Combine(tempDirectoryPath, "MyCdkApp1"));
+        }
+
+        [Fact]
+        public async Task LocateCustomRecipePathsWithoutManifestFile()
+        {
+            var tempDirectoryPath = new TestAppManager().GetProjectPath(string.Empty);
+            var webAppWithDockerFilePath = Path.Combine(tempDirectoryPath, "testapps", "WebAppWithDockerFile");
+            var webAppNoDockerFilePath = Path.Combine(tempDirectoryPath, "testapps", "WebAppNoDockerFile");
+            var webAppWithDockerCsproj = Path.Combine(webAppWithDockerFilePath, "WebAppWithDockerFile.csproj");
+            var webAppNoDockerCsproj = Path.Combine(webAppNoDockerFilePath, "WebAppNoDockerFile.csproj");
+            var solutionDirectoryPath = tempDirectoryPath;
+            var customRecipeLocator = BuildCustomRecipeLocator();
+            await _commandLineWrapper.Run("git init", tempDirectoryPath);
+
+            // ARRANGE - Create 2 CDK deployment projects that contain the custom recipe snapshot
+            await Utilities.CreateCDKDeploymentProject(webAppWithDockerFilePath, Path.Combine(tempDirectoryPath, "MyCdkApp1"));
+            await Utilities.CreateCDKDeploymentProject(webAppWithDockerFilePath, Path.Combine(tempDirectoryPath, "MyCdkApp2"));
+
+            // ACT - Fetch custom recipes corresponding to a different target application (under source control) without a deployment-manifest file.
+            var customRecipePaths = await customRecipeLocator.LocateCustomRecipePaths(webAppNoDockerCsproj, solutionDirectoryPath);
+
+            // ASSERT
+            File.Exists(Path.Combine(webAppNoDockerFilePath, "aws-deployments.json")).ShouldBeFalse();
+            customRecipePaths.Count.ShouldEqual(2);
+            customRecipePaths.ShouldContain(Path.Combine(tempDirectoryPath, "MyCdkApp1"));
+            customRecipePaths.ShouldContain(Path.Combine(tempDirectoryPath, "MyCdkApp1"));
+        }
+
+        private ICustomRecipeLocator BuildCustomRecipeLocator()
+        {
             var directoryManager = new DirectoryManager();
             var fileManager = new FileManager();
             var deploymentManifestEngine = new DeploymentManifestEngine(directoryManager, fileManager);
             var consoleInteractiveServiceImpl = new ConsoleInteractiveServiceImpl();
             var consoleOrchestratorLogger = new ConsoleOrchestratorLogger(consoleInteractiveServiceImpl);
             var commandLineWrapper = new CommandLineWrapper(consoleOrchestratorLogger);
-            _customRecipeLocator = new CustomRecipeLocator(deploymentManifestEngine, consoleOrchestratorLogger, commandLineWrapper, directoryManager);
-
-            var solutionPath = Path.Combine(testAppsDirectoryPath, "..", "AWS.Deploy.sln");
-            _solutionDirectoryPath = directoryManager.GetDirectoryInfo(solutionPath).Parent.FullName;
-        }
-
-        [Fact]
-        public async Task LocateCustomRecipePathsWithManifestFile()
-        {
-            // ARRANGE - Create 2 CDK deployment projects that contain the custom recipe snapshot
-            await Utilities.CreateCDKDeploymentProject(_webAppWithDockerFilePath, Path.Combine(_testArtifactsDirectoryPath, "MyCdkApp1"));
-            await Utilities.CreateCDKDeploymentProject(_webAppWithDockerFilePath, Path.Combine(_testArtifactsDirectoryPath, "MyCdkApp2"));
-
-            // ACT - Fetch custom recipes corresponding to the same target application that has a deployment-manifest file.
-            var customRecipePaths = await _customRecipeLocator.LocateCustomRecipePaths(_webAppWithDockerCsproj, _solutionDirectoryPath);
-
-            // ASSERT
-            File.Exists(Path.Combine(_webAppWithDockerFilePath, "aws-deployments.json")).ShouldBeTrue();
-            customRecipePaths.Count.ShouldEqual(2);
-            customRecipePaths.ShouldContain(Path.Combine(_testArtifactsDirectoryPath, "MyCdkApp1"));
-            customRecipePaths.ShouldContain(Path.Combine(_testArtifactsDirectoryPath, "MyCdkApp1"));
-
-            CleanUp();
-        }
-
-        [Fact]
-        public async Task LocateCustomRecipePathsWithoutManifestFile()
-        {
-            // ARRANGE - Create 2 CDK deployment projects that contain the custom recipe snapshot
-            await Utilities.CreateCDKDeploymentProject(_webAppWithDockerFilePath, Path.Combine(_testArtifactsDirectoryPath, "MyCdkApp1"));
-            await Utilities.CreateCDKDeploymentProject(_webAppWithDockerFilePath, Path.Combine(_testArtifactsDirectoryPath, "MyCdkApp2"));
-
-            // ACT - Fetch custom recipes corresponding to a different target application (under source control) without a deployment-manifest file.
-            var customRecipePaths = await _customRecipeLocator.LocateCustomRecipePaths(_webAppNoDockerCsproj, _solutionDirectoryPath);
-
-            // ASSERT
-            File.Exists(Path.Combine(_webAppWithNoDockerFilePath, "aws-deployments.json")).ShouldBeFalse();
-            customRecipePaths.Count.ShouldEqual(2);
-            customRecipePaths.ShouldContain(Path.Combine(_testArtifactsDirectoryPath, "MyCdkApp1"));
-            customRecipePaths.ShouldContain(Path.Combine(_testArtifactsDirectoryPath, "MyCdkApp1"));
-
-            CleanUp();
-        }
-
-        private void CleanUp()
-        {
-            if (Directory.Exists(_testArtifactsDirectoryPath))
-                Directory.Delete(_testArtifactsDirectoryPath, true);
-
-            if (File.Exists(Path.Combine(_webAppWithDockerFilePath, "aws-deployments.json")))
-                File.Delete(Path.Combine(_webAppWithDockerFilePath, "aws-deployments.json"));
-
-            if (File.Exists(Path.Combine(_webAppWithNoDockerFilePath, "aws-deployments.json")))
-                File.Delete(Path.Combine(_webAppWithNoDockerFilePath, "aws-deployments.json"));
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_isDisposed) return;
-
-            if (disposing)
-            {
-                CleanUp();
-            }
-
-            _isDisposed = true;
-        }
-
-        ~CustomRecipeLocatorTests()
-        {
-            Dispose(false);
+            return new CustomRecipeLocator(deploymentManifestEngine, consoleOrchestratorLogger, commandLineWrapper, directoryManager);
         }
     }
 }

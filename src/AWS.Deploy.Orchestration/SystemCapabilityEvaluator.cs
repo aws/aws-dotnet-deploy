@@ -2,21 +2,21 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
-using System.IO;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using AWS.Deploy.Orchestration;
-using AWS.Deploy.Orchestration.CDK;
+using AWS.Deploy.Common;
+using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestration.Utilities;
 
-namespace AWS.Deploy.CLI
+namespace AWS.Deploy.Orchestration
 {
     public interface ISystemCapabilityEvaluator
     {
-        Task<SystemCapabilities> Evaluate();
+        Task<List<SystemCapability>> EvaluateSystemCapabilities(Recommendation selectedRecommendation);
     }
 
-    internal class SystemCapabilityEvaluator : ISystemCapabilityEvaluator
+    public class SystemCapabilityEvaluator : ISystemCapabilityEvaluator
     {
         private readonly ICommandLineWrapper _commandLineWrapper;
 
@@ -76,6 +76,44 @@ namespace AWS.Deploy.CLI
                 return false;
 
             return version.Major > 10 || version.Major == 10 && version.Minor >= 3;
+        }
+
+        /// <summary>
+        /// Checks if the system meets all the necessary requirements for deployment.
+        /// </summary>
+        public async Task<List<SystemCapability>> EvaluateSystemCapabilities(Recommendation selectedRecommendation)
+        {
+            var capabilities = new List<SystemCapability>();
+            var systemCapabilities = await Evaluate();
+            if (selectedRecommendation.Recipe.DeploymentType == DeploymentTypes.CdkProject &&
+                !systemCapabilities.NodeJsMinVersionInstalled)
+            {
+                capabilities.Add(new SystemCapability("NodeJS", false, false) {
+                    InstallationUrl = "https://nodejs.org/en/download/",
+                    Message = "The selected deployment uses the AWS CDK, which requires version of Node.js higher than your current installation. The latest LTS version of Node.js is recommended and can be installed from https://nodejs.org/en/download/. Specifically, AWS CDK requires 10.3+ to work properly."
+                });
+            }
+
+            if (selectedRecommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.Container)
+            {
+                if (!systemCapabilities.DockerInfo.DockerInstalled)
+                {
+                    capabilities.Add(new SystemCapability("Docker", false, false)
+                    {
+                        InstallationUrl = "https://docs.docker.com/engine/install/",
+                        Message = "The selected deployment option requires Docker, which was not detected. Please install and start the appropriate version of Docker for you OS: https://docs.docker.com/engine/install/"
+                    });
+                }
+                else if (!systemCapabilities.DockerInfo.DockerContainerType.Equals("linux", StringComparison.OrdinalIgnoreCase))
+                {
+                    capabilities.Add(new SystemCapability("Docker", true, false)
+                    {
+                        Message = "The deployment tool requires Docker to be running in linux mode. Please switch Docker to linux mode to continue."
+                    });
+                }
+            }
+
+            return capabilities;
         }
     }
 }

@@ -7,6 +7,7 @@ using System.Linq;
 using Amazon.CloudFormation;
 using Amazon.ECS;
 using Amazon.ECS.Model;
+using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.CLI.Extensions;
 using AWS.Deploy.CLI.IntegrationTests.Extensions;
 using AWS.Deploy.CLI.IntegrationTests.Helpers;
@@ -18,7 +19,6 @@ using Task = System.Threading.Tasks.Task;
 
 namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
 {
-    [Collection("WebAppWithDockerFile")]
     public class ECSFargateDeploymentTest : IDisposable
     {
         private readonly HttpHelper _httpHelper;
@@ -27,9 +27,9 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
         private readonly App _app;
         private readonly InMemoryInteractiveService _interactiveService;
         private bool _isDisposed;
-        private readonly string _stackName;
-        private readonly string _clusterName;
-        private readonly string _configFilePath;
+        private string _stackName;
+        private string _clusterName;
+        private readonly TestAppManager _testAppManager;
 
         public ECSFargateDeploymentTest()
         {
@@ -48,28 +48,29 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
-            _configFilePath = Path.Combine("ConfigFileDeployment", "TestFiles", "IntegrationTestFiles", "ECSFargateConfigFile.json");
-
-            ConfigFileHelper.ReplacePlaceholders(_configFilePath);
-
-            var userDeploymentSettings = UserDeploymentSettings.ReadSettings(_configFilePath);
-
-            _stackName = userDeploymentSettings.StackName;
-            _clusterName = userDeploymentSettings.LeafOptionSettingItems["ECSCluster.NewClusterName"];
-
             _app = serviceProvider.GetService<App>();
             Assert.NotNull(_app);
 
             _interactiveService = serviceProvider.GetService<InMemoryInteractiveService>();
             Assert.NotNull(_interactiveService);
+
+            _testAppManager = new TestAppManager();
         }
 
         [Fact]
         public async Task PerformDeployment()
         {
             // Deploy
-            var projectPath = Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj");
-            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--apply", _configFilePath, "--silent" };
+            var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
+            var configFilePath = Path.Combine(Directory.GetParent(projectPath).FullName, "ECSFargateConfigFile.json");
+            ConfigFileHelper.ReplacePlaceholders(configFilePath);
+
+            var userDeploymentSettings = UserDeploymentSettings.ReadSettings(configFilePath);
+
+            _stackName = userDeploymentSettings.StackName;
+            _clusterName = userDeploymentSettings.LeafOptionSettingItems["ECSCluster.NewClusterName"];
+
+            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--apply", configFilePath, "--silent" };
             await _app.Run(deployArgs);
 
             // Verify application is deployed and running
@@ -105,7 +106,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
             // Delete
             await _app.Run(deleteArgs);
 
-            // Verify application is delete
+            // Verify application is deleted
             Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName), $"{_stackName} still exists.");
         }
 

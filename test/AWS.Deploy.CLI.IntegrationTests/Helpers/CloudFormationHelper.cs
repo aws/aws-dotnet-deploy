@@ -40,20 +40,12 @@ namespace AWS.Deploy.CLI.IntegrationTests.Helpers
 
         public async Task DeleteStack(string stackName)
         {
-            try
+            var request = new DeleteStackRequest()
             {
-                var request = new DeleteStackRequest()
-                {
-                    StackName = stackName
-                };
+                StackName = stackName
+            };
 
-                await _cloudFormationClient.DeleteStackAsync(request);
-            }
-            catch (AmazonCloudFormationException)
-            {
-                // Don't throw an error if the stack does not exist. Most likely a test has failed before a stack was actually created. If we
-                // throw the exception here it will hide the original error.
-            }
+            await _cloudFormationClient.DeleteStackAsync(request);
         }
 
         private async Task<Stack> GetStackAsync(string stackName)

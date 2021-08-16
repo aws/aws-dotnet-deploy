@@ -15,6 +15,11 @@ namespace AWS.Deploy.Common
     public class ProjectDefinition
     {
         /// <summary>
+        /// The name of the project
+        /// </summary>
+        public string ProjectName => GetProjectName();
+
+        /// <summary>
         /// Xml file contents of the Project file.
         /// </summary>
         public XmlDocument Contents { get; set; }
@@ -82,6 +87,14 @@ namespace AWS.Deploy.Common
             var dir = Directory.GetFiles(new FileInfo(projectPath).DirectoryName ??
                                          throw new InvalidProjectPathException("The project path is invalid."), "Dockerfile");
             return dir.Length == 1;
+        }
+
+        private string GetProjectName()
+        {
+            if (string.IsNullOrEmpty(ProjectPath))
+                return string.Empty;
+
+            return Path.GetFileNameWithoutExtension(ProjectPath);
         }
     }
 }

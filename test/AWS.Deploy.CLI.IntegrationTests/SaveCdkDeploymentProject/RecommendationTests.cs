@@ -20,32 +20,28 @@ using Xunit;
 using Should;
 using AWS.Deploy.Common.Recipes;
 using Newtonsoft.Json;
+using AWS.Deploy.CLI.Common.UnitTests.IO;
+using AWS.Deploy.Orchestration.LocalUserSettings;
 
 namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 {
-    [Collection("SaveCdkDeploymentProjectTests")]
-    public class RecommendationTests : IDisposable
+    public class RecommendationTests 
     {
-        private readonly string _testArtifactsDirectoryPath;
-        private readonly string _webAppWithDockerFilePath;
-        private readonly string _webAppWithNoDockerFilePath;
-        private readonly string _blazorAppPath;
-        private bool _isDisposed;
+        private readonly CommandLineWrapper _commandLineWrapper;
 
         public RecommendationTests()
         {
-            var testAppsDirectoryPath = Utilities.ResolvePathToTestApps();
-            _webAppWithDockerFilePath = Path.Combine(testAppsDirectoryPath, "WebAppWithDockerFile");
-            _webAppWithNoDockerFilePath = Path.Combine(testAppsDirectoryPath, "WebAppNoDockerFile");
-            _blazorAppPath = Path.Combine(testAppsDirectoryPath, "BlazorWasm50");
-            _testArtifactsDirectoryPath = Path.Combine(testAppsDirectoryPath, "TestArtifacts");
+            _commandLineWrapper = new CommandLineWrapper(new ConsoleOrchestratorLogger(new ConsoleInteractiveServiceImpl()));
         }
 
         [Fact]
         public async Task GenerateRecommendationsWithoutCustomRecipes()
         {
             // ARRANGE
-            var orchestrator = await GetOrchestrator(_webAppWithDockerFilePath);
+            var tempDirectoryPath = new TestAppManager().GetProjectPath(string.Empty);
+            var webAppWithDockerFilePath = Path.Combine(tempDirectoryPath, "testapps", "WebAppWithDockerFile");
+            var orchestrator = await GetOrchestrator(webAppWithDockerFilePath);
+            await _commandLineWrapper.Run("git init", tempDirectoryPath);
 
             // ACT
             var recommendations = await orchestrator.GenerateDeploymentRecommendations();
@@ -55,27 +51,28 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             recommendations[0].Name.ShouldEqual("ASP.NET Core App to Amazon ECS using Fargate"); // default recipe
             recommendations[1].Name.ShouldEqual("ASP.NET Core App to AWS App Runner"); // default recipe
             recommendations[2].Name.ShouldEqual("ASP.NET Core App to AWS Elastic Beanstalk on Linux"); // default recipe
-
-            CleanUp();
         }
 
         [Fact]
         public async Task GenerateRecommendationsFromCustomRecipesWithManifestFile()
         {
             // ARRANGE
-            var orchestrator = await GetOrchestrator(_webAppWithDockerFilePath);
+            var tempDirectoryPath = new TestAppManager().GetProjectPath(string.Empty);
+            var webAppWithDockerFilePath = Path.Combine(tempDirectoryPath, "testapps", "WebAppWithDockerFile");
+            var orchestrator = await GetOrchestrator(webAppWithDockerFilePath);
+            await _commandLineWrapper.Run("git init", tempDirectoryPath);
 
-            var saveDirectoryPathEcsProject = Path.Combine(_testArtifactsDirectoryPath, "ECS-CDK");
-            var saveDirectoryPathEbsProject = Path.Combine(_testArtifactsDirectoryPath, "EBS-CDK");
+            var saveDirectoryPathEcsProject = Path.Combine(tempDirectoryPath, "ECS-CDK");
+            var saveDirectoryPathEbsProject = Path.Combine(tempDirectoryPath, "EBS-CDK");
 
             var customEcsRecipeName = "Custom ECS Fargate Recipe";
             var customEbsRecipeName = "Custom Elastic Beanstalk Recipe";
 
             // select ECS Fargate recipe
-            await Utilities.CreateCDKDeploymentProjectWithRecipeName(_webAppWithDockerFilePath, customEcsRecipeName, "1", saveDirectoryPathEcsProject);
+            await Utilities.CreateCDKDeploymentProjectWithRecipeName(webAppWithDockerFilePath, customEcsRecipeName, "1", saveDirectoryPathEcsProject);
 
             // select Elastic Beanstalk recipe
-            await Utilities.CreateCDKDeploymentProjectWithRecipeName(_webAppWithDockerFilePath, customEbsRecipeName, "2", saveDirectoryPathEbsProject);
+            await Utilities.CreateCDKDeploymentProjectWithRecipeName(webAppWithDockerFilePath, customEbsRecipeName, "3", saveDirectoryPathEbsProject);
 
             // Get custom recipe IDs
             var customEcsRecipeId = await GetCustomRecipeId(Path.Combine(saveDirectoryPathEcsProject, "ECS-CDK.recipe"));
@@ -100,28 +97,30 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             recommendations[0].Recipe.Id.ShouldEqual(customEcsRecipeId);
             recommendations[1].Recipe.Id.ShouldEqual(customEbsRecipeId);
 
-            File.Exists(Path.Combine(_webAppWithDockerFilePath, "aws-deployments.json")).ShouldBeTrue();
-
-            CleanUp();
+            File.Exists(Path.Combine(webAppWithDockerFilePath, "aws-deployments.json")).ShouldBeTrue();
         }
 
         [Fact]
         public async Task GenerateRecommendationsFromCustomRecipesWithoutManifestFile()
         {
             // ARRANGE
-            var orchestrator = await GetOrchestrator(_webAppWithNoDockerFilePath);
+            var tempDirectoryPath = new TestAppManager().GetProjectPath(string.Empty);
+            var webAppWithDockerFilePath = Path.Combine(tempDirectoryPath, "testapps", "WebAppWithDockerFile");
+            var webAppNoDockerFilePath = Path.Combine(tempDirectoryPath, "testapps", "WebAppNoDockerFile");
+            var orchestrator = await GetOrchestrator(webAppNoDockerFilePath);
+            await _commandLineWrapper.Run("git init", tempDirectoryPath);
 
-            var saveDirectoryPathEcsProject = Path.Combine(_testArtifactsDirectoryPath, "ECS-CDK");
-            var saveDirectoryPathEbsProject = Path.Combine(_testArtifactsDirectoryPath, "EBS-CDK");
+            var saveDirectoryPathEcsProject = Path.Combine(tempDirectoryPath, "ECS-CDK");
+            var saveDirectoryPathEbsProject = Path.Combine(tempDirectoryPath, "EBS-CDK");
 
             var customEcsRecipeName = "Custom ECS Fargate Recipe";
             var customEbsRecipeName = "Custom Elastic Beanstalk Recipe";
 
             // Select ECS Fargate recipe
-            await Utilities.CreateCDKDeploymentProjectWithRecipeName(_webAppWithDockerFilePath, customEcsRecipeName, "1", saveDirectoryPathEcsProject);
+            await Utilities.CreateCDKDeploymentProjectWithRecipeName(webAppWithDockerFilePath, customEcsRecipeName, "1", saveDirectoryPathEcsProject);
 
             // Select Elastic Beanstalk recipe
-            await Utilities.CreateCDKDeploymentProjectWithRecipeName(_webAppWithDockerFilePath, customEbsRecipeName, "2", saveDirectoryPathEbsProject);
+            await Utilities.CreateCDKDeploymentProjectWithRecipeName(webAppWithDockerFilePath, customEbsRecipeName, "3", saveDirectoryPathEbsProject);
 
             // Get custom recipe IDs
             var customEcsRecipeId = await GetCustomRecipeId(Path.Combine(saveDirectoryPathEcsProject, "ECS-CDK.recipe"));
@@ -145,21 +144,23 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             // ASSERT - Custom recipe IDs
             recommendations[0].Recipe.Id.ShouldEqual(customEbsRecipeId);
             recommendations[1].Recipe.Id.ShouldEqual(customEcsRecipeId);
-            File.Exists(Path.Combine(_webAppWithNoDockerFilePath, "aws-deployments.json")).ShouldBeFalse();
-
-            CleanUp();
+            File.Exists(Path.Combine(webAppNoDockerFilePath, "aws-deployments.json")).ShouldBeFalse();
         }
 
         [Fact]
         public async Task GenerateRecommendationsFromCompatibleDeploymentProject()
         {
             // ARRANGE
-            var orchestrator = await GetOrchestrator(_webAppWithDockerFilePath);
-            var saveDirectoryPathEcsProject = Path.Combine(_testArtifactsDirectoryPath, "ECS-CDK");
+            var tempDirectoryPath = new TestAppManager().GetProjectPath(string.Empty);
+            var webAppWithDockerFilePath = Path.Combine(tempDirectoryPath, "testapps", "WebAppWithDockerFile");
+            var orchestrator = await GetOrchestrator(webAppWithDockerFilePath);
+            await _commandLineWrapper.Run("git init", tempDirectoryPath);
+
+            var saveDirectoryPathEcsProject = Path.Combine(tempDirectoryPath, "ECS-CDK");
             var customEcsRecipeName = "Custom ECS Fargate Recipe";
 
             // Select ECS Fargate recipe
-            await Utilities.CreateCDKDeploymentProjectWithRecipeName(_webAppWithDockerFilePath, customEcsRecipeName, "1", saveDirectoryPathEcsProject);
+            await Utilities.CreateCDKDeploymentProjectWithRecipeName(webAppWithDockerFilePath, customEcsRecipeName, "1", saveDirectoryPathEcsProject);
 
             // Get custom recipe IDs
             var customEcsRecipeId = await GetCustomRecipeId(Path.Combine(saveDirectoryPathEcsProject, "ECS-CDK.recipe"));
@@ -172,25 +173,26 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             recommendations[0].Name.ShouldEqual("Custom ECS Fargate Recipe");
             recommendations[0].Recipe.Id.ShouldEqual(customEcsRecipeId);
             recommendations[0].Recipe.RecipePath.ShouldEqual(Path.Combine(saveDirectoryPathEcsProject, "ECS-CDK.recipe"));
-
-            CleanUp();
         }
 
         [Fact]
         public async Task GenerateRecommendationsFromIncompatibleDeploymentProject()
         {
             // ARRANGE
-            var orchestrator = await GetOrchestrator(_blazorAppPath);
-            var saveDirectoryPathEcsProject = Path.Combine(_testArtifactsDirectoryPath, "ECS-CDK");
-            await Utilities.CreateCDKDeploymentProject(_webAppWithDockerFilePath, saveDirectoryPathEcsProject);
+            var tempDirectoryPath = new TestAppManager().GetProjectPath(string.Empty);
+            var webAppWithDockerFilePath = Path.Combine(tempDirectoryPath, "testapps", "WebAppWithDockerFile");
+            var blazorAppPath = Path.Combine(tempDirectoryPath, "testapps", "BlazorWasm50");
+            var orchestrator = await GetOrchestrator(blazorAppPath);
+            await _commandLineWrapper.Run("git init", tempDirectoryPath);
+
+            var saveDirectoryPathEcsProject = Path.Combine(tempDirectoryPath, "ECS-CDK");
+            await Utilities.CreateCDKDeploymentProject(webAppWithDockerFilePath, saveDirectoryPathEcsProject);
 
             // ACT
             var recommendations = await orchestrator.GenerateRecommendationsFromSavedDeploymentProject(saveDirectoryPathEcsProject);
 
             // ASSERT 
             recommendations.ShouldBeEmpty();
-
-            CleanUp();
         }
 
         private async Task<Orchestrator> GetOrchestrator(string targetApplicationProjectPath)
@@ -198,6 +200,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             var directoryManager = new DirectoryManager();
             var fileManager = new FileManager();
             var deploymentManifestEngine = new DeploymentManifestEngine(directoryManager, fileManager);
+            var localUserSettingsEngine = new LocalUserSettingsEngine(fileManager, directoryManager);
             var consoleInteractiveServiceImpl = new ConsoleInteractiveServiceImpl();
             var consoleOrchestratorLogger = new ConsoleOrchestratorLogger(consoleInteractiveServiceImpl);
             var commandLineWrapper = new CommandLineWrapper(consoleOrchestratorLogger);
@@ -212,6 +215,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
                 new Mock<ICDKManager>().Object,
                 new TestToolAWSResourceQueryer(),
                 new Mock<IDeploymentBundleHandler>().Object,
+                localUserSettingsEngine,
                 new Mock<IDockerEngine>().Object,
                 customRecipeLocator,
                 new List<string> { RecipeLocator.FindRecipeDefinitionsPath() });
@@ -222,44 +226,6 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             var recipeBody = await File.ReadAllTextAsync(recipeFilePath);
             var recipe = JsonConvert.DeserializeObject<RecipeDefinition>(recipeBody);
             return recipe.Id;
-        }
-
-        private void CleanUp()
-        {
-            if (Directory.Exists(_testArtifactsDirectoryPath))
-                Directory.Delete(_testArtifactsDirectoryPath, true);
-
-            if (File.Exists(Path.Combine(_webAppWithDockerFilePath, "aws-deployments.json")))
-                File.Delete(Path.Combine(_webAppWithDockerFilePath, "aws-deployments.json"));
-
-            if (File.Exists(Path.Combine(_webAppWithNoDockerFilePath, "aws-deployments.json")))
-                File.Delete(Path.Combine(_webAppWithNoDockerFilePath, "aws-deployments.json"));
-
-            if (File.Exists(Path.Combine(_blazorAppPath, "aws-deployments.json")))
-                File.Delete(Path.Combine(_blazorAppPath, "aws-deployments.json"));
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_isDisposed) return;
-
-            if (disposing)
-            {
-                CleanUp();
-            }
-
-            _isDisposed = true;
-        }
-
-        ~RecommendationTests()
-        {
-            Dispose(false);
         }
     }
 }

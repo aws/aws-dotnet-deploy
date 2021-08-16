@@ -18,6 +18,8 @@ using AWS.Deploy.Recipes;
 using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.Utilities;
 using AWS.Deploy.Orchestration.DisplayedResources;
+using AWS.Deploy.Common.IO;
+using AWS.Deploy.Orchestration.LocalUserSettings;
 
 namespace AWS.Deploy.CLI.Commands
 {
@@ -35,9 +37,10 @@ namespace AWS.Deploy.CLI.Commands
         private readonly ITypeHintCommandFactory _typeHintCommandFactory;
         private readonly IDisplayedResourcesHandler _displayedResourcesHandler;
         private readonly ICloudApplicationNameGenerator _cloudApplicationNameGenerator;
+        private readonly ILocalUserSettingsEngine _localUserSettingsEngine;
         private readonly IConsoleUtilities _consoleUtilities;
         private readonly ICustomRecipeLocator _customRecipeLocator;
-
+        private readonly ISystemCapabilityEvaluator _systemCapabilityEvaluator;
         private readonly OrchestratorSession _session;
 
         public DeployCommand(
@@ -53,8 +56,10 @@ namespace AWS.Deploy.CLI.Commands
             ITypeHintCommandFactory typeHintCommandFactory,
             IDisplayedResourcesHandler displayedResourcesHandler,
             ICloudApplicationNameGenerator cloudApplicationNameGenerator,
+            ILocalUserSettingsEngine localUserSettingsEngine,
             IConsoleUtilities consoleUtilities,
             ICustomRecipeLocator customRecipeLocator,
+            ISystemCapabilityEvaluator systemCapabilityEvaluator,
             OrchestratorSession session)
         {
             _toolInteractiveService = toolInteractiveService;
@@ -68,10 +73,12 @@ namespace AWS.Deploy.CLI.Commands
             _typeHintCommandFactory = typeHintCommandFactory;
             _displayedResourcesHandler = displayedResourcesHandler;
             _cloudApplicationNameGenerator = cloudApplicationNameGenerator;
+            _localUserSettingsEngine = localUserSettingsEngine;
             _consoleUtilities = consoleUtilities;
             _session = session;
             _cdkManager = cdkManager;
             _customRecipeLocator = customRecipeLocator;
+            _systemCapabilityEvaluator = systemCapabilityEvaluator;
         }
 
         public async Task ExecuteAsync(string stackName, string deploymentProjectPath, UserDeploymentSettings? userDeploymentSettings = null)
@@ -79,7 +86,7 @@ namespace AWS.Deploy.CLI.Commands
             var (orchestrator, selectedRecommendation, cloudApplication) = await InitializeDeployment(stackName, userDeploymentSettings, deploymentProjectPath);
 
             // Verify Docker installation and minimum NodeJS version.
-            await EvaluateSystemCapabilities(_session, selectedRecommendation);
+            await EvaluateSystemCapabilities(selectedRecommendation);
 
             // Configure option settings.
             await ConfigureDeployment(cloudApplication, orchestrator, selectedRecommendation, userDeploymentSettings);
@@ -131,6 +138,7 @@ namespace AWS.Deploy.CLI.Commands
                     _cdkManager,
                     _awsResourceQueryer,
                     _deploymentBundleHandler,
+                    _localUserSettingsEngine,
                     _dockerEngine,
                     _customRecipeLocator,
                     new List<string> { RecipeLocator.FindRecipeDefinitionsPath() });
@@ -142,7 +150,7 @@ namespace AWS.Deploy.CLI.Commands
             var allDeployedApplications = await _deployedApplicationQueryer.GetExistingDeployedApplications();
 
             // Filter compatible applications that can be re-deployed  using the current set of recommendations.
-            var compatibleApplications = GetCompatibleApplications(allDeployedApplications, recommendations);
+            var compatibleApplications = await _deployedApplicationQueryer.GetCompatibleApplications(recommendations, allDeployedApplications, _session);
 
             // Get Cloudformation stack name.
             var cloudApplicationName = GetCloudApplicationName(stackName, userDeploymentSettings, compatibleApplications);
@@ -181,51 +189,20 @@ namespace AWS.Deploy.CLI.Commands
         }
 
         /// <summary>
-        /// Filters the applications that can be re-deployed using the current set of available recommendations.
-        /// </summary>
-        /// <param name="allDeployedApplications"></param>
-        /// <param name="recommendations"></param>
-        /// <returns>A list of <see cref="CloudApplication"/> that are compatible for a re-deployment</returns>
-        private List<CloudApplication> GetCompatibleApplications(List<CloudApplication> allDeployedApplications, List<Recommendation> recommendations)
-        {
-            var compatibleApplications = new List<CloudApplication>();
-            foreach (var app in allDeployedApplications)
-            {
-                if (recommendations.Any(rec => string.Equals(rec.Recipe.Id, app.RecipeId, StringComparison.Ordinal)))
-                    compatibleApplications.Add(app);
-            }
-            return compatibleApplications;
-        }
-
-        /// <summary>
         /// Checks if the system meets all the necessary requirements for deployment.
         /// </summary>
-        /// <param name="session">Holds metadata about the deployment project and the AWS account used for deployment.<see cref="OrchestratorSession"/></param>
         /// <param name="selectedRecommendation">The selected recommendation settings used for deployment.<see cref="Recommendation"/></param>
-        public async Task EvaluateSystemCapabilities(OrchestratorSession session, Recommendation selectedRecommendation)
+        public async Task EvaluateSystemCapabilities(Recommendation selectedRecommendation)
         {
-            if (_session.SystemCapabilities == null)
-                throw new SystemCapabilitiesNotProvidedException("The system capabilities were not provided.");
-
-            var systemCapabilities = await _session.SystemCapabilities;
-            if (selectedRecommendation.Recipe.DeploymentType == DeploymentTypes.CdkProject &&
-                !systemCapabilities.NodeJsMinVersionInstalled)
+            var systemCapabilities = await _systemCapabilityEvaluator.EvaluateSystemCapabilities(selectedRecommendation);
+            var missingCapabilitiesMessage = "";
+            foreach (var capability in systemCapabilities)
             {
-                throw new MissingNodeJsException("The selected deployment uses the AWS CDK, which requires version of Node.js higher than your current installation. The latest LTS version of Node.js is recommended and can be installed from https://nodejs.org/en/download/. Specifically, AWS CDK requires 10.3+ to work properly.");
+                missingCapabilitiesMessage = $"{missingCapabilitiesMessage}{capability.GetMessage()}{Environment.NewLine}";
             }
 
-            if (selectedRecommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.Container)
-            {
-                if (!systemCapabilities.DockerInfo.DockerInstalled)
-                {
-                    throw new MissingDockerException("The selected deployment option requires Docker, which was not detected. Please install and start the appropriate version of Docker for you OS: https://docs.docker.com/engine/install/");
-                }
-
-                if (!systemCapabilities.DockerInfo.DockerContainerType.Equals("linux", StringComparison.OrdinalIgnoreCase))
-                {
-                    throw new DockerContainerTypeException("The deployment tool requires Docker to be running in linux mode. Please switch Docker to linux mode to continue.");
-                }
-            }
+            if (systemCapabilities.Any())
+                throw new MissingSystemCapabilityException(missingCapabilitiesMessage);
         }
 
         /// <summary>
@@ -574,7 +551,7 @@ namespace AWS.Deploy.CLI.Commands
                     }
 
                     _toolInteractiveService.WriteLine(string.Empty);
-                    var answer = _consoleUtilities.AskYesNoQuestion("Do you want to go back and modify the current configuration?", "true");
+                    var answer = _consoleUtilities.AskYesNoQuestion("Do you want to go back and modify the current configuration?", "false");
                     if (answer == YesNo.Yes)
                     {
                         var dockerExecutionDirectory =

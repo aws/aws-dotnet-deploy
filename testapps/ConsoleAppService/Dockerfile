@@ -7,10 +7,10 @@ WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 WORKDIR /src
-COPY ["testapps/ConsoleAppService/ConsoleAppService.csproj", "testapps/ConsoleAppService/"]
-RUN dotnet restore "testapps/ConsoleAppService/ConsoleAppService.csproj"
-COPY "testapps/ConsoleAppService/" "testapps/ConsoleAppService/"
-WORKDIR "/src/testapps/ConsoleAppService"
+COPY ["ConsoleAppService.csproj", "ConsoleAppService/"]
+RUN dotnet restore "ConsoleAppService/ConsoleAppService.csproj"
+COPY . "ConsoleAppService/"
+WORKDIR "/src/ConsoleAppService"
 RUN dotnet build "ConsoleAppService.csproj" -c Release -o /app/build
 
 FROM build AS publish

@@ -25,13 +25,14 @@ namespace AWS.Deploy.Orchestration
         private const string HostIdentifier = "aws-net-deploy-template-generator";
         private const string HostVersion = "v1.0.0";
         private readonly Bootstrapper _bootstrapper;
+        private static readonly object s_locker = new();
 
         public TemplateEngine()
         {
             _bootstrapper = new Bootstrapper(CreateHost(), null, virtualizeConfiguration: true);
         }
 
-        public async Task GenerateCDKProjectFromTemplate(Recommendation recommendation, OrchestratorSession session, string outputDirectory, string assemblyName)
+        public void GenerateCDKProjectFromTemplate(Recommendation recommendation, OrchestratorSession session, string outputDirectory, string assemblyName)
         {
             if (string.IsNullOrEmpty(recommendation.Recipe.CdkProjectTemplate))
             {
@@ -73,8 +74,11 @@ namespace AWS.Deploy.Orchestration
 
             try
             {
-                //Generate the CDK project using the installed template into the output directory
-                await _bootstrapper.CreateAsync(template, assemblyName, outputDirectory, templateParameters, false, "");
+                lock (s_locker)
+                {
+                    //Generate the CDK project using the installed template into the output directory
+                    _bootstrapper.CreateAsync(template, assemblyName, outputDirectory, templateParameters, false, "").GetAwaiter().GetResult();
+                }
             }
             catch
             {
@@ -86,7 +90,10 @@ namespace AWS.Deploy.Orchestration
         {
             try
             {
-                _bootstrapper.Install(folderLocation);
+                lock (s_locker)
+                {
+                    _bootstrapper.Install(folderLocation);
+                }
             }
             catch(Exception e)
             {

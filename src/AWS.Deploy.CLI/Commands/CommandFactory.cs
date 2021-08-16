@@ -6,6 +6,8 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using Amazon;
 using AWS.Deploy.CLI.Commands.TypeHints;
 using AWS.Deploy.CLI.Utilities;
@@ -19,6 +21,7 @@ using AWS.Deploy.CLI.Commands.CommandHandlerInput;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.DeploymentManifest;
 using AWS.Deploy.Orchestration.DisplayedResources;
+using AWS.Deploy.Orchestration.LocalUserSettings;
 
 namespace AWS.Deploy.CLI.Commands
 {
@@ -33,12 +36,14 @@ namespace AWS.Deploy.CLI.Commands
         private static readonly Option<string> _optionRegion = new("--region", "AWS region to deploy the application to. For example, us-west-2.");
         private static readonly Option<string> _optionProjectPath = new("--project-path", () => Directory.GetCurrentDirectory(), "Path to the project to deploy.");
         private static readonly Option<string> _optionStackName = new("--stack-name", "Name the AWS stack to deploy your application to.");
-        private static readonly Option<bool> _optionDiagnosticLogging = new(new []{"-d", "--diagnostics"}, "Enable diagnostic output.");
+        private static readonly Option<bool> _optionDiagnosticLogging = new(new[] { "-d", "--diagnostics" }, "Enable diagnostic output.");
         private static readonly Option<string> _optionApply = new("--apply", "Path to the deployment settings file to be applied.");
-        private static readonly Option<bool> _optionDisableInteractive = new(new []{"-s", "--silent" }, "Disable interactivity to deploy without any prompts for user input.");
-        private static readonly Option<string> _optionOutputDirectory = new(new[]{"-o", "--output"}, "Directory path in which the CDK deployment project will be saved.");
+        private static readonly Option<bool> _optionDisableInteractive = new(new[] { "-s", "--silent" }, "Disable interactivity to deploy without any prompts for user input.");
+        private static readonly Option<string> _optionOutputDirectory = new(new[] { "-o", "--output" }, "Directory path in which the CDK deployment project will be saved.");
         private static readonly Option<string> _optionProjectDisplayName = new(new[] { "--project-display-name" }, "The name of the deployment project that will be displayed in the list of available deployment options.");
         private static readonly Option<string> _optionDeploymentProject = new(new[] { "--deployment-project" }, "The absolute or relative path of the CDK project that will be used for deployment");
+        private static readonly object s_root_command_lock = new();
+        private static readonly object s_child_command_lock = new();
 
         private readonly IToolInteractiveService _toolInteractiveService;
         private readonly IOrchestratorInteractiveService _orchestratorInteractiveService;
@@ -57,8 +62,11 @@ namespace AWS.Deploy.CLI.Commands
         private readonly ITypeHintCommandFactory _typeHintCommandFactory;
         private readonly IDisplayedResourcesHandler _displayedResourceHandler;
         private readonly IConsoleUtilities _consoleUtilities;
+        private readonly IDirectoryManager _directoryManager;
+        private readonly IFileManager _fileManager;
         private readonly IDeploymentManifestEngine _deploymentManifestEngine;
         private readonly ICustomRecipeLocator _customRecipeLocator;
+        private readonly ILocalUserSettingsEngine _localUserSettingsEngine;
 
         public CommandFactory(
             IToolInteractiveService toolInteractiveService,
@@ -78,8 +86,11 @@ namespace AWS.Deploy.CLI.Commands
             ITypeHintCommandFactory typeHintCommandFactory,
             IDisplayedResourcesHandler displayedResourceHandler,
             IConsoleUtilities consoleUtilities,
+            IDirectoryManager directoryManager,
+            IFileManager fileManager,
             IDeploymentManifestEngine deploymentManifestEngine,
-            ICustomRecipeLocator customRecipeLocator)
+            ICustomRecipeLocator customRecipeLocator,
+            ILocalUserSettingsEngine localUserSettingsEngine)
         {
             _toolInteractiveService = toolInteractiveService;
             _orchestratorInteractiveService = orchestratorInteractiveService;
@@ -98,43 +109,52 @@ namespace AWS.Deploy.CLI.Commands
             _typeHintCommandFactory = typeHintCommandFactory;
             _displayedResourceHandler = displayedResourceHandler;
             _consoleUtilities = consoleUtilities;
+            _directoryManager = directoryManager;
+            _fileManager = fileManager;
             _deploymentManifestEngine = deploymentManifestEngine;
             _customRecipeLocator = customRecipeLocator;
+            _localUserSettingsEngine = localUserSettingsEngine;
         }
 
         public Command BuildRootCommand()
         {
             // Name is important to set here to show correctly in the CLI usage help.
             // Either dotnet-aws or dotnet aws works from the CLI. System.Commandline's help system does not like having a space with dotnet aws.
-            var rootCommand = new RootCommand {
+            var rootCommand = new RootCommand
+            {
                 Name = "dotnet-aws",
                 Description = "The AWS .NET deployment tool for deploying .NET applications on AWS."
             };
 
-            rootCommand.Add(BuildDeployCommand());
-            rootCommand.Add(BuildListCommand());
-            rootCommand.Add(BuildDeleteCommand());
-            rootCommand.Add(BuildDeploymentProjectCommand());
-            rootCommand.Add(BuildServerModeCommand());
+            lock(s_root_command_lock)
+            {
+                rootCommand.Add(BuildDeployCommand());
+                rootCommand.Add(BuildListCommand());
+                rootCommand.Add(BuildDeleteCommand());
+                rootCommand.Add(BuildDeploymentProjectCommand());
+                rootCommand.Add(BuildServerModeCommand());
+            }
 
             return rootCommand;
         }
 
         private Command BuildDeployCommand()
         {
-             var deployCommand = new Command(
+            var deployCommand = new Command(
                 "deploy",
-                "Inspect, build, and deploy the .NET project to AWS using the recommended AWS service.")
+                "Inspect, build, and deploy the .NET project to AWS using the recommended AWS service.");
+
+            lock (s_child_command_lock)
             {
-                _optionProfile,
-                _optionRegion,
-                _optionProjectPath,
-                _optionStackName,
-                _optionApply,
-                _optionDiagnosticLogging,
-                _optionDisableInteractive,
-                _optionDeploymentProject
-            };
+                deployCommand.Add(_optionProfile);
+                deployCommand.Add(_optionRegion);
+                deployCommand.Add(_optionProjectPath);
+                deployCommand.Add(_optionStackName);
+                deployCommand.Add(_optionApply);
+                deployCommand.Add(_optionDiagnosticLogging);
+                deployCommand.Add(_optionDisableInteractive);
+                deployCommand.Add(_optionDeploymentProject);
+            }
 
             deployCommand.Handler = CommandHandler.Create(async (DeployCommandHandlerInput input) =>
             {
@@ -142,7 +162,7 @@ namespace AWS.Deploy.CLI.Commands
                 {
                     _toolInteractiveService.Diagnostics = input.Diagnostics;
                     _toolInteractiveService.DisableInteractive = input.Silent;
-                    
+
                     var userDeploymentSettings = !string.IsNullOrEmpty(input.Apply)
                         ? UserDeploymentSettings.ReadSettings(input.Apply)
                         : null;
@@ -153,10 +173,8 @@ namespace AWS.Deploy.CLI.Commands
                     _commandLineWrapper.RegisterAWSContext(awsCredentials, awsRegion);
                     _awsClientFactory.RegisterAWSContext(awsCredentials, awsRegion);
 
-                    var systemCapabilities = _systemCapabilityEvaluator.Evaluate();
-
                     var projectDefinition = await _projectParserUtility.Parse(input.ProjectPath ?? "");
-                    
+
                     var callerIdentity = await _awsResourceQueryer.GetCallerIdentity();
 
                     var session = new OrchestratorSession(
@@ -165,7 +183,6 @@ namespace AWS.Deploy.CLI.Commands
                         awsRegion,
                         callerIdentity.Account)
                     {
-                        SystemCapabilities = systemCapabilities,
                         AWSProfileName = input.Profile ?? userDeploymentSettings?.AWSProfile ?? null
                     };
 
@@ -184,8 +201,10 @@ namespace AWS.Deploy.CLI.Commands
                         _typeHintCommandFactory,
                         _displayedResourceHandler,
                         _cloudApplicationNameGenerator,
+                        _localUserSettingsEngine,
                         _consoleUtilities,
                         _customRecipeLocator,
+                        _systemCapabilityEvaluator,
                         session);
 
                     var deploymentProjectPath = input.DeploymentProject ?? string.Empty;
@@ -208,6 +227,7 @@ namespace AWS.Deploy.CLI.Commands
                         _toolInteractiveService.WriteErrorLine(string.Empty);
                         _toolInteractiveService.WriteErrorLine(e.Message);
                     }
+
                     // bail out with an non-zero return code.
                     return CommandReturnCodes.USER_ERROR;
                 }
@@ -226,14 +246,16 @@ namespace AWS.Deploy.CLI.Commands
 
         private Command BuildDeleteCommand()
         {
-            var deleteCommand = new Command("delete-deployment", "Delete an existing deployment.")
+            var deleteCommand = new Command("delete-deployment", "Delete an existing deployment.");
+            lock (s_child_command_lock)
             {
-                _optionProfile,
-                _optionRegion,
-                _optionProjectPath,
-                _optionDiagnosticLogging,
-                new Argument("deployment-name")
-            };
+                deleteCommand.Add(_optionProfile);
+                deleteCommand.Add(_optionRegion);
+                deleteCommand.Add(_optionProjectPath);
+                deleteCommand.Add(_optionDiagnosticLogging);
+                deleteCommand.AddArgument(new Argument("deployment-name"));
+            }
+
             deleteCommand.Handler = CommandHandler.Create(async (DeleteCommandHandlerInput input) =>
             {
                 try
@@ -256,7 +278,28 @@ namespace AWS.Deploy.CLI.Commands
                         return CommandReturnCodes.USER_ERROR;
                     }
 
-                    await new DeleteDeploymentCommand(_awsClientFactory, _toolInteractiveService, _consoleUtilities).ExecuteAsync(input.DeploymentName);
+                    OrchestratorSession? session = null;
+
+                    try
+                    {
+                        var projectDefinition = await _projectParserUtility.Parse(input.ProjectPath ?? string.Empty);
+
+                        var callerIdentity = await _awsResourceQueryer.GetCallerIdentity();
+
+                        session = new OrchestratorSession(
+                            projectDefinition,
+                            awsCredentials,
+                            awsRegion,
+                            callerIdentity.Account);
+                    }
+                    catch (FailedToFindDeployableTargetException) { }
+
+                    await new DeleteDeploymentCommand(
+                        _awsClientFactory,
+                        _toolInteractiveService,
+                        _consoleUtilities,
+                        _localUserSettingsEngine,
+                        session).ExecuteAsync(input.DeploymentName);
 
                     return CommandReturnCodes.SUCCESS;
                 }
@@ -269,6 +312,7 @@ namespace AWS.Deploy.CLI.Commands
                         _toolInteractiveService.WriteErrorLine(string.Empty);
                         _toolInteractiveService.WriteErrorLine(e.Message);
                     }
+
                     // bail out with an non-zero return code.
                     return CommandReturnCodes.USER_ERROR;
                 }
@@ -287,13 +331,15 @@ namespace AWS.Deploy.CLI.Commands
 
         private Command BuildListCommand()
         {
-            var listCommand = new Command("list-deployments", "List existing deployments.")
+            var listCommand = new Command("list-deployments", "List existing deployments.");
+            lock (s_child_command_lock)
             {
-                _optionProfile,
-                _optionRegion,
-                _optionProjectPath,
-                _optionDiagnosticLogging
-            };
+                listCommand.Add(_optionProfile);
+                listCommand.Add(_optionRegion);
+                listCommand.Add(_optionProjectPath);
+                listCommand.Add(_optionDiagnosticLogging);
+            } 
+
             listCommand.Handler = CommandHandler.Create(async (ListCommandHandlerInput input) =>
             {
                 try
@@ -345,13 +391,15 @@ namespace AWS.Deploy.CLI.Commands
                 "Save the deployment project inside a user provided directory path.");
 
             var generateDeploymentProjectCommand = new Command("generate",
-                "Save the deployment project inside a user provided directory path without proceeding with a deployment")
+                "Save the deployment project inside a user provided directory path without proceeding with a deployment");
+
+            lock (s_child_command_lock)
             {
-                _optionOutputDirectory,
-                _optionDiagnosticLogging,
-                _optionProjectPath,
-                _optionProjectDisplayName
-            };
+                generateDeploymentProjectCommand.Add(_optionOutputDirectory);
+                generateDeploymentProjectCommand.Add(_optionDiagnosticLogging);
+                generateDeploymentProjectCommand.Add(_optionProjectPath);
+                generateDeploymentProjectCommand.Add(_optionProjectDisplayName);
+            }
 
             generateDeploymentProjectCommand.Handler = CommandHandler.Create(async (GenerateDeploymentProjectCommandHandlerInput input) =>
             {
@@ -378,8 +426,8 @@ namespace AWS.Deploy.CLI.Commands
                         _consoleUtilities,
                         _cdkProjectHandler,
                         _commandLineWrapper,
-                        new DirectoryManager(),
-                        new FileManager(),
+                        _directoryManager,
+                        _fileManager,
                         session,
                         _deploymentManifestEngine,
                         targetApplicationFullPath);
@@ -397,6 +445,7 @@ namespace AWS.Deploy.CLI.Commands
                         _toolInteractiveService.WriteErrorLine(string.Empty);
                         _toolInteractiveService.WriteErrorLine(e.Message);
                     }
+
                     // bail out with an non-zero return code.
                     return CommandReturnCodes.USER_ERROR;
                 }
@@ -411,7 +460,11 @@ namespace AWS.Deploy.CLI.Commands
                 }
             });
 
-            deploymentProjectCommand.Add(generateDeploymentProjectCommand);
+            lock (s_child_command_lock)
+            {
+                deploymentProjectCommand.Add(generateDeploymentProjectCommand);
+            }
+
             return deploymentProjectCommand;
         }
 
@@ -419,13 +472,16 @@ namespace AWS.Deploy.CLI.Commands
         {
             var serverModeCommand = new Command(
                 "server-mode",
-                "Launches the tool in a server mode for IDEs like Visual Studio to integrate with.")
+                "Launches the tool in a server mode for IDEs like Visual Studio to integrate with.");
+
+            lock (s_child_command_lock)
             {
-                new Option<int>(new []{"--port"}, description: "Port the server mode will listen to."),
-                new Option<int>(new []{"--parent-pid"}, description: "The ID of the process that is launching server mode. Server mode will exit when the parent pid terminates."),
-                new Option<bool>(new []{"--encryption-keyinfo-stdin"}, description: "If set the cli reads encryption key info from stdin to use for decryption."),
-                _optionDiagnosticLogging
-            };
+                serverModeCommand.Add(new Option<int>(new[] { "--port" }, description: "Port the server mode will listen to."));
+                serverModeCommand.Add(new Option<int>(new[] { "--parent-pid" }, description: "The ID of the process that is launching server mode. Server mode will exit when the parent pid terminates."));
+                serverModeCommand.Add(new Option<bool>(new[] { "--encryption-keyinfo-stdin" }, description: "If set the cli reads encryption key info from stdin to use for decryption."));
+                serverModeCommand.Add(_optionDiagnosticLogging);
+            }
+
             serverModeCommand.Handler = CommandHandler.Create(async (ServerModeCommandHandlerInput input) =>
             {
                 try

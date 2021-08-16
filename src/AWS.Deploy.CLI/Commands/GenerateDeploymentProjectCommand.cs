@@ -102,7 +102,7 @@ namespace AWS.Deploy.CLI.Commands
                 }
             }
 
-            await _cdkProjectHandler.CreateCdkProjectForDeployment(selectedRecommendation, _session, saveCdkDirectoryPath);
+            _cdkProjectHandler.CreateCdkProjectForDeployment(selectedRecommendation, _session, saveCdkDirectoryPath);
             await GenerateDeploymentRecipeSnapShot(selectedRecommendation, saveCdkDirectoryPath, projectDisplayName);
 
             var saveCdkDirectoryFullPath = _directoryManager.GetDirectoryInfo(saveCdkDirectoryPath).FullName;
@@ -239,7 +239,7 @@ namespace AWS.Deploy.CLI.Commands
             {
                 Formatting = Formatting.Indented,
                 NullValueHandling = NullValueHandling.Ignore,
-                ContractResolver = new SerializeRecipeContractResolver()
+                ContractResolver = new SerializeModelContractResolver()
             });
             await _fileManager.WriteAllTextAsync(recipeSnapshotFilePath, recipeSnapshotBody);
         }
