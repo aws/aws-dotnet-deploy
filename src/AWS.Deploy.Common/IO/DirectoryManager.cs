@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace AWS.Deploy.Common.IO
 {
@@ -18,19 +20,26 @@ namespace AWS.Deploy.Common.IO
         void Delete(string path, bool recursive = false);
         string GetRelativePath(string referenceFullPath, string targetFullPath);
         string GetAbsolutePath(string referenceFullPath, string targetRelativePath);
+        public string[] GetProjFiles(string path);
     }
 
     public class DirectoryManager : IDirectoryManager
     {
+        private readonly HashSet<string> _projFileExtensions = new()
+        {
+            "csproj",
+            "fsproj"
+        };
+
         public DirectoryInfo CreateDirectory(string path) => Directory.CreateDirectory(path);
-            
+
         public DirectoryInfo GetDirectoryInfo(string path) => new DirectoryInfo(path);
 
         public bool Exists(string path) => Directory.Exists(path);
 
         public string[] GetFiles(string path, string? searchPattern = null, SearchOption searchOption = SearchOption.TopDirectoryOnly)
             => Directory.GetFiles(path, searchPattern ?? "*", searchOption);
-        
+
         public string[] GetDirectories(string path, string? searchPattern = null, SearchOption searchOption = SearchOption.TopDirectoryOnly)
             => Directory.GetDirectories(path, searchPattern ?? "*", searchOption);
 
@@ -47,5 +56,10 @@ namespace AWS.Deploy.Common.IO
 
         public string GetRelativePath(string referenceFullPath, string targetFullPath) => Path.GetRelativePath(referenceFullPath, targetFullPath);
         public string GetAbsolutePath(string referenceFullPath, string targetRelativePath) => Path.GetFullPath(targetRelativePath, referenceFullPath);
+
+        public string[] GetProjFiles(string path)
+        {
+            return Directory.GetFiles(path).Where(filePath => _projFileExtensions.Contains(Path.GetExtension(filePath).ToLower())).ToArray();
+        }
     }
 }

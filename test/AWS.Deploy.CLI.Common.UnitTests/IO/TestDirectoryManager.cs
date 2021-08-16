@@ -23,6 +23,8 @@ namespace AWS.Deploy.CLI.Common.UnitTests.IO
         public string GetRelativePath(string referenceFullPath, string targetFullPath) => Path.GetRelativePath(referenceFullPath, targetFullPath);
 
         public string GetAbsolutePath(string referenceFullPath, string targetRelativePath) => Path.GetFullPath(targetRelativePath, referenceFullPath);
+        public string[] GetProjFiles(string path) =>
+            throw new NotImplementedException("If your test needs this method, you'll need to implement this.");
 
         public void Delete(string path, bool recursive = false) =>
             throw new NotImplementedException("If your test needs this method, you'll need to implement this.");

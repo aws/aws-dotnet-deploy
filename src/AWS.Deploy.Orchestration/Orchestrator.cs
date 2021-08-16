@@ -29,12 +29,14 @@ namespace AWS.Deploy.Orchestration
 
         private readonly ICdkProjectHandler? _cdkProjectHandler;
         private readonly ICDKManager? _cdkManager;
+        private readonly ICDKVersionDetector? _cdkVersionDetector;
         private readonly IOrchestratorInteractiveService? _interactiveService;
         private readonly IAWSResourceQueryer? _awsResourceQueryer;
         private readonly IDeploymentBundleHandler? _deploymentBundleHandler;
         private readonly ILocalUserSettingsEngine? _localUserSettingsEngine;
         private readonly IDockerEngine? _dockerEngine;
         private readonly IList<string>? _recipeDefinitionPaths;
+        private readonly IDirectoryManager? _directoryManager;
         private readonly ICustomRecipeLocator? _customRecipeLocator;
         private readonly OrchestratorSession? _session;
 
@@ -43,23 +45,27 @@ namespace AWS.Deploy.Orchestration
             IOrchestratorInteractiveService interactiveService,
             ICdkProjectHandler cdkProjectHandler,
             ICDKManager cdkManager,
+            ICDKVersionDetector cdkVersionDetector,
             IAWSResourceQueryer awsResourceQueryer,
             IDeploymentBundleHandler deploymentBundleHandler,
             ILocalUserSettingsEngine localUserSettingsEngine,
             IDockerEngine dockerEngine,
             ICustomRecipeLocator customRecipeLocator,
-            IList<string> recipeDefinitionPaths)
+            IList<string> recipeDefinitionPaths,
+            IDirectoryManager directoryManager)
         {
             _session = session;
             _interactiveService = interactiveService;
             _cdkProjectHandler = cdkProjectHandler;
             _cdkManager = cdkManager;
+            _cdkVersionDetector = cdkVersionDetector;
             _awsResourceQueryer = awsResourceQueryer;
             _deploymentBundleHandler = deploymentBundleHandler;
             _dockerEngine = dockerEngine;
             _customRecipeLocator = customRecipeLocator;
             _recipeDefinitionPaths = recipeDefinitionPaths;
             _localUserSettingsEngine = localUserSettingsEngine;
+            _directoryManager = directoryManager;
         }
 
         public Orchestrator(OrchestratorSession session, IList<string> recipeDefinitionPaths)
@@ -137,16 +143,27 @@ namespace AWS.Deploy.Orchestration
             _interactiveService.LogMessageLine(string.Empty);
             _interactiveService.LogMessageLine($"Initiating deployment: {recommendation.Name}");
 
-            if (recommendation.Recipe.DeploymentType == DeploymentTypes.CdkProject)
-            {
-                _interactiveService.LogMessageLine("AWS CDK is being configured.");
-                await _cdkManager.EnsureCompatibleCDKExists(Constants.CDK.DeployToolWorkspaceDirectoryRoot, Constants.CDK.MinimumCDKVersion);
-            }
-
             switch (recommendation.Recipe.DeploymentType)
             {
                 case DeploymentTypes.CdkProject:
-                    await _cdkProjectHandler.CreateCdkDeployment(_session, cloudApplication, recommendation);
+                    if (_cdkVersionDetector == null)
+                    {
+                        throw new InvalidOperationException($"{nameof(_cdkVersionDetector)} must not be null.");
+                    }
+
+                    if (_directoryManager == null)
+                    {
+                        throw new InvalidOperationException($"{nameof(_directoryManager)} must not be null.");
+                    }
+
+                    var cdkProject = await _cdkProjectHandler.ConfigureCdkProject(_session, cloudApplication, recommendation);
+                    _interactiveService.LogMessageLine("AWS CDK is being configured.");
+
+                    var projFiles = _directoryManager.GetProjFiles(cdkProject);
+                    var cdkVersion = _cdkVersionDetector.Detect(projFiles);
+                    await _cdkManager.EnsureCompatibleCDKExists(Constants.CDK.DeployToolWorkspaceDirectoryRoot, cdkVersion);
+
+                    await _cdkProjectHandler.DeployCdkProject(_session, cdkProject, recommendation);
                     break;
                 default:
                     _interactiveService.LogErrorMessageLine($"Unknown deployment type {recommendation.Recipe.DeploymentType} specified in recipe.");
