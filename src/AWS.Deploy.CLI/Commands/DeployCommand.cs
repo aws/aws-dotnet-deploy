@@ -18,6 +18,8 @@ using AWS.Deploy.Recipes;
 using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.Utilities;
 using AWS.Deploy.Orchestration.DisplayedResources;
+using AWS.Deploy.Common.IO;
+using AWS.Deploy.Orchestration.LocalUserSettings;
 
 namespace AWS.Deploy.CLI.Commands
 {
@@ -35,6 +37,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly ITypeHintCommandFactory _typeHintCommandFactory;
         private readonly IDisplayedResourcesHandler _displayedResourcesHandler;
         private readonly ICloudApplicationNameGenerator _cloudApplicationNameGenerator;
+        private readonly ILocalUserSettingsEngine _localUserSettingsEngine;
         private readonly IConsoleUtilities _consoleUtilities;
         private readonly ICustomRecipeLocator _customRecipeLocator;
 
@@ -53,6 +56,7 @@ namespace AWS.Deploy.CLI.Commands
             ITypeHintCommandFactory typeHintCommandFactory,
             IDisplayedResourcesHandler displayedResourcesHandler,
             ICloudApplicationNameGenerator cloudApplicationNameGenerator,
+            ILocalUserSettingsEngine localUserSettingsEngine,
             IConsoleUtilities consoleUtilities,
             ICustomRecipeLocator customRecipeLocator,
             OrchestratorSession session)
@@ -68,6 +72,7 @@ namespace AWS.Deploy.CLI.Commands
             _typeHintCommandFactory = typeHintCommandFactory;
             _displayedResourcesHandler = displayedResourcesHandler;
             _cloudApplicationNameGenerator = cloudApplicationNameGenerator;
+            _localUserSettingsEngine = localUserSettingsEngine;
             _consoleUtilities = consoleUtilities;
             _session = session;
             _cdkManager = cdkManager;
@@ -131,6 +136,7 @@ namespace AWS.Deploy.CLI.Commands
                     _cdkManager,
                     _awsResourceQueryer,
                     _deploymentBundleHandler,
+                    _localUserSettingsEngine,
                     _dockerEngine,
                     _customRecipeLocator,
                     new List<string> { RecipeLocator.FindRecipeDefinitionsPath() });
@@ -142,7 +148,7 @@ namespace AWS.Deploy.CLI.Commands
             var allDeployedApplications = await _deployedApplicationQueryer.GetExistingDeployedApplications();
 
             // Filter compatible applications that can be re-deployed  using the current set of recommendations.
-            var compatibleApplications = GetCompatibleApplications(allDeployedApplications, recommendations);
+            var compatibleApplications = await _deployedApplicationQueryer.GetCompatibleApplications(recommendations, allDeployedApplications, _session);
 
             // Get Cloudformation stack name.
             var cloudApplicationName = GetCloudApplicationName(stackName, userDeploymentSettings, compatibleApplications);
@@ -178,23 +184,6 @@ namespace AWS.Deploy.CLI.Commands
             var cloudApplication = new CloudApplication(cloudApplicationName, selectedRecommendation.Recipe.Id);
 
             return (orchestrator, selectedRecommendation, cloudApplication);
-        }
-
-        /// <summary>
-        /// Filters the applications that can be re-deployed using the current set of available recommendations.
-        /// </summary>
-        /// <param name="allDeployedApplications"></param>
-        /// <param name="recommendations"></param>
-        /// <returns>A list of <see cref="CloudApplication"/> that are compatible for a re-deployment</returns>
-        private List<CloudApplication> GetCompatibleApplications(List<CloudApplication> allDeployedApplications, List<Recommendation> recommendations)
-        {
-            var compatibleApplications = new List<CloudApplication>();
-            foreach (var app in allDeployedApplications)
-            {
-                if (recommendations.Any(rec => string.Equals(rec.Recipe.Id, app.RecipeId, StringComparison.Ordinal)))
-                    compatibleApplications.Add(app);
-            }
-            return compatibleApplications;
         }
 
         /// <summary>
@@ -574,7 +563,7 @@ namespace AWS.Deploy.CLI.Commands
                     }
 
                     _toolInteractiveService.WriteLine(string.Empty);
-                    var answer = _consoleUtilities.AskYesNoQuestion("Do you want to go back and modify the current configuration?", "true");
+                    var answer = _consoleUtilities.AskYesNoQuestion("Do you want to go back and modify the current configuration?", "false");
                     if (answer == YesNo.Yes)
                     {
                         var dockerExecutionDirectory =

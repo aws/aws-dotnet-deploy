@@ -21,6 +21,7 @@ using AWS.Deploy.CLI.Commands.CommandHandlerInput;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.DeploymentManifest;
 using AWS.Deploy.Orchestration.DisplayedResources;
+using AWS.Deploy.Orchestration.LocalUserSettings;
 
 namespace AWS.Deploy.CLI.Commands
 {
@@ -61,8 +62,11 @@ namespace AWS.Deploy.CLI.Commands
         private readonly ITypeHintCommandFactory _typeHintCommandFactory;
         private readonly IDisplayedResourcesHandler _displayedResourceHandler;
         private readonly IConsoleUtilities _consoleUtilities;
+        private readonly IDirectoryManager _directoryManager;
+        private readonly IFileManager _fileManager;
         private readonly IDeploymentManifestEngine _deploymentManifestEngine;
         private readonly ICustomRecipeLocator _customRecipeLocator;
+        private readonly ILocalUserSettingsEngine _localUserSettingsEngine;
 
         public CommandFactory(
             IToolInteractiveService toolInteractiveService,
@@ -82,8 +86,11 @@ namespace AWS.Deploy.CLI.Commands
             ITypeHintCommandFactory typeHintCommandFactory,
             IDisplayedResourcesHandler displayedResourceHandler,
             IConsoleUtilities consoleUtilities,
+            IDirectoryManager directoryManager,
+            IFileManager fileManager,
             IDeploymentManifestEngine deploymentManifestEngine,
-            ICustomRecipeLocator customRecipeLocator)
+            ICustomRecipeLocator customRecipeLocator,
+            ILocalUserSettingsEngine localUserSettingsEngine)
         {
             _toolInteractiveService = toolInteractiveService;
             _orchestratorInteractiveService = orchestratorInteractiveService;
@@ -102,8 +109,11 @@ namespace AWS.Deploy.CLI.Commands
             _typeHintCommandFactory = typeHintCommandFactory;
             _displayedResourceHandler = displayedResourceHandler;
             _consoleUtilities = consoleUtilities;
+            _directoryManager = directoryManager;
+            _fileManager = fileManager;
             _deploymentManifestEngine = deploymentManifestEngine;
             _customRecipeLocator = customRecipeLocator;
+            _localUserSettingsEngine = localUserSettingsEngine;
         }
 
         public Command BuildRootCommand()
@@ -194,6 +204,7 @@ namespace AWS.Deploy.CLI.Commands
                         _typeHintCommandFactory,
                         _displayedResourceHandler,
                         _cloudApplicationNameGenerator,
+                        _localUserSettingsEngine,
                         _consoleUtilities,
                         _customRecipeLocator,
                         session);
@@ -269,7 +280,28 @@ namespace AWS.Deploy.CLI.Commands
                         return CommandReturnCodes.USER_ERROR;
                     }
 
-                    await new DeleteDeploymentCommand(_awsClientFactory, _toolInteractiveService, _consoleUtilities).ExecuteAsync(input.DeploymentName);
+                    OrchestratorSession? session = null;
+
+                    try
+                    {
+                        var projectDefinition = await _projectParserUtility.Parse(input.ProjectPath ?? string.Empty);
+
+                        var callerIdentity = await _awsResourceQueryer.GetCallerIdentity();
+
+                        session = new OrchestratorSession(
+                            projectDefinition,
+                            awsCredentials,
+                            awsRegion,
+                            callerIdentity.Account);
+                    }
+                    catch (FailedToFindDeployableTargetException) { }
+
+                    await new DeleteDeploymentCommand(
+                        _awsClientFactory,
+                        _toolInteractiveService,
+                        _consoleUtilities,
+                        _localUserSettingsEngine,
+                        session).ExecuteAsync(input.DeploymentName);
 
                     return CommandReturnCodes.SUCCESS;
                 }
@@ -396,8 +428,8 @@ namespace AWS.Deploy.CLI.Commands
                         _consoleUtilities,
                         _cdkProjectHandler,
                         _commandLineWrapper,
-                        new DirectoryManager(),
-                        new FileManager(),
+                        _directoryManager,
+                        _fileManager,
                         session,
                         _deploymentManifestEngine,
                         targetApplicationFullPath);

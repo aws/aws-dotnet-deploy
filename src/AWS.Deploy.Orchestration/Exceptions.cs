@@ -165,4 +165,21 @@ namespace AWS.Deploy.Orchestration
     {
         public AWSResourceNotFoundException(string message, Exception? innerException = null) : base(message, innerException) { }
     }
+
+    /// <summary>
+    /// Exception thrown if the Local User Settings File is invalid.
+    /// </summary>
+    [AWSDeploymentExpectedException]
+    public class InvalidLocalUserSettingsFileException : Exception
+    {
+        public InvalidLocalUserSettingsFileException(string message, Exception? innerException = null) : base(message, innerException) { }
+    }
+
+    /// Exception thrown if a failure occured while trying to update the Local User Settings file.
+    /// </summary>
+    [AWSDeploymentExpectedException]
+    public class FailedToUpdateLocalUserSettingsFileException : Exception
+    {
+        public FailedToUpdateLocalUserSettingsFileException(string message, Exception? innerException = null) : base(message, innerException) { }
+    }
 }

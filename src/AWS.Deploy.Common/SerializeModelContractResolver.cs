@@ -6,13 +6,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
 namespace AWS.Deploy.Common
 {
-    public class SerializeRecipeContractResolver : DefaultContractResolver
+    public class SerializeModelContractResolver : DefaultContractResolver
     {
         protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
         {

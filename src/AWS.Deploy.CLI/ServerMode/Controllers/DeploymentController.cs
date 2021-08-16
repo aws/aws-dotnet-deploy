@@ -26,6 +26,8 @@ using Microsoft.AspNetCore.Authorization;
 using Amazon.Runtime;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestration.DisplayedResources;
+using AWS.Deploy.Common.IO;
+using AWS.Deploy.Orchestration.LocalUserSettings;
 
 namespace AWS.Deploy.CLI.ServerMode.Controllers
 {
@@ -242,13 +244,16 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             var output = new GetExistingDeploymentsOutput();
 
             var deployedApplicationQueryer = serviceProvider.GetRequiredService<IDeployedApplicationQueryer>();
-            state.ExistingDeployments = await deployedApplicationQueryer.GetExistingDeployedApplications(state.NewRecommendations);
+            var session = CreateOrchestratorSession(state);
+            state.ExistingDeployments = await deployedApplicationQueryer.GetCompatibleApplications(state.NewRecommendations.ToList(), session: session);
 
             foreach(var deployment in state.ExistingDeployments)
             {
                 output.ExistingDeployments.Add(new ExistingDeploymentSummary(
                     deployment.Name,
-                    deployment.RecipeId));
+                    deployment.RecipeId,
+                    deployment.LastUpdatedTime,
+                    deployment.UpdatedByCurrentUser));
             }
 
             return Ok(output);
@@ -434,6 +439,16 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             return serviceProvider;
         }
 
+        private OrchestratorSession CreateOrchestratorSession(SessionState state, AWSCredentials? awsCredentials = null)
+        {
+            return new OrchestratorSession(
+                state.ProjectDefinition,
+                awsCredentials ?? HttpContext.User.ToAWSCredentials() ??
+                    throw new FailedToRetrieveAWSCredentialsException("The tool was not able to retrieve the AWS Credentials."),
+                state.AWSRegion,
+                state.AWSAccountId);
+        }
+
         private Orchestrator CreateOrchestrator(SessionState state, IServiceProvider? serviceProvider = null, AWSCredentials? awsCredentials = null)
         {
             if(serviceProvider == null)
@@ -441,12 +456,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 serviceProvider = CreateSessionServiceProvider(state);
             }
 
-            var session = new OrchestratorSession(
-                state.ProjectDefinition,
-                awsCredentials ?? HttpContext.User.ToAWSCredentials() ??
-                    throw new FailedToRetrieveAWSCredentialsException("The tool was not able to retrieve the AWS Credentials."),
-                state.AWSRegion,
-                state.AWSAccountId);
+            var session = CreateOrchestratorSession(state, awsCredentials);
 
             return new Orchestrator(
                                     session,
@@ -455,6 +465,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                                     serviceProvider.GetRequiredService<ICDKManager>(),
                                     serviceProvider.GetRequiredService<IAWSResourceQueryer>(),
                                     serviceProvider.GetRequiredService<IDeploymentBundleHandler>(),
+                                    serviceProvider.GetRequiredService<ILocalUserSettingsEngine>(),
                                     new DockerEngine.DockerEngine(session.ProjectDefinition),
                                     serviceProvider.GetRequiredService<ICustomRecipeLocator>(),
                                     new List<string> { RecipeLocator.FindRecipeDefinitionsPath() }

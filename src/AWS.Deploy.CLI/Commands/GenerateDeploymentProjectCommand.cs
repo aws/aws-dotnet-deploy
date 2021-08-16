@@ -239,7 +239,7 @@ namespace AWS.Deploy.CLI.Commands
             {
                 Formatting = Formatting.Indented,
                 NullValueHandling = NullValueHandling.Ignore,
-                ContractResolver = new SerializeRecipeContractResolver()
+                ContractResolver = new SerializeModelContractResolver()
             });
             await _fileManager.WriteAllTextAsync(recipeSnapshotFilePath, recipeSnapshotBody);
         }

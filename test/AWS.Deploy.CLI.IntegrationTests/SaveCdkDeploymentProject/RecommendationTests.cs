@@ -21,6 +21,7 @@ using Should;
 using AWS.Deploy.Common.Recipes;
 using Newtonsoft.Json;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
+using AWS.Deploy.Orchestration.LocalUserSettings;
 
 namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 {
@@ -199,6 +200,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             var directoryManager = new DirectoryManager();
             var fileManager = new FileManager();
             var deploymentManifestEngine = new DeploymentManifestEngine(directoryManager, fileManager);
+            var localUserSettingsEngine = new LocalUserSettingsEngine(fileManager, directoryManager);
             var consoleInteractiveServiceImpl = new ConsoleInteractiveServiceImpl();
             var consoleOrchestratorLogger = new ConsoleOrchestratorLogger(consoleInteractiveServiceImpl);
             var commandLineWrapper = new CommandLineWrapper(consoleOrchestratorLogger);
@@ -213,6 +215,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
                 new Mock<ICDKManager>().Object,
                 new TestToolAWSResourceQueryer(),
                 new Mock<IDeploymentBundleHandler>().Object,
+                localUserSettingsEngine,
                 new Mock<IDockerEngine>().Object,
                 customRecipeLocator,
                 new List<string> { RecipeLocator.FindRecipeDefinitionsPath() });

@@ -12,6 +12,7 @@ using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.CDK;
 using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.DisplayedResources;
+using AWS.Deploy.Orchestration.LocalUserSettings;
 using AWS.Deploy.Orchestration.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -54,6 +55,7 @@ namespace AWS.Deploy.CLI.Extensions
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IZipFileManager), typeof(ZipFileManager), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IDeploymentManifestEngine), typeof(DeploymentManifestEngine), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICustomRecipeLocator), typeof(CustomRecipeLocator), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(ILocalUserSettingsEngine), typeof(LocalUserSettingsEngine), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICommandFactory), typeof(CommandFactory), lifetime));
 
             var packageJsonTemplate = typeof(PackageJsonGenerator).Assembly.ReadEmbeddedFile(PackageJsonGenerator.TemplateIdentifier);
