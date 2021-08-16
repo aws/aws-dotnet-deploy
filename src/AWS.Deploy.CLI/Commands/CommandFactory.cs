@@ -63,6 +63,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly IConsoleUtilities _consoleUtilities;
         private readonly IDeploymentManifestEngine _deploymentManifestEngine;
         private readonly ICustomRecipeLocator _customRecipeLocator;
+        private readonly ICDKVersionDetector _cdkVersionDetector;
 
         public CommandFactory(
             IToolInteractiveService toolInteractiveService,
@@ -83,7 +84,8 @@ namespace AWS.Deploy.CLI.Commands
             IDisplayedResourcesHandler displayedResourceHandler,
             IConsoleUtilities consoleUtilities,
             IDeploymentManifestEngine deploymentManifestEngine,
-            ICustomRecipeLocator customRecipeLocator)
+            ICustomRecipeLocator customRecipeLocator,
+            ICDKVersionDetector cdkVersionDetector)
         {
             _toolInteractiveService = toolInteractiveService;
             _orchestratorInteractiveService = orchestratorInteractiveService;
@@ -104,6 +106,7 @@ namespace AWS.Deploy.CLI.Commands
             _consoleUtilities = consoleUtilities;
             _deploymentManifestEngine = deploymentManifestEngine;
             _customRecipeLocator = customRecipeLocator;
+            _cdkVersionDetector = cdkVersionDetector;
         }
 
         public Command BuildRootCommand()
@@ -186,6 +189,7 @@ namespace AWS.Deploy.CLI.Commands
                         _orchestratorInteractiveService,
                         _cdkProjectHandler,
                         _cdkManager,
+                        _cdkVersionDetector,
                         _deploymentBundleHandler,
                         dockerEngine,
                         _awsResourceQueryer,
@@ -308,7 +312,7 @@ namespace AWS.Deploy.CLI.Commands
                 listCommand.Add(_optionRegion);
                 listCommand.Add(_optionProjectPath);
                 listCommand.Add(_optionDiagnosticLogging);
-            } 
+            }
 
             listCommand.Handler = CommandHandler.Create(async (ListCommandHandlerInput input) =>
             {

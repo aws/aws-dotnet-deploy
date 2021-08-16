@@ -39,12 +39,14 @@ namespace AWS.Deploy.CLI.Commands
         private readonly ICustomRecipeLocator _customRecipeLocator;
 
         private readonly OrchestratorSession _session;
+        private ICDKVersionDetector _cdkVersionDetector;
 
         public DeployCommand(
             IToolInteractiveService toolInteractiveService,
             IOrchestratorInteractiveService orchestratorInteractiveService,
             ICdkProjectHandler cdkProjectHandler,
             ICDKManager cdkManager,
+            ICDKVersionDetector cdkVersionDetector,
             IDeploymentBundleHandler deploymentBundleHandler,
             IDockerEngine dockerEngine,
             IAWSResourceQueryer awsResourceQueryer,
@@ -70,6 +72,7 @@ namespace AWS.Deploy.CLI.Commands
             _cloudApplicationNameGenerator = cloudApplicationNameGenerator;
             _consoleUtilities = consoleUtilities;
             _session = session;
+            _cdkVersionDetector = cdkVersionDetector;
             _cdkManager = cdkManager;
             _customRecipeLocator = customRecipeLocator;
         }
@@ -129,6 +132,7 @@ namespace AWS.Deploy.CLI.Commands
                     _orchestratorInteractiveService,
                     _cdkProjectHandler,
                     _cdkManager,
+                    _cdkVersionDetector,
                     _awsResourceQueryer,
                     _deploymentBundleHandler,
                     _dockerEngine,
@@ -162,7 +166,7 @@ namespace AWS.Deploy.CLI.Commands
 
                 // preset settings for deployment based on last deployment.
                 selectedRecommendation = await GetSelectedRecommendationFromPreviousDeployment(recommendations, deployedApplication, userDeploymentSettings);
-            } 
+            }
             else
             {
                 if (!string.IsNullOrEmpty(deploymentProjectPath))
@@ -174,7 +178,7 @@ namespace AWS.Deploy.CLI.Commands
                     selectedRecommendation = GetSelectedRecommendation(userDeploymentSettings, recommendations);
                 }
             }
-                
+
             var cloudApplication = new CloudApplication(cloudApplicationName, selectedRecommendation.Recipe.Id);
 
             return (orchestrator, selectedRecommendation, cloudApplication);
@@ -298,7 +302,7 @@ namespace AWS.Deploy.CLI.Commands
                 }
                 throw new InvalidUserDeploymentSettingsException(errorMessage.Trim());
             }
-                
+
             selectedRecommendation = selectedRecommendation.ApplyPreviousSettings(existingCloudApplicationMetadata.Settings);
 
             var header = $"Loading {deployedApplication.Name} settings:";
@@ -460,7 +464,7 @@ namespace AWS.Deploy.CLI.Commands
         private Recommendation GetSelectedRecommendation(UserDeploymentSettings? userDeploymentSettings, List<Recommendation> recommendations)
         {
             var deploymentSettingsRecipeId = userDeploymentSettings?.RecipeId;
-            
+
             if (string.IsNullOrEmpty(deploymentSettingsRecipeId))
             {
                 if (_toolInteractiveService.DisableInteractive)
@@ -473,13 +477,13 @@ namespace AWS.Deploy.CLI.Commands
                 }
                 return _consoleUtilities.AskToChooseRecommendation(recommendations);
             }
-            
+
             var selectedRecommendation = recommendations.FirstOrDefault(x => x.Recipe.Id.Equals(deploymentSettingsRecipeId, StringComparison.Ordinal));
             if (selectedRecommendation == null)
             {
                 throw new InvalidUserDeploymentSettingsException($"The user deployment settings provided contains an invalid value for the property '{nameof(userDeploymentSettings.RecipeId)}'.");
             }
-                
+
             _toolInteractiveService.WriteLine();
             _toolInteractiveService.WriteLine($"Configuring Recommendation with: '{selectedRecommendation.Name}'.");
             return selectedRecommendation;

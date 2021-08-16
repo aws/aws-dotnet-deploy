@@ -20,6 +20,12 @@
       <ProjectReference Include="..\AWS.Deploy.CLI.Common.UnitTests\AWS.Deploy.CLI.Common.UnitTests.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Include="CDK\CSProjFiles\*">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
     <Import Project="..\..\src\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems" Label="Shared" />
 
 </Project>

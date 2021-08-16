@@ -19,12 +19,8 @@ namespace AWS.Deploy.Constants
         public static string ProjectsDirectory => Path.Combine(DeployToolWorkspaceDirectoryRoot, "Projects");
 
         /// <summary>
-        /// Minimum version of CDK CLI to check before starting the deployment
+        /// Default version of CDK CLI
         /// </summary>
-        /// <remarks>
-        /// Currently the version is hardcoded by design.
-        /// In coming iterations, this will be dynamically calculated based on the package references used in the CDK App csproj files.
-        /// </remarks>
-        public static readonly Version MinimumCDKVersion = Version.Parse("1.107.0");
+        public static readonly Version DefaultCDKVersion = Version.Parse("1.107.0");
     }
 }

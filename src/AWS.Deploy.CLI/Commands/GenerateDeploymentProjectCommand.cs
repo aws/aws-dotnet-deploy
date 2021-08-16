@@ -102,7 +102,7 @@ namespace AWS.Deploy.CLI.Commands
                 }
             }
 
-            _cdkProjectHandler.CreateCdkProjectForDeployment(selectedRecommendation, _session, saveCdkDirectoryPath);
+            _cdkProjectHandler.CreateCdkProject(selectedRecommendation, _session, saveCdkDirectoryPath);
             await GenerateDeploymentRecipeSnapShot(selectedRecommendation, saveCdkDirectoryPath, projectDisplayName);
 
             var saveCdkDirectoryFullPath = _directoryManager.GetDirectoryInfo(saveCdkDirectoryPath).FullName;

@@ -27,6 +27,7 @@ namespace AWS.Deploy.Orchestration
 
         private readonly ICdkProjectHandler? _cdkProjectHandler;
         private readonly ICDKManager? _cdkManager;
+        private readonly ICDKVersionDetector? _cdkVersionDetector;
         private readonly IOrchestratorInteractiveService? _interactiveService;
         private readonly IAWSResourceQueryer? _awsResourceQueryer;
         private readonly IDeploymentBundleHandler? _deploymentBundleHandler;
@@ -41,6 +42,7 @@ namespace AWS.Deploy.Orchestration
             IOrchestratorInteractiveService interactiveService,
             ICdkProjectHandler cdkProjectHandler,
             ICDKManager cdkManager,
+            ICDKVersionDetector cdkVersionDetector,
             IAWSResourceQueryer awsResourceQueryer,
             IDeploymentBundleHandler deploymentBundleHandler,
             IDockerEngine dockerEngine,
@@ -51,6 +53,7 @@ namespace AWS.Deploy.Orchestration
             _interactiveService = interactiveService;
             _cdkProjectHandler = cdkProjectHandler;
             _cdkManager = cdkManager;
+            _cdkVersionDetector = cdkVersionDetector;
             _awsResourceQueryer = awsResourceQueryer;
             _deploymentBundleHandler = deploymentBundleHandler;
             _dockerEngine = dockerEngine;
@@ -131,16 +134,22 @@ namespace AWS.Deploy.Orchestration
             _interactiveService.LogMessageLine(string.Empty);
             _interactiveService.LogMessageLine($"Initiating deployment: {recommendation.Name}");
 
-            if (recommendation.Recipe.DeploymentType == DeploymentTypes.CdkProject)
-            {
-                _interactiveService.LogMessageLine("AWS CDK is being configured.");
-                await _cdkManager.EnsureCompatibleCDKExists(Constants.CDK.DeployToolWorkspaceDirectoryRoot, Constants.CDK.MinimumCDKVersion);
-            }
-
             switch (recommendation.Recipe.DeploymentType)
             {
                 case DeploymentTypes.CdkProject:
-                    await _cdkProjectHandler.CreateCdkDeployment(_session, cloudApplication, recommendation);
+                    var cdkProject = await _cdkProjectHandler.ConfigureCdkProject(_session, cloudApplication, recommendation);
+                    _interactiveService.LogMessageLine("AWS CDK is being configured.");
+
+                    if (_cdkVersionDetector == null)
+                    {
+                        throw new InvalidOperationException($"{nameof(_cdkVersionDetector)} must not be null.");
+                    }
+
+                    var csprojFiles = Directory.GetFiles(cdkProject, "*.csproj") ?? new string[]{};
+                    var cdkVersion = _cdkVersionDetector.Detect(csprojFiles);
+                    await _cdkManager.EnsureCompatibleCDKExists(Constants.CDK.DeployToolWorkspaceDirectoryRoot, cdkVersion);
+
+                    await _cdkProjectHandler.DeployCdkProject(_session, cdkProject, recommendation);
                     break;
                 default:
                     _interactiveService.LogErrorMessageLine($"Unknown deployment type {recommendation.Recipe.DeploymentType} specified in recipe.");

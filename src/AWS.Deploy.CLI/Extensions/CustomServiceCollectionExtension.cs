@@ -55,6 +55,7 @@ namespace AWS.Deploy.CLI.Extensions
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IDeploymentManifestEngine), typeof(DeploymentManifestEngine), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICustomRecipeLocator), typeof(CustomRecipeLocator), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICommandFactory), typeof(CommandFactory), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICDKVersionDetector), typeof(CDKVersionDetector), lifetime));
 
             var packageJsonTemplate = typeof(PackageJsonGenerator).Assembly.ReadEmbeddedFile(PackageJsonGenerator.TemplateIdentifier);
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IPackageJsonGenerator), (serviceProvider) => new PackageJsonGenerator(packageJsonTemplate), lifetime));

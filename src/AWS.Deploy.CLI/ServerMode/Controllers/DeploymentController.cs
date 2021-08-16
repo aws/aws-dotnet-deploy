@@ -424,7 +424,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             var serviceProvider = services.BuildServiceProvider();
 
             var awsClientFactory = serviceProvider.GetRequiredService<IAWSClientFactory>();
-            
+
             awsClientFactory.ConfigureAWSOptions(awsOptions =>
             {
                 awsOptions.Credentials = awsCredentials;
@@ -453,6 +453,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                                     serviceProvider.GetRequiredService<IOrchestratorInteractiveService>(),
                                     serviceProvider.GetRequiredService<ICdkProjectHandler>(),
                                     serviceProvider.GetRequiredService<ICDKManager>(),
+                                    serviceProvider.GetRequiredService<ICDKVersionDetector>(),
                                     serviceProvider.GetRequiredService<IAWSResourceQueryer>(),
                                     serviceProvider.GetRequiredService<IDeploymentBundleHandler>(),
                                     new DockerEngine.DockerEngine(session.ProjectDefinition),
