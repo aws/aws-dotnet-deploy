@@ -13,8 +13,9 @@ namespace AWS.Deploy.Orchestration
 {
     public interface ICdkProjectHandler
     {
-        Task CreateCdkDeployment(OrchestratorSession session, CloudApplication cloudApplication, Recommendation recommendation);
-        string CreateCdkProjectForDeployment(Recommendation recommendation, OrchestratorSession session, string? saveDirectoryPath = null);
+        Task<string> ConfigureCdkProject(OrchestratorSession session, CloudApplication cloudApplication, Recommendation recommendation);
+        string CreateCdkProject(Recommendation recommendation, OrchestratorSession session, string? saveDirectoryPath = null);
+        Task DeployCdkProject(OrchestratorSession session, string cdkProjectPath, Recommendation recommendation);
     }
 
     public class CdkProjectHandler : ICdkProjectHandler
@@ -32,14 +33,8 @@ namespace AWS.Deploy.Orchestration
             _directoryManager = new DirectoryManager();
         }
 
-        public async Task CreateCdkDeployment(OrchestratorSession session, CloudApplication cloudApplication, Recommendation recommendation)
+        public async Task<string> ConfigureCdkProject(OrchestratorSession session, CloudApplication cloudApplication, Recommendation recommendation)
         {
-            var recipeInfo = $"{recommendation.Recipe.Id}_{recommendation.Recipe.Version}";
-            var environmentVariables = new Dictionary<string, string>
-            {
-                { EnvironmentVariableKeys.AWS_EXECUTION_ENV, recipeInfo }
-            };
-
             string? cdkProjectPath;
             if (recommendation.Recipe.PersistedDeploymentProject)
             {
@@ -53,22 +48,33 @@ namespace AWS.Deploy.Orchestration
             {
                 // Create a new temporary CDK project for a new deployment
                 _interactiveService.LogMessageLine($"Generating a {recommendation.Recipe.Name} CDK Project");
-                cdkProjectPath = CreateCdkProjectForDeployment(recommendation, session);
+                cdkProjectPath = CreateCdkProject(recommendation, session);
             }
-            
+
             // Write required configuration in appsettings.json
             var appSettingsBody = _appSettingsBuilder.Build(cloudApplication, recommendation, session);
             var appSettingsFilePath = Path.Combine(cdkProjectPath, "appsettings.json");
-            using (var appSettingsFile = new StreamWriter(appSettingsFilePath))
+            await using var appSettingsFile = new StreamWriter(appSettingsFilePath);
+            await appSettingsFile.WriteAsync(appSettingsBody);
+
+            return cdkProjectPath;
+        }
+
+        public async Task DeployCdkProject(OrchestratorSession session, string cdkProjectPath, Recommendation recommendation)
+        {
+            var recipeInfo = $"{recommendation.Recipe.Id}_{recommendation.Recipe.Version}";
+            var environmentVariables = new Dictionary<string, string>
             {
-                await appSettingsFile.WriteAsync(appSettingsBody);
-            }
+                { EnvironmentVariableKeys.AWS_EXECUTION_ENV, recipeInfo }
+            };
 
             _interactiveService.LogMessageLine("Starting deployment of CDK Project");
 
             // Ensure region is bootstrapped
             await _commandLineWrapper.Run($"npx cdk bootstrap aws://{session.AWSAccountId}/{session.AWSRegion}",
                 needAwsCredentials: true);
+
+            var appSettingsFilePath = Path.Combine(cdkProjectPath, "appsettings.json");
 
             // Handover to CDK command line tool
             // Use a CDK Context parameter to specify the settings file that has been serialized.
@@ -82,7 +88,7 @@ namespace AWS.Deploy.Orchestration
                 throw new FailedToDeployCDKAppException("We had an issue deploying your application to AWS. Check the deployment output for more details.");
         }
 
-        public string CreateCdkProjectForDeployment(Recommendation recommendation, OrchestratorSession session, string? saveCdkDirectoryPath = null)
+        public string CreateCdkProject(Recommendation recommendation, OrchestratorSession session, string? saveCdkDirectoryPath = null)
         {
             string? assemblyName;
             if (string.IsNullOrEmpty(saveCdkDirectoryPath))
@@ -101,7 +107,7 @@ namespace AWS.Deploy.Orchestration
 
             if (string.IsNullOrEmpty(assemblyName))
                 throw new ArgumentNullException("The assembly name for the CDK deployment project cannot be null");
-           
+
             _directoryManager.CreateDirectory(saveCdkDirectoryPath);
 
             var templateEngine = new TemplateEngine();
