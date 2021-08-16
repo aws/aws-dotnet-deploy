@@ -1322,6 +1322,12 @@ namespace AWS.Deploy.ServerMode.Client
         [Newtonsoft.Json.JsonProperty("recipeId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string RecipeId { get; set; }
     
+        [Newtonsoft.Json.JsonProperty("lastUpdatedTime", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.DateTimeOffset? LastUpdatedTime { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("updatedByCurrentUser", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public bool UpdatedByCurrentUser { get; set; }
+    
     
     }
     

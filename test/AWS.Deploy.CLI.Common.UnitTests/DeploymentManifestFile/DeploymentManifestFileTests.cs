@@ -121,7 +121,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.DeploymentManifestFile
             var manifestFilejsonString = await _fileManager.ReadAllTextAsync(deploymentManifestFilePath);
             var deploymentManifestModel = JsonConvert.DeserializeObject<DeploymentManifestModel>(manifestFilejsonString);
 
-            foreach (var entry in deploymentManifestModel.DeploymentManifestEntries)
+            foreach (var entry in deploymentManifestModel.DeploymentProjects)
             {
                 deploymentProjectPaths.Add(entry.SaveCdkDirectoryRelativePath);
             }

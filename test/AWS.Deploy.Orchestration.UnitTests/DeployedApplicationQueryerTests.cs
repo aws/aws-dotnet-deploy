@@ -9,7 +9,9 @@ using System.Threading.Tasks;
 using Amazon.CloudFormation;
 using Amazon.CloudFormation.Model;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.IO;
 using AWS.Deploy.Orchestration.Data;
+using AWS.Deploy.Orchestration.LocalUserSettings;
 using AWS.Deploy.Orchestration.Utilities;
 using AWS.Deploy.Recipes.CDK.Common;
 using Moq;
@@ -20,10 +22,16 @@ namespace AWS.Deploy.Orchestration.UnitTests
     public class DeployedApplicationQueryerTests
     {
         private readonly Mock<IAWSResourceQueryer> _mockAWSResourceQueryer;
+        private readonly IDirectoryManager _directoryManager;
+        private readonly Mock<ILocalUserSettingsEngine> _mockLocalUserSettingsEngine;
+        private readonly Mock<IOrchestratorInteractiveService> _mockOrchestratorInteractiveService;
 
         public DeployedApplicationQueryerTests()
         {
             _mockAWSResourceQueryer = new Mock<IAWSResourceQueryer>();
+            _directoryManager = new TestDirectoryManager();
+            _mockLocalUserSettingsEngine = new Mock<ILocalUserSettingsEngine>();
+            _mockOrchestratorInteractiveService = new Mock<IOrchestratorInteractiveService>();
         }
 
         [Fact]
@@ -43,7 +51,10 @@ namespace AWS.Deploy.Orchestration.UnitTests
                 .Setup(x => x.GetCloudFormationStacks())
                 .Returns(Task.FromResult(new List<Stack>() { stack }));
 
-            var deployedApplicationQueryer = new DeployedApplicationQueryer(_mockAWSResourceQueryer.Object);
+            var deployedApplicationQueryer = new DeployedApplicationQueryer(
+                _mockAWSResourceQueryer.Object,
+                _mockLocalUserSettingsEngine.Object,
+                _mockOrchestratorInteractiveService.Object);
 
             var result = await deployedApplicationQueryer.GetExistingDeployedApplications();
             Assert.Single(result);
@@ -70,9 +81,12 @@ namespace AWS.Deploy.Orchestration.UnitTests
                 .Setup(x => x.GetCloudFormationStacks())
                 .Returns(Task.FromResult(new List<Stack>() { stack }));
 
-            var deployedApplicationQueryer = new DeployedApplicationQueryer(_mockAWSResourceQueryer.Object);
+            var deployedApplicationQueryer = new DeployedApplicationQueryer(
+                _mockAWSResourceQueryer.Object,
+                _mockLocalUserSettingsEngine.Object,
+                _mockOrchestratorInteractiveService.Object);
 
-            var result = await deployedApplicationQueryer.GetExistingDeployedApplications(new List<Recommendation>());
+            var result = await deployedApplicationQueryer.GetCompatibleApplications(new List<Recommendation>());
             Assert.Empty(result);
         }
 
@@ -103,7 +117,10 @@ namespace AWS.Deploy.Orchestration.UnitTests
                 .Setup(x => x.GetCloudFormationStacks())
                 .Returns(Task.FromResult(new List<Stack>() { stack }));
 
-            var deployedApplicationQueryer = new DeployedApplicationQueryer(_mockAWSResourceQueryer.Object);
+            var deployedApplicationQueryer = new DeployedApplicationQueryer(
+                _mockAWSResourceQueryer.Object,
+                _mockLocalUserSettingsEngine.Object,
+                _mockOrchestratorInteractiveService.Object);
 
             var result = await deployedApplicationQueryer.GetExistingDeployedApplications();
             Assert.Empty(result);

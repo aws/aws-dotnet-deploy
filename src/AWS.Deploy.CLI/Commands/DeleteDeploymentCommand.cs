@@ -8,7 +8,9 @@ using Amazon.CloudFormation;
 using Amazon.CloudFormation.Model;
 using AWS.Deploy.CLI.CloudFormation;
 using AWS.Deploy.Common;
-using AWS.Deploy.Recipes.CDK.Common;
+using AWS.Deploy.Common.IO;
+using AWS.Deploy.Orchestration;
+using AWS.Deploy.Orchestration.LocalUserSettings;
 
 namespace AWS.Deploy.CLI.Commands
 {
@@ -23,14 +25,23 @@ namespace AWS.Deploy.CLI.Commands
         private readonly IToolInteractiveService _interactiveService;
         private readonly IAmazonCloudFormation _cloudFormationClient;
         private readonly IConsoleUtilities _consoleUtilities;
+        private readonly ILocalUserSettingsEngine _localUserSettingsEngine;
+        private readonly OrchestratorSession? _session;
         private const int MAX_RETRIES = 4;
 
-        public DeleteDeploymentCommand(IAWSClientFactory awsClientFactory, IToolInteractiveService interactiveService, IConsoleUtilities consoleUtilities)
+        public DeleteDeploymentCommand(
+            IAWSClientFactory awsClientFactory,
+            IToolInteractiveService interactiveService,
+            IConsoleUtilities consoleUtilities,
+            ILocalUserSettingsEngine localUserSettingsEngine,
+            OrchestratorSession? session)
         {
             _awsClientFactory = awsClientFactory;
             _interactiveService = interactiveService;
             _consoleUtilities = consoleUtilities;
             _cloudFormationClient = _awsClientFactory.GetAWSClient<IAmazonCloudFormation>();
+            _localUserSettingsEngine = localUserSettingsEngine;
+            _session = session;
         }
 
         /// <summary>
@@ -67,6 +78,12 @@ namespace AWS.Deploy.CLI.Commands
                 var _ = monitor.StartAsync();
 
                 await WaitForStackDelete(stackName);
+
+                if (_session != null)
+                {
+                    await _localUserSettingsEngine.DeleteLastDeployedStack(stackName, _session.ProjectDefinition.ProjectName, _session.AWSAccountId, _session.AWSRegion);
+                }
+
                 _interactiveService.WriteLine($"{stackName}: deleted");
             }
             finally

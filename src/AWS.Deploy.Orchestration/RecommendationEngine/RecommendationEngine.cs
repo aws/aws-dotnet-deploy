@@ -74,7 +74,7 @@ namespace AWS.Deploy.Orchestration.RecommendationEngine
                 recommendations.Add(new Recommendation(potentialRecipe, _orchestratorSession.ProjectDefinition, deploymentBundleSettings, priority, additionalReplacements));
             }
 
-            recommendations = recommendations.OrderByDescending(recommendation => recommendation.ComputedPriority).ToList();
+            recommendations = recommendations.OrderByDescending(recommendation => recommendation.ComputedPriority).ThenBy(recommendation => recommendation.Name).ToList();
             return recommendations;
         }
 

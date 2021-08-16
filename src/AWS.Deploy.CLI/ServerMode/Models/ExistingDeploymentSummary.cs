@@ -14,13 +14,21 @@ namespace AWS.Deploy.CLI.ServerMode.Models
 
         public string RecipeId { get; set; }
 
+        public DateTime? LastUpdatedTime { get; set; }
+
+        public bool UpdatedByCurrentUser { get; set; }
+
         public ExistingDeploymentSummary(
             string name,
-            string recipeId
+            string recipeId,
+            DateTime? lastUpdatedTime,
+            bool updatedByCurrentUser
         )
         {
             Name = name;
             RecipeId = recipeId;
+            LastUpdatedTime = lastUpdatedTime;
+            UpdatedByCurrentUser = updatedByCurrentUser;
         }
     }
 }

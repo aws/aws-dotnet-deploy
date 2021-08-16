@@ -57,7 +57,14 @@ namespace AWS.Deploy.Common.DeploymentManifest
                 if (_fileManager.Exists(deploymentManifestFilePath))
                 {
                     deploymentManifestModel = await ReadManifestFile(deploymentManifestFilePath);
-                    deploymentManifestModel.DeploymentManifestEntries.Add(new DeploymentManifestEntry(saveCdkDirectoryRelativePath));
+                    if (deploymentManifestModel.DeploymentProjects == null)
+                    {
+                        deploymentManifestModel.DeploymentProjects = new List<DeploymentManifestEntry> { new DeploymentManifestEntry(saveCdkDirectoryRelativePath) };
+                    }
+                    else
+                    {
+                        deploymentManifestModel.DeploymentProjects.Add(new DeploymentManifestEntry(saveCdkDirectoryRelativePath));
+                    }
                 }
                 else
                 {
@@ -90,7 +97,9 @@ namespace AWS.Deploy.Common.DeploymentManifest
             if (_fileManager.Exists(deploymentManifestFilePath))
             {
                 var deploymentManifestModel = await ReadManifestFile(deploymentManifestFilePath);
-                foreach (var entry in deploymentManifestModel.DeploymentManifestEntries)
+                if (deploymentManifestModel.DeploymentProjects == null)
+                    return recipeDefinitionPaths;
+                foreach (var entry in deploymentManifestModel.DeploymentProjects)
                 {
                     var saveCdkDirectoryRelativePath = entry.SaveCdkDirectoryRelativePath;
                     if (string.IsNullOrEmpty(saveCdkDirectoryRelativePath))

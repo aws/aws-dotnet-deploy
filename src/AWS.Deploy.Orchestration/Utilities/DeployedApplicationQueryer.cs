@@ -1,12 +1,15 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.\r
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Amazon.CloudFormation;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.IO;
 using AWS.Deploy.Orchestration.Data;
+using AWS.Deploy.Orchestration.LocalUserSettings;
 using AWS.Deploy.Recipes.CDK.Common;
 
 namespace AWS.Deploy.Orchestration.Utilities
@@ -16,23 +19,32 @@ namespace AWS.Deploy.Orchestration.Utilities
         /// <summary>
         /// Get the list of existing deployed applications by describe the CloudFormation stacks and filtering the stacks to the
         /// ones that have the AWS .NET deployment tool tag and description.
-        ///
-        /// If <paramref name="compatibleRecommendations"/> has any values that only existing applications that were deployed with any of the recipes
-        /// identified by the recommendations will be returned.
         /// </summary>
-        Task<List<CloudApplication>> GetExistingDeployedApplications(IList<Recommendation>? compatibleRecommendations = null);
+        Task<List<CloudApplication>> GetExistingDeployedApplications();
+
+        /// <summary>
+        /// Get the list of compatible applications based on the matching elements of the deployed stack and recommendation, such as Recipe Id.
+        /// </summary>
+        Task<List<CloudApplication>> GetCompatibleApplications(List<Recommendation> recommendations, List<CloudApplication>? allDeployedApplications = null, OrchestratorSession? session = null);
     }
 
     public class DeployedApplicationQueryer : IDeployedApplicationQueryer
     {
         private readonly IAWSResourceQueryer _awsResourceQueryer;
+        private readonly ILocalUserSettingsEngine _localUserSettingsEngine;
+        private readonly IOrchestratorInteractiveService _orchestratorInteractiveService;
 
-        public DeployedApplicationQueryer(IAWSResourceQueryer awsResourceQueryer)
+        public DeployedApplicationQueryer(
+            IAWSResourceQueryer awsResourceQueryer,
+            ILocalUserSettingsEngine localUserSettingsEngine,
+            IOrchestratorInteractiveService orchestratorInteractiveService)
         {
             _awsResourceQueryer = awsResourceQueryer;
+            _localUserSettingsEngine = localUserSettingsEngine;
+            _orchestratorInteractiveService = orchestratorInteractiveService;
         }
 
-        public async Task<List<CloudApplication>> GetExistingDeployedApplications(IList<Recommendation>? compatibleRecommendations = null)
+        public async Task<List<CloudApplication>> GetExistingDeployedApplications()
         {
             var stacks = await _awsResourceQueryer.GetCloudFormationStacks();
             var apps = new List<CloudApplication>();
@@ -66,17 +78,62 @@ namespace AWS.Deploy.Orchestration.Utilities
                 // If a list of compatible recommendations was given then skip existing applications that were used with a
                 // recipe that is not compatible.
                 var recipeId = deployTag.Value;
-                if (
-                    compatibleRecommendations != null &&
-                    !compatibleRecommendations.Any(rec => string.Equals(rec.Recipe.Id, recipeId)))
-                {
-                    continue;
-                }
 
-                apps.Add(new CloudApplication(stack.StackName, recipeId));
+                apps.Add(new CloudApplication(stack.StackName, recipeId, stack.LastUpdatedTime));
             }
 
             return apps;
+        }
+
+        /// <summary>
+        /// Filters the applications that can be re-deployed using the current set of available recommendations.
+        /// </summary>
+        /// <param name="allDeployedApplications"></param>
+        /// <param name="recommendations"></param>
+        /// <returns>A list of <see cref="CloudApplication"/> that are compatible for a re-deployment</returns>
+        public async Task<List<CloudApplication>> GetCompatibleApplications(List<Recommendation> recommendations, List<CloudApplication>? allDeployedApplications = null, OrchestratorSession? session = null)
+        {
+            var compatibleApplications = new List<CloudApplication>();
+            if (allDeployedApplications == null)
+                allDeployedApplications = await GetExistingDeployedApplications();
+
+            foreach (var app in allDeployedApplications)
+            {
+                if (recommendations.Any(rec => string.Equals(rec.Recipe.Id, app.RecipeId, StringComparison.Ordinal)))
+                    compatibleApplications.Add(app);
+            }
+
+            if (session != null)
+            {
+                try
+                {
+                    await _localUserSettingsEngine.CleanOrphanStacks(allDeployedApplications.Select(x => x.StackName).ToList(), session.ProjectDefinition.ProjectName, session.AWSAccountId, session.AWSRegion);
+                    var deploymentManifest = await _localUserSettingsEngine.GetLocalUserSettings();
+                    var lastDeployedStack = deploymentManifest?.LastDeployedStacks?
+                    .FirstOrDefault(x => x.Exists(session.AWSAccountId, session.AWSRegion, session.ProjectDefinition.ProjectName));
+
+                    return compatibleApplications
+                        .Select(x => {
+                            x.UpdatedByCurrentUser = lastDeployedStack?.Stacks?.Contains(x.StackName) ?? false;
+                            return x;
+                            })
+                        .OrderByDescending(x => x.UpdatedByCurrentUser)
+                        .ThenByDescending(x => x.LastUpdatedTime)
+                        .ToList();
+                }
+                catch (FailedToUpdateLocalUserSettingsFileException ex)
+                {
+                    _orchestratorInteractiveService.LogErrorMessageLine(ex.Message);
+                }
+                catch (InvalidLocalUserSettingsFileException ex)
+                {
+                    _orchestratorInteractiveService.LogErrorMessageLine(ex.Message);
+                }
+            }
+
+            return compatibleApplications
+                .OrderByDescending(x => x.LastUpdatedTime)
+                .ToList(); ;
         }
     }
 }

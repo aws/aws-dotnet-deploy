@@ -7,10 +7,12 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.DockerEngine;
 using AWS.Deploy.Orchestration.CDK;
 using AWS.Deploy.Orchestration.Data;
+using AWS.Deploy.Orchestration.LocalUserSettings;
 using AWS.Deploy.Recipes;
 using Newtonsoft.Json;
 
@@ -30,10 +32,10 @@ namespace AWS.Deploy.Orchestration
         private readonly IOrchestratorInteractiveService? _interactiveService;
         private readonly IAWSResourceQueryer? _awsResourceQueryer;
         private readonly IDeploymentBundleHandler? _deploymentBundleHandler;
+        private readonly ILocalUserSettingsEngine? _localUserSettingsEngine;
         private readonly IDockerEngine? _dockerEngine;
         private readonly IList<string>? _recipeDefinitionPaths;
         private readonly ICustomRecipeLocator? _customRecipeLocator;
-
         private readonly OrchestratorSession? _session;
 
         public Orchestrator(
@@ -43,6 +45,7 @@ namespace AWS.Deploy.Orchestration
             ICDKManager cdkManager,
             IAWSResourceQueryer awsResourceQueryer,
             IDeploymentBundleHandler deploymentBundleHandler,
+            ILocalUserSettingsEngine localUserSettingsEngine,
             IDockerEngine dockerEngine,
             ICustomRecipeLocator customRecipeLocator,
             IList<string> recipeDefinitionPaths)
@@ -56,6 +59,7 @@ namespace AWS.Deploy.Orchestration
             _dockerEngine = dockerEngine;
             _customRecipeLocator = customRecipeLocator;
             _recipeDefinitionPaths = recipeDefinitionPaths;
+            _localUserSettingsEngine = localUserSettingsEngine;
         }
 
         public Orchestrator(OrchestratorSession session, IList<string> recipeDefinitionPaths)
@@ -125,6 +129,8 @@ namespace AWS.Deploy.Orchestration
                 throw new InvalidOperationException($"{nameof(_cdkManager)} is null as part of the orchestartor object");
             if (_cdkProjectHandler == null)
                 throw new InvalidOperationException($"{nameof(_cdkProjectHandler)} is null as part of the orchestartor object");
+            if (_localUserSettingsEngine == null)
+                throw new InvalidOperationException($"{nameof(_localUserSettingsEngine)} is null as part of the orchestartor object");
             if (_session == null)
                 throw new InvalidOperationException($"{nameof(_session)} is null as part of the orchestartor object");
 
@@ -144,8 +150,10 @@ namespace AWS.Deploy.Orchestration
                     break;
                 default:
                     _interactiveService.LogErrorMessageLine($"Unknown deployment type {recommendation.Recipe.DeploymentType} specified in recipe.");
-                    break;
+                    return;
             }
+
+            await _localUserSettingsEngine.UpdateLastDeployedStack(cloudApplication.StackName, _session.ProjectDefinition.ProjectName, _session.AWSAccountId, _session.AWSRegion);
         }
 
         public async Task<bool> CreateContainerDeploymentBundle(CloudApplication cloudApplication, Recommendation recommendation)

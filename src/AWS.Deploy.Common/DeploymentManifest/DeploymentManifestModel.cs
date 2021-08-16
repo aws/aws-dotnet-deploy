@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections.Generic;
-using Newtonsoft.Json;
 
 namespace AWS.Deploy.Common.DeploymentManifest
 {
@@ -11,12 +10,11 @@ namespace AWS.Deploy.Common.DeploymentManifest
     /// </summary>
     public class DeploymentManifestModel
     {
-        [JsonProperty("deployment-projects")]
-        public List<DeploymentManifestEntry> DeploymentManifestEntries { get; set; }
+        public List<DeploymentManifestEntry> DeploymentProjects { get; set; }
 
-        public DeploymentManifestModel(List<DeploymentManifestEntry> deploymentManifestEntries)
+        public DeploymentManifestModel(List<DeploymentManifestEntry> deploymentProjects)
         {
-            DeploymentManifestEntries = deploymentManifestEntries;
+            DeploymentProjects = deploymentProjects;
         }
     }
 }
