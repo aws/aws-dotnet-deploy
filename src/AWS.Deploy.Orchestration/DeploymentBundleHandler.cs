@@ -144,7 +144,7 @@ namespace AWS.Deploy.Orchestration
             var dockerFileDirectory = new FileInfo(recommendation.ProjectPath).Directory?.FullName;
             if (dockerFileDirectory == null)
                 throw new InvalidProjectPathException("The project path is invalid.");
-            var projectSolutionPath = GetProjectSolutionFile(recommendation.ProjectPath);
+            var projectSolutionPath = recommendation.ProjectDefinition.ProjectSolutionPath;
 
             if (string.IsNullOrEmpty(dockerExecutionDirectory))
             {
@@ -169,54 +169,6 @@ namespace AWS.Deploy.Orchestration
                 throw new InvalidProjectPathException("The project path is invalid.");
 
             return Path.Combine(dockerFileDirectory, "Dockerfile");
-        }
-
-        private string GetProjectSolutionFile(string projectPath)
-        {
-            var projectDirectory = Directory.GetParent(projectPath);
-            var solutionExists = false;
-
-            while (solutionExists == false && projectDirectory != null)
-            {
-                var files = projectDirectory.GetFiles("*.sln");
-                foreach (var solutionFile in files)
-                {
-                    if (ValidateProjectInSolution(projectPath, solutionFile.FullName))
-                    {
-                        return solutionFile.FullName;
-                    }
-                }
-                projectDirectory = projectDirectory.Parent;
-            }
-
-            return string.Empty;
-        }
-
-        private bool ValidateProjectInSolution(string projectPath, string solutionFile)
-        {
-            var projectFileName = Path.GetFileName(projectPath);
-
-            if (string.IsNullOrWhiteSpace(solutionFile) ||
-                string.IsNullOrWhiteSpace(projectFileName))
-            {
-                return false;
-            }
-
-            var lines = File.ReadAllLines(solutionFile);
-            var projectLines = lines.Where(x => x.StartsWith("Project"));
-            var projectPaths =
-                projectLines
-                    .Select(x => x.Split(','))
-                    .Where(x => x.Length > 1)
-                    .Select(x =>
-                            x[1]
-                                .Replace('\"', ' ')
-                                .Trim())
-                    .Select(x => x.Replace('\\', Path.DirectorySeparatorChar))
-                    .ToList();
-
-            //Validate project exists in solution
-            return projectPaths.Any(x => Path.GetFileName(x).Equals(projectFileName));
         }
 
         private string GetDockerBuildArgs(Recommendation recommendation)

@@ -126,7 +126,16 @@ namespace AWS.Deploy.Common
 
             var lines = await _fileManager.ReadAllLinesAsync(solutionFile);
             var projectLines = lines.Where(x => x.StartsWith("Project"));
-            var projectPaths = projectLines.Select(x => x.Split(',')[1].Replace('\"', ' ').Trim()).ToList();
+            var projectPaths =
+                projectLines
+                    .Select(x => x.Split(','))
+                    .Where(x => x.Length > 1)
+                    .Select(x =>
+                            x[1]
+                                .Replace('\"', ' ')
+                                .Trim())
+                    .Select(x => x.Replace('\\', Path.DirectorySeparatorChar))
+                    .ToList();
 
             //Validate project exists in solution
             return projectPaths.Select(x => Path.GetFileName(x)).Any(x => x.Equals(projectFileName));
