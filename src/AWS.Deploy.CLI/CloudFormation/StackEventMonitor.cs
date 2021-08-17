@@ -23,7 +23,7 @@ namespace AWS.Deploy.CLI.CloudFormation
         private const int RESOURCE_STATUS_WIDTH = 20;
         private const int RESOURCE_TYPE_WIDTH = 40;
         private const int LOGICAL_RESOURCE_WIDTH = 40;
-        private static readonly TimeSpan s_pollingPeriod = TimeSpan.FromSeconds(2);
+        private static readonly TimeSpan s_pollingPeriod = TimeSpan.FromSeconds(5);
 
         private readonly string _stackName;
         private bool _isActive;

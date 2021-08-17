@@ -68,6 +68,28 @@ namespace AWS.Deploy.CLI.IntegrationTests.Services
         }
 
         [Fact]
+        public void WriteDebugLine()
+        {
+            var service = new InMemoryInteractiveService();
+
+            service.WriteDebugLine("Debug Line 1");
+            service.WriteDebugLine("Debug Line 2");
+            service.WriteDebugLine("Debug Line 3");
+
+            Assert.Equal("Debug Line 1", service.StdDebugReader.ReadLine());
+            Assert.Equal("Debug Line 2", service.StdDebugReader.ReadLine());
+            Assert.Equal("Debug Line 3", service.StdDebugReader.ReadLine());
+
+            service.WriteDebugLine("Debug Line 4");
+            service.WriteDebugLine("Debug Line 5");
+            service.WriteDebugLine("Debug Line 6");
+
+            Assert.Equal("Debug Line 4", service.StdDebugReader.ReadLine());
+            Assert.Equal("Debug Line 5", service.StdDebugReader.ReadLine());
+            Assert.Equal("Debug Line 6", service.StdDebugReader.ReadLine());
+        }
+
+        [Fact]
         public void ReadLine()
         {
             var service = new InMemoryInteractiveService();
