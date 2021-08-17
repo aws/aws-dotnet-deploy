@@ -35,6 +35,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var absoluteProjectDirectoryPath = new DirectoryInfo(projectDirectoryPath).FullName;
             var absoluteProjectPath = Path.Combine(absoluteProjectDirectoryPath, csprojName);
             var relativeProjectDirectoryPath = Path.GetRelativePath(currrentWorkingDirectory, absoluteProjectDirectoryPath);
+            var projectSolutionPath = SystemIOUtilities.ResolvePathToSolution();
 
             // Act
             var projectDefinition = await new ProjectDefinitionParser(new FileManager(), new DirectoryManager()).Parse(relativeProjectDirectoryPath);
@@ -42,6 +43,7 @@ namespace AWS.Deploy.CLI.UnitTests
             // Assert
             projectDefinition.ShouldNotBeNull();
             Assert.Equal(absoluteProjectPath, projectDefinition.ProjectPath);
+            Assert.Equal(projectSolutionPath, projectDefinition.ProjectSolutionPath);
         }
 
         [Theory]
@@ -60,6 +62,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var projectDirectoryPath = SystemIOUtilities.ResolvePath(projectName);
             var absoluteProjectDirectoryPath = new DirectoryInfo(projectDirectoryPath).FullName;
             var absoluteProjectPath = Path.Combine(absoluteProjectDirectoryPath, csprojName);
+            var projectSolutionPath = SystemIOUtilities.ResolvePathToSolution();
 
             // Act
             var projectDefinition = await new ProjectDefinitionParser(new FileManager(), new DirectoryManager()).Parse(absoluteProjectDirectoryPath);
@@ -67,6 +70,7 @@ namespace AWS.Deploy.CLI.UnitTests
             // Assert
             projectDefinition.ShouldNotBeNull();
             Assert.Equal(absoluteProjectPath, projectDefinition.ProjectPath);
+            Assert.Equal(projectSolutionPath, projectDefinition.ProjectSolutionPath);
         }
     }
 }
