@@ -2,10 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.IO;
+using System.Linq;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.CLI.Utilities;
 using Xunit;
 using Task = System.Threading.Tasks.Task;
+using Newtonsoft.Json;
+using AWS.Deploy.Common.Recipes;
 
 namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 {
@@ -26,6 +29,13 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             var targetApplicationProjectPath = Path.Combine(tempDirectoryPath, "testapps", "WebAppWithDockerFile");
 
             await Utilities.CreateCDKDeploymentProject(targetApplicationProjectPath);
+
+            // Verify a bug fix that the IDictionary for TypeHintData was not getting serialized.
+            var recipeFilePath = Directory.GetFiles(targetApplicationProjectPath + "CDK", "*.recipe", SearchOption.TopDirectoryOnly).FirstOrDefault();
+            Assert.True(File.Exists(recipeFilePath));
+            var recipeRoot = JsonConvert.DeserializeObject<RecipeDefinition>(File.ReadAllText(recipeFilePath));
+            var applicationIAMRoleSetting = recipeRoot.OptionSettings.FirstOrDefault(x => string.Equals(x.Id, "ApplicationIAMRole"));
+            Assert.Equal("ecs-tasks.amazonaws.com", applicationIAMRoleSetting.TypeHintData["ServicePrincipal"]);
         }
 
         [Fact]
