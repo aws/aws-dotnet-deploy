@@ -22,7 +22,7 @@ namespace AWS.Deploy.CLI.ServerMode
         public string? Version { get; set; }
 
         /// <summary>
-        /// Encryption key base 64 encoded 
+        /// Encryption key base 64 encoded
         /// </summary>
         public string? Key { get; set; }
 
@@ -33,15 +33,22 @@ namespace AWS.Deploy.CLI.ServerMode
 
         public static EncryptionKeyInfo ParseStdInKeyInfo(string input)
         {
-            var json = Encoding.UTF8.GetString(Convert.FromBase64String(input));
-            var keyInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<EncryptionKeyInfo>(json);
-
-            if(string.IsNullOrEmpty(keyInfo.Key))
+            try
             {
-                throw new InvalidEncryptionKeyInfoException("Encryption key info is missing \"Key\" property.");
-            }
+                var json = Encoding.UTF8.GetString(Convert.FromBase64String(input));
+                var keyInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<EncryptionKeyInfo>(json);
 
-            return keyInfo;
+                if(string.IsNullOrEmpty(keyInfo.Key))
+                {
+                    throw new InvalidEncryptionKeyInfoException("The symmetric key is missing a \"Key\" attribute.");
+                }
+
+                return keyInfo;
+            }
+            catch (Exception)
+            {
+                throw new InvalidEncryptionKeyInfoException($"The symmetric key has not been passed to Stdin or is invalid.");
+            }
         }
     }
 }
