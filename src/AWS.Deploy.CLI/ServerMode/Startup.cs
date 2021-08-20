@@ -19,6 +19,7 @@ using AWS.Deploy.Common;
 using AWS.Deploy.Orchestration.CDK;
 using AWS.Deploy.CLI.Extensions;
 using AWS.Deploy.CLI.ServerMode.Hubs;
+using Microsoft.AspNetCore.HostFiltering;
 
 namespace AWS.Deploy.CLI.ServerMode
 {
@@ -27,6 +28,9 @@ namespace AWS.Deploy.CLI.ServerMode
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<HostFilteringOptions>(
+                options => options.AllowedHosts = new List<string> { "127.0.0.1", "localhost" });
+
             services.AddCustomServices();
 
             services.AddSingleton<IDeploymentSessionStateServer>(new InMemoryDeploymentSessionStateServer());
