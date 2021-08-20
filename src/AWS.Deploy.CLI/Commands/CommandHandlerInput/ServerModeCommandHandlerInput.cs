@@ -12,7 +12,7 @@ namespace AWS.Deploy.CLI.Commands.CommandHandlerInput
     {
         public int Port { get; set; }
         public int ParentPid { get; set; }
-        public bool EncryptionKeyInfoStdIn { get; set; }
+        public bool UnsecureMode { get; set; }
         public bool Diagnostics { get; set; }
     }
 }

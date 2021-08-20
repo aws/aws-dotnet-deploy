@@ -68,7 +68,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             var portNumber = 4000;
             using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ResolveCredentials);
 
-            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, false);
+            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
             var cancelSource = new CancellationTokenSource();
 
             var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
@@ -119,7 +119,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             await interactiveService.StdInWriter.WriteAsync(keyInfoStdin);
             await interactiveService.StdInWriter.FlushAsync();
 
-            var serverCommand = new ServerModeCommand(interactiveService, portNumber, null, true);
+            var serverCommand = new ServerModeCommand(interactiveService, portNumber, null, false);
             var cancelSource = new CancellationTokenSource();
 
             var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
@@ -160,7 +160,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             var portNumber = 4001;
             using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ResolveCredentials);
 
-            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, false);
+            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
             var cancelSource = new CancellationTokenSource();
 
             var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);

@@ -484,7 +484,7 @@ namespace AWS.Deploy.CLI.Commands
             {
                 serverModeCommand.Add(new Option<int>(new[] { "--port" }, description: "Port the server mode will listen to."));
                 serverModeCommand.Add(new Option<int>(new[] { "--parent-pid" }, description: "The ID of the process that is launching server mode. Server mode will exit when the parent pid terminates."));
-                serverModeCommand.Add(new Option<bool>(new[] { "--encryption-keyinfo-stdin" }, description: "If set the cli reads encryption key info from stdin to use for decryption."));
+                serverModeCommand.Add(new Option<bool>(new[] { "--unsecure-mode" }, description: "If set the cli uses an unsecure mode without encryption."));
                 serverModeCommand.Add(_optionDiagnosticLogging);
             }
 
@@ -493,7 +493,7 @@ namespace AWS.Deploy.CLI.Commands
                 try
                 {
                     _toolInteractiveService.Diagnostics = input.Diagnostics;
-                    var serverMode = new ServerModeCommand(_toolInteractiveService, input.Port, input.ParentPid, input.EncryptionKeyInfoStdIn);
+                    var serverMode = new ServerModeCommand(_toolInteractiveService, input.Port, input.ParentPid, input.UnsecureMode);
 
                     await serverMode.ExecuteAsync();
 

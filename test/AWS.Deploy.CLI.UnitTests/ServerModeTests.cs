@@ -17,8 +17,8 @@ namespace AWS.Deploy.CLI.UnitTests
         [Fact]
         public async Task TcpPortIsInUseTest()
         {
-            var serverModeCommand1 = new ServerModeCommand(new TestToolInteractiveServiceImpl(), 1234, null, false);
-            var serverModeCommand2 = new ServerModeCommand(new TestToolInteractiveServiceImpl(), 1234, null, false);
+            var serverModeCommand1 = new ServerModeCommand(new TestToolInteractiveServiceImpl(), 1234, null, true);
+            var serverModeCommand2 = new ServerModeCommand(new TestToolInteractiveServiceImpl(), 1234, null, true);
 
             var serverModeTask1 = serverModeCommand1.ExecuteAsync();
             var serverModeTask2 = serverModeCommand2.ExecuteAsync();
