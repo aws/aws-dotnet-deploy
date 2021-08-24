@@ -7,13 +7,6 @@ namespace AWS.Deploy.CLI
 {
     public class ConsoleInteractiveServiceImpl : IToolInteractiveService
     {
-        private readonly bool _diagnosticLoggingEnabled;
-
-        public ConsoleInteractiveServiceImpl(bool diagnosticLoggingEnabled = false)
-        {
-            _diagnosticLoggingEnabled = diagnosticLoggingEnabled;
-        }
-
         public string ReadLine()
         {
             return Console.ReadLine() ?? string.Empty;
@@ -24,7 +17,7 @@ namespace AWS.Deploy.CLI
 
         public void WriteDebugLine(string? message)
         {
-            if (_diagnosticLoggingEnabled)
+            if (Diagnostics)
                 Console.WriteLine($"DEBUG: {message}");
         }
 

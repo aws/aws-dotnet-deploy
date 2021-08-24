@@ -69,7 +69,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             await _interactiveService.StdInWriter.FlushAsync();
 
             // Deploy
-            var deployArgs = new[] { "deploy", "--project-path", _testAppManager.GetProjectPath(Path.Combine(components)), "--stack-name", _stackName };
+            var deployArgs = new[] { "deploy", "--project-path", _testAppManager.GetProjectPath(Path.Combine(components)), "--stack-name", _stackName, "--diagnostics" };
             await _app.Run(deployArgs);
 
             // Verify application is deployed and running
@@ -82,6 +82,15 @@ namespace AWS.Deploy.CLI.IntegrationTests
             var logGroup = await _ecsHelper.GetLogGroup(_stackName);
             var logMessages = await _cloudWatchLogsHelper.GetLogMessages(logGroup);
             Assert.Contains("Hello World!", logMessages);
+
+            var deployStdDebug = _interactiveService.StdDebugReader.ReadAllLines();
+
+            var tempCdkProject = deployStdDebug.FirstOrDefault(line => line.Trim().Contains("The CDK Project is saved at: "))?
+                .Split(": ")[1]
+                .Trim();
+
+            Assert.NotNull(tempCdkProject);
+            Assert.False(Directory.Exists(tempCdkProject));
 
             // list
             var listArgs = new[] { "list-deployments" };

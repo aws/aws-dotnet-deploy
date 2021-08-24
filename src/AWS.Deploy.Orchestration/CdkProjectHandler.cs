@@ -16,6 +16,7 @@ namespace AWS.Deploy.Orchestration
         Task<string> ConfigureCdkProject(OrchestratorSession session, CloudApplication cloudApplication, Recommendation recommendation);
         string CreateCdkProject(Recommendation recommendation, OrchestratorSession session, string? saveDirectoryPath = null);
         Task DeployCdkProject(OrchestratorSession session, string cdkProjectPath, Recommendation recommendation);
+        void DeleteTemporaryCdkProject(string cdkProjectPath);
     }
 
     public class CdkProjectHandler : ICdkProjectHandler
@@ -113,7 +114,26 @@ namespace AWS.Deploy.Orchestration
             var templateEngine = new TemplateEngine();
             templateEngine.GenerateCDKProjectFromTemplate(recommendation, session, saveCdkDirectoryPath, assemblyName);
 
+            _interactiveService.LogDebugLine($"The CDK Project is saved at: {saveCdkDirectoryPath}");
             return saveCdkDirectoryPath;
+        }
+
+        public void DeleteTemporaryCdkProject(string cdkProjectPath)
+        {
+            var parentPath = Path.GetFullPath(Constants.CDK.ProjectsDirectory);
+            cdkProjectPath = Path.GetFullPath(cdkProjectPath);
+
+            if (!cdkProjectPath.StartsWith(parentPath))
+                return;
+
+            try
+            {
+                _directoryManager.Delete(cdkProjectPath, true);
+            }
+            catch (Exception)
+            {
+                _interactiveService.LogErrorMessageLine($"We were unable to delete the temporary project that was created for this deployment. Please manually delete it at this location: {cdkProjectPath}");
+            }
         }
     }
 }
