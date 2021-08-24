@@ -492,8 +492,8 @@ namespace AWS.Deploy.CLI.Commands
             {
                 try
                 {
-                    var toolInteractiveService = new ConsoleInteractiveServiceImpl(input.Diagnostics);
-                    var serverMode = new ServerModeCommand(toolInteractiveService, input.Port, input.ParentPid, input.EncryptionKeyInfoStdIn);
+                    _toolInteractiveService.Diagnostics = input.Diagnostics;
+                    var serverMode = new ServerModeCommand(_toolInteractiveService, input.Port, input.ParentPid, input.EncryptionKeyInfoStdIn);
 
                     await serverMode.ExecuteAsync();
 

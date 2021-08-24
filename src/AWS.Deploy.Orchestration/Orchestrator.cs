@@ -163,7 +163,14 @@ namespace AWS.Deploy.Orchestration
                     var cdkVersion = _cdkVersionDetector.Detect(projFiles);
                     await _cdkManager.EnsureCompatibleCDKExists(Constants.CDK.DeployToolWorkspaceDirectoryRoot, cdkVersion);
 
-                    await _cdkProjectHandler.DeployCdkProject(_session, cdkProject, recommendation);
+                    try
+                    {
+                        await _cdkProjectHandler.DeployCdkProject(_session, cdkProject, recommendation);
+                    }
+                    finally
+                    {
+                        _cdkProjectHandler.DeleteTemporaryCdkProject(cdkProject);
+                    }
                     break;
                 default:
                     _interactiveService.LogErrorMessageLine($"Unknown deployment type {recommendation.Recipe.DeploymentType} specified in recipe.");

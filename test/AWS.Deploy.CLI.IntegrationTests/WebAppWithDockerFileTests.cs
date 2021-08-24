@@ -67,7 +67,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
             // Deploy
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
-            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--stack-name", _stackName };
+            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--stack-name", _stackName, "--diagnostics" };
             await _app.Run(deployArgs);
 
             // Verify application is deployed and running
@@ -75,6 +75,15 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
             var cluster = await _ecsHelper.GetCluster(_stackName);
             Assert.Equal("ACTIVE", cluster.Status);
+
+            var deployStdDebug = _interactiveService.StdDebugReader.ReadAllLines();
+
+            var tempCdkProject = deployStdDebug.FirstOrDefault(line => line.Trim().Contains("The CDK Project is saved at: "))?
+                .Split(": ")[1]
+                .Trim();
+
+            Assert.NotNull(tempCdkProject);
+            Assert.False(Directory.Exists(tempCdkProject));
 
             var deployStdOut = _interactiveService.StdOutReader.ReadAllLines();
 
