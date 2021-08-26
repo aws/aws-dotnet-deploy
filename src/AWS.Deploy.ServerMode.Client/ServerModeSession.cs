@@ -128,12 +128,10 @@ namespace AWS.Deploy.ServerMode.Client
             {
                 _aes = Aes.Create();
                 _aes.GenerateKey();
-                _aes.GenerateIV();
 
                 var keyInfo = new EncryptionKeyInfo(
                     EncryptionKeyInfo.VERSION_1_0,
-                    Convert.ToBase64String(_aes.Key),
-                    Convert.ToBase64String(_aes.IV));
+                    Convert.ToBase64String(_aes.Key));
 
                 var keyInfoStdin = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(keyInfo)));
 
@@ -245,9 +243,9 @@ namespace AWS.Deploy.ServerMode.Client
 
             public string Version { get; set; }
             public string Key { get; set; }
-            public string IV { get; set; }
+            public string? IV { get; set; }
 
-            public EncryptionKeyInfo(string version, string key, string iv)
+            public EncryptionKeyInfo(string version, string key, string? iv = null)
             {
                 Version = version;
                 Key = key;

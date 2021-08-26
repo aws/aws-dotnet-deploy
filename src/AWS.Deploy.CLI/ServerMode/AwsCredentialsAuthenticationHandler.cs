@@ -82,9 +82,18 @@ namespace AWS.Deploy.CLI.ServerMode
         public static AuthenticateResult ProcessAuthorizationHeader(string authorizationHeaderValue, IEncryptionProvider encryptionProvider)
         {
             var tokens = authorizationHeaderValue.Split(' ');
-            if (tokens.Length != 2)
+            if (tokens.Length != 2 && tokens.Length != 3)
             {
-                return AuthenticateResult.Fail($"Incorrect format Authorization header. Format should be \"{SchemaName} <base-64-auth-parameters>\"");
+                var ivPlaceholder = "";
+                if (encryptionProvider is AesEncryptionProvider)
+                {
+                    ivPlaceholder = "<iv> ";
+                }
+                return AuthenticateResult.Fail($"Incorrect format Authorization header. Format should be \"{SchemaName} {ivPlaceholder}<base-64-auth-parameters>\"");
+            }
+            if (tokens.Length == 2 && encryptionProvider is AesEncryptionProvider)
+            {
+                return AuthenticateResult.Fail($"Incorrect format Authorization header. Format should be \"{SchemaName} <iv> <base-64-auth-parameters>\"");
             }
             if (!string.Equals(SchemaName, tokens[0]))
             {
@@ -93,9 +102,20 @@ namespace AWS.Deploy.CLI.ServerMode
 
             try
             {
-                var base64Bytes = Convert.FromBase64String(tokens[1]);
+                byte[]? base64IV;
+                byte[] base64Bytes;
+                if (tokens.Length == 2)
+                {
+                    base64IV = null;
+                    base64Bytes = Convert.FromBase64String(tokens[1]);
+                }
+                else
+                {
+                    base64IV = Convert.FromBase64String(tokens[1]);
+                    base64Bytes = Convert.FromBase64String(tokens[2]);
+                }
 
-                var decryptedBytes = encryptionProvider.Decrypt(base64Bytes);
+                var decryptedBytes = encryptionProvider.Decrypt(base64Bytes, base64IV);
                 var json = Encoding.UTF8.GetString(decryptedBytes);
 
                 var authParameters = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
