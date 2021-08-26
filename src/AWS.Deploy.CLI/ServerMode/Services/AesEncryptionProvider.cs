@@ -19,9 +19,9 @@ namespace AWS.Deploy.CLI.ServerMode.Services
             _aes = aes;
         }
 
-        public byte[] Decrypt(byte[] encryptedData)
-        {            
-            var decryptor = _aes.CreateDecryptor(_aes.Key, _aes.IV);
+        public byte[] Decrypt(byte[] encryptedData, byte[]? generatedIV)
+        {
+            var decryptor = _aes.CreateDecryptor(_aes.Key, generatedIV);
 
             using var inputStream = new MemoryStream(encryptedData);
             using var decryptStream = new CryptoStream(inputStream, decryptor, CryptoStreamMode.Read);

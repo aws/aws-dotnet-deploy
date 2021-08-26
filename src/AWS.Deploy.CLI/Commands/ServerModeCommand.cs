@@ -100,10 +100,6 @@ namespace AWS.Deploy.CLI.Commands
                         {
                             aes.Key = Convert.FromBase64String(keyInfo.Key);
                         }
-                        if (keyInfo.IV != null)
-                        {
-                            aes.IV = Convert.FromBase64String(keyInfo.IV);
-                        }
 
                         encryptionProvider = new AesEncryptionProvider(aes);
                         break;

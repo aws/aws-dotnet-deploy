@@ -10,6 +10,6 @@ namespace AWS.Deploy.CLI.ServerMode.Services
 {
     public class NoEncryptionProvider : IEncryptionProvider
     {
-        public byte[] Decrypt(byte[] encryptedData) => encryptedData;
+        public byte[] Decrypt(byte[] encryptedData, byte[]? generatedIV) => encryptedData;
     }
 }
