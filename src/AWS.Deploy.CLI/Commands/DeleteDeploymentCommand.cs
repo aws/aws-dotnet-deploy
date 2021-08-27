@@ -19,7 +19,7 @@ namespace AWS.Deploy.CLI.Commands
     /// </summary>
     public class DeleteDeploymentCommand
     {
-        private static readonly TimeSpan s_pollingPeriod = TimeSpan.FromSeconds(1);
+        private static readonly TimeSpan s_pollingPeriod = TimeSpan.FromSeconds(5);
 
         private readonly IAWSClientFactory _awsClientFactory;
         private readonly IToolInteractiveService _interactiveService;
@@ -173,7 +173,7 @@ namespace AWS.Deploy.CLI.Commands
                 {
                     shouldRetry = false;
                 }
-                catch (AmazonCloudFormationException exception) when (exception.ErrorCode.Equals("ThrottlingException"))
+                catch (AmazonCloudFormationException exception) when (exception.ErrorCode.Equals("Throttling"))
                 {
                     _interactiveService.WriteDebugLine(exception.PrettyPrint());
                     shouldRetry = true;

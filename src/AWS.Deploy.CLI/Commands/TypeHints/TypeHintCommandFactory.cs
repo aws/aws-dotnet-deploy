@@ -45,6 +45,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 { OptionSettingTypeHint.DockerExecutionDirectory, new DockerExecutionDirectoryCommand(consoleUtilities) },
                 { OptionSettingTypeHint.DockerBuildArgs, new DockerBuildArgsCommand(consoleUtilities) },
                 { OptionSettingTypeHint.ECSCluster, new ECSClusterCommand(awsResourceQueryer, consoleUtilities) },
+                { OptionSettingTypeHint.ExistingApplicationLoadBalancer, new ExistingApplicationLoadBalancerCommand(awsResourceQueryer, consoleUtilities) },
             };
         }
 

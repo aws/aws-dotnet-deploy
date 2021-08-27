@@ -93,7 +93,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
             var recommendations = await engine.ComputeRecommendations();
             var recommendation = recommendations.First(r => r.Recipe.Id.Equals("AspNetAppEcsFargate"));
 
-            _stackResource.LogicalResourceId = "FargateServiceLBB353E155";
+            _stackResource.LogicalResourceId = "GeneratedRecipeConstructServiceLoadBalancerA6C6B865";
             _stackResource.PhysicalResourceId = "PhysicalResourceId";
             _stackResource.ResourceType = "AWS::ElasticLoadBalancingV2::LoadBalancer";
             _loadBalancer.DNSName = "www.website.com";

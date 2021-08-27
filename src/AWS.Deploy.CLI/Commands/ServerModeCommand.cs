@@ -21,14 +21,14 @@ namespace AWS.Deploy.CLI.Commands
         private readonly IToolInteractiveService _interactiveService;
         private readonly int _port;
         private readonly int? _parentPid;
-        private readonly bool _encryptionKeyInfoStdIn;
+        private readonly bool _noEncryptionKeyInfo;
 
-        public ServerModeCommand(IToolInteractiveService interactiveService, int port, int? parentPid, bool encryptionKeyInfoStdIn)
+        public ServerModeCommand(IToolInteractiveService interactiveService, int port, int? parentPid, bool noEncryptionKeyInfo)
         {
             _interactiveService = interactiveService;
             _port = port;
             _parentPid = parentPid;
-            _encryptionKeyInfoStdIn = encryptionKeyInfoStdIn;
+            _noEncryptionKeyInfo = noEncryptionKeyInfo;
         }
 
         public async Task ExecuteAsync(CancellationToken cancellationToken = default(CancellationToken))
@@ -85,9 +85,13 @@ namespace AWS.Deploy.CLI.Commands
         private IEncryptionProvider CreateEncryptionProvider()
         {
             IEncryptionProvider encryptionProvider;
-            if (_encryptionKeyInfoStdIn)
+            if (_noEncryptionKeyInfo)
             {
-                _interactiveService.WriteLine("Waiting on encryption key info from stdin");
+                encryptionProvider = new NoEncryptionProvider();
+            }
+            else
+            {
+                _interactiveService.WriteLine("Waiting on symmetric key from stdin");
                 var input = _interactiveService.ReadLine();
                 var keyInfo = EncryptionKeyInfo.ParseStdInKeyInfo(input);
 
@@ -108,16 +112,12 @@ namespace AWS.Deploy.CLI.Commands
                         encryptionProvider = new AesEncryptionProvider(aes);
                         break;
                     case null:
-                        throw new InvalidEncryptionKeyInfoException("Missing required \"Version\" property in encryption key info");
+                        throw new InvalidEncryptionKeyInfoException("Missing required \"Version\" property in the symmetric key");
                     default:
-                        throw new InvalidEncryptionKeyInfoException($"Unsupported encryption key info {keyInfo.Version}");
+                        throw new InvalidEncryptionKeyInfoException($"Unsupported symmetric key {keyInfo.Version}");
                 }
 
                 _interactiveService.WriteLine("Encryption provider enabled");
-            }
-            else
-            {
-                encryptionProvider = new NoEncryptionProvider();
             }
 
             return encryptionProvider;

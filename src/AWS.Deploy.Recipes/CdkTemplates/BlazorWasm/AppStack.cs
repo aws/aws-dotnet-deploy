@@ -50,7 +50,8 @@ namespace BlazorWasm
             new BucketDeployment(this, "BlazorDeployment", new BucketDeploymentProps
             {
                 Sources = new ISource[] { Source.Asset(Path.Combine(recipeConfiguration.DotnetPublishOutputDirectory, "wwwroot")) },
-                DestinationBucket = bucket
+                DestinationBucket = bucket,
+                MemoryLimit = 4096
             });
 
             new CfnOutput(this, "EndpointURL", new CfnOutputProps

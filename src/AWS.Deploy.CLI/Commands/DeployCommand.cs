@@ -42,12 +42,15 @@ namespace AWS.Deploy.CLI.Commands
         private readonly ICustomRecipeLocator _customRecipeLocator;
         private readonly ISystemCapabilityEvaluator _systemCapabilityEvaluator;
         private readonly OrchestratorSession _session;
+        private readonly IDirectoryManager _directoryManager;
+        private ICDKVersionDetector _cdkVersionDetector;
 
         public DeployCommand(
             IToolInteractiveService toolInteractiveService,
             IOrchestratorInteractiveService orchestratorInteractiveService,
             ICdkProjectHandler cdkProjectHandler,
             ICDKManager cdkManager,
+            ICDKVersionDetector cdkVersionDetector,
             IDeploymentBundleHandler deploymentBundleHandler,
             IDockerEngine dockerEngine,
             IAWSResourceQueryer awsResourceQueryer,
@@ -60,7 +63,8 @@ namespace AWS.Deploy.CLI.Commands
             IConsoleUtilities consoleUtilities,
             ICustomRecipeLocator customRecipeLocator,
             ISystemCapabilityEvaluator systemCapabilityEvaluator,
-            OrchestratorSession session)
+            OrchestratorSession session,
+            IDirectoryManager directoryManager)
         {
             _toolInteractiveService = toolInteractiveService;
             _orchestratorInteractiveService = orchestratorInteractiveService;
@@ -76,6 +80,8 @@ namespace AWS.Deploy.CLI.Commands
             _localUserSettingsEngine = localUserSettingsEngine;
             _consoleUtilities = consoleUtilities;
             _session = session;
+            _directoryManager = directoryManager;
+            _cdkVersionDetector = cdkVersionDetector;
             _cdkManager = cdkManager;
             _customRecipeLocator = customRecipeLocator;
             _systemCapabilityEvaluator = systemCapabilityEvaluator;
@@ -136,12 +142,14 @@ namespace AWS.Deploy.CLI.Commands
                     _orchestratorInteractiveService,
                     _cdkProjectHandler,
                     _cdkManager,
+                    _cdkVersionDetector,
                     _awsResourceQueryer,
                     _deploymentBundleHandler,
                     _localUserSettingsEngine,
                     _dockerEngine,
                     _customRecipeLocator,
-                    new List<string> { RecipeLocator.FindRecipeDefinitionsPath() });
+                    new List<string> { RecipeLocator.FindRecipeDefinitionsPath() },
+                    _directoryManager);
 
             // Determine what recommendations are possible for the project.
             var recommendations = await GenerateDeploymentRecommendations(orchestrator, deploymentProjectPath);
@@ -170,7 +178,7 @@ namespace AWS.Deploy.CLI.Commands
 
                 // preset settings for deployment based on last deployment.
                 selectedRecommendation = await GetSelectedRecommendationFromPreviousDeployment(recommendations, deployedApplication, userDeploymentSettings);
-            } 
+            }
             else
             {
                 if (!string.IsNullOrEmpty(deploymentProjectPath))
@@ -182,7 +190,7 @@ namespace AWS.Deploy.CLI.Commands
                     selectedRecommendation = GetSelectedRecommendation(userDeploymentSettings, recommendations);
                 }
             }
-                
+
             var cloudApplication = new CloudApplication(cloudApplicationName, selectedRecommendation.Recipe.Id);
 
             return (orchestrator, selectedRecommendation, cloudApplication);
@@ -275,7 +283,7 @@ namespace AWS.Deploy.CLI.Commands
                 }
                 throw new InvalidUserDeploymentSettingsException(errorMessage.Trim());
             }
-                
+
             selectedRecommendation = selectedRecommendation.ApplyPreviousSettings(existingCloudApplicationMetadata.Settings);
 
             var header = $"Loading {deployedApplication.Name} settings:";
@@ -336,6 +344,9 @@ namespace AWS.Deploy.CLI.Commands
                                 break;
                             case OptionSettingValueType.Bool:
                                 settingValue = bool.Parse(optionSettingValue);
+                                break;
+                            case OptionSettingValueType.Double:
+                                settingValue = double.Parse(optionSettingValue);
                                 break;
                             default:
                                 throw new InvalidOverrideValueException($"Invalid value {optionSettingValue} for option setting item {optionSettingJsonPath}");
@@ -437,7 +448,7 @@ namespace AWS.Deploy.CLI.Commands
         private Recommendation GetSelectedRecommendation(UserDeploymentSettings? userDeploymentSettings, List<Recommendation> recommendations)
         {
             var deploymentSettingsRecipeId = userDeploymentSettings?.RecipeId;
-            
+
             if (string.IsNullOrEmpty(deploymentSettingsRecipeId))
             {
                 if (_toolInteractiveService.DisableInteractive)
@@ -450,13 +461,13 @@ namespace AWS.Deploy.CLI.Commands
                 }
                 return _consoleUtilities.AskToChooseRecommendation(recommendations);
             }
-            
+
             var selectedRecommendation = recommendations.FirstOrDefault(x => x.Recipe.Id.Equals(deploymentSettingsRecipeId, StringComparison.Ordinal));
             if (selectedRecommendation == null)
             {
                 throw new InvalidUserDeploymentSettingsException($"The user deployment settings provided contains an invalid value for the property '{nameof(userDeploymentSettings.RecipeId)}'.");
             }
-                
+
             _toolInteractiveService.WriteLine();
             _toolInteractiveService.WriteLine($"Configuring Recommendation with: '{selectedRecommendation.Name}'.");
             return selectedRecommendation;
@@ -710,6 +721,7 @@ namespace AWS.Deploy.CLI.Commands
                     {
                         case OptionSettingValueType.String:
                         case OptionSettingValueType.Int:
+                        case OptionSettingValueType.Double:
                             settingValue = _consoleUtilities.AskUserForValue(string.Empty, currentValue.ToString() ?? "", allowEmpty: true, resetValue: recommendation.GetOptionSettingDefaultValue<string>(setting) ?? "");
                             break;
                         case OptionSettingValueType.Bool:

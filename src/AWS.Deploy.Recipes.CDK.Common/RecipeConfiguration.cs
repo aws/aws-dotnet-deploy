@@ -5,6 +5,9 @@ using System.Text.Json.Serialization;
 
 namespace AWS.Deploy.Recipes.CDK.Common
 {
+    // TODO, remove this class once all recipes are migrated to IRecipeProps.
+
+
     /// <summary>
     /// A representation of the settings transferred from the AWS .NET deployment tool to the CDK project.
     /// </summary>

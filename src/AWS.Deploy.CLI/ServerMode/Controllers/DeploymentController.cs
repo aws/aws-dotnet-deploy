@@ -353,7 +353,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         [HttpPost("session/<sessionId>/execute")]
         [SwaggerOperation(OperationId = "StartDeployment")]
         [Authorize]
-        public IActionResult StartDeployment(string sessionId)
+        public async Task<IActionResult> StartDeployment(string sessionId)
         {
             var state = _stateServer.Get(sessionId);
             if (state == null)
@@ -367,6 +367,19 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
             if (state.SelectedRecommendation == null)
                 throw new SelectedRecommendationIsNullException("The selected recommendation is null or invalid.");
+
+            var systemCapabilityEvaluator = serviceProvider.GetRequiredService<ISystemCapabilityEvaluator>();
+
+            var capabilities = await systemCapabilityEvaluator.EvaluateSystemCapabilities(state.SelectedRecommendation);
+
+            var missingCapabilitiesMessage = "";
+            foreach (var capability in capabilities)
+            {
+                missingCapabilitiesMessage = $"{missingCapabilitiesMessage}{capability.GetMessage()}{Environment.NewLine}";
+            }
+
+            if (capabilities.Any())
+                return Problem($"Unable to start deployment due to missing system capabilities.{Environment.NewLine}{missingCapabilitiesMessage}");
 
             var task = new DeployRecommendationTask(orchestrator, state.ApplicationDetails, state.SelectedRecommendation);
             state.DeploymentTask = task.Execute();
@@ -464,7 +477,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             var serviceProvider = services.BuildServiceProvider();
 
             var awsClientFactory = serviceProvider.GetRequiredService<IAWSClientFactory>();
-            
+
             awsClientFactory.ConfigureAWSOptions(awsOptions =>
             {
                 awsOptions.Credentials = awsCredentials;
@@ -498,12 +511,14 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                                     serviceProvider.GetRequiredService<IOrchestratorInteractiveService>(),
                                     serviceProvider.GetRequiredService<ICdkProjectHandler>(),
                                     serviceProvider.GetRequiredService<ICDKManager>(),
+                                    serviceProvider.GetRequiredService<ICDKVersionDetector>(),
                                     serviceProvider.GetRequiredService<IAWSResourceQueryer>(),
                                     serviceProvider.GetRequiredService<IDeploymentBundleHandler>(),
                                     serviceProvider.GetRequiredService<ILocalUserSettingsEngine>(),
                                     new DockerEngine.DockerEngine(session.ProjectDefinition),
                                     serviceProvider.GetRequiredService<ICustomRecipeLocator>(),
-                                    new List<string> { RecipeLocator.FindRecipeDefinitionsPath() }
+                                    new List<string> { RecipeLocator.FindRecipeDefinitionsPath() },
+                                    serviceProvider.GetRequiredService<IDirectoryManager>()
                                 );
         }
     }

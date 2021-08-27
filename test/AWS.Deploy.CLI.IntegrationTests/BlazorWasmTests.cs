@@ -64,11 +64,20 @@ namespace AWS.Deploy.CLI.IntegrationTests
             await _interactiveService.StdInWriter.FlushAsync();
 
             // Deploy
-            var deployArgs = new[] { "deploy", "--project-path", _testAppManager.GetProjectPath(Path.Combine(components)), "--stack-name", _stackName };
+            var deployArgs = new[] { "deploy", "--project-path", _testAppManager.GetProjectPath(Path.Combine(components)), "--stack-name", _stackName, "--diagnostics" };
             await _app.Run(deployArgs);
 
             // Verify application is deployed and running
             Assert.Equal(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
+
+            var deployStdDebug = _interactiveService.StdDebugReader.ReadAllLines();
+
+            var tempCdkProject = deployStdDebug.FirstOrDefault(line => line.Trim().Contains("The CDK Project is saved at: "))?
+                .Split(": ")[1]
+                .Trim();
+
+            Assert.NotNull(tempCdkProject);
+            Assert.False(Directory.Exists(tempCdkProject));
 
             var deployStdOut = _interactiveService.StdOutReader.ReadAllLines();
 

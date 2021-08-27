@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -11,6 +12,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Amazon.Runtime;
+using AWS.Deploy.ServerMode.Client.Utilities;
 using Newtonsoft.Json;
 
 namespace AWS.Deploy.ServerMode.Client
@@ -114,7 +116,7 @@ namespace AWS.Deploy.ServerMode.Client
             var deployToolRoot = "dotnet aws";
             if (!string.IsNullOrEmpty(_deployToolPath))
             {
-                if (!File.Exists(_deployToolPath))
+                if (!PathUtilities.IsDeployToolPathValid(_deployToolPath))
                     throw new InvalidAssemblyReferenceException("The specified assembly location is invalid.");
 
                 deployToolRoot = _deployToolPath;
@@ -135,7 +137,7 @@ namespace AWS.Deploy.ServerMode.Client
 
                 var keyInfoStdin = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(keyInfo)));
 
-                var command = $"{deployToolRoot} server-mode --port {port} --parent-pid {currentProcessId} --encryption-keyinfo-stdin";
+                var command = $"{deployToolRoot} server-mode --port {port} --parent-pid {currentProcessId}";
                 var startServerTask = _commandLineWrapper.Run(command, keyInfoStdin);
 
                 _baseUrl = $"http://localhost:{port}";

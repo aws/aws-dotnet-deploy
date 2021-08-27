@@ -25,7 +25,7 @@ using AWS.Deploy.Orchestration.LocalUserSettings;
 
 namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 {
-    public class RecommendationTests 
+    public class RecommendationTests
     {
         private readonly CommandLineWrapper _commandLineWrapper;
 
@@ -168,7 +168,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             // ACT
             var recommendations = await orchestrator.GenerateRecommendationsFromSavedDeploymentProject(saveDirectoryPathEcsProject);
 
-            // ASSERT 
+            // ASSERT
             recommendations.Count.ShouldEqual(1);
             recommendations[0].Name.ShouldEqual("Custom ECS Fargate Recipe");
             recommendations[0].Recipe.Id.ShouldEqual(customEcsRecipeId);
@@ -191,7 +191,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             // ACT
             var recommendations = await orchestrator.GenerateRecommendationsFromSavedDeploymentProject(saveDirectoryPathEcsProject);
 
-            // ASSERT 
+            // ASSERT
             recommendations.ShouldBeEmpty();
         }
 
@@ -213,12 +213,14 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
                 consoleOrchestratorLogger,
                 new Mock<ICdkProjectHandler>().Object,
                 new Mock<ICDKManager>().Object,
+                new Mock<ICDKVersionDetector>().Object,
                 new TestToolAWSResourceQueryer(),
                 new Mock<IDeploymentBundleHandler>().Object,
                 localUserSettingsEngine,
                 new Mock<IDockerEngine>().Object,
                 customRecipeLocator,
-                new List<string> { RecipeLocator.FindRecipeDefinitionsPath() });
+                new List<string> { RecipeLocator.FindRecipeDefinitionsPath() },
+                directoryManager);
         }
 
         private async Task<string> GetCustomRecipeId(string recipeFilePath)

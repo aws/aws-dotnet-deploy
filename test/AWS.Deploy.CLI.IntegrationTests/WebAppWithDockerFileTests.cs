@@ -67,7 +67,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
             // Deploy
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
-            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--stack-name", _stackName };
+            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--stack-name", _stackName, "--diagnostics" };
             await _app.Run(deployArgs);
 
             // Verify application is deployed and running
@@ -76,11 +76,19 @@ namespace AWS.Deploy.CLI.IntegrationTests
             var cluster = await _ecsHelper.GetCluster(_stackName);
             Assert.Equal("ACTIVE", cluster.Status);
 
+            var deployStdDebug = _interactiveService.StdDebugReader.ReadAllLines();
+
+            var tempCdkProject = deployStdDebug.FirstOrDefault(line => line.Trim().Contains("The CDK Project is saved at: "))?
+                .Split(": ")[1]
+                .Trim();
+
+            Assert.NotNull(tempCdkProject);
+            Assert.False(Directory.Exists(tempCdkProject));
+
             var deployStdOut = _interactiveService.StdOutReader.ReadAllLines();
 
-            // Example: WebAppWithDockerFile3d078c3ca551.FargateServiceServiceURL47701F45 = http://WebAp-Farga-12O3W5VNB5OLC-166471465.us-west-2.elb.amazonaws.com
-            var applicationUrl = deployStdOut.First(line => line.StartsWith($"{_stackName}.FargateServiceServiceURL"))
-                .Split("=")[1]
+            var applicationUrl = deployStdOut.First(line => line.Trim().StartsWith("Endpoint:"))
+                .Split(" ")[1]
                 .Trim();
 
             // URL could take few more minutes to come live, therefore, we want to wait and keep trying for a specified timeout

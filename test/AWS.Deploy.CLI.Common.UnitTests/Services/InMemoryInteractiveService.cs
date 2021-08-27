@@ -11,9 +11,11 @@ namespace AWS.Deploy.CLI.IntegrationTests.Services
     {
         private long _stdOutWriterPosition;
         private long _stdErrorWriterPosition;
+        private long _stdDebugWriterPosition;
         private long _stdInReaderPosition;
         private readonly StreamWriter _stdOutWriter;
         private readonly StreamWriter _stdErrorWriter;
+        private readonly StreamWriter _stdDebugWriter;
         private readonly StreamReader _stdInReader;
 
         /// <summary>
@@ -32,6 +34,11 @@ namespace AWS.Deploy.CLI.IntegrationTests.Services
         /// </summary>
         public StreamReader StdErrorReader { get; }
 
+        /// <summary>
+        /// Allows consumers to read string which is written via <see cref="WriteDebugLine"/>
+        /// </summary>
+        public StreamReader StdDebugReader { get; }
+
         public InMemoryInteractiveService()
         {
             var stdOut = new MemoryStream();
@@ -41,6 +48,10 @@ namespace AWS.Deploy.CLI.IntegrationTests.Services
             var stdError = new MemoryStream();
             _stdErrorWriter = new StreamWriter(stdError);
             StdErrorReader = new StreamReader(stdError);
+
+            var stdDebug = new MemoryStream();
+            _stdDebugWriter = new StreamWriter(stdDebug);
+            StdDebugReader = new StreamReader(stdDebug);
 
             var stdIn = new MemoryStream();
             _stdInReader = new StreamReader(stdIn);
@@ -89,7 +100,26 @@ namespace AWS.Deploy.CLI.IntegrationTests.Services
             StdOutReader.BaseStream.Position = stdOutReaderPosition;
         }
 
-        public void WriteDebugLine(string message) => throw new System.NotImplementedException();
+        public void WriteDebugLine(string message)
+        {
+            Console.WriteLine(message);
+            Debug.WriteLine(message);
+
+            // Save BaseStream position, it must be only modified by the consumer of StdDebugReader
+            // After writing to the BaseStream, we will reset it to the original position.
+            var stdDebugReaderPosition = StdDebugReader.BaseStream.Position;
+
+            // Reset the BaseStream to the last save position to continue writing from where we left.
+            _stdDebugWriter.BaseStream.Position = _stdDebugWriterPosition;
+            _stdDebugWriter.WriteLine(message);
+            _stdDebugWriter.Flush();
+
+            // Save the BaseStream position for future writes.
+            _stdDebugWriterPosition = _stdDebugWriter.BaseStream.Position;
+
+            // Reset the BaseStream position to the original position
+            StdDebugReader.BaseStream.Position = stdDebugReaderPosition;
+        }
 
         public void WriteErrorLine(string message)
         {

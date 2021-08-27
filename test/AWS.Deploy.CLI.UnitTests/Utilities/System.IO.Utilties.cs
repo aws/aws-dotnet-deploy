@@ -20,5 +20,16 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
             return Path.Combine(testsPath, "..", "testapps", projectName);
         }
 
+        public static string ResolvePathToSolution()
+        {
+            var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            while (path != null && !string.Equals(new DirectoryInfo(path).Name, "aws-dotnet-deploy", StringComparison.OrdinalIgnoreCase))
+            {
+                path = Directory.GetParent(path).FullName;
+            }
+
+            return new DirectoryInfo(Path.Combine(path, "AWS.Deploy.sln")).FullName;
+        }
+
     }
 }

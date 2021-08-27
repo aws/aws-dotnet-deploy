@@ -211,7 +211,7 @@ namespace AWS.Deploy.CLI.UnitTests
             await interactiveService.StdInWriter.WriteAsync(keyInfoStdin);
             await interactiveService.StdInWriter.FlushAsync();
 
-            var serverCommand = new ServerModeCommand(interactiveService, portNumber, null, true);
+            var serverCommand = new ServerModeCommand(interactiveService, portNumber, null, false);
 
 
             var cancelSource = new CancellationTokenSource();
@@ -230,7 +230,7 @@ namespace AWS.Deploy.CLI.UnitTests
             }
 
             Assert.NotNull(actualException);
-            Assert.Equal("Missing required \"Version\" property in encryption key info", actualException.Message);
+            Assert.Equal("Missing required \"Version\" property in the symmetric key", actualException.Message);
         }
 
         [Fact]
@@ -254,7 +254,7 @@ namespace AWS.Deploy.CLI.UnitTests
             await interactiveService.StdInWriter.WriteAsync(keyInfoStdin);
             await interactiveService.StdInWriter.FlushAsync();
 
-            var serverCommand = new ServerModeCommand(interactiveService, portNumber, null, true);
+            var serverCommand = new ServerModeCommand(interactiveService, portNumber, null, false);
 
 
             var cancelSource = new CancellationTokenSource();
@@ -273,7 +273,7 @@ namespace AWS.Deploy.CLI.UnitTests
             }
 
             Assert.NotNull(actualException);
-            Assert.Equal("Unsupported encryption key info not-valid", actualException.Message);
+            Assert.Equal("Unsupported symmetric key not-valid", actualException.Message);
         }
 
         [Fact]

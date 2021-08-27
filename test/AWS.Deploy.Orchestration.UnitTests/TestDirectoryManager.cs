@@ -24,6 +24,9 @@ namespace AWS.Deploy.Orchestration.UnitTests
 
         public string GetAbsolutePath(string referenceFullPath, string targetRelativePath) => Path.GetFullPath(targetRelativePath, referenceFullPath);
 
+        public string[] GetProjFiles(string path) =>
+            throw new NotImplementedException("If your test needs this method, you'll need to implement this.");
+
         public void Delete(string path, bool recursive = false) =>
             throw new NotImplementedException("If your test needs this method, you'll need to implement this.");
 

@@ -11,6 +11,7 @@ using Amazon.EC2.Model;
 using Amazon.ECR.Model;
 using Amazon.ECS.Model;
 using Amazon.ElasticBeanstalk.Model;
+using Amazon.ElasticLoadBalancingV2;
 using Amazon.IdentityManagement.Model;
 using Amazon.SecurityToken.Model;
 using AWS.Deploy.Orchestration.Data;
@@ -44,5 +45,6 @@ namespace AWS.Deploy.CLI.IntegrationTests.Utilities
         public Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(string applicationName) => throw new NotImplementedException();
         public Task<List<Role>> ListOfIAMRoles(string servicePrincipal) => throw new NotImplementedException();
         public Task<Amazon.AppRunner.Model.Service> DescribeAppRunnerService(string serviceArn) => throw new NotImplementedException();
+        public Task<List<Amazon.ElasticLoadBalancingV2.Model.LoadBalancer>> ListOfLoadBalancers(LoadBalancerTypeEnum loadBalancerType) => throw new NotImplementedException();
     }
 }

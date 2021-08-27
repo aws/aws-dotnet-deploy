@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using System.Collections;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
@@ -67,6 +68,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly IDeploymentManifestEngine _deploymentManifestEngine;
         private readonly ICustomRecipeLocator _customRecipeLocator;
         private readonly ILocalUserSettingsEngine _localUserSettingsEngine;
+        private readonly ICDKVersionDetector _cdkVersionDetector;
 
         public CommandFactory(
             IToolInteractiveService toolInteractiveService,
@@ -90,7 +92,8 @@ namespace AWS.Deploy.CLI.Commands
             IFileManager fileManager,
             IDeploymentManifestEngine deploymentManifestEngine,
             ICustomRecipeLocator customRecipeLocator,
-            ILocalUserSettingsEngine localUserSettingsEngine)
+            ILocalUserSettingsEngine localUserSettingsEngine,
+            ICDKVersionDetector cdkVersionDetector)
         {
             _toolInteractiveService = toolInteractiveService;
             _orchestratorInteractiveService = orchestratorInteractiveService;
@@ -114,6 +117,7 @@ namespace AWS.Deploy.CLI.Commands
             _deploymentManifestEngine = deploymentManifestEngine;
             _customRecipeLocator = customRecipeLocator;
             _localUserSettingsEngine = localUserSettingsEngine;
+            _cdkVersionDetector = cdkVersionDetector;
         }
 
         public Command BuildRootCommand()
@@ -193,6 +197,7 @@ namespace AWS.Deploy.CLI.Commands
                         _orchestratorInteractiveService,
                         _cdkProjectHandler,
                         _cdkManager,
+                        _cdkVersionDetector,
                         _deploymentBundleHandler,
                         dockerEngine,
                         _awsResourceQueryer,
@@ -205,7 +210,8 @@ namespace AWS.Deploy.CLI.Commands
                         _consoleUtilities,
                         _customRecipeLocator,
                         _systemCapabilityEvaluator,
-                        session);
+                        session,
+                        _directoryManager);
 
                     var deploymentProjectPath = input.DeploymentProject ?? string.Empty;
                     if (!string.IsNullOrEmpty(deploymentProjectPath))
@@ -338,7 +344,7 @@ namespace AWS.Deploy.CLI.Commands
                 listCommand.Add(_optionRegion);
                 listCommand.Add(_optionProjectPath);
                 listCommand.Add(_optionDiagnosticLogging);
-            } 
+            }
 
             listCommand.Handler = CommandHandler.Create(async (ListCommandHandlerInput input) =>
             {
@@ -478,7 +484,7 @@ namespace AWS.Deploy.CLI.Commands
             {
                 serverModeCommand.Add(new Option<int>(new[] { "--port" }, description: "Port the server mode will listen to."));
                 serverModeCommand.Add(new Option<int>(new[] { "--parent-pid" }, description: "The ID of the process that is launching server mode. Server mode will exit when the parent pid terminates."));
-                serverModeCommand.Add(new Option<bool>(new[] { "--encryption-keyinfo-stdin" }, description: "If set the cli reads encryption key info from stdin to use for decryption."));
+                serverModeCommand.Add(new Option<bool>(new[] { "--unsecure-mode" }, description: "If set the cli uses an unsecure mode without encryption."));
                 serverModeCommand.Add(_optionDiagnosticLogging);
             }
 
@@ -486,8 +492,8 @@ namespace AWS.Deploy.CLI.Commands
             {
                 try
                 {
-                    var toolInteractiveService = new ConsoleInteractiveServiceImpl(input.Diagnostics);
-                    var serverMode = new ServerModeCommand(toolInteractiveService, input.Port, input.ParentPid, input.EncryptionKeyInfoStdIn);
+                    _toolInteractiveService.Diagnostics = input.Diagnostics;
+                    var serverMode = new ServerModeCommand(_toolInteractiveService, input.Port, input.ParentPid, input.UnsecureMode);
 
                     await serverMode.ExecuteAsync();
 

@@ -14,6 +14,7 @@ namespace AWS.Deploy.Common.Recipes
         ECSTaskSchedule,
         EC2KeyPair,
         Vpc,
+        ExistingApplicationLoadBalancer,
         DotnetBeanstalkPlatformArn,
         DotnetPublishSelfContainedBuild,
         DotnetPublishBuildConfiguration,

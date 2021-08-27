@@ -9,6 +9,7 @@ using Amazon.CloudWatchEvents.Model;
 using Amazon.EC2.Model;
 using Amazon.ECR.Model;
 using Amazon.ElasticBeanstalk.Model;
+using Amazon.ElasticLoadBalancingV2;
 using Amazon.IdentityManagement.Model;
 using Amazon.S3;
 using Amazon.SecurityToken.Model;
@@ -69,5 +70,7 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
         public Task<List<Amazon.ElasticLoadBalancingV2.Model.Listener>> DescribeElasticLoadBalancerListeners(string loadBalancerArn) => throw new NotImplementedException();
         public Task<DescribeRuleResponse> DescribeCloudWatchRule(string ruleName) => throw new NotImplementedException();
         Task<string> IAWSResourceQueryer.GetS3BucketLocation(string bucketName) => throw new NotImplementedException();
+
+        public Task<List<Amazon.ElasticLoadBalancingV2.Model.LoadBalancer>> ListOfLoadBalancers(LoadBalancerTypeEnum loadBalancerType) => throw new NotImplementedException();
     }
 }
