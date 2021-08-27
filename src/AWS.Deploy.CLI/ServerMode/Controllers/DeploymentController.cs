@@ -515,7 +515,9 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                                     serviceProvider.GetRequiredService<IAWSResourceQueryer>(),
                                     serviceProvider.GetRequiredService<IDeploymentBundleHandler>(),
                                     serviceProvider.GetRequiredService<ILocalUserSettingsEngine>(),
-                                    new DockerEngine.DockerEngine(session.ProjectDefinition),
+                                    new DockerEngine.DockerEngine(
+                                        session.ProjectDefinition,
+                                        serviceProvider.GetRequiredService<IFileManager>()),
                                     serviceProvider.GetRequiredService<ICustomRecipeLocator>(),
                                     new List<string> { RecipeLocator.FindRecipeDefinitionsPath() },
                                     serviceProvider.GetRequiredService<IDirectoryManager>()

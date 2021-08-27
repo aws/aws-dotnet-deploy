@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using AWS.Deploy.Common.Utilities;
 
 namespace AWS.Deploy.Common.IO
 {
@@ -35,7 +36,7 @@ namespace AWS.Deploy.Common.IO
 
         public DirectoryInfo GetDirectoryInfo(string path) => new DirectoryInfo(path);
 
-        public bool Exists(string path) => Directory.Exists(path);
+        public bool Exists(string path) => IsDirectoryValid(path);
 
         public string[] GetFiles(string path, string? searchPattern = null, SearchOption searchOption = SearchOption.TopDirectoryOnly)
             => Directory.GetFiles(path, searchPattern ?? "*", searchOption);
@@ -60,6 +61,17 @@ namespace AWS.Deploy.Common.IO
         public string[] GetProjFiles(string path)
         {
             return Directory.GetFiles(path).Where(filePath => _projFileExtensions.Contains(Path.GetExtension(filePath).ToLower())).ToArray();
+        }
+
+        private bool IsDirectoryValid(string directoryPath)
+        {
+            if (!PathUtilities.IsPathValid(directoryPath))
+                return false;
+
+            if (!Directory.Exists(directoryPath))
+                return false;
+
+            return true;
         }
     }
 }

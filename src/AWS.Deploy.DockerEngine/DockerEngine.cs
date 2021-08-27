@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.IO;
 using Newtonsoft.Json;
 
 namespace AWS.Deploy.DockerEngine
@@ -31,9 +32,10 @@ namespace AWS.Deploy.DockerEngine
     public class DockerEngine : IDockerEngine
     {
         private readonly ProjectDefinition _project;
+        private readonly IFileManager _fileManager;
         private readonly string _projectPath;
 
-        public DockerEngine(ProjectDefinition project)
+        public DockerEngine(ProjectDefinition project, IFileManager fileManager)
         {
             if (project == null)
             {
@@ -42,6 +44,7 @@ namespace AWS.Deploy.DockerEngine
 
             _project = project;
             _projectPath = project.ProjectPath;
+            _fileManager = fileManager;
         }
 
         /// <summary>
@@ -146,7 +149,7 @@ namespace AWS.Deploy.DockerEngine
             {
                 var projectFilename = Path.GetFileName(recommendation.ProjectPath);
                 var dockerFilePath = Path.Combine(Path.GetDirectoryName(recommendation.ProjectPath) ?? "", "Dockerfile");
-                if (File.Exists(dockerFilePath))
+                if (_fileManager.Exists(dockerFilePath))
                 {
                     using (var stream = File.OpenRead(dockerFilePath))
                     using (var reader = new StreamReader(stream))

@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.IO;
 
 namespace AWS.Deploy.CLI
 {
@@ -35,10 +36,12 @@ namespace AWS.Deploy.CLI
     public class ConsoleUtilities : IConsoleUtilities
     {
         private readonly IToolInteractiveService _interactiveService;
+        private readonly IDirectoryManager _directoryManager;
 
-        public ConsoleUtilities(IToolInteractiveService interactiveService)
+        public ConsoleUtilities(IToolInteractiveService interactiveService, IDirectoryManager directoryManager)
         {
             _interactiveService = interactiveService;
+            _directoryManager = directoryManager;
         }
 
         public Recommendation AskToChooseRecommendation(IList<Recommendation> recommendations)
@@ -311,7 +314,7 @@ namespace AWS.Deploy.CLI
             {
                 var keyPairDirectory = _interactiveService.ReadLine();
                 if (keyPairDirectory != null &&
-                    Directory.Exists(keyPairDirectory))
+                    _directoryManager.Exists(keyPairDirectory))
                 {
                     var projectFolder = new FileInfo(projectPath).Directory;
                     var keyPairDirectoryInfo = new DirectoryInfo(keyPairDirectory);

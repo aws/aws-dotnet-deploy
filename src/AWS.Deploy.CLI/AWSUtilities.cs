@@ -9,6 +9,7 @@ using Amazon.Runtime.CredentialManagement;
 using Amazon.EC2.Model;
 using System.IO;
 using AWS.Deploy.CLI.Utilities;
+using AWS.Deploy.Common.IO;
 
 namespace AWS.Deploy.CLI
 {
@@ -22,11 +23,13 @@ namespace AWS.Deploy.CLI
     {
         private readonly IToolInteractiveService _toolInteractiveService;
         private readonly IConsoleUtilities _consoleUtilities;
+        private readonly IDirectoryManager _directoryManager;
 
-        public AWSUtilities(IToolInteractiveService toolInteractiveService, IConsoleUtilities consoleUtilities)
+        public AWSUtilities(IToolInteractiveService toolInteractiveService, IConsoleUtilities consoleUtilities, IDirectoryManager directoryManager)
         {
             _toolInteractiveService = toolInteractiveService;
             _consoleUtilities = consoleUtilities;
+            _directoryManager = directoryManager;
         }
 
         public async Task<AWSCredentials> ResolveAWSCredentials(string? profileName, string? lastUsedProfileName = null)
@@ -89,7 +92,7 @@ namespace AWS.Deploy.CLI
             if (credentials is AssumeRoleAWSCredentials assumeRoleAWSCredentials)
             {
                 var assumeOptions = assumeRoleAWSCredentials.Options;
-                assumeOptions.MfaTokenCodeCallback = new AssumeRoleMfaTokenCodeCallback(_toolInteractiveService, assumeOptions).Execute;
+                assumeOptions.MfaTokenCodeCallback = new AssumeRoleMfaTokenCodeCallback(_toolInteractiveService, _directoryManager, assumeOptions).Execute;
             }
 
             return credentials;

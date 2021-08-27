@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestration.Data;
 
@@ -29,7 +30,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
     {
         private readonly Dictionary<OptionSettingTypeHint, ITypeHintCommand> _commands;
 
-        public TypeHintCommandFactory(IToolInteractiveService toolInteractiveService, IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities)
+        public TypeHintCommandFactory(IToolInteractiveService toolInteractiveService, IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities, IDirectoryManager directoryManager)
         {
             _commands = new Dictionary<OptionSettingTypeHint, ITypeHintCommand>
             {
@@ -42,7 +43,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 { OptionSettingTypeHint.DotnetPublishAdditionalBuildArguments, new DotnetPublishArgsCommand(consoleUtilities) },
                 { OptionSettingTypeHint.DotnetPublishSelfContainedBuild, new DotnetPublishSelfContainedBuildCommand(consoleUtilities) },
                 { OptionSettingTypeHint.DotnetPublishBuildConfiguration, new DotnetPublishBuildConfigurationCommand(consoleUtilities) },
-                { OptionSettingTypeHint.DockerExecutionDirectory, new DockerExecutionDirectoryCommand(consoleUtilities) },
+                { OptionSettingTypeHint.DockerExecutionDirectory, new DockerExecutionDirectoryCommand(consoleUtilities, directoryManager) },
                 { OptionSettingTypeHint.DockerBuildArgs, new DockerBuildArgsCommand(consoleUtilities) },
                 { OptionSettingTypeHint.ECSCluster, new ECSClusterCommand(awsResourceQueryer, consoleUtilities) },
                 { OptionSettingTypeHint.ExistingApplicationLoadBalancer, new ExistingApplicationLoadBalancerCommand(awsResourceQueryer, consoleUtilities) },
