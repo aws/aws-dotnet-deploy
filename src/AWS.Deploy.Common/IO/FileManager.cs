@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AWS.Deploy.Common.Utilities;
 
 namespace AWS.Deploy.Common.IO
 {
@@ -20,7 +22,7 @@ namespace AWS.Deploy.Common.IO
     /// </summary>
     public class FileManager : IFileManager
     {
-        public bool Exists(string path) => File.Exists(path);
+        public bool Exists(string path) => IsFileValid(path);
 
         public Task<string> ReadAllTextAsync(string path) => File.ReadAllTextAsync(path);
 
@@ -28,5 +30,16 @@ namespace AWS.Deploy.Common.IO
 
         public Task WriteAllTextAsync(string filePath, string contents, CancellationToken cancellationToken) =>
             File.WriteAllTextAsync(filePath, contents, cancellationToken);
+
+        private bool IsFileValid(string filePath)
+        {
+            if (!PathUtilities.IsPathValid(filePath))
+                return false;
+
+            if (!File.Exists(filePath))
+                return false;
+
+            return true;
+        }
     }
 }

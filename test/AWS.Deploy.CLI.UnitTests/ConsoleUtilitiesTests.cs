@@ -9,11 +9,20 @@ using Xunit;
 using Amazon.Runtime;
 using AWS.Deploy.CLI.Utilities;
 using System;
+using AWS.Deploy.Common.IO;
+using AWS.Deploy.CLI.Common.UnitTests.IO;
 
 namespace AWS.Deploy.CLI.UnitTests
 {
     public class ConsoleUtilitiesTests
     {
+        private readonly IDirectoryManager _directoryManager;
+
+        public ConsoleUtilitiesTests()
+        {
+            _directoryManager = new TestDirectoryManager();
+        }
+
         private readonly List<OptionItem> _options = new List<OptionItem>
         {
             new()
@@ -36,7 +45,7 @@ namespace AWS.Deploy.CLI.UnitTests
                 "3",
                 "CustomNewIdentifier"
             });
-            var consoleUtilities = new ConsoleUtilities(interactiveServices);
+            var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager);
             var userInputConfiguration = new UserInputConfiguration<OptionItem>(
                 option => option.DisplayName,
                 option => option.Identifier.Equals("Identifier2"),
@@ -67,7 +76,7 @@ namespace AWS.Deploy.CLI.UnitTests
             {
                 "1"
             });
-            var consoleUtilities = new ConsoleUtilities(interactiveServices);
+            var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager);
             var userInputConfiguration = new UserInputConfiguration<OptionItem>(
                 option => option.DisplayName,
                 option => option.Identifier.Equals("Identifier2"),
@@ -94,7 +103,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public void AskUserToChooseStringsPickDefault()
         {
             var interactiveServices = new TestToolInteractiveServiceImpl(new List<string> { "" });
-            var consoleUtilities = new ConsoleUtilities(interactiveServices);
+            var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager);
             var selectedValue = consoleUtilities.AskUserToChoose(new List<string> { "Option1", "Option2" }, "Title", "Option2");
             Assert.Equal("Option2", selectedValue);
 
@@ -111,7 +120,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public void AskUserToChooseStringsPicksNoDefault()
         {
             var interactiveServices = new TestToolInteractiveServiceImpl(new List<string> { "1" });
-            var consoleUtilities = new ConsoleUtilities(interactiveServices);
+            var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager);
             var selectedValue = consoleUtilities.AskUserToChoose(new List<string> { "Option1", "Option2" }, "Title", "Option2");
             Assert.Equal("Option1", selectedValue);
         }
@@ -120,7 +129,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public void AskUserToChooseStringsFirstSelectInvalid()
         {
             var interactiveServices = new TestToolInteractiveServiceImpl(new List<string> { "a", "10", "1" });
-            var consoleUtilities = new ConsoleUtilities(interactiveServices);
+            var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager);
             var selectedValue = consoleUtilities.AskUserToChoose(new List<string> { "Option1", "Option2" }, "Title", "Option2");
             Assert.Equal("Option1", selectedValue);
         }
@@ -129,7 +138,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public void AskUserToChooseStringsNoTitle()
         {
             var interactiveServices = new TestToolInteractiveServiceImpl(new List<string> { "a", "10", "1" });
-            var consoleUtilities = new ConsoleUtilities(interactiveServices);
+            var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager);
             var selectedValue = consoleUtilities.AskUserToChoose(new List<string> { "Option1", "Option2" }, null, "Option2");
             Assert.Equal("Option1", selectedValue);
 
@@ -140,7 +149,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public void AskUserForValueCanBeSetToEmptyString()
         {
             var interactiveServices = new TestToolInteractiveServiceImpl(new List<string> { "<reset>" });
-            var consoleUtilities = new ConsoleUtilities(interactiveServices);
+            var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager);
 
             var selectedValue =
                 consoleUtilities.AskUserForValue(
@@ -155,7 +164,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public void AskUserForValueCanBeSetToEmptyStringNoDefault()
         {
             var interactiveServices = new TestToolInteractiveServiceImpl(new List<string> { "<reset>" });
-            var consoleUtilities = new ConsoleUtilities(interactiveServices);
+            var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager);
 
             var selectedValue =
                 consoleUtilities.AskUserForValue(
@@ -170,7 +179,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public void AskYesNoPickDefault()
         {
             var interactiveServices = new TestToolInteractiveServiceImpl(new List<string> { string.Empty });
-            var consoleUtilities = new ConsoleUtilities(interactiveServices);
+            var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager);
             var selectedValue = consoleUtilities.AskYesNoQuestion("Do you want to deploy", YesNo.Yes);
             Assert.Equal(YesNo.Yes, selectedValue);
 
@@ -181,7 +190,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public void AskYesNoPickNonDefault()
         {
             var interactiveServices = new TestToolInteractiveServiceImpl(new List<string> { "n" });
-            var consoleUtilities = new ConsoleUtilities(interactiveServices);
+            var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager);
             var selectedValue = consoleUtilities.AskYesNoQuestion("Do you want to deploy", YesNo.Yes);
             Assert.Equal(YesNo.No, selectedValue);
         }
@@ -190,7 +199,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public void AskYesNoPickNoDefault()
         {
             var interactiveServices = new TestToolInteractiveServiceImpl(new List<string> { "n" });
-            var consoleUtilities = new ConsoleUtilities(interactiveServices);
+            var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager);
             var selectedValue = consoleUtilities.AskYesNoQuestion("Do you want to deploy");
             Assert.Equal(YesNo.No, selectedValue);
 
@@ -201,7 +210,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public void AskYesNoPickInvalidChoice()
         {
             var interactiveServices = new TestToolInteractiveServiceImpl(new List<string> { "q", "n" });
-            var consoleUtilities = new ConsoleUtilities(interactiveServices);
+            var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager);
             var selectedValue = consoleUtilities.AskYesNoQuestion("Do you want to deploy", YesNo.Yes);
             Assert.Equal(YesNo.No, selectedValue);
 
@@ -212,7 +221,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public void DisplayRow()
         {
             var interactiveServices = new TestToolInteractiveServiceImpl();
-            var consoleUtilities = new ConsoleUtilities(interactiveServices);
+            var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager);
             consoleUtilities.DisplayRow(new[] { ("Hello", 10), ("World", 20) });
 
             Assert.Equal("Hello      | World               ", interactiveServices.OutputMessages[0]);
@@ -230,7 +239,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var interactiveServices = new TestToolInteractiveServiceImpl();
             interactiveServices.QueueConsoleInfos(ConsoleKey.A, ConsoleKey.B, ConsoleKey.C, ConsoleKey.Enter);
 
-            var callback = new AssumeRoleMfaTokenCodeCallback(interactiveServices, options);
+            var callback = new AssumeRoleMfaTokenCodeCallback(interactiveServices, _directoryManager, options);
             var code = callback.Execute();
 
             Assert.Equal("ABC", code);
@@ -254,7 +263,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var interactiveServices = new TestToolInteractiveServiceImpl();
             interactiveServices.QueueConsoleInfos(ConsoleKey.A, ConsoleKey.B, ConsoleKey.C, ConsoleKey.Backspace, ConsoleKey.D, ConsoleKey.Enter);
 
-            var callback = new AssumeRoleMfaTokenCodeCallback(interactiveServices, options);
+            var callback = new AssumeRoleMfaTokenCodeCallback(interactiveServices, _directoryManager, options);
             var code = callback.Execute();
 
             Assert.Equal("ABD", code);

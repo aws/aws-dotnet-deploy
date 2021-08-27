@@ -190,7 +190,7 @@ namespace AWS.Deploy.CLI.Commands
                         AWSProfileName = input.Profile ?? userDeploymentSettings?.AWSProfile ?? null
                     };
 
-                    var dockerEngine = new DockerEngine.DockerEngine(projectDefinition);
+                    var dockerEngine = new DockerEngine.DockerEngine(projectDefinition, _fileManager);
 
                     var deploy = new DeployCommand(
                         _toolInteractiveService,

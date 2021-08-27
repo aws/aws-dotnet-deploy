@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Amazon.Runtime;
+using AWS.Deploy.Common.IO;
 
 namespace AWS.Deploy.CLI.Utilities
 {
@@ -15,18 +16,20 @@ namespace AWS.Deploy.CLI.Utilities
     {
         private readonly AssumeRoleAWSCredentialsOptions _options;
         private readonly IToolInteractiveService _toolInteractiveService;
+        private readonly IDirectoryManager _directoryManager;
 
-        internal AssumeRoleMfaTokenCodeCallback(IToolInteractiveService toolInteractiveService, AssumeRoleAWSCredentialsOptions options)
+        internal AssumeRoleMfaTokenCodeCallback(IToolInteractiveService toolInteractiveService, IDirectoryManager directoryManager, AssumeRoleAWSCredentialsOptions options)
         {
             _toolInteractiveService = toolInteractiveService;
             _options = options;
+            _directoryManager = directoryManager;
         }
 
         internal string Execute()
         {
             _toolInteractiveService.WriteLine();
             _toolInteractiveService.WriteLine($"Enter MFA code for {_options.MfaSerialNumber}: ");
-            var consoleUtilites = new ConsoleUtilities(_toolInteractiveService);
+            var consoleUtilites = new ConsoleUtilities(_toolInteractiveService, _directoryManager);
             var code = consoleUtilites.ReadSecretFromConsole();
             
             return code;

@@ -106,7 +106,9 @@ namespace AWS.Deploy.Orchestration
         {
             if (_session == null)
                 throw new InvalidOperationException($"{nameof(_session)} is null as part of the orchestartor object");
-            if (!Directory.Exists(deploymentProjectPath))
+            if (_directoryManager == null)
+                throw new InvalidOperationException($"{nameof(_directoryManager)} is null as part of the orchestartor object");
+            if (!_directoryManager.Exists(deploymentProjectPath))
                 throw new InvalidCliArgumentException($"The path '{deploymentProjectPath}' does not exists on the file system. Please provide a valid deployment project path and try again.");
 
             var engine = new RecommendationEngine.RecommendationEngine(new List<string> { deploymentProjectPath }, _session);

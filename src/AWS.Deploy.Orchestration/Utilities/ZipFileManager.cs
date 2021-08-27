@@ -8,6 +8,7 @@ using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using AWS.Deploy.Common.IO;
 
 namespace AWS.Deploy.Orchestration.Utilities
 {
@@ -19,10 +20,12 @@ namespace AWS.Deploy.Orchestration.Utilities
     public class ZipFileManager : IZipFileManager
     {
         private readonly ICommandLineWrapper _commandLineWrapper;
+        private readonly IFileManager _fileManager;
 
-        public ZipFileManager(ICommandLineWrapper commandLineWrapper)
+        public ZipFileManager(ICommandLineWrapper commandLineWrapper, IFileManager fileManager)
         {
             _commandLineWrapper = commandLineWrapper;
+            _fileManager = fileManager;
         }
 
         public async Task CreateFromDirectory(string sourceDirectoryName, string destinationArchiveFileName)
@@ -94,7 +97,7 @@ namespace AWS.Deploy.Orchestration.Utilities
         /// <returns>The full path to the command if found otherwise it will return null</returns>
         private string? FindExecutableInPath(string command)
         {
-            if (File.Exists(command))
+            if (_fileManager.Exists(command))
                 return Path.GetFullPath(command);
 
             Func<string, string> quoteRemover = x =>
@@ -112,7 +115,7 @@ namespace AWS.Deploy.Orchestration.Utilities
                 try
                 {
                     var fullPath = Path.Combine(quoteRemover(path), command);
-                    if (File.Exists(fullPath))
+                    if (_fileManager.Exists(fullPath))
                         return fullPath;
                 }
                 catch (Exception)
@@ -121,7 +124,7 @@ namespace AWS.Deploy.Orchestration.Utilities
                 }
             }
 
-            if (KNOWN_LOCATIONS.ContainsKey(command) && File.Exists(KNOWN_LOCATIONS[command]))
+            if (KNOWN_LOCATIONS.ContainsKey(command) && _fileManager.Exists(KNOWN_LOCATIONS[command]))
                 return KNOWN_LOCATIONS[command];
 
             return null;

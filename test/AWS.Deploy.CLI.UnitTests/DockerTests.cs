@@ -27,9 +27,11 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var projectPath = ResolvePath(Path.Combine(topLevelFolder, projectName));
 
-            var project = await new ProjectDefinitionParser(new FileManager(), new DirectoryManager()).Parse(projectPath);
+            var fileManager = new FileManager();
 
-            var engine = new DockerEngine.DockerEngine(project);
+            var project = await new ProjectDefinitionParser(fileManager, new DirectoryManager()).Parse(projectPath);
+
+            var engine = new DockerEngine.DockerEngine(project, fileManager);
 
             engine.GenerateDockerFile();
 

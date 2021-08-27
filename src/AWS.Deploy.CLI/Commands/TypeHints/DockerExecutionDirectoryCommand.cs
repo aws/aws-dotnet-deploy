@@ -4,6 +4,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 
 namespace AWS.Deploy.CLI.Commands.TypeHints
@@ -11,10 +12,12 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
     public class DockerExecutionDirectoryCommand : ITypeHintCommand
     {
         private readonly IConsoleUtilities _consoleUtilities;
+        private readonly IDirectoryManager _directoryManager;
 
-        public DockerExecutionDirectoryCommand(IConsoleUtilities consoleUtilities)
+        public DockerExecutionDirectoryCommand(IConsoleUtilities consoleUtilities, IDirectoryManager directoryManager)
         {
             _consoleUtilities = consoleUtilities;
+            _directoryManager = directoryManager;
         }
 
         public Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
@@ -47,7 +50,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
         private string ValidateExecutionDirectory(string executionDirectory)
         {
-            if (!string.IsNullOrEmpty(executionDirectory) && !Directory.Exists(executionDirectory))
+            if (!string.IsNullOrEmpty(executionDirectory) && !_directoryManager.Exists(executionDirectory))
                 return "The directory specified for Docker execution does not exist.";
             else
                 return "";
