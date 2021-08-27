@@ -43,7 +43,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly ISystemCapabilityEvaluator _systemCapabilityEvaluator;
         private readonly OrchestratorSession _session;
         private readonly IDirectoryManager _directoryManager;
-        private ICDKVersionDetector _cdkVersionDetector;
+        private readonly ICDKVersionDetector _cdkVersionDetector;
 
         public DeployCommand(
             IToolInteractiveService toolInteractiveService,
