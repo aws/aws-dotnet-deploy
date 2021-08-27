@@ -142,7 +142,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
                 Assert.Equal("AspNetAppElasticBeanstalkLinux", getRecommendationOutput.Recommendations.FirstOrDefault().RecipeId);
 
                 var listDeployStdOut = interactiveService.StdOutReader.ReadAllLines();
-                Assert.Contains("Waiting on encryption key info from stdin", listDeployStdOut);
+                Assert.Contains("Waiting on symmetric key from stdin", listDeployStdOut);
                 Assert.Contains("Encryption provider enabled", listDeployStdOut);
             }
             finally
