@@ -7,7 +7,7 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <LangVersion>9</LangVersion>
     <Nullable>enable</Nullable>
-
+    <AWSProjectType>DeploymentProject</AWSProjectType>
     <!-- The value "AWSDeployRecipesCDKCommonVersion" is replaced by the project template system. -->
     <RecipeCDKCommonVersion>AWSDeployRecipesCDKCommonVersion</RecipeCDKCommonVersion>
   </PropertyGroup>

@@ -300,7 +300,7 @@ namespace AWS.Deploy.CLI.Commands
                             return false;
 
                         var value = selectedRecommendation.GetOptionSettingValue(x);
-                        if (value == null || value.ToString() == string.Empty || object.Equals(value, x.DefaultValue))
+                        if (value == null || value.ToString() == string.Empty)
                             return false;
 
                         return true;

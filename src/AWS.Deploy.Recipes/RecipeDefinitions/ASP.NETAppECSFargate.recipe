@@ -13,15 +13,15 @@
 
     "DisplayedResources": [
         {
-            "LogicalId": "GeneratedRecipeConstructServiceLoadBalancerA6C6B865",
+            "LogicalId": "RecipeServiceLoadBalancer68534AEF",
             "Description": "Application Endpoint"
         },
         {
-            "LogicalId": "GeneratedRecipeConstructAppFargateServiceA4EB7E71",
+            "LogicalId": "RecipeAppFargateService71FD6243",
             "Description": "ECS Service"
         },
         {
-            "LogicalId": "GeneratedRecipeConstructEcsClusterB9B37255",
+            "LogicalId": "RecipeEcsClusterB4EDBB7E",
             "Description": "ECS Cluster"
         }
     ],

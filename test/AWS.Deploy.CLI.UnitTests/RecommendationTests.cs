@@ -111,7 +111,6 @@ namespace AWS.Deploy.CLI.UnitTests
             var blazorRecommendation = recommendations.FirstOrDefault(r => r.Recipe.Id == Constants.BLAZOR_WASM);
 
             Assert.NotNull(blazorRecommendation);
-            Assert.NotNull(blazorRecommendation.Recipe.DeploymentConfirmation.DefaultMessage);
         }
 
 

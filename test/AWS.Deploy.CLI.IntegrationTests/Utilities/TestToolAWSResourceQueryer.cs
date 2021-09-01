@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Amazon.CloudFormation.Model;
+using Amazon.CloudFront.Model;
 using Amazon.CloudWatchEvents.Model;
 using Amazon.EC2.Model;
 using Amazon.ECR.Model;
@@ -39,6 +40,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.Utilities
         public Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns() => throw new NotImplementedException();
         public Task<List<Vpc>> GetListOfVpcs() => throw new NotImplementedException();
         public Task<string> GetS3BucketLocation(string bucketName) => throw new NotImplementedException();
+        public Task<Amazon.S3.Model.WebsiteConfiguration> GetS3BucketWebSiteConfiguration(string bucketName) => throw new NotImplementedException();
         public Task<List<KeyPairInfo>> ListOfEC2KeyPairs() => throw new NotImplementedException();
         public Task<List<Cluster>> ListOfECSClusters() => throw new NotImplementedException();
         public Task<List<ApplicationDescription>> ListOfElasticBeanstalkApplications() => throw new NotImplementedException();
@@ -46,5 +48,6 @@ namespace AWS.Deploy.CLI.IntegrationTests.Utilities
         public Task<List<Role>> ListOfIAMRoles(string servicePrincipal) => throw new NotImplementedException();
         public Task<Amazon.AppRunner.Model.Service> DescribeAppRunnerService(string serviceArn) => throw new NotImplementedException();
         public Task<List<Amazon.ElasticLoadBalancingV2.Model.LoadBalancer>> ListOfLoadBalancers(LoadBalancerTypeEnum loadBalancerType) => throw new NotImplementedException();
+        public Task<Distribution> GetCloudFrontDistribution(string distributionId) => throw new NotImplementedException();
     }
 }

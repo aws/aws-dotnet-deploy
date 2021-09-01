@@ -29,6 +29,7 @@ namespace AWS.Deploy.Orchestration.DisplayedResources
         private const string RESOURCE_TYPE_ELASTICBEANSTALK_ENVIRONMENT = "AWS::ElasticBeanstalk::Environment";
         private const string RESOURCE_TYPE_ELASTICLOADBALANCINGV2_LOADBALANCER = "AWS::ElasticLoadBalancingV2::LoadBalancer";
         private const string RESOURCE_TYPE_S3_BUCKET = "AWS::S3::Bucket";
+        private const string RESOURCE_TYPE_CLOUDFRONT_DISTRIBUTION = "AWS::CloudFront::Distribution";
         private const string RESOURCE_TYPE_EVENTS_RULE = "AWS::Events::Rule";
 
         private readonly Dictionary<string, IDisplayedResourceCommand> _resources;
@@ -41,6 +42,7 @@ namespace AWS.Deploy.Orchestration.DisplayedResources
                 { RESOURCE_TYPE_ELASTICBEANSTALK_ENVIRONMENT, new ElasticBeanstalkEnvironmentResource(awsResourceQueryer) },
                 { RESOURCE_TYPE_ELASTICLOADBALANCINGV2_LOADBALANCER, new ElasticLoadBalancerResource(awsResourceQueryer) },
                 { RESOURCE_TYPE_S3_BUCKET, new S3BucketResource(awsResourceQueryer) },
+                { RESOURCE_TYPE_CLOUDFRONT_DISTRIBUTION, new CloudFrontDistributionResource(awsResourceQueryer) },
                 { RESOURCE_TYPE_EVENTS_RULE, new CloudWatchEventResource(awsResourceQueryer) }
             };
         }

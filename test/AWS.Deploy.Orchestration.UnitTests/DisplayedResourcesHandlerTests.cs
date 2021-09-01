@@ -93,7 +93,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
             var recommendations = await engine.ComputeRecommendations();
             var recommendation = recommendations.First(r => r.Recipe.Id.Equals("AspNetAppEcsFargate"));
 
-            _stackResource.LogicalResourceId = "GeneratedRecipeConstructServiceLoadBalancerA6C6B865";
+            _stackResource.LogicalResourceId = "RecipeServiceLoadBalancer68534AEF";
             _stackResource.PhysicalResourceId = "PhysicalResourceId";
             _stackResource.ResourceType = "AWS::ElasticLoadBalancingV2::LoadBalancer";
             _loadBalancer.DNSName = "www.website.com";
@@ -115,22 +115,22 @@ namespace AWS.Deploy.Orchestration.UnitTests
         }
 
         [Fact]
-        public async Task GetDeploymentOutputs_S3Bucket()
+        public async Task GetDeploymentOutputs_S3BucketWithWebSiteConfig()
         {
             var engine = await BuildRecommendationEngine("BlazorWasm31");
             var recommendations = await engine.ComputeRecommendations();
             var recommendation = recommendations.First(r => r.Recipe.Id.Equals("BlazorWasm"));
 
-            _stackResource.LogicalResourceId = "BlazorHostC7106839";
+            _stackResource.LogicalResourceId = "RecipeContentS3BucketE74B8362";
             _stackResource.PhysicalResourceId = "PhysicalResourceId";
             _stackResource.ResourceType = "AWS::S3::Bucket";
             _mockAWSResourceQueryer.Setup(x => x.DescribeCloudFormationResources(It.IsAny<string>())).Returns(Task.FromResult(_stackResources));
             _mockAWSResourceQueryer.Setup(x => x.GetS3BucketLocation(It.IsAny<string>())).Returns(Task.FromResult("us-west-2"));
+            _mockAWSResourceQueryer.Setup(x => x.GetS3BucketWebSiteConfiguration(It.IsAny<string>())).Returns(Task.FromResult(new Amazon.S3.Model.WebsiteConfiguration { IndexDocumentSuffix = "index.html" }));
             var disaplayedResourcesHandler = new DisplayedResourcesHandler(_mockAWSResourceQueryer.Object, _displayedResourcesFactory);
 
             var outputs = await disaplayedResourcesHandler.GetDeploymentOutputs(_cloudApplication, recommendation);
 
-            Assert.Single(outputs);
             var resource = outputs.First();
             Assert.Equal("PhysicalResourceId", resource.Id);
             Assert.Equal("AWS::S3::Bucket", resource.Type);
@@ -139,7 +139,58 @@ namespace AWS.Deploy.Orchestration.UnitTests
             Assert.True(resource.Data.ContainsKey("Bucket Name"));
             Assert.Equal("http://PhysicalResourceId.s3-website-us-west-2.amazonaws.com/", resource.Data["Endpoint"]);
             Assert.Equal("PhysicalResourceId", resource.Data["Bucket Name"]);
+        }
 
+        [Fact]
+        public async Task GetDeploymentOutputs_S3BucketWithoutWebSiteConfig()
+        {
+            var engine = await BuildRecommendationEngine("BlazorWasm31");
+            var recommendations = await engine.ComputeRecommendations();
+            var recommendation = recommendations.First(r => r.Recipe.Id.Equals("BlazorWasm"));
+
+            _stackResource.LogicalResourceId = "RecipeContentS3BucketE74B8362";
+            _stackResource.PhysicalResourceId = "PhysicalResourceId";
+            _stackResource.ResourceType = "AWS::S3::Bucket";
+            _mockAWSResourceQueryer.Setup(x => x.DescribeCloudFormationResources(It.IsAny<string>())).Returns(Task.FromResult(_stackResources));
+            _mockAWSResourceQueryer.Setup(x => x.GetS3BucketLocation(It.IsAny<string>())).Returns(Task.FromResult("us-west-2"));
+            var disaplayedResourcesHandler = new DisplayedResourcesHandler(_mockAWSResourceQueryer.Object, _displayedResourcesFactory);
+
+            var outputs = await disaplayedResourcesHandler.GetDeploymentOutputs(_cloudApplication, recommendation);
+
+            var resource = outputs.First();
+            Assert.Equal("PhysicalResourceId", resource.Id);
+            Assert.Equal("AWS::S3::Bucket", resource.Type);
+            Assert.Single(resource.Data);
+            Assert.True(resource.Data.ContainsKey("Bucket Name"));
+            Assert.Equal("PhysicalResourceId", resource.Data["Bucket Name"]);
+        }
+
+        [Fact]
+        public async Task GetDeploymentOutputs_CloudFrontDistribution()
+        {
+            var engine = await BuildRecommendationEngine("BlazorWasm31");
+            var recommendations = await engine.ComputeRecommendations();
+            var recommendation = recommendations.First(r => r.Recipe.Id.Equals("BlazorWasm"));
+
+            _stackResource.LogicalResourceId = "RecipeCloudFrontDistribution2BE25932";
+            _stackResource.PhysicalResourceId = "PhysicalResourceId";
+            _stackResource.ResourceType = "AWS::CloudFront::Distribution";
+            _mockAWSResourceQueryer.Setup(x => x.DescribeCloudFormationResources(It.IsAny<string>())).Returns(Task.FromResult(_stackResources));
+            _mockAWSResourceQueryer.Setup(x => x.GetCloudFrontDistribution(It.IsAny<string>())).Returns(Task.FromResult(new Amazon.CloudFront.Model.Distribution
+            {
+                Id = "PhysicalResourceId",
+                DomainName = "id.cloudfront.net"
+            }));
+            var disaplayedResourcesHandler = new DisplayedResourcesHandler(_mockAWSResourceQueryer.Object, _displayedResourcesFactory);
+
+            var outputs = await disaplayedResourcesHandler.GetDeploymentOutputs(_cloudApplication, recommendation);
+
+            var resource = outputs.First();
+            Assert.Equal("PhysicalResourceId", resource.Id);
+            Assert.Equal("AWS::CloudFront::Distribution", resource.Type);
+            Assert.Single(resource.Data);
+            Assert.True(resource.Data.ContainsKey("Endpoint"));
+            Assert.Equal("https://id.cloudfront.net/", resource.Data["Endpoint"]);
         }
 
         [Fact]

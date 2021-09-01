@@ -27,11 +27,11 @@ namespace AspNetAppEcsFargate
                 }
             };
 
-        // The RegisterStack method is used to set identifying information on the stack
-        // for the recipe used to deploy the application and preserve the settings used in the recipe
-        // to allow redeployment. The information is stored as CloudFormation tags and metadata inside
-        // the generated CloudFormation template.
-        CDKRecipeSetup.RegisterStack<Configuration>(new AppStack(app, appStackProps), appStackProps.RecipeProps);
+            // The RegisterStack method is used to set identifying information on the stack
+            // for the recipe used to deploy the application and preserve the settings used in the recipe
+            // to allow redeployment. The information is stored as CloudFormation tags and metadata inside
+            // the generated CloudFormation template.
+            CDKRecipeSetup.RegisterStack<Configuration>(new AppStack(app, appStackProps), appStackProps.RecipeProps);
 
             app.Synth();
         }

@@ -20,26 +20,31 @@ namespace AWS.Deploy.Orchestration.DisplayedResources
 
         public async Task<Dictionary<string, string>> Execute(string resourceId)
         {
-            string region = await _awsResourceQueryer.GetS3BucketLocation(resourceId);
-            string regionSeparator = ".";
-            if (string.Equals("us-east-1", region) ||
-                string.Equals("us-west-1", region) ||
-                string.Equals("us-west-2", region) ||
-                string.Equals("ap-southeast-1", region) ||
-                string.Equals("ap-southeast-2", region) ||
-                string.Equals("ap-northeast-1", region) ||
-                string.Equals("eu-west-1", region) ||
-                string.Equals("sa-east-1", region))
+            var metadata = new Dictionary<string, string> { { "Bucket Name", resourceId } };
+
+            var webSiteConfiguration = await _awsResourceQueryer.GetS3BucketWebSiteConfiguration(resourceId);
+            // Only add an endpoint if the S3 bucket has been configured to have a website configuration.
+            if(webSiteConfiguration != null && !string.IsNullOrEmpty(webSiteConfiguration.IndexDocumentSuffix))
             {
-                regionSeparator = "-";
+                string region = await _awsResourceQueryer.GetS3BucketLocation(resourceId);
+                string regionSeparator = ".";
+                if (string.Equals("us-east-1", region) ||
+                    string.Equals("us-west-1", region) ||
+                    string.Equals("us-west-2", region) ||
+                    string.Equals("ap-southeast-1", region) ||
+                    string.Equals("ap-southeast-2", region) ||
+                    string.Equals("ap-northeast-1", region) ||
+                    string.Equals("eu-west-1", region) ||
+                    string.Equals("sa-east-1", region))
+                {
+                    regionSeparator = "-";
+                }
+
+                var endpoint = $"http://{resourceId}.s3-website{regionSeparator}{region}.amazonaws.com/";
+                metadata["Endpoint"] = endpoint;
             }
 
-            var endpoint = $"http://{resourceId}.s3-website{regionSeparator}{region}.amazonaws.com/";
-
-            return new Dictionary<string, string>() {
-                { "Endpoint", endpoint },
-                { "Bucket Name", resourceId }
-            };
+            return metadata;
         }
     }
 }
