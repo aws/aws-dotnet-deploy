@@ -19,7 +19,7 @@ namespace AspNetAppEcsFargate.Configurations
 
         public enum ScalingTypeEnum { Cpu, Memory, Request }
 
-        public ScalingTypeEnum ScalingType { get; set; } = ScalingTypeEnum.Cpu;
+        public ScalingTypeEnum? ScalingType { get; set; }
 
 
 

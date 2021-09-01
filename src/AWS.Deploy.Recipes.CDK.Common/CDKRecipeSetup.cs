@@ -5,6 +5,7 @@ using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 
 using Amazon.CDK;
+using System.Text.Json.Serialization;
 
 namespace AWS.Deploy.Recipes.CDK.Common
 {
@@ -27,7 +28,13 @@ namespace AWS.Deploy.Recipes.CDK.Common
             stack.Tags.SetTag(Constants.CloudFormationIdentifier.STACK_TAG, $"{recipeConfiguration.RecipeId}");
 
             // Serializes all AWS .NET deployment tool settings.
-            var json = JsonSerializer.Serialize(recipeConfiguration.Settings, new JsonSerializerOptions { WriteIndented = false });
+            var json = JsonSerializer.Serialize(
+                recipeConfiguration.Settings,
+                new JsonSerializerOptions
+                {
+                    WriteIndented = false,
+                    Converters = { new JsonStringEnumConverter() }
+                });
 
             Dictionary<string, object> metadata;
             if(stack.TemplateOptions.Metadata?.Count > 0)
