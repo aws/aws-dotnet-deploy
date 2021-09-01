@@ -28,8 +28,8 @@ namespace AWS.Deploy.Common.IO
     {
         private readonly HashSet<string> _projFileExtensions = new()
         {
-            "csproj",
-            "fsproj"
+            ".csproj",
+            ".fsproj"
         };
 
         public DirectoryInfo CreateDirectory(string path) => Directory.CreateDirectory(path);

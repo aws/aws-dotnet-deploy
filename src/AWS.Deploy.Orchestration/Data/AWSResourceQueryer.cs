@@ -8,6 +8,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Amazon.CloudFormation;
 using Amazon.CloudFormation.Model;
+using Amazon.CloudFront;
+using Amazon.CloudFront.Model;
 using Amazon.CloudWatchEvents;
 using Amazon.CloudWatchEvents.Model;
 using Amazon.EC2;
@@ -38,6 +40,7 @@ namespace AWS.Deploy.Orchestration.Data
         Task<List<Amazon.ElasticLoadBalancingV2.Model.Listener>> DescribeElasticLoadBalancerListeners(string loadBalancerArn);
         Task<DescribeRuleResponse> DescribeCloudWatchRule(string ruleName);
         Task<string> GetS3BucketLocation(string bucketName);
+        Task<Amazon.S3.Model.WebsiteConfiguration> GetS3BucketWebSiteConfiguration(string bucketName);
         Task<List<Cluster>> ListOfECSClusters();
         Task<List<ApplicationDescription>> ListOfElasticBeanstalkApplications();
         Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(string? applicationName);
@@ -53,6 +56,7 @@ namespace AWS.Deploy.Orchestration.Data
         Task<List<Stack>> GetCloudFormationStacks();
         Task<GetCallerIdentityResponse> GetCallerIdentity();
         Task<List<Amazon.ElasticLoadBalancingV2.Model.LoadBalancer>> ListOfLoadBalancers(LoadBalancerTypeEnum loadBalancerType);
+        Task<Distribution> GetCloudFrontDistribution(string distributionId);
     }
 
     public class AWSResourceQueryer : IAWSResourceQueryer
@@ -176,6 +180,15 @@ namespace AWS.Deploy.Orchestration.Data
                 region = location.Location;
 
             return region;
+        }
+
+        public async Task<Amazon.S3.Model.WebsiteConfiguration> GetS3BucketWebSiteConfiguration(string bucketName)
+        {
+            var s3Client = _awsClientFactory.GetAWSClient<IAmazonS3>();
+
+            var response = await s3Client.GetBucketWebsiteAsync(bucketName);
+
+            return response.WebsiteConfiguration;
         }
 
         public async Task<List<Cluster>> ListOfECSClusters()
@@ -404,6 +417,18 @@ namespace AWS.Deploy.Orchestration.Data
             }
 
             return loadBalancers;
+        }
+
+        public async Task<Distribution> GetCloudFrontDistribution(string distributionId)
+        {
+            var client = _awsClientFactory.GetAWSClient<IAmazonCloudFront>();
+
+            var response = await client.GetDistributionAsync(new GetDistributionRequest
+            {
+                Id = distributionId
+            });
+
+            return response.Distribution;
         }
     }
 }

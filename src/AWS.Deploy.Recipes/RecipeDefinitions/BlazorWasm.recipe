@@ -1,7 +1,7 @@
 {
     "$schema": "./aws-deploy-recipe-schema.json",
     "Id": "BlazorWasm",
-    "Version": "0.1.0",
+    "Version": "0.2.0",
     "Name": "Blazor WebAssembly App",
     "DeploymentType": "CdkProject",
     "DeploymentBundle": "DotnetPublishZipFile",
@@ -13,14 +13,18 @@
 
     "DisplayedResources": [
         {
-            "LogicalId": "BlazorHostC7106839",
-            "Description": "Application Endpoint"
+            "LogicalId": "RecipeCloudFrontDistribution2BE25932",
+            "Description": "CloudFront Distribution"
+        },
+        {
+            "LogicalId": "RecipeContentS3BucketE74B8362",
+            "Description": "S3 Bucket for web application content"
+        },
+        {
+            "LogicalId": "RecipeAccessLoggingBucket3DC188EF",
+            "Description": "S3 Bucket for storing access logs"
         }
     ],
-
-    "DeploymentConfirmation": {
-        "DefaultMessage": "The Blazor WebAssembly application will be hosted in an Amazon S3 bucket with public read access. It is important that your application not contain any sensitive information like AWS credentials since the contents will be public. Do you wish to continue?"
-    },
 
     "RecipePriority": -1,
     "RecommendationRules": [
@@ -109,11 +113,141 @@
         },
         {
             "Id": "Redirect404ToRoot",
-            "Name": "Redirect 404 Errors",
-            "Description": "Redirect any 404 requests to the index document. This is useful in Blazor applications that modify the resource path. If the modified resource path is reused in a new browser it will result in a 404 from Amazon S3 since no S3 object exists at that resource path.",
+            "Name": "Redirect 404 and 403 Errors",
+            "Description": "Redirect any 404 and 403 requests to the index document. This is useful in Blazor applications that modify the resource path in the browser. If the modified resource path is reused in a new browser it will result in a 403 from Amazon CloudFront since no S3 object exists at that resource path.",
             "Type": "Bool",
             "DefaultValue": true,
             "AdvancedSetting": false,
+            "Updatable": true
+        },
+        {
+            "Id": "AccessLogging",
+            "Name": "CloudFront Access Logging",
+            "Description": "Configure if and how access logs are written for the CloudFront distribution",
+            "Type": "Object",
+            "AdvancedSetting": false,
+            "Updatable": true,
+            "ChildOptionSettings": [
+                {
+                    "Id": "EnableAccessLogging",
+                    "Name": "Enable",
+                    "Description": "Enable CloudFront Access Logging",
+                    "Type": "Bool",
+                    "DefaultValue": false,
+                    "AdvancedSetting": false,
+                    "Updatable": true
+                },
+                {
+                    "Id": "LogIncludesCookies",
+                    "Name": "Log Cookies",
+                    "Description": "Include cookies in access logs",
+                    "Type": "Bool",
+                    "DefaultValue": false,
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "AccessLogging.EnableAccessLogging",
+                            "Value": true
+                        }
+                    ]
+                },
+                {
+                    "Id": "CreateLoggingS3Bucket",
+                    "Name": "Create Logging Bucket",
+                    "Description": "Create new S3 bucket for access logs to be stored. Bucket and logs will be retained after deployment is deleted.",
+                    "Type": "Bool",
+                    "DefaultValue": true,
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "AccessLogging.EnableAccessLogging",
+                            "Value": true
+                        }
+                    ]
+                },
+                {
+                    "Id": "ExistingS3LoggingBucket",
+                    "Name": "Logging Bucket",
+                    "Description": "S3 bucket to use for storing access logs",
+                    "Type": "String",
+                    "DefaultValue": true,
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "AccessLogging.EnableAccessLogging",
+                            "Value": true
+                        },
+                        {
+                            "Id": "AccessLogging.CreateLoggingS3Bucket",
+                            "Value": false
+                        }
+                    ]
+                },
+                {
+                    "Id": "LoggingS3KeyPrefix",
+                    "Name": "Logging S3 Key Prefix",
+                    "Description": "Optional S3 key prefix to store access logs (e.g. app-name/)",
+                    "Type": "String",
+                    "DefaultValue": null,
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "AccessLogging.EnableAccessLogging",
+                            "Value": true
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Id": "PriceClass",
+            "Name": "CloudFront Price Class",
+            "Description": "Configure the edge locations that will respond to request for the CloudFront distribution",
+            "Type": "String",
+            "DefaultValue": "PRICE_CLASS_ALL",
+            "AllowedValues": [ "PRICE_CLASS_100", "PRICE_CLASS_200", "PRICE_CLASS_ALL" ],
+            "ValueMapping": {
+                "PRICE_CLASS_100": "North America and Europe edge locations",
+                "PRICE_CLASS_200": "North America, Europe, Asia, Middle East, and Africa edge locations",
+                "PRICE_CLASS_ALL": "All edge locations (best performance)"
+            },
+            "AdvancedSetting": true,
+            "Updatable": true
+        },
+        {
+            "Id": "EnableIpv6",
+            "Name": "Enable IPv6",
+            "Description": "Control if IPv6 should be enabled for the CloudFront distribution",
+            "Type": "Bool",
+            "DefaultValue": true,
+            "AdvancedSetting": true,
+            "Updatable": true
+        },
+        {
+            "Id": "MaxHttpVersion",
+            "Name": "Maximum HTTP Version",
+            "Description": "The maximum http version that users can use to communicate with the CloudFront distribution",
+            "Type": "String",
+            "DefaultValue": "HTTP2",
+            "AllowedValues": [ "HTTP2", "HTTP1_1" ],
+            "ValueMapping": {
+                "HTTP2": "HTTP 2",
+                "HTTP1_1": "HTTP 1.1"
+            },
+            "AdvancedSetting": true,
+            "Updatable": true
+        },
+        {
+            "Id": "WebAclId",
+            "Name": "Web ACL Arn",
+            "Description": "The AWS WAF (web application firewall) ACL arn",
+            "Type": "String",
+            "DefaultValue": null,
+            "AdvancedSetting": true,
             "Updatable": true
         }
     ]

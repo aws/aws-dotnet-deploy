@@ -30,8 +30,6 @@ namespace AspNetAppEcsFargate
             // the generatedRecipe variable.
         }
 
-        public const string FakeConstant = "FakeConstant";
-
         /// <summary>
         /// This method can be used to customize the properties for CDK constructs before creating the constructs.
         ///

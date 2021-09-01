@@ -48,6 +48,19 @@ namespace AWS.Deploy.CLI.IntegrationTests.Helpers
             await _cloudFormationClient.DeleteStackAsync(request);
         }
 
+        public async Task<string> GetResourceId(string stackName, string logicalId)
+        {
+            var request = new DescribeStackResourceRequest
+            {
+                StackName = stackName,
+                LogicalResourceId = logicalId
+            };
+
+            var response = await _cloudFormationClient.DescribeStackResourceAsync(request);
+            return response.StackResourceDetail.PhysicalResourceId;
+        }
+
+
         private async Task<Stack> GetStackAsync(string stackName)
         {
             var response = await _cloudFormationClient.DescribeStacksAsync(new DescribeStacksRequest
@@ -57,7 +70,5 @@ namespace AWS.Deploy.CLI.IntegrationTests.Helpers
 
             return response.Stacks.Count == 0 ? null : response.Stacks[0];
         }
-
-
     }
 }
