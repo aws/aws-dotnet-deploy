@@ -73,6 +73,7 @@ namespace AWS.Deploy.ServerMode.Client
             string base64;
             if(aes != null)
             {
+                aes.GenerateIV();
                 var encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
 
                 using var inputStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
@@ -82,7 +83,7 @@ namespace AWS.Deploy.ServerMode.Client
                     inputStream.CopyTo(encryptStream);
                 }
 
-                base64 = Convert.ToBase64String(outputStream.ToArray());
+                base64 = $"{Convert.ToBase64String(aes.IV)} {Convert.ToBase64String(outputStream.ToArray())}";
             }
             else
             {

@@ -102,6 +102,17 @@ namespace AWS.Deploy.CLI.IntegrationTests
             var listDeployStdOut = _interactiveService.StdOutReader.ReadAllLines();
             Assert.Contains(listDeployStdOut, (deployment) => _stackName.Equals(deployment));
 
+            // Arrange input for re-deployment
+            await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Select default option settings
+            await _interactiveService.StdInWriter.FlushAsync();
+
+            // Perform re-deployment
+            deployArgs = new[] { "deploy", "--project-path", projectPath, "--stack-name", _stackName, "--diagnostics" };
+            var returnCode  = await _app.Run(deployArgs);
+            Assert.Equal(CommandReturnCodes.SUCCESS, returnCode);
+            Assert.Equal(StackStatus.UPDATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
+            Assert.Equal("ACTIVE", cluster.Status);
+
             // Arrange input for delete
             await _interactiveService.StdInWriter.WriteAsync("y"); // Confirm delete
             await _interactiveService.StdInWriter.FlushAsync();

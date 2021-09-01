@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Amazon.Runtime;
+using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.CLI.TypeHintResponses;
 using AWS.Deploy.CLI.UnitTests.Utilities;
 using AWS.Deploy.Common;
@@ -22,6 +23,13 @@ namespace AWS.Deploy.CLI.UnitTests
     public class RecommendationTests
     {
         private OrchestratorSession _session;
+        private readonly IDirectoryManager _directoryManager;
+
+        public RecommendationTests()
+        {
+            _directoryManager = new TestDirectoryManager();
+        }
+
         private async Task<RecommendationEngine> BuildRecommendationEngine(string testProjectName)
         {
             var fullPath = SystemIOUtilities.ResolvePath(testProjectName);
@@ -128,7 +136,7 @@ namespace AWS.Deploy.CLI.UnitTests
                 "<reset>"
             });
 
-            var consoleUtilities = new ConsoleUtilities(interactiveServices);
+            var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager);
 
             var engine = await BuildRecommendationEngine("WebAppNoDockerFile");
 
@@ -155,7 +163,7 @@ namespace AWS.Deploy.CLI.UnitTests
             {
                 "<reset>"
             });
-            var consoleUtilities = new ConsoleUtilities(interactiveServices);
+            var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager);
 
             var engine = await BuildRecommendationEngine("WebAppNoDockerFile");
 

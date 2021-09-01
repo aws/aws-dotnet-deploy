@@ -43,7 +43,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly ISystemCapabilityEvaluator _systemCapabilityEvaluator;
         private readonly OrchestratorSession _session;
         private readonly IDirectoryManager _directoryManager;
-        private ICDKVersionDetector _cdkVersionDetector;
+        private readonly ICDKVersionDetector _cdkVersionDetector;
 
         public DeployCommand(
             IToolInteractiveService toolInteractiveService,
@@ -390,7 +390,7 @@ namespace AWS.Deploy.CLI.Commands
             switch (optionSettingId)
             {
                 case "DockerExecutionDirectory":
-                    new DockerExecutionDirectoryCommand(_consoleUtilities).OverrideValue(recommendation, settingValue.ToString() ?? "");
+                    new DockerExecutionDirectoryCommand(_consoleUtilities, _directoryManager).OverrideValue(recommendation, settingValue.ToString() ?? "");
                     break;
                 case "DockerBuildArgs":
                     new DockerBuildArgsCommand(_consoleUtilities).OverrideValue(recommendation, settingValue.ToString() ?? "");
@@ -571,7 +571,7 @@ namespace AWS.Deploy.CLI.Commands
                             selectedRecommendation.DeploymentBundle.DockerExecutionDirectory,
                             allowEmpty: true);
 
-                        if (!Directory.Exists(dockerExecutionDirectory))
+                        if (!_directoryManager.Exists(dockerExecutionDirectory))
                             continue;
 
                         selectedRecommendation.DeploymentBundle.DockerExecutionDirectory = dockerExecutionDirectory;
