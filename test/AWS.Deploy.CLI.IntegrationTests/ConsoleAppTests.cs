@@ -79,9 +79,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             Assert.Equal("ACTIVE", cluster.Status);
 
             // Verify CloudWatch logs
-            var logGroup = await _ecsHelper.GetLogGroup(_stackName);
-            var logMessages = await _cloudWatchLogsHelper.GetLogMessages(logGroup);
-            Assert.Contains("Hello World!", logMessages);
+            await WaitUntilLogMessageFound("Hello World!", TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(30));
 
             var deployStdDebug = _interactiveService.StdDebugReader.ReadAllLines();
 
@@ -110,6 +108,23 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
             // Verify application is deleted
             Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName), $"{_stackName} still exists.");
+        }
+
+        private async Task WaitUntilLogMessageFound(string logMessage, TimeSpan frequency, TimeSpan timeout)
+        {
+            try
+            {
+                await WaitUntilHelper.WaitUntil(async () =>
+                {
+                    var logGroup = await _ecsHelper.GetLogGroup(_stackName);
+                    var logMessages = await _cloudWatchLogsHelper.GetLogMessages(logGroup);
+                    return logMessages.Contains(logMessage);
+                }, frequency, timeout);
+            }
+            catch (TimeoutException)
+            {
+                Assert.True(false, "Log message was not found.");
+            }
         }
 
         public void Dispose()

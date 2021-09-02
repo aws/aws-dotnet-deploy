@@ -100,7 +100,14 @@ namespace AWS.Deploy.Orchestration.Utilities
             foreach (var app in allDeployedApplications)
             {
                 if (recommendations.Any(rec => string.Equals(rec.Recipe.Id, app.RecipeId, StringComparison.Ordinal)))
+                {
                     compatibleApplications.Add(app);
+                }
+                // check for persisted custom deployment recommendations
+                else if (recommendations.Any(rec => string.Equals(rec.Recipe.BaseRecipeId, app.RecipeId, StringComparison.Ordinal)))
+                {
+                    compatibleApplications.Add(app);
+                }
             }
 
             if (session != null)
