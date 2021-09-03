@@ -83,14 +83,27 @@ namespace AWS.Deploy.CLI.Utilities
             if (null == process)
                 throw new Exception("Process.Start failed to return a non-null process");
 
-            if (redirectIO && streamOutputToInteractiveService)
+            if (redirectIO)
             {
-                process.OutputDataReceived += (sender, e) => {
-                    _interactiveService.LogMessageLine(e.Data);
-                    strOutput.Append(e.Data); };
-                process.ErrorDataReceived += (sender, e) => {
-                    _interactiveService.LogMessageLine(e.Data);
-                    strError.Append(e.Data); };
+                process.OutputDataReceived += (sender, e) =>
+                {
+                    if(streamOutputToInteractiveService)
+                    {
+                        _interactiveService.LogMessageLine(e.Data);
+                    }
+
+                    strOutput.Append(e.Data);
+                };
+
+                process.ErrorDataReceived += (sender, e) =>
+                {
+                    if(streamOutputToInteractiveService)
+                    {
+                        _interactiveService.LogMessageLine(e.Data);
+                    }
+
+                    strError.Append(e.Data);
+                };
                 process.BeginOutputReadLine();
                 process.BeginErrorReadLine();
             }
@@ -115,8 +128,8 @@ namespace AWS.Deploy.CLI.Utilities
 
                 if (redirectIO)
                 {
-                    result.StandardError = streamOutputToInteractiveService ? strError.ToString() : await process.StandardError.ReadToEndAsync();
-                    result.StandardOut = streamOutputToInteractiveService ? strOutput.ToString() : await process.StandardOutput.ReadToEndAsync();
+                    result.StandardError = strError.ToString();
+                    result.StandardOut = strOutput.ToString();
                 }
 
                 onComplete(result);
