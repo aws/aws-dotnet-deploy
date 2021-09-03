@@ -23,7 +23,7 @@ namespace AWS.Deploy.Orchestration
     /// </summary>
     public class CustomRecipeLocator : ICustomRecipeLocator
     {
-        private const string GIT_STATUS_COMMAND = "git status";
+        private const string GIT_STATUS_COMMAND = "git worktree list";
         private const string SVN_STATUS_COMMAND = "svn status";
 
         private readonly string _ignorePathSubstring = Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar;
