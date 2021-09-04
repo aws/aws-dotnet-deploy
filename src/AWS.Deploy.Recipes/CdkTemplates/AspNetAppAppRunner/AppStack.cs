@@ -1,6 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using System.Collections.Generic;
 using Amazon.CDK;
 using Amazon.CDK.AWS.AppRunner;
@@ -18,113 +19,41 @@ namespace AspNetAppAppRunner
 {
     public class AppStack : Stack
     {
-        internal AppStack(Construct scope, RecipeConfiguration<Configuration> recipeConfiguration, IStackProps? props = null)
-            : base(scope, recipeConfiguration.StackName, props)
+        internal AppStack(Construct scope, IDeployToolStackProps<Configuration> props)
+            : base(scope, props.StackName, props)
         {
-            var settings = recipeConfiguration.Settings;
+            // Setup callback for generated construct to provide access to customize CDK properties before creating constructs.
+            CDKRecipeCustomizer<Recipe>.CustomizeCDKProps += CustomizeCDKProps;
 
-            if (string.IsNullOrEmpty(recipeConfiguration.ECRRepositoryName))
-                throw new InvalidOrMissingConfigurationException("The provided ECR Repository Name is null or empty.");
+            // Create custom CDK constructs here that might need to be referenced in the CustomizeCDKProps. For example if
+            // creating a DynamoDB table construct and then later using the CDK construct reference in CustomizeCDKProps to
+            // pass the table name as an environment variable to the container image.
 
-            var ecrRepository = Repository.FromRepositoryName(this, "ECRRepository", recipeConfiguration.ECRRepositoryName);
+            // Create the recipe defined CDK construct with all of its sub constructs.
+            var generatedRecipe = new Recipe(this, props.RecipeProps);
 
-            IRole serviceAccessRole;
-            if (settings.ServiceAccessIAMRole.CreateNew)
-            {
-                serviceAccessRole = new Role(this, "ServiceAccessRole", new RoleProps
-                {
-                    AssumedBy = new ServicePrincipal("build.apprunner.amazonaws.com")
-                });
+            // Create additional CDK constructs here. The recipe's constructs can be accessed as properties on
+            // the generatedRecipe variable.
+        }
 
-                serviceAccessRole.AddManagedPolicy(ManagedPolicy.FromManagedPolicyArn(this, "ServiceAccessRoleManagedPolicy", "arn:aws:iam::aws:policy/service-role/AWSAppRunnerServicePolicyForECRAccess"));
-            }
-            else
-            {
-                if (string.IsNullOrEmpty(settings.ServiceAccessIAMRole.RoleArn))
-                    throw new InvalidOrMissingConfigurationException("The provided Application IAM Role ARN is null or empty.");
-
-                serviceAccessRole = Role.FromRoleArn(this, "ServiceAccessRole", settings.ServiceAccessIAMRole.RoleArn, new FromRoleArnOptions
-                {
-                    Mutable = false
-                });
-            }
-
-            var appRunnerServiceProp = new CfnServiceProps
-            {
-                ServiceName = settings.ServiceName,
-                SourceConfiguration = new CfnService.SourceConfigurationProperty
-                {
-                    AuthenticationConfiguration = new CfnService.AuthenticationConfigurationProperty
-                    {
-                        AccessRoleArn = serviceAccessRole.RoleArn
-                    },
-                    ImageRepository = new CfnService.ImageRepositoryProperty
-                    {
-                        ImageRepositoryType = "ECR",
-                        ImageIdentifier = ContainerImage.FromEcrRepository(ecrRepository, recipeConfiguration.ECRImageTag).ImageName,
-                        ImageConfiguration = new CfnService.ImageConfigurationProperty
-                        {
-                            Port = settings.Port.ToString(),
-                            StartCommand = !string.IsNullOrWhiteSpace(settings.StartCommand) ? settings.StartCommand : null
-                        }
-                    }
-                }
-            };
-
-            if(!string.IsNullOrEmpty(settings.EncryptionKmsKey))
-            {
-                var encryptionConfig = new CfnService.EncryptionConfigurationProperty();
-                appRunnerServiceProp.EncryptionConfiguration = encryptionConfig;
-
-                encryptionConfig.KmsKey = settings.EncryptionKmsKey;
-            }
-
-            var healthCheckConfig = new CfnService.HealthCheckConfigurationProperty();
-            appRunnerServiceProp.HealthCheckConfiguration = healthCheckConfig;
-
-            healthCheckConfig.HealthyThreshold = settings.HealthCheckHealthyThreshold;
-            healthCheckConfig.Interval = settings.HealthCheckInterval;
-            healthCheckConfig.Protocol = settings.HealthCheckProtocol;
-            healthCheckConfig.Timeout = settings.HealthCheckTimeout;
-            healthCheckConfig.UnhealthyThreshold = settings.HealthCheckUnhealthyThreshold;
-
-            if(string.Equals(healthCheckConfig.Protocol, "HTTP"))
-            {
-                healthCheckConfig.Path = string.IsNullOrEmpty(settings.HealthCheckPath) ? "/" : settings.HealthCheckPath;
-            }
-
-            var instanceConfig = new CfnService.InstanceConfigurationProperty();
-            appRunnerServiceProp.InstanceConfiguration = instanceConfig;
-
-            IRole role;
-            if (settings.ApplicationIAMRole.CreateNew)
-            {
-                role = new Role(this, "TaskRole", new RoleProps
-                {
-                    AssumedBy = new ServicePrincipal("tasks.apprunner.amazonaws.com")
-                });
-            }
-            else
-            {
-                if (string.IsNullOrEmpty(settings.ApplicationIAMRole.RoleArn))
-                    throw new InvalidOrMissingConfigurationException("The provided Application IAM Role ARN is null or empty.");
-
-                role = Role.FromRoleArn(this, "TaskRole", settings.ApplicationIAMRole.RoleArn, new FromRoleArnOptions
-                {
-                    Mutable = false
-                });
-            }
-            instanceConfig.InstanceRoleArn = role.RoleArn;
-
-            instanceConfig.Cpu = settings.Cpu;
-            instanceConfig.Memory = settings.Memory;
-
-            var service = new CfnService(this, "AppRunnerService", appRunnerServiceProp);
-
-            var output = new CfnOutput(this, "EndpointURL", new CfnOutputProps
-            {
-                Value = $"https://{service.AttrServiceUrl}/"
-            });            
+        /// <summary>
+        /// This method can be used to customize the properties for CDK constructs before creating the constructs.
+        ///
+        /// The pattern used in this method is to check to evnt.ResourceLogicalName to see if the CDK construct about to be created is one
+        /// you want to customize. If so cast the evnt.Props object to the CDK properties object and make the appropriate settings.
+        /// </summary>
+        /// <param name="evnt"></param>
+        private void CustomizeCDKProps(CustomizePropsEventArgs<Recipe> evnt)
+        {
+            // Example of how to customize the container image definition to include environment variables to the running applications.
+            // 
+            //if (string.Equals(evnt.ResourceLogicalName, nameof(evnt.Construct.AppRunnerService)))
+            //{
+            //    if (evnt.Props is CfnServiceProps props)
+            //    {
+            //        Console.WriteLine("Customizing AppRunner Service");
+            //    }
+            //}
         }
     }
 }

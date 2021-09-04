@@ -13,7 +13,7 @@
 
     "DisplayedResources": [
         {
-            "LogicalId": "AppRunnerService",
+            "LogicalId": "RecipeAppRunnerServiceDA9A12DF",
             "Description": "Application Endpoint"
         }
     ],
