@@ -1,7 +1,7 @@
 {
     "$schema": "./aws-deploy-recipe-schema.json",
     "Id": "ConsoleAppEcsFargateService",
-    "Version": "0.1.0",
+    "Version": "0.2.0",
     "Name": "Service on Amazon ECS using Fargate",
     "DeploymentType": "CdkProject",
     "DeploymentBundle": "Container",
@@ -13,15 +13,15 @@
 
     "DisplayedResources": [
         {
-            "LogicalId": "ClusterEB0386A7",
+            "LogicalId": "RecipeEcsClusterB4EDBB7E",
             "Description": "ECS Cluster"
         },
         {
-            "LogicalId": "FargateServiceAC2B3B85",
+            "LogicalId": "RecipeAppFargateService71FD6243",
             "Description": "ECS Service"
         },
         {
-            "LogicalId": "TaskDefinitionB36D86D9",
+            "LogicalId": "RecipeAppTaskDefinitionAC7F53DB",
             "Description": "ECS Task Definition"
         }
     ],
@@ -124,7 +124,7 @@
                     "Validators": [
                         {
                             "ValidatorType": "Regex",
-                            "Configuration" : {
+                            "Configuration": {
                                 "Regex": "arn:[^:]+:ecs:[^:]*:[0-9]{12}:cluster/.+",
                                 "AllowEmptyString": true,
                                 "ValidationFailedMessage": "Invalid cluster Arn. The ARN should contain the arn:[PARTITION]:ecs namespace, followed by the Region of the cluster, the AWS account ID of the cluster owner, the cluster namespace, and then the cluster name. For example, arn:aws:ecs:region:012345678910:cluster/test. For more information visit https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_Cluster.html"
@@ -149,7 +149,7 @@
                     "Validators": [
                         {
                             "ValidatorType": "Regex",
-                            "Configuration" : {
+                            "Configuration": {
                                 "Regex": "^([A-Za-z0-9_-]{1,255})$",
                                 "AllowEmptyString": true,
                                 "ValidationFailedMessage": "Invalid cluster name. The cluster name can only contain letters (case-sensitive), numbers, hyphens, underscores and can't be longer than 255 character in length."
@@ -178,7 +178,7 @@
             "Validators": [
                 {
                     "ValidatorType": "Regex",
-                    "Configuration" : {
+                    "Configuration": {
                         "Regex": "^([A-Za-z0-9_-]{1,255})$",
                         "ValidationFailedMessage": "Invalid service name. The service name can only contain letters (case-sensitive), numbers, hyphens, underscores and can't be longer than 255 character in length."
                     }
@@ -196,7 +196,7 @@
             "Validators": [
                 {
                     "ValidatorType": "Range",
-                    "Configuration" : {
+                    "Configuration": {
                         "Min": 1,
                         "Max": 5000
                     }
@@ -234,7 +234,7 @@
                     "Validators": [
                         {
                             "ValidatorType": "Regex",
-                            "Configuration" : {
+                            "Configuration": {
                                 "Regex": "arn:.+:iam::[0-9]{12}:.+",
                                 "AllowEmptyString": true,
                                 "ValidationFailedMessage": "Invalid IAM Role ARN. The ARN should contain the arn:[PARTITION]:iam namespace, followed by the account ID, and then the resource path. For example - arn:aws:iam::123456789012:role/S3Access is a valid IAM Role ARN. For more information visit https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-arns"
@@ -294,7 +294,7 @@
                     "Validators": [
                         {
                             "ValidatorType": "Regex",
-                            "Configuration" : {
+                            "Configuration": {
                                 "Regex": "^vpc-([0-9a-f]{8}|[0-9a-f]{17})$",
                                 "AllowEmptyString": true,
                                 "ValidationFailedMessage": "Invalid VPC ID. The VPC ID must start with the \"vpc-\" prefix, followed by either 8 or 17 characters consisting of digits and letters(lower-case) from a to f. For example vpc-abc88de9 is a valid VPC ID."
@@ -414,6 +414,188 @@
                 "29696": "29 GB",
                 "30720": "30 GB"
             }
+        },
+        {
+            "Id": "AutoScaling",
+            "Name": "AutoScaling",
+            "Description": "The AutoScaling configuration for the ECS service.",
+            "Type": "Object",
+            "AdvancedSetting": true,
+            "Updatable": true,
+            "ChildOptionSettings": [
+                {
+                    "Id": "Enabled",
+                    "Name": "Enable",
+                    "Description": "Do you want to enable AutoScaling?",
+                    "Type": "Bool",
+                    "DefaultValue": false,
+                    "AdvancedSetting": false,
+                    "Updatable": true
+                },
+                {
+                    "Id": "MinCapacity",
+                    "Name": "Minimum Capacity",
+                    "Description": "The minimum number of ECS tasks handling the demand for the ECS service.",
+                    "Type": "Int",
+                    "DefaultValue": 1,
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "AutoScaling.Enabled",
+                            "Value": true
+                        }
+                    ]
+                },
+                {
+                    "Id": "MaxCapacity",
+                    "Name": "Maximum Capacity",
+                    "Description": "The maximum number of ECS tasks handling the demand for the ECS service.",
+                    "Type": "Int",
+                    "DefaultValue": 3,
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "AutoScaling.Enabled",
+                            "Value": true
+                        }
+                    ]
+                },
+                {
+                    "Id": "ScalingType",
+                    "Name": "AutoScaling Metric",
+                    "Description": "The metric to monitor for scaling changes.",
+                    "Type": "String",
+                    "DefaultValue": "Cpu",
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "AllowedValues": [
+                        "Cpu",
+                        "Memory"
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "AutoScaling.Enabled",
+                            "Value": true
+                        }
+                    ]
+                },
+                {
+                    "Id": "CpuTypeTargetUtilizationPercent",
+                    "Name": "CPU Target Utilization",
+                    "Description": "The target cpu utilization that triggers a scaling change.",
+                    "Type": "Double",
+                    "DefaultValue": 70,
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "AutoScaling.Enabled",
+                            "Value": true
+                        },
+                        {
+                            "Id": "AutoScaling.ScalingType",
+                            "Value": "Cpu"
+                        }
+                    ]
+                },
+                {
+                    "Id": "CpuTypeScaleInCooldownSeconds",
+                    "Name": "Scale in cooldown (seconds)",
+                    "Description": "The amount of time, in seconds, after a scale in activity completes before another scale in activity can start.",
+                    "Type": "Int",
+                    "DefaultValue": 300,
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "AutoScaling.Enabled",
+                            "Value": true
+                        },
+                        {
+                            "Id": "AutoScaling.ScalingType",
+                            "Value": "Cpu"
+                        }
+                    ]
+                },
+                {
+                    "Id": "CpuTypeScaleOutCooldownSeconds",
+                    "Name": "Scale out cooldown (seconds)",
+                    "Description": "The amount of time, in seconds, after a scale out activity completes before another scale out activity can start.",
+                    "Type": "Int",
+                    "DefaultValue": 300,
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "AutoScaling.Enabled",
+                            "Value": true
+                        },
+                        {
+                            "Id": "AutoScaling.ScalingType",
+                            "Value": "Cpu"
+                        }
+                    ]
+                },
+                {
+                    "Id": "MemoryTypeTargetUtilizationPercent",
+                    "Name": "Memory Target Utilization",
+                    "Description": "The target memory utilization that triggers a scaling change.",
+                    "Type": "Double",
+                    "DefaultValue": 70,
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "AutoScaling.Enabled",
+                            "Value": true
+                        },
+                        {
+                            "Id": "AutoScaling.ScalingType",
+                            "Value": "Memory"
+                        }
+                    ]
+                },
+                {
+                    "Id": "MemoryTypeScaleInCooldownSeconds",
+                    "Name": "Scale in cooldown (seconds)",
+                    "Description": "The amount of time, in seconds, after a scale in activity completes before another scale in activity can start.",
+                    "Type": "Int",
+                    "DefaultValue": 300,
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "AutoScaling.Enabled",
+                            "Value": true
+                        },
+                        {
+                            "Id": "AutoScaling.ScalingType",
+                            "Value": "Memory"
+                        }
+                    ]
+                },
+                {
+                    "Id": "MemoryTypeScaleOutCooldownSeconds",
+                    "Name": "Scale out cooldown (seconds)",
+                    "Description": "The amount of time, in seconds, after a scale out activity completes before another scale out activity can start.",
+                    "Type": "Int",
+                    "DefaultValue": 300,
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "AutoScaling.Enabled",
+                            "Value": true
+                        },
+                        {
+                            "Id": "AutoScaling.ScalingType",
+                            "Value": "Memory"
+                        }
+                    ]
+                }
+            ]
         }
     ]
 }

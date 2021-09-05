@@ -149,7 +149,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
             var recommendations = await engine.ComputeRecommendations();
             var recommendation = recommendations.First(r => r.Recipe.Id.Equals("ConsoleAppEcsFargateService"));
 
-            _stackResource.LogicalResourceId = "ClusterEB0386A7";
+            _stackResource.LogicalResourceId = "RecipeEcsClusterB4EDBB7E";
             _stackResource.PhysicalResourceId = "PhysicalResourceId";
             _stackResource.ResourceType = "UnknownType";
             _mockAWSResourceQueryer.Setup(x => x.DescribeCloudFormationResources(It.IsAny<string>())).Returns(Task.FromResult(_stackResources));
