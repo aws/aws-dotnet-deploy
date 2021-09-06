@@ -3,55 +3,15 @@
 
 namespace ConsoleAppECSFargateScheduleTask.Configurations
 {
-    public class Configuration
+    /// <summary>
+    /// The configuration settings that are passed in from the deploy tool to the CDK project. If
+    /// custom settings are defined in the recipe definition then corresponding properties should be added here.
+    ///
+    /// This is a partial class with all of the settings defined by default in the recipe declared in the
+    /// Generated directory's version of this file.
+    /// </summary>
+    public partial class Configuration
     {
-        /// <summary>
-        /// The Identity and Access Management Role that provides AWS credentials to the application to access AWS services.
-        /// </summary>
-        public IAMRoleConfiguration ApplicationIAMRole { get; set; }
 
-        /// <summary>
-        /// The schedule or rate (frequency) that determines when CloudWatch Events runs the rule.
-        /// </summary>
-        public string Schedule { get; set; }
-
-        /// <summary>
-        /// The ECS cluster that will host the deployed application.
-        /// </summary>
-        public ECSClusterConfiguration ECSCluster { get; set; }
-
-        /// <summary>
-        /// Virtual Private Cloud to launch container instance into a virtual network.
-        /// </summary>
-        public VpcConfiguration Vpc { get; set; }
-
-        /// <inheritdoc cref="FargateTaskDefinitionProps.Cpu"/>
-        public double? TaskCpu { get; set; }
-
-        /// <inheritdoc cref="FargateTaskDefinitionProps.MemoryLimitMiB"/>
-        public double? TaskMemory { get; set; }
-
-        /// A parameterless constructor is needed for <see cref="Microsoft.Extensions.Configuration.ConfigurationBuilder"/>
-        /// or the classes will fail to initialize.
-        /// The warnings are disabled since a parameterless constructor will allow non-nullable properties to be initialized with null values.
-#nullable disable warnings
-        public Configuration()
-        {
-
-        }
-#nullable restore warnings
-
-        public Configuration(
-            IAMRoleConfiguration applicationIAMRole,
-            string schedule,
-            ECSClusterConfiguration ecsCluster,
-            VpcConfiguration vpc
-            )
-        {
-            ApplicationIAMRole = applicationIAMRole;
-            Schedule = schedule;
-            ECSCluster = ecsCluster;
-            Vpc = vpc;
-        }
     }
 }
