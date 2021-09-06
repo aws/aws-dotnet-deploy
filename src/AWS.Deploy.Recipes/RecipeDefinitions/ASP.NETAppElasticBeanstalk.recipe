@@ -13,7 +13,7 @@
 
     "DisplayedResources": [
         {
-            "LogicalId": "Environment",
+            "LogicalId": "RecipeEnvironment0DFE4D35",
             "Description": "Application Endpoint"
         }
     ],
@@ -38,6 +38,23 @@
             ],
             "Effect": {
                 "Pass": { "Include": true }
+            }
+        },
+
+        {
+            "Tests": [
+                {
+                    "Type": "FileExists",
+                    "Condition": {
+                        "FileName": "Dockerfile"
+                    }
+                }
+            ],
+            "Effect": {
+                "Fail": {
+                    "PriorityAdjustment": 100,
+                    "Include": true
+                }
             }
         },
 

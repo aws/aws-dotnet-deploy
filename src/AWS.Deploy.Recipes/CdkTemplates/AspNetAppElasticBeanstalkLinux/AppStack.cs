@@ -13,172 +13,45 @@ namespace AspNetAppElasticBeanstalkLinux
 {
     public class AppStack : Stack
     {
-        private const string ENVIRONMENTTYPE_SINGLEINSTANCE = "SingleInstance";
-        private const string ENVIRONMENTTYPE_LOADBALANCED = "LoadBalanced";
-
-        internal AppStack(Construct scope, RecipeConfiguration<Configuration> recipeConfiguration, IStackProps? props = null)
-            : base(scope, recipeConfiguration.StackName, props)
+        internal AppStack(Construct scope, IDeployToolStackProps<Configuration> props)
+            : base(scope, props.StackName, props)
         {
-            var settings = recipeConfiguration.Settings;
+            // Setup callback for generated construct to provide access to customize CDK properties before creating constructs.
+            CDKRecipeCustomizer<Recipe>.CustomizeCDKProps += CustomizeCDKProps;
 
-            if (string.IsNullOrEmpty(recipeConfiguration.DotnetPublishZipPath))
-                throw new InvalidOrMissingConfigurationException("The provided path containing the dotnet publish zip file is null or empty.");
+            // Create custom CDK constructs here that might need to be referenced in the CustomizeCDKProps. For example if
+            // creating a DynamoDB table construct and then later using the CDK construct reference in CustomizeCDKProps to
+            // pass the table name as an environment variable to the container image.
 
-            var asset = new Asset(this, "Asset", new AssetProps
-            {
-                Path = recipeConfiguration.DotnetPublishZipPath
-            });
+            // Create the recipe defined CDK construct with all of its sub constructs.
+            var generatedRecipe = new Recipe(this, props.RecipeProps);
 
-            CfnApplication? application = null;
+            // Create additional CDK constructs here. The recipe's constructs can be accessed as properties on
+            // the generatedRecipe variable.
+        }
 
-            // Create an app version from the S3 asset defined above
-            // The S3 "putObject" will occur first before CF generates the template
-            var applicationVersion = new CfnApplicationVersion(this, "ApplicationVersion", new CfnApplicationVersionProps
-            {
-                ApplicationName = settings.BeanstalkApplication.ApplicationName,
-                SourceBundle = new CfnApplicationVersion.SourceBundleProperty
-                {
-                    S3Bucket = asset.S3BucketName,
-                    S3Key = asset.S3ObjectKey
-                }
-            });
+        /// <summary>
+        /// This method can be used to customize the properties for CDK constructs before creating the constructs.
+        ///
+        /// The pattern used in this method is to check to evnt.ResourceLogicalName to see if the CDK construct about to be created is one
+        /// you want to customize. If so cast the evnt.Props object to the CDK properties object and make the appropriate settings.
+        /// </summary>
+        /// <param name="evnt"></param>
+        private void CustomizeCDKProps(CustomizePropsEventArgs<Recipe> evnt)
+        {
+            // Example of how to customize the container image definition to include environment variables to the running applications.
+            // 
+            //if (string.Equals(evnt.ResourceLogicalName, nameof(evnt.Construct.AppContainerDefinition)))
+            //{
+            //    if(evnt.Props is ContainerDefinitionOptions props)
+            //    {
+            //        Console.WriteLine("Customizing AppContainerDefinition");
+            //        if (props.Environment == null)
+            //            props.Environment = new Dictionary<string, string>();
 
-            if (settings.BeanstalkApplication.CreateNew)
-            {
-                application = new CfnApplication(this, "Application", new CfnApplicationProps
-                {
-                    ApplicationName = settings.BeanstalkApplication.ApplicationName
-                });
-
-                applicationVersion.AddDependsOn(application);
-            }
-
-            IRole role;
-            if (settings.ApplicationIAMRole.CreateNew)
-            {
-                role = new Role(this, "Role", new RoleProps
-                {
-                    AssumedBy = new ServicePrincipal("ec2.amazonaws.com"),
-
-                    // https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/iam-instanceprofile.html
-                    ManagedPolicies = new[]
-                    {
-                        ManagedPolicy.FromAwsManagedPolicyName("AWSElasticBeanstalkWebTier"),
-                        ManagedPolicy.FromAwsManagedPolicyName("AWSElasticBeanstalkWorkerTier")
-                    }
-                });
-            }
-            else
-            {
-                if (string.IsNullOrEmpty(settings.ApplicationIAMRole.RoleArn))
-                    throw new InvalidOrMissingConfigurationException("The provided Application IAM Role ARN is null or empty.");
-
-                role = Role.FromRoleArn(this, "Role", settings.ApplicationIAMRole.RoleArn);
-            }
-
-            var instanceProfile = new CfnInstanceProfile(this, "InstanceProfile", new CfnInstanceProfileProps
-            {
-                Roles = new[]
-                {
-                    role.RoleName
-                }
-            });
-
-            var optionSettingProperties = new List<CfnEnvironment.OptionSettingProperty> {
-                   new CfnEnvironment.OptionSettingProperty {
-                        Namespace = "aws:autoscaling:launchconfiguration",
-                        OptionName =  "IamInstanceProfile",
-                        Value = instanceProfile.AttrArn
-                   },
-                   new CfnEnvironment.OptionSettingProperty {
-                        Namespace = "aws:elasticbeanstalk:environment",
-                        OptionName =  "EnvironmentType",
-                        Value = settings.EnvironmentType
-                   },
-                   new CfnEnvironment.OptionSettingProperty
-                   {
-                        Namespace = "aws:elasticbeanstalk:managedactions",
-                        OptionName = "ManagedActionsEnabled",
-                        Value = settings.ElasticBeanstalkManagedPlatformUpdates.ManagedActionsEnabled.ToString().ToLower()
-                   }
-                };
-
-            if (settings.ElasticBeanstalkManagedPlatformUpdates.ManagedActionsEnabled)
-            {
-                var beanstalkrole = new Role(this, "BeanstalkServiceRole", new RoleProps
-                {
-                    AssumedBy = new ServicePrincipal("elasticbeanstalk.amazonaws.com"),
-                    ManagedPolicies = new[]
-                    {
-                        ManagedPolicy.FromAwsManagedPolicyName("AWSElasticBeanstalkManagedUpdatesCustomerRolePolicy")
-                    }
-                });
-
-                optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
-                {
-                    Namespace = "aws:elasticbeanstalk:environment",
-                    OptionName = "ServiceRole",
-                    Value = beanstalkrole.RoleArn
-                });
-
-                optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
-                {
-                    Namespace = "aws:elasticbeanstalk:managedactions",
-                    OptionName = "PreferredStartTime",
-                    Value = settings.ElasticBeanstalkManagedPlatformUpdates.PreferredStartTime
-                });
-
-                optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
-                {
-                    Namespace = "aws:elasticbeanstalk:managedactions:platformupdate",
-                    OptionName = "UpdateLevel",
-                    Value = settings.ElasticBeanstalkManagedPlatformUpdates.UpdateLevel
-                });
-            }
-
-            if(!string.IsNullOrEmpty(settings.InstanceType))
-            {
-                optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
-                {
-                    Namespace = "aws:autoscaling:launchconfiguration",
-                    OptionName = "InstanceType",
-                    Value = settings.InstanceType
-                });
-            }
-
-            if (settings.EnvironmentType.Equals(ENVIRONMENTTYPE_LOADBALANCED))
-            {
-                optionSettingProperties.Add(
-                    new CfnEnvironment.OptionSettingProperty
-                    {
-                        Namespace = "aws:elasticbeanstalk:environment",
-                        OptionName = "LoadBalancerType",
-                        Value = settings.LoadBalancerType
-                    }
-                );
-            }
-
-            if (!string.IsNullOrEmpty(settings.EC2KeyPair))
-            {
-                optionSettingProperties.Add(
-                    new CfnEnvironment.OptionSettingProperty
-                    {
-                        Namespace = "aws:autoscaling:launchconfiguration",
-                        OptionName = "EC2KeyName",
-                        Value = settings.EC2KeyPair
-                    }
-                );
-            }
-
-            var environment = new CfnEnvironment(this, "Environment", new CfnEnvironmentProps
-            {
-                EnvironmentName = settings.EnvironmentName,
-                ApplicationName = settings.BeanstalkApplication.ApplicationName,
-                PlatformArn = settings.ElasticBeanstalkPlatformArn,
-                OptionSettings = optionSettingProperties.ToArray(),
-                // This line is critical - reference the label created in this same stack
-                VersionLabel = applicationVersion.Ref,
-            });
+            //        props.Environment["EXAMPLE_ENV1"] = "EXAMPLE_VALUE1";
+            //    }
+            //}
         }
     }
 }
