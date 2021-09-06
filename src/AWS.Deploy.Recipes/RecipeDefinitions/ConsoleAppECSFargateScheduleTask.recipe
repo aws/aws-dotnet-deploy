@@ -1,7 +1,7 @@
 {
     "$schema": "./aws-deploy-recipe-schema.json",
     "Id": "ConsoleAppEcsFargateScheduleTask",
-    "Version": "0.1.0",
+    "Version": "0.2.0",
     "Name": "Scheduled Task on Amazon ECS using Fargate",
     "DeploymentType": "CdkProject",
     "DeploymentBundle": "Container",
@@ -13,15 +13,15 @@
 
     "DisplayedResources": [
         {
-            "LogicalId": "ClusterEB0386A7",
+            "LogicalId": "RecipeEcsClusterB4EDBB7E",
             "Description": "ECS Cluster"
         },
         {
-            "LogicalId": "TaskDefinitionB36D86D9",
+            "LogicalId": "RecipeAppTaskDefinitionAC7F53DB",
             "Description": "ECS Task Definition"
         },
         {
-            "LogicalId": "FargateServiceScheduledEventRule7F21314E",
+            "LogicalId": "RecipeScheduleTaskScheduledEventRuleAB80FDC8",
             "Description": "CloudWatch Event"
         }
     ],
