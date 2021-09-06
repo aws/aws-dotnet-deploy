@@ -80,7 +80,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             var deployStdOut = _interactiveService.StdOutReader.ReadAllLines();
 
             // Example:     Endpoint: http://52.36.216.238/
-            var applicationUrl = deployStdOut.First(line => line.StartsWith($"\tEndpoint"))
+            var applicationUrl = deployStdOut.First(line => line.Trim().StartsWith($"Endpoint"))
                 .Split(":")[1]
                 .Trim();
 
