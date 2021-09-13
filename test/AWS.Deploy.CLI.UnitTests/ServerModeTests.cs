@@ -10,6 +10,17 @@ using AWS.Deploy.Orchestration;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
 
+using Moq;
+using AWS.Deploy.Common.IO;
+using AWS.Deploy.Common.DeploymentManifest;
+using AWS.Deploy.Orchestration.LocalUserSettings;
+using AWS.Deploy.CLI.Utilities;
+using AWS.Deploy.Common;
+using AWS.Deploy.CLI.UnitTests.Utilities;
+
+using System.Collections.Generic;
+using System.IO;
+
 namespace AWS.Deploy.CLI.UnitTests
 {
     public class ServerModeTests
@@ -39,22 +50,77 @@ namespace AWS.Deploy.CLI.UnitTests
         [Theory]
         [InlineData("")]
         [InlineData("InvalidId")]
-        public void RecipeController_GetRecipe_EmptyId(string recipeId)
+        public async Task RecipeController_GetRecipe_EmptyId(string recipeId)
         {
-            var recipeController = new RecipeController();
-            var response = recipeController.GetRecipe(recipeId);
+            var directoryManager = new DirectoryManager();
+            var fileManager = new FileManager();
+            var deploymentManifestEngine = new DeploymentManifestEngine(directoryManager, fileManager);
+            var consoleInteractiveServiceImpl = new ConsoleInteractiveServiceImpl();
+            var consoleOrchestratorLogger = new ConsoleOrchestratorLogger(consoleInteractiveServiceImpl);
+            var commandLineWrapper = new CommandLineWrapper(consoleOrchestratorLogger);
+            var customRecipeLocator = new CustomRecipeLocator(deploymentManifestEngine, consoleOrchestratorLogger, commandLineWrapper, directoryManager);
+            var projectDefinitionParser = new ProjectDefinitionParser(fileManager, directoryManager);
+
+            var recipeController = new RecipeController(customRecipeLocator, projectDefinitionParser);
+            var response = await recipeController.GetRecipe(recipeId);
 
             Assert.IsType<BadRequestObjectResult>(response);
         }
 
         [Fact]
-        public void RecipeController_GetRecipe_HappyPath()
+        public async Task RecipeController_GetRecipe_HappyPath()
         {
-            var recipeController = new RecipeController();
-            var recipeDefinitions = RecipeHandler.GetRecipeDefinitions();
+            var directoryManager = new DirectoryManager();
+            var fileManager = new FileManager();
+            var deploymentManifestEngine = new DeploymentManifestEngine(directoryManager, fileManager);
+            var consoleInteractiveServiceImpl = new ConsoleInteractiveServiceImpl();
+            var consoleOrchestratorLogger = new ConsoleOrchestratorLogger(consoleInteractiveServiceImpl);
+            var commandLineWrapper = new CommandLineWrapper(consoleOrchestratorLogger);
+            var customRecipeLocator = new CustomRecipeLocator(deploymentManifestEngine, consoleOrchestratorLogger, commandLineWrapper, directoryManager);
+            var projectDefinitionParser = new ProjectDefinitionParser(fileManager, directoryManager);
+
+            var recipeController = new RecipeController(customRecipeLocator, projectDefinitionParser);
+            var recipeDefinitions = await RecipeHandler.GetRecipeDefinitions(customRecipeLocator, null);
             var recipe = recipeDefinitions.First();
 
-            var response = recipeController.GetRecipe(recipe.Id);
+            var response = await recipeController.GetRecipe(recipe.Id);
+
+            var result = Assert.IsType<OkObjectResult>(response);
+            var resultRecipe = Assert.IsType<RecipeSummary>(result.Value);
+            Assert.Equal(recipe.Id, resultRecipe.Id);
+        }
+
+        [Fact]
+        public async Task RecipeController_GetRecipe_WithProjectPath()
+        {
+            var directoryManager = new DirectoryManager();
+            var fileManager = new FileManager();
+            var projectDefinitionParser = new ProjectDefinitionParser(fileManager, directoryManager);
+
+            var mockCustomRecipeLocator = new Mock<ICustomRecipeLocator>();
+
+            var sourceProjectDirectory = SystemIOUtilities.ResolvePath("WebAppWithDockerFile");
+
+            var customLocatorCalls = 0;
+            mockCustomRecipeLocator
+                .Setup(x => x.LocateCustomRecipePaths(It.IsAny<string>(), It.IsAny<string>()))
+                .Callback<string, string>((csProjectPath, solutionPath) =>
+                {
+                    customLocatorCalls++;
+                    Assert.Equal(new DirectoryInfo(sourceProjectDirectory).FullName, Directory.GetParent(csProjectPath).FullName);
+                })
+                .Returns(Task.FromResult(new HashSet<string>()));
+
+            var projectDefinition = await projectDefinitionParser.Parse(sourceProjectDirectory);
+
+            var recipeDefinitions = await RecipeHandler.GetRecipeDefinitions(mockCustomRecipeLocator.Object, projectDefinition);
+            var recipe = recipeDefinitions.First();
+            Assert.NotEqual(0, customLocatorCalls);
+
+            customLocatorCalls = 0;
+            var recipeController = new RecipeController(mockCustomRecipeLocator.Object, projectDefinitionParser);
+            var response = await recipeController.GetRecipe(recipe.Id, sourceProjectDirectory);
+            Assert.NotEqual(0, customLocatorCalls);
 
             var result = Assert.IsType<OkObjectResult>(response);
             var resultRecipe = Assert.IsType<RecipeSummary>(result.Value);
