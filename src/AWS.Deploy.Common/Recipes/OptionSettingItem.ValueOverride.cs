@@ -114,7 +114,7 @@ namespace AWS.Deploy.Common.Recipes
                 !AllowedValues.Contains(valueOverride.ToString() ?? ""))
                 throw new InvalidOverrideValueException($"Invalid value for option setting item '{Name}'");
 
-            if (valueOverride is bool || valueOverride is int || valueOverride is long)
+            if (valueOverride is bool || valueOverride is int || valueOverride is long || valueOverride is double)
             {
                 _valueOverride = valueOverride;
             }
