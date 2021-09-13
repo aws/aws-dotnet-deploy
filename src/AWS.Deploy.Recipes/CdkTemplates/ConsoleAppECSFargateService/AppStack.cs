@@ -11,9 +11,13 @@ namespace ConsoleAppEcsFargateService
 {
     public class AppStack : Stack
     {
+        private readonly Configuration _configuration;
+
         internal AppStack(Construct scope, IDeployToolStackProps<Configuration> props)
             : base(scope, props.StackName, props)
         {
+            _configuration = props.RecipeProps.Settings;
+
             // Setup callback for generated construct to provide access to customize CDK properties before creating constructs.
             CDKRecipeCustomizer<Recipe>.CustomizeCDKProps += CustomizeCDKProps;
 
