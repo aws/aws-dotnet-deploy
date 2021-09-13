@@ -4,6 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Recipes;
 using Newtonsoft.Json;
@@ -12,24 +15,37 @@ namespace AWS.Deploy.Orchestration
 {
     public class RecipeHandler
     {
-        public static List<RecipeDefinition> GetRecipeDefinitions()
+        public static async Task<List<RecipeDefinition>> GetRecipeDefinitions(ICustomRecipeLocator customRecipeLocator, ProjectDefinition? projectDefinition)
         {
-            var recipeDefinitionsPath = RecipeLocator.FindRecipeDefinitionsPath();
+            IEnumerable<string> recipeDefinitionsPaths = new List<string> { RecipeLocator.FindRecipeDefinitionsPath() };
+            if(projectDefinition != null)
+            {
+                var targetApplicationFullPath = new DirectoryInfo(projectDefinition.ProjectPath).FullName;
+                var solutionDirectoryPath = !string.IsNullOrEmpty(projectDefinition.ProjectSolutionPath) ?
+                    new DirectoryInfo(projectDefinition.ProjectSolutionPath).Parent.FullName : string.Empty;
+
+                var customPaths = await customRecipeLocator.LocateCustomRecipePaths(targetApplicationFullPath, solutionDirectoryPath);
+                recipeDefinitionsPaths = recipeDefinitionsPaths.Union(customPaths);
+            }
+
             var recipeDefinitions = new List<RecipeDefinition>();
 
             try
             {
-                foreach (var recipeDefinitionFile in Directory.GetFiles(recipeDefinitionsPath, "*.recipe", SearchOption.TopDirectoryOnly))
+                foreach(var recipeDefinitionsPath in recipeDefinitionsPaths)
                 {
-                    try
+                    foreach (var recipeDefinitionFile in Directory.GetFiles(recipeDefinitionsPath, "*.recipe", SearchOption.TopDirectoryOnly))
                     {
-                        var content = File.ReadAllText(recipeDefinitionFile);
-                        var definition = JsonConvert.DeserializeObject<RecipeDefinition>(content);
-                        recipeDefinitions.Add(definition);
-                    }
-                    catch (Exception e)
-                    {
-                        throw new Exception($"Failed to Deserialize Recipe Definition [{recipeDefinitionFile}]: {e.Message}", e);
+                        try
+                        {
+                            var content = File.ReadAllText(recipeDefinitionFile);
+                            var definition = JsonConvert.DeserializeObject<RecipeDefinition>(content);
+                            recipeDefinitions.Add(definition);
+                        }
+                        catch (Exception e)
+                        {
+                            throw new Exception($"Failed to Deserialize Recipe Definition [{recipeDefinitionFile}]: {e.Message}", e);
+                        }
                     }
                 }
             }
