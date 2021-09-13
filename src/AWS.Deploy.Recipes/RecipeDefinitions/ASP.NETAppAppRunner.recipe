@@ -13,7 +13,7 @@
 
     "DisplayedResources": [
         {
-            "LogicalId": "AppRunnerService",
+            "LogicalId": "RecipeAppRunnerServiceDA9A12DF",
             "Description": "Application Endpoint"
         }
     ],
@@ -37,25 +37,6 @@
                 }
             ]
         },
-
-        {
-            "Tests": [
-                {
-                    "Type": "FileExists",
-                    "Condition": {
-                        "FileName": "Dockerfile"
-                    }
-                }
-            ],
-            "Effect": {
-                "Fail": {
-                    "PriorityAdjustment": -55,
-                    "Include": true
-                }
-            }
-        },
-
-
         {
             "Tests": [
                 {

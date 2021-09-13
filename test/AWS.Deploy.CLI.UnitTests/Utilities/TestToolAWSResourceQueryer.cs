@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Amazon.CloudFormation.Model;
+using Amazon.CloudFront.Model;
 using Amazon.CloudWatchEvents.Model;
 using Amazon.EC2.Model;
 using Amazon.ECR.Model;
@@ -67,10 +68,11 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
         public Task<EnvironmentDescription> DescribeElasticBeanstalkEnvironment(string environmentId) => throw new NotImplementedException();
         public Task<Amazon.ElasticLoadBalancingV2.Model.LoadBalancer> DescribeElasticLoadBalancer(string loadBalancerArn) => throw new NotImplementedException();
         public Task<S3Region> GetS3BucketLocation(string bucketName) => throw new NotImplementedException();
+        public Task<Amazon.S3.Model.WebsiteConfiguration> GetS3BucketWebSiteConfiguration(string bucketName) => throw new NotImplementedException();
         public Task<List<Amazon.ElasticLoadBalancingV2.Model.Listener>> DescribeElasticLoadBalancerListeners(string loadBalancerArn) => throw new NotImplementedException();
         public Task<DescribeRuleResponse> DescribeCloudWatchRule(string ruleName) => throw new NotImplementedException();
         Task<string> IAWSResourceQueryer.GetS3BucketLocation(string bucketName) => throw new NotImplementedException();
-
         public Task<List<Amazon.ElasticLoadBalancingV2.Model.LoadBalancer>> ListOfLoadBalancers(LoadBalancerTypeEnum loadBalancerType) => throw new NotImplementedException();
+        public Task<Distribution> GetCloudFrontDistribution(string distributionId) => throw new NotImplementedException();
     }
 }

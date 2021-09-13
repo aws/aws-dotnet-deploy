@@ -7,6 +7,11 @@ namespace AWS.Deploy.CLI
 {
     public class ConsoleInteractiveServiceImpl : IToolInteractiveService
     {
+        public ConsoleInteractiveServiceImpl()
+        {
+            Console.Title = Constants.CLI.CLI_APP_NAME;
+        }
+
         public string ReadLine()
         {
             return Console.ReadLine() ?? string.Empty;

@@ -21,7 +21,6 @@ namespace AspNetAppEcsFargate
 {
     using static AWS.Deploy.Recipes.CDK.Common.CDKRecipeCustomizer<Recipe>;
 
-
     public class Recipe : Construct
     {
         public IVpc? AppVpc { get; private set; }
@@ -47,7 +46,9 @@ namespace AspNetAppEcsFargate
         public string AddTargetGroup { get; } = "AddTargetGroup";
 
         public Recipe(Construct scope, IRecipeProps<Configuration> props)
-            : base(scope, "GeneratedRecipeConstruct")
+            // The "Recipe" construct ID will be used as part of the CloudFormation logical ID. If the value is changed this will
+            // change the expected values for the "DisplayedResources" in the corresponding recipe file.
+            : base(scope, "Recipe")
         {
             var settings = props.Settings;
 
@@ -107,7 +108,7 @@ namespace AspNetAppEcsFargate
         private void ConfigureECSClusterAndService(IRecipeProps<Configuration> recipeConfiguration)
         {
             if (AppVpc == null)
-                throw new ArgumentNullException(nameof(AppVpc));
+                throw new InvalidOperationException($"{nameof(AppVpc)} has not been set. The {nameof(ConfigureVpc)} method should be called before {nameof(ConfigureECSClusterAndService)}");
 
             var settings = recipeConfiguration.Settings;
             if (settings.ECSCluster.CreateNew)
@@ -192,11 +193,11 @@ namespace AspNetAppEcsFargate
         private void ConfigureLoadBalancer(Configuration settings)
         {
             if (AppVpc == null)
-                throw new ArgumentNullException(nameof(AppVpc));
+                throw new InvalidOperationException($"{nameof(AppVpc)} has not been set. The {nameof(ConfigureVpc)} method should be called before {nameof(ConfigureLoadBalancer)}");
             if (EcsCluster == null)
-                throw new ArgumentNullException(nameof(EcsCluster));
+                throw new InvalidOperationException($"{nameof(EcsCluster)} has not been set. The {nameof(ConfigureECSClusterAndService)} method should be called before {nameof(ConfigureLoadBalancer)}");
             if (AppFargateService == null)
-                throw new ArgumentNullException(nameof(AppFargateService));
+                throw new InvalidOperationException($"{nameof(AppFargateService)} has not been set. The {nameof(ConfigureECSClusterAndService)} method should be called before {nameof(ConfigureLoadBalancer)}");
 
             if (settings.LoadBalancer.CreateNew)
             {
@@ -294,9 +295,9 @@ namespace AspNetAppEcsFargate
         private void ConfigureAutoScaling(Configuration settings)
         {
             if (AppFargateService == null)
-                throw new ArgumentNullException(nameof(AppFargateService));
+                throw new InvalidOperationException($"{nameof(AppFargateService)} has not been set. The {nameof(ConfigureECSClusterAndService)} method should be called before {nameof(ConfigureAutoScaling)}");
             if (ServiceTargetGroup == null)
-                throw new ArgumentNullException(nameof(ServiceTargetGroup));
+                throw new InvalidOperationException($"{nameof(ServiceTargetGroup)} has not been set. The {nameof(ConfigureLoadBalancer)} method should be called before {nameof(ConfigureAutoScaling)}");
 
             if (settings.AutoScaling.Enabled)
             {
@@ -334,7 +335,7 @@ namespace AspNetAppEcsFargate
                         }));
                         break;
                     default:
-                        throw new System.ArgumentException($"Invalid AutoScaling type {settings.AutoScaling.ScalingType}");
+                        throw new ArgumentException($"Invalid AutoScaling type {settings.AutoScaling.ScalingType}");
                 }
             }
         }

@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="AWSSDK.CloudWatchEvents" Version="3.7.3.14" />
+    <PackageReference Include="AWSSDK.CloudFront" Version="3.7.3.10" />
     <PackageReference Include="AWSSDK.EC2" Version="3.7.19.1" />
     <PackageReference Include="AWSSDK.ECR" Version="3.7.0.45" />
     <PackageReference Include="AWSSDK.ECS" Version="3.7.2.20" />

@@ -5,7 +5,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RollForward>Major</RollForward>
     <Nullable>enable</Nullable>
-
+    <AWSProjectType>DeploymentProject</AWSProjectType>
     <!-- The value "AWSDeployRecipesCDKCommonVersion" is replaced by the project template system. -->
     <RecipeCDKCommonVersion>AWSDeployRecipesCDKCommonVersion</RecipeCDKCommonVersion>
   </PropertyGroup>
@@ -14,7 +14,6 @@
     <Compile Remove="cdk.out\**" />
     <EmbeddedResource Remove="cdk.out\**" />
     <None Remove="cdk.out\**" />
-    <None Include="appsettings.json" CopyToOutputDirectory="Always" />
   </ItemGroup>
 
   <ItemGroup>
@@ -25,9 +24,9 @@
 
   <ItemGroup>
     <!-- CDK Construct Library dependencies -->
-    <PackageReference Include="Amazon.CDK" Version="1.107.0" />
-    <PackageReference Include="Amazon.CDK.AWS.AppRunner" Version="1.107.0" />
-    <PackageReference Include="Amazon.CDK.AWS.ECS.Patterns" Version="1.107.0" />
+    <PackageReference Include="Amazon.CDK" Version="1.121.0" />
+    <PackageReference Include="Amazon.CDK.AWS.AppRunner" Version="1.121.0" />
+    <PackageReference Include="Amazon.CDK.AWS.ECS.Patterns" Version="1.121.0" />
 
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.7" />
 

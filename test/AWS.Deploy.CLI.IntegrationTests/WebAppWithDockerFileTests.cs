@@ -145,7 +145,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
             var deployStdOut = _interactiveService.StdOutReader.ReadAllLines();
 
-            var applicationUrl = deployStdOut.First(line => line.StartsWith($"{_stackName}.EndpointURL"))
+            var applicationUrl = deployStdOut.First(line => line.StartsWith($"{_stackName}.RecipeEndpointURL"))
                 .Split("=")[1]
                 .Trim();
 

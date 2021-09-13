@@ -21,6 +21,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
     {
         private readonly HttpHelper _httpHelper;
         private readonly CloudFormationHelper _cloudFormationHelper;
+        private readonly CloudFrontHelper _cloudFrontHelper;
         private readonly InMemoryInteractiveService _interactiveService;
         private readonly App _app;
         private string _stackName;
@@ -31,8 +32,8 @@ namespace AWS.Deploy.CLI.IntegrationTests
         {
             _httpHelper = new HttpHelper();
 
-            var cloudFormationClient = new AmazonCloudFormationClient();
-            _cloudFormationHelper = new CloudFormationHelper(cloudFormationClient);
+            _cloudFormationHelper = new CloudFormationHelper(new AmazonCloudFormationClient());
+            _cloudFrontHelper = new CloudFrontHelper(new Amazon.CloudFront.AmazonCloudFrontClient());
 
             var serviceCollection = new ServiceCollection();
 
@@ -60,7 +61,6 @@ namespace AWS.Deploy.CLI.IntegrationTests
             // Arrange input for deploy
             await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Select default recommendation
             await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Select default option settings
-            await _interactiveService.StdInWriter.WriteAsync("y"); // Blazor webassembly confirmation
             await _interactiveService.StdInWriter.FlushAsync();
 
             // Deploy
@@ -82,12 +82,17 @@ namespace AWS.Deploy.CLI.IntegrationTests
             var deployStdOut = _interactiveService.StdOutReader.ReadAllLines();
 
             // Example URL string: BlazorWasm5068e7a879d5ee.EndpointURL = http://blazorwasm5068e7a879d5ee-blazorhostc7106839-a2585dcq9xve.s3-website-us-west-2.amazonaws.com/
-            var applicationUrl = deployStdOut.First(line => line.StartsWith($"{_stackName}.EndpointURL"))
+            var applicationUrl = deployStdOut.First(line => line.Contains("https://") && line.Contains("cloudfront.net/"))
                 .Split("=")[1]
                 .Trim();
 
             // URL could take few more minutes to come live, therefore, we want to wait and keep trying for a specified timeout
             await _httpHelper.WaitUntilSuccessStatusCode(applicationUrl, TimeSpan.FromSeconds(5), TimeSpan.FromMinutes(5));
+
+            // The initial state of logging should be false, the test will test enabling logging during redeployment.
+            var distributionId = await _cloudFormationHelper.GetResourceId(_stackName, "RecipeCloudFrontDistribution2BE25932");
+            var distribution = await _cloudFrontHelper.GetDistribution(distributionId);
+            Assert.Equal(Amazon.CloudFront.PriceClass.PriceClass_All, distribution.DistributionConfig.PriceClass);
 
             // list
             var listArgs = new[] { "list-deployments" };
@@ -96,6 +101,20 @@ namespace AWS.Deploy.CLI.IntegrationTests
             // Verify stack exists in list of deployments
             var listDeployStdOut = _interactiveService.StdOutReader.ReadAllLines();
             Assert.Contains(listDeployStdOut, (deployment) => _stackName.Equals(deployment));
+
+            // Setup for redeployment turning on access logging via settings file.
+            await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Select default option settings
+            await _interactiveService.StdInWriter.FlushAsync();
+
+            var applyLoggingSettingsFile = Path.Combine(Directory.GetParent(_testAppManager.GetProjectPath(Path.Combine(components))).FullName, "apply-settings.json");
+            deployArgs = new[] { "deploy", "--project-path", _testAppManager.GetProjectPath(Path.Combine(components)), "--stack-name", _stackName, "--diagnostics", "--apply", applyLoggingSettingsFile };
+            await _app.Run(deployArgs);
+
+            // URL could take few more minutes to come live, therefore, we want to wait and keep trying for a specified timeout
+            await _httpHelper.WaitUntilSuccessStatusCode(applicationUrl, TimeSpan.FromSeconds(5), TimeSpan.FromMinutes(5));
+
+            distribution = await _cloudFrontHelper.GetDistribution(distributionId);
+            Assert.Equal(Amazon.CloudFront.PriceClass.PriceClass_100, distribution.DistributionConfig.PriceClass);
 
             // Arrange input for delete
             await _interactiveService.StdInWriter.WriteAsync("y"); // Confirm delete
