@@ -66,50 +66,5 @@ namespace AWS.Deploy.Recipes.CDK.Common
                 stack.TemplateOptions.Description = $"{Constants.CloudFormationIdentifier.STACK_DESCRIPTION_PREFIX}: {stack.TemplateOptions.Description}";
             }
         }
-
-        /// <summary>
-        /// TODO remove this function once all recipes have migrated to IRecipeProps
-        /// </summary>
-        /// <typeparam name="C"></typeparam>
-        /// <param name="stack"></param>
-        /// <param name="recipeConfiguration"></param>
-        public static void RegisterStack<C>(Stack stack, RecipeConfiguration<C> recipeConfiguration)
-        {
-            // Set the AWS .NET deployment tool tag which also identifies the recipe used.
-            stack.Tags.SetTag(Constants.CloudFormationIdentifier.STACK_TAG, $"{recipeConfiguration.RecipeId}");
-
-            // Serializes all AWS .NET deployment tool settings.
-            var json = JsonSerializer.Serialize(recipeConfiguration.Settings, new JsonSerializerOptions { WriteIndented = false });
-
-            Dictionary<string, object> metadata;
-            if (stack.TemplateOptions.Metadata?.Count > 0)
-            {
-                metadata = new Dictionary<string, object>(stack.TemplateOptions.Metadata);
-            }
-            else
-            {
-                metadata = new Dictionary<string, object>();
-            }
-
-            // Save the settings, recipe id and version as metadata to the CloudFormation template.
-            metadata[Constants.CloudFormationIdentifier.STACK_METADATA_SETTINGS] = json;
-            metadata[Constants.CloudFormationIdentifier.STACK_METADATA_RECIPE_ID] = recipeConfiguration.RecipeId;
-            metadata[Constants.CloudFormationIdentifier.STACK_METADATA_RECIPE_VERSION] = recipeConfiguration.RecipeVersion;
-
-            // For the CDK to pick up the changes to the metadata .NET Dictionary you have to reassign the Metadata property.
-            stack.TemplateOptions.Metadata = metadata;
-
-            // CloudFormation tags are propagated to resources created by the stack. In case of Beanstalk deployment a second CloudFormation stack is
-            // launched which will also have the AWS .NET deployment tool tag. To differentiate these additional stacks a special AWS .NET deployment tool prefix
-            // is added to the description.
-            if (string.IsNullOrEmpty(stack.TemplateOptions.Description))
-            {
-                stack.TemplateOptions.Description = Constants.CloudFormationIdentifier.STACK_DESCRIPTION_PREFIX;
-            }
-            else
-            {
-                stack.TemplateOptions.Description = $"{Constants.CloudFormationIdentifier.STACK_DESCRIPTION_PREFIX}: {stack.TemplateOptions.Description}";
-            }
-        }
     }
 }
