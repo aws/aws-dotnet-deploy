@@ -45,7 +45,7 @@ namespace AspNetAppEcsFargate.Configurations
 
 
 
-        public int MemoryTypeTargetUtilizationPercent { get; set; } = 70;
+        public double MemoryTypeTargetUtilizationPercent { get; set; } = 70;
 
         public int MemoryTypeScaleInCooldownSeconds { get; set; } = defaultCooldown;
 
