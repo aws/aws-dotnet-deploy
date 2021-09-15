@@ -1,18 +1,24 @@
-using Amazon.CDK;
-using Amazon.CDK.AWS.S3;
-using Amazon.CDK.AWS.S3.Deployment;
-using AWS.Deploy.Recipes.CDK.Common;
+
+using System;
 using System.IO;
 using System.Collections.Generic;
+using Amazon.CDK;
+using Amazon.CDK.AWS.CloudFront;
+using AWS.Deploy.Recipes.CDK.Common;
+
 using BlazorWasm.Configurations;
 
 namespace BlazorWasm
 {
     public class AppStack : Stack
     {
+        private readonly Configuration _configuration;
+
         internal AppStack(Construct scope, IDeployToolStackProps<Configuration> props)
             : base(scope, props.StackName, props)
         {
+            _configuration = props.RecipeProps.Settings;
+
             // Setup callback for generated construct to provide access to customize CDK properties before creating constructs.
             CDKRecipeCustomizer<Recipe>.CustomizeCDKProps += CustomizeCDKProps;
 
@@ -38,17 +44,13 @@ namespace BlazorWasm
         {
             // Example of how to customize the container image definition to include environment variables to the running applications.
             // 
-            //if (string.Equals(evnt.ResourceLogicalName, nameof(evnt.Construct.AppContainerDefinition)))
-            //{
-            //    if(evnt.Props is ContainerDefinitionOptions props)
-            //    {
-            //        Console.WriteLine("Customizing AppContainerDefinition");
-            //        if (props.Environment == null)
-            //            props.Environment = new Dictionary<string, string>();
-
-            //        props.Environment["EXAMPLE_ENV1"] = "EXAMPLE_VALUE1";
-            //    }
-            //}
+            if (string.Equals(evnt.ResourceLogicalName, nameof(evnt.Construct.CloudFrontDistribution)))
+            {
+                if (evnt.Props is DistributionProps props)
+                {
+                    Console.WriteLine("Customizing CloudFront Distribution");
+                }
+            }
         }
     }
 }

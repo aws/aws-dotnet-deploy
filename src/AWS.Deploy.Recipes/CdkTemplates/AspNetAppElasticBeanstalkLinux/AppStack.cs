@@ -1,21 +1,26 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using System.Collections.Generic;
 using Amazon.CDK;
 using Amazon.CDK.AWS.ElasticBeanstalk;
-using Amazon.CDK.AWS.IAM;
-using Amazon.CDK.AWS.S3.Assets;
 using AWS.Deploy.Recipes.CDK.Common;
+
 using AspNetAppElasticBeanstalkLinux.Configurations;
+
 
 namespace AspNetAppElasticBeanstalkLinux
 {
     public class AppStack : Stack
     {
+        private readonly Configuration _configuration;
+
         internal AppStack(Construct scope, IDeployToolStackProps<Configuration> props)
             : base(scope, props.StackName, props)
         {
+            _configuration = props.RecipeProps.Settings;
+
             // Setup callback for generated construct to provide access to customize CDK properties before creating constructs.
             CDKRecipeCustomizer<Recipe>.CustomizeCDKProps += CustomizeCDKProps;
 
@@ -39,17 +44,13 @@ namespace AspNetAppElasticBeanstalkLinux
         /// <param name="evnt"></param>
         private void CustomizeCDKProps(CustomizePropsEventArgs<Recipe> evnt)
         {
-            // Example of how to customize the container image definition to include environment variables to the running applications.
+            // Example of how to customize the Beanstalk Environment.
             // 
-            //if (string.Equals(evnt.ResourceLogicalName, nameof(evnt.Construct.AppContainerDefinition)))
+            //if (string.Equals(evnt.ResourceLogicalName, nameof(evnt.Construct.BeanstalkEnvironment)))
             //{
-            //    if(evnt.Props is ContainerDefinitionOptions props)
+            //    if (evnt.Props is CfnEnvironmentProps props)
             //    {
-            //        Console.WriteLine("Customizing AppContainerDefinition");
-            //        if (props.Environment == null)
-            //            props.Environment = new Dictionary<string, string>();
-
-            //        props.Environment["EXAMPLE_ENV1"] = "EXAMPLE_VALUE1";
+            //        Console.WriteLine("Customizing Beanstalk Environment");
             //    }
             //}
         }

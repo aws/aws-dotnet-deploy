@@ -87,6 +87,18 @@ namespace AWS.Deploy.CLI.Common.UnitTests.LocalUserSettings
             Assert.Equal(awsAccountId, userSettings.LastDeployedStacks[0].AWSAccountId);
             Assert.Equal(awsRegion, userSettings.LastDeployedStacks[0].AWSRegion);
             Assert.Null(userSettings.LastDeployedStacks[0].Stacks);
+
+            // Attempt to clean orphans again. This is to make sure if the underlying stacks array collection is null we don't throw an exception. 
+            await _localUserSettingsEngine.CleanOrphanStacks(new List<string> { "WebAppWithDockerFile1" }, stackName, awsAccountId, awsRegion);
+            userSettings = await _localUserSettingsEngine.GetLocalUserSettings();
+
+            Assert.True(_fileManager.Exists(settingsFilePath));
+            Assert.NotNull(userSettings);
+            Assert.NotNull(userSettings.LastDeployedStacks);
+            Assert.Single(userSettings.LastDeployedStacks);
+            Assert.Equal(awsAccountId, userSettings.LastDeployedStacks[0].AWSAccountId);
+            Assert.Equal(awsRegion, userSettings.LastDeployedStacks[0].AWSRegion);
+            Assert.Null(userSettings.LastDeployedStacks[0].Stacks);
         }
     }
 }

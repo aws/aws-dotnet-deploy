@@ -142,7 +142,7 @@ namespace AWS.Deploy.Orchestration.LocalUserSettings
                 var localStacks = localUserSettings?.LastDeployedStacks?
                     .FirstOrDefault(x => x.Exists(awsAccountId, awsRegion, projectName));
 
-                if (localUserSettings == null || localStacks == null)
+                if (localUserSettings == null || localStacks == null || localStacks.Stacks == null)
                     return;
 
                 var validStacks = deployedStacks.Intersect(localStacks.Stacks);

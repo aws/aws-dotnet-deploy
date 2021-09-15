@@ -214,7 +214,7 @@ namespace AspNetAppElasticBeanstalkLinux
                 });
             }
 
-            BeanstalkEnvironment = new CfnEnvironment(this, "Environment", new CfnEnvironmentProps
+            BeanstalkEnvironment = new CfnEnvironment(this, nameof(BeanstalkEnvironment), InvokeCustomizeCDKPropsEvent(nameof(BeanstalkEnvironment), this, new CfnEnvironmentProps
             {
                 EnvironmentName = settings.EnvironmentName,
                 ApplicationName = settings.BeanstalkApplication.ApplicationName,
@@ -222,7 +222,7 @@ namespace AspNetAppElasticBeanstalkLinux
                 OptionSettings = optionSettingProperties.ToArray(),
                 // This line is critical - reference the label created in this same stack
                 VersionLabel = ApplicationVersion.Ref,
-            });
+            }));
         }
     }
 }
