@@ -66,7 +66,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
             var recommendations = await engine.ComputeRecommendations();
             var recommendation = recommendations.First(r => r.Recipe.Id.Equals("AspNetAppElasticBeanstalkLinux"));
 
-            _stackResource.LogicalResourceId = "RecipeEnvironment0DFE4D35";
+            _stackResource.LogicalResourceId = "RecipeBeanstalkEnvironment83CC12DE";
             _stackResource.PhysicalResourceId = "PhysicalResourceId";
             _stackResource.ResourceType = "AWS::ElasticBeanstalk::Environment";
             _environmentDescription.CNAME = "www.website.com";
