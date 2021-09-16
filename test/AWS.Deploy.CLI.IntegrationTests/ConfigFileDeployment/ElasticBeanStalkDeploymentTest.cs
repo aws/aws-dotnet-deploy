@@ -72,8 +72,8 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
             var deployStdOut = _interactiveService.StdOutReader.ReadAllLines();
 
             // Example:     Endpoint: http://52.36.216.238/
-            var applicationUrl = deployStdOut.First(line => line.StartsWith($"\tEndpoint"))
-                .Split(":")[1]
+            var applicationUrl = deployStdOut.First(line => line.Trim().StartsWith("Endpoint:"))
+                .Split(" ")[1]
                 .Trim();
 
             // URL could take few more minutes to come live, therefore, we want to wait and keep trying for a specified timeout

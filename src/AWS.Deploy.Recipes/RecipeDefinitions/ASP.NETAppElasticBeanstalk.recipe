@@ -13,7 +13,7 @@
 
     "DisplayedResources": [
         {
-            "LogicalId": "RecipeEnvironment0DFE4D35",
+            "LogicalId": "RecipeBeanstalkEnvironment83CC12DE",
             "Description": "Application Endpoint"
         }
     ],
