@@ -28,6 +28,7 @@ using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestration.DisplayedResources;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Orchestration.LocalUserSettings;
+using AWS.Deploy.CLI.Commands;
 
 namespace AWS.Deploy.CLI.ServerMode.Controllers
 {
@@ -284,6 +285,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
                 state.ApplicationDetails.Name = input.NewDeploymentName;
                 state.ApplicationDetails.RecipeId = input.NewDeploymentRecipeId;
+                state.SelectedRecommendation.AddReplacementToken(DeployCommand.REPLACE_TOKEN_STACK_NAME, input.NewDeploymentName);
             }
             else if(!string.IsNullOrEmpty(input.ExistingDeploymentName))
             {
@@ -307,6 +309,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
                 state.ApplicationDetails.Name = input.ExistingDeploymentName;
                 state.ApplicationDetails.RecipeId = existingDeployment.RecipeId;
+                state.SelectedRecommendation.AddReplacementToken(DeployCommand.REPLACE_TOKEN_STACK_NAME, input.ExistingDeploymentName);
             }
 
             return Ok();

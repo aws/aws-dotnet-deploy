@@ -100,7 +100,7 @@
                     "Name": "Application Name",
                     "Description": "The Elastic Beanstalk application name.",
                     "Type": "String",
-                    "DefaultValue": "{ProjectName}",
+                    "DefaultValue": "{StackName}",
                     "AdvancedSetting": false,
                     "Updatable": false,
                     "Validators": [
@@ -122,7 +122,7 @@
             "Description": "The Elastic Beanstalk environment name.",
             "Type": "String",
             "TypeHint": "BeanstalkEnvironment",
-            "DefaultValue": "{ProjectName}-dev",
+            "DefaultValue": "{StackName}-dev",
             "AdvancedSetting": false,
             "Updatable": false,
             "Validators": [

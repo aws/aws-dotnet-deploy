@@ -25,6 +25,8 @@ namespace AWS.Deploy.CLI.Commands
 {
     public class DeployCommand
     {
+        public const string REPLACE_TOKEN_STACK_NAME = "{StackName}";
+
         private readonly IToolInteractiveService _toolInteractiveService;
         private readonly IOrchestratorInteractiveService _orchestratorInteractiveService;
         private readonly ICdkProjectHandler _cdkProjectHandler;
@@ -162,7 +164,7 @@ namespace AWS.Deploy.CLI.Commands
 
             // Get Cloudformation stack name.
             var cloudApplicationName = GetCloudApplicationName(stackName, userDeploymentSettings, compatibleApplications);
-
+            
             // Find existing application with the same CloudFormation stack name.
             var deployedApplication = allDeployedApplications.FirstOrDefault(x => string.Equals(x.Name, cloudApplicationName));
 
@@ -190,6 +192,9 @@ namespace AWS.Deploy.CLI.Commands
                     selectedRecommendation = GetSelectedRecommendation(userDeploymentSettings, recommendations);
                 }
             }
+
+            // Apply the user entered stack name to the recommendation so that any default settings based on stack name are applied.
+            selectedRecommendation.AddReplacementToken(REPLACE_TOKEN_STACK_NAME, cloudApplicationName);
 
             var cloudApplication = new CloudApplication(cloudApplicationName, selectedRecommendation.Recipe.Id);
 
@@ -222,9 +227,6 @@ namespace AWS.Deploy.CLI.Commands
         /// <param name="userDeploymentSettings"><see cref="UserDeploymentSettings"/></param>
         public async Task ConfigureDeployment(CloudApplication cloudApplication, Orchestrator orchestrator, Recommendation selectedRecommendation, UserDeploymentSettings? userDeploymentSettings)
         {
-            // Apply the user entered project name to the recommendation so that any default settings based on project name are applied.
-            selectedRecommendation.OverrideProjectName(cloudApplication.Name);
-
             var configurableOptionSettings = selectedRecommendation.GetConfigurableOptionSettingItems();
 
             if (userDeploymentSettings != null)
