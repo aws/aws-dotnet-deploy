@@ -45,6 +45,10 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 
             // ACT
             var recommendations = await orchestrator.GenerateDeploymentRecommendations();
+            foreach (var rec in recommendations)
+            {
+                Console.WriteLine($"Test Debug kmalhar - {rec.Recipe.RecipePath}");
+            }
 
             // ASSERT
             recommendations.Count.ShouldEqual(3);
