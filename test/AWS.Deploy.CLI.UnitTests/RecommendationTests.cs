@@ -169,6 +169,8 @@ namespace AWS.Deploy.CLI.UnitTests
             var recommendations = await engine.ComputeRecommendations();
 
             var fargateRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_ASPNET_CORE_FARGATE_RECIPE_ID);
+            fargateRecommendation.AddReplacementToken("{StackName}", "MyAppStack");
+
             var ecsServiceNameOptionSetting = fargateRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("ECSServiceName"));
 
             var originalDefaultValue = fargateRecommendation.GetOptionSettingDefaultValue<string>(ecsServiceNameOptionSetting);
@@ -252,11 +254,14 @@ namespace AWS.Deploy.CLI.UnitTests
             var recommendations = await engine.ComputeRecommendations();
 
             var beanstalkRecommendation = recommendations.FirstOrDefault(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
-            var beanstalEnvNameSetting = beanstalkRecommendation.Recipe.OptionSettings.FirstOrDefault(x => string.Equals("EnvironmentName", x.Id));
-            Assert.Equal("WebAppNoDockerFile-dev", beanstalkRecommendation.GetOptionSettingValue<string>(beanstalEnvNameSetting));
 
-            beanstalkRecommendation.OverrideProjectName("CustomName");
-            Assert.Equal("CustomName-dev", beanstalkRecommendation.GetOptionSettingValue<string>(beanstalEnvNameSetting));
+            var beanstalEnvNameSetting = beanstalkRecommendation.Recipe.OptionSettings.FirstOrDefault(x => string.Equals("EnvironmentName", x.Id));
+
+            beanstalkRecommendation.AddReplacementToken("{StackName}", "MyAppStack");
+            Assert.Equal("MyAppStack-dev", beanstalkRecommendation.GetOptionSettingValue<string>(beanstalEnvNameSetting));
+
+            beanstalkRecommendation.AddReplacementToken("{StackName}", "CustomAppStack");
+            Assert.Equal("CustomAppStack-dev", beanstalkRecommendation.GetOptionSettingValue<string>(beanstalEnvNameSetting));
         }
 
         [Theory]

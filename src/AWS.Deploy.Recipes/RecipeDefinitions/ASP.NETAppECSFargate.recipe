@@ -116,7 +116,7 @@
                     "Name": "New Cluster Name",
                     "Description": "The name of the new cluster to create.",
                     "Type": "String",
-                    "DefaultValue": "{ProjectName}",
+                    "DefaultValue": "{StackName}",
                     "AdvancedSetting": false,
                     "Updatable": false,
                     "Validators": [
@@ -145,7 +145,7 @@
             "Description": "The name of the ECS service running in the cluster.",
             "Type": "String",
             "TypeHint": "ECSService",
-            "DefaultValue": "{ProjectName}-service",
+            "DefaultValue": "{StackName}-service",
             "AdvancedSetting": false,
             "Updatable": false,
             "Validators": [

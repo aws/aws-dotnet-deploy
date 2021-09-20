@@ -11,8 +11,6 @@ namespace AWS.Deploy.Common
 {
     public class Recommendation : IUserInputOption
     {
-        private const string REPLACE_TOKEN_PROJECT_NAME = "{ProjectName}";
-
         public string ProjectPath => ProjectDefinition.ProjectPath;
 
         public ProjectDefinition ProjectDefinition { get; }
@@ -46,22 +44,11 @@ namespace AWS.Deploy.Common
             DeploymentBundle = new DeploymentBundle();
             DeploymentBundleSettings = deploymentBundleSettings;
 
-            _replacementTokens[REPLACE_TOKEN_PROJECT_NAME] = Path.GetFileNameWithoutExtension(projectDefinition.ProjectPath);
-
             foreach (var replacement in additionalReplacements)
             {
                 if (!_replacementTokens.ContainsKey(replacement.Key))
                     _replacementTokens[replacement.Key] = replacement.Value;
             }
-        }
-
-        /// <summary>
-        /// Overrides the project name used as a replacement token in default setting values.
-        /// </summary>
-        /// <param name="name"></param>
-        public void OverrideProjectName(string name)
-        {
-            _replacementTokens[REPLACE_TOKEN_PROJECT_NAME] = name;
         }
 
         public Recommendation ApplyPreviousSettings(IDictionary<string, object> previousSettings)
@@ -71,6 +58,11 @@ namespace AWS.Deploy.Common
             ApplyPreviousSettings(recommendation, previousSettings);
 
             return recommendation;
+        }
+
+        public void AddReplacementToken(string key, string value)
+        {
+            _replacementTokens[key] = value;
         }
 
         private void ApplyPreviousSettings(Recommendation recommendation, IDictionary<string, object> previousSettings)

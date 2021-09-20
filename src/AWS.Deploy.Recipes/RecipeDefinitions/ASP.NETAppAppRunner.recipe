@@ -63,7 +63,7 @@
             "TypeHint": "AppRunnerService",
             "AdvancedSetting": false,
             "Updatable": false,
-            "DefaultValue": "{ProjectName}-service"
+            "DefaultValue": "{StackName}-service"
         },
         {
             "Id": "Port",
