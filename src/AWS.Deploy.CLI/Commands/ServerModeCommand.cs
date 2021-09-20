@@ -13,6 +13,7 @@ using AWS.Deploy.CLI.ServerMode;
 using AWS.Deploy.CLI.ServerMode.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using AWS.Deploy.Common;
 
 namespace AWS.Deploy.CLI.Commands
 {
@@ -65,8 +66,9 @@ namespace AWS.Deploy.CLI.Commands
                     process.EnableRaisingEvents = true;
                     process.Exited += async (sender, args) => { await ShutDownHost(host, cancellationToken); };
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
+                    Console.WriteLine($"kmalhar found Exception - {e.PrettyPrint()}");
                     return;
                 }
 

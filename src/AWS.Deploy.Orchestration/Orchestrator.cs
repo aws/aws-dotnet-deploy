@@ -200,6 +200,7 @@ namespace AWS.Deploy.Orchestration
                 }
                 catch (DockerEngineExceptionBase ex)
                 {
+                    Console.WriteLine($"kmalhar found Exception - {ex.PrettyPrint()}");
                     throw new FailedToGenerateDockerFileException("Failed to generate a docker file", ex);
                 }
             }
@@ -214,6 +215,7 @@ namespace AWS.Deploy.Orchestration
             }
             catch(DockerBuildFailedException ex)
             {
+                Console.WriteLine($"kmalhar found Exception - {ex.PrettyPrint()}");
                 _interactiveService.LogErrorMessageLine("We were unable to build the docker image due to the following error:");
                 _interactiveService.LogErrorMessageLine(ex.Message);
                 _interactiveService.LogErrorMessageLine("Docker builds usually fail due to executing them from a working directory that is incompatible with the Dockerfile.");
@@ -237,12 +239,14 @@ namespace AWS.Deploy.Orchestration
             }
             catch (DotnetPublishFailedException ex)
             {
+                Console.WriteLine($"kmalhar found Exception - {ex.PrettyPrint()}");
                 _interactiveService.LogErrorMessageLine("We were unable to package the application using 'dotnet publish' due to the following error:");
                 _interactiveService.LogErrorMessageLine(ex.Message);
                 return false;
             }
-            catch (FailedToCreateZipFileException)
+            catch (FailedToCreateZipFileException e)
             {
+                Console.WriteLine($"kmalhar found Exception - {e.PrettyPrint()}");
                 _interactiveService.LogErrorMessageLine("We were unable to create a zip archive of the packaged application.");
                 _interactiveService.LogErrorMessageLine("Normally this indicates a problem running the \"zip\" utility. Make sure that application is installed and available in your PATH.");
                 return false;

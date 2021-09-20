@@ -213,6 +213,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine($"kmalhar found Exception - {ex.PrettyPrint()}");
                     output.FailedConfigUpdates.Add(updatedSetting.Key, ex.Message);
                 }
             }

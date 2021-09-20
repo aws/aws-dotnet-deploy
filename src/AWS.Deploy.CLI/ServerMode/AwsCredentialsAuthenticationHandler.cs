@@ -16,6 +16,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
 using AWS.Deploy.CLI.ServerMode.Services;
+using AWS.Deploy.Common;
 
 namespace AWS.Deploy.CLI.ServerMode
 {
@@ -138,8 +139,9 @@ namespace AWS.Deploy.CLI.ServerMode
 
                 return AuthenticateResult.Success(ticket);
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Console.WriteLine($"kmalhar found Exception - {e.PrettyPrint()}");
                 return AuthenticateResult.Fail("Error decoding authorization value");
             }
         }

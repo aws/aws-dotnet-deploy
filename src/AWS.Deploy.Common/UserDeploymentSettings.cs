@@ -42,6 +42,7 @@ namespace AWS.Deploy.Common
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"kmalhar found Exception - {ex.PrettyPrint()}");
                 throw new InvalidUserDeploymentSettingsException("An error occured while trying to deserialize the User Deployment Settings file.", ex);
             }
         }

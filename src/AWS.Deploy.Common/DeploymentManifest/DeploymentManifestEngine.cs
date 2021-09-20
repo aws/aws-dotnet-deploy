@@ -77,6 +77,7 @@ namespace AWS.Deploy.Common.DeploymentManifest
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"kmalhar found Exception - {ex.PrettyPrint()}");
                 throw new FailedToUpdateDeploymentManifestFileException($"Failed to update the deployment manifest file " +
                     $"for the deployment project stored at '{saveCdkDirectoryFullPath}'", ex);
             }

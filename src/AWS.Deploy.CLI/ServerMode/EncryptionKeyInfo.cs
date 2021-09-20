@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using AWS.Deploy.Common;
 using Newtonsoft.Json;
 
 namespace AWS.Deploy.CLI.ServerMode
@@ -45,8 +45,9 @@ namespace AWS.Deploy.CLI.ServerMode
 
                 return keyInfo;
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Console.WriteLine($"kmalhar found Exception - {e.PrettyPrint()}");
                 throw new InvalidEncryptionKeyInfoException($"The symmetric key has not been passed to Stdin or is invalid.");
             }
         }

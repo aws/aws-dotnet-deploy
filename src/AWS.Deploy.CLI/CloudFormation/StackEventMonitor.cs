@@ -112,10 +112,13 @@ namespace AWS.Deploy.CLI.CloudFormation
             catch (AmazonCloudFormationException exception) when (exception.ErrorCode.Equals("ValidationError") && exception.Message.Equals($"Stack [{_stackName}] does not exist"))
             {
                 // Stack is deleted, there could be some missed events between the last poll timestamp and DELETE_COMPLETE
+                Console.WriteLine($"kmalhar found AmazonCloudFormationException - {exception.PrettyPrint()}");
+
             }
-            catch (AmazonCloudFormationException)
+            catch (AmazonCloudFormationException e)
             {
                 // Other AmazonCloudFormationException
+                Console.WriteLine($"kmalhar found AmazonCloudFormationException - {e.PrettyPrint()}");
             }
 
             foreach (var stackEvent in stackEvents.OrderBy(e => e.Timestamp))

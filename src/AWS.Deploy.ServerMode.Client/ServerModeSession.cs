@@ -198,8 +198,9 @@ namespace AWS.Deploy.ServerMode.Client
                 var response = await client.GetAsync(HealthUrl, cancellationToken);
                 return response.IsSuccessStatusCode;
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Console.WriteLine($"kmalhar found Exception - {e.StackTrace}");
                 return false;
             }
         }

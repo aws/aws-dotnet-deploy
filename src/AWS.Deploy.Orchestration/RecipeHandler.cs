@@ -44,13 +44,15 @@ namespace AWS.Deploy.Orchestration
                         }
                         catch (Exception e)
                         {
+                            Console.WriteLine($"kmalhar found Exception - {e.PrettyPrint()}");
                             throw new Exception($"Failed to Deserialize Recipe Definition [{recipeDefinitionFile}]: {e.Message}", e);
                         }
                     }
                 }
             }
-            catch(IOException)
+            catch(IOException e)
             {
+                Console.WriteLine($"kmalhar found Exception - {e.PrettyPrint()}");
                 throw new NoRecipeDefinitionsFoundException("Failed to find recipe definitions");
             }
 

@@ -298,7 +298,10 @@ namespace AWS.Deploy.CLI.Commands
                             awsRegion,
                             callerIdentity.Account);
                     }
-                    catch (FailedToFindDeployableTargetException) { }
+                    catch (FailedToFindDeployableTargetException e)
+                    {
+                        Console.WriteLine($"kmalhar found FailedToFindDeployableTargetException - {e.PrettyPrint()}");
+                    }
 
                     await new DeleteDeploymentCommand(
                         _awsClientFactory,

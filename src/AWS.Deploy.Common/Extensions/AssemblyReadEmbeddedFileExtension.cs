@@ -25,6 +25,7 @@ namespace AWS.Deploy.Common.Extensions
             }
             catch (Exception exception)
             {
+                Console.WriteLine($"kmalhar found Exception - {exception.PrettyPrint()}");
                 throw new Exception($"Failed to read {resourceName} in assembly {assembly}.{Environment.NewLine}{exception.Message}");
             }
         }

@@ -370,8 +370,9 @@ namespace AWS.Deploy.Orchestration.Data
                     .Repositories
                     .ToListAsync();
             }
-            catch (RepositoryNotFoundException)
+            catch (RepositoryNotFoundException e)
             {
+                Console.WriteLine($"kmalhar found Exception - {e.PrettyPrint()}");
                 return new List<Repository>();
             }
         }

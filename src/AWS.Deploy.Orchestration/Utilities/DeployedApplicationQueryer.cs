@@ -123,10 +123,12 @@ namespace AWS.Deploy.Orchestration.Utilities
                 }
                 catch (FailedToUpdateLocalUserSettingsFileException ex)
                 {
+                    Console.WriteLine($"kmalhar found Exception - {ex.PrettyPrint()}");
                     _orchestratorInteractiveService.LogErrorMessageLine(ex.Message);
                 }
                 catch (InvalidLocalUserSettingsFileException ex)
                 {
+                    Console.WriteLine($"kmalhar found Exception - {ex.PrettyPrint()}");
                     _orchestratorInteractiveService.LogErrorMessageLine(ex.Message);
                 }
             }

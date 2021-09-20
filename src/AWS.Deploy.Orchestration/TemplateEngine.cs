@@ -80,8 +80,9 @@ namespace AWS.Deploy.Orchestration
                     _bootstrapper.CreateAsync(template, assemblyName, outputDirectory, templateParameters, false, "").GetAwaiter().GetResult();
                 }
             }
-            catch
+            catch(Exception e)
             {
+                Console.WriteLine($"kmalhar found Exception - {e.PrettyPrint()}");
                 throw new TemplateGenerationFailedException("Failed to generate CDK project from template");
             }
         }
@@ -97,6 +98,7 @@ namespace AWS.Deploy.Orchestration
             }
             catch(Exception e)
             {
+                Console.WriteLine($"kmalhar found Exception - {e.PrettyPrint()}");
                 throw new DefaultTemplateInstallationFailedException("Failed to install the default template that is required to the generate the CDK project", e);
             }
         }

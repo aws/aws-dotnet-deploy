@@ -78,6 +78,7 @@ namespace AWS.Deploy.Orchestration.Utilities
             }
             catch(Exception e)
             {
+                Console.WriteLine($"kmalhar found Exception - {e.PrettyPrint()}");
                 throw new ParsingExistingCloudApplicationMetadataException("Error parsing existing application's metadata", e);
             }
         }

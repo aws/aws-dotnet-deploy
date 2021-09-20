@@ -1,6 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.\r
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
@@ -41,6 +42,7 @@ namespace AWS.Deploy.CLI.Utilities
             }
             catch (ProjectFileNotFoundException ex)
             {
+                Console.WriteLine($"kmalhar found Exception - {ex.PrettyPrint()}");
                 var files = _directoryManager.GetFiles(projectPath, "*.sln");
                 var errorMessage = string.Empty;
 

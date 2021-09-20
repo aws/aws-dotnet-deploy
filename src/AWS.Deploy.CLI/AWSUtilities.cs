@@ -10,6 +10,8 @@ using Amazon.EC2.Model;
 using System.IO;
 using AWS.Deploy.CLI.Utilities;
 using AWS.Deploy.Common.IO;
+using System;
+using AWS.Deploy.Common;
 
 namespace AWS.Deploy.CLI
 {
@@ -64,10 +66,11 @@ namespace AWS.Deploy.CLI
                         return fallbackCredentials;
                 }
             }
-            catch (AmazonServiceException)
+            catch (AmazonServiceException e)
             {
                 // FallbackCredentialsFactory throws an exception if no credentials are found. Burying exception because if no credentials are found
                 // we want to continue and ask the user to select a profile.
+                Console.WriteLine($"kmalhar found AmazonServiceException - {e.PrettyPrint()}");
             }
 
             var sharedCredentials = new SharedCredentialsFile();
@@ -108,8 +111,9 @@ namespace AWS.Deploy.CLI
                 await credentials.GetCredentialsAsync();
                 return true;
             }
-            catch
+            catch (Exception e)
             {
+                Console.WriteLine($"kmalhar found exception - {e.PrettyPrint()}");
                 return false;
             }
         }

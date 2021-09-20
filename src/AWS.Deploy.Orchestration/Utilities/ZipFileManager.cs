@@ -8,6 +8,7 @@ using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
 
 namespace AWS.Deploy.Orchestration.Utilities
@@ -118,8 +119,9 @@ namespace AWS.Deploy.Orchestration.Utilities
                     if (_fileManager.Exists(fullPath))
                         return fullPath;
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
+                    Console.WriteLine($"kmalhar found Exception - {e.PrettyPrint()}");
                     // Catch exceptions and continue if there are invalid characters in the user's path.
                 }
             }

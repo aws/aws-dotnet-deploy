@@ -39,14 +39,16 @@ namespace AWS.Deploy.ServerMode.Client
                         var httpResponseMessage = await client.GetAsync(url, cancellationToken);
                         return httpResponseMessage.IsSuccessStatusCode;
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
+                        Console.WriteLine($"kmalhar found Exception - {e.StackTrace}");
                         return false;
                     }
                 }, frequency, timeout, cancellationToken);
             }
-            catch (TimeoutException)
+            catch (TimeoutException e)
             {
+                Console.WriteLine($"kmalhar found Exception - {e.StackTrace}");
                 return false;
             }
 

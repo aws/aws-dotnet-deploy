@@ -354,8 +354,9 @@ namespace AWS.Deploy.CLI.Commands
                                 throw new InvalidOverrideValueException($"Invalid value {optionSettingValue} for option setting item {optionSettingJsonPath}");
                         }
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
+                        Console.WriteLine($"kmalhar found Exception - {e.PrettyPrint()}");
                         throw new InvalidOverrideValueException($"Invalid value {optionSettingValue} for option setting item {optionSettingJsonPath}");
                     }
 
@@ -483,7 +484,10 @@ namespace AWS.Deploy.CLI.Commands
             {
                 defaultName = _cloudApplicationNameGenerator.GenerateValidName(project, existingApplications);
             }
-            catch { }
+            catch(Exception e)
+            {
+                Console.WriteLine($"kmalhar found AmazonCloudFormationException - {e.PrettyPrint()}");
+            }
 
             var cloudApplicationName = "";
 
@@ -751,6 +755,7 @@ namespace AWS.Deploy.CLI.Commands
                 }
                 catch (ValidationFailedException ex)
                 {
+                    Console.WriteLine($"kmalhar found ValidationFailedException - {ex.PrettyPrint()}");
                     _toolInteractiveService.WriteErrorLine(
                         $"Value [{settingValue}] is not valid: {ex.Message}");
 

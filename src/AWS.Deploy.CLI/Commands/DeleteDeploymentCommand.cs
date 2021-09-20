@@ -171,10 +171,12 @@ namespace AWS.Deploy.CLI.Commands
                 }
                 catch (AmazonCloudFormationException exception) when (exception.ErrorCode.Equals("ValidationError") && exception.Message.Equals($"Stack with id {stackName} does not exist"))
                 {
+                    Console.WriteLine($"kmalhar found AmazonCloudFormationException - {exception.PrettyPrint()}");
                     shouldRetry = false;
                 }
                 catch (AmazonCloudFormationException exception) when (exception.ErrorCode.Equals("Throttling"))
                 {
+                    Console.WriteLine($"kmalhar found AmazonCloudFormationException - {exception.PrettyPrint()}");
                     _interactiveService.WriteDebugLine(exception.PrettyPrint());
                     shouldRetry = true;
                 }

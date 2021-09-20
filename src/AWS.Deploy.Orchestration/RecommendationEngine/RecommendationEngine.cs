@@ -43,6 +43,7 @@ namespace AWS.Deploy.Orchestration.RecommendationEngine
                     }
                     catch (Exception e)
                     {
+                        Console.WriteLine($"kmalhar found Exception - {e.PrettyPrint()}");
                         throw new Exception($"Failed to Deserialize Recipe [{recipeFile}]: {e.Message}", e);
                     }
                 }
@@ -95,12 +96,14 @@ namespace AWS.Deploy.Orchestration.RecommendationEngine
                     }
                     catch (Exception e)
                     {
+                        Console.WriteLine($"kmalhar found Exception - {e.PrettyPrint()}");
                         throw new Exception($"Failed to Deserialize Deployment Bundle [{deploymentBundleFile}]: {e.Message}", e);
                     }
                 }
             }
-            catch(IOException)
+            catch(IOException e)
             {
+                Console.WriteLine($"kmalhar found Exception - {e.PrettyPrint()}");
                 throw new NoDeploymentBundleDefinitionsFoundException("Failed to find a deployment bundle definition");
             }
 

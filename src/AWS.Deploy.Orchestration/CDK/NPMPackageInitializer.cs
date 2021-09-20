@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Orchestration.Utilities;
 
@@ -78,6 +79,7 @@ namespace AWS.Deploy.Orchestration.CDK
             }
             catch (Exception exception)
             {
+                Console.WriteLine($"kmalhar found Exception - {exception.PrettyPrint()}");
                 throw new PackageJsonFileException($"Failed to write {_packageJsonFileName} at {packageJsonFilePath}", exception);
             }
 
@@ -88,6 +90,7 @@ namespace AWS.Deploy.Orchestration.CDK
             }
             catch (Exception exception)
             {
+                Console.WriteLine($"kmalhar found Exception - {exception.PrettyPrint()}");
                 throw new NPMCommandFailedException($"Failed to install npm packages at {workingDirectory}", exception);
             }
         }

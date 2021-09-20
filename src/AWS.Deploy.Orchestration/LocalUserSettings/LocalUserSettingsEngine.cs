@@ -91,6 +91,7 @@ namespace AWS.Deploy.Orchestration.LocalUserSettings
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"kmalhar found Exception - {ex.PrettyPrint()}");
                 throw new FailedToUpdateLocalUserSettingsFileException($"Failed to update the local user settings file " +
                     $"to include the last deployed to stack '{stackName}'.", ex);
             }
@@ -121,6 +122,7 @@ namespace AWS.Deploy.Orchestration.LocalUserSettings
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"kmalhar found Exception - {ex.PrettyPrint()}");
                 throw new FailedToUpdateLocalUserSettingsFileException($"Failed to update the local user settings file " +
                     $"to delete the stack '{stackName}'.", ex);
             }
@@ -153,6 +155,7 @@ namespace AWS.Deploy.Orchestration.LocalUserSettings
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"kmalhar found Exception - {ex.PrettyPrint()}");
                 throw new FailedToUpdateLocalUserSettingsFileException($"Failed to update the local user settings file " +
                     $"to delete orphan stacks.", ex);
             }
@@ -191,6 +194,7 @@ namespace AWS.Deploy.Orchestration.LocalUserSettings
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"kmalhar found Exception - {ex.PrettyPrint()}");
                 throw new InvalidLocalUserSettingsFileException("The Local User Settings file is invalid.", ex);
             }
         }

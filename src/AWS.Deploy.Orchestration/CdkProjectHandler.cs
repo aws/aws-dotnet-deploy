@@ -130,8 +130,9 @@ namespace AWS.Deploy.Orchestration
             {
                 _directoryManager.Delete(cdkProjectPath, true);
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Console.WriteLine($"kmalhar found Exception - {e.PrettyPrint()}");
                 _interactiveService.LogErrorMessageLine($"We were unable to delete the temporary project that was created for this deployment. Please manually delete it at this location: {cdkProjectPath}");
             }
         }

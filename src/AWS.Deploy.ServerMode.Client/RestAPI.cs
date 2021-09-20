@@ -13,6 +13,7 @@
 
 namespace AWS.Deploy.ServerMode.Client
 {
+    using System;
     using System = global::System;
     
     [System.CodeDom.Compiler.GeneratedCode("NSwag", "13.10.9.0 (NJsonSchema v10.4.1.0 (Newtonsoft.Json v12.0.0.0))")]
@@ -1278,6 +1279,7 @@ namespace AWS.Deploy.ServerMode.Client
                 }
                 catch (Newtonsoft.Json.JsonException exception)
                 {
+                    Console.WriteLine($"kmalhar found Exception - {exception.StackTrace}");
                     var message = "Could not deserialize the response body string as " + typeof(T).FullName + ".";
                     throw new ApiException(message, (int)response.StatusCode, responseText, headers, exception);
                 }
@@ -1297,6 +1299,7 @@ namespace AWS.Deploy.ServerMode.Client
                 }
                 catch (Newtonsoft.Json.JsonException exception)
                 {
+                    Console.WriteLine($"kmalhar found Exception - {exception.StackTrace}");
                     var message = "Could not deserialize the response body stream as " + typeof(T).FullName + ".";
                     throw new ApiException(message, (int)response.StatusCode, string.Empty, headers, exception);
                 }

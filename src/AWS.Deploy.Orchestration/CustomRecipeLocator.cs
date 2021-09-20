@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using AWS.Deploy.Common;
 using AWS.Deploy.Common.DeploymentManifest;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Orchestration.Utilities;
@@ -78,8 +79,9 @@ namespace AWS.Deploy.Orchestration
             {
                 return await _deploymentManifestEngine.GetRecipeDefinitionPaths(targetApplicationFullPath);
             }
-            catch
+            catch (Exception e)
             {
+                Console.WriteLine($"kmalhar found Exception - {e.PrettyPrint()}");
                 _orchestratorInteractiveService.LogMessageLine(Environment.NewLine);
                 _orchestratorInteractiveService.LogErrorMessageLine("Failed to load custom deployment recommendations " +
                    "from the deployment-manifest file due to an error while trying to deserialze the file.");

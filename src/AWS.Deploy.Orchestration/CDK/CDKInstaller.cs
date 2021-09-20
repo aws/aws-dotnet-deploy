@@ -4,6 +4,7 @@
 using System;
 using System.Text;
 using System.Threading.Tasks;
+using AWS.Deploy.Common;
 using AWS.Deploy.Orchestration.Utilities;
 
 namespace AWS.Deploy.Orchestration.CDK
@@ -70,6 +71,7 @@ namespace AWS.Deploy.Orchestration.CDK
             }
             catch (Exception exception)
             {
+                Console.WriteLine($"kmalhar found Exception - {exception.PrettyPrint()}");
                 throw new NPMCommandFailedException($"Failed to execute {command}", exception);
             }
 
