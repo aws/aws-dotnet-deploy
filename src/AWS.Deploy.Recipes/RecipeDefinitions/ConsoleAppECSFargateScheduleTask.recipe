@@ -143,7 +143,7 @@
                     "Name": "New Cluster Name",
                     "Description": "The name of the new cluster to create.",
                     "Type": "String",
-                    "DefaultValue": "{ProjectName}",
+                    "DefaultValue": "{StackName}",
                     "AdvancedSetting": false,
                     "Updatable": false,
                     "Validators": [
