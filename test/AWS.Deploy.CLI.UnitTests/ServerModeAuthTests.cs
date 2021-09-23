@@ -255,8 +255,6 @@ namespace AWS.Deploy.CLI.UnitTests
             await interactiveService.StdInWriter.FlushAsync();
 
             var serverCommand = new ServerModeCommand(interactiveService, portNumber, null, false);
-
-
             var cancelSource = new CancellationTokenSource();
             Exception actualException = null;
             try

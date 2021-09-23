@@ -1,9 +1,11 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using System.IO;
 using System.Linq;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
+using AWS.Deploy.CLI.IntegrationTests.Services;
 using AWS.Deploy.CLI.Utilities;
 using Xunit;
 using Task = System.Threading.Tasks.Task;
@@ -12,13 +14,15 @@ using AWS.Deploy.Common.Recipes;
 
 namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 {
-    public class SaveCdkDeploymentProjectTests 
+    public class SaveCdkDeploymentProjectTests : IDisposable
     {
         private readonly CommandLineWrapper _commandLineWrapper;
+        private readonly InMemoryInteractiveService _inMemoryInteractiveService;
 
         public SaveCdkDeploymentProjectTests()
         {
-            _commandLineWrapper = new CommandLineWrapper(new ConsoleOrchestratorLogger(new ConsoleInteractiveServiceImpl()));
+            _inMemoryInteractiveService = new InMemoryInteractiveService();
+            _commandLineWrapper = new CommandLineWrapper(_inMemoryInteractiveService);
         }
 
         [Fact]
@@ -71,5 +75,21 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             var saveDirectoryPath = Path.Combine(tempDirectoryPath, "MyCdkApp");
             await Utilities.CreateCDKDeploymentProject(targetApplicationProjectPath, saveDirectoryPath, false);
         }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _inMemoryInteractiveService.ReadStdOutStartToEnd();
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~SaveCdkDeploymentProjectTests() => Dispose(false);
     }
 }

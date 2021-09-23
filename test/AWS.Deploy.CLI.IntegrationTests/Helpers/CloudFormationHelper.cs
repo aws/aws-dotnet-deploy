@@ -5,6 +5,7 @@ using System;
 using System.Threading.Tasks;
 using Amazon.CloudFormation;
 using Amazon.CloudFormation.Model;
+using AWS.Deploy.Common;
 using Xunit;
 
 namespace AWS.Deploy.CLI.IntegrationTests.Helpers

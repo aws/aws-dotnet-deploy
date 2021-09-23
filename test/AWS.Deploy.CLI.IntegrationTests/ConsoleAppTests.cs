@@ -31,9 +31,6 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
         public ConsoleAppTests()
         {
-            var cloudFormationClient = new AmazonCloudFormationClient();
-            _cloudFormationHelper = new CloudFormationHelper(cloudFormationClient);
-
             var ecsClient = new AmazonECSClient();
             _ecsHelper = new ECSHelper(ecsClient);
 
@@ -53,6 +50,9 @@ namespace AWS.Deploy.CLI.IntegrationTests
             _interactiveService = serviceProvider.GetService<InMemoryInteractiveService>();
             Assert.NotNull(_interactiveService);
 
+            var cloudFormationClient = new AmazonCloudFormationClient();
+            _cloudFormationHelper = new CloudFormationHelper(cloudFormationClient);
+
             _testAppManager = new TestAppManager();
         }
 
@@ -70,7 +70,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
             // Deploy
             var deployArgs = new[] { "deploy", "--project-path", _testAppManager.GetProjectPath(Path.Combine(components)), "--stack-name", _stackName, "--diagnostics" };
-            await _app.Run(deployArgs);
+            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
 
             // Verify application is deployed and running
             Assert.Equal(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
@@ -83,30 +83,27 @@ namespace AWS.Deploy.CLI.IntegrationTests
             var logMessages = await _cloudWatchLogsHelper.GetLogMessages(logGroup);
             Assert.Contains("Hello World!", logMessages);
 
-            var deployStdDebug = _interactiveService.StdDebugReader.ReadAllLines();
+            var deployStdOut = _interactiveService.StdOutReader.ReadAllLines();
 
-            var tempCdkProject = deployStdDebug.FirstOrDefault(line => line.Trim().Contains("The CDK Project is saved at: "))?
-                .Split(": ")[1]
-                .Trim();
-
-            Assert.NotNull(tempCdkProject);
-            Assert.False(Directory.Exists(tempCdkProject));
+            var tempCdkProjectLine = deployStdOut.First(line => line.StartsWith("The CDK Project is saved at:"));
+            var tempCdkProject = tempCdkProjectLine.Split(":")[1].Trim();
+            Assert.False(Directory.Exists(tempCdkProject), $"{tempCdkProject} must not exist.");
 
             // list
-            var listArgs = new[] { "list-deployments" };
-            await _app.Run(listArgs);
+            var listArgs = new[] { "list-deployments", "--diagnostics" };
+            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(listArgs));;
 
             // Verify stack exists in list of deployments
-            var listDeployStdOut = _interactiveService.StdOutReader.ReadAllLines();
-            Assert.Contains(listDeployStdOut, (deployment) => _stackName.Equals(deployment));
+            var listStdOut = _interactiveService.StdOutReader.ReadAllLines();
+            Assert.Contains(listStdOut, (deployment) => _stackName.Equals(deployment));
 
             // Arrange input for delete
             await _interactiveService.StdInWriter.WriteAsync("y"); // Confirm delete
             await _interactiveService.StdInWriter.FlushAsync();
-            var deleteArgs = new[] { "delete-deployment", _stackName };
+            var deleteArgs = new[] { "delete-deployment", _stackName, "--diagnostics" };
 
             // Delete
-            await _app.Run(deleteArgs);
+            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deleteArgs));;
 
             // Verify application is deleted
             Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName), $"{_stackName} still exists.");
@@ -129,6 +126,8 @@ namespace AWS.Deploy.CLI.IntegrationTests
                 {
                     _cloudFormationHelper.DeleteStack(_stackName).GetAwaiter().GetResult();
                 }
+
+                _interactiveService.ReadStdOutStartToEnd();
             }
 
             _isDisposed = true;

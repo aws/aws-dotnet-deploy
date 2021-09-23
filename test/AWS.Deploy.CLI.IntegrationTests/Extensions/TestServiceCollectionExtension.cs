@@ -26,6 +26,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.Extensions
         {
             serviceCollection.AddSingleton<InMemoryInteractiveService>();
             serviceCollection.AddSingleton<IToolInteractiveService>(serviceProvider => serviceProvider.GetService<InMemoryInteractiveService>());
+            serviceCollection.AddSingleton<IOrchestratorInteractiveService>(serviceProvider => serviceProvider.GetService<InMemoryInteractiveService>());
         }
     }
 }
