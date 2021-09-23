@@ -1,15 +1,17 @@
+using System;
+
 namespace AWS.Deploy.Orchestration
 {
     public class SystemCapabilities
     {
-        public bool NodeJsMinVersionInstalled { get; set; }
+        public Version? NodeJsVersion { get; set; }
         public DockerInfo DockerInfo { get; set; }
 
         public SystemCapabilities(
-            bool nodeJsMinVersionInstalled,
+            Version? nodeJsVersion,
             DockerInfo dockerInfo)
         {
-            NodeJsMinVersionInstalled = nodeJsMinVersionInstalled;
+            NodeJsVersion = nodeJsVersion;
             DockerInfo = dockerInfo;
         }
     }
