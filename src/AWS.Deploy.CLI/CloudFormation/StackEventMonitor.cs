@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Amazon.CloudFormation;
 using Amazon.CloudFormation.Model;
+using AWS.Deploy.CLI.Commands.CommandHandlerInput;
 using AWS.Deploy.CLI.Extensions;
 using AWS.Deploy.Common;
 
@@ -31,11 +32,19 @@ namespace AWS.Deploy.CLI.CloudFormation
         private readonly IAmazonCloudFormation _cloudFormationClient;
         private readonly HashSet<string> _processedEventIds = new HashSet<string>();
         private readonly IConsoleUtilities _consoleUtilities;
+        private readonly IToolInteractiveService _interactiveService;
+        private readonly ICommandInputService _commandInputService;
 
-        public StackEventMonitor(string stackName, IAWSClientFactory awsClientFactory, IConsoleUtilities consoleUtilities)
+        public StackEventMonitor(string stackName,
+            IAWSClientFactory awsClientFactory,
+            IConsoleUtilities consoleUtilities,
+            IToolInteractiveService interactiveService,
+            ICommandInputService commandInputService)
         {
             _stackName = stackName;
             _consoleUtilities = consoleUtilities;
+            _interactiveService = interactiveService;
+            _commandInputService = commandInputService;
 
             _cloudFormationClient = awsClientFactory.GetAWSClient<IAmazonCloudFormation>();
         }
@@ -112,10 +121,18 @@ namespace AWS.Deploy.CLI.CloudFormation
             catch (AmazonCloudFormationException exception) when (exception.ErrorCode.Equals("ValidationError") && exception.Message.Equals($"Stack [{_stackName}] does not exist"))
             {
                 // Stack is deleted, there could be some missed events between the last poll timestamp and DELETE_COMPLETE
+                if (_commandInputService.Diagnostics)
+                {
+                    _interactiveService.WriteErrorLine(exception.PrettyPrint());
+                }
             }
-            catch (AmazonCloudFormationException)
+            catch (AmazonCloudFormationException exception)
             {
                 // Other AmazonCloudFormationException
+                if (_commandInputService.Diagnostics)
+                {
+                    _interactiveService.WriteErrorLine(exception.PrettyPrint());
+                }
             }
 
             foreach (var stackEvent in stackEvents.OrderBy(e => e.Timestamp))

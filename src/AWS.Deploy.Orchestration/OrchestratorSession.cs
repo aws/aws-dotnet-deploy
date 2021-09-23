@@ -20,21 +20,26 @@ namespace AWS.Deploy.Orchestration
         public string? AWSRegion { get; set; }
         public string? AWSAccountId { get; set; }
 
+        public bool Diagnostics { get; set; }
+
         public OrchestratorSession(
             ProjectDefinition projectDefinition,
             AWSCredentials awsCredentials,
             string awsRegion,
-            string awsAccountId)
+            string awsAccountId,
+            bool diagnostics)
         {
             ProjectDefinition = projectDefinition;
             AWSCredentials = awsCredentials;
             AWSRegion = awsRegion;
             AWSAccountId = awsAccountId;
+            Diagnostics = diagnostics;
         }
 
-        public OrchestratorSession(ProjectDefinition projectDefinition)
+        public OrchestratorSession(ProjectDefinition projectDefinition, bool diagnostics)
         {
             ProjectDefinition = projectDefinition;
+            Diagnostics = diagnostics;
         }
     }
 }

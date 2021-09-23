@@ -1,6 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,7 +9,9 @@ using Amazon.Runtime;
 using Amazon.Runtime.CredentialManagement;
 using Amazon.EC2.Model;
 using System.IO;
+using AWS.Deploy.CLI.Commands.CommandHandlerInput;
 using AWS.Deploy.CLI.Utilities;
+using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
 
 namespace AWS.Deploy.CLI
@@ -24,63 +27,73 @@ namespace AWS.Deploy.CLI
         private readonly IToolInteractiveService _toolInteractiveService;
         private readonly IConsoleUtilities _consoleUtilities;
         private readonly IDirectoryManager _directoryManager;
+        private readonly ICommandInputService _commandInputService;
 
-        public AWSUtilities(IToolInteractiveService toolInteractiveService, IConsoleUtilities consoleUtilities, IDirectoryManager directoryManager)
+        public AWSUtilities(
+            IToolInteractiveService toolInteractiveService,
+            IConsoleUtilities consoleUtilities,
+            IDirectoryManager directoryManager,
+            ICommandInputService commandInputService)
         {
             _toolInteractiveService = toolInteractiveService;
             _consoleUtilities = consoleUtilities;
             _directoryManager = directoryManager;
+            _commandInputService = commandInputService;
         }
 
         public async Task<AWSCredentials> ResolveAWSCredentials(string? profileName, string? lastUsedProfileName = null)
         {
             async Task<AWSCredentials> Resolve()
             {
-            var chain = new CredentialProfileStoreChain();
+                var chain = new CredentialProfileStoreChain();
 
                 if (!string.IsNullOrEmpty(profileName) && chain.TryGetAWSCredentials(profileName, out var profileCredentials) &&
                     // Skip checking CanLoadCredentials for AssumeRoleAWSCredentials because it might require an MFA token and the callback hasn't been setup yet.
                     (profileCredentials is AssumeRoleAWSCredentials || await CanLoadCredentials(profileCredentials)))
-            {
+                {
                     _toolInteractiveService.WriteLine($"Configuring AWS Credentials from Profile {profileName}.");
                     return profileCredentials;
                 }
 
-            if (!string.IsNullOrEmpty(lastUsedProfileName) &&
+                if (!string.IsNullOrEmpty(lastUsedProfileName) &&
                     chain.TryGetAWSCredentials(lastUsedProfileName, out var lastUsedCredentials) &&
                     await CanLoadCredentials(lastUsedCredentials))
-            {
-                _toolInteractiveService.WriteLine($"Configuring AWS Credentials with previous configured profile value {lastUsedProfileName}.");
+                {
+                    _toolInteractiveService.WriteLine($"Configuring AWS Credentials with previous configured profile value {lastUsedProfileName}.");
                     return lastUsedCredentials;
-            }
+                }
 
-            try
-            {
+                try
+                {
                     var fallbackCredentials = FallbackCredentialsFactory.GetCredentials();
 
                     if (await CanLoadCredentials(fallbackCredentials))
-                {
-                    _toolInteractiveService.WriteLine("Configuring AWS Credentials using AWS SDK credential search.");
+                    {
+                        _toolInteractiveService.WriteLine("Configuring AWS Credentials using AWS SDK credential search.");
                         return fallbackCredentials;
+                    }
                 }
-            }
-            catch (AmazonServiceException)
-            {
-                // FallbackCredentialsFactory throws an exception if no credentials are found. Burying exception because if no credentials are found
-                // we want to continue and ask the user to select a profile.
-            }
+                catch (AmazonServiceException ex)
+                {
+                    // FallbackCredentialsFactory throws an exception if no credentials are found. Burying exception because if no credentials are found
+                    // we want to continue and ask the user to select a profile.
+                    if (_commandInputService.Diagnostics)
+                    {
+                        _toolInteractiveService.WriteErrorLine(ex.PrettyPrint());
+                    }
+                }
 
-            var sharedCredentials = new SharedCredentialsFile();
-            if (sharedCredentials.ListProfileNames().Count == 0)
-            {
-                throw new NoAWSCredentialsFoundException("Unable to resolve AWS credentials to access AWS.");
-            }
+                var sharedCredentials = new SharedCredentialsFile();
+                if (sharedCredentials.ListProfileNames().Count == 0)
+                {
+                    throw new NoAWSCredentialsFoundException("Unable to resolve AWS credentials to access AWS.");
+                }
 
-            var selectedProfileName = _consoleUtilities.AskUserToChoose(sharedCredentials.ListProfileNames(), "Select AWS Credentials Profile", null);
+                var selectedProfileName = _consoleUtilities.AskUserToChoose(sharedCredentials.ListProfileNames(), "Select AWS Credentials Profile", null);
 
                 if (chain.TryGetAWSCredentials(selectedProfileName, out var selectedProfileCredentials) &&
                     (await CanLoadCredentials(selectedProfileCredentials)))
-            {
+                {
                     return selectedProfileCredentials;
                 }
 
@@ -100,16 +113,17 @@ namespace AWS.Deploy.CLI
 
         private async Task<bool> CanLoadCredentials(AWSCredentials credentials)
         {
-            if (null == credentials)
-                return false;
-
             try
             {
                 await credentials.GetCredentialsAsync();
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                if (_commandInputService.Diagnostics)
+                {
+                    _toolInteractiveService.WriteErrorLine(ex.PrettyPrint());
+                }
                 return false;
             }
         }

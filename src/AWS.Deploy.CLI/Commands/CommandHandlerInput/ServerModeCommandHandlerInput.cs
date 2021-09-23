@@ -8,11 +8,10 @@ using System.Threading.Tasks;
 
 namespace AWS.Deploy.CLI.Commands.CommandHandlerInput
 {
-    public class ServerModeCommandHandlerInput
+    public class ServerModeCommandHandlerInput : CommandHandlerInput
     {
         public int Port { get; set; }
-        public int ParentPid { get; set; }
+        public int? ParentPid { get; set; }
         public bool UnsecureMode { get; set; }
-        public bool Diagnostics { get; set; }
     }
 }

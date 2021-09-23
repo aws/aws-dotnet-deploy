@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using AWS.Deploy.CLI.Commands.CommandHandlerInput;
 using AWS.Deploy.CLI.Commands.TypeHints;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
@@ -45,6 +46,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly ISystemCapabilityEvaluator _systemCapabilityEvaluator;
         private readonly OrchestratorSession _session;
         private readonly IDirectoryManager _directoryManager;
+        private readonly ICommandInputService _commandInputService;
         private readonly ICDKVersionDetector _cdkVersionDetector;
 
         public DeployCommand(
@@ -66,7 +68,8 @@ namespace AWS.Deploy.CLI.Commands
             ICustomRecipeLocator customRecipeLocator,
             ISystemCapabilityEvaluator systemCapabilityEvaluator,
             OrchestratorSession session,
-            IDirectoryManager directoryManager)
+            IDirectoryManager directoryManager,
+            ICommandInputService commandInputService)
         {
             _toolInteractiveService = toolInteractiveService;
             _orchestratorInteractiveService = orchestratorInteractiveService;
@@ -83,6 +86,7 @@ namespace AWS.Deploy.CLI.Commands
             _consoleUtilities = consoleUtilities;
             _session = session;
             _directoryManager = directoryManager;
+            _commandInputService = commandInputService;
             _cdkVersionDetector = cdkVersionDetector;
             _cdkManager = cdkManager;
             _customRecipeLocator = customRecipeLocator;
@@ -164,7 +168,7 @@ namespace AWS.Deploy.CLI.Commands
 
             // Get Cloudformation stack name.
             var cloudApplicationName = GetCloudApplicationName(stackName, userDeploymentSettings, compatibleApplications);
-            
+
             // Find existing application with the same CloudFormation stack name.
             var deployedApplication = allDeployedApplications.FirstOrDefault(x => string.Equals(x.Name, cloudApplicationName));
 
@@ -279,7 +283,7 @@ namespace AWS.Deploy.CLI.Commands
             {
                 var errorMessage = $"The existing stack {deployedApplication.StackName} was created from a different deployment recommendation. " +
                     "Deploying to an existing stack must be performed with the original deployment recommendation to avoid unintended destructive changes to the stack.";
-                if (_toolInteractiveService.Diagnostics)
+                if (_commandInputService.Diagnostics)
                 {
                     errorMessage += Environment.NewLine + $"The original deployment recipe ID was {deployedApplication.RecipeId} and the current deployment recipe ID is {deploymentSettingRecipeId}";
                 }
@@ -354,8 +358,12 @@ namespace AWS.Deploy.CLI.Commands
                                 throw new InvalidOverrideValueException($"Invalid value {optionSettingValue} for option setting item {optionSettingJsonPath}");
                         }
                     }
-                    catch (Exception)
+                    catch (Exception exception)
                     {
+                        if (_commandInputService.Diagnostics)
+                        {
+                            _toolInteractiveService.WriteErrorLine(exception.PrettyPrint());
+                        }
                         throw new InvalidOverrideValueException($"Invalid value {optionSettingValue} for option setting item {optionSettingJsonPath}");
                     }
 
@@ -483,7 +491,13 @@ namespace AWS.Deploy.CLI.Commands
             {
                 defaultName = _cloudApplicationNameGenerator.GenerateValidName(project, existingApplications);
             }
-            catch { }
+            catch (Exception exception)
+            {
+                if (_commandInputService.Diagnostics)
+                {
+                    _toolInteractiveService.WriteErrorLine(exception.PrettyPrint());
+                }
+            }
 
             var cloudApplicationName = "";
 

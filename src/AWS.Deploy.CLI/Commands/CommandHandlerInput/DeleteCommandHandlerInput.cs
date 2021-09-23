@@ -8,12 +8,11 @@ using System.Threading.Tasks;
 
 namespace AWS.Deploy.CLI.Commands.CommandHandlerInput
 {
-    public class DeleteCommandHandlerInput
+    public class DeleteCommandHandlerInput : CommandHandlerInput
     {
         public string? Profile { get; set; }
         public string? Region { get; set; }
         public string? ProjectPath { get; set; }
         public string? DeploymentName { get; set; }
-        public bool Diagnostics { get; set; }
     }
 }

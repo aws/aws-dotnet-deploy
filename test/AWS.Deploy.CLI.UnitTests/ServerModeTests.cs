@@ -20,6 +20,7 @@ using AWS.Deploy.CLI.UnitTests.Utilities;
 
 using System.Collections.Generic;
 using System.IO;
+using AWS.Deploy.CLI.Commands.CommandHandlerInput;
 
 namespace AWS.Deploy.CLI.UnitTests
 {
@@ -28,8 +29,8 @@ namespace AWS.Deploy.CLI.UnitTests
         [Fact]
         public async Task TcpPortIsInUseTest()
         {
-            var serverModeCommand1 = new ServerModeCommand(new TestToolInteractiveServiceImpl(), 1234, null, true);
-            var serverModeCommand2 = new ServerModeCommand(new TestToolInteractiveServiceImpl(), 1234, null, true);
+            var serverModeCommand1 = new ServerModeCommand(new TestToolInteractiveServiceImpl(), 1234, null, true, true);
+            var serverModeCommand2 = new ServerModeCommand(new TestToolInteractiveServiceImpl(), 1234, null, true, true);
 
             var serverModeTask1 = serverModeCommand1.ExecuteAsync();
             var serverModeTask2 = serverModeCommand2.ExecuteAsync();
@@ -55,7 +56,8 @@ namespace AWS.Deploy.CLI.UnitTests
             var directoryManager = new DirectoryManager();
             var fileManager = new FileManager();
             var deploymentManifestEngine = new DeploymentManifestEngine(directoryManager, fileManager);
-            var consoleInteractiveServiceImpl = new ConsoleInteractiveServiceImpl();
+            var commandInputService = new CommandInputService();
+            var consoleInteractiveServiceImpl = new ConsoleInteractiveServiceImpl(commandInputService);
             var consoleOrchestratorLogger = new ConsoleOrchestratorLogger(consoleInteractiveServiceImpl);
             var commandLineWrapper = new CommandLineWrapper(consoleOrchestratorLogger);
             var customRecipeLocator = new CustomRecipeLocator(deploymentManifestEngine, consoleOrchestratorLogger, commandLineWrapper, directoryManager);
@@ -73,7 +75,8 @@ namespace AWS.Deploy.CLI.UnitTests
             var directoryManager = new DirectoryManager();
             var fileManager = new FileManager();
             var deploymentManifestEngine = new DeploymentManifestEngine(directoryManager, fileManager);
-            var consoleInteractiveServiceImpl = new ConsoleInteractiveServiceImpl();
+            var commandInputService = new CommandInputService();
+            var consoleInteractiveServiceImpl = new ConsoleInteractiveServiceImpl(commandInputService);
             var consoleOrchestratorLogger = new ConsoleOrchestratorLogger(consoleInteractiveServiceImpl);
             var commandLineWrapper = new CommandLineWrapper(consoleOrchestratorLogger);
             var customRecipeLocator = new CustomRecipeLocator(deploymentManifestEngine, consoleOrchestratorLogger, commandLineWrapper, directoryManager);

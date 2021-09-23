@@ -9,8 +9,10 @@ using System.Security.Cryptography;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using AWS.Deploy.CLI.Commands.CommandHandlerInput;
 using AWS.Deploy.CLI.ServerMode;
 using AWS.Deploy.CLI.ServerMode.Services;
+using AWS.Deploy.Common;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -22,13 +24,15 @@ namespace AWS.Deploy.CLI.Commands
         private readonly int _port;
         private readonly int? _parentPid;
         private readonly bool _noEncryptionKeyInfo;
+        private readonly bool _diagnostics;
 
-        public ServerModeCommand(IToolInteractiveService interactiveService, int port, int? parentPid, bool noEncryptionKeyInfo)
+        public ServerModeCommand(IToolInteractiveService interactiveService, int port, int? parentPid, bool noEncryptionKeyInfo, bool diagnostics)
         {
             _interactiveService = interactiveService;
             _port = port;
             _parentPid = parentPid;
             _noEncryptionKeyInfo = noEncryptionKeyInfo;
+            _diagnostics = diagnostics;
         }
 
         public async Task ExecuteAsync(CancellationToken cancellationToken = default(CancellationToken))
@@ -42,12 +46,26 @@ namespace AWS.Deploy.CLI.Commands
 
             var url = $"http://localhost:{_port}";
 
+            var input = new ServerModeCommandHandlerInput
+            {
+                Port = _port,
+                ParentPid = _parentPid,
+                UnsecureMode = _noEncryptionKeyInfo,
+                Diagnostics = _diagnostics
+            };
+
+            var inputService = new CommandInputService
+            {
+                ServerModeInput = input
+            };
+
             var builder = new WebHostBuilder()
                 .UseKestrel()
                 .UseUrls(url)
                 .ConfigureServices(services =>
                 {
-                    services.AddSingleton<IEncryptionProvider>(encryptionProvider);
+                    services.AddSingleton(encryptionProvider);
+                    services.AddSingleton(inputService);
                 })
                 .UseStartup<Startup>();
 
@@ -65,8 +83,12 @@ namespace AWS.Deploy.CLI.Commands
                     process.EnableRaisingEvents = true;
                     process.Exited += async (sender, args) => { await ShutDownHost(host, cancellationToken); };
                 }
-                catch (Exception)
+                catch (Exception exception)
                 {
+                    if (_diagnostics)
+                    {
+                        _interactiveService.WriteErrorLine(exception.PrettyPrint());
+                    }
                     return;
                 }
 

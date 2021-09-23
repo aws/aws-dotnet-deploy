@@ -69,6 +69,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly ICustomRecipeLocator _customRecipeLocator;
         private readonly ILocalUserSettingsEngine _localUserSettingsEngine;
         private readonly ICDKVersionDetector _cdkVersionDetector;
+        private readonly ICommandInputService _commandInputService;
 
         public CommandFactory(
             IToolInteractiveService toolInteractiveService,
@@ -93,7 +94,8 @@ namespace AWS.Deploy.CLI.Commands
             IDeploymentManifestEngine deploymentManifestEngine,
             ICustomRecipeLocator customRecipeLocator,
             ILocalUserSettingsEngine localUserSettingsEngine,
-            ICDKVersionDetector cdkVersionDetector)
+            ICDKVersionDetector cdkVersionDetector,
+            ICommandInputService commandInputService)
         {
             _toolInteractiveService = toolInteractiveService;
             _orchestratorInteractiveService = orchestratorInteractiveService;
@@ -118,6 +120,7 @@ namespace AWS.Deploy.CLI.Commands
             _customRecipeLocator = customRecipeLocator;
             _localUserSettingsEngine = localUserSettingsEngine;
             _cdkVersionDetector = cdkVersionDetector;
+            _commandInputService = commandInputService;
         }
 
         public Command BuildRootCommand()
@@ -162,9 +165,10 @@ namespace AWS.Deploy.CLI.Commands
 
             deployCommand.Handler = CommandHandler.Create(async (DeployCommandHandlerInput input) =>
             {
+
                 try
                 {
-                    _toolInteractiveService.Diagnostics = input.Diagnostics;
+                    _commandInputService.DeployInput = input;
                     _toolInteractiveService.DisableInteractive = input.Silent;
 
                     var userDeploymentSettings = !string.IsNullOrEmpty(input.Apply)
@@ -185,7 +189,8 @@ namespace AWS.Deploy.CLI.Commands
                         projectDefinition,
                         awsCredentials,
                         awsRegion,
-                        callerIdentity.Account)
+                        callerIdentity.Account,
+                        _commandInputService.Diagnostics)
                     {
                         AWSProfileName = input.Profile ?? userDeploymentSettings?.AWSProfile ?? null
                     };
@@ -211,7 +216,8 @@ namespace AWS.Deploy.CLI.Commands
                         _customRecipeLocator,
                         _systemCapabilityEvaluator,
                         session,
-                        _directoryManager);
+                        _directoryManager,
+                        _commandInputService);
 
                     var deploymentProjectPath = input.DeploymentProject ?? string.Empty;
                     if (!string.IsNullOrEmpty(deploymentProjectPath))
@@ -264,9 +270,10 @@ namespace AWS.Deploy.CLI.Commands
 
             deleteCommand.Handler = CommandHandler.Create(async (DeleteCommandHandlerInput input) =>
             {
+
                 try
                 {
-                    _toolInteractiveService.Diagnostics = input.Diagnostics;
+                    _commandInputService.DeleteInput = input;
 
                     var awsCredentials = await _awsUtilities.ResolveAWSCredentials(input.Profile);
                     var awsRegion = _awsUtilities.ResolveAWSRegion(input.Region);
@@ -296,16 +303,26 @@ namespace AWS.Deploy.CLI.Commands
                             projectDefinition,
                             awsCredentials,
                             awsRegion,
-                            callerIdentity.Account);
+                            callerIdentity.Account,
+                            _commandInputService.Diagnostics);
                     }
-                    catch (FailedToFindDeployableTargetException) { }
+                    catch (FailedToFindDeployableTargetException exception)
+                    {
+                        if (_commandInputService.Diagnostics)
+                        {
+                            _toolInteractiveService.WriteErrorLine(exception.PrettyPrint());
+                        }
+                    }
 
-                    await new DeleteDeploymentCommand(
+                    var delete = new DeleteDeploymentCommand(
                         _awsClientFactory,
                         _toolInteractiveService,
                         _consoleUtilities,
                         _localUserSettingsEngine,
-                        session).ExecuteAsync(input.DeploymentName);
+                        session,
+                        _commandInputService);
+
+                    await delete.ExecuteAsync(input.DeploymentName);
 
                     return CommandReturnCodes.SUCCESS;
                 }
@@ -350,7 +367,7 @@ namespace AWS.Deploy.CLI.Commands
             {
                 try
                 {
-                    _toolInteractiveService.Diagnostics = input.Diagnostics;
+                    _commandInputService.List = input;
 
                     var awsCredentials = await _awsUtilities.ResolveAWSCredentials(input.Profile);
                     var awsRegion = _awsUtilities.ResolveAWSRegion(input.Region);
@@ -411,13 +428,13 @@ namespace AWS.Deploy.CLI.Commands
             {
                 try
                 {
-                    _toolInteractiveService.Diagnostics = input.Diagnostics;
+                    _commandInputService.GenerateDeploymentProjectInput = input;
                     var projectDefinition = await _projectParserUtility.Parse(input.ProjectPath ?? "");
 
                     var saveDirectory = input.Output;
                     var projectDisplayName = input.ProjectDisplayName;
 
-                    OrchestratorSession session = new OrchestratorSession(projectDefinition);
+                    var session = new OrchestratorSession(projectDefinition, input.Diagnostics);
 
                     var targetApplicationFullPath = new DirectoryInfo(projectDefinition.ProjectPath).FullName;
 
@@ -492,8 +509,8 @@ namespace AWS.Deploy.CLI.Commands
             {
                 try
                 {
-                    _toolInteractiveService.Diagnostics = input.Diagnostics;
-                    var serverMode = new ServerModeCommand(_toolInteractiveService, input.Port, input.ParentPid, input.UnsecureMode);
+                    _commandInputService.ServerModeInput = input;
+                    var serverMode = new ServerModeCommand(_toolInteractiveService, input.Port, input.ParentPid, input.UnsecureMode, input.Diagnostics);
 
                     await serverMode.ExecuteAsync();
 

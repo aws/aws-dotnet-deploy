@@ -29,6 +29,7 @@ using AWS.Deploy.Orchestration.DisplayedResources;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Orchestration.LocalUserSettings;
 using AWS.Deploy.CLI.Commands;
+using AWS.Deploy.CLI.Commands.CommandHandlerInput;
 
 namespace AWS.Deploy.CLI.ServerMode.Controllers
 {
@@ -41,18 +42,21 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         private readonly IProjectParserUtility _projectParserUtility;
         private readonly ICloudApplicationNameGenerator _cloudApplicationNameGenerator;
         private readonly IHubContext<DeploymentCommunicationHub, IDeploymentCommunicationHub> _hubContext;
+        private readonly ICommandInputService _commandInputService;
 
         public DeploymentController(
                         IDeploymentSessionStateServer stateServer,
                         IProjectParserUtility projectParserUtility,
                         ICloudApplicationNameGenerator cloudApplicationNameGenerator,
-                        IHubContext<DeploymentCommunicationHub, IDeploymentCommunicationHub> hubContext
+                        IHubContext<DeploymentCommunicationHub, IDeploymentCommunicationHub> hubContext,
+                        ICommandInputService commandInputService
                     )
         {
             _stateServer = stateServer;
             _projectParserUtility = projectParserUtility;
             _cloudApplicationNameGenerator = cloudApplicationNameGenerator;
             _hubContext = hubContext;
+            _commandInputService = commandInputService;
         }
 
         /// <summary>
@@ -497,7 +501,8 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 awsCredentials ?? HttpContext.User.ToAWSCredentials() ??
                     throw new FailedToRetrieveAWSCredentialsException("The tool was not able to retrieve the AWS Credentials."),
                 state.AWSRegion,
-                state.AWSAccountId);
+                state.AWSAccountId,
+                _commandInputService.Diagnostics);
         }
 
         private Orchestrator CreateOrchestrator(SessionState state, IServiceProvider? serviceProvider = null, AWSCredentials? awsCredentials = null)
