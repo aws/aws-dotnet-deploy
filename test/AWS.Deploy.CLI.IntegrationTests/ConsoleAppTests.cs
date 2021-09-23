@@ -85,7 +85,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
             var deployStdDebug = _interactiveService.StdDebugReader.ReadAllLines();
 
-            var tempCdkProject = deployStdDebug.FirstOrDefault(line => line.Trim().Contains("The CDK Project is saved at: "))?
+            var tempCdkProject = deployStdDebug.FirstOrDefault(line => line.Trim().Contains("Saving AWS CDK deployment project to: "))?
                 .Split(": ")[1]
                 .Trim();
 
