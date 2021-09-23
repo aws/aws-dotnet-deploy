@@ -44,7 +44,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 
             // ASSERT
             File.Exists(Path.Combine(webAppWithDockerFilePath, "aws-deployments.json")).ShouldBeTrue();
-            customRecipePaths.Count.ShouldEqual(2);
+            customRecipePaths.Count.ShouldEqual(2, $"Custom recipes found: {Environment.NewLine} {string.Join(Environment.NewLine, customRecipePaths)}");
             customRecipePaths.ShouldContain(Path.Combine(tempDirectoryPath, "MyCdkApp1"));
             customRecipePaths.ShouldContain(Path.Combine(tempDirectoryPath, "MyCdkApp1"));
         }
@@ -70,7 +70,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 
             // ASSERT
             File.Exists(Path.Combine(webAppNoDockerFilePath, "aws-deployments.json")).ShouldBeFalse();
-            customRecipePaths.Count.ShouldEqual(2);
+            customRecipePaths.Count.ShouldEqual(2, $"Custom recipes found: {Environment.NewLine} {string.Join(Environment.NewLine, customRecipePaths)}");
             customRecipePaths.ShouldContain(Path.Combine(tempDirectoryPath, "MyCdkApp1"));
             customRecipePaths.ShouldContain(Path.Combine(tempDirectoryPath, "MyCdkApp1"));
         }
