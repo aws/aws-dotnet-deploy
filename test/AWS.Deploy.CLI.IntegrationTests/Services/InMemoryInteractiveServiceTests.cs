@@ -54,17 +54,17 @@ namespace AWS.Deploy.CLI.IntegrationTests.Services
             service.WriteErrorLine("Error Line 2");
             service.WriteErrorLine("Error Line 3");
 
-            Assert.Equal("Error Line 1", service.StdErrorReader.ReadLine());
-            Assert.Equal("Error Line 2", service.StdErrorReader.ReadLine());
-            Assert.Equal("Error Line 3", service.StdErrorReader.ReadLine());
+            Assert.Equal("Error Line 1", service.StdOutReader.ReadLine());
+            Assert.Equal("Error Line 2", service.StdOutReader.ReadLine());
+            Assert.Equal("Error Line 3", service.StdOutReader.ReadLine());
 
             service.WriteErrorLine("Error Line 4");
             service.WriteErrorLine("Error Line 5");
             service.WriteErrorLine("Error Line 6");
 
-            Assert.Equal("Error Line 4", service.StdErrorReader.ReadLine());
-            Assert.Equal("Error Line 5", service.StdErrorReader.ReadLine());
-            Assert.Equal("Error Line 6", service.StdErrorReader.ReadLine());
+            Assert.Equal("Error Line 4", service.StdOutReader.ReadLine());
+            Assert.Equal("Error Line 5", service.StdOutReader.ReadLine());
+            Assert.Equal("Error Line 6", service.StdOutReader.ReadLine());
         }
 
         [Fact]
@@ -76,17 +76,17 @@ namespace AWS.Deploy.CLI.IntegrationTests.Services
             service.WriteDebugLine("Debug Line 2");
             service.WriteDebugLine("Debug Line 3");
 
-            Assert.Equal("Debug Line 1", service.StdDebugReader.ReadLine());
-            Assert.Equal("Debug Line 2", service.StdDebugReader.ReadLine());
-            Assert.Equal("Debug Line 3", service.StdDebugReader.ReadLine());
+            Assert.Equal("Debug Line 1", service.StdOutReader.ReadLine());
+            Assert.Equal("Debug Line 2", service.StdOutReader.ReadLine());
+            Assert.Equal("Debug Line 3", service.StdOutReader.ReadLine());
 
             service.WriteDebugLine("Debug Line 4");
             service.WriteDebugLine("Debug Line 5");
             service.WriteDebugLine("Debug Line 6");
 
-            Assert.Equal("Debug Line 4", service.StdDebugReader.ReadLine());
-            Assert.Equal("Debug Line 5", service.StdDebugReader.ReadLine());
-            Assert.Equal("Debug Line 6", service.StdDebugReader.ReadLine());
+            Assert.Equal("Debug Line 4", service.StdOutReader.ReadLine());
+            Assert.Equal("Debug Line 5", service.StdOutReader.ReadLine());
+            Assert.Equal("Debug Line 6", service.StdOutReader.ReadLine());
         }
 
         [Fact]

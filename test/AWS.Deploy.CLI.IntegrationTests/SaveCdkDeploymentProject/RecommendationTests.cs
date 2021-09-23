@@ -21,17 +21,20 @@ using Should;
 using AWS.Deploy.Common.Recipes;
 using Newtonsoft.Json;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
+using AWS.Deploy.CLI.IntegrationTests.Services;
 using AWS.Deploy.Orchestration.LocalUserSettings;
 
 namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 {
-    public class RecommendationTests
+    public class RecommendationTests : IDisposable
     {
         private readonly CommandLineWrapper _commandLineWrapper;
+        private readonly InMemoryInteractiveService _inMemoryInteractiveService;
 
         public RecommendationTests()
         {
-            _commandLineWrapper = new CommandLineWrapper(new ConsoleOrchestratorLogger(new ConsoleInteractiveServiceImpl()));
+            _inMemoryInteractiveService  = new InMemoryInteractiveService();
+            _commandLineWrapper = new CommandLineWrapper(_inMemoryInteractiveService);
         }
 
         [Fact]
@@ -202,15 +205,14 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             var deploymentManifestEngine = new DeploymentManifestEngine(directoryManager, fileManager);
             var localUserSettingsEngine = new LocalUserSettingsEngine(fileManager, directoryManager);
             var consoleInteractiveServiceImpl = new ConsoleInteractiveServiceImpl();
-            var consoleOrchestratorLogger = new ConsoleOrchestratorLogger(consoleInteractiveServiceImpl);
-            var commandLineWrapper = new CommandLineWrapper(consoleOrchestratorLogger);
-            var customRecipeLocator = new CustomRecipeLocator(deploymentManifestEngine, consoleOrchestratorLogger, commandLineWrapper, directoryManager);
+            var commandLineWrapper = new CommandLineWrapper(_inMemoryInteractiveService);
+            var customRecipeLocator = new CustomRecipeLocator(deploymentManifestEngine, _inMemoryInteractiveService, commandLineWrapper, directoryManager);
 
             var projectDefinition = await new ProjectDefinitionParser(fileManager, directoryManager).Parse(targetApplicationProjectPath);
             var session = new OrchestratorSession(projectDefinition);
 
             return new Orchestrator(session,
-                consoleOrchestratorLogger,
+                _inMemoryInteractiveService,
                 new Mock<ICdkProjectHandler>().Object,
                 new Mock<ICDKManager>().Object,
                 new Mock<ICDKVersionDetector>().Object,
@@ -229,5 +231,21 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             var recipe = JsonConvert.DeserializeObject<RecipeDefinition>(recipeBody);
             return recipe.Id;
         }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _inMemoryInteractiveService.ReadStdOutStartToEnd();
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~RecommendationTests() => Dispose(false);
     }
 }
