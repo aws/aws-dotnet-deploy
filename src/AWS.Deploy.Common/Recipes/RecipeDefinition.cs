@@ -108,6 +108,11 @@ namespace AWS.Deploy.Common.Recipes
         /// </summary>
         public bool PersistedDeploymentProject { get; set; }
 
+        /// <summary>
+        /// The recipe ID of the base recommendation using which the persisted deployment project is created.
+        /// </summary>
+        public string? BaseRecipeId { get; set; }
+
         public RecipeDefinition(
             string id,
             string version,

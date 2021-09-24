@@ -234,6 +234,7 @@ namespace AWS.Deploy.CLI.Commands
             recipe.CdkProjectTemplate = null;
             recipe.PersistedDeploymentProject = true;
             recipe.RecipePriority = DEFAULT_PERSISTED_RECIPE_PRIORITY;
+            recipe.BaseRecipeId = recommendation.Recipe.Id;
 
             var recipeSnapshotBody = JsonConvert.SerializeObject(recipe, new JsonSerializerSettings
             {

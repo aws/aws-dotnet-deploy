@@ -272,7 +272,12 @@ namespace AWS.Deploy.CLI.Commands
 
             if (selectedRecommendation == null)
             {
-                var errorMessage = $"{deployedApplication.StackName} already exists as a Cloudformation stack but the recommendation used to deploy to the stack was not found.";
+                //check for persisted custom deployment recommendations
+                selectedRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.BaseRecipeId, deployedApplication.RecipeId, StringComparison.InvariantCultureIgnoreCase));
+            }
+            if (selectedRecommendation == null)
+            {
+                var errorMessage = $"{deployedApplication.StackName} already exists as a Cloudformation stack but a compatible recommendation used to perform a re-deployment was not found.";
                 throw new FailedToFindCompatibleRecipeException(errorMessage);
             }
             if (!string.IsNullOrEmpty(deploymentSettingRecipeId) && !string.Equals(deploymentSettingRecipeId, selectedRecommendation.Recipe.Id, StringComparison.InvariantCultureIgnoreCase))
