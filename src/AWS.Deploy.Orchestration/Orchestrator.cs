@@ -159,7 +159,7 @@ namespace AWS.Deploy.Orchestration
                     }
 
                     var cdkProject = await _cdkProjectHandler.ConfigureCdkProject(_session, cloudApplication, recommendation);
-                    _interactiveService.LogMessageLine("AWS CDK is being configured.");
+                    _interactiveService.LogMessageLine("Configuring AWS Cloud Development Kit (CDK)...");
 
                     var projFiles = _directoryManager.GetProjFiles(cdkProject);
                     var cdkVersion = _cdkVersionDetector.Detect(projFiles);

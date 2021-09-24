@@ -45,7 +45,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 
             // Verify project is saved
             var stdOut = interactiveService.StdOutReader.ReadAllLines();
-            var successMessage = $"The CDK deployment project is saved at: {saveDirectoryPath}";
+            var successMessage = $"Saving AWS CDK deployment project to: {saveDirectoryPath}";
             
             if (!isValid)
             {
@@ -87,7 +87,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 
             // Verify project is saved
             var stdOut = interactiveService.StdOutReader.ReadAllLines();
-            var successMessage = $"The CDK deployment project is saved at: {saveDirectoryPath}";
+            var successMessage = $"Saving AWS CDK deployment project to: {saveDirectoryPath}";
 
             if (!isValid)
             {

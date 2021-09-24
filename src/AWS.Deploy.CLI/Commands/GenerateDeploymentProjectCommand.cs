@@ -107,7 +107,7 @@ namespace AWS.Deploy.CLI.Commands
 
             var saveCdkDirectoryFullPath = _directoryManager.GetDirectoryInfo(saveCdkDirectoryPath).FullName;
             _toolInteractiveService.WriteLine();
-            _toolInteractiveService.WriteLine($"The CDK deployment project is saved at: {saveCdkDirectoryFullPath}");
+            _toolInteractiveService.WriteLine($"Saving AWS CDK deployment project to: {saveCdkDirectoryFullPath}");
 
             await _deploymentManifestEngine.UpdateDeploymentManifestFile(saveCdkDirectoryFullPath, _targetApplicationFullPath);
         }
