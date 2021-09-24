@@ -8,14 +8,13 @@ using System.Threading.Tasks;
 
 namespace AWS.Deploy.CLI.Commands.CommandHandlerInput
 {
-    public class DeployCommandHandlerInput
+    public class DeployCommandHandlerInput : CommandHandlerInput
     {
         public string? Profile { get; set; }
         public string? Region { get; set; }
         public string? ProjectPath { get; set; }
         public string? StackName { get; set; }
         public string? Apply { get; set; }
-        public bool Diagnostics { get; set; }
         public bool Silent { get; set; }
         public string? DeploymentProject { get; set; }
     }

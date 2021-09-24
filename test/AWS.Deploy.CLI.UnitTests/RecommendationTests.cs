@@ -40,7 +40,8 @@ namespace AWS.Deploy.CLI.UnitTests
                 await parser.Parse(fullPath),
                 awsCredentials.Object,
                 "us-west-2",
-                "123456789012")
+                "123456789012",
+                true)
             {
                 AWSProfileName = "default"
             };
@@ -273,7 +274,8 @@ namespace AWS.Deploy.CLI.UnitTests
                 null,
                 awsCredentials.Object,
                 "us-west-2",
-                "123456789012")
+                "123456789012",
+                true)
             {
                 AWSProfileName = "default"
             };

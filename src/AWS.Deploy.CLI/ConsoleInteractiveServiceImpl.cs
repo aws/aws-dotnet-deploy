@@ -2,13 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using AWS.Deploy.CLI.Commands.CommandHandlerInput;
 
 namespace AWS.Deploy.CLI
 {
     public class ConsoleInteractiveServiceImpl : IToolInteractiveService
     {
-        public ConsoleInteractiveServiceImpl()
+        private readonly ICommandInputService _commandInputService;
+
+        public ConsoleInteractiveServiceImpl(ICommandInputService commandInputService)
         {
+            _commandInputService = commandInputService;
             Console.Title = Constants.CLI.CLI_APP_NAME;
         }
 
@@ -17,12 +21,11 @@ namespace AWS.Deploy.CLI
             return Console.ReadLine() ?? string.Empty;
         }
 
-        public bool Diagnostics { get; set; }
         public bool DisableInteractive { get; set; }
 
         public void WriteDebugLine(string? message)
         {
-            if (Diagnostics)
+            if (_commandInputService.Diagnostics)
                 Console.WriteLine($"DEBUG: {message}");
         }
 

@@ -32,7 +32,8 @@ namespace AWS.Deploy.CLI.UnitTests
                 parser.Parse(projectPath).Result,
                 awsCredentials.Object,
                 "us-west-2",
-                "123456789012")
+                "123456789012",
+                true)
             {
                 AWSProfileName = "default"
             };

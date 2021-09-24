@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Amazon.CloudFormation;
 using Amazon.CloudFormation.Model;
 using AWS.Deploy.CLI.CloudFormation;
+using AWS.Deploy.CLI.Commands.CommandHandlerInput;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Orchestration;
@@ -27,6 +28,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly IConsoleUtilities _consoleUtilities;
         private readonly ILocalUserSettingsEngine _localUserSettingsEngine;
         private readonly OrchestratorSession? _session;
+        private ICommandInputService _commandInputService;
         private const int MAX_RETRIES = 4;
 
         public DeleteDeploymentCommand(
@@ -34,7 +36,8 @@ namespace AWS.Deploy.CLI.Commands
             IToolInteractiveService interactiveService,
             IConsoleUtilities consoleUtilities,
             ILocalUserSettingsEngine localUserSettingsEngine,
-            OrchestratorSession? session)
+            OrchestratorSession? session,
+            ICommandInputService commandInputService)
         {
             _awsClientFactory = awsClientFactory;
             _interactiveService = interactiveService;
@@ -42,6 +45,7 @@ namespace AWS.Deploy.CLI.Commands
             _cloudFormationClient = _awsClientFactory.GetAWSClient<IAmazonCloudFormation>();
             _localUserSettingsEngine = localUserSettingsEngine;
             _session = session;
+            _commandInputService = commandInputService;
         }
 
         /// <summary>
@@ -64,7 +68,7 @@ namespace AWS.Deploy.CLI.Commands
             }
 
             _interactiveService.WriteLine($"{stackName}: deleting...");
-            var monitor = new StackEventMonitor(stackName, _awsClientFactory, _consoleUtilities);
+            var monitor = new StackEventMonitor(stackName, _awsClientFactory, _consoleUtilities, _interactiveService, _commandInputService);
 
             try
             {
@@ -171,11 +175,18 @@ namespace AWS.Deploy.CLI.Commands
                 }
                 catch (AmazonCloudFormationException exception) when (exception.ErrorCode.Equals("ValidationError") && exception.Message.Equals($"Stack with id {stackName} does not exist"))
                 {
+                    if (_commandInputService.Diagnostics)
+                    {
+                        _interactiveService.WriteDebugLine(exception.PrettyPrint());
+                    }
                     shouldRetry = false;
                 }
                 catch (AmazonCloudFormationException exception) when (exception.ErrorCode.Equals("Throttling"))
                 {
-                    _interactiveService.WriteDebugLine(exception.PrettyPrint());
+                    if (_commandInputService.Diagnostics)
+                    {
+                        _interactiveService.WriteDebugLine(exception.PrettyPrint());
+                    }
                     shouldRetry = true;
                 }
             } while (shouldRetry && retryCount++ < MAX_RETRIES);

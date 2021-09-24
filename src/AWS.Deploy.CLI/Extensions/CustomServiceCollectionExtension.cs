@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using AWS.Deploy.CLI.Commands;
+using AWS.Deploy.CLI.Commands.CommandHandlerInput;
 using AWS.Deploy.CLI.Commands.TypeHints;
 using AWS.Deploy.CLI.Utilities;
 using AWS.Deploy.Common;
@@ -58,6 +59,7 @@ namespace AWS.Deploy.CLI.Extensions
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(ILocalUserSettingsEngine), typeof(LocalUserSettingsEngine), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICommandFactory), typeof(CommandFactory), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICDKVersionDetector), typeof(CDKVersionDetector), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICommandInputService), typeof(CommandInputService), lifetime));
 
             var packageJsonTemplate = typeof(PackageJsonGenerator).Assembly.ReadEmbeddedFile(PackageJsonGenerator.TemplateIdentifier);
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IPackageJsonGenerator), (serviceProvider) => new PackageJsonGenerator(packageJsonTemplate), lifetime));

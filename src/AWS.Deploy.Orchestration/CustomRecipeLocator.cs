@@ -31,7 +31,7 @@ namespace AWS.Deploy.Orchestration
         private readonly ICommandLineWrapper _commandLineWrapper;
         private readonly IDeploymentManifestEngine _deploymentManifestEngine;
         private readonly IDirectoryManager _directoryManager;
-        
+
         public CustomRecipeLocator(IDeploymentManifestEngine deploymentManifestEngine, IOrchestratorInteractiveService orchestratorInteractiveService,
             ICommandLineWrapper commandLineWrapper, IDirectoryManager directoryManager)
         {
@@ -109,7 +109,7 @@ namespace AWS.Deploy.Orchestration
                 rootDirectoryPath = solutionDirectoryPath;
             }
 
-            return GetRecipePathsFromRootDirectory(rootDirectoryPath); 
+            return GetRecipePathsFromRootDirectory(rootDirectoryPath);
         }
 
         /// <summary>
@@ -141,10 +141,15 @@ namespace AWS.Deploy.Orchestration
         private async Task<string?> GetSourceControlRootDirectory(string currentDirectoryPath)
         {
             var possibleRootDirectoryPath = currentDirectoryPath;
-            while (currentDirectoryPath != null && await IsDirectoryUnderSourceControl(currentDirectoryPath))
+            while (await IsDirectoryUnderSourceControl(currentDirectoryPath))
             {
                 possibleRootDirectoryPath = currentDirectoryPath;
-                currentDirectoryPath = _directoryManager.GetDirectoryInfo(currentDirectoryPath).Parent.FullName;
+                var currentDirectoryInfo = _directoryManager.GetDirectoryInfo(currentDirectoryPath);
+                if (currentDirectoryInfo.Parent == null)
+                {
+                    break;
+                }
+                currentDirectoryPath = currentDirectoryInfo.Parent.FullName;
             }
             return possibleRootDirectoryPath;
         }

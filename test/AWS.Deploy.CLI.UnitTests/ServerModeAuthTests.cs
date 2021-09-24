@@ -20,6 +20,7 @@ using AWS.Deploy.CLI.Commands;
 using AWS.Deploy.CLI.UnitTests.Utilities;
 using System.Threading;
 using System.Globalization;
+using AWS.Deploy.CLI.Commands.CommandHandlerInput;
 using AWS.Deploy.CLI.IntegrationTests.Services;
 
 namespace AWS.Deploy.CLI.UnitTests
@@ -211,7 +212,7 @@ namespace AWS.Deploy.CLI.UnitTests
             await interactiveService.StdInWriter.WriteAsync(keyInfoStdin);
             await interactiveService.StdInWriter.FlushAsync();
 
-            var serverCommand = new ServerModeCommand(interactiveService, portNumber, null, false);
+            var serverCommand = new ServerModeCommand(interactiveService, portNumber, null, false, true);
 
 
             var cancelSource = new CancellationTokenSource();
@@ -254,9 +255,7 @@ namespace AWS.Deploy.CLI.UnitTests
             await interactiveService.StdInWriter.WriteAsync(keyInfoStdin);
             await interactiveService.StdInWriter.FlushAsync();
 
-            var serverCommand = new ServerModeCommand(interactiveService, portNumber, null, false);
-
-
+            var serverCommand = new ServerModeCommand(interactiveService, portNumber, null, false, true);
             var cancelSource = new CancellationTokenSource();
             Exception actualException = null;
             try

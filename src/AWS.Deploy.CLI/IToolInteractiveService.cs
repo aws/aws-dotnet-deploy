@@ -13,7 +13,6 @@ namespace AWS.Deploy.CLI
         void WriteErrorLine(string? message);
 
         string ReadLine();
-        bool Diagnostics { get; set; }
         bool DisableInteractive { get; set; }
         ConsoleKeyInfo ReadKey(bool intercept);
     }

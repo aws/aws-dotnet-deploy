@@ -15,7 +15,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.Extensions
         /// </summary>
         /// <param name="reader">Reader that allows line by line reading</param>
         /// <returns>Read lines</returns>
-        public static IEnumerable<string> ReadAllLines(this StreamReader reader)
+        public static IList<string> ReadAllLines(this StreamReader reader)
         {
             var lines = new List<string>();
 

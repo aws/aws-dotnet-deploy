@@ -19,6 +19,7 @@ namespace AWS.Deploy.Orchestration
     public class SystemCapabilityEvaluator : ISystemCapabilityEvaluator
     {
         private readonly ICommandLineWrapper _commandLineWrapper;
+        private static readonly Version MinimumNodeJSVersion = new Version(10,13,0);
 
         public SystemCapabilityEvaluator(ICommandLineWrapper commandLineWrapper)
         {
@@ -28,7 +29,7 @@ namespace AWS.Deploy.Orchestration
         public async Task<SystemCapabilities> Evaluate()
         {
             var dockerTask = HasDockerInstalledAndRunning();
-            var nodeTask = HasMinVersionNodeJs();
+            var nodeTask = GetNodeJsVersion();
 
             var capabilities = new SystemCapabilities(await nodeTask, await dockerTask);
 
@@ -62,7 +63,7 @@ namespace AWS.Deploy.Orchestration
         /// From https://docs.aws.amazon.com/cdk/latest/guide/work-with.html#work-with-prerequisites,
         /// min version is 10.3
         /// </summary>
-        private async Task<bool> HasMinVersionNodeJs()
+        private async Task<Version?> GetNodeJsVersion()
         {
             // run node --version to get the version
             var result = await _commandLineWrapper.TryRunWithResult("node --version");
@@ -73,9 +74,9 @@ namespace AWS.Deploy.Orchestration
                 versionString = versionString.Substring(1, versionString.Length - 1);
 
             if (!result.Success || !Version.TryParse(versionString, out var version))
-                return false;
+                return null;
 
-            return version.Major > 10 || version.Major == 10 && version.Minor >= 3;
+            return version;
         }
 
         /// <summary>
@@ -85,13 +86,22 @@ namespace AWS.Deploy.Orchestration
         {
             var capabilities = new List<SystemCapability>();
             var systemCapabilities = await Evaluate();
-            if (selectedRecommendation.Recipe.DeploymentType == DeploymentTypes.CdkProject &&
-                !systemCapabilities.NodeJsMinVersionInstalled)
+            if (selectedRecommendation.Recipe.DeploymentType == DeploymentTypes.CdkProject)
             {
-                capabilities.Add(new SystemCapability("NodeJS", false, false) {
-                    InstallationUrl = "https://nodejs.org/en/download/",
-                    Message = "The selected deployment uses the AWS CDK, which requires version of Node.js higher than your current installation. The latest LTS version of Node.js is recommended and can be installed from https://nodejs.org/en/download/. Specifically, AWS CDK requires 10.3+ to work properly."
-                });
+                if (systemCapabilities.NodeJsVersion == null)
+                {
+                    capabilities.Add(new SystemCapability("NodeJS", false, false) {
+                        InstallationUrl = "https://nodejs.org/en/download/",
+                        Message = "The selected deployment uses the AWS CDK, which requires Node.js. The latest LTS version of Node.js is recommended and can be installed from https://nodejs.org/en/download/. Specifically, AWS CDK requires 10.13.0+ to work properly."
+                    });
+                }
+                else if (systemCapabilities.NodeJsVersion < MinimumNodeJSVersion)
+                {
+                    capabilities.Add(new SystemCapability("NodeJS", false, false) {
+                        InstallationUrl = "https://nodejs.org/en/download/",
+                        Message = $"The selected deployment uses the AWS CDK, which requires version of Node.js higher than your current installation ({systemCapabilities.NodeJsVersion}). The latest LTS version of Node.js is recommended and can be installed from https://nodejs.org/en/download/. Specifically, AWS CDK requires 10.3+ to work properly."
+                    });
+                }
             }
 
             if (selectedRecommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.Container)

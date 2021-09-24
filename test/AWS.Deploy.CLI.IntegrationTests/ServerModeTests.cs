@@ -37,9 +37,12 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
         private readonly string _awsRegion;
         private readonly TestAppManager _testAppManager;
+        private readonly InMemoryInteractiveService _interactiveService;
 
         public ServerModeTests()
         {
+            _interactiveService = new InMemoryInteractiveService();
+
             var cloudFormationClient = new AmazonCloudFormationClient(Amazon.RegionEndpoint.USWest2);
             _cloudFormationHelper = new CloudFormationHelper(cloudFormationClient);
 
@@ -68,7 +71,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             var portNumber = 4000;
             using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ResolveCredentials);
 
-            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
+            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true, true);
             var cancelSource = new CancellationTokenSource();
 
             var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
@@ -108,7 +111,6 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
             using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ResolveCredentials, aes);
 
-            InMemoryInteractiveService interactiveService = new InMemoryInteractiveService();
             var keyInfo = new EncryptionKeyInfo
             {
                 Version = EncryptionKeyInfo.VERSION_1_0,
@@ -116,10 +118,10 @@ namespace AWS.Deploy.CLI.IntegrationTests
                 IV = Convert.ToBase64String(aes.IV)
             };
             var keyInfoStdin = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(keyInfo)));
-            await interactiveService.StdInWriter.WriteAsync(keyInfoStdin);
-            await interactiveService.StdInWriter.FlushAsync();
+            await _interactiveService.StdInWriter.WriteAsync(keyInfoStdin);
+            await _interactiveService.StdInWriter.FlushAsync();
 
-            var serverCommand = new ServerModeCommand(interactiveService, portNumber, null, false);
+            var serverCommand = new ServerModeCommand(_interactiveService, portNumber, null, false, true);
             var cancelSource = new CancellationTokenSource();
 
             var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
@@ -141,7 +143,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
                 Assert.NotEmpty(getRecommendationOutput.Recommendations);
                 Assert.Equal("AspNetAppElasticBeanstalkLinux", getRecommendationOutput.Recommendations.FirstOrDefault().RecipeId);
 
-                var listDeployStdOut = interactiveService.StdOutReader.ReadAllLines();
+                var listDeployStdOut = _interactiveService.StdOutReader.ReadAllLines();
                 Assert.Contains("Waiting on symmetric key from stdin", listDeployStdOut);
                 Assert.Contains("Encryption provider enabled", listDeployStdOut);
             }
@@ -160,7 +162,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             var portNumber = 4001;
             using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ResolveCredentials);
 
-            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
+            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true, true);
             var cancelSource = new CancellationTokenSource();
 
             var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
@@ -270,6 +272,8 @@ namespace AWS.Deploy.CLI.IntegrationTests
                     {
                         _cloudFormationHelper.DeleteStack(_stackName).GetAwaiter().GetResult();
                     }
+
+                    _interactiveService.ReadStdOutStartToEnd();
                 }
             }
 

@@ -105,7 +105,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.DeploymentManifestFile
 
             // Assert
             Assert.True(_fileManager.Exists(deploymentManifestFilePath));
-            recipeDefinitionPaths.Count.ShouldEqual(3);
+            recipeDefinitionPaths.Count.ShouldEqual(3, $"Custom recipes found: {Environment.NewLine} {string.Join(Environment.NewLine, recipeDefinitionPaths)}");
             recipeDefinitionPaths.ShouldContain(saveCdkDirectoryFullPath);
             recipeDefinitionPaths.ShouldContain(saveCdkDirectoryFullPath2);
             recipeDefinitionPaths.ShouldContain(saveCdkDirectoryFullPath3);
