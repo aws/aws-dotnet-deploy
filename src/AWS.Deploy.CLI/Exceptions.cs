@@ -79,4 +79,9 @@ namespace AWS.Deploy.CLI
     {
         public InvalidSaveDirectoryForCdkProject(string message, Exception? innerException = null) : base(message, innerException) { }
     }
+
+    public class FailedToFindDeploymentProjectRecipeIdException : Exception
+    {
+        public FailedToFindDeploymentProjectRecipeIdException(string message, Exception? innerException = null) : base(message, innerException) { }
+    }
 }

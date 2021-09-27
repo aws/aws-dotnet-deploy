@@ -26,6 +26,11 @@ namespace AWS.Deploy.Orchestration.Utilities
         /// Get the list of compatible applications based on the matching elements of the deployed stack and recommendation, such as Recipe Id.
         /// </summary>
         Task<List<CloudApplication>> GetCompatibleApplications(List<Recommendation> recommendations, List<CloudApplication>? allDeployedApplications = null, OrchestratorSession? session = null);
+
+        /// <summary>
+        /// Checks if the given recommendation can be used for a redeployment to an existing cloudformation stack.
+        /// </summary>
+        bool IsCompatible(CloudApplication application, Recommendation recommendation);
     }
 
     public class DeployedApplicationQueryer : IDeployedApplicationQueryer
@@ -97,10 +102,12 @@ namespace AWS.Deploy.Orchestration.Utilities
             if (allDeployedApplications == null)
                 allDeployedApplications = await GetExistingDeployedApplications();
 
-            foreach (var app in allDeployedApplications)
+            foreach (var application in allDeployedApplications)
             {
-                if (recommendations.Any(rec => string.Equals(rec.Recipe.Id, app.RecipeId, StringComparison.Ordinal)))
-                    compatibleApplications.Add(app);
+                if (recommendations.Any(rec => IsCompatible(application, rec)))
+                {
+                    compatibleApplications.Add(application);
+                }
             }
 
             if (session != null)
@@ -136,6 +143,18 @@ namespace AWS.Deploy.Orchestration.Utilities
             return compatibleApplications
                 .OrderByDescending(x => x.LastUpdatedTime)
                 .ToList();
+        }
+
+        /// <summary>
+        /// Checks if the given recommendation can be used for a redeployment to an existing cloudformation stack.
+        /// </summary>
+        public bool IsCompatible(CloudApplication application, Recommendation recommendation)
+        {
+            if (recommendation.Recipe.PersistedDeploymentProject)
+            {
+                return string.Equals(recommendation.Recipe.BaseRecipeId, application.RecipeId, StringComparison.Ordinal);
+            }
+            return string.Equals(recommendation.Recipe.Id, application.RecipeId, StringComparison.Ordinal);
         }
     }
 }

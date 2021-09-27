@@ -100,6 +100,16 @@
         },
         "Validators": {
             "$ref": "#/definitions/Validators"
+        },
+        "PersistedDeploymentProject": {
+            "type": "boolean",
+            "title": "Persisted Deployment Project",
+            "description": "A boolean value that indicates if this recipe is generated from a saved CDK deployment project."
+        },
+        "BaseRecipeId": {
+            "type": "string",
+            "title": "Base Recipe Id",
+            "description": "The parent recipe Id which was used to create the saved CDK deployment project."
         }
     },
     "definitions": {
