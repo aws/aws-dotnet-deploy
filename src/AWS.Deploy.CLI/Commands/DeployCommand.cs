@@ -164,7 +164,7 @@ namespace AWS.Deploy.CLI.Commands
 
             // Get Cloudformation stack name.
             var cloudApplicationName = GetCloudApplicationName(stackName, userDeploymentSettings, compatibleApplications);
-            
+
             // Find existing application with the same CloudFormation stack name.
             var deployedApplication = allDeployedApplications.FirstOrDefault(x => string.Equals(x.Name, cloudApplicationName));
 
@@ -354,8 +354,9 @@ namespace AWS.Deploy.CLI.Commands
                                 throw new InvalidOverrideValueException($"Invalid value {optionSettingValue} for option setting item {optionSettingJsonPath}");
                         }
                     }
-                    catch (Exception)
+                    catch (Exception exception)
                     {
+                        _toolInteractiveService.WriteDebugLine(exception.PrettyPrint());
                         throw new InvalidOverrideValueException($"Invalid value {optionSettingValue} for option setting item {optionSettingJsonPath}");
                     }
 
@@ -483,7 +484,10 @@ namespace AWS.Deploy.CLI.Commands
             {
                 defaultName = _cloudApplicationNameGenerator.GenerateValidName(project, existingApplications);
             }
-            catch { }
+            catch (Exception exception)
+            {
+                _toolInteractiveService.WriteDebugLine(exception.PrettyPrint());
+            }
 
             var cloudApplicationName = "";
 

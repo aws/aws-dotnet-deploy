@@ -204,7 +204,6 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             var fileManager = new FileManager();
             var deploymentManifestEngine = new DeploymentManifestEngine(directoryManager, fileManager);
             var localUserSettingsEngine = new LocalUserSettingsEngine(fileManager, directoryManager);
-            var consoleInteractiveServiceImpl = new ConsoleInteractiveServiceImpl();
             var commandLineWrapper = new CommandLineWrapper(_inMemoryInteractiveService);
             var customRecipeLocator = new CustomRecipeLocator(deploymentManifestEngine, _inMemoryInteractiveService, commandLineWrapper, directoryManager);
 

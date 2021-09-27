@@ -16,7 +16,7 @@ namespace AWS.Deploy.Orchestration
         Task<string> ConfigureCdkProject(OrchestratorSession session, CloudApplication cloudApplication, Recommendation recommendation);
         string CreateCdkProject(Recommendation recommendation, OrchestratorSession session, string? saveDirectoryPath = null);
         Task DeployCdkProject(OrchestratorSession session, string cdkProjectPath, Recommendation recommendation);
-        void DeleteTemporaryCdkProject(string cdkProjectPath);
+        void DeleteTemporaryCdkProject(OrchestratorSession session, string cdkProjectPath);
     }
 
     public class CdkProjectHandler : ICdkProjectHandler
@@ -83,6 +83,7 @@ namespace AWS.Deploy.Orchestration
                 workingDirectory: cdkProjectPath,
                 environmentVariables: environmentVariables,
                 needAwsCredentials: true,
+                redirectIO: true,
                 streamOutputToInteractiveService: true);
 
             if (cdkDeploy.ExitCode != 0)
@@ -118,7 +119,7 @@ namespace AWS.Deploy.Orchestration
             return saveCdkDirectoryPath;
         }
 
-        public void DeleteTemporaryCdkProject(string cdkProjectPath)
+        public void DeleteTemporaryCdkProject(OrchestratorSession session, string cdkProjectPath)
         {
             var parentPath = Path.GetFullPath(Constants.CDK.ProjectsDirectory);
             cdkProjectPath = Path.GetFullPath(cdkProjectPath);
@@ -130,8 +131,9 @@ namespace AWS.Deploy.Orchestration
             {
                 _directoryManager.Delete(cdkProjectPath, true);
             }
-            catch (Exception)
+            catch (Exception exception)
             {
+                _interactiveService.LogDebugLine(exception.PrettyPrint());
                 _interactiveService.LogErrorMessageLine($"We were unable to delete the temporary project that was created for this deployment. Please manually delete it at this location: {cdkProjectPath}");
             }
         }
