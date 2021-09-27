@@ -33,11 +33,11 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             if (string.IsNullOrEmpty(saveDirectoryPath))
             {
                 saveDirectoryPath = targetApplicationPath + "CDK";
-                deployArgs = new[] { "deployment-project", "generate", "--project-path", targetApplicationPath };
+                deployArgs = new[] { "deployment-project", "generate", "--project-path", targetApplicationPath, "--diagnostics" };
             }  
             else
             {
-                deployArgs = new[] { "deployment-project", "generate", "--project-path", targetApplicationPath, "--output", saveDirectoryPath };
+                deployArgs = new[] { "deployment-project", "generate", "--project-path", targetApplicationPath, "--output", saveDirectoryPath, "--diagnostics" };
             }
                 
 
@@ -59,14 +59,18 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             VerifyCreatedArtifacts(targetApplicationPath, saveDirectoryPath);
         }
 
-        public static async Task CreateCDKDeploymentProjectWithRecipeName(string targetApplicationPath, string recipeName, string option, string saveDirectoryPath = null, bool isValid = true)
+        public static async Task CreateCDKDeploymentProjectWithRecipeName(string targetApplicationPath, string recipeName, string option, string saveDirectoryPath = null, bool isValid = true, bool underSourceControl = true)
         {
             var (app, interactiveService) = GetAppServiceProvider();
             Assert.NotNull(app);
             Assert.NotNull(interactiveService);
 
             // Arrange input for saving the CDK deployment project
-            await interactiveService.StdInWriter.WriteAsync(option); // select recipe to save the CDK deployment project
+            await interactiveService.StdInWriter.WriteLineAsync(option); // select recipe to save the CDK deployment project
+            if (!underSourceControl)
+            {
+                await interactiveService.StdInWriter.WriteAsync("y"); // proceed to save without source control.
+            }
             await interactiveService.StdInWriter.FlushAsync();
 
 
@@ -75,11 +79,11 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             if (string.IsNullOrEmpty(saveDirectoryPath))
             {
                 saveDirectoryPath = targetApplicationPath + "CDK";
-                deployArgs = new[] { "deployment-project", "generate", "--project-path", targetApplicationPath, "--project-display-name", recipeName};
+                deployArgs = new[] { "deployment-project", "generate", "--project-path", targetApplicationPath, "--project-display-name", recipeName, "--diagnostics"};
             }
             else
             {
-                deployArgs = new[] { "deployment-project", "generate", "--project-path", targetApplicationPath, "--output", saveDirectoryPath, "--project-display-name", recipeName };
+                deployArgs = new[] { "deployment-project", "generate", "--project-path", targetApplicationPath, "--output", saveDirectoryPath, "--project-display-name", recipeName, "--diagnostics" };
             }
 
 

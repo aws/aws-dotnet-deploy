@@ -20,6 +20,7 @@ using AWS.Deploy.Orchestration.Utilities;
 using AWS.Deploy.Orchestration.DisplayedResources;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Orchestration.LocalUserSettings;
+using Newtonsoft.Json;
 
 namespace AWS.Deploy.CLI.Commands
 {
@@ -45,6 +46,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly ISystemCapabilityEvaluator _systemCapabilityEvaluator;
         private readonly OrchestratorSession _session;
         private readonly IDirectoryManager _directoryManager;
+        private readonly IFileManager _fileManager;
         private readonly ICDKVersionDetector _cdkVersionDetector;
 
         public DeployCommand(
@@ -66,7 +68,8 @@ namespace AWS.Deploy.CLI.Commands
             ICustomRecipeLocator customRecipeLocator,
             ISystemCapabilityEvaluator systemCapabilityEvaluator,
             OrchestratorSession session,
-            IDirectoryManager directoryManager)
+            IDirectoryManager directoryManager,
+            IFileManager fileManager)
         {
             _toolInteractiveService = toolInteractiveService;
             _orchestratorInteractiveService = orchestratorInteractiveService;
@@ -83,6 +86,7 @@ namespace AWS.Deploy.CLI.Commands
             _consoleUtilities = consoleUtilities;
             _session = session;
             _directoryManager = directoryManager;
+            _fileManager = fileManager;
             _cdkVersionDetector = cdkVersionDetector;
             _cdkManager = cdkManager;
             _customRecipeLocator = customRecipeLocator;
@@ -174,12 +178,12 @@ namespace AWS.Deploy.CLI.Commands
                 // Verify that the target application can be deployed using the current set of recommendations
                 if (!compatibleApplications.Any(app => app.StackName.Equals(deployedApplication.StackName, StringComparison.Ordinal)))
                 {
-                    var errorMessage = $"{deployedApplication.StackName} already exists as a Cloudformation stack but a compatible recommendation to perform a redeployment was no found";
+                    var errorMessage = $"{deployedApplication.StackName} already exists as a Cloudformation stack but a compatible recommendation to perform a redeployment was not found";
                     throw new FailedToFindCompatibleRecipeException(errorMessage);
                 }
 
                 // preset settings for deployment based on last deployment.
-                selectedRecommendation = await GetSelectedRecommendationFromPreviousDeployment(recommendations, deployedApplication, userDeploymentSettings);
+                selectedRecommendation = await GetSelectedRecommendationFromPreviousDeployment(recommendations, deployedApplication, userDeploymentSettings, deploymentProjectPath);
             }
             else
             {
@@ -264,15 +268,14 @@ namespace AWS.Deploy.CLI.Commands
             return recommendations;
         }
 
-        private async Task<Recommendation> GetSelectedRecommendationFromPreviousDeployment(List<Recommendation> recommendations, CloudApplication deployedApplication, UserDeploymentSettings? userDeploymentSettings)
+        private async Task<Recommendation> GetSelectedRecommendationFromPreviousDeployment(List<Recommendation> recommendations, CloudApplication deployedApplication, UserDeploymentSettings? userDeploymentSettings, string deploymentProjectPath)
         {
             var existingCloudApplicationMetadata = await _templateMetadataReader.LoadCloudApplicationMetadata(deployedApplication.Name);
             var deploymentSettingRecipeId = userDeploymentSettings?.RecipeId;
-            var selectedRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, deployedApplication.RecipeId, StringComparison.InvariantCultureIgnoreCase));
-
+            var selectedRecommendation = await GetRecommendationForRedeployment(recommendations, deployedApplication, deploymentProjectPath);
             if (selectedRecommendation == null)
             {
-                var errorMessage = $"{deployedApplication.StackName} already exists as a Cloudformation stack but the recommendation used to deploy to the stack was not found.";
+                var errorMessage = $"{deployedApplication.StackName} already exists as a Cloudformation stack but a compatible recommendation used to perform a re-deployment was not found.";
                 throw new FailedToFindCompatibleRecipeException(errorMessage);
             }
             if (!string.IsNullOrEmpty(deploymentSettingRecipeId) && !string.Equals(deploymentSettingRecipeId, selectedRecommendation.Recipe.Id, StringComparison.InvariantCultureIgnoreCase))
@@ -315,6 +318,51 @@ namespace AWS.Deploy.CLI.Commands
             }
 
             return selectedRecommendation;
+        }
+
+        private async Task<Recommendation?> GetRecommendationForRedeployment(List<Recommendation> recommendations, CloudApplication deployedApplication, string deploymentProjectPath)
+        {
+            var targetRecipeId = !string.IsNullOrEmpty(deploymentProjectPath) ?
+                await GetDeploymentProjectRecipeId(deploymentProjectPath) : deployedApplication.RecipeId;
+
+            foreach (var recommendation in recommendations)
+            {
+                if (string.Equals(recommendation.Recipe.Id, targetRecipeId) && _deployedApplicationQueryer.IsCompatible(deployedApplication, recommendation))
+                {
+                    return recommendation;
+                }
+            }
+            return null;
+        }
+
+        private async Task<string> GetDeploymentProjectRecipeId(string deploymentProjectPath)
+        {
+            if (!_directoryManager.Exists(deploymentProjectPath))
+            {
+                throw new InvalidOperationException($"Invalid deployment project path. {deploymentProjectPath} does not exist on the file system.");
+            }
+
+            try
+            {
+                var recipeFiles = _directoryManager.GetFiles(deploymentProjectPath, "*.recipe");
+                if (recipeFiles.Length == 0)
+                {
+                    throw new InvalidOperationException($"Failed to find a recipe file at {deploymentProjectPath}");
+                }
+                if (recipeFiles.Length > 1)
+                {
+                    throw new InvalidOperationException($"Found more than one recipe files at {deploymentProjectPath}. Only one recipe file per deployment project is supported.");
+                }
+
+                var recipeFilePath = recipeFiles.First();
+                var recipeBody = await _fileManager.ReadAllTextAsync(recipeFilePath);
+                var recipe = JsonConvert.DeserializeObject<RecipeDefinition>(recipeBody);
+                return recipe.Id;
+            }
+            catch (Exception ex)
+            {
+                throw new FailedToFindDeploymentProjectRecipeIdException($"Failed to find a recipe ID for the deployment project located at {deploymentProjectPath}", ex);
+            }
         }
 
         /// <summary>

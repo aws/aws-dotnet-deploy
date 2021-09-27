@@ -211,7 +211,8 @@ namespace AWS.Deploy.CLI.Commands
                         _customRecipeLocator,
                         _systemCapabilityEvaluator,
                         session,
-                        _directoryManager);
+                        _directoryManager,
+                        _fileManager);
 
                     var deploymentProjectPath = input.DeploymentProject ?? string.Empty;
                     if (!string.IsNullOrEmpty(deploymentProjectPath))
