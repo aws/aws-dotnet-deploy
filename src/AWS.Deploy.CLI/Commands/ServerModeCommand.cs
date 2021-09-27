@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using AWS.Deploy.CLI.ServerMode;
 using AWS.Deploy.CLI.ServerMode.Services;
+using AWS.Deploy.Common;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -65,8 +66,9 @@ namespace AWS.Deploy.CLI.Commands
                     process.EnableRaisingEvents = true;
                     process.Exited += async (sender, args) => { await ShutDownHost(host, cancellationToken); };
                 }
-                catch (Exception)
+                catch (Exception exception)
                 {
+                    _interactiveService.WriteDebugLine(exception.PrettyPrint());
                     return;
                 }
 

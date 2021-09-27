@@ -171,7 +171,7 @@ namespace AWS.Deploy.Orchestration
                     }
                     finally
                     {
-                        _cdkProjectHandler.DeleteTemporaryCdkProject(cdkProject);
+                        _cdkProjectHandler.DeleteTemporaryCdkProject(_session, cdkProject);
                     }
                     break;
                 default:
@@ -235,16 +235,18 @@ namespace AWS.Deploy.Orchestration
             {
                 await _deploymentBundleHandler.CreateDotnetPublishZip(recommendation);
             }
-            catch (DotnetPublishFailedException ex)
+            catch (DotnetPublishFailedException exception)
             {
                 _interactiveService.LogErrorMessageLine("We were unable to package the application using 'dotnet publish' due to the following error:");
-                _interactiveService.LogErrorMessageLine(ex.Message);
+                _interactiveService.LogErrorMessageLine(exception.Message);
+                _interactiveService.LogDebugLine(exception.PrettyPrint());
                 return false;
             }
-            catch (FailedToCreateZipFileException)
+            catch (FailedToCreateZipFileException exception)
             {
                 _interactiveService.LogErrorMessageLine("We were unable to create a zip archive of the packaged application.");
                 _interactiveService.LogErrorMessageLine("Normally this indicates a problem running the \"zip\" utility. Make sure that application is installed and available in your PATH.");
+                _interactiveService.LogDebugLine(exception.PrettyPrint());
                 return false;
             }
 

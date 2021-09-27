@@ -64,7 +64,7 @@ namespace AWS.Deploy.CLI.Commands
             }
 
             _interactiveService.WriteLine($"{stackName}: deleting...");
-            var monitor = new StackEventMonitor(stackName, _awsClientFactory, _consoleUtilities);
+            var monitor = new StackEventMonitor(stackName, _awsClientFactory, _consoleUtilities, _interactiveService);
 
             try
             {
@@ -171,6 +171,7 @@ namespace AWS.Deploy.CLI.Commands
                 }
                 catch (AmazonCloudFormationException exception) when (exception.ErrorCode.Equals("ValidationError") && exception.Message.Equals($"Stack with id {stackName} does not exist"))
                 {
+                    _interactiveService.WriteDebugLine(exception.PrettyPrint());
                     shouldRetry = false;
                 }
                 catch (AmazonCloudFormationException exception) when (exception.ErrorCode.Equals("Throttling"))
