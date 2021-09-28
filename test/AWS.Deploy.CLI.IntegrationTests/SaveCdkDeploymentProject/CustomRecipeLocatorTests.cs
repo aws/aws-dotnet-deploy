@@ -1,6 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using System.IO;
 using AWS.Deploy.CLI.Utilities;
 using AWS.Deploy.Common.DeploymentManifest;
@@ -10,17 +11,19 @@ using Xunit;
 using Task = System.Threading.Tasks.Task;
 using Should;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
+using AWS.Deploy.CLI.IntegrationTests.Services;
 
 namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 {
-    public class CustomRecipeLocatorTests
+    public class CustomRecipeLocatorTests : IDisposable
     {
         private readonly CommandLineWrapper _commandLineWrapper;
+        private readonly InMemoryInteractiveService _inMemoryInteractiveService;
 
         public CustomRecipeLocatorTests()
         {
-            _commandLineWrapper = new CommandLineWrapper(new ConsoleOrchestratorLogger(new ConsoleInteractiveServiceImpl()));
-        }
+            _inMemoryInteractiveService = new InMemoryInteractiveService();
+            _commandLineWrapper = new CommandLineWrapper(_inMemoryInteractiveService);        }
 
         [Fact]
         public async Task LocateCustomRecipePathsWithManifestFile()
@@ -41,7 +44,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 
             // ASSERT
             File.Exists(Path.Combine(webAppWithDockerFilePath, "aws-deployments.json")).ShouldBeTrue();
-            customRecipePaths.Count.ShouldEqual(2);
+            customRecipePaths.Count.ShouldEqual(2, $"Custom recipes found: {Environment.NewLine} {string.Join(Environment.NewLine, customRecipePaths)}");
             customRecipePaths.ShouldContain(Path.Combine(tempDirectoryPath, "MyCdkApp1"));
             customRecipePaths.ShouldContain(Path.Combine(tempDirectoryPath, "MyCdkApp1"));
         }
@@ -67,7 +70,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 
             // ASSERT
             File.Exists(Path.Combine(webAppNoDockerFilePath, "aws-deployments.json")).ShouldBeFalse();
-            customRecipePaths.Count.ShouldEqual(2);
+            customRecipePaths.Count.ShouldEqual(2, $"Custom recipes found: {Environment.NewLine} {string.Join(Environment.NewLine, customRecipePaths)}");
             customRecipePaths.ShouldContain(Path.Combine(tempDirectoryPath, "MyCdkApp1"));
             customRecipePaths.ShouldContain(Path.Combine(tempDirectoryPath, "MyCdkApp1"));
         }
@@ -77,10 +80,24 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             var directoryManager = new DirectoryManager();
             var fileManager = new FileManager();
             var deploymentManifestEngine = new DeploymentManifestEngine(directoryManager, fileManager);
-            var consoleInteractiveServiceImpl = new ConsoleInteractiveServiceImpl();
-            var consoleOrchestratorLogger = new ConsoleOrchestratorLogger(consoleInteractiveServiceImpl);
-            var commandLineWrapper = new CommandLineWrapper(consoleOrchestratorLogger);
-            return new CustomRecipeLocator(deploymentManifestEngine, consoleOrchestratorLogger, commandLineWrapper, directoryManager);
+            var commandLineWrapper = new CommandLineWrapper(_inMemoryInteractiveService);
+            return new CustomRecipeLocator(deploymentManifestEngine, _inMemoryInteractiveService, commandLineWrapper, directoryManager);
         }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _inMemoryInteractiveService.ReadStdOutStartToEnd();
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~CustomRecipeLocatorTests() => Dispose(false);
     }
 }

@@ -124,16 +124,18 @@ namespace AWS.Deploy.Orchestration.Utilities
                 catch (FailedToUpdateLocalUserSettingsFileException ex)
                 {
                     _orchestratorInteractiveService.LogErrorMessageLine(ex.Message);
+                    _orchestratorInteractiveService.LogDebugLine(ex.PrettyPrint());
                 }
                 catch (InvalidLocalUserSettingsFileException ex)
                 {
                     _orchestratorInteractiveService.LogErrorMessageLine(ex.Message);
+                    _orchestratorInteractiveService.LogDebugLine(ex.PrettyPrint());
                 }
             }
 
             return compatibleApplications
                 .OrderByDescending(x => x.LastUpdatedTime)
-                .ToList(); ;
+                .ToList();
         }
     }
 }
