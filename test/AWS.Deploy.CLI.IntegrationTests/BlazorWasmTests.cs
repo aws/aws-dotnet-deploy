@@ -73,8 +73,8 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
             var deployStdOut = _interactiveService.StdOutReader.ReadAllLines();
 
-            var tempCdkProjectLine = deployStdOut.First(line => line.StartsWith("The CDK Project is saved at:"));
-            var tempCdkProject = tempCdkProjectLine.Split(":")[1].Trim();
+            var tempCdkProjectLine = deployStdOut.First(line => line.StartsWith("Saving AWS CDK deployment project to: "));
+            var tempCdkProject = tempCdkProjectLine.Split(": ")[1].Trim();
             Assert.False(Directory.Exists(tempCdkProject), $"{tempCdkProject} must not exist.");
 
             // Example URL string: BlazorWasm5068e7a879d5ee.EndpointURL = http://blazorwasm5068e7a879d5ee-blazorhostc7106839-a2585dcq9xve.s3-website-us-west-2.amazonaws.com/

@@ -48,7 +48,7 @@ namespace AWS.Deploy.Orchestration
             else
             {
                 // Create a new temporary CDK project for a new deployment
-                _interactiveService.LogMessageLine($"Generating a {recommendation.Recipe.Name} CDK Project");
+                _interactiveService.LogMessageLine("Generating AWS Cloud Development Kit (AWS CDK) deployment project");
                 cdkProjectPath = CreateCdkProject(recommendation, session);
             }
 
@@ -69,7 +69,7 @@ namespace AWS.Deploy.Orchestration
                 { EnvironmentVariableKeys.AWS_EXECUTION_ENV, recipeInfo }
             };
 
-            _interactiveService.LogMessageLine("Starting deployment of CDK Project");
+            _interactiveService.LogMessageLine("Deploying AWS CDK project");
 
             // Ensure region is bootstrapped
             await _commandLineWrapper.Run($"npx cdk bootstrap aws://{session.AWSAccountId}/{session.AWSRegion}",
@@ -115,7 +115,7 @@ namespace AWS.Deploy.Orchestration
             var templateEngine = new TemplateEngine();
             templateEngine.GenerateCDKProjectFromTemplate(recommendation, session, saveCdkDirectoryPath, assemblyName);
 
-            _interactiveService.LogDebugLine($"The CDK Project is saved at: {saveCdkDirectoryPath}");
+            _interactiveService.LogDebugLine($"Saving AWS CDK deployment project to: {saveCdkDirectoryPath}");
             return saveCdkDirectoryPath;
         }
 

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
@@ -25,6 +26,7 @@ namespace AWS.Deploy.Orchestration
     /// </summary>
     public class Orchestrator
     {
+        private static readonly SemaphoreSlim s_cdkManagerSemaphoreSlim = new(1,1);
         private const string REPLACE_TOKEN_LATEST_DOTNET_BEANSTALK_PLATFORM_ARN = "{LatestDotnetBeanstalkPlatformArn}";
 
         private readonly ICdkProjectHandler? _cdkProjectHandler;
@@ -158,12 +160,22 @@ namespace AWS.Deploy.Orchestration
                         throw new InvalidOperationException($"{nameof(_directoryManager)} must not be null.");
                     }
 
+                    _interactiveService.LogMessageLine("Configuring AWS Cloud Development Kit (CDK)...");
                     var cdkProject = await _cdkProjectHandler.ConfigureCdkProject(_session, cloudApplication, recommendation);
-                    _interactiveService.LogMessageLine("AWS CDK is being configured.");
 
                     var projFiles = _directoryManager.GetProjFiles(cdkProject);
                     var cdkVersion = _cdkVersionDetector.Detect(projFiles);
-                    await _cdkManager.EnsureCompatibleCDKExists(Constants.CDK.DeployToolWorkspaceDirectoryRoot, cdkVersion);
+
+                    await s_cdkManagerSemaphoreSlim.WaitAsync();
+
+                    try
+                    {
+                        await _cdkManager.EnsureCompatibleCDKExists(Constants.CDK.DeployToolWorkspaceDirectoryRoot, cdkVersion);
+                    }
+                    finally
+                    {
+                        s_cdkManagerSemaphoreSlim.Release();
+                    }
 
                     try
                     {
