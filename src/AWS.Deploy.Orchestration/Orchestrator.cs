@@ -160,8 +160,8 @@ namespace AWS.Deploy.Orchestration
                         throw new InvalidOperationException($"{nameof(_directoryManager)} must not be null.");
                     }
 
+                    _interactiveService.LogMessageLine("Configuring AWS Cloud Development Kit (CDK)...");
                     var cdkProject = await _cdkProjectHandler.ConfigureCdkProject(_session, cloudApplication, recommendation);
-                    _interactiveService.LogMessageLine("AWS CDK is being configured.");
 
                     var projFiles = _directoryManager.GetProjFiles(cdkProject);
                     var cdkVersion = _cdkVersionDetector.Detect(projFiles);
