@@ -1,6 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.\r
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using System.Collections.Generic;
 
 namespace AWS.Deploy.CLI.ServerMode.Models
@@ -22,6 +23,10 @@ namespace AWS.Deploy.CLI.ServerMode.Models
         public bool Advanced { get; set; }
 
         public bool Updatable { get; set; }
+
+        public IList<string> AllowedValues { get; set; } = new List<string>();
+
+        public IDictionary<string, string> ValueMapping { get; set; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         public List<OptionSettingItemSummary> ChildOptionSettings { get; set; } = new();
 
