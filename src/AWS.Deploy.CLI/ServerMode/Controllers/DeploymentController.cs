@@ -171,6 +171,8 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                     Value = recommendation.GetOptionSettingValue(setting),
                     Advanced = setting.AdvancedSetting,
                     Updatable = (!recommendation.IsExistingCloudApplication || setting.Updatable) && recommendation.IsOptionSettingDisplayable(setting),
+                    AllowedValues = setting.AllowedValues,
+                    ValueMapping = setting.ValueMapping,
                     ChildOptionSettings = ListOptionSettingSummary(recommendation, setting.ChildOptionSettings)
                 };
 
