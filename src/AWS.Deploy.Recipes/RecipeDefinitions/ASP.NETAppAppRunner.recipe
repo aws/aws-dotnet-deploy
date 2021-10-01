@@ -8,7 +8,7 @@
     "CdkProjectTemplate": "../CdkTemplates/AspNetAppAppRunner",
     "CdkProjectTemplateId": "netdeploy.AspNetAppAppRunner",
     "ShortDescription": "ASP.NET Core application deployed to AWS App Runner",
-    "Description": "ASP.NET Core applications built as a container image and deployed to AWS App Runner, a fully management environment as a container image. If your project does not contain a Dockerfile, one will be generated for the project.",
+    "Description": "This ASP.NET Core application will be built as a container image and deployed to AWS App Runner. If your project does not contain a Dockerfile, it will be automatically generated. Recommended if you want to deploy your application as a container image on a fully managed environment.",
     "TargetService": "AWS App Runner",
 
     "DisplayedResources": [
