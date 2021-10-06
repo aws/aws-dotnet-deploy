@@ -21,7 +21,7 @@ namespace BlazorWasm.Configurations
         /// <summary>
         /// Enable CloudFront Access Logging.
         /// </summary>
-        public bool EnableAccessLogging { get; set; } = false;
+        public bool Enable { get; set; } = false;
 
         /// <summary>
         /// Include cookies in access logs.
