@@ -32,7 +32,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             // default save directory
             if (string.IsNullOrEmpty(saveDirectoryPath))
             {
-                saveDirectoryPath = targetApplicationPath + "CDK";
+                saveDirectoryPath = targetApplicationPath + ".Deployment";
                 deployArgs = new[] { "deployment-project", "generate", "--project-path", targetApplicationPath, "--diagnostics" };
             }  
             else
@@ -78,7 +78,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             // default save directory
             if (string.IsNullOrEmpty(saveDirectoryPath))
             {
-                saveDirectoryPath = targetApplicationPath + "CDK";
+                saveDirectoryPath = targetApplicationPath + ".Deployment";
                 deployArgs = new[] { "deployment-project", "generate", "--project-path", targetApplicationPath, "--project-display-name", recipeName, "--diagnostics"};
             }
             else

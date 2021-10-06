@@ -35,7 +35,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             await Utilities.CreateCDKDeploymentProject(targetApplicationProjectPath);
 
             // Verify a bug fix that the IDictionary for TypeHintData was not getting serialized.
-            var recipeFilePath = Directory.GetFiles(targetApplicationProjectPath + "CDK", "*.recipe", SearchOption.TopDirectoryOnly).FirstOrDefault();
+            var recipeFilePath = Directory.GetFiles(targetApplicationProjectPath + ".Deployment", "*.recipe", SearchOption.TopDirectoryOnly).FirstOrDefault();
             Assert.True(File.Exists(recipeFilePath));
             var recipeRoot = JsonConvert.DeserializeObject<RecipeDefinition>(File.ReadAllText(recipeFilePath));
             var applicationIAMRoleSetting = recipeRoot.OptionSettings.FirstOrDefault(x => string.Equals(x.Id, "ApplicationIAMRole"));
