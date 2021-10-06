@@ -11,7 +11,7 @@
         "language": "C#",
         "type": "project"
     },
-    "sourceName": "ConsoleAppECSFargateScheduleTask",
+    "sourceName": "BlazorWasm",
     "preferNameDirectory": true,
     "symbols": {
         "AWSDeployRecipesCDKCommonVersion": {
