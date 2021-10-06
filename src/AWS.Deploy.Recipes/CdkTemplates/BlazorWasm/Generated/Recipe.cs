@@ -118,7 +118,7 @@ namespace BlazorWasm
                 distributionProps.ErrorResponses = errorResponses.ToArray();
             }
 
-            if(settings.AccessLogging?.EnableAccessLogging == true)
+            if(settings.AccessLogging?.Enable == true)
             {
                 distributionProps.EnableLogging = true;
 
@@ -156,6 +156,25 @@ namespace BlazorWasm
             }
 
             CloudFrontDistribution = new Distribution(this, nameof(CloudFrontDistribution), InvokeCustomizeCDKPropsEvent(nameof(CloudFrontDistribution), this, distributionProps));
+
+            if (settings.BackendApi?.Enable == true)
+            {
+                var backendApiUri = new Uri(settings.BackendApi.Uri);
+
+                var httpOrigin = new HttpOrigin(backendApiUri.Host, new HttpOriginProps
+                {
+                    OriginPath = backendApiUri.PathAndQuery
+                });
+
+                // Since this is a backend API where the business logic for the Blazor app caching must be disabled.
+                var addBehavorOptions = new AddBehaviorOptions
+                {
+                    AllowedMethods = AllowedMethods.ALLOW_ALL,
+                    CachePolicy = CachePolicy.CACHING_DISABLED
+                };
+
+                CloudFrontDistribution.AddBehavior(settings.BackendApi.ResourcePathPattern, httpOrigin, addBehavorOptions);
+            }
 
             new CfnOutput(this, "EndpointURL", new CfnOutputProps
             {
