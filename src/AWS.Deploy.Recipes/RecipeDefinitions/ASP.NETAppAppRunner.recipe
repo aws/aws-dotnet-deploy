@@ -92,7 +92,7 @@
                 "ServicePrincipal": "tasks.apprunner.amazonaws.com"
             },
             "AdvancedSetting": false,
-            "Updatable": false,
+            "Updatable": true,
             "ChildOptionSettings": [
                 {
                     "Id": "CreateNew",
@@ -101,7 +101,7 @@
                     "Type": "Bool",
                     "DefaultValue": true,
                     "AdvancedSetting": false,
-                    "Updatable": false
+                    "Updatable": true
                 },
                 {
                     "Id": "RoleArn",
@@ -113,7 +113,7 @@
                     "DependsOn": [
                         {
                             "Id": "ApplicationIAMRole.CreateNew",
-                            "Value": false
+                            "Value": true
                         }
                     ]
                 }
@@ -129,7 +129,7 @@
                 "ServicePrincipal": "build.apprunner.amazonaws.com"
             },
             "AdvancedSetting": true,
-            "Updatable": false,
+            "Updatable": true,
             "ChildOptionSettings": [
                 {
                     "Id": "CreateNew",
@@ -138,7 +138,7 @@
                     "Type": "Bool",
                     "DefaultValue": true,
                     "AdvancedSetting": false,
-                    "Updatable": false
+                    "Updatable": true
                 },
                 {
                     "Id": "RoleArn",
@@ -146,7 +146,7 @@
                     "Description": "The ARN of the existing role to use.",
                     "Type": "String",
                     "AdvancedSetting": false,
-                    "Updatable": false,
+                    "Updatable": true,
                     "DependsOn": [
                         {
                             "Id": "ServiceAccessIAMRole.CreateNew",
