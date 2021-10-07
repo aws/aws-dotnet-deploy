@@ -34,4 +34,14 @@ namespace AWS.Deploy.ServerMode.Client
         {
         }
     }
+
+    /// <summary>
+    /// Thrown if failed to find the path to AWS.Deploy.CLI.dll
+    /// </summary>
+    public class FailedToFindDeployToolPathException : Exception
+    {
+        public FailedToFindDeployToolPathException(string message, Exception? innerException = null) : base(message, innerException)
+        {
+        }
+    }
 }

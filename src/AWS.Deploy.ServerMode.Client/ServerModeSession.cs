@@ -69,6 +69,7 @@ namespace AWS.Deploy.ServerMode.Client
         private readonly HttpClientHandler _httpClientHandler;
         private readonly TimeSpan _serverTimeout;
         private readonly string _deployToolPath;
+        private readonly CertificateVerificationEngine _certificateVerificationEngine;
 
         private string? _baseUrl;
         private Aes? _aes;
@@ -89,6 +90,7 @@ namespace AWS.Deploy.ServerMode.Client
         public ServerModeSession(int startPort = 10000, int endPort = 10100, string deployToolPath = "", bool diagnosticLoggingEnabled = false)
             : this(new CommandLineWrapper(diagnosticLoggingEnabled),
                 new HttpClientHandler(),
+                new CertificateVerificationEngine(),
                 TimeSpan.FromSeconds(60),
                 startPort,
                 endPort,
@@ -98,6 +100,7 @@ namespace AWS.Deploy.ServerMode.Client
 
         public ServerModeSession(CommandLineWrapper commandLineWrapper,
             HttpClientHandler httpClientHandler,
+            CertificateVerificationEngine certificateVerificationEngine,
             TimeSpan serverTimeout,
             int startPort = 10000,
             int endPort = 10100,
@@ -107,6 +110,7 @@ namespace AWS.Deploy.ServerMode.Client
             _endPort = endPort;
             _commandLineWrapper = commandLineWrapper;
             _httpClientHandler = httpClientHandler;
+            _certificateVerificationEngine = certificateVerificationEngine;
             _serverTimeout = serverTimeout;
             _deployToolPath = deployToolPath;
         }
@@ -121,6 +125,8 @@ namespace AWS.Deploy.ServerMode.Client
 
                 deployToolRoot = _deployToolPath;
             }
+
+            _certificateVerificationEngine.VerifyCertificate(deployToolRoot);
 
             var currentProcessId = Process.GetCurrentProcess().Id;
 

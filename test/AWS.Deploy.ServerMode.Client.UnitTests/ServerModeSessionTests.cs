@@ -15,12 +15,14 @@ namespace AWS.Deploy.ServerMode.Client.UnitTests
         private readonly ServerModeSession _serverModeSession;
         private readonly Mock<HttpClientHandler> _httpClientHandlerMock;
         private readonly Mock<CommandLineWrapper> _commandLineWrapper;
+        private readonly Mock<CertificateVerificationEngine> _certificateVerificationEngineMock;
 
         public ServerModeSessionTests()
         {
             _httpClientHandlerMock = new Mock<HttpClientHandler>();
             _commandLineWrapper = new Mock<CommandLineWrapper>(false);
-            _serverModeSession = new ServerModeSession(_commandLineWrapper.Object, _httpClientHandlerMock.Object, TimeSpan.FromSeconds(5));
+            _certificateVerificationEngineMock = new Mock<CertificateVerificationEngine>();
+            _serverModeSession = new ServerModeSession(_commandLineWrapper.Object, _httpClientHandlerMock.Object, _certificateVerificationEngineMock.Object, TimeSpan.FromSeconds(5));
         }
 
         [Fact]
@@ -29,6 +31,7 @@ namespace AWS.Deploy.ServerMode.Client.UnitTests
             // Arrange
             MockCommandLineWrapperRun(0, TimeSpan.FromSeconds(100));
             MockHttpGet(HttpStatusCode.OK);
+            MockVerifyCertificate();
 
             // Act
             var exception = await Record.ExceptionAsync(async () =>
@@ -46,6 +49,7 @@ namespace AWS.Deploy.ServerMode.Client.UnitTests
             // Arrange
             MockCommandLineWrapperRun(-100);
             MockHttpGet(HttpStatusCode.NotFound, TimeSpan.FromSeconds(5));
+            MockVerifyCertificate();
 
             // Act & Assert
             await Assert.ThrowsAsync<PortUnavailableException>(async () =>
@@ -60,6 +64,7 @@ namespace AWS.Deploy.ServerMode.Client.UnitTests
             // Arrange
             MockCommandLineWrapperRun(0, TimeSpan.FromSeconds(100));
             MockHttpGetThrows();
+            MockVerifyCertificate();
 
             // Act & Assert
             await Assert.ThrowsAsync<InternalServerModeException>(async () =>
@@ -74,6 +79,7 @@ namespace AWS.Deploy.ServerMode.Client.UnitTests
             // Arrange
             MockCommandLineWrapperRun(0, TimeSpan.FromSeconds(100));
             MockHttpGet(HttpStatusCode.Forbidden);
+            MockVerifyCertificate();
 
             // Act & Assert
             await Assert.ThrowsAsync<InternalServerModeException>(async () =>
@@ -98,6 +104,7 @@ namespace AWS.Deploy.ServerMode.Client.UnitTests
             // Arrange
             MockCommandLineWrapperRun(0, TimeSpan.FromSeconds(100));
             MockHttpGet(HttpStatusCode.OK);
+            MockVerifyCertificate();
             await _serverModeSession.Start(CancellationToken.None);
 
             MockHttpGetThrows();
@@ -115,6 +122,7 @@ namespace AWS.Deploy.ServerMode.Client.UnitTests
             // Arrange
             MockCommandLineWrapperRun(0, TimeSpan.FromSeconds(100));
             MockHttpGet(HttpStatusCode.OK);
+            MockVerifyCertificate();
             await _serverModeSession.Start(CancellationToken.None);
 
             // Act
@@ -130,6 +138,7 @@ namespace AWS.Deploy.ServerMode.Client.UnitTests
             // Arrange
             MockCommandLineWrapperRun(0, TimeSpan.FromSeconds(100));
             MockHttpGet(HttpStatusCode.OK);
+            MockVerifyCertificate();
             await _serverModeSession.Start(CancellationToken.None);
 
             MockHttpGet(HttpStatusCode.Forbidden);
@@ -147,6 +156,7 @@ namespace AWS.Deploy.ServerMode.Client.UnitTests
             // Arrange
             MockCommandLineWrapperRun(0, TimeSpan.FromSeconds(100));
             MockHttpGet(HttpStatusCode.OK);
+            MockVerifyCertificate();
             await _serverModeSession.Start(CancellationToken.None);
 
             // Act
@@ -178,6 +188,7 @@ namespace AWS.Deploy.ServerMode.Client.UnitTests
             // Arrange
             MockCommandLineWrapperRun(0, TimeSpan.FromSeconds(100));
             MockHttpGet(HttpStatusCode.OK);
+            MockVerifyCertificate();
             await _serverModeSession.Start(CancellationToken.None);
 
             // Act
@@ -237,6 +248,10 @@ namespace AWS.Deploy.ServerMode.Client.UnitTests
             _commandLineWrapper
                 .Setup(wrapper => wrapper.Run(It.IsAny<string>(), It.IsAny<string[]>()))
                 .ReturnsAsync(statusCode, delay);
+
+        private void MockVerifyCertificate() =>
+            _certificateVerificationEngineMock
+            .Setup(engine => engine.VerifyCertificate(It.IsAny<string>()));
 
         private Task<AWSCredentials> CredentialGenerator() => throw new NotImplementedException();
     }
