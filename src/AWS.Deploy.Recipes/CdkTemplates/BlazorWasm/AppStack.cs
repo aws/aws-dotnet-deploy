@@ -44,13 +44,13 @@ namespace BlazorWasm
         {
             // Example of how to customize the container image definition to include environment variables to the running applications.
             // 
-            if (string.Equals(evnt.ResourceLogicalName, nameof(evnt.Construct.CloudFrontDistribution)))
-            {
-                if (evnt.Props is DistributionProps props)
-                {
-                    Console.WriteLine("Customizing CloudFront Distribution");
-                }
-            }
+            //if (string.Equals(evnt.ResourceLogicalName, nameof(evnt.Construct.CloudFrontDistribution)))
+            //{
+            //    if (evnt.Props is DistributionProps props)
+            //    {
+            //        Console.WriteLine("Customizing CloudFront Distribution");
+            //    }
+            //}
         }
     }
 }

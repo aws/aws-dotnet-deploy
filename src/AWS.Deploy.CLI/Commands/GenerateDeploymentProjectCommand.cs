@@ -132,17 +132,17 @@ namespace AWS.Deploy.CLI.Commands
         /// a default save directory inside the parent folder of the current directory.
         /// For example:
         /// Target project directory - C:\Codebase\MyWebApp
-        /// Generated default save directory - C:\Codebase\MyWebAppCDK If the save directory already exists, then a suffix number is attached.
+        /// Generated default save directory - C:\Codebase\MyWebApp.Deployment If the save directory already exists, then a suffix number is attached.
         /// </summary>
-        /// <returns>The defaukt save directory path.</returns>
+        /// <returns>The default save directory path.</returns>
         private string GenerateDefaultSaveDirectoryPath()
         {
             var applicatonDirectoryFullPath = _directoryManager.GetDirectoryInfo(_targetApplicationFullPath).Parent.FullName;
-            var saveCdkDirectoryFullPath = applicatonDirectoryFullPath + "CDK";
+            var saveCdkDirectoryFullPath = applicatonDirectoryFullPath + ".Deployment";
 
             var suffixNumber = 0;
             while (_directoryManager.Exists(saveCdkDirectoryFullPath))
-                saveCdkDirectoryFullPath = applicatonDirectoryFullPath + $"CDK{++suffixNumber}";
+                saveCdkDirectoryFullPath = applicatonDirectoryFullPath + $".Deployment{++suffixNumber}";
             
             return saveCdkDirectoryFullPath;
         }
@@ -167,7 +167,7 @@ namespace AWS.Deploy.CLI.Commands
         /// This method takes the path to the intended location of the CDK deployment project and performs validations on it.
         /// </summary>
         /// <param name="saveCdkDirectoryPath">Relative or absolute path of the directory at which the CDK deployment project will be saved.</param>
-        /// <returns>A tuple containaing a boolean that indicates if the directory is valid and a corresponding string error message.</returns>
+        /// <returns>A tuple containing a boolean that indicates if the directory is valid and a corresponding string error message.</returns>
         private Tuple<bool, string> ValidateSaveCdkDirectory(string saveCdkDirectoryPath)
         {
             var errorMessage = string.Empty;
@@ -234,6 +234,7 @@ namespace AWS.Deploy.CLI.Commands
             recipe.CdkProjectTemplate = null;
             recipe.PersistedDeploymentProject = true;
             recipe.RecipePriority = DEFAULT_PERSISTED_RECIPE_PRIORITY;
+            recipe.BaseRecipeId = recommendation.Recipe.Id;
 
             var recipeSnapshotBody = JsonConvert.SerializeObject(recipe, new JsonSerializerSettings
             {

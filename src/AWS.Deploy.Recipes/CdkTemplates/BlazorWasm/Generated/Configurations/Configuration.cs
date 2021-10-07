@@ -53,6 +53,11 @@ namespace BlazorWasm.Configurations
         /// </summary>
         public Amazon.CDK.AWS.CloudFront.HttpVersion MaxHttpVersion { get; set; } = Amazon.CDK.AWS.CloudFront.HttpVersion.HTTP2;
 
+        /// <summary>
+        /// The backend rest api to be added as a origin to the CloudFront distribution
+        /// </summary>
+        public BackendRestApiConfiguration? BackendApi { get; set; }
+
         /// A parameterless constructor is needed for <see cref="Microsoft.Extensions.Configuration.ConfigurationBuilder"/>
         /// or the classes will fail to initialize.
         /// The warnings are disabled since a parameterless constructor will allow non-nullable properties to be initialized with null values.

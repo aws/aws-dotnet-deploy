@@ -81,7 +81,21 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
             _stateServer.Save(output.SessionId, state);
 
-            output.DefaultDeploymentName = _cloudApplicationNameGenerator.GenerateValidName(state.ProjectDefinition, new List<CloudApplication>());
+            var deployedApplicationQueryer = serviceProvider.GetRequiredService<IDeployedApplicationQueryer>();
+            var session = CreateOrchestratorSession(state);
+            var orchestrator = CreateOrchestrator(state);
+
+            // Determine what recommendations are possible for the project.
+            var recommendations = await orchestrator.GenerateDeploymentRecommendations();
+            state.NewRecommendations = recommendations;
+
+            // Get all existing applications that were previously deployed using our deploy tool.
+            var allDeployedApplications = await deployedApplicationQueryer.GetExistingDeployedApplications();
+
+            var existingApplications = await deployedApplicationQueryer.GetCompatibleApplications(recommendations, allDeployedApplications, session);
+            state.ExistingDeployments = existingApplications;
+
+            output.DefaultDeploymentName = _cloudApplicationNameGenerator.GenerateValidName(state.ProjectDefinition, existingApplications);
             return Ok(output);
         }
 
@@ -116,7 +130,8 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
             var output = new GetRecommendationsOutput();
 
-            state.NewRecommendations = await orchestrator.GenerateDeploymentRecommendations();
+            //NewRecommendations is set during StartDeploymentSession API. It is only updated here if NewRecommendations was null.
+            state.NewRecommendations ??= await orchestrator.GenerateDeploymentRecommendations();
             foreach (var recommendation in state.NewRecommendations)
             {
                 output.Recommendations.Add(new RecommendationSummary(
@@ -171,6 +186,8 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                     Value = recommendation.GetOptionSettingValue(setting),
                     Advanced = setting.AdvancedSetting,
                     Updatable = (!recommendation.IsExistingCloudApplication || setting.Updatable) && recommendation.IsOptionSettingDisplayable(setting),
+                    AllowedValues = setting.AllowedValues,
+                    ValueMapping = setting.ValueMapping,
                     ChildOptionSettings = ListOptionSettingSummary(recommendation, setting.ChildOptionSettings)
                 };
 
@@ -246,7 +263,9 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
             var deployedApplicationQueryer = serviceProvider.GetRequiredService<IDeployedApplicationQueryer>();
             var session = CreateOrchestratorSession(state);
-            state.ExistingDeployments = await deployedApplicationQueryer.GetCompatibleApplications(state.NewRecommendations.ToList(), session: session);
+            
+            //ExistingDeployments is set during StartDeploymentSession API. It is only updated here if ExistingDeployments was null.
+            state.ExistingDeployments ??= await deployedApplicationQueryer.GetCompatibleApplications(state.NewRecommendations.ToList(), session: session);
 
             foreach(var deployment in state.ExistingDeployments)
             {

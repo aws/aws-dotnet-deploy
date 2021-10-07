@@ -7,7 +7,7 @@
     "DeploymentBundle": "DotnetPublishZipFile",
     "CdkProjectTemplate": "../CdkTemplates/BlazorWasm",
     "CdkProjectTemplateId": "netdeploy.BlazorWasm",
-    "Description": "Blazor WebAssembly application hosted in an Amazon S3 bucket. The Amazon S3 bucket created during deployment will be configured for web hosting and its contents will be open to the public with read access.",
+    "Description": "This Blazor WebAssembly application will be built and hosted in the new Amazon Simple Storage Service (Amazon S3) bucket. The created Amazon S3 bucket will be configured for web hosting and open to the public with read access.",
     "ShortDescription": "Blazor WebAssembly application hosted in an Amazon S3 bucket.",
     "TargetService": "Amazon S3",
 
@@ -121,6 +121,56 @@
             "Updatable": true
         },
         {
+            "Id": "BackendApi",
+            "Name": "Backend REST API",
+            "Description": "URI to a backend rest api that will be added as an origin to the CloudFront distribution. For example an API Gateway endpoint.",
+            "Type": "Object",
+            "DefaultValue": "",
+            "AdvancedSetting": false,
+            "Updatable": true,
+            "ChildOptionSettings": [
+                {
+                    "Id": "Enable",
+                    "Name": "Enable",
+                    "Description": "Enable adding backend rest api",
+                    "Type": "Bool",
+                    "DefaultValue": false,
+                    "AdvancedSetting": false,
+                    "Updatable": true
+                },
+                {
+                    "Id": "Uri",
+                    "Name": "Uri",
+                    "Description": "Uri to the backend rest api",
+                    "Type": "String",
+                    "DefaultValue": "",
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "BackendApi.Enable",
+                            "Value": true
+                        }
+                    ]
+                },
+                {
+                    "Id": "ResourcePathPattern",
+                    "Name": "Resource Path Pattern",
+                    "Description": "The resource path pattern to determine which request go to backend rest api. (i.e. \"/api/*\") ",
+                    "Type": "String",
+                    "DefaultValue": "",
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "BackendApi.Enable",
+                            "Value": true
+                        }
+                    ]
+                }
+            ]
+        },
+        {
             "Id": "AccessLogging",
             "Name": "CloudFront Access Logging",
             "Description": "Configure if and how access logs are written for the CloudFront distribution",
@@ -129,7 +179,7 @@
             "Updatable": true,
             "ChildOptionSettings": [
                 {
-                    "Id": "EnableAccessLogging",
+                    "Id": "Enable",
                     "Name": "Enable",
                     "Description": "Enable CloudFront Access Logging",
                     "Type": "Bool",
@@ -147,7 +197,7 @@
                     "Updatable": true,
                     "DependsOn": [
                         {
-                            "Id": "AccessLogging.EnableAccessLogging",
+                            "Id": "AccessLogging.Enable",
                             "Value": true
                         }
                     ]
@@ -162,7 +212,7 @@
                     "Updatable": true,
                     "DependsOn": [
                         {
-                            "Id": "AccessLogging.EnableAccessLogging",
+                            "Id": "AccessLogging.Enable",
                             "Value": true
                         }
                     ]
@@ -177,7 +227,7 @@
                     "Updatable": true,
                     "DependsOn": [
                         {
-                            "Id": "AccessLogging.EnableAccessLogging",
+                            "Id": "AccessLogging.Enable",
                             "Value": true
                         },
                         {
@@ -196,7 +246,7 @@
                     "Updatable": true,
                     "DependsOn": [
                         {
-                            "Id": "AccessLogging.EnableAccessLogging",
+                            "Id": "AccessLogging.Enable",
                             "Value": true
                         }
                     ]
