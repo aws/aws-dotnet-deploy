@@ -213,7 +213,7 @@
                 "ServicePrincipal": "ecs-tasks.amazonaws.com"
             },
             "AdvancedSetting": false,
-            "Updatable": false,
+            "Updatable": true,
             "ChildOptionSettings": [
                 {
                     "Id": "CreateNew",
@@ -222,7 +222,7 @@
                     "Type": "Bool",
                     "DefaultValue": true,
                     "AdvancedSetting": false,
-                    "Updatable": false
+                    "Updatable": true
                 },
                 {
                     "Id": "RoleArn",
@@ -230,7 +230,7 @@
                     "Description": "The ARN of the existing role to use.",
                     "Type": "String",
                     "AdvancedSetting": false,
-                    "Updatable": false,
+                    "Updatable": true,
                     "Validators": [
                         {
                             "ValidatorType": "Regex",

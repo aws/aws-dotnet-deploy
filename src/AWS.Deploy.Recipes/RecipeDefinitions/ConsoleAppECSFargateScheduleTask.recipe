@@ -175,7 +175,7 @@
                 "ServicePrincipal": "ecs-tasks.amazonaws.com"
             },
             "AdvancedSetting": false,
-            "Updatable": false,
+            "Updatable": true,
             "ChildOptionSettings": [
                 {
                     "Id": "CreateNew",
@@ -184,7 +184,7 @@
                     "Type": "Bool",
                     "DefaultValue": true,
                     "AdvancedSetting": false,
-                    "Updatable": false
+                    "Updatable": true
                 },
                 {
                     "Id": "RoleArn",
@@ -192,11 +192,11 @@
                     "Description": "The ARN of the existing role to use.",
                     "Type": "String",
                     "AdvancedSetting": false,
-                    "Updatable": false,
+                    "Updatable": true,
                     "Validators": [
                         {
                             "ValidatorType": "Regex",
-                            "Configuration" : {
+                            "Configuration": {
                                 "Regex": "arn:.+:iam::[0-9]{12}:.+",
                                 "AllowEmptyString": true,
                                 "ValidationFailedMessage": "Invalid IAM Role ARN. The ARN should contain the arn:[PARTITION]:iam namespace, followed by the account ID, and then the resource path. For example - arn:aws:iam::123456789012:role/S3Access is a valid IAM Role ARN. For more information visit https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-arns"
