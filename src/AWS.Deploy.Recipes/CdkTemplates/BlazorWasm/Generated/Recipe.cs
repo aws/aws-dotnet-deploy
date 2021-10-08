@@ -33,6 +33,10 @@ namespace BlazorWasm
 
         public string AccessLoggingBucket { get; } = "AccessLoggingBucket";
 
+        public string BackendRestApiHttpOrigin { get; } = "BackendRestApiHttpOrigin";
+
+        public string BackendRestApiCacheBehavior { get; } = "BackendRestApiCacheBehavior";
+
         public Recipe(Construct scope, IRecipeProps<Configuration> props)
             // The "Recipe" construct ID will be used as part of the CloudFormation logical ID. If the value is changed this will
             // change the expected values for the "DisplayedResources" in the corresponding recipe file.
@@ -161,10 +165,24 @@ namespace BlazorWasm
             {
                 var backendApiUri = new Uri(settings.BackendApi.Uri);
 
-                var httpOrigin = new HttpOrigin(backendApiUri.Host, new HttpOriginProps
+
+                var httpOriginProps = new HttpOriginProps
                 {
                     OriginPath = backendApiUri.PathAndQuery
-                });
+                };
+
+                if (string.Equals("https", backendApiUri.Scheme, StringComparison.OrdinalIgnoreCase))
+                {
+                    httpOriginProps.ProtocolPolicy = OriginProtocolPolicy.HTTPS_ONLY;
+                    httpOriginProps.HttpsPort = backendApiUri.Port;
+                }
+                else
+                {
+                    httpOriginProps.ProtocolPolicy = OriginProtocolPolicy.HTTP_ONLY;
+                    httpOriginProps.HttpPort = backendApiUri.Port;
+                }
+
+                var httpOrigin = new HttpOrigin(backendApiUri.Host, InvokeCustomizeCDKPropsEvent(nameof(BackendRestApiHttpOrigin), this, httpOriginProps));
 
                 // Since this is a backend API where the business logic for the Blazor app caching must be disabled.
                 var addBehavorOptions = new AddBehaviorOptions
@@ -173,7 +191,7 @@ namespace BlazorWasm
                     CachePolicy = CachePolicy.CACHING_DISABLED
                 };
 
-                CloudFrontDistribution.AddBehavior(settings.BackendApi.ResourcePathPattern, httpOrigin, addBehavorOptions);
+                CloudFrontDistribution.AddBehavior(settings.BackendApi.ResourcePathPattern, httpOrigin, InvokeCustomizeCDKPropsEvent(nameof(BackendRestApiCacheBehavior), this, addBehavorOptions));
             }
 
             new CfnOutput(this, "EndpointURL", new CfnOutputProps
