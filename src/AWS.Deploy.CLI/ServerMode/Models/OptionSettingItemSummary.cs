@@ -22,7 +22,9 @@ namespace AWS.Deploy.CLI.ServerMode.Models
 
         public bool Advanced { get; set; }
 
-        public bool Updatable { get; set; }
+        public bool ReadOnly { get; set; }
+
+        public bool Visible { get; set; }
 
         public IList<string> AllowedValues { get; set; } = new List<string>();
 

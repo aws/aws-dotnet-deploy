@@ -185,7 +185,8 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                     TypeHint = setting.TypeHint?.ToString(),
                     Value = recommendation.GetOptionSettingValue(setting),
                     Advanced = setting.AdvancedSetting,
-                    Updatable = (!recommendation.IsExistingCloudApplication || setting.Updatable) && recommendation.IsOptionSettingDisplayable(setting),
+                    ReadOnly = recommendation.IsExistingCloudApplication && !setting.Updatable,
+                    Visible = recommendation.IsOptionSettingDisplayable(setting),
                     AllowedValues = setting.AllowedValues,
                     ValueMapping = setting.ValueMapping,
                     ChildOptionSettings = ListOptionSettingSummary(recommendation, setting.ChildOptionSettings)
@@ -263,7 +264,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
             var deployedApplicationQueryer = serviceProvider.GetRequiredService<IDeployedApplicationQueryer>();
             var session = CreateOrchestratorSession(state);
-            
+
             //ExistingDeployments is set during StartDeploymentSession API. It is only updated here if ExistingDeployments was null.
             state.ExistingDeployments ??= await deployedApplicationQueryer.GetCompatibleApplications(state.NewRecommendations.ToList(), session: session);
 
