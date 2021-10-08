@@ -109,11 +109,11 @@
                     "Description": "The ARN of the existing role to use.",
                     "Type": "String",
                     "AdvancedSetting": false,
-                    "Updatable": false,
+                    "Updatable": true,
                     "DependsOn": [
                         {
                             "Id": "ApplicationIAMRole.CreateNew",
-                            "Value": true
+                            "Value": false
                         }
                     ]
                 }
