@@ -46,14 +46,20 @@ namespace AWS.Deploy.Orchestration.CDK
         private readonly IPackageJsonGenerator _packageJsonGenerator;
         private readonly IFileManager _fileManager;
         private readonly IDirectoryManager _directoryManager;
+        private readonly IOrchestratorInteractiveService _interactiveService;
         private const string _packageJsonFileName = "package.json";
 
-        public NPMPackageInitializer(ICommandLineWrapper commandLineWrapper, IPackageJsonGenerator packageJsonGenerator, IFileManager fileManager, IDirectoryManager directoryManager)
+        public NPMPackageInitializer(ICommandLineWrapper commandLineWrapper,
+            IPackageJsonGenerator packageJsonGenerator,
+            IFileManager fileManager,
+            IDirectoryManager directoryManager,
+            IOrchestratorInteractiveService interactiveService)
         {
             _commandLineWrapper = commandLineWrapper;
             _packageJsonGenerator = packageJsonGenerator;
             _fileManager = fileManager;
             _directoryManager = directoryManager;
+            _interactiveService = interactiveService;
         }
 
         public bool IsInitialized(string workingDirectory)
@@ -64,6 +70,7 @@ namespace AWS.Deploy.Orchestration.CDK
 
         public async Task Initialize(string workingDirectory, Version cdkVersion)
         {
+            _interactiveService.LogDebugLine($"Creating package.json at {workingDirectory}.");
             var packageJsonFileContent = _packageJsonGenerator.Generate(cdkVersion);
             var packageJsonFilePath = Path.Combine(workingDirectory, _packageJsonFileName);
 

@@ -13,6 +13,7 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
     {
         private readonly Mock<ICDKInstaller> _mockCdkManager;
         private readonly Mock<INPMPackageInitializer> _mockNodeInitializer;
+        private readonly Mock<IOrchestratorInteractiveService> _mockInteractiveService;
         private readonly CDKManager _cdkManager;
         private const string _workingDirectory = @"c:\fake\path";
 
@@ -20,7 +21,8 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
         {
             _mockCdkManager = new Mock<ICDKInstaller>();
             _mockNodeInitializer = new Mock<INPMPackageInitializer>();
-            _cdkManager = new CDKManager(_mockCdkManager.Object, _mockNodeInitializer.Object);
+            _mockInteractiveService = new Mock<IOrchestratorInteractiveService>();
+            _cdkManager = new CDKManager(_mockCdkManager.Object, _mockNodeInitializer.Object, _mockInteractiveService.Object);
         }
 
         [Theory]

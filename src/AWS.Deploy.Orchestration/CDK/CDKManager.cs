@@ -2,7 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
+using AWS.Deploy.Orchestration.Utilities;
 
 namespace AWS.Deploy.Orchestration.CDK
 {
@@ -25,37 +28,52 @@ namespace AWS.Deploy.Orchestration.CDK
 
     public class CDKManager : ICDKManager
     {
+        private static readonly SemaphoreSlim s_cdkManagerSemaphoreSlim = new(1,1);
+
         private readonly ICDKInstaller _cdkInstaller;
         private readonly INPMPackageInitializer _npmPackageInitializer;
+        private readonly IOrchestratorInteractiveService _interactiveService;
 
-        public CDKManager(ICDKInstaller cdkInstaller, INPMPackageInitializer npmPackageInitializer)
+        public CDKManager(ICDKInstaller cdkInstaller, INPMPackageInitializer npmPackageInitializer, IOrchestratorInteractiveService interactiveService)
         {
             _cdkInstaller = cdkInstaller;
             _npmPackageInitializer = npmPackageInitializer;
+            _interactiveService = interactiveService;
         }
 
         public async Task EnsureCompatibleCDKExists(string workingDirectory, Version cdkVersion)
         {
-            var globalCDKVersionResult = await _cdkInstaller.GetGlobalVersion();
-            if (globalCDKVersionResult.Success && globalCDKVersionResult.Result?.CompareTo(cdkVersion) >= 0)
-            {
-                return;
-            }
+            await s_cdkManagerSemaphoreSlim.WaitAsync();
 
-            var isNPMPackageInitialized = _npmPackageInitializer.IsInitialized(workingDirectory);
-            if (!isNPMPackageInitialized)
+            try
             {
-                await _npmPackageInitializer.Initialize(workingDirectory, cdkVersion);
-                return; // There is no need to install CDK CLI explicitly, npm install takes care of first time bootstrap.
-            }
+                var globalCdkVerion = await _cdkInstaller.GetGlobalVersion();
+                if (globalCdkVerion.Success && globalCdkVerion.Result?.CompareTo(cdkVersion) >= 0)
+                {
+                    _interactiveService.LogDebugLine($"CDK version {globalCdkVerion.Result} found in global node_modules.");
+                    return;
+                }
 
-            var localCDKVersionResult = await _cdkInstaller.GetLocalVersion(workingDirectory);
-            if (localCDKVersionResult.Success && localCDKVersionResult.Result?.CompareTo(cdkVersion) >= 0)
+                var isNPMPackageInitialized = _npmPackageInitializer.IsInitialized(workingDirectory);
+                if (!isNPMPackageInitialized)
+                {
+                    await _npmPackageInitializer.Initialize(workingDirectory, cdkVersion);
+                    return; // There is no need to install CDK CLI explicitly, npm install takes care of first time bootstrap.
+                }
+
+                var localCdkVersion = await _cdkInstaller.GetLocalVersion(workingDirectory);
+                if (localCdkVersion.Success && localCdkVersion.Result?.CompareTo(cdkVersion) >= 0)
+                {
+                    _interactiveService.LogDebugLine($"CDK version {localCdkVersion.Result} found in local node_modules at {workingDirectory}.");
+                    return;
+                }
+
+                await _cdkInstaller.Install(workingDirectory, cdkVersion);
+            }
+            finally
             {
-                return;
+                s_cdkManagerSemaphoreSlim.Release();
             }
-
-            await _cdkInstaller.Install(workingDirectory, cdkVersion);
         }
     }
 }

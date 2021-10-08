@@ -4,8 +4,10 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using AWS.Deploy.CLI;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.Orchestration.CDK;
+using Moq;
 using Xunit;
 
 namespace AWS.Deploy.Orchestration.UnitTests.CDK
@@ -16,6 +18,7 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
         private readonly INPMPackageInitializer _npmPackageInitializer;
         private readonly TestFileManager _fileManager;
         private readonly TestDirectoryManager _directoryManager;
+        private readonly Mock<IOrchestratorInteractiveService> _mockInteractiveService;
         private const string _workingDirectory = @"c:\fake\path";
 
         private const string _packageJsonContent =
@@ -44,11 +47,12 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
 
         public NPMPackageInitializerTests()
         {
+            _mockInteractiveService = new Mock<IOrchestratorInteractiveService>();
             _fileManager = new TestFileManager();
             _directoryManager = new TestDirectoryManager();
             _testCommandLineWrapper = new TestCommandLineWrapper();
             var packageJsonGenerator = new PackageJsonGenerator(_packageJsonTemplate);
-            _npmPackageInitializer = new NPMPackageInitializer(_testCommandLineWrapper, packageJsonGenerator, _fileManager, _directoryManager);
+            _npmPackageInitializer = new NPMPackageInitializer(_testCommandLineWrapper, packageJsonGenerator, _fileManager, _directoryManager, _mockInteractiveService.Object);
         }
 
         [Fact]
