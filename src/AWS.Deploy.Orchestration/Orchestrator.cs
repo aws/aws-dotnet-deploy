@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
@@ -14,8 +13,6 @@ using AWS.Deploy.DockerEngine;
 using AWS.Deploy.Orchestration.CDK;
 using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.LocalUserSettings;
-using AWS.Deploy.Recipes;
-using Newtonsoft.Json;
 
 namespace AWS.Deploy.Orchestration
 {
@@ -26,7 +23,6 @@ namespace AWS.Deploy.Orchestration
     /// </summary>
     public class Orchestrator
     {
-        private static readonly SemaphoreSlim s_cdkManagerSemaphoreSlim = new(1,1);
         private const string REPLACE_TOKEN_LATEST_DOTNET_BEANSTALK_PLATFORM_ARN = "{LatestDotnetBeanstalkPlatformArn}";
 
         private readonly ICdkProjectHandler? _cdkProjectHandler;
@@ -166,16 +162,7 @@ namespace AWS.Deploy.Orchestration
                     var projFiles = _directoryManager.GetProjFiles(cdkProject);
                     var cdkVersion = _cdkVersionDetector.Detect(projFiles);
 
-                    await s_cdkManagerSemaphoreSlim.WaitAsync();
-
-                    try
-                    {
-                        await _cdkManager.EnsureCompatibleCDKExists(Constants.CDK.DeployToolWorkspaceDirectoryRoot, cdkVersion);
-                    }
-                    finally
-                    {
-                        s_cdkManagerSemaphoreSlim.Release();
-                    }
+                    await _cdkManager.EnsureCompatibleCDKExists(Constants.CDK.DeployToolWorkspaceDirectoryRoot, cdkVersion);
 
                     try
                     {
