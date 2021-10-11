@@ -1,12 +1,17 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Amazon.ECS.Model;
+using Amazon.ElasticBeanstalk.Model;
 using AWS.Deploy.CLI.TypeHintResponses;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.TypeHintData;
 using AWS.Deploy.Orchestration.Data;
+using Newtonsoft.Json;
 
 namespace AWS.Deploy.CLI.Commands.TypeHints
 {
@@ -21,9 +26,20 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             _consoleUtilities = consoleUtilities;
         }
 
+        private async Task<List<Cluster>> GetData()
+        {
+            return await _awsResourceQueryer.ListOfECSClusters();
+        }
+
+        public async Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
+        {
+            var clusters = await GetData();
+            return clusters.Select(x => new TypeHintResource(x.ClusterArn, x.ClusterName)).ToList();
+        }
+
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
-            var clusters = await _awsResourceQueryer.ListOfECSClusters();
+            var clusters = await GetData();
             var currentTypeHintResponse = recommendation.GetOptionSettingValue<ECSClusterTypeHintResponse>(optionSetting);
 
             var userInputConfiguration = new UserInputConfiguration<Cluster>(

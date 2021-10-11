@@ -1,7 +1,10 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Amazon.ECS.Model;
 using Amazon.IdentityManagement.Model;
 using AWS.Deploy.CLI.TypeHintResponses;
 using AWS.Deploy.Common;
@@ -9,6 +12,7 @@ using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.TypeHintData;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.Data;
+using Newtonsoft.Json;
 
 namespace AWS.Deploy.CLI.Commands.TypeHints
 {
@@ -23,10 +27,21 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             _consoleUtilities = consoleUtilities;
         }
 
-        public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
+        private async Task<List<Role>> GetData(OptionSettingItem optionSetting)
         {
             var typeHintData = optionSetting.GetTypeHintData<IAMRoleTypeHintData>();
-            var existingRoles = await _awsResourceQueryer.ListOfIAMRoles(typeHintData?.ServicePrincipal);
+            return await _awsResourceQueryer.ListOfIAMRoles(typeHintData?.ServicePrincipal);
+        }
+
+        public async Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
+        {
+            var existingRoles = await GetData(optionSetting);
+            return existingRoles.Select(x => new TypeHintResource(x.Arn, x.RoleName)).ToList();
+        }
+
+        public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
+        {
+            var existingRoles = await GetData(optionSetting);
             var currentTypeHintResponse = recommendation.GetOptionSettingValue<IAMRoleTypeHintResponse>(optionSetting);
 
             var userInputConfiguration = new UserInputConfiguration<Role>(

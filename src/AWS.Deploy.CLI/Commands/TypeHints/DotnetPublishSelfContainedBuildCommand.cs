@@ -1,9 +1,11 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.TypeHintData;
 
 namespace AWS.Deploy.CLI.Commands.TypeHints
 {
@@ -15,6 +17,8 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         {
             _consoleUtilities = consoleUtilities;
         }
+
+        public Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting) => Task.FromResult<List<TypeHintResource>?>(null);
 
         public Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
