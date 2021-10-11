@@ -1,11 +1,17 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Amazon.EC2.Model;
+using Amazon.ElasticBeanstalk.Model;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.TypeHintData;
 using AWS.Deploy.Orchestration.Data;
+using Newtonsoft.Json;
+using YamlDotNet.Core.Tokens;
 
 namespace AWS.Deploy.CLI.Commands.TypeHints
 {
@@ -22,10 +28,21 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             _consoleUtilities = consoleUtilities;
         }
 
+        private async Task<List<KeyPairInfo>> GetData()
+        {
+            return await _awsResourceQueryer.ListOfEC2KeyPairs();
+        }
+
+        public async Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
+        {
+            var keyPairs = await GetData();
+            return keyPairs.Select(x => new TypeHintResource(x.KeyName, x.KeyName)).ToList();
+        }
+
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var currentValue = recommendation.GetOptionSettingValue(optionSetting);
-            var keyPairs = await _awsResourceQueryer.ListOfEC2KeyPairs();
+            var keyPairs = await GetData();
 
             var userInputConfiguration = new UserInputConfiguration<KeyPairInfo>(
                 kp => kp.KeyName,
