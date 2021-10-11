@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.TypeHintData;
 
 namespace AWS.Deploy.CLI.Commands.TypeHints
 {
@@ -17,6 +19,8 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             _consoleUtilities = consoleUtilities;
         }
 
+        public Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting) => Task.FromResult<List<TypeHintResource>?>(null);
+
         public Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var settingValue = _consoleUtilities
@@ -25,7 +29,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                     recommendation.GetOptionSettingValue<string>(optionSetting),
                     allowEmpty: true,
                     resetValue: recommendation.GetOptionSettingDefaultValue<string>(optionSetting) ?? "",
-                    validators: publishArgs => ValidateDotnetPublishArgs(publishArgs))     
+                    validators: publishArgs => ValidateDotnetPublishArgs(publishArgs))
                 .ToString()
                 .Replace("\"", "\"\"");
 

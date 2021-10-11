@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
 using Amazon;
+using Amazon.ElasticLoadBalancingV2;
 using AWS.Deploy.CLI.Utilities;
 using AWS.Deploy.Recipes;
 using AWS.Deploy.Orchestration.CDK;
@@ -29,6 +30,8 @@ using AWS.Deploy.Orchestration.DisplayedResources;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Orchestration.LocalUserSettings;
 using AWS.Deploy.CLI.Commands;
+using AWS.Deploy.CLI.Commands.TypeHints;
+using AWS.Deploy.Common.TypeHintData;
 
 namespace AWS.Deploy.CLI.ServerMode.Controllers
 {
@@ -239,6 +242,44 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             }
 
             return Ok(output);
+        }
+
+        [HttpGet("session/<sessionId>/settings/<configSettingId>/resources")]
+        [SwaggerOperation(OperationId = "GetConfigSettingResources")]
+        [SwaggerResponse(200, type: typeof(GetConfigSettingResourcesOutput))]
+        [Authorize]
+        public async Task<IActionResult> GetConfigSettingResources(string sessionId, string configSettingId)
+        {
+            var state = _stateServer.Get(sessionId);
+            if (state == null)
+            {
+                return NotFound($"Session ID {sessionId} not found.");
+            }
+            if (state.SelectedRecommendation == null)
+            {
+                return NotFound($"A deployment target is not set for Session ID {sessionId}.");
+            }
+
+            var serviceProvider = CreateSessionServiceProvider(state);
+            var typeHintCommandFactory = serviceProvider.GetRequiredService<ITypeHintCommandFactory>();
+
+            var configSetting = state.SelectedRecommendation.GetOptionSetting(configSettingId);
+
+            if (configSetting.TypeHint.HasValue && typeHintCommandFactory.GetCommand(configSetting.TypeHint.Value) is var typeHintCommand && typeHintCommand != null)
+            {
+                var output = new GetConfigSettingResourcesOutput();
+                var resources = await typeHintCommand.GetResources(state.SelectedRecommendation, configSetting);
+
+                if (resources == null)
+                {
+                    return NotFound("The Config Setting type hint is not recognized.");
+                }
+
+                output.Resources = resources.Select(x => new TypeHintResourceSummary(x.SystemName, x.DisplayName)).ToList();
+                return Ok(output);
+            }
+
+            return NotFound("The Config Setting type hint is not recognized.");
         }
 
         /// <summary>
