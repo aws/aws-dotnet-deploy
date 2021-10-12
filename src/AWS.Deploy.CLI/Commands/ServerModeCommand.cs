@@ -54,7 +54,7 @@ namespace AWS.Deploy.CLI.Commands
 
             var host = builder.Build();
 
-            if (_parentPid == null)
+            if (_parentPid.HasValue && _parentPid.Value != 0)
             {
                 await host.RunAsync(cancellationToken);
             }
@@ -62,7 +62,7 @@ namespace AWS.Deploy.CLI.Commands
             {
                 try
                 {
-                    var process = Process.GetProcessById((int)_parentPid);
+                    var process = Process.GetProcessById(_parentPid.GetValueOrDefault());
                     process.EnableRaisingEvents = true;
                     process.Exited += async (sender, args) => { await ShutDownHost(host, cancellationToken); };
                 }
