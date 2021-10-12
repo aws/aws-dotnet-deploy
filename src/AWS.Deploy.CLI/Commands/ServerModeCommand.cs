@@ -34,7 +34,7 @@ namespace AWS.Deploy.CLI.Commands
 
         public async Task ExecuteAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
-            _interactiveService.WriteLine("Server mode is an experimental feature being developed to allow communication between this CLI and the AWS Toolkit for Visual Studio. Expect behavior changes and API changes as server mode is being developed.");
+            _interactiveService.WriteLine("Server mode allows communication between this CLI and the AWS Toolkit for Visual Studio.");
 
             IEncryptionProvider encryptionProvider = CreateEncryptionProvider();
 
