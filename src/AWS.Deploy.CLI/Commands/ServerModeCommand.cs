@@ -34,7 +34,7 @@ namespace AWS.Deploy.CLI.Commands
 
         public async Task ExecuteAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
-            _interactiveService.WriteLine("Server mode is an experimental feature being developed to allow communication between this CLI and the AWS Toolkit for Visual Studio. Expect behavior changes and API changes as server mode is being developed.");
+            _interactiveService.WriteLine("Server mode allows communication between this CLI and the AWS Toolkit for Visual Studio.");
 
             IEncryptionProvider encryptionProvider = CreateEncryptionProvider();
 
@@ -54,7 +54,7 @@ namespace AWS.Deploy.CLI.Commands
 
             var host = builder.Build();
 
-            if (_parentPid == null)
+            if (_parentPid.HasValue && _parentPid.Value != 0)
             {
                 await host.RunAsync(cancellationToken);
             }
@@ -62,7 +62,7 @@ namespace AWS.Deploy.CLI.Commands
             {
                 try
                 {
-                    var process = Process.GetProcessById((int)_parentPid);
+                    var process = Process.GetProcessById(_parentPid.GetValueOrDefault());
                     process.EnableRaisingEvents = true;
                     process.Exited += async (sender, args) => { await ShutDownHost(host, cancellationToken); };
                 }

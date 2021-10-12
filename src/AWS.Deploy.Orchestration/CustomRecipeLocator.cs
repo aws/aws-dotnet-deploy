@@ -58,7 +58,7 @@ namespace AWS.Deploy.Orchestration
                     customRecipePaths.Add(recipePath);
             }
 
-            foreach (var recipePath in await LocateAlternateRecipePaths(targetApplicationFullPath, solutionDirectoryPath))
+            foreach (var recipePath in LocateAlternateRecipePaths(targetApplicationFullPath, solutionDirectoryPath))
             {
                 if (ContainsRecipeFile(recipePath))
                     customRecipePaths.Add(recipePath);
@@ -95,14 +95,14 @@ namespace AWS.Deploy.Orchestration
         /// <param name="targetApplicationFullPath">The absolute path to the target application csproj or fsproj file</param>
         /// <param name="solutionDirectoryPath">The absolute path of the directory which contains the solution file for the target application</param>
         /// <returns>A list of recipe definition paths.</returns>
-        private async Task<List<string>> LocateAlternateRecipePaths(string targetApplicationFullPath, string solutionDirectoryPath )
+        private List<string> LocateAlternateRecipePaths(string targetApplicationFullPath, string solutionDirectoryPath )
         {
             var targetApplicationDirectoryPath = _directoryManager.GetDirectoryInfo(targetApplicationFullPath).Parent.FullName;
             string? rootDirectoryPath;
 
-            if (await IsDirectoryUnderSourceControl(targetApplicationDirectoryPath))
+            if (IsDirectoryUnderSourceControl(targetApplicationDirectoryPath))
             {
-                rootDirectoryPath = await GetSourceControlRootDirectory(targetApplicationDirectoryPath);
+                rootDirectoryPath = GetSourceControlRootDirectory(targetApplicationDirectoryPath);
             }
             else
             {
@@ -138,10 +138,10 @@ namespace AWS.Deploy.Orchestration
         /// </summary>
         /// <param name="currentDirectoryPath">The absolute path of the current directory</param>
         /// <returns>The source control root directory absolute path.</returns>
-        private async Task<string?> GetSourceControlRootDirectory(string currentDirectoryPath)
+        private string? GetSourceControlRootDirectory(string currentDirectoryPath)
         {
             var possibleRootDirectoryPath = currentDirectoryPath;
-            while (await IsDirectoryUnderSourceControl(currentDirectoryPath))
+            while (IsDirectoryUnderSourceControl(currentDirectoryPath))
             {
                 possibleRootDirectoryPath = currentDirectoryPath;
                 var currentDirectoryInfo = _directoryManager.GetDirectoryInfo(currentDirectoryPath);
@@ -159,14 +159,19 @@ namespace AWS.Deploy.Orchestration
         /// </summary>
         /// <param name="directoryPath">An absolute directory path.</param>
         /// <returns></returns>
-        private async Task<bool> IsDirectoryUnderSourceControl(string? directoryPath)
+        private bool IsDirectoryUnderSourceControl(string? directoryPath)
         {
-            if (!string.IsNullOrEmpty(directoryPath))
+            var currentDir = directoryPath;
+            while(currentDir != null)
             {
-                var gitStatusResult = await _commandLineWrapper.TryRunWithResult(GIT_STATUS_COMMAND, directoryPath);
-                var svnStatusResult = await _commandLineWrapper.TryRunWithResult(SVN_STATUS_COMMAND, directoryPath);
-                return gitStatusResult.Success || svnStatusResult.Success;
+                if(_directoryManager.GetDirectories(currentDir, ".git").Any())
+                {
+                    return true;
+                }
+
+                currentDir = _directoryManager.GetDirectoryInfo(currentDir).Parent?.FullName;
             }
+
             return false;
         }
 

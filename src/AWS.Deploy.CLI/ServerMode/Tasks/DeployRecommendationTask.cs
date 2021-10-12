@@ -34,7 +34,9 @@ namespace AWS.Deploy.CLI.ServerMode.Tasks
         {
             if (_selectedRecommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.Container)
             {
-                await _orchestrator.CreateContainerDeploymentBundle(_cloudApplication, _selectedRecommendation);
+                var dockerBuildDeploymentBundleResult = await _orchestrator.CreateContainerDeploymentBundle(_cloudApplication, _selectedRecommendation);
+                if (!dockerBuildDeploymentBundleResult)
+                    throw new FailedToCreateDeploymentBundleException("Failed to create a deployment bundle");
             }
             else if (_selectedRecommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.DotnetPublishZipFile)
             {
