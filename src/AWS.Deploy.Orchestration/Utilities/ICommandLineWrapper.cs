@@ -129,7 +129,7 @@ namespace AWS.Deploy.Orchestration.Utilities
         /// Indicates if this command was run successfully.  This checks that
         /// <see cref="StandardError"/> is empty.
         /// </summary>
-        public bool Success => string.IsNullOrEmpty(StandardError);
+        public bool Success => string.IsNullOrWhiteSpace(StandardError);
 
         /// <summary>
         /// Fully read <see cref="Process.StandardOutput"/>
