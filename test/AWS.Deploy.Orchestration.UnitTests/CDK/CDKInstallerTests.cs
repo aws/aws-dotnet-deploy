@@ -22,79 +22,51 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
         }
 
         [Fact]
-        public async Task GetGlobalVersion_CDKExists()
-        {
-            // Arrange: add fake version information to return
-            _commandLineWrapper.Results.Add(new TryRunResult
-            {
-                StandardOut = @"C:\Users\user\AppData\Roaming\npm
-+-- aws-cdk@1.91.0"
-            });
-
-            // Act
-            var globalCDKVersionResult = await _cdkInstaller.GetGlobalVersion();
-
-            // Assert
-            Assert.True(globalCDKVersionResult.Success);
-            Assert.Equal(0, Version.Parse("1.91.0").CompareTo(globalCDKVersionResult.Result));
-            Assert.Contains(("npm list aws-cdk --global", string.Empty, false), _commandLineWrapper.Commands);
-        }
-
-        [Fact]
-        public async Task GetLocalVersion_CDKExists()
-        {
-            // Arrange: add fake version information to return
-            _commandLineWrapper.Results.Add(new TryRunResult
-            {
-                StandardOut = @"C:\fake\path
-+-- aws-cdk@1.91.0"
-            });
-
-            // Act
-            var localCDKVersionResult = await _cdkInstaller.GetLocalVersion(_workingDirectory);
-
-            // Assert
-            Assert.True(localCDKVersionResult.Success);
-            Assert.Equal(0, Version.Parse("1.91.0").CompareTo(localCDKVersionResult.Result));
-            Assert.Contains(("npm list aws-cdk", _workingDirectory, false), _commandLineWrapper.Commands);
-        }
-
-        [Fact]
-        public async Task GetLocalVersion_CDKDependentExists()
-        {
-            // Arrange: add fake version information to return for a CDK CLI plugin
-            _commandLineWrapper.Results.Add(new TryRunResult
-            {
-                StandardOut = @"C:\Users\user\AppData\Roaming\npm
-`-- cdk-assume-role-credential-plugin@1.0.0 (git+https://github.com/aws-samples/cdk-assume-role-credential-plugin.git#5167c798a50bc9c96a9d660b28306428be4e99fb)"
-            });
-
-            // Act
-            var localCDKVersionResult = await _cdkInstaller.GetLocalVersion(_workingDirectory);
-
-            // Assert
-            Assert.False(localCDKVersionResult.Success);
-            Assert.Null(localCDKVersionResult.Result);
-            Assert.Contains(("npm list aws-cdk", _workingDirectory, false), _commandLineWrapper.Commands);
-        }
-
-        [Fact]
-        public async Task GetLocalVersion_CDKDoesNotExist()
+        public async Task GetVersion_OutputContainsVersionOnly()
         {
             // Arrange: add empty version information to return
             _commandLineWrapper.Results.Add(new TryRunResult
             {
-                StandardOut = @"C:\Users\user\AppData\Local\Temp\AWS.Deploy\Projects
-`-- (empty)"
+                StandardOut = @"1.127.0 (build 0ea309a)"
             });
 
             // Act
-            var localCDKVersionResult = await _cdkInstaller.GetLocalVersion(_workingDirectory);
+            var version = await _cdkInstaller.GetVersion(_workingDirectory);
 
             // Assert
-            Assert.False(localCDKVersionResult.Success);
-            Assert.Null(localCDKVersionResult.Result);
-            Assert.Contains(("npm list aws-cdk", _workingDirectory, false), _commandLineWrapper.Commands);
+            Assert.True(version.Success);
+            Assert.Equal(0, Version.Parse("1.127.0").CompareTo(version.Result));
+            Assert.Contains(("npx --no-install cdk --version", _workingDirectory, false), _commandLineWrapper.Commands);
+        }
+
+        [Fact]
+        public async Task GetVersion_OutputContainsMessage()
+        {
+            // Arrange: add fake version information to return
+            _commandLineWrapper.Results.Add(new TryRunResult
+            {
+                StandardOut =
+@"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!                                                                                  !!
+!!  Node v10.19.0 has reached end-of-life and is not supported.                     !!
+!!  You may to encounter runtime issues, and should switch to a supported release.  !!
+!!                                                                                  !!
+!!  As of the current release, supported versions of node are:                      !!
+!!  - ^12.7.0                                                                       !!
+!!  - ^14.5.0                                                                       !!
+!!  - ^16.3.0                                                                       !!
+!!                                                                                  !!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+1.127.0 (build 0ea309a)"
+            });
+
+            // Act
+            var version = await _cdkInstaller.GetVersion(_workingDirectory);
+
+            // Assert
+            Assert.True(version.Success);
+            Assert.Equal(0, Version.Parse("1.127.0").CompareTo(version.Result));
+            Assert.Contains(("npx --no-install cdk --version", _workingDirectory, false), _commandLineWrapper.Commands);
         }
 
         [Fact]

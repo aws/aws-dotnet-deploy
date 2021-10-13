@@ -92,7 +92,7 @@ namespace AWS.Deploy.CLI.Utilities
                         _interactiveService.LogMessageLine(e.Data);
                     }
 
-                    strOutput.Append(e.Data);
+                    strOutput.AppendLine(e.Data);
                 };
 
                 process.ErrorDataReceived += (sender, e) =>
@@ -102,7 +102,7 @@ namespace AWS.Deploy.CLI.Utilities
                         _interactiveService.LogMessageLine(e.Data);
                     }
 
-                    strError.Append(e.Data);
+                    strError.AppendLine(e.Data);
                 };
                 process.BeginOutputReadLine();
                 process.BeginErrorReadLine();

@@ -47,10 +47,10 @@ namespace AWS.Deploy.Orchestration.CDK
 
             try
             {
-                var globalCdkVerion = await _cdkInstaller.GetGlobalVersion();
-                if (globalCdkVerion.Success && globalCdkVerion.Result?.CompareTo(cdkVersion) >= 0)
+                var installedCdkVersion = await _cdkInstaller.GetVersion(workingDirectory);
+                if (installedCdkVersion.Success && installedCdkVersion.Result?.CompareTo(cdkVersion) >= 0)
                 {
-                    _interactiveService.LogDebugLine($"CDK version {globalCdkVerion.Result} found in global node_modules.");
+                    _interactiveService.LogDebugLine($"CDK version {installedCdkVersion.Result} found in global node_modules.");
                     return;
                 }
 
@@ -59,13 +59,6 @@ namespace AWS.Deploy.Orchestration.CDK
                 {
                     await _npmPackageInitializer.Initialize(workingDirectory, cdkVersion);
                     return; // There is no need to install CDK CLI explicitly, npm install takes care of first time bootstrap.
-                }
-
-                var localCdkVersion = await _cdkInstaller.GetLocalVersion(workingDirectory);
-                if (localCdkVersion.Success && localCdkVersion.Result?.CompareTo(cdkVersion) >= 0)
-                {
-                    _interactiveService.LogDebugLine($"CDK version {localCdkVersion.Result} found in local node_modules at {workingDirectory}.");
-                    return;
                 }
 
                 await _cdkInstaller.Install(workingDirectory, cdkVersion);

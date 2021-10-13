@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AWS.Deploy.Orchestration.Utilities;
@@ -15,17 +16,12 @@ namespace AWS.Deploy.Orchestration.CDK
     public interface ICDKInstaller
     {
         /// <summary>
-        /// Gets CDK CLI version installed in global node_modules using npm command.
-        /// </summary>
-        /// <returns><see cref="Version"/> object wrapped in <see cref="TryGetResult{TResult}"/></returns>
-        Task<TryGetResult<Version>> GetGlobalVersion();
-
-        /// <summary>
-        /// Gets CDK CLI version installed <see cref="workingDirectory"/> using npm command.
+        /// Gets CDK CLI version installed <see cref="workingDirectory"/> using npx command.
+        /// It checks for local as well as global version
         /// </summary>
         /// <param name="workingDirectory">Directory for local node app.</param>
         /// <returns><see cref="Version"/> object wrapped in <see cref="TryGetResult{TResult}"/></returns>
-        Task<TryGetResult<Version>> GetLocalVersion(string workingDirectory);
+        Task<TryGetResult<Version>> GetVersion(string workingDirectory);
 
         /// <summary>
         /// Installs local version of the AWS SDK CLI in the given working directory
@@ -44,81 +40,47 @@ namespace AWS.Deploy.Orchestration.CDK
             _commandLineWrapper = commandLineWrapper;
         }
 
-        public Task<TryGetResult<Version>> GetGlobalVersion()
+        public async Task<TryGetResult<Version>> GetVersion(string workingDirectory)
         {
-            return GetVersion(string.Empty, true);
-        }
-
-        public Task<TryGetResult<Version>> GetLocalVersion(string workingDirectory)
-        {
-            return GetVersion(workingDirectory, false);
-        }
-
-        private async Task<TryGetResult<Version>> GetVersion(string workingDirectory, bool checkGlobal)
-        {
-            var command = new StringBuilder("npm list aws-cdk");
-            if (checkGlobal)
-            {
-                command.Append(" --global");
-            }
+            const string command = "npx --no-install cdk --version";
 
             TryRunResult result;
 
             try
             {
-                result = await _commandLineWrapper.TryRunWithResult(command.ToString(), workingDirectory, false);
+                result = await _commandLineWrapper.TryRunWithResult(command, workingDirectory, false);
             }
             catch (Exception exception)
             {
                 throw new NPMCommandFailedException($"Failed to execute {command}", exception);
             }
 
-            /*
-             * A typical Standard out looks like with version information in line 2
-             *
-             * > npm list aws-cdk --global
-             * C:\Users\user\AppData\Roaming\npm
-             * `-- aws-cdk@0.0.0
-             */
             var standardOut = result.StandardOut ?? "";
-            var lines = standardOut.Split('\n'); // Environment.NewLine doesn't work here.
-            if (lines.Length < 2)
+            var lines = standardOut.Split(Environment.NewLine).Where(line => !string.IsNullOrWhiteSpace(line)).ToArray();
+            if (lines.Length < 1)
             {
                 return TryGetResult.Failure<Version>();
             }
 
-            var versionLine = lines[1];
+            var versionLine = lines.Last();
 
             /*
-             * Split line 2 in parts so that we have package name and version in separate parts
+             * Split the last line which has the version
+             * typical version line: 1.127.0 (build 0ea309a)
              *
-             * part 0: `--
-             * part 1: aws-cdk
-             * part 2: 0.0.0
+             * part 0: 1.127.0
+             * part 1: build
+             * part 2: 0ea309a
              *
              * It could be possible we have more than 3 parts with more information but they can be ignored.
              */
-            var parts = versionLine.Split(' ', '@');
+            var parts = versionLine.Split(' ', '(', ')').Where(part => !string.IsNullOrWhiteSpace(part)).ToArray();
             if (parts.Length < 3)
             {
                 return TryGetResult.Failure<Version>();
             }
 
-            /*
-             * Make sure that we are checking aws-cdk only
-             * If a customer has plugin which depends on aws-cdk and then customer removes aws-cdk
-             * Plugin version information is shown which can lead to a false positive.
-             *
-             * > npm list aws-cdk --global
-             * C:\Users\user\AppData\Roaming\npm
-             * `-- cdk-assume-role-credential-plugin@1.0.0 (git+https://github.com/aws-samples/cdk-assume-role-credential-plugin.git#5167c798a50bc9c96a9d660b28306428be4e99fb)
-             */
-            if (!parts[1].Equals("aws-cdk"))
-            {
-                return TryGetResult.Failure<Version>();
-            }
-
-            if (Version.TryParse(parts[2], out var version))
+            if (Version.TryParse(parts[0], out var version))
             {
                 return TryGetResult.FromResult(version);
             }
