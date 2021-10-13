@@ -81,7 +81,7 @@ Recommended Deployment Option
 1: ASP.NET Core App to Amazon ECS using Fargate
 ASP.NET Core applications built as a container and deployed to Amazon Elastic Container Service (ECS) with compute power managed by AWS Fargate compute engine. Recommended for applications that can be deployed as a container image. If your project does not contain a Dockerfile, one will be generated for the project.
 
-Additional Deployments Options
+Additional Deployment Options
 ------------------------------
 2: ASP.NET Core App to AWS Elastic Beanstalk on Linux
 Deploy an ASP.NET Core application to AWS Elastic Beanstalk. Recommended for applications that are not set up to be deployed as containers.
