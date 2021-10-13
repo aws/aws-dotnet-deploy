@@ -14,6 +14,14 @@ namespace AWS.Deploy.CLI.ServerMode.Models
 
         public string RecipeId { get; set; }
 
+        public string RecipeName { get; set; }
+
+        public string ShortDescription { get; set; }
+
+        public string Description { get; set; }
+
+        public string TargetService { get; set; }
+
         public DateTime? LastUpdatedTime { get; set; }
 
         public bool UpdatedByCurrentUser { get; set; }
@@ -21,12 +29,20 @@ namespace AWS.Deploy.CLI.ServerMode.Models
         public ExistingDeploymentSummary(
             string name,
             string recipeId,
+            string recipeName,
+            string shortDescription,
+            string description,
+            string targetService,
             DateTime? lastUpdatedTime,
             bool updatedByCurrentUser
         )
         {
             Name = name;
             RecipeId = recipeId;
+            RecipeName = recipeName;
+            ShortDescription = shortDescription;
+            Description = description;
+            TargetService = targetService;
             LastUpdatedTime = lastUpdatedTime;
             UpdatedByCurrentUser = updatedByCurrentUser;
         }
