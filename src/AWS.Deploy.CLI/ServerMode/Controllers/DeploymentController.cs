@@ -135,9 +135,11 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             foreach (var recommendation in state.NewRecommendations)
             {
                 output.Recommendations.Add(new RecommendationSummary(
-                    recommendation.Recipe.Id,
-                    recommendation.Name,
-                    recommendation.ShortDescription
+                    recipeId: recommendation.Recipe.Id,
+                    name: recommendation.Name,
+                    shortDescription: recommendation.ShortDescription,
+                    description: recommendation.Description,
+                    targetService: recommendation.Recipe.TargetService
                     ));
             }
 
@@ -270,11 +272,17 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
             foreach(var deployment in state.ExistingDeployments)
             {
+                var recommendation = state.NewRecommendations.First(x => string.Equals(x.Recipe.Id, deployment.RecipeId));
+
                 output.ExistingDeployments.Add(new ExistingDeploymentSummary(
-                    deployment.Name,
-                    deployment.RecipeId,
-                    deployment.LastUpdatedTime,
-                    deployment.UpdatedByCurrentUser));
+                    name: deployment.Name,
+                    recipeId: deployment.RecipeId,
+                    recipeName: recommendation.Name,
+                    shortDescription: recommendation.ShortDescription,
+                    description: recommendation.Description,
+                    targetService: recommendation.Recipe.TargetService,
+                    lastUpdatedTime: deployment.LastUpdatedTime,
+                    updatedByCurrentUser: deployment.UpdatedByCurrentUser));
             }
 
             return Ok(output);

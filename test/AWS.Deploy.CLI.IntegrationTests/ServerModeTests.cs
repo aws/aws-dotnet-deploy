@@ -91,7 +91,12 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
                 var getRecommendationOutput = await restClient.GetRecommendationsAsync(sessionId);
                 Assert.NotEmpty(getRecommendationOutput.Recommendations);
-                Assert.Equal("AspNetAppElasticBeanstalkLinux", getRecommendationOutput.Recommendations.FirstOrDefault().RecipeId);
+                var beanstalkRecommendation = getRecommendationOutput.Recommendations.FirstOrDefault();
+                Assert.Equal("AspNetAppElasticBeanstalkLinux", beanstalkRecommendation.RecipeId);
+                Assert.NotNull(beanstalkRecommendation.ShortDescription);
+                Assert.NotNull(beanstalkRecommendation.Description);
+                Assert.True(beanstalkRecommendation.ShortDescription.Length < beanstalkRecommendation.Description.Length);
+                Assert.Equal("AWS Elastic Beanstalk", beanstalkRecommendation.TargetService);
             }
             finally
             {
@@ -212,6 +217,24 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
                 Assert.True(logOutput.Length > 0);
                 Assert.Contains("Initiating deployment", logOutput.ToString());
+
+                var redeploymentSessionOutput = await restClient.StartDeploymentSessionAsync(new StartDeploymentSessionInput
+                {
+                    AwsRegion = _awsRegion,
+                    ProjectPath = projectPath
+                });
+
+                var redeploymentSessionId = redeploymentSessionOutput.SessionId;
+
+                var existingDeployments = await restClient.GetExistingDeploymentsAsync(redeploymentSessionId);
+                var existingDeployment = existingDeployments.ExistingDeployments.First(x => string.Equals(_stackName, x.Name));
+
+                Assert.Equal(_stackName, existingDeployment.Name);
+                Assert.Equal(fargateRecommendation.RecipeId, existingDeployment.RecipeId);
+                Assert.Equal(fargateRecommendation.Name, existingDeployment.RecipeName);
+                Assert.Equal(fargateRecommendation.ShortDescription, existingDeployment.ShortDescription);
+                Assert.Equal(fargateRecommendation.Description, existingDeployment.Description);
+                Assert.Equal(fargateRecommendation.TargetService, existingDeployment.TargetService);
             }
             finally
             {
