@@ -1415,6 +1415,18 @@ namespace AWS.Deploy.ServerMode.Client
         [Newtonsoft.Json.JsonProperty("recipeId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string RecipeId { get; set; }
     
+        [Newtonsoft.Json.JsonProperty("recipeName", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string RecipeName { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("shortDescription", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string ShortDescription { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Description { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("targetService", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string TargetService { get; set; }
+    
         [Newtonsoft.Json.JsonProperty("lastUpdatedTime", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? LastUpdatedTime { get; set; }
     
@@ -1524,6 +1536,9 @@ namespace AWS.Deploy.ServerMode.Client
         [Newtonsoft.Json.JsonProperty("visible", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool Visible { get; set; }
     
+        [Newtonsoft.Json.JsonProperty("summaryDisplayable", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public bool SummaryDisplayable { get; set; }
+    
         [Newtonsoft.Json.JsonProperty("allowedValues", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<string> AllowedValues { get; set; }
     
@@ -1575,8 +1590,14 @@ namespace AWS.Deploy.ServerMode.Client
         [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Name { get; set; }
     
+        [Newtonsoft.Json.JsonProperty("shortDescription", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string ShortDescription { get; set; }
+    
         [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Description { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("targetService", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string TargetService { get; set; }
     
     
     }

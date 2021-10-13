@@ -299,17 +299,7 @@ namespace AWS.Deploy.CLI.Commands
                 selectedRecommendation
                     .Recipe
                     .OptionSettings
-                    .Where(x =>
-                    {
-                        if (!selectedRecommendation.IsOptionSettingDisplayable(x))
-                            return false;
-
-                        var value = selectedRecommendation.GetOptionSettingValue(x);
-                        if (value == null || value.ToString() == string.Empty)
-                            return false;
-
-                        return true;
-                    })
+                    .Where(x => selectedRecommendation.IsSummaryDisplayable(x))
                     .ToArray();
 
             foreach (var setting in optionSettings)

@@ -26,6 +26,8 @@ namespace AWS.Deploy.CLI.ServerMode.Models
 
         public bool Visible { get; set; }
 
+        public bool SummaryDisplayable { get; set; }
+
         public IList<string> AllowedValues { get; set; } = new List<string>();
 
         public IDictionary<string, string> ValueMapping { get; set; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
