@@ -61,7 +61,7 @@ namespace AWS.Deploy.CLI
 
             if (recommendations.Count > 1)
             {
-                _interactiveService.WriteLine("Additional Deployments Options");
+                _interactiveService.WriteLine("Additional Deployment Options");
                 _interactiveService.WriteLine("------------------------------");
                 for (var index = 1; index < recommendations.Count; index++)
                 {
