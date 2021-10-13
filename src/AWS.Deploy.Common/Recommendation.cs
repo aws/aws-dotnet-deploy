@@ -182,5 +182,20 @@ namespace AWS.Deploy.Common
 
             return true;
         }
+
+        /// <summary>
+        /// Checks whether the Option Setting Item can be displayed as part of the settings summary of the previous deployment.
+        /// </summary>
+        public bool IsSummaryDisplayable(OptionSettingItem optionSettingItem)
+        {
+            if (!IsOptionSettingDisplayable(optionSettingItem))
+                return false;
+
+            var value = GetOptionSettingValue(optionSettingItem);
+            if (string.IsNullOrEmpty(value?.ToString()))
+                return false;
+
+            return true;
+        }
     }
 }
