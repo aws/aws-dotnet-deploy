@@ -189,6 +189,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                     Advanced = setting.AdvancedSetting,
                     ReadOnly = recommendation.IsExistingCloudApplication && !setting.Updatable,
                     Visible = recommendation.IsOptionSettingDisplayable(setting),
+                    SummaryDisplayable = recommendation.IsSummaryDisplayable(setting),
                     AllowedValues = setting.AllowedValues,
                     ValueMapping = setting.ValueMapping,
                     ChildOptionSettings = ListOptionSettingSummary(recommendation, setting.ChildOptionSettings)
