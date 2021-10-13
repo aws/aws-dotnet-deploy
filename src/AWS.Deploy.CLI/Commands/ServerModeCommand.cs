@@ -54,7 +54,7 @@ namespace AWS.Deploy.CLI.Commands
 
             var host = builder.Build();
 
-            if (_parentPid.HasValue && _parentPid.Value != 0)
+            if (_parentPid.GetValueOrDefault() == 0)
             {
                 await host.RunAsync(cancellationToken);
             }
