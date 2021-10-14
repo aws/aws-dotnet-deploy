@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -126,6 +127,14 @@ namespace AWS.Deploy.ServerMode.Client
 
             for (var port = _startPort; port <= _endPort; port++)
             {
+                // This ensures that deploy tool CLI doesn't try on the in-use port
+                // because server availability task will return success response for
+                // an in-use port
+                if (IsPortInUse(port))
+                {
+                    continue;
+                }
+
                 _aes = Aes.Create();
                 _aes.GenerateKey();
 
@@ -214,6 +223,14 @@ namespace AWS.Deploy.ServerMode.Client
                 TimeSpan.FromMilliseconds(100),
                 _serverTimeout,
                 cancellationToken);
+        }
+
+        private static bool IsPortInUse(int port)
+        {
+            var ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
+            var listeners = ipGlobalProperties.GetActiveTcpListeners();
+
+            return listeners.Any(x => x.Port == port);
         }
 
         #endregion
