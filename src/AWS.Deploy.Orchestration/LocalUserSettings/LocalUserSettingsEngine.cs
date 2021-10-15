@@ -67,12 +67,23 @@ namespace AWS.Deploy.Orchestration.LocalUserSettings
                     }
                     else
                     {
-                        localUserSettings.LastDeployedStacks = new List<LastDeployedStack>() {
-                            new LastDeployedStack(
-                                awsAccountId,
-                                awsRegion,
-                                projectName,
-                                new List<string>() { stackName })};
+                        var currentStack = new LastDeployedStack(
+                            awsAccountId,
+                            awsRegion,
+                            projectName,
+                            new List<string>()
+                            {
+                                stackName
+                            });
+
+                        if (localUserSettings.LastDeployedStacks == null)
+                        {
+                            localUserSettings.LastDeployedStacks = new List<LastDeployedStack>() { currentStack };
+                        }
+                        else
+                        {
+                            localUserSettings.LastDeployedStacks.Add(currentStack);
+                        }
                     }
                 }
                 else
@@ -84,7 +95,10 @@ namespace AWS.Deploy.Orchestration.LocalUserSettings
                             awsRegion,
                             projectName,
                             new List<string>() { stackName }) };
-                    localUserSettings = new LocalUserSettings(lastDeployedStacks);
+                    localUserSettings = new LocalUserSettings
+                    {
+                        LastDeployedStacks = lastDeployedStacks
+                    };
                 }
 
                 await WriteLocalUserSettingsFile(localUserSettings);
@@ -167,8 +181,7 @@ namespace AWS.Deploy.Orchestration.LocalUserSettings
             var settingsFilejsonString = JsonConvert.SerializeObject(deploymentManifestModel, new JsonSerializerSettings
             {
                 Formatting = Formatting.Indented,
-                NullValueHandling = NullValueHandling.Ignore,
-                ContractResolver = new SerializeModelContractResolver()
+                NullValueHandling = NullValueHandling.Ignore
             });
 
             await _fileManager.WriteAllTextAsync(localUserSettingsFilePath, settingsFilejsonString);
