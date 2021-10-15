@@ -36,6 +36,8 @@ namespace AWS.Deploy.ServerMode.Client
         private readonly Func<Task<AWSCredentials>> _credentialsGenerator;
         private readonly Aes? _aes;
 
+        private static readonly object AES_LOCK = new object();
+
         internal ServerModeHttpClientAuthorizationHandler(Func<Task<AWSCredentials>> credentialsGenerator, Aes? aes = null)
         {
             _credentialsGenerator = credentialsGenerator;
@@ -73,8 +75,14 @@ namespace AWS.Deploy.ServerMode.Client
             string base64;
             if(aes != null)
             {
-                aes.GenerateIV();
-                var encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
+                byte[] iv;
+                lock (AES_LOCK)
+                {
+                    aes.GenerateIV();
+                    iv = aes.IV;
+                }
+
+                var encryptor = aes.CreateEncryptor(aes.Key, iv);
 
                 using var inputStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
                 using var outputStream = new MemoryStream();
@@ -83,7 +91,7 @@ namespace AWS.Deploy.ServerMode.Client
                     inputStream.CopyTo(encryptStream);
                 }
 
-                base64 = $"{Convert.ToBase64String(aes.IV)} {Convert.ToBase64String(outputStream.ToArray())}";
+                base64 = $"{Convert.ToBase64String(iv)} {Convert.ToBase64String(outputStream.ToArray())}";
             }
             else
             {
