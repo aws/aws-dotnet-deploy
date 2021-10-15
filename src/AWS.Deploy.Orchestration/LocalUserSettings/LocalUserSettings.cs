@@ -7,11 +7,6 @@ namespace AWS.Deploy.Orchestration.LocalUserSettings
 {
     public class LocalUserSettings
     {
-        public List<LastDeployedStack>? LastDeployedStacks { get; set; }
-
-        public LocalUserSettings(List<LastDeployedStack> lastDeployedStacks)
-        {
-            LastDeployedStacks = lastDeployedStacks;
-        }
+        public List<LastDeployedStack> LastDeployedStacks = new List<LastDeployedStack>();
     }
 }
