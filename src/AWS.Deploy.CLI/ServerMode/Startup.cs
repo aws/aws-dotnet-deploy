@@ -82,10 +82,6 @@ namespace AWS.Deploy.CLI.ServerMode
             }
 
             app.UseSwagger();
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "AWS .NET Deploy Tool Server Mode API");
-            });
 
             app.UseRouting();
 
