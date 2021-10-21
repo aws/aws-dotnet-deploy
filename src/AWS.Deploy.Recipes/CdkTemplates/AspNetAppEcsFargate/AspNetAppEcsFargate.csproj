@@ -5,7 +5,6 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RollForward>Major</RollForward>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <LangVersion>9</LangVersion>
     <Nullable>enable</Nullable>
     <AWSProjectType>DeploymentProject</AWSProjectType>
     <!-- The value "AWSDeployRecipesCDKCommonVersion" is replaced by the project template system. -->
@@ -26,10 +25,10 @@
 
   <ItemGroup>
     <!-- CDK Construct Library dependencies -->
-    <PackageReference Include="Amazon.CDK" Version="1.107.0" />
-    <PackageReference Include="Amazon.CDK.AWS.EC2" Version="1.107.0" />
-    <PackageReference Include="Amazon.CDK.AWS.ECS.Patterns" Version="1.107.0" />
-    <PackageReference Include="Amazon.CDK.AWS.S3.Assets" Version="1.107.0" />
+    <PackageReference Include="Amazon.CDK" Version="1.128.0" />
+    <PackageReference Include="Amazon.CDK.AWS.EC2" Version="1.128.0" />
+    <PackageReference Include="Amazon.CDK.AWS.ECS.Patterns" Version="1.128.0" />
+    <PackageReference Include="Amazon.CDK.AWS.S3.Assets" Version="1.128.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.7" />
 
     <!-- jsii Roslyn analyzers (un-comment to obtain compile-time checks for missing required props
