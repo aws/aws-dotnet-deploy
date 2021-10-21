@@ -150,9 +150,11 @@ namespace AWS.Deploy.Orchestration.Utilities
         /// </summary>
         public bool IsCompatible(CloudApplication application, Recommendation recommendation)
         {
+            // For persisted projects check both the recipe id and the base recipe id for compatibility. The base recipe id check is for stacks that
+            // were first created by a system recipe and then later moved to a persisted deployment project.
             if (recommendation.Recipe.PersistedDeploymentProject)
             {
-                return string.Equals(recommendation.Recipe.BaseRecipeId, application.RecipeId, StringComparison.Ordinal);
+                return string.Equals(recommendation.Recipe.Id, application.RecipeId, StringComparison.Ordinal) || string.Equals(recommendation.Recipe.BaseRecipeId, application.RecipeId, StringComparison.Ordinal);
             }
             return string.Equals(recommendation.Recipe.Id, application.RecipeId, StringComparison.Ordinal);
         }
