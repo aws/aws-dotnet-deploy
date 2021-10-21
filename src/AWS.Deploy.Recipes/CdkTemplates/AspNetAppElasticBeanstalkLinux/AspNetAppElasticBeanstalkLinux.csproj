@@ -5,7 +5,6 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RollForward>Major</RollForward>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <LangVersion>9</LangVersion>
     <Nullable>enable</Nullable>
     <AWSProjectType>DeploymentProject</AWSProjectType>
     <!-- The value "AWSDeployRecipesCDKCommonVersion" is replaced by the project template system. -->
@@ -26,9 +25,9 @@
 
   <ItemGroup>
     <!-- CDK Construct Library dependencies -->
-    <PackageReference Include="Amazon.CDK" Version="1.121.0" />
-    <PackageReference Include="Amazon.CDK.AWS.ElasticBeanstalk" Version="1.121.0" />
-    <PackageReference Include="Amazon.CDK.AWS.S3.Assets" Version="1.121.0" />
+    <PackageReference Include="Amazon.CDK" Version="1.128.0" />
+    <PackageReference Include="Amazon.CDK.AWS.ElasticBeanstalk" Version="1.128.0" />
+    <PackageReference Include="Amazon.CDK.AWS.S3.Assets" Version="1.128.0" />
 
     <PackageReference Include="AWSSDK.ElasticBeanstalk" Version="3.7.0.61" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.7" />
