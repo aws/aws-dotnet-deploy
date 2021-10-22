@@ -12,6 +12,8 @@ using Amazon.CloudFront;
 using Amazon.CloudFront.Model;
 using Amazon.CloudWatchEvents;
 using Amazon.CloudWatchEvents.Model;
+using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.Model;
 using Amazon.EC2;
 using Amazon.EC2.Model;
 using Amazon.ECR;
@@ -27,6 +29,10 @@ using Amazon.IdentityManagement.Model;
 using Amazon.S3;
 using Amazon.SecurityToken;
 using Amazon.SecurityToken.Model;
+using Amazon.SimpleNotificationService;
+using Amazon.SimpleNotificationService.Model;
+using Amazon.SQS;
+using Amazon.SQS.Model;
 using AWS.Deploy.Common;
 
 namespace AWS.Deploy.Orchestration.Data
@@ -57,6 +63,10 @@ namespace AWS.Deploy.Orchestration.Data
         Task<GetCallerIdentityResponse> GetCallerIdentity();
         Task<List<Amazon.ElasticLoadBalancingV2.Model.LoadBalancer>> ListOfLoadBalancers(LoadBalancerTypeEnum loadBalancerType);
         Task<Distribution> GetCloudFrontDistribution(string distributionId);
+        Task<List<string>> ListOfDyanmoDBTables();
+        Task<List<string>> ListOfSQSQueuesUrls();
+        Task<List<string>> ListOfSNSTopicArns();
+        Task<List<Amazon.S3.Model.S3Bucket>> ListOfS3Buckets();
     }
 
     public class AWSResourceQueryer : IAWSResourceQueryer
@@ -429,6 +439,59 @@ namespace AWS.Deploy.Orchestration.Data
             });
 
             return response.Distribution;
+        }
+
+        public async Task<List<string>> ListOfDyanmoDBTables()
+        {
+            var client = _awsClientFactory.GetAWSClient<IAmazonDynamoDB>();
+
+            var tables = new List<string>();
+
+            await foreach(var table in client.Paginators.ListTables(new ListTablesRequest()).TableNames)
+            {
+                tables.Add(table);
+            }
+
+            return tables;
+        }
+
+        public async Task<List<string>> ListOfSQSQueuesUrls()
+        {
+            var client = _awsClientFactory.GetAWSClient<IAmazonSQS>();
+
+            var queueUrls = new List<string>();
+            await foreach(var queueUrl in client.Paginators.ListQueues(new ListQueuesRequest()).QueueUrls)
+            {
+                queueUrls.Add(queueUrl);
+            }
+
+            return queueUrls;
+        }
+
+        public async Task<List<string>> ListOfSNSTopicArns()
+        {
+            var client = _awsClientFactory.GetAWSClient<IAmazonSimpleNotificationService>();
+
+            var arns = new List<string>();
+            await foreach (var topic in client.Paginators.ListTopics(new ListTopicsRequest()).Topics)
+            {
+                arns.Add(topic.TopicArn);
+            }
+
+            return arns;
+        }
+
+        public async Task<List<Amazon.S3.Model.S3Bucket>> ListOfS3Buckets()
+        {
+            var client = _awsClientFactory.GetAWSClient<IAmazonS3>();
+
+            var buckets = new List<Amazon.S3.Model.S3Bucket>();
+            foreach (var bucket in (await client.ListBucketsAsync()).Buckets)
+            {
+                buckets.Add(bucket);
+            }
+
+            return buckets;
         }
     }
 }
