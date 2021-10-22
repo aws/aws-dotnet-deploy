@@ -50,6 +50,10 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 { OptionSettingTypeHint.DockerBuildArgs, new DockerBuildArgsCommand(consoleUtilities) },
                 { OptionSettingTypeHint.ECSCluster, new ECSClusterCommand(awsResourceQueryer, consoleUtilities) },
                 { OptionSettingTypeHint.ExistingApplicationLoadBalancer, new ExistingApplicationLoadBalancerCommand(awsResourceQueryer, consoleUtilities) },
+                { OptionSettingTypeHint.DynamoDBTableName, new DynamoDBTableCommand(awsResourceQueryer, consoleUtilities) },
+                { OptionSettingTypeHint.SQSQueueUrl, new SQSQueueUrlCommand(awsResourceQueryer, consoleUtilities) },
+                { OptionSettingTypeHint.SNSTopicArn, new SNSTopicArnsCommand(awsResourceQueryer, consoleUtilities) },
+                { OptionSettingTypeHint.S3BucketName, new S3BucketNameCommand(awsResourceQueryer, consoleUtilities) },
             };
         }
 

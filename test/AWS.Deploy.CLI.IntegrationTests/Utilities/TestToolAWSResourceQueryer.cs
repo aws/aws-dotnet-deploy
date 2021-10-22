@@ -49,5 +49,9 @@ namespace AWS.Deploy.CLI.IntegrationTests.Utilities
         public Task<Amazon.AppRunner.Model.Service> DescribeAppRunnerService(string serviceArn) => throw new NotImplementedException();
         public Task<List<Amazon.ElasticLoadBalancingV2.Model.LoadBalancer>> ListOfLoadBalancers(LoadBalancerTypeEnum loadBalancerType) => throw new NotImplementedException();
         public Task<Distribution> GetCloudFrontDistribution(string distributionId) => throw new NotImplementedException();
+        public Task<List<string>> ListOfDyanmoDBTables() => throw new NotImplementedException();
+        public Task<List<string>> ListOfSQSQueuesUrls() => throw new NotImplementedException();
+        public Task<List<string>> ListOfSNSTopicArns() => throw new NotImplementedException();
+        public Task<List<Amazon.S3.Model.S3Bucket>> ListOfS3Buckets() => throw new NotImplementedException();
     }
 }
