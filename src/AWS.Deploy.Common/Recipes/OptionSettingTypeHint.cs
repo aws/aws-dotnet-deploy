@@ -21,6 +21,10 @@ namespace AWS.Deploy.Common.Recipes
         DotnetPublishAdditionalBuildArguments,
         DockerExecutionDirectory,
         DockerBuildArgs,
-        AppRunnerService
+        AppRunnerService,
+        DynamoDBTableName,
+        SQSQueueUrl,
+        SNSTopicArn,
+        S3BucketName
     };
 }
