@@ -26,7 +26,7 @@ namespace AWS.Deploy.Orchestration
             string dockerContainerType)
         {
             DockerInstalled = dockerInstalled;
-            DockerContainerType = dockerContainerType;
+            DockerContainerType = dockerContainerType.Trim();
         }
     }
 
