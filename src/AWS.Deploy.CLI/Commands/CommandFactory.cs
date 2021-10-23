@@ -167,17 +167,21 @@ namespace AWS.Deploy.CLI.Commands
                     _toolInteractiveService.Diagnostics = input.Diagnostics;
                     _toolInteractiveService.DisableInteractive = input.Silent;
 
-                    var userDeploymentSettings = !string.IsNullOrEmpty(input.Apply)
-                        ? UserDeploymentSettings.ReadSettings(input.Apply)
-                        : null;
+                    var projectDefinition = await _projectParserUtility.Parse(input.ProjectPath ?? "");
+                    var targetApplicationDirectoryPath = new DirectoryInfo(projectDefinition.ProjectPath).Parent!.FullName;
+
+                    UserDeploymentSettings? userDeploymentSettings = null;
+                    if (!string.IsNullOrEmpty(input.Apply))
+                    {
+                        var applyPath = Path.GetFullPath(input.Apply, targetApplicationDirectoryPath);
+                        userDeploymentSettings = UserDeploymentSettings.ReadSettings(applyPath);
+                    }
 
                     var awsCredentials = await _awsUtilities.ResolveAWSCredentials(input.Profile ?? userDeploymentSettings?.AWSProfile);
                     var awsRegion = _awsUtilities.ResolveAWSRegion(input.Region ?? userDeploymentSettings?.AWSRegion);
 
                     _commandLineWrapper.RegisterAWSContext(awsCredentials, awsRegion);
                     _awsClientFactory.RegisterAWSContext(awsCredentials, awsRegion);
-
-                    var projectDefinition = await _projectParserUtility.Parse(input.ProjectPath ?? "");
 
                     var callerIdentity = await _awsResourceQueryer.GetCallerIdentity();
 
@@ -217,7 +221,6 @@ namespace AWS.Deploy.CLI.Commands
                     var deploymentProjectPath = input.DeploymentProject ?? string.Empty;
                     if (!string.IsNullOrEmpty(deploymentProjectPath))
                     {
-                        var targetApplicationDirectoryPath = new DirectoryInfo(projectDefinition.ProjectPath).Parent!.FullName;
                         deploymentProjectPath = Path.GetFullPath(deploymentProjectPath, targetApplicationDirectoryPath);
                     }
 
