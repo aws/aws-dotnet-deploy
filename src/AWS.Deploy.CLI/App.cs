@@ -26,7 +26,7 @@ namespace AWS.Deploy.CLI
         {
             Console.OutputEncoding = Encoding.UTF8;
 
-            SetExecutionEnvironment();
+            SetExecutionEnvironment(args);
 
             _toolInteractiveService.WriteLine("AWS .NET deployment tool for deploying .NET Core applications to AWS.");
             _toolInteractiveService.WriteLine("Project Home: https://github.com/aws/aws-dotnet-deploy");
@@ -45,7 +45,7 @@ namespace AWS.Deploy.CLI
         /// Set up the execution environment variable picked up by the AWS .NET SDK. This can be useful for identify calls
         /// made by this tool in AWS CloudTrail.
         /// </summary>
-        private static void SetExecutionEnvironment()
+        private static void SetExecutionEnvironment(string[] args)
         {
             const string envName = "AWS_EXECUTION_ENV";
             const string awsDotnetDeployCLI = "aws-dotnet-deploy-cli";
@@ -64,6 +64,11 @@ namespace AWS.Deploy.CLI
             }
 
             envValue.Append($"{awsDotnetDeployCLI}_{assemblyVersion?.InformationalVersion}");
+
+            if (args?.Length > 0)
+            {
+                envValue.Append($"_{args[0]}");
+            }
 
             Environment.SetEnvironmentVariable(envName, envValue.ToString());
         }
