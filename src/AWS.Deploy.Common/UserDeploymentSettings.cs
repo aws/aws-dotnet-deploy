@@ -42,7 +42,7 @@ namespace AWS.Deploy.Common
             }
             catch (Exception ex)
             {
-                throw new InvalidUserDeploymentSettingsException("An error occured while trying to deserialize the User Deployment Settings file.", ex);
+                throw new InvalidUserDeploymentSettingsException(DeployToolErrorCode.FailedToDeserializeUserDeploymentFile, "An error occured while trying to deserialize the User Deployment Settings file.", ex);
             }
         }
 

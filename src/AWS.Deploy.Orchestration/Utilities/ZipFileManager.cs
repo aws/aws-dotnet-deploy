@@ -8,6 +8,7 @@ using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
 
 namespace AWS.Deploy.Orchestration.Utilities
@@ -48,7 +49,7 @@ namespace AWS.Deploy.Orchestration.Utilities
             var zipCLI = FindExecutableInPath("zip");
 
             if (string.IsNullOrEmpty(zipCLI))
-                throw new FailedToCreateZipFileException("Failed to find the \"zip\" utility program in path. This program is required to maintain Linux file permissions in the zip archive.");
+                throw new FailedToCreateZipFileException(DeployToolErrorCode.FailedToFindZipUtility, "Failed to find the \"zip\" utility program in path. This program is required to maintain Linux file permissions in the zip archive.");
 
             var args = new StringBuilder($"\"{destinationArchiveFileName}\"");
 
@@ -61,7 +62,7 @@ namespace AWS.Deploy.Orchestration.Utilities
             var command = $"{zipCLI} {args}";
             var result = await _commandLineWrapper.TryRunWithResult(command, sourceDirectoryName);
             if (result.ExitCode != 0)
-                throw new FailedToCreateZipFileException("\"zip\" utility program has failed to create a zip archive.");
+                throw new FailedToCreateZipFileException(DeployToolErrorCode.ZipUtilityFailedToZip, "\"zip\" utility program has failed to create a zip archive.");
         }
 
         /// <summary>

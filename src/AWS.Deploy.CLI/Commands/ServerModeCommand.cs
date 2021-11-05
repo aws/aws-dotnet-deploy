@@ -39,7 +39,7 @@ namespace AWS.Deploy.CLI.Commands
             IEncryptionProvider encryptionProvider = CreateEncryptionProvider();
 
             if (IsPortInUse(_port))
-                throw new TcpPortInUseException("The port you have selected is currently in use by another process.");
+                throw new TcpPortInUseException(DeployToolErrorCode.TcpPortInUse, "The port you have selected is currently in use by another process.");
 
             var url = $"http://localhost:{_port}";
 

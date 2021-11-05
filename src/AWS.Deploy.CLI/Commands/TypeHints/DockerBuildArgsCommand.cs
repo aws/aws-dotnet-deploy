@@ -47,7 +47,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         {
             var resultString = ValidateBuildArgs(dockerBuildArgs);
             if (!string.IsNullOrEmpty(resultString))
-                throw new InvalidOverrideValueException(resultString);
+                throw new InvalidOverrideValueException(DeployToolErrorCode.InvalidDockerBuildArgs, resultString);
             recommendation.DeploymentBundle.DockerBuildArgs = dockerBuildArgs;
         }
 

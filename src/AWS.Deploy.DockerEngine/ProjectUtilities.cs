@@ -3,6 +3,7 @@
 
 using System.IO;
 using System.Reflection;
+using AWS.Deploy.Common;
 using AWS.Deploy.Common.Extensions;
 
 namespace AWS.Deploy.DockerEngine
@@ -21,7 +22,7 @@ namespace AWS.Deploy.DockerEngine
 
             if (string.IsNullOrWhiteSpace(template))
             {
-                throw new DockerEngineException($"The DockerEngine could not find the embedded config file responsible for mapping projects to Docker images.");
+                throw new DockerEngineException(DeployToolErrorCode.UnableToMapProjectToDockerImage, $"The DockerEngine could not find the embedded config file responsible for mapping projects to Docker images.");
             }
 
             return template;
@@ -36,7 +37,7 @@ namespace AWS.Deploy.DockerEngine
 
             if (string.IsNullOrWhiteSpace(template))
             {
-                throw new DockerFileTemplateException("The Dockerfile template for the project was not found.");
+                throw new DockerFileTemplateException(DeployToolErrorCode.DockerFileTemplateNotFound, "The Dockerfile template for the project was not found.");
             }
 
             return template;

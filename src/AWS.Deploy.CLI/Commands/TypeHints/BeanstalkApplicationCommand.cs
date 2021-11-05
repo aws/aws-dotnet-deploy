@@ -57,7 +57,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             return new BeanstalkApplicationTypeHintResponse(
                 userResponse.CreateNew,
                 userResponse.SelectedOption?.ApplicationName ?? userResponse.NewName
-                    ?? throw new UserPromptForNameReturnedNullException("The user response for a new application name was null.")
+                    ?? throw new UserPromptForNameReturnedNullException(DeployToolErrorCode.BeanstalkAppPromptForNameReturnedNull, "The user response for a new application name was null.")
                 );
         }
     }

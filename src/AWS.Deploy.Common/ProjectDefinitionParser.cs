@@ -62,7 +62,7 @@ namespace AWS.Deploy.Common
 
             if (!_fileManager.Exists(projectPath))
             {
-                throw new ProjectFileNotFoundException(projectPath);
+                throw new ProjectFileNotFoundException(DeployToolErrorCode.ProjectPathNotFound, $"A project was not found at the path {projectPath}.");
             }
 
             var xmlProjectFile = new XmlDocument();
@@ -73,7 +73,7 @@ namespace AWS.Deploy.Common
                 projectPath,
                 await GetProjectSolutionFile(projectPath),
                 xmlProjectFile.DocumentElement?.Attributes["Sdk"]?.Value ??
-                    throw new InvalidProjectDefinitionException(
+                    throw new InvalidProjectDefinitionException(DeployToolErrorCode.ProjectParserNoSdkAttribute,
                         "The project file that is being referenced does not contain and 'Sdk' attribute.")
                 );
 

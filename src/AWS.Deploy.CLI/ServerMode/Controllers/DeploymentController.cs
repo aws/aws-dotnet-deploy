@@ -68,8 +68,8 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         public async Task<IActionResult> StartDeploymentSession(StartDeploymentSessionInput input)
         {
             var output = new StartDeploymentSessionOutput(
-                Guid.NewGuid().ToString()
-                );
+            Guid.NewGuid().ToString()
+            );
 
             var serviceProvider = CreateSessionServiceProvider(output.SessionId, input.AWSRegion);
             var awsResourceQueryer = serviceProvider.GetRequiredService<IAWSResourceQueryer>();
@@ -482,7 +482,21 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             else if (state.DeploymentTask.IsCompleted && state.DeploymentTask.Status == TaskStatus.RanToCompletion)
                 output.Status = DeploymentStatus.Success;
             else if (state.DeploymentTask.IsCompleted && state.DeploymentTask.Status == TaskStatus.Faulted)
+            {
                 output.Status = DeploymentStatus.Error;
+                if (state.DeploymentTask.Exception != null)
+                {
+                    var innerException = state.DeploymentTask.Exception.InnerException;
+                    if (innerException is DeployToolException deployToolException)
+                    {
+                        output.Exception = new DeployToolExceptionSummary(deployToolException.ErrorCode.ToString(), deployToolException.Message);
+                    }
+                    else
+                    {
+                        output.Exception = new DeployToolExceptionSummary(DeployToolErrorCode.UnexpectedError.ToString(), innerException?.Message ?? string.Empty);
+                    }
+                }
+            }
             else
                 output.Status = DeploymentStatus.Executing;
 

@@ -9,79 +9,71 @@ namespace AWS.Deploy.CLI
     /// <summary>
     /// Throw if no AWS credentials were found.
     /// </summary>
-    [AWSDeploymentExpectedException]
-    public class NoAWSCredentialsFoundException : Exception
+    public class NoAWSCredentialsFoundException : DeployToolException
     {
-        public NoAWSCredentialsFoundException(string message, Exception? innerException = null) : base(message, innerException) { }
+        public NoAWSCredentialsFoundException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     /// <summary>
     /// Throw if Delete Command is unable to delete
     /// the specified stack
     /// </summary>
-    [AWSDeploymentExpectedException ]
-    public class FailedToDeleteException : Exception
+    public class FailedToDeleteException : DeployToolException
     {
-        public FailedToDeleteException(string message, Exception? innerException = null) : base(message, innerException) { }
+        public FailedToDeleteException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     /// <summary>
     /// Throw if Deploy Command is unable to find a target to deploy.
     /// Currently, this is limited to .csproj or .fsproj files.
     /// </summary>
-    [AWSDeploymentExpectedException]
-    public class FailedToFindDeployableTargetException : Exception
+    public class FailedToFindDeployableTargetException : DeployToolException
     {
-        public FailedToFindDeployableTargetException(string message, Exception? innerException = null) : base(message, innerException) { }
+        public FailedToFindDeployableTargetException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     /// <summary>
     /// Throw if prompting the user for a name returns a null value.
     /// </summary>
-    [AWSDeploymentExpectedException]
-    public class UserPromptForNameReturnedNullException : Exception
+    public class UserPromptForNameReturnedNullException : DeployToolException
     {
-        public UserPromptForNameReturnedNullException(string message, Exception? innerException = null) : base(message, innerException) { }
+        public UserPromptForNameReturnedNullException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     /// <summary>
     /// Throw if the system capabilities were not provided.
     /// </summary>
-    [AWSDeploymentExpectedException]
-    public class SystemCapabilitiesNotProvidedException : Exception
+    public class SystemCapabilitiesNotProvidedException : DeployToolException
     {
-        public SystemCapabilitiesNotProvidedException(string message, Exception? innerException = null) : base(message, innerException) { }
+        public SystemCapabilitiesNotProvidedException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     /// <summary>
     /// Throw if TCP port is in use by another process.
     /// </summary>
-    [AWSDeploymentExpectedException]
-    public class TcpPortInUseException : Exception
+    public class TcpPortInUseException : DeployToolException
     {
-        public TcpPortInUseException(string message, Exception? innerException = null) : base(message, innerException) { }
+        public TcpPortInUseException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     /// <summary>
     /// Throw if unable to find a compatible recipe.
     /// </summary>
-    [AWSDeploymentExpectedException]
-    public class FailedToFindCompatibleRecipeException : Exception
+    public class FailedToFindCompatibleRecipeException : DeployToolException
     {
-        public FailedToFindCompatibleRecipeException(string message, Exception? innerException = null) : base(message, innerException) { }
+        public FailedToFindCompatibleRecipeException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     /// <summary>
     /// Throw if the directory specified to save the CDK deployment project is invalid.
     /// </summary>
-    [AWSDeploymentExpectedException]
-    public class InvalidSaveDirectoryForCdkProject : Exception
+    public class InvalidSaveDirectoryForCdkProject : DeployToolException
     {
-        public InvalidSaveDirectoryForCdkProject(string message, Exception? innerException = null) : base(message, innerException) { }
+        public InvalidSaveDirectoryForCdkProject(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
-    public class FailedToFindDeploymentProjectRecipeIdException : Exception
+    public class FailedToFindDeploymentProjectRecipeIdException : DeployToolException
     {
-        public FailedToFindDeploymentProjectRecipeIdException(string message, Exception? innerException = null) : base(message, innerException) { }
+        public FailedToFindDeploymentProjectRecipeIdException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 }

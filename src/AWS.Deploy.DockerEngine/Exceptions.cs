@@ -2,31 +2,32 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using AWS.Deploy.Common;
 
 namespace AWS.Deploy.DockerEngine
 {
     public class DockerFileTemplateException : DockerEngineExceptionBase
     {
-        public DockerFileTemplateException(string message) : base(message) { }
+        public DockerFileTemplateException(DeployToolErrorCode errorCode, string message) : base(errorCode, message) { }
     }
 
     public class DockerEngineException : DockerEngineExceptionBase
     {
-        public DockerEngineException(string message) : base(message) { }
+        public DockerEngineException(DeployToolErrorCode errorCode, string message) : base(errorCode, message) { }
     }
 
     public class UnknownDockerImageException : DockerEngineExceptionBase
     {
-        public UnknownDockerImageException(string message) : base(message) { }
+        public UnknownDockerImageException(DeployToolErrorCode errorCode, string message) : base(errorCode, message) { }
     }
 
-    public class DockerEngineExceptionBase : Exception
+    public class DockerEngineExceptionBase : DeployToolException
     {
-        public DockerEngineExceptionBase(string message) : base(message) { }
+        public DockerEngineExceptionBase(DeployToolErrorCode errorCode, string message) : base(errorCode, message) { }
     }
 
     public class UnsupportedProjectException : DockerEngineExceptionBase
     {
-        public UnsupportedProjectException(string message) : base(message) { }
+        public UnsupportedProjectException(DeployToolErrorCode errorCode, string message) : base(errorCode, message) { }
     }
 }

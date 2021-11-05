@@ -15,7 +15,7 @@ namespace AWS.Deploy.Orchestration
         {
             var projectPath = new FileInfo(recommendation.ProjectPath).Directory?.FullName;
             if (string.IsNullOrEmpty(projectPath))
-                throw new InvalidProjectPathException("The project path provided is invalid.");
+                throw new InvalidProjectPathException(DeployToolErrorCode.ProjectPathNotFound, "The project path provided is invalid.");
 
             // General Settings
             var appSettingsContainer = new RecipeProps<Dictionary<string, object>>(

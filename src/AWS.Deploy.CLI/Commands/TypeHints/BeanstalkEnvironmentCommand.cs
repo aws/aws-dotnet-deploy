@@ -48,7 +48,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 askNewName: true,
                 defaultNewName: currentValue.ToString() ?? "");
             return userResponse.SelectedOption ?? userResponse.NewName
-                ?? throw new UserPromptForNameReturnedNullException("The user response for a new environment name was null.");
+                ?? throw new UserPromptForNameReturnedNullException(DeployToolErrorCode.BeanstalkEnvPromptForNameReturnedNull, "The user response for a new environment name was null.");
         }
     }
 }

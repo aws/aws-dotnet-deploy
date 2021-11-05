@@ -36,13 +36,13 @@ namespace AWS.Deploy.CLI.ServerMode.Tasks
             {
                 var dockerBuildDeploymentBundleResult = await _orchestrator.CreateContainerDeploymentBundle(_cloudApplication, _selectedRecommendation);
                 if (!dockerBuildDeploymentBundleResult)
-                    throw new FailedToCreateDeploymentBundleException("Failed to create a deployment bundle");
+                    throw new FailedToCreateDeploymentBundleException(DeployToolErrorCode.FailedToCreateContainerDeploymentBundle, "Failed to create a deployment bundle");
             }
             else if (_selectedRecommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.DotnetPublishZipFile)
             {
                 var dotnetPublishDeploymentBundleResult = await _orchestrator.CreateDotnetPublishDeploymentBundle(_selectedRecommendation);
                 if (!dotnetPublishDeploymentBundleResult)
-                    throw new FailedToCreateDeploymentBundleException("Failed to create a deployment bundle");
+                    throw new FailedToCreateDeploymentBundleException(DeployToolErrorCode.FailedToCreateDotnetPublishDeploymentBundle, "Failed to create a deployment bundle");
             }
         }
     }
