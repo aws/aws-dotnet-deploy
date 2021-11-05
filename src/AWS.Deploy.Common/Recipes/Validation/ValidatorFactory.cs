@@ -47,7 +47,7 @@ namespace AWS.Deploy.Common.Recipes.Validation
             {
                 var validatorInstance = Activator.CreateInstance(typeMappings[validatorType]);
                 if (validatorInstance == null)
-                    throw new InvalidValidatorTypeException($"Could not create an instance of validator type {validatorType}");
+                    throw new InvalidValidatorTypeException(DeployToolErrorCode.UnableToCreateValidatorInstance, $"Could not create an instance of validator type {validatorType}");
                 return validatorInstance;
             }
 
@@ -55,7 +55,7 @@ namespace AWS.Deploy.Common.Recipes.Validation
             {
                 var validatorInstance = jObject.ToObject(typeMappings[validatorType]);
                 if (validatorInstance == null)
-                    throw new InvalidValidatorTypeException($"Could not create an instance of validator type {validatorType}");
+                    throw new InvalidValidatorTypeException(DeployToolErrorCode.UnableToCreateValidatorInstance, $"Could not create an instance of validator type {validatorType}");
                 return validatorInstance;
             }
 

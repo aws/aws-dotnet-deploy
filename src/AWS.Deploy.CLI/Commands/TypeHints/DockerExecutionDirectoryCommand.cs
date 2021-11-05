@@ -48,7 +48,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         {
             var resultString = ValidateExecutionDirectory(executionDirectory);
             if (!string.IsNullOrEmpty(resultString))
-                throw new InvalidOverrideValueException(resultString);
+                throw new InvalidOverrideValueException(DeployToolErrorCode.InvalidDockerExecutionDirectory, resultString);
             recommendation.DeploymentBundle.DockerExecutionDirectory = executionDirectory;
         }
 

@@ -50,7 +50,7 @@ namespace AWS.Deploy.Orchestration
                     processExitCode = proc.ExitCode;
                     containerType = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ?
                         proc.StandardOut?.TrimEnd('\n') ??
-                            throw new DockerInfoException("Failed to check if Docker is running in Windows or Linux container mode.") :
+                            throw new DockerInfoException(DeployToolErrorCode.FailedToCheckDockerInfo, "Failed to check if Docker is running in Windows or Linux container mode.") :
                         "linux";
                 });
 

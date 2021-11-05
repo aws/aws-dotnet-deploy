@@ -108,11 +108,11 @@ namespace AWS.Deploy.Common.Recipes
                 }
             }
             if (!isValid)
-                throw new ValidationFailedException(validationFailedMessage.Trim());
+                throw new ValidationFailedException(DeployToolErrorCode.OptionSettingItemValueValidationFailed, validationFailedMessage.Trim());
 
             if (AllowedValues != null && AllowedValues.Count > 0 && valueOverride != null &&
                 !AllowedValues.Contains(valueOverride.ToString() ?? ""))
-                throw new InvalidOverrideValueException($"Invalid value for option setting item '{Name}'");
+                throw new InvalidOverrideValueException(DeployToolErrorCode.InvalidValueForOptionSettingItem, $"Invalid value for option setting item '{Name}'");
 
             if (valueOverride is bool || valueOverride is int || valueOverride is long || valueOverride is double)
             {

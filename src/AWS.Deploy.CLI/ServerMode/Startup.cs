@@ -50,9 +50,10 @@ namespace AWS.Deploy.CLI.ServerMode
                     {
                         opts.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                     });
-
+                    
             services.AddSwaggerGen(c =>
             {
+                c.UseAllOfToExtendReferenceSchemas();
                 c.EnableAnnotations();
                 c.SwaggerDoc("v1", new OpenApiInfo
                 {

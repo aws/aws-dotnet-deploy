@@ -80,7 +80,7 @@ namespace AWS.Deploy.CLI.Commands
                 if (newDirectoryCreated)
                     _directoryManager.Delete(saveCdkDirectoryPath);
                 errorMessage = $"Failed to generate deployment project.{Environment.NewLine}{errorMessage}";
-                throw new InvalidSaveDirectoryForCdkProject(errorMessage.Trim());
+                throw new InvalidSaveDirectoryForCdkProject(DeployToolErrorCode.InvalidSaveDirectoryForCdkProject, errorMessage.Trim());
             }
             
             var directoryUnderSourceControl = await IsDirectoryUnderSourceControl(saveCdkDirectoryPath);
@@ -122,7 +122,7 @@ namespace AWS.Deploy.CLI.Commands
             var recommendations = await orchestrator.GenerateRecommendationsToSaveDeploymentProject();
             if (recommendations.Count == 0)
             {
-                throw new FailedToGenerateAnyRecommendations("The project you are trying to deploy is currently not supported.");
+                throw new FailedToGenerateAnyRecommendations(DeployToolErrorCode.DeploymentProjectNotSupported, "The project you are trying to deploy is currently not supported.");
             }
             return recommendations;
         }

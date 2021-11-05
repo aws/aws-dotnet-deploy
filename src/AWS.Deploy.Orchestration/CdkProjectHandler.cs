@@ -87,7 +87,7 @@ namespace AWS.Deploy.Orchestration
                 streamOutputToInteractiveService: true);
 
             if (cdkDeploy.ExitCode != 0)
-                throw new FailedToDeployCDKAppException("We had an issue deploying your application to AWS. Check the deployment output for more details.");
+                throw new FailedToDeployCDKAppException(DeployToolErrorCode.FailedToDeployCdkApplication, "We had an issue deploying your application to AWS. Check the deployment output for more details.");
         }
 
         public string CreateCdkProject(Recommendation recommendation, OrchestratorSession session, string? saveCdkDirectoryPath = null)

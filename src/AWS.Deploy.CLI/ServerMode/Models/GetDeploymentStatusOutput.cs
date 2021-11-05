@@ -11,5 +11,6 @@ namespace AWS.Deploy.CLI.ServerMode.Models
     public class GetDeploymentStatusOutput
     {
         public DeploymentStatus Status { get; set; }
+        public DeployToolExceptionSummary? Exception { get; set; }
     }
 }

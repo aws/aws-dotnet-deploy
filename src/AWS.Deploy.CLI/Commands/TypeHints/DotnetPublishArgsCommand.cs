@@ -48,7 +48,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         {
             var resultString = ValidateDotnetPublishArgs(publishArgs);
             if (!string.IsNullOrEmpty(resultString))
-                throw new InvalidOverrideValueException(resultString);
+                throw new InvalidOverrideValueException(DeployToolErrorCode.InvalidDotnetPublishArgs, resultString);
             recommendation.DeploymentBundle.DotnetPublishAdditionalBuildArguments = publishArgs.Replace("\"", "\"\"");
         }
 

@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Orchestration.Utilities;
 
@@ -85,7 +86,7 @@ namespace AWS.Deploy.Orchestration.CDK
             }
             catch (Exception exception)
             {
-                throw new PackageJsonFileException($"Failed to write {_packageJsonFileName} at {packageJsonFilePath}", exception);
+                throw new PackageJsonFileException(DeployToolErrorCode.FailedToWritePackageJsonFile, $"Failed to write {_packageJsonFileName} at {packageJsonFilePath}", exception);
             }
 
             try
@@ -95,7 +96,7 @@ namespace AWS.Deploy.Orchestration.CDK
             }
             catch (Exception exception)
             {
-                throw new NPMCommandFailedException($"Failed to install npm packages at {workingDirectory}", exception);
+                throw new NPMCommandFailedException(DeployToolErrorCode.FailedToInstallNpmPackages, $"Failed to install npm packages at {workingDirectory}", exception);
             }
         }
     }

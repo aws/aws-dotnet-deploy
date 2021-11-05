@@ -42,9 +42,9 @@ namespace AWS.Deploy.Orchestration.LocalUserSettings
             try
             {
                 if (string.IsNullOrEmpty(projectName))
-                    throw new FailedToUpdateLocalUserSettingsFileException("The Project Name is not defined.");
+                    throw new FailedToUpdateLocalUserSettingsFileException(DeployToolErrorCode.FailedToUpdateLocalUserSettingsFile, "The Project Name is not defined.");
                 if (string.IsNullOrEmpty(awsAccountId) || string.IsNullOrEmpty(awsRegion))
-                    throw new FailedToUpdateLocalUserSettingsFileException("The AWS Account Id or Region is not defined.");
+                    throw new FailedToUpdateLocalUserSettingsFileException(DeployToolErrorCode.FailedToUpdateLocalUserSettingsFile, "The AWS Account Id or Region is not defined.");
 
                 var localUserSettings = await GetLocalUserSettings();
                 var lastDeployedStack = localUserSettings?.LastDeployedStacks?
@@ -105,7 +105,7 @@ namespace AWS.Deploy.Orchestration.LocalUserSettings
             }
             catch (Exception ex)
             {
-                throw new FailedToUpdateLocalUserSettingsFileException($"Failed to update the local user settings file " +
+                throw new FailedToUpdateLocalUserSettingsFileException(DeployToolErrorCode.FailedToUpdateLocalUserSettingsFile, $"Failed to update the local user settings file " +
                     $"to include the last deployed to stack '{stackName}'.", ex);
             }
         }
@@ -118,9 +118,9 @@ namespace AWS.Deploy.Orchestration.LocalUserSettings
             try
             {
                 if (string.IsNullOrEmpty(projectName))
-                    throw new FailedToUpdateLocalUserSettingsFileException("The Project Name is not defined.");
+                    throw new FailedToUpdateLocalUserSettingsFileException(DeployToolErrorCode.FailedToUpdateLocalUserSettingsFile, "The Project Name is not defined.");
                 if (string.IsNullOrEmpty(awsAccountId) || string.IsNullOrEmpty(awsRegion))
-                    throw new FailedToUpdateLocalUserSettingsFileException("The AWS Account Id or Region is not defined.");
+                    throw new FailedToUpdateLocalUserSettingsFileException(DeployToolErrorCode.FailedToUpdateLocalUserSettingsFile, "The AWS Account Id or Region is not defined.");
 
                 var localUserSettings = await GetLocalUserSettings();
                 var lastDeployedStack = localUserSettings?.LastDeployedStacks?
@@ -135,7 +135,7 @@ namespace AWS.Deploy.Orchestration.LocalUserSettings
             }
             catch (Exception ex)
             {
-                throw new FailedToUpdateLocalUserSettingsFileException($"Failed to update the local user settings file " +
+                throw new FailedToUpdateLocalUserSettingsFileException(DeployToolErrorCode.FailedToUpdateLocalUserSettingsFile, $"Failed to update the local user settings file " +
                     $"to delete the stack '{stackName}'.", ex);
             }
         }
@@ -148,9 +148,9 @@ namespace AWS.Deploy.Orchestration.LocalUserSettings
             try
             {
                 if (string.IsNullOrEmpty(projectName))
-                    throw new FailedToUpdateLocalUserSettingsFileException("The Project Name is not defined.");
+                    throw new FailedToUpdateLocalUserSettingsFileException(DeployToolErrorCode.FailedToUpdateLocalUserSettingsFile, "The Project Name is not defined.");
                 if (string.IsNullOrEmpty(awsAccountId) || string.IsNullOrEmpty(awsRegion))
-                    throw new FailedToUpdateLocalUserSettingsFileException("The AWS Account Id or Region is not defined.");
+                    throw new FailedToUpdateLocalUserSettingsFileException(DeployToolErrorCode.FailedToUpdateLocalUserSettingsFile, "The AWS Account Id or Region is not defined.");
 
                 var localUserSettings = await GetLocalUserSettings();
                 var localStacks = localUserSettings?.LastDeployedStacks?
@@ -167,7 +167,7 @@ namespace AWS.Deploy.Orchestration.LocalUserSettings
             }
             catch (Exception ex)
             {
-                throw new FailedToUpdateLocalUserSettingsFileException($"Failed to update the local user settings file " +
+                throw new FailedToUpdateLocalUserSettingsFileException(DeployToolErrorCode.FailedToUpdateLocalUserSettingsFile, $"Failed to update the local user settings file " +
                     $"to delete orphan stacks.", ex);
             }
         }
@@ -204,7 +204,7 @@ namespace AWS.Deploy.Orchestration.LocalUserSettings
             }
             catch (Exception ex)
             {
-                throw new InvalidLocalUserSettingsFileException("The Local User Settings file is invalid.", ex);
+                throw new InvalidLocalUserSettingsFileException(DeployToolErrorCode.InvalidLocalUserSettingsFile, "The Local User Settings file is invalid.", ex);
             }
         }
 

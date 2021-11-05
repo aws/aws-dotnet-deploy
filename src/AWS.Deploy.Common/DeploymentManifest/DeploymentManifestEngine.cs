@@ -77,7 +77,7 @@ namespace AWS.Deploy.Common.DeploymentManifest
             }
             catch (Exception ex)
             {
-                throw new FailedToUpdateDeploymentManifestFileException($"Failed to update the deployment manifest file " +
+                throw new FailedToUpdateDeploymentManifestFileException(DeployToolErrorCode.DeploymentManifestUpdateFailed, $"Failed to update the deployment manifest file " +
                     $"for the deployment project stored at '{saveCdkDirectoryFullPath}'", ex);
             }
         }
