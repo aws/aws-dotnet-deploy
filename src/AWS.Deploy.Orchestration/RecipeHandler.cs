@@ -51,7 +51,7 @@ namespace AWS.Deploy.Orchestration
             }
             catch(IOException)
             {
-                throw new NoRecipeDefinitionsFoundException("Failed to find recipe definitions");
+                throw new NoRecipeDefinitionsFoundException(DeployToolErrorCode.FailedToFindRecipeDefinitions, "Failed to find recipe definitions");
             }
 
             return recipeDefinitions;

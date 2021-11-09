@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AWS.Deploy.Common;
 using AWS.Deploy.Orchestration.Utilities;
 
 namespace AWS.Deploy.Orchestration.CDK
@@ -52,7 +53,7 @@ namespace AWS.Deploy.Orchestration.CDK
             }
             catch (Exception exception)
             {
-                throw new NPMCommandFailedException($"Failed to execute {command}", exception);
+                throw new NPMCommandFailedException(DeployToolErrorCode.FailedToGetCDKVersion, $"Failed to execute {command}", exception);
             }
 
             var standardOut = result.StandardOut ?? "";

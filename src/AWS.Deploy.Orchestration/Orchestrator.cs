@@ -107,7 +107,7 @@ namespace AWS.Deploy.Orchestration
             if (_directoryManager == null)
                 throw new InvalidOperationException($"{nameof(_directoryManager)} is null as part of the orchestartor object");
             if (!_directoryManager.Exists(deploymentProjectPath))
-                throw new InvalidCliArgumentException($"The path '{deploymentProjectPath}' does not exists on the file system. Please provide a valid deployment project path and try again.");
+                throw new InvalidCliArgumentException(DeployToolErrorCode.DeploymentProjectPathNotFound, $"The path '{deploymentProjectPath}' does not exists on the file system. Please provide a valid deployment project path and try again.");
 
             var engine = new RecommendationEngine.RecommendationEngine(new List<string> { deploymentProjectPath }, _session);
             var additionalReplacements = await GetReplacements();
@@ -199,7 +199,7 @@ namespace AWS.Deploy.Orchestration
                 }
                 catch (DockerEngineExceptionBase ex)
                 {
-                    throw new FailedToGenerateDockerFileException("Failed to generate a docker file", ex);
+                    throw new FailedToGenerateDockerFileException(DeployToolErrorCode.FailedToGenerateDockerFile, "Failed to generate a docker file", ex);
                 }
             }
 

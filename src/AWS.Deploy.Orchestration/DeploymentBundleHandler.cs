@@ -65,7 +65,7 @@ namespace AWS.Deploy.Orchestration
             var result = await _commandLineWrapper.TryRunWithResult(dockerBuildCommand, dockerExecutionDirectory, streamOutputToInteractiveService: true);
             if (result.ExitCode != 0)
             {
-                throw new DockerBuildFailedException(result.StandardError ?? "");
+                throw new DockerBuildFailedException(DeployToolErrorCode.DockerBuildFailed, result.StandardError ?? "");
             }
 
             return imageTag;
@@ -120,7 +120,7 @@ namespace AWS.Deploy.Orchestration
             var result = await _commandLineWrapper.TryRunWithResult(publishCommand, streamOutputToInteractiveService: true);
             if (result.ExitCode != 0)
             {
-                throw new DotnetPublishFailedException(result.StandardError ?? "");
+                throw new DotnetPublishFailedException(DeployToolErrorCode.DotnetPublishFailed, result.StandardError ?? "");
             }
 
             var zipFilePath = $"{publishDirectoryInfo.FullName}.zip";
@@ -143,7 +143,7 @@ namespace AWS.Deploy.Orchestration
             var dockerExecutionDirectory = recommendation.DeploymentBundle.DockerExecutionDirectory;
             var dockerFileDirectory = new FileInfo(recommendation.ProjectPath).Directory?.FullName;
             if (dockerFileDirectory == null)
-                throw new InvalidProjectPathException("The project path is invalid.");
+                throw new InvalidProjectPathException(DeployToolErrorCode.ProjectPathNotFound, "The project path is invalid.");
             var projectSolutionPath = recommendation.ProjectDefinition.ProjectSolutionPath;
 
             if (string.IsNullOrEmpty(dockerExecutionDirectory))
@@ -155,7 +155,7 @@ namespace AWS.Deploy.Orchestration
                 else
                 {
                     var projectSolutionDirectory = new FileInfo(projectSolutionPath).Directory?.FullName;
-                    dockerExecutionDirectory = projectSolutionDirectory ?? throw new InvalidSolutionPathException("The solution path is invalid.");
+                    dockerExecutionDirectory = projectSolutionDirectory ?? throw new InvalidSolutionPathException(DeployToolErrorCode.InvalidSolutionPath, "The solution path is invalid.");
                 }
             }
 
@@ -166,7 +166,7 @@ namespace AWS.Deploy.Orchestration
         {
             var dockerFileDirectory = new FileInfo(recommendation.ProjectPath).Directory?.FullName;
             if (dockerFileDirectory == null)
-                throw new InvalidProjectPathException("The project path is invalid.");
+                throw new InvalidProjectPathException(DeployToolErrorCode.ProjectPathNotFound, "The project path is invalid.");
 
             return Path.Combine(dockerFileDirectory, "Dockerfile");
         }
@@ -195,7 +195,7 @@ namespace AWS.Deploy.Orchestration
             var authorizationTokens = await _awsResourceQueryer.GetECRAuthorizationToken();
 
             if (authorizationTokens.Count == 0)
-                throw new DockerLoginFailedException("Failed to login to Docker");
+                throw new DockerLoginFailedException(DeployToolErrorCode.DockerLoginFailed, "Failed to login to Docker");
 
             var authTokenBytes = Convert.FromBase64String(authorizationTokens[0].AuthorizationToken);
             var authToken = Encoding.UTF8.GetString(authTokenBytes);
@@ -205,7 +205,7 @@ namespace AWS.Deploy.Orchestration
             var result = await _commandLineWrapper.TryRunWithResult(dockerLoginCommand, streamOutputToInteractiveService: true);
 
             if (result.ExitCode != 0)
-                throw new DockerLoginFailedException("Failed to login to Docker");
+                throw new DockerLoginFailedException(DeployToolErrorCode.DockerLoginFailed, "Failed to login to Docker");
         }
 
         private async Task<Repository> SetupECRRepository(string ecrRepositoryName)
@@ -228,7 +228,7 @@ namespace AWS.Deploy.Orchestration
             var result = await _commandLineWrapper.TryRunWithResult(dockerTagCommand, streamOutputToInteractiveService: true);
 
             if (result.ExitCode != 0)
-                throw new DockerTagFailedException("Failed to tag Docker image");
+                throw new DockerTagFailedException(DeployToolErrorCode.DockerTagFailed, "Failed to tag Docker image");
         }
 
         private async Task PushDockerImage(string targetTagName)
@@ -237,7 +237,7 @@ namespace AWS.Deploy.Orchestration
             var result = await _commandLineWrapper.TryRunWithResult(dockerPushCommand, streamOutputToInteractiveService: true);
 
             if (result.ExitCode != 0)
-                throw new DockerPushFailedException("Failed to push Docker Image");
+                throw new DockerPushFailedException(DeployToolErrorCode.DockerPushFailed, "Failed to push Docker Image");
         }
     }
 }

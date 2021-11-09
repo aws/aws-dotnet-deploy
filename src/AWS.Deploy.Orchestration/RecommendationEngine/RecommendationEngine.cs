@@ -101,10 +101,10 @@ namespace AWS.Deploy.Orchestration.RecommendationEngine
             }
             catch(IOException)
             {
-                throw new NoDeploymentBundleDefinitionsFoundException("Failed to find a deployment bundle definition");
+                throw new NoDeploymentBundleDefinitionsFoundException(DeployToolErrorCode.DeploymentBundleDefinitionNotFound, "Failed to find a deployment bundle definition");
             }
 
-            throw new NoDeploymentBundleDefinitionsFoundException("Failed to find a deployment bundle definition");
+            throw new NoDeploymentBundleDefinitionsFoundException(DeployToolErrorCode.DeploymentBundleDefinitionNotFound, "Failed to find a deployment bundle definition");
         }
 
         public async Task<RulesResult> EvaluateRules(IList<RecommendationRuleItem> rules)
@@ -125,7 +125,7 @@ namespace AWS.Deploy.Orchestration.RecommendationEngine
                 {
                     if(!availableTests.TryGetValue(test.Type, out var testInstance))
                     {
-                        throw new InvalidRecipeDefinitionException($"Invalid test type [{test.Type}] found in rule.");
+                        throw new InvalidRecipeDefinitionException(DeployToolErrorCode.RuleHasInvalidTestType, $"Invalid test type [{test.Type}] found in rule.");
                     }
 
                     var input = new RecommendationTestInput(

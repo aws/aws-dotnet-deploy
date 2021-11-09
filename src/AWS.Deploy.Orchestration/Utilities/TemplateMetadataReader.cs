@@ -78,7 +78,7 @@ namespace AWS.Deploy.Orchestration.Utilities
             }
             catch(Exception e)
             {
-                throw new ParsingExistingCloudApplicationMetadataException("Error parsing existing application's metadata", e);
+                throw new ParsingExistingCloudApplicationMetadataException(DeployToolErrorCode.ErrorParsingApplicationMetadata, "Error parsing existing application's metadata", e);
             }
         }
 

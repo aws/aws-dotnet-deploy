@@ -16,8 +16,8 @@ namespace AWS.Deploy.CLI
         /// exception was thrown.  This usually means there is an intermittent io problem
         /// or bug in the code base.
         /// <para />
-        /// Unexpected exception are any exception not marked by
-        /// <see cref="AWSDeploymentExpectedExceptionAttribute"/>
+        /// Unexpected exceptions are any exception that do not inherit from
+        /// <see cref="DeployToolException"/>
         /// </summary>
         public const int UNHANDLED_EXCEPTION = -1;
         /// <summary>
@@ -25,8 +25,8 @@ namespace AWS.Deploy.CLI
         /// configuration or system configuration problem.  For example, a required
         /// dependency like Docker is not installed.
         /// <para />
-        /// Expected problems are usually indicated by throwing an exception that is
-        /// decorated with <see cref="AWSDeploymentExpectedExceptionAttribute"/>
+        /// Expected problems are usually indicated by throwing an exception that
+        /// inherits from <see cref="DeployToolException"/>
         /// </summary>
         public const int USER_ERROR = 1;
         /// <summary>

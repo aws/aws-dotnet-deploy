@@ -89,7 +89,7 @@ namespace AWS.Deploy.Orchestration.Data
 
             if (service == null)
             {
-                throw new AWSResourceNotFoundException($"The AppRunner service '{serviceArn}' does not exist.");
+                throw new AWSResourceNotFoundException(DeployToolErrorCode.AppRunnerServiceDoesNotExist, $"The AppRunner service '{serviceArn}' does not exist.");
             }
 
             return service;
@@ -113,7 +113,7 @@ namespace AWS.Deploy.Orchestration.Data
 
             if (!environment.Environments.Any())
             {
-                throw new AWSResourceNotFoundException($"The elastic beanstalk environment '{environmentId}' does not exist.");
+                throw new AWSResourceNotFoundException(DeployToolErrorCode.BeanstalkEnvironmentDoesNotExist, $"The elastic beanstalk environment '{environmentId}' does not exist.");
             }
 
             return environment.Environments.First();
@@ -130,7 +130,7 @@ namespace AWS.Deploy.Orchestration.Data
 
             if (!loadBalancers.LoadBalancers.Any())
             {
-                throw new AWSResourceNotFoundException($"The load balancer '{loadBalancerArn}' does not exist.");
+                throw new AWSResourceNotFoundException(DeployToolErrorCode.LoadBalancerDoesNotExist, $"The load balancer '{loadBalancerArn}' does not exist.");
             }
 
             return loadBalancers.LoadBalancers.First();
@@ -147,7 +147,7 @@ namespace AWS.Deploy.Orchestration.Data
 
             if (!listeners.Listeners.Any())
             {
-                throw new AWSResourceNotFoundException($"The load balancer '{loadBalancerArn}' does not have any listeners.");
+                throw new AWSResourceNotFoundException(DeployToolErrorCode.LoadBalancerListenerDoesNotExist, $"The load balancer '{loadBalancerArn}' does not have any listeners.");
             }
 
             return listeners.Listeners;
@@ -164,7 +164,7 @@ namespace AWS.Deploy.Orchestration.Data
 
             if (rule == null)
             {
-                throw new AWSResourceNotFoundException($"The CloudWatch rule'{ruleName}' does not exist.");
+                throw new AWSResourceNotFoundException(DeployToolErrorCode.CloudWatchRuleDoesNotExist, $"The CloudWatch rule'{ruleName}' does not exist.");
             }
 
             return rule;

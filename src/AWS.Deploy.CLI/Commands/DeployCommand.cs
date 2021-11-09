@@ -179,7 +179,7 @@ namespace AWS.Deploy.CLI.Commands
                 if (!compatibleApplications.Any(app => app.StackName.Equals(deployedApplication.StackName, StringComparison.Ordinal)))
                 {
                     var errorMessage = $"{deployedApplication.StackName} already exists as a Cloudformation stack but a compatible recommendation to perform a redeployment was not found";
-                    throw new FailedToFindCompatibleRecipeException(errorMessage);
+                    throw new FailedToFindCompatibleRecipeException(DeployToolErrorCode.CompatibleRecommendationForRedeploymentNotFound, errorMessage);
                 }
 
                 // preset settings for deployment based on last deployment.
@@ -219,7 +219,7 @@ namespace AWS.Deploy.CLI.Commands
             }
 
             if (systemCapabilities.Any())
-                throw new MissingSystemCapabilityException(missingCapabilitiesMessage);
+                throw new MissingSystemCapabilityException(DeployToolErrorCode.MissingSystemCapabilities, missingCapabilitiesMessage);
         }
 
         /// <summary>
@@ -253,7 +253,7 @@ namespace AWS.Deploy.CLI.Commands
                 if (!recommendations.Any())
                 {
                     var errorMessage = $"Could not find any deployment recipe located inside '{deploymentProjectPath}' that can be used for deployment of the target application";
-                    throw new FailedToGenerateAnyRecommendations(errorMessage);
+                    throw new FailedToGenerateAnyRecommendations(DeployToolErrorCode.NoDeploymentRecipesFound, errorMessage);
                 }
             }
             else
@@ -262,7 +262,7 @@ namespace AWS.Deploy.CLI.Commands
                 if (!recommendations.Any())
                 {
                     var errorMessage = "There are no compatible deployment recommendations for this application.";
-                    throw new FailedToGenerateAnyRecommendations(errorMessage);
+                    throw new FailedToGenerateAnyRecommendations(DeployToolErrorCode.NoCompatibleDeploymentRecipesFound, errorMessage);
                 }
             }
             return recommendations;
@@ -276,7 +276,7 @@ namespace AWS.Deploy.CLI.Commands
             if (selectedRecommendation == null)
             {
                 var errorMessage = $"{deployedApplication.StackName} already exists as a Cloudformation stack but a compatible recommendation used to perform a re-deployment was not found.";
-                throw new FailedToFindCompatibleRecipeException(errorMessage);
+                throw new FailedToFindCompatibleRecipeException(DeployToolErrorCode.CompatibleRecommendationForRedeploymentNotFound, errorMessage);
             }
             if (!string.IsNullOrEmpty(deploymentSettingRecipeId) && !string.Equals(deploymentSettingRecipeId, selectedRecommendation.Recipe.Id, StringComparison.InvariantCultureIgnoreCase))
             {
@@ -286,7 +286,7 @@ namespace AWS.Deploy.CLI.Commands
                 {
                     errorMessage += Environment.NewLine + $"The original deployment recipe ID was {deployedApplication.RecipeId} and the current deployment recipe ID is {deploymentSettingRecipeId}";
                 }
-                throw new InvalidUserDeploymentSettingsException(errorMessage.Trim());
+                throw new InvalidUserDeploymentSettingsException(DeployToolErrorCode.StackCreatedFromDifferentDeploymentRecommendation, errorMessage.Trim());
             }
 
             selectedRecommendation = selectedRecommendation.ApplyPreviousSettings(existingCloudApplicationMetadata.Settings);
@@ -351,7 +351,7 @@ namespace AWS.Deploy.CLI.Commands
             }
             catch (Exception ex)
             {
-                throw new FailedToFindDeploymentProjectRecipeIdException($"Failed to find a recipe ID for the deployment project located at {deploymentProjectPath}", ex);
+                throw new FailedToFindDeploymentProjectRecipeIdException(DeployToolErrorCode.FailedToFindDeploymentProjectRecipeId, $"Failed to find a recipe ID for the deployment project located at {deploymentProjectPath}", ex);
             }
         }
 
@@ -389,13 +389,13 @@ namespace AWS.Deploy.CLI.Commands
                                 settingValue = double.Parse(optionSettingValue);
                                 break;
                             default:
-                                throw new InvalidOverrideValueException($"Invalid value {optionSettingValue} for option setting item {optionSettingJsonPath}");
+                                throw new InvalidOverrideValueException(DeployToolErrorCode.InvalidValueForOptionSettingItem, $"Invalid value {optionSettingValue} for option setting item {optionSettingJsonPath}");
                         }
                     }
                     catch (Exception exception)
                     {
                         _toolInteractiveService.WriteDebugLine(exception.PrettyPrint());
-                        throw new InvalidOverrideValueException($"Invalid value {optionSettingValue} for option setting item {optionSettingJsonPath}");
+                        throw new InvalidOverrideValueException(DeployToolErrorCode.InvalidValueForOptionSettingItem, $"Invalid value {optionSettingValue} for option setting item {optionSettingJsonPath}");
                     }
 
                     optionSetting.SetValueOverride(settingValue);
@@ -423,7 +423,7 @@ namespace AWS.Deploy.CLI.Commands
             {
                 errorMessage += result.ValidationFailedMessage + Environment.NewLine;
             }
-            throw new InvalidUserDeploymentSettingsException(errorMessage.Trim());
+            throw new InvalidUserDeploymentSettingsException(DeployToolErrorCode.DeploymentConfigurationNeedsAdjusting, errorMessage.Trim());
         }
 
         private void SetDeploymentBundleOptionSetting(Recommendation recommendation, string optionSettingId, object settingValue)
@@ -459,7 +459,7 @@ namespace AWS.Deploy.CLI.Commands
                     return stackName;
 
                 PrintInvalidStackNameMessage();
-                throw new InvalidCliArgumentException("Found invalid CLI arguments");
+                throw new InvalidCliArgumentException(DeployToolErrorCode.InvalidCliArguments, "Found invalid CLI arguments");
             }
 
             if (!string.IsNullOrEmpty(userDeploymentSettings?.StackName))
@@ -468,14 +468,14 @@ namespace AWS.Deploy.CLI.Commands
                     return userDeploymentSettings.StackName;
 
                 PrintInvalidStackNameMessage();
-                throw new InvalidUserDeploymentSettingsException("Please provide a valid stack name and try again.");
+                throw new InvalidUserDeploymentSettingsException(DeployToolErrorCode.UserDeploymentInvalidStackName, "Please provide a valid stack name and try again.");
             }
 
             if (_toolInteractiveService.DisableInteractive)
             {
                 var message = "The \"--silent\" CLI argument can only be used if a CDK stack name is provided either via the CLI argument \"--stack-name\" or through a deployment-settings file. " +
                 "Please provide a stack name and try again";
-                throw new InvalidCliArgumentException(message);
+                throw new InvalidCliArgumentException(DeployToolErrorCode.SilentArgumentNeedsStackNameArgument, message);
             }
             return AskUserForCloudApplicationName(_session.ProjectDefinition, deployedApplications);
         }
@@ -498,7 +498,7 @@ namespace AWS.Deploy.CLI.Commands
                     "deployement-settings file or if a path to a custom CDK deployment project is provided via the '--deployment-project' CLI argument." +
                     $"{Environment.NewLine}Please provide a deployment recipe and try again";
 
-                    throw new InvalidCliArgumentException(message);
+                    throw new InvalidCliArgumentException(DeployToolErrorCode.SilentArgumentNeedsDeploymentRecipe, message);
                 }
                 return _consoleUtilities.AskToChooseRecommendation(recommendations);
             }
@@ -506,7 +506,7 @@ namespace AWS.Deploy.CLI.Commands
             var selectedRecommendation = recommendations.FirstOrDefault(x => x.Recipe.Id.Equals(deploymentSettingsRecipeId, StringComparison.Ordinal));
             if (selectedRecommendation == null)
             {
-                throw new InvalidUserDeploymentSettingsException($"The user deployment settings provided contains an invalid value for the property '{nameof(userDeploymentSettings.RecipeId)}'.");
+                throw new InvalidUserDeploymentSettingsException(DeployToolErrorCode.InvalidPropertyValueForUserDeployment, $"The user deployment settings provided contains an invalid value for the property '{nameof(userDeploymentSettings.RecipeId)}'.");
             }
 
             _toolInteractiveService.WriteLine();
@@ -602,7 +602,7 @@ namespace AWS.Deploy.CLI.Commands
                         var errorMessage = "Failed to build Docker Image." + Environment.NewLine;
                         errorMessage += "Docker builds usually fail due to executing them from a working directory that is incompatible with the Dockerfile." + Environment.NewLine;
                         errorMessage += "Specify a valid Docker execution directory as part of the deployment settings file and try again.";
-                        throw new DockerBuildFailedException(errorMessage);
+                        throw new DockerBuildFailedException(DeployToolErrorCode.DockerBuildFailed, errorMessage);
                     }
 
                     _toolInteractiveService.WriteLine(string.Empty);
@@ -622,7 +622,7 @@ namespace AWS.Deploy.CLI.Commands
                     }
                     else
                     {
-                        throw new FailedToCreateDeploymentBundleException("Failed to create a deployment bundle");
+                        throw new FailedToCreateDeploymentBundleException(DeployToolErrorCode.FailedToCreateContainerDeploymentBundle, "Failed to create a deployment bundle");
                     }
                 }
             }
@@ -630,7 +630,7 @@ namespace AWS.Deploy.CLI.Commands
             {
                 var dotnetPublishDeploymentBundleResult = await orchestrator.CreateDotnetPublishDeploymentBundle(selectedRecommendation);
                 if (!dotnetPublishDeploymentBundleResult)
-                    throw new FailedToCreateDeploymentBundleException("Failed to create a deployment bundle");
+                    throw new FailedToCreateDeploymentBundleException(DeployToolErrorCode.FailedToCreateDotnetPublishDeploymentBundle, "Failed to create a deployment bundle");
             }
         }
 

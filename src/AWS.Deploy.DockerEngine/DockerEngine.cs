@@ -56,7 +56,7 @@ namespace AWS.Deploy.DockerEngine
             var imageMapping = GetImageMapping();
             if (imageMapping == null)
             {
-                throw new UnknownDockerImageException($"Unable to determine a valid docker base and build image for project of type {_project.SdkType} and Target Framework {_project.TargetFramework}");
+                throw new UnknownDockerImageException(DeployToolErrorCode.NoValidDockerImageForProject, $"Unable to determine a valid docker base and build image for project of type {_project.SdkType} and Target Framework {_project.TargetFramework}");
             }
 
             var dockerFile = new DockerFile(imageMapping, projectFileName, _project.AssemblyName);
@@ -131,10 +131,10 @@ namespace AWS.Deploy.DockerEngine
             var definitions = JsonConvert.DeserializeObject<List<ImageDefinition>>(content);
             var mappings = definitions.FirstOrDefault(x => x.SdkType.Equals(_project.SdkType));
             if (mappings == null)
-                throw new UnsupportedProjectException($"The project with SDK Type {_project.SdkType} is not supported.");
+                throw new UnsupportedProjectException(DeployToolErrorCode.NoValidDockerMappingForSdkType, $"The project with SDK Type {_project.SdkType} is not supported.");
 
             return mappings.ImageMapping.FirstOrDefault(x => x.TargetFramework.Equals(_project.TargetFramework))
-                ?? throw new UnsupportedProjectException($"The project with Target Framework {_project.TargetFramework} is not supported.");
+                ?? throw new UnsupportedProjectException(DeployToolErrorCode.NoValidDockerMappingForTargetFramework, $"The project with Target Framework {_project.TargetFramework} is not supported.");
         }
 
         /// <summary>

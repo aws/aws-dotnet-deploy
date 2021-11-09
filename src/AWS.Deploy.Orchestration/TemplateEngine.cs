@@ -46,7 +46,7 @@ namespace AWS.Deploy.Orchestration
             //The location of the base template that will be installed into the templating engine
             var cdkProjectTemplateDirectory = Path.Combine(
                 Path.GetDirectoryName(recommendation.Recipe.RecipePath) ??
-                    throw new InvalidRecipePathException($"The following RecipePath is invalid as we could not retrieve the parent directory: {recommendation.Recipe.RecipePath}"),
+                    throw new InvalidRecipePathException(DeployToolErrorCode.BaseTemplatesInvalidPath, $"The following RecipePath is invalid as we could not retrieve the parent directory: {recommendation.Recipe.RecipePath}"),
                 recommendation.Recipe.CdkProjectTemplate);
 
             //Installing the base template into the templating engine to make it available for generation
@@ -69,7 +69,7 @@ namespace AWS.Deploy.Orchestration
                 // CDK Template projects can parameterize the version number of the AWS.Deploy.Recipes.CDK.Common package. This avoid
                 // projects having to be modified every time the package version is bumped.
                 { "AWSDeployRecipesCDKCommonVersion", FileVersionInfo.GetVersionInfo(typeof(Constants.CloudFormationIdentifier).Assembly.Location).ProductVersion
-                                                      ?? throw new InvalidAWSDeployRecipesCDKCommonVersionException("The version number of the AWS.Deploy.Recipes.CDK.Common package is invalid.") }
+                                                      ?? throw new InvalidAWSDeployRecipesCDKCommonVersionException(DeployToolErrorCode.InvalidAWSDeployRecipesCDKCommonVersion, "The version number of the AWS.Deploy.Recipes.CDK.Common package is invalid.") }
             };
 
             try
@@ -82,7 +82,7 @@ namespace AWS.Deploy.Orchestration
             }
             catch
             {
-                throw new TemplateGenerationFailedException("Failed to generate CDK project from template");
+                throw new TemplateGenerationFailedException(DeployToolErrorCode.FailedToGenerateCDKProjectFromTemplate, "Failed to generate CDK project from template");
             }
         }
 
@@ -97,7 +97,7 @@ namespace AWS.Deploy.Orchestration
             }
             catch(Exception e)
             {
-                throw new DefaultTemplateInstallationFailedException("Failed to install the default template that is required to the generate the CDK project", e);
+                throw new DefaultTemplateInstallationFailedException(DeployToolErrorCode.FailedToInstallProjectTemplates, "Failed to install the default template that is required to the generate the CDK project", e);
             }
         }
 

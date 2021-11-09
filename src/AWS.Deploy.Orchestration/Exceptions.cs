@@ -7,189 +7,168 @@ namespace AWS.Deploy.Orchestration
     /// <summary>
     /// Exception is thrown if Microsoft Templating Engine is unable to generate a template
     /// </summary>
-    [AWSDeploymentExpectedException]
-    public class TemplateGenerationFailedException : Exception
+    public class TemplateGenerationFailedException : DeployToolException
     {
-        public TemplateGenerationFailedException(string message, Exception? innerException = null) : base(message, innerException) { }
+        public TemplateGenerationFailedException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     /// <summary>
     /// Exception is thrown if Microsoft Templating Engine is unable to find location to install templates from
     /// </summary>
-    [AWSDeploymentExpectedException]
-    public class DefaultTemplateInstallationFailedException : Exception
+    public class DefaultTemplateInstallationFailedException : DeployToolException
     {
-        public DefaultTemplateInstallationFailedException(string message, Exception? innerException = null) : base(message, innerException) { }
+        public DefaultTemplateInstallationFailedException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     /// <summary>
     /// Exception is thrown if Microsoft Templating Engine returns an error when running a command
     /// </summary>
-    [AWSDeploymentExpectedException]
-    public class RunCommandFailedException : Exception
+    public class RunCommandFailedException : DeployToolException
     {
-        public RunCommandFailedException(string message, Exception? innerException = null) : base(message, innerException) { }
+        public RunCommandFailedException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     /// <summary>
     /// Exception is thrown if package.json file IO fails.
     /// </summary>
-    [AWSDeploymentExpectedException]
-    public class PackageJsonFileException : Exception
+    public class PackageJsonFileException : DeployToolException
     {
-        public PackageJsonFileException(string message, Exception? innerException = null) : base(message, innerException) { }
+        public PackageJsonFileException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     /// <summary>
     /// Exception is thrown if docker build attempt failed
     /// </summary>
-    [AWSDeploymentExpectedException]
-    public class DockerBuildFailedException : Exception
+    public class DockerBuildFailedException : DeployToolException
     {
-        public DockerBuildFailedException(string message, Exception? innerException = null) : base(message, innerException) { }
+        public DockerBuildFailedException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     /// <summary>
     /// Exception is thrown if npm command fails to execute.
     /// </summary>
-    [AWSDeploymentExpectedException]
-    public class NPMCommandFailedException : Exception
+    public class NPMCommandFailedException : DeployToolException
     {
-        public NPMCommandFailedException(string message, Exception? innerException = null) : base(message, innerException) { }
+        public NPMCommandFailedException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     /// <summary>
     /// Exception is thrown if docker login attempt failed
     /// </summary>
-    [AWSDeploymentExpectedException]
-    public class DockerLoginFailedException : Exception
+    public class DockerLoginFailedException : DeployToolException
     {
-        public DockerLoginFailedException(string message, Exception? innerException = null) : base(message, innerException) { }
+        public DockerLoginFailedException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     /// <summary>
     /// Exception is thrown if docker tag attempt failed
     /// </summary>
-    [AWSDeploymentExpectedException]
-    public class DockerTagFailedException : Exception
+    public class DockerTagFailedException : DeployToolException
     {
-        public DockerTagFailedException(string message, Exception? innerException = null) : base(message, innerException) { }
+        public DockerTagFailedException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     /// <summary>
     /// Exception is thrown if docker push attempt failed
     /// </summary>
-    [AWSDeploymentExpectedException]
-    public class DockerPushFailedException : Exception
+    public class DockerPushFailedException : DeployToolException
     {
-        public DockerPushFailedException(string message, Exception? innerException = null) : base(message, innerException) { }
+        public DockerPushFailedException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     /// <summary>
     /// Exception is thrown if we cannot retrieve recipe definitions
     /// </summary>
-    [AWSDeploymentExpectedException]
-    public class NoRecipeDefinitionsFoundException : Exception
+    public class NoRecipeDefinitionsFoundException : DeployToolException
     {
-        public NoRecipeDefinitionsFoundException(string message, Exception? innerException = null) : base(message, innerException) { }
+        public NoRecipeDefinitionsFoundException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     /// <summary>
     /// Exception is thrown if dotnet publish attempt failed
     /// </summary>
-    [AWSDeploymentExpectedException]
-    public class DotnetPublishFailedException : Exception
+    public class DotnetPublishFailedException : DeployToolException
     {
-        public DotnetPublishFailedException(string message, Exception? innerException = null) : base(message, innerException) { }
+        public DotnetPublishFailedException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     /// <summary>
     /// Throw if Zip File Manager fails to create a Zip File
     /// </summary>
-    [AWSDeploymentExpectedException]
-    public class FailedToCreateZipFileException : Exception
+    public class FailedToCreateZipFileException : DeployToolException
     {
-        public FailedToCreateZipFileException(string message, Exception? innerException = null) : base(message, innerException) { }
+        public FailedToCreateZipFileException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     /// <summary>
     /// Exception thrown if Docker file could not be generated
     /// </summary>
-    [AWSDeploymentExpectedException]
-    public class FailedToGenerateDockerFileException : Exception
+    public class FailedToGenerateDockerFileException : DeployToolException
     {
-        public FailedToGenerateDockerFileException(string message, Exception? innerException = null) : base(message, innerException) { }
+        public FailedToGenerateDockerFileException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     /// <summary>
     /// Exception thrown if RecipePath contains an invalid path
     /// </summary>
-    [AWSDeploymentExpectedException]
-    public class InvalidRecipePathException : Exception
+    public class InvalidRecipePathException : DeployToolException
     {
-        public InvalidRecipePathException(string message, Exception? innerException = null) : base(message, innerException) { }
+        public InvalidRecipePathException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     /// <summary>
     /// Exception thrown if Solution Path contains an invalid path
     /// </summary>
-    [AWSDeploymentExpectedException]
-    public class InvalidSolutionPathException : Exception
+    public class InvalidSolutionPathException : DeployToolException
     {
-        public InvalidSolutionPathException(string message, Exception? innerException = null) : base(message, innerException) { }
+        public InvalidSolutionPathException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     /// <summary>
     /// Exception thrown if AWS Deploy Recipes CDK Common Product Version is invalid.
     /// </summary>
-    [AWSDeploymentExpectedException]
-    public class InvalidAWSDeployRecipesCDKCommonVersionException : Exception
+    public class InvalidAWSDeployRecipesCDKCommonVersionException : DeployToolException
     {
-        public InvalidAWSDeployRecipesCDKCommonVersionException(string message, Exception? innerException = null) : base(message, innerException) { }
+        public InvalidAWSDeployRecipesCDKCommonVersionException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     /// <summary>
     /// Exception thrown if the 'cdk deploy' command failed.
     /// </summary>
-    [AWSDeploymentExpectedException]
-    public class FailedToDeployCDKAppException : Exception
+    public class FailedToDeployCDKAppException : DeployToolException
     {
-        public FailedToDeployCDKAppException(string message, Exception? innerException = null) : base(message, innerException) { }
+        public FailedToDeployCDKAppException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     /// <summary>
     /// Exception thrown if an AWS Resource is not found or does not exist.
     /// </summary>
-    [AWSDeploymentExpectedException]
-    public class AWSResourceNotFoundException : Exception
+    public class AWSResourceNotFoundException : DeployToolException
     {
-        public AWSResourceNotFoundException(string message, Exception? innerException = null) : base(message, innerException) { }
+        public AWSResourceNotFoundException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     /// <summary>
     /// Exception thrown if the Local User Settings File is invalid.
     /// </summary>
-    [AWSDeploymentExpectedException]
-    public class InvalidLocalUserSettingsFileException : Exception
+    public class InvalidLocalUserSettingsFileException : DeployToolException
     {
-        public InvalidLocalUserSettingsFileException(string message, Exception? innerException = null) : base(message, innerException) { }
+        public InvalidLocalUserSettingsFileException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     /// <summary>
     /// Exception thrown if a failure occured while trying to update the Local User Settings file.
     /// </summary>
-    [AWSDeploymentExpectedException]
-    public class FailedToUpdateLocalUserSettingsFileException : Exception
+    public class FailedToUpdateLocalUserSettingsFileException : DeployToolException
     {
-        public FailedToUpdateLocalUserSettingsFileException(string message, Exception? innerException = null) : base(message, innerException) { }
+        public FailedToUpdateLocalUserSettingsFileException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     /// <summary>
     /// Throw if docker info failed to return output.
     /// </summary>
-    [AWSDeploymentExpectedException]
-    public class DockerInfoException : Exception
+    public class DockerInfoException : DeployToolException
     {
-        public DockerInfoException(string message, Exception? innerException = null) : base(message, innerException) { }
+        public DockerInfoException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 }

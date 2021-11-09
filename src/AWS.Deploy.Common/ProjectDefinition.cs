@@ -85,7 +85,7 @@ namespace AWS.Deploy.Common
         private bool CheckIfDockerFileExists(string projectPath)
         {
             var dir = Directory.GetFiles(new FileInfo(projectPath).DirectoryName ??
-                                         throw new InvalidProjectPathException("The project path is invalid."), "Dockerfile");
+                                         throw new InvalidProjectPathException(DeployToolErrorCode.ProjectPathNotFound, "The project path is invalid."), "Dockerfile");
             return dir.Length == 1;
         }
 

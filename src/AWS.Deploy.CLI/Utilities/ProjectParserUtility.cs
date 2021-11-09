@@ -50,7 +50,7 @@ namespace AWS.Deploy.CLI.Utilities
                 else
                     errorMessage = $"A project was not found at the path {projectPath}";
 
-                throw new FailedToFindDeployableTargetException(errorMessage, ex);
+                throw new FailedToFindDeployableTargetException(DeployToolErrorCode.FailedToFindDeployableTarget, errorMessage, ex);
             }
         }
     }
