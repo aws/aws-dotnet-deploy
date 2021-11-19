@@ -56,6 +56,11 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
         /// </summary>
         public ElasticBeanstalkManagedPlatformUpdatesConfiguration ElasticBeanstalkManagedPlatformUpdates { get; set; }
 
+        /// <summary>
+        /// Specifies whether to enable or disable AWS X-Ray tracing support.
+        /// </summary>
+        public bool XRayTracingSupportEnabled { get; set; } = false;
+
         /// A parameterless constructor is needed for <see cref="Microsoft.Extensions.Configuration.ConfigurationBuilder"/>
         /// or the classes will fail to initialize.
         /// The warnings are disabled since a parameterless constructor will allow non-nullable properties to be initialized with null values.
@@ -75,7 +80,8 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
             string ec2KeyPair,
             ElasticBeanstalkManagedPlatformUpdatesConfiguration elasticBeanstalkManagedPlatformUpdates,
             string environmentType = Recipe.ENVIRONMENTTYPE_SINGLEINSTANCE,
-            string loadBalancerType = Recipe.LOADBALANCERTYPE_APPLICATION)
+            string loadBalancerType = Recipe.LOADBALANCERTYPE_APPLICATION,
+            bool xrayTracingSupportEnabled = false)
         {
             ApplicationIAMRole = applicationIAMRole;
             InstanceType = instanceType;
@@ -86,6 +92,7 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
             ElasticBeanstalkManagedPlatformUpdates = elasticBeanstalkManagedPlatformUpdates;
             EnvironmentType = environmentType;
             LoadBalancerType = loadBalancerType;
+            XRayTracingSupportEnabled = xrayTracingSupportEnabled;
         }
     }
 }

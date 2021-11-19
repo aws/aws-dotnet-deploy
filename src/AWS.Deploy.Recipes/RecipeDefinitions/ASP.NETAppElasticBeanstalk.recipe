@@ -329,6 +329,15 @@
                     ]
                 }
             ]
+        },
+        {
+            "Id": "XRayTracingSupportEnabled",
+            "Name": "Enable AWS X-Ray Tracing Support",
+            "Description": "AWS X-Ray is a service that collects data about requests that your application serves, and provides tools you can use to view, filter, and gain insights into that data to identify issues and opportunities for optimization. Do you want to enable AWS X-Ray tracing support?",
+            "Type": "Bool",
+            "DefaultValue": false,
+            "AdvancedSetting": true,
+            "Updatable": true
         }
     ]
 }

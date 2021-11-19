@@ -144,6 +144,12 @@ namespace AspNetAppElasticBeanstalkLinux
                         Namespace = "aws:elasticbeanstalk:managedactions",
                         OptionName = "ManagedActionsEnabled",
                         Value = settings.ElasticBeanstalkManagedPlatformUpdates.ManagedActionsEnabled.ToString().ToLower()
+                   },
+                   new CfnEnvironment.OptionSettingProperty
+                   {
+                        Namespace = "aws:elasticbeanstalk:xray",
+                        OptionName = "XRayEnabled",
+                        Value = settings.XRayTracingSupportEnabled.ToString().ToLower()
                    }
                 };
 
