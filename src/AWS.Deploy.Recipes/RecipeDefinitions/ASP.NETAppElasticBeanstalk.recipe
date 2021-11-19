@@ -338,6 +338,19 @@
             "DefaultValue": false,
             "AdvancedSetting": true,
             "Updatable": true
+        },
+        {
+            "Id": "ReverseProxy",
+            "Name": "Reverse Proxy",
+            "Description": "By default Nginx is used as a reverse proxy in front of the .NET Core web server Kestrel. To use Kestrel as the front facing web server then select `none` as the reverse proxy.",
+            "Type": "String",
+            "DefaultValue": "nginx",
+            "AllowedValues": [
+                "nginx",
+                "none"
+            ],
+            "AdvancedSetting": true,
+            "Updatable": true
         }
     ]
 }

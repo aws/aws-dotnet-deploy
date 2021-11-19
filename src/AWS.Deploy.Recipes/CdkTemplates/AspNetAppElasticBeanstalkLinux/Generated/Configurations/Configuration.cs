@@ -61,6 +61,11 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
         /// </summary>
         public bool XRayTracingSupportEnabled { get; set; } = false;
 
+        /// <summary>
+        /// The reverse proxy to use. 
+        /// </summary>
+        public string ReverseProxy { get; set; } = Recipe.REVERSEPROXY_NGINX;
+
         /// A parameterless constructor is needed for <see cref="Microsoft.Extensions.Configuration.ConfigurationBuilder"/>
         /// or the classes will fail to initialize.
         /// The warnings are disabled since a parameterless constructor will allow non-nullable properties to be initialized with null values.
@@ -81,6 +86,7 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
             ElasticBeanstalkManagedPlatformUpdatesConfiguration elasticBeanstalkManagedPlatformUpdates,
             string environmentType = Recipe.ENVIRONMENTTYPE_SINGLEINSTANCE,
             string loadBalancerType = Recipe.LOADBALANCERTYPE_APPLICATION,
+            string reverseProxy = Recipe.REVERSEPROXY_NGINX,
             bool xrayTracingSupportEnabled = false)
         {
             ApplicationIAMRole = applicationIAMRole;
@@ -93,6 +99,7 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
             EnvironmentType = environmentType;
             LoadBalancerType = loadBalancerType;
             XRayTracingSupportEnabled = xrayTracingSupportEnabled;
+            ReverseProxy = reverseProxy;
         }
     }
 }
