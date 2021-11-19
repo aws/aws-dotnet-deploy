@@ -26,6 +26,8 @@ namespace AspNetAppElasticBeanstalkLinux
 
         public const string LOADBALANCERTYPE_APPLICATION = "application";
 
+        public const string REVERSEPROXY_NGINX = "nginx";
+
         public IRole? AppIAMRole { get; private set; }
 
         public IRole? BeanstalkServiceRole { get; private set; }
@@ -218,6 +220,18 @@ namespace AspNetAppElasticBeanstalkLinux
                     OptionName = "UpdateLevel",
                     Value = settings.ElasticBeanstalkManagedPlatformUpdates.UpdateLevel
                 });
+            }
+
+            if (!string.IsNullOrEmpty(settings.ReverseProxy))
+            {
+                optionSettingProperties.Add(
+                    new CfnEnvironment.OptionSettingProperty
+                    {
+                        Namespace = "aws:elasticbeanstalk:environment:proxy",
+                        OptionName = "ProxyServer",
+                        Value = settings.ReverseProxy
+                    }
+                );
             }
 
             BeanstalkEnvironment = new CfnEnvironment(this, nameof(BeanstalkEnvironment), InvokeCustomizeCDKPropsEvent(nameof(BeanstalkEnvironment), this, new CfnEnvironmentProps
