@@ -71,6 +71,11 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
         /// </summary>
         public string EnhancedHealthReporting { get; set; } = Recipe.ENHANCED_HEALTH_REPORTING;
 
+        /// <summary>
+        /// The health check URL to use.
+        /// </summary>
+        public string HealthCheckURL { get; set; }
+
         /// A parameterless constructor is needed for <see cref="Microsoft.Extensions.Configuration.ConfigurationBuilder"/>
         /// or the classes will fail to initialize.
         /// The warnings are disabled since a parameterless constructor will allow non-nullable properties to be initialized with null values.
@@ -89,6 +94,7 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
             string elasticBeanstalkPlatformArn,
             string ec2KeyPair,
             ElasticBeanstalkManagedPlatformUpdatesConfiguration elasticBeanstalkManagedPlatformUpdates,
+            string healthCheckURL,
             string environmentType = Recipe.ENVIRONMENTTYPE_SINGLEINSTANCE,
             string loadBalancerType = Recipe.LOADBALANCERTYPE_APPLICATION,
             string reverseProxy = Recipe.REVERSEPROXY_NGINX,
@@ -107,6 +113,7 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
             XRayTracingSupportEnabled = xrayTracingSupportEnabled;
             ReverseProxy = reverseProxy;
             EnhancedHealthReporting = enhancedHealthReporting;
+            HealthCheckURL = healthCheckURL;
         }
     }
 }

@@ -183,6 +183,27 @@ namespace AspNetAppElasticBeanstalkLinux
                         Value = settings.LoadBalancerType
                     }
                 );
+
+                if (!string.IsNullOrEmpty(settings.HealthCheckURL))
+                {
+                    optionSettingProperties.Add(
+                        new CfnEnvironment.OptionSettingProperty
+                        {
+                            Namespace = "aws:elasticbeanstalk:application",
+                            OptionName = "Application Healthcheck URL",
+                            Value = settings.HealthCheckURL
+                        }
+                    );
+
+                    optionSettingProperties.Add(
+                        new CfnEnvironment.OptionSettingProperty
+                        {
+                            Namespace = "aws:elasticbeanstalk:environment:process:default",
+                            OptionName = "HealthCheckPath",
+                            Value = settings.HealthCheckURL
+                        }
+                    );
+                }
             }
 
             if (!string.IsNullOrEmpty(settings.EC2KeyPair))
