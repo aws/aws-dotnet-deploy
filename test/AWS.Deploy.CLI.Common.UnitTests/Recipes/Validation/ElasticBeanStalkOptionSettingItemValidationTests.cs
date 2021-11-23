@@ -78,6 +78,20 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             Validate(optionSettingItem, value, isValid);
         }
 
+        [Theory]
+        [InlineData("PT10M", true)]
+        [InlineData("PT1H", true)]
+        [InlineData("PT25S", true)]
+        [InlineData("PT1H20M30S", true)]
+        [InlineData("invalid", false)]
+        [InlineData("PTB1H20M30S", false)]
+        public void ElasticBeanstalkRollingUpdatesPauseTime(string value, bool isValid)
+        {
+            var optionSettingItem = new OptionSettingItem("id", "name", "description");
+            optionSettingItem.Validators.Add(GetRegexValidatorConfig("^P([0-9]+(?:[,\\.][0-9]+)?Y)?([0-9]+(?:[,\\.][0-9]+)?M)?([0-9]+(?:[,\\.][0-9]+)?D)?(?:T([0-9]+(?:[,\\.][0-9]+)?H)?([0-9]+(?:[,\\.][0-9]+)?M)?([0-9]+(?:[,\\.][0-9]+)?S)?)?$"));
+            Validate(optionSettingItem, value, isValid);
+        }
+
         private OptionSettingItemValidatorConfig GetRegexValidatorConfig(string regex)
         {
             var regexValidatorConfig = new OptionSettingItemValidatorConfig

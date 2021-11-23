@@ -75,6 +75,11 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
         /// The health check URL to use.
         /// </summary>
         public string HealthCheckURL { get; set; }
+        
+        /// <summary>
+        /// Specifies whether to enable or disable Rolling Updates.
+        /// </summary>
+        public ElasticBeanstalkRollingUpdatesConfiguration ElasticBeanstalkRollingUpdates { get; set; }
 
         /// A parameterless constructor is needed for <see cref="Microsoft.Extensions.Configuration.ConfigurationBuilder"/>
         /// or the classes will fail to initialize.
@@ -95,6 +100,7 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
             string ec2KeyPair,
             ElasticBeanstalkManagedPlatformUpdatesConfiguration elasticBeanstalkManagedPlatformUpdates,
             string healthCheckURL,
+            ElasticBeanstalkRollingUpdatesConfiguration elasticBeanstalkRollingUpdates,
             string environmentType = Recipe.ENVIRONMENTTYPE_SINGLEINSTANCE,
             string loadBalancerType = Recipe.LOADBALANCERTYPE_APPLICATION,
             string reverseProxy = Recipe.REVERSEPROXY_NGINX,
@@ -108,6 +114,7 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
             ElasticBeanstalkPlatformArn = elasticBeanstalkPlatformArn;
             EC2KeyPair = ec2KeyPair;
             ElasticBeanstalkManagedPlatformUpdates = elasticBeanstalkManagedPlatformUpdates;
+            ElasticBeanstalkRollingUpdates = elasticBeanstalkRollingUpdates;
             EnvironmentType = environmentType;
             LoadBalancerType = loadBalancerType;
             XRayTracingSupportEnabled = xrayTracingSupportEnabled;
