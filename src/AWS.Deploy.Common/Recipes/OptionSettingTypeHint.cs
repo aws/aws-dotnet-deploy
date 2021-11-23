@@ -25,6 +25,7 @@ namespace AWS.Deploy.Common.Recipes
         DynamoDBTableName,
         SQSQueueUrl,
         SNSTopicArn,
-        S3BucketName
+        S3BucketName,
+        BeanstalkRollingUpdates
     };
 }

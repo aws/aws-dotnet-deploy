@@ -387,6 +387,149 @@
             ],
             "AdvancedSetting": true,
             "Updatable": true
+        },
+        {
+            "Id": "ElasticBeanstalkRollingUpdates",
+            "Name": "Rolling Updates",
+            "Description": "When a configuration change requires replacing instances, Elastic Beanstalk can perform the update in batches to avoid downtime while the change is propagated. During a rolling update, capacity is only reduced by the size of a single batch, which you can configure. Elastic Beanstalk takes one batch of instances out of service, terminates them, and then launches a batch with the new configuration. After the new batch starts serving requests, Elastic Beanstalk moves on to the next batch.",
+            "Type": "Object",
+            "TypeHint": "BeanstalkRollingUpdates",
+            "AdvancedSetting": true,
+            "Updatable": true,
+            "DependsOn": [
+                {
+                    "Id": "EnvironmentType",
+                    "Value": "LoadBalanced"
+                }
+            ],
+            "ChildOptionSettings": [
+                {
+                    "Id": "RollingUpdatesEnabled",
+                    "Name": "Enable Rolling Updates",
+                    "Description": "Do you want to enable Rolling Updates?",
+                    "Type": "Bool",
+                    "DefaultValue": false,
+                    "AdvancedSetting": true,
+                    "Updatable": true
+                },
+                {
+                    "Id": "RollingUpdateType",
+                    "Name": "Rolling Update Type",
+                    "Description": "This includes three types: time-based rolling updates, health-based rolling updates, and immutable updates. Time-based rolling updates apply a PauseTime between batches. Health-based rolling updates wait for new instances to pass health checks before moving on to the next batch. Immutable updates launch a full set of instances in a new Auto Scaling group.",
+                    "Type": "String",
+                    "DefaultValue": "Time",
+                    "AllowedValues": [
+                        "Time",
+                        "Health",
+                        "Immutable"
+                    ],
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "ElasticBeanstalkRollingUpdates.RollingUpdatesEnabled",
+                            "Value": true
+                        }
+                    ]
+                },
+                {
+                    "Id": "MaxBatchSize",
+                    "Name": "Max Batch Size",
+                    "Description": "The number of instances included in each batch of the rolling update.",
+                    "Type": "Int",
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "ElasticBeanstalkRollingUpdates.RollingUpdatesEnabled",
+                            "Value": true
+                        }
+                    ],
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": {
+                                "Min": 1,
+                                "Max": 10000,
+                                "AllowEmptyString": true
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Id": "MinInstancesInService",
+                    "Name": "Min Instances In Service",
+                    "Description": "The minimum number of instances that must be in service within the Auto Scaling group while other instances are terminated.",
+                    "Type": "Int",
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "ElasticBeanstalkRollingUpdates.RollingUpdatesEnabled",
+                            "Value": true
+                        }
+                    ],
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": {
+                                "Min": 0,
+                                "Max": 9999,
+                                "AllowEmptyString": true
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Id": "PauseTime",
+                    "Name": "Pause Time",
+                    "Description": "The amount of time (in seconds, minutes, or hours) the Elastic Beanstalk service waits after it completed updates to one batch of instances and before it continues on to the next batch. (ISO8601 duration format: PT#H#M#S where each # is the number of hours, minutes, and/or seconds, respectively.)",
+                    "Type": "String",
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "ElasticBeanstalkRollingUpdates.RollingUpdatesEnabled",
+                            "Value": true
+                        }
+                    ],
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": {
+                                "Regex": "^P([0-9]+(?:[,\\.][0-9]+)?Y)?([0-9]+(?:[,\\.][0-9]+)?M)?([0-9]+(?:[,\\.][0-9]+)?D)?(?:T([0-9]+(?:[,\\.][0-9]+)?H)?([0-9]+(?:[,\\.][0-9]+)?M)?([0-9]+(?:[,\\.][0-9]+)?S)?)?$",
+                                "AllowEmptyString": true,
+                                "ValidationFailedMessage": "Invalid PauseTime. The PauseTime follows the ISO8601 duration format: PT#H#M#S where each # is the number of hours, minutes, and/or seconds, respectively."
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Id": "Timeout",
+                    "Name": "Timeout",
+                    "Description": "The maximum amount of time (in minutes or hours) to wait for all instances in a batch of instances to pass health checks before canceling the update. (ISO8601 duration format: PT#H#M#S where each # is the number of hours, minutes, and/or seconds, respectively.)",
+                    "Type": "String",
+                    "DefaultValue": "PT30M",
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "ElasticBeanstalkRollingUpdates.RollingUpdatesEnabled",
+                            "Value": true
+                        }
+                    ],
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": {
+                                "Regex": "^P([0-9]+(?:[,\\.][0-9]+)?Y)?([0-9]+(?:[,\\.][0-9]+)?M)?([0-9]+(?:[,\\.][0-9]+)?D)?(?:T([0-9]+(?:[,\\.][0-9]+)?H)?([0-9]+(?:[,\\.][0-9]+)?M)?([0-9]+(?:[,\\.][0-9]+)?S)?)?$",
+                                "AllowEmptyString": true,
+                                "ValidationFailedMessage": "Invalid Timeout. The Timeout follows the ISO8601 duration format: PT#H#M#S where each # is the number of hours, minutes, and/or seconds, respectively."
+                            }
+                        }
+                    ]
+                }
+            ]
         }
     ]
 }

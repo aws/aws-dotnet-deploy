@@ -262,6 +262,60 @@ namespace AspNetAppElasticBeanstalkLinux
                     }
                 );
             }
+            
+            if (settings.ElasticBeanstalkRollingUpdates.RollingUpdatesEnabled)
+            {
+                optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
+                {
+                    Namespace = "aws:autoscaling:updatepolicy:rollingupdate",
+                    OptionName = "RollingUpdateEnabled",
+                    Value = settings.ElasticBeanstalkRollingUpdates.RollingUpdatesEnabled.ToString().ToLower()
+                });
+
+                optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
+                {
+                    Namespace = "aws:autoscaling:updatepolicy:rollingupdate",
+                    OptionName = "RollingUpdateType",
+                    Value = settings.ElasticBeanstalkRollingUpdates.RollingUpdateType
+                });
+
+                optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
+                {
+                    Namespace = "aws:autoscaling:updatepolicy:rollingupdate",
+                    OptionName = "Timeout",
+                    Value = settings.ElasticBeanstalkRollingUpdates.Timeout
+                });
+
+                if (settings.ElasticBeanstalkRollingUpdates.MaxBatchSize != null)
+                {
+                    optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
+                    {
+                        Namespace = "aws:autoscaling:updatepolicy:rollingupdate",
+                        OptionName = "MaxBatchSize",
+                        Value = settings.ElasticBeanstalkRollingUpdates.MaxBatchSize.ToString()
+                    });
+                }
+
+                if (settings.ElasticBeanstalkRollingUpdates.MinInstancesInService != null)
+                {
+                    optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
+                    {
+                        Namespace = "aws:autoscaling:updatepolicy:rollingupdate",
+                        OptionName = "MinInstancesInService",
+                        Value = settings.ElasticBeanstalkRollingUpdates.MinInstancesInService.ToString()
+                    });
+                }
+
+                if (settings.ElasticBeanstalkRollingUpdates.PauseTime != null)
+                {
+                    optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
+                    {
+                        Namespace = "aws:autoscaling:updatepolicy:rollingupdate",
+                        OptionName = "PauseTime",
+                        Value = settings.ElasticBeanstalkRollingUpdates.PauseTime
+                    });
+                }
+            }
 
             BeanstalkEnvironment = new CfnEnvironment(this, nameof(BeanstalkEnvironment), InvokeCustomizeCDKPropsEvent(nameof(BeanstalkEnvironment), this, new CfnEnvironmentProps
             {
