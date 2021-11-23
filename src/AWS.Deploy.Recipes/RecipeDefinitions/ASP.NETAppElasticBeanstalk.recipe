@@ -372,6 +372,21 @@
                     "Value": false
                 }
             ]
+        },
+        {
+            "Id": "HealthCheckURL",
+            "Name": "Health Check URL",
+            "Description": "Customize the load balancer health check to ensure that your application, and not just the web server, is in a good state.",
+            "Type": "String",
+            "DefaultValue": "/",
+            "DependsOn": [
+                {
+                    "Id": "EnvironmentType",
+                    "Value": "LoadBalanced"
+                }
+            ],
+            "AdvancedSetting": true,
+            "Updatable": true
         }
     ]
 }
