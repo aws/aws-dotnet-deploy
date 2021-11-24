@@ -369,6 +369,9 @@ namespace AWS.Deploy.CLI.Commands
 
                 var optionSetting = recommendation.GetOptionSetting(optionSettingJsonPath);
 
+                if (optionSetting == null)
+                    throw new OptionSettingItemDoesNotExistException(DeployToolErrorCode.OptionSettingItemDoesNotExistInRecipe, $"The Option Setting Item {optionSettingJsonPath} does not exist.");
+
                 if (!recommendation.IsExistingCloudApplication || optionSetting.Updatable)
                 {
                     object settingValue;
@@ -387,6 +390,13 @@ namespace AWS.Deploy.CLI.Commands
                                 break;
                             case OptionSettingValueType.Double:
                                 settingValue = double.Parse(optionSettingValue);
+                                break;
+                            case OptionSettingValueType.KeyValue:
+                                var optionSettingKey = optionSettingJsonPath.Split(".").Last();
+                                var existingValue = recommendation.GetOptionSettingValue<Dictionary<string, string>>(optionSetting);
+                                existingValue ??= new Dictionary<string, string>();
+                                existingValue[optionSettingKey] = optionSettingValue;
+                                settingValue = existingValue;
                                 break;
                             default:
                                 throw new InvalidOverrideValueException(DeployToolErrorCode.InvalidValueForOptionSettingItem, $"Invalid value {optionSettingValue} for option setting item {optionSettingJsonPath}");
@@ -772,6 +782,9 @@ namespace AWS.Deploy.CLI.Commands
                             var answer = _consoleUtilities.AskYesNoQuestion(string.Empty, recommendation.GetOptionSettingValue(setting).ToString());
                             settingValue = answer == YesNo.Yes ? "true" : "false";
                             break;
+                        case OptionSettingValueType.KeyValue:
+                            settingValue = _consoleUtilities.AskUserForKeyValue(!string.IsNullOrEmpty(currentValue.ToString()) ? (Dictionary<string, string>) currentValue : new Dictionary<string, string>());
+                            break;
                         case OptionSettingValueType.Object:
                             foreach (var childSetting in setting.ChildOptionSettings)
                             {
@@ -809,6 +822,7 @@ namespace AWS.Deploy.CLI.Commands
         private void DisplayValue(Recommendation recommendation, OptionSettingItem optionSetting, int optionSettingNumber, int optionSettingsCount, Type? typeHintResponseType, DisplayOptionSettingsMode mode)
         {
             object? displayValue = null;
+            Dictionary<string, string>? keyValuePair = null;
             Dictionary<string, object>? objectValues = null;
             if (typeHintResponseType != null)
             {
@@ -823,7 +837,8 @@ namespace AWS.Deploy.CLI.Commands
             {
                 var value = recommendation.GetOptionSettingValue(optionSetting);
                 objectValues = value as Dictionary<string, object>;
-                displayValue = objectValues == null ? value : string.Empty;
+                keyValuePair = value as Dictionary<string, string>;
+                displayValue = objectValues == null && keyValuePair == null ? value : string.Empty;
             }
 
             if (mode == DisplayOptionSettingsMode.Editable)
@@ -833,6 +848,14 @@ namespace AWS.Deploy.CLI.Commands
             else if (mode == DisplayOptionSettingsMode.Readonly)
             {
                 _toolInteractiveService.WriteLine($"{optionSetting.Name}: {displayValue}");
+            }
+
+            if (keyValuePair != null)
+            {
+                foreach (var (key, value) in keyValuePair)
+                {
+                    _toolInteractiveService.WriteLine($"\t{key}: {value}");
+                }
             }
 
             if (objectValues != null)

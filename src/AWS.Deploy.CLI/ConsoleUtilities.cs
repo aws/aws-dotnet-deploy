@@ -31,6 +31,7 @@ namespace AWS.Deploy.CLI
         YesNo AskYesNoQuestion(string question, string? defaultValue);
         YesNo AskYesNoQuestion(string question, YesNo? defaultValue = default);
         void DisplayValues(Dictionary<string, object> objectValues, string indent);
+        Dictionary<string, string> AskUserForKeyValue(Dictionary<string, string> keyValue);
     }
 
     public class ConsoleUtilities : IConsoleUtilities
@@ -304,6 +305,68 @@ namespace AWS.Deploy.CLI
             }
 
             return userValue;
+        }
+
+        public Dictionary<string, string> AskUserForKeyValue(Dictionary<string, string> keyValue)
+        {
+            keyValue ??= new Dictionary<string, string>();
+
+            if (keyValue.Keys.Count == 0)
+            {
+                AskToAddKeyValuePair(keyValue);
+                return keyValue;
+            }
+
+            const string ADD = "Add new";
+            const string UPDATE = "Update existing";
+            const string DELETE = "Delete existing";
+            var operations = new List<string> { ADD, UPDATE, DELETE };
+
+            var selectedOperation = AskUserToChoose(operations, "Select which operation you want to perform:", ADD);
+
+            if(selectedOperation.Equals(ADD))
+                AskToAddKeyValuePair(keyValue);
+
+            if(selectedOperation.Equals(UPDATE))
+                AskToUpdateKeyValuePair(keyValue);
+
+            if(selectedOperation.Equals(DELETE))
+                AskToDeleteKeyValuePair(keyValue);
+
+            return keyValue;
+        }
+
+        private void AskToAddKeyValuePair(Dictionary<string, string> keyValue)
+        {
+            const string RESET = "<reset>";
+            var variableName = string.Empty;
+            while (string.IsNullOrEmpty(variableName))
+            {
+                _interactiveService.WriteLine("Enter the name:");
+                variableName = _interactiveService.ReadLine()?.Trim() ?? "";
+            }
+
+            _interactiveService.WriteLine($"Enter the value (type {RESET} to reset):");
+            var variableValue = _interactiveService.ReadLine()?.Trim() ?? "";
+            if (string.Equals(RESET, variableValue.Trim(), StringComparison.OrdinalIgnoreCase) ||
+                string.Equals($"'{RESET}'", variableValue.Trim(), StringComparison.OrdinalIgnoreCase))
+                variableValue = keyValue.ContainsKey(variableName) ? keyValue[variableName] : "";
+
+            keyValue[variableName] = variableValue;
+        }
+
+        private void AskToUpdateKeyValuePair(Dictionary<string, string> keyValue)
+        {
+            var selectedKey = AskUserToChoose(keyValue.Keys.ToList(), "Select the one you wish to update:", null);
+            var selectedValue = AskUserForValue("Enter the value:", keyValue[selectedKey], true);
+
+            keyValue[selectedKey] = selectedValue;
+        }
+
+        private void AskToDeleteKeyValuePair(Dictionary<string, string> keyValue)
+        {
+            var selectedKey = AskUserToChoose(keyValue.Keys.ToList(), "Select the one you wish to delete:", null);
+            keyValue.Remove(selectedKey);
         }
 
         public string AskForEC2KeyPairSaveDirectory(string projectPath)
