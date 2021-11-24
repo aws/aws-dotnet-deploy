@@ -317,6 +317,19 @@ namespace AspNetAppElasticBeanstalkLinux
                 }
             }
 
+            if (settings.ElasticBeanstalkEnvironmentVariables != null)
+            {
+                foreach (var (key, value) in settings.ElasticBeanstalkEnvironmentVariables)
+                {
+                    optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
+                    {
+                        Namespace = "aws:elasticbeanstalk:application:environment",
+                        OptionName = key,
+                        Value = value
+                    });
+                }
+            }
+
             BeanstalkEnvironment = new CfnEnvironment(this, nameof(BeanstalkEnvironment), InvokeCustomizeCDKPropsEvent(nameof(BeanstalkEnvironment), this, new CfnEnvironmentProps
             {
                 EnvironmentName = settings.EnvironmentName,

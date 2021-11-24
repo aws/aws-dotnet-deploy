@@ -539,6 +539,14 @@
             "DefaultValue": "",
             "AdvancedSetting": true,
             "Updatable": false
+        },
+        {
+            "Id": "ElasticBeanstalkEnvironmentVariables",
+            "Name": "Environment Variables",
+            "Description": "Configure environment properties for your application.",
+            "Type": "KeyValue",
+            "AdvancedSetting": false,
+            "Updatable": true
         }
     ]
 }

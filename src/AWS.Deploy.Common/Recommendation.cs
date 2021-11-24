@@ -89,6 +89,9 @@ namespace AWS.Deploy.Common
         /// <summary>
         /// Interactively traverses given json path and returns target option setting.
         /// Throws exception if there is no <see cref="OptionSettingItem" /> that matches <paramref name="jsonPath"/> />
+        /// In case an option setting of type <see cref="OptionSettingValueType.KeyValue"/> is encountered,
+        /// that <paramref name="jsonPath"/> can have the key value pair name as the leaf node with the option setting Id as the node before that.
+        /// In case there are multiple nodes after a <see cref="OptionSettingValueType.KeyValue"/>, then that indicates an invalid <paramref name="jsonPath"/>
         /// </summary>
         /// <param name="jsonPath">
         /// Dot (.) separated key values string pointing to an option setting.
@@ -104,13 +107,21 @@ namespace AWS.Deploy.Common
             var ids = jsonPath.Split('.');
             OptionSettingItem? optionSetting = null;
 
-            foreach (var id in ids)
+            for (int i = 0; i < ids.Length; i++)
             {
                 var optionSettings = optionSetting?.ChildOptionSettings ?? GetConfigurableOptionSettingItems();
-                optionSetting = optionSettings.FirstOrDefault(os => os.Id.Equals(id));
+                optionSetting = optionSettings.FirstOrDefault(os => os.Id.Equals(ids[i]));
                 if (optionSetting == null)
                 {
                     throw new OptionSettingItemDoesNotExistException(DeployToolErrorCode.OptionSettingItemDoesNotExistInRecipe, $"The Option Setting Item {jsonPath} does not exist as part of the" +
+                    $" {Recipe.Name} recipe");
+                }
+                if (optionSetting.Type.Equals(OptionSettingValueType.KeyValue))
+                {
+                    if (i + 2 == ids.Length)
+                        return optionSetting;
+                    else
+                        throw new OptionSettingItemDoesNotExistException(DeployToolErrorCode.OptionSettingItemDoesNotExistInRecipe, $"The Option Setting Item {jsonPath} does not exist as part of the" +
                     $" {Recipe.Name} recipe");
                 }
             }

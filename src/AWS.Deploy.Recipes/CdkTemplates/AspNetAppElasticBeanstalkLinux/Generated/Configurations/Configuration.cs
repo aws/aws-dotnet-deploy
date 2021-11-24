@@ -7,6 +7,8 @@
 // This class is marked as a partial class. If you add new settings to the recipe file, those settings should be
 // added to partial versions of this class outside of the Generated folder for example in the Configuration folder.
 
+using System.Collections.Generic;
+
 namespace AspNetAppElasticBeanstalkLinux.Configurations
 {
     public partial class Configuration
@@ -86,6 +88,11 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
         /// </summary>
         public string CNamePrefix { get; set; }
 
+        /// <summary>
+        /// The environment variables that are set for the beanstalk environment.
+        /// </summary>
+        public Dictionary<string, string> ElasticBeanstalkEnvironmentVariables { get; set; } = new Dictionary<string, string> { };
+
         /// A parameterless constructor is needed for <see cref="Microsoft.Extensions.Configuration.ConfigurationBuilder"/>
         /// or the classes will fail to initialize.
         /// The warnings are disabled since a parameterless constructor will allow non-nullable properties to be initialized with null values.
@@ -107,6 +114,7 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
             string healthCheckURL,
             ElasticBeanstalkRollingUpdatesConfiguration elasticBeanstalkRollingUpdates,
             string cnamePrefix,
+            Dictionary<string, string> elasticBeanstalkEnvironmentVariables,
             string environmentType = Recipe.ENVIRONMENTTYPE_SINGLEINSTANCE,
             string loadBalancerType = Recipe.LOADBALANCERTYPE_APPLICATION,
             string reverseProxy = Recipe.REVERSEPROXY_NGINX,
@@ -121,6 +129,7 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
             EC2KeyPair = ec2KeyPair;
             ElasticBeanstalkManagedPlatformUpdates = elasticBeanstalkManagedPlatformUpdates;
             ElasticBeanstalkRollingUpdates = elasticBeanstalkRollingUpdates;
+            ElasticBeanstalkEnvironmentVariables = elasticBeanstalkEnvironmentVariables;
             EnvironmentType = environmentType;
             LoadBalancerType = loadBalancerType;
             XRayTracingSupportEnabled = xrayTracingSupportEnabled;
