@@ -81,6 +81,11 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
         /// </summary>
         public ElasticBeanstalkRollingUpdatesConfiguration ElasticBeanstalkRollingUpdates { get; set; }
 
+        /// <summary>
+        /// The CName Prefix used for the Beanstalk Environment.
+        /// </summary>
+        public string CNamePrefix { get; set; }
+
         /// A parameterless constructor is needed for <see cref="Microsoft.Extensions.Configuration.ConfigurationBuilder"/>
         /// or the classes will fail to initialize.
         /// The warnings are disabled since a parameterless constructor will allow non-nullable properties to be initialized with null values.
@@ -101,6 +106,7 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
             ElasticBeanstalkManagedPlatformUpdatesConfiguration elasticBeanstalkManagedPlatformUpdates,
             string healthCheckURL,
             ElasticBeanstalkRollingUpdatesConfiguration elasticBeanstalkRollingUpdates,
+            string cnamePrefix,
             string environmentType = Recipe.ENVIRONMENTTYPE_SINGLEINSTANCE,
             string loadBalancerType = Recipe.LOADBALANCERTYPE_APPLICATION,
             string reverseProxy = Recipe.REVERSEPROXY_NGINX,
@@ -121,6 +127,7 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
             ReverseProxy = reverseProxy;
             EnhancedHealthReporting = enhancedHealthReporting;
             HealthCheckURL = healthCheckURL;
+            CNamePrefix = cnamePrefix;
         }
     }
 }

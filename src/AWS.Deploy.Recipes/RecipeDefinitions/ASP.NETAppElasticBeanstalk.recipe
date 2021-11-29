@@ -530,6 +530,15 @@
                     ]
                 }
             ]
+        },
+        {
+            "Id": "CNamePrefix",
+            "Name": "CName Prefix",
+            "Description": "If specified, the environment attempts to use this value as the prefix for the CNAME in your Elastic Beanstalk environment URL. If not specified, the CNAME is generated automatically by appending a random alphanumeric string to the environment name.",
+            "Type": "String",
+            "DefaultValue": "",
+            "AdvancedSetting": true,
+            "Updatable": false
         }
     ]
 }
