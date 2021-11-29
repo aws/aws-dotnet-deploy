@@ -323,6 +323,7 @@ namespace AspNetAppElasticBeanstalkLinux
                 ApplicationName = settings.BeanstalkApplication.ApplicationName,
                 PlatformArn = settings.ElasticBeanstalkPlatformArn,
                 OptionSettings = optionSettingProperties.ToArray(),
+                CnamePrefix = !string.IsNullOrEmpty(settings.CNamePrefix) ? settings.CNamePrefix : null,
                 // This line is critical - reference the label created in this same stack
                 VersionLabel = ApplicationVersion.Ref,
             }));
