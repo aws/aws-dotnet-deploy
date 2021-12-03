@@ -27,6 +27,8 @@ namespace AspNetAppElasticBeanstalkLinux
         public const string LOADBALANCERTYPE_APPLICATION = "application";
 
         public const string REVERSEPROXY_NGINX = "nginx";
+        
+        public const string ENHANCED_HEALTH_REPORTING = "enhanced";
 
         public IRole? AppIAMRole { get; private set; }
 
@@ -152,6 +154,12 @@ namespace AspNetAppElasticBeanstalkLinux
                         Namespace = "aws:elasticbeanstalk:xray",
                         OptionName = "XRayEnabled",
                         Value = settings.XRayTracingSupportEnabled.ToString().ToLower()
+                   },
+                   new CfnEnvironment.OptionSettingProperty
+                   {
+                        Namespace = "aws:elasticbeanstalk:healthreporting:system",
+                        OptionName = "SystemType",
+                        Value = settings.EnhancedHealthReporting
                    }
                 };
 
