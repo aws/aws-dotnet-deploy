@@ -74,8 +74,6 @@
         }
     ],
 
-
-
     "OptionSettings": [
         {
             "Id": "BeanstalkApplication",
@@ -351,6 +349,29 @@
             ],
             "AdvancedSetting": true,
             "Updatable": true
+        },
+        {
+            "Id": "EnhancedHealthReporting",
+            "Name": "Enhanced Health Reporting",
+            "Description": "Enhanced health reporting provides free real-time application and operating system monitoring of the instances and other resources in your environment.",
+            "Type": "String",
+            "DefaultValue": "enhanced",
+            "AllowedValues": [
+                "enhanced",
+                "basic"
+            ],
+            "ValueMapping": {
+                "enhanced": "Enhanced",
+                "basic": "Basic"
+            },
+            "AdvancedSetting": true,
+            "Updatable": true,
+            "DependsOn": [
+                {
+                    "Id": "ElasticBeanstalkManagedPlatformUpdates.ManagedActionsEnabled",
+                    "Value": false
+                }
+            ]
         }
     ]
 }

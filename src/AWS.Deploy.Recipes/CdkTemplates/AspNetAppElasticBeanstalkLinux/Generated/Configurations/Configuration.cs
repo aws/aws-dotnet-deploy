@@ -65,6 +65,11 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
         /// The reverse proxy to use. 
         /// </summary>
         public string ReverseProxy { get; set; } = Recipe.REVERSEPROXY_NGINX;
+        
+        /// <summary>
+        /// Specifies whether to enable or disable enhanced health reporting.
+        /// </summary>
+        public string EnhancedHealthReporting { get; set; } = Recipe.ENHANCED_HEALTH_REPORTING;
 
         /// A parameterless constructor is needed for <see cref="Microsoft.Extensions.Configuration.ConfigurationBuilder"/>
         /// or the classes will fail to initialize.
@@ -87,7 +92,8 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
             string environmentType = Recipe.ENVIRONMENTTYPE_SINGLEINSTANCE,
             string loadBalancerType = Recipe.LOADBALANCERTYPE_APPLICATION,
             string reverseProxy = Recipe.REVERSEPROXY_NGINX,
-            bool xrayTracingSupportEnabled = false)
+            bool xrayTracingSupportEnabled = false,
+            string enhancedHealthReporting = Recipe.ENHANCED_HEALTH_REPORTING)
         {
             ApplicationIAMRole = applicationIAMRole;
             InstanceType = instanceType;
@@ -100,6 +106,7 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
             LoadBalancerType = loadBalancerType;
             XRayTracingSupportEnabled = xrayTracingSupportEnabled;
             ReverseProxy = reverseProxy;
+            EnhancedHealthReporting = enhancedHealthReporting;
         }
     }
 }
