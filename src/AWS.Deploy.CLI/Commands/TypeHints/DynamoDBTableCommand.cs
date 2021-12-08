@@ -38,9 +38,12 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         {
             const string NO_VALUE = "*** Do not select table ***";
             var currentValue = recommendation.GetOptionSettingValue(optionSetting);
+            var typeHintData = optionSetting.GetTypeHintData<DynamoDBTableTypeHintData>();
             var tables = await GetData();
 
-            tables.Add(NO_VALUE);
+            if (typeHintData?.AllowNoValue ?? false)
+                tables.Add(NO_VALUE);
+
             var userResponse = _consoleUtilities.AskUserToChoose(
                 values: tables,
                 title: "Select a DynamoDB table:",

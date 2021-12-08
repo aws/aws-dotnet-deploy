@@ -119,6 +119,7 @@
                     "Name": "Existing Cluster ARN",
                     "Description": "The ARN of the existing cluster to use.",
                     "Type": "String",
+                    "TypeHint": "ExistingECSCluster",
                     "AdvancedSetting": false,
                     "Updatable": false,
                     "Validators": [
@@ -229,6 +230,10 @@
                     "Name": "Existing Role ARN",
                     "Description": "The ARN of the existing role to use.",
                     "Type": "String",
+                    "TypeHint": "ExistingIAMRole",
+                    "TypeHintData": {
+                        "ServicePrincipal": "ecs-tasks.amazonaws.com"
+                    },
                     "AdvancedSetting": false,
                     "Updatable": true,
                     "Validators": [
@@ -288,6 +293,7 @@
                     "Name": "Existing VPC ID",
                     "Description": "The ID of the existing VPC to use.",
                     "Type": "String",
+                    "TypeHint": "ExistingVpc",
                     "DefaultValue": null,
                     "AdvancedSetting": false,
                     "Updatable": false,

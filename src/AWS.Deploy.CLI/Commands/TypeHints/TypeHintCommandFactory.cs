@@ -38,22 +38,27 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             _commands = new Dictionary<OptionSettingTypeHint, ITypeHintCommand>
             {
                 { OptionSettingTypeHint.BeanstalkApplication, new BeanstalkApplicationCommand(awsResourceQueryer, consoleUtilities) },
+                { OptionSettingTypeHint.ExistingBeanstalkApplication, new BeanstalkApplicationCommand(awsResourceQueryer, consoleUtilities) },
                 { OptionSettingTypeHint.BeanstalkEnvironment, new BeanstalkEnvironmentCommand(awsResourceQueryer, consoleUtilities) },
                 { OptionSettingTypeHint.DotnetBeanstalkPlatformArn, new DotnetBeanstalkPlatformArnCommand(awsResourceQueryer, consoleUtilities) },
                 { OptionSettingTypeHint.EC2KeyPair, new EC2KeyPairCommand(toolInteractiveService, awsResourceQueryer, consoleUtilities) },
                 { OptionSettingTypeHint.IAMRole, new IAMRoleCommand(awsResourceQueryer, consoleUtilities) },
+                { OptionSettingTypeHint.ExistingIAMRole, new IAMRoleCommand(awsResourceQueryer, consoleUtilities) },
                 { OptionSettingTypeHint.Vpc, new VpcCommand(awsResourceQueryer, consoleUtilities) },
+                { OptionSettingTypeHint.ExistingVpc, new VpcCommand(awsResourceQueryer, consoleUtilities) },
                 { OptionSettingTypeHint.DotnetPublishAdditionalBuildArguments, new DotnetPublishArgsCommand(consoleUtilities) },
                 { OptionSettingTypeHint.DotnetPublishSelfContainedBuild, new DotnetPublishSelfContainedBuildCommand(consoleUtilities) },
                 { OptionSettingTypeHint.DotnetPublishBuildConfiguration, new DotnetPublishBuildConfigurationCommand(consoleUtilities) },
                 { OptionSettingTypeHint.DockerExecutionDirectory, new DockerExecutionDirectoryCommand(consoleUtilities, directoryManager) },
                 { OptionSettingTypeHint.DockerBuildArgs, new DockerBuildArgsCommand(consoleUtilities) },
                 { OptionSettingTypeHint.ECSCluster, new ECSClusterCommand(awsResourceQueryer, consoleUtilities) },
+                { OptionSettingTypeHint.ExistingECSCluster, new ECSClusterCommand(awsResourceQueryer, consoleUtilities) },
                 { OptionSettingTypeHint.ExistingApplicationLoadBalancer, new ExistingApplicationLoadBalancerCommand(awsResourceQueryer, consoleUtilities) },
                 { OptionSettingTypeHint.DynamoDBTableName, new DynamoDBTableCommand(awsResourceQueryer, consoleUtilities) },
                 { OptionSettingTypeHint.SQSQueueUrl, new SQSQueueUrlCommand(awsResourceQueryer, consoleUtilities) },
                 { OptionSettingTypeHint.SNSTopicArn, new SNSTopicArnsCommand(awsResourceQueryer, consoleUtilities) },
                 { OptionSettingTypeHint.S3BucketName, new S3BucketNameCommand(awsResourceQueryer, consoleUtilities) },
+                { OptionSettingTypeHint.InstanceType, new InstanceTypeCommand(awsResourceQueryer, consoleUtilities) },
             };
         }
 

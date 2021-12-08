@@ -98,6 +98,7 @@
                     "Name": "Application Name",
                     "Description": "The Elastic Beanstalk application name.",
                     "Type": "String",
+                    "TypeHint": "ExistingBeanstalkApplication",
                     "DefaultValue": "{StackName}",
                     "AdvancedSetting": false,
                     "Updatable": false,
@@ -139,7 +140,6 @@
             "Description": "The EC2 instance type of the EC2 instances created for the environment.",
             "Type": "String",
             "TypeHint": "InstanceType",
-            "DefaultValue": "",
             "AdvancedSetting": true,
             "Updatable": true
         },
@@ -211,6 +211,10 @@
                     "Name": "Existing Role ARN",
                     "Description": "The ARN of the existing role to use.",
                     "Type": "String",
+                    "TypeHint": "ExistingIAMRole",
+                    "TypeHintData": {
+                        "ServicePrincipal": "elasticbeanstalk.amazonaws.com"
+                    },
                     "AdvancedSetting": false,
                     "Updatable": false,
                     "DependsOn": [

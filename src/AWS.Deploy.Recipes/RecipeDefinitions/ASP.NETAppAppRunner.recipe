@@ -108,6 +108,10 @@
                     "Name": "Existing Role ARN",
                     "Description": "The ARN of the existing role to use.",
                     "Type": "String",
+                    "TypeHint": "ExistingIAMRole",
+                    "TypeHintData": {
+                        "ServicePrincipal": "tasks.apprunner.amazonaws.com"
+                    },
                     "AdvancedSetting": false,
                     "Updatable": true,
                     "DependsOn": [
@@ -145,6 +149,10 @@
                     "Name": "Existing Role ARN",
                     "Description": "The ARN of the existing role to use.",
                     "Type": "String",
+                    "TypeHint": "ExistingIAMRole",
+                    "TypeHintData": {
+                        "ServicePrincipal": "build.apprunner.amazonaws.com"
+                    },
                     "AdvancedSetting": false,
                     "Updatable": true,
                     "DependsOn": [

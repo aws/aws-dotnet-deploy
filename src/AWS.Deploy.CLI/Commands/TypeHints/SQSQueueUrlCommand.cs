@@ -33,6 +33,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         {
             const string NO_VALUE = "*** Do not select queue ***";
             var currentValue = recommendation.GetOptionSettingValue(optionSetting);
+            var typeHintData = optionSetting.GetTypeHintData<SQSQueueUrlTypeHintData>();
             var currentValueStr = currentValue.ToString() ?? string.Empty;
             var queueUrls = await GetResources(recommendation, optionSetting);
 
@@ -43,7 +44,8 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 currentName = currentValueStr.Substring(currentValueStr.LastIndexOf('/') + 1);
             }
 
-            queueNames.Add(NO_VALUE);
+            if (typeHintData?.AllowNoValue ?? false)
+                queueNames.Add(NO_VALUE);
             var userResponse = _consoleUtilities.AskUserToChoose(
                 values: queueNames,
                 title: "Select a SQS queue:",

@@ -39,6 +39,7 @@ namespace AWS.Deploy.Orchestration.Data
 {
     public interface IAWSResourceQueryer
     {
+        Task<List<InstanceTypeInfo>> ListOfAvailableInstanceTypes();
         Task<Amazon.AppRunner.Model.Service> DescribeAppRunnerService(string serviceArn);
         Task<List<StackResource>> DescribeCloudFormationResources(string stackName);
         Task<EnvironmentDescription> DescribeElasticBeanstalkEnvironment(string environmentId);
@@ -76,6 +77,20 @@ namespace AWS.Deploy.Orchestration.Data
         public AWSResourceQueryer(IAWSClientFactory awsClientFactory)
         {
             _awsClientFactory = awsClientFactory;
+        }
+
+        public async Task<List<InstanceTypeInfo>> ListOfAvailableInstanceTypes()
+        {
+            var ec2Client = _awsClientFactory.GetAWSClient<IAmazonEC2>();
+            var instanceTypes = new List<InstanceTypeInfo>();
+            var listInstanceTypesPaginator = ec2Client.Paginators.DescribeInstanceTypes(new DescribeInstanceTypesRequest());
+
+            await foreach (var response in listInstanceTypesPaginator.Responses)
+            {
+                instanceTypes.AddRange(response.InstanceTypes);
+            }
+
+            return instanceTypes;
         }
 
         public async Task<Amazon.AppRunner.Model.Service> DescribeAppRunnerService(string serviceArn)

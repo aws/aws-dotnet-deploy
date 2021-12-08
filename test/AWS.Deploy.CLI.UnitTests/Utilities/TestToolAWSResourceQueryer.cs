@@ -78,5 +78,6 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
         public Task<List<string>> ListOfSQSQueuesUrls() => throw new NotImplementedException();
         public Task<List<string>> ListOfSNSTopicArns() => throw new NotImplementedException();
         public Task<List<Amazon.S3.Model.S3Bucket>> ListOfS3Buckets() => throw new NotImplementedException();
+        public Task<List<InstanceTypeInfo>> ListOfAvailableInstanceTypes() => throw new NotImplementedException();
     }
 }

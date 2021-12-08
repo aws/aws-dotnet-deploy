@@ -39,9 +39,12 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         {
             const string NO_VALUE = "*** Do not select bucket ***";
             var currentValue = recommendation.GetOptionSettingValue(optionSetting);
+            var typeHintData = optionSetting.GetTypeHintData<S3BucketNameTypeHintData>();
             var buckets = (await GetData()).Select(bucket => bucket.BucketName).ToList();
 
-            buckets.Add(NO_VALUE);
+            if (typeHintData?.AllowNoValue ?? false)
+                buckets.Add(NO_VALUE);
+
             var userResponse = _consoleUtilities.AskUserToChoose(
                 values: buckets,
                 title: "Select a S3 bucket:",
