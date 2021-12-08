@@ -26,6 +26,10 @@ namespace AWS.Deploy.Common.Recipes
         SQSQueueUrl,
         SNSTopicArn,
         S3BucketName,
-        BeanstalkRollingUpdates
+        BeanstalkRollingUpdates,
+        ExistingIAMRole,
+        ExistingECSCluster,
+        ExistingVpc,
+        ExistingBeanstalkApplication
     };
 }
