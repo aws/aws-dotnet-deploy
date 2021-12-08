@@ -22,7 +22,8 @@ namespace AWS.Deploy.Common.Recipes.Validation
 
         private static readonly Dictionary<RecipeValidatorList, Type> _recipeValidatorTypeMapping = new()
         {
-            { RecipeValidatorList.FargateTaskSizeCpuMemoryLimits, typeof(FargateTaskCpuMemorySizeValidator) }
+            { RecipeValidatorList.FargateTaskSizeCpuMemoryLimits, typeof(FargateTaskCpuMemorySizeValidator) },
+            { RecipeValidatorList.MinMaxConstraint, typeof(MinMaxConstraintValidator) }
         };
 
         public static IOptionSettingItemValidator[] BuildValidators(this OptionSettingItem optionSettingItem)

@@ -98,6 +98,32 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             Validate(optionSettingItem, value, isValid);
         }
 
+        [Theory]
+        [InlineData("arn:aws:elasticloadbalancing:us-east-1:012345678910:loadbalancer/my-load-balancer", true)]
+        [InlineData("arn:aws:elasticloadbalancing:us-east-1:012345678910:loadbalancer/app/my-load-balancer", true)]
+        [InlineData("arn:aws:elasticloadbalancing:012345678910:elasticloadbalancing:loadbalancer/my-load-balancer", false)] //missing region
+        [InlineData("arn:aws:elasticloadbalancing:012345678910:elasticloadbalancing:loadbalancer", false)] //missing resource path
+        [InlineData("arn:aws:elasticloadbalancing:01234567891:elasticloadbalancing:loadbalancer", false)] //11 digit account ID
+        public void LoadBalancerArnValidationTest(string value, bool isValid)
+        {
+            var optionSettingItem = new OptionSettingItem("id", "name", "description");
+            optionSettingItem.Validators.Add(GetRegexValidatorConfig("arn:[^:]+:elasticloadbalancing:[^:]*:[0-9]{12}:loadbalancer/.+"));
+            Validate(optionSettingItem, value, isValid);
+        }
+
+        [Theory]
+        [InlineData("/", true)]
+        [InlineData("/Api/*", true)]
+        [InlineData("/Api/Path/&*$-/@", true)]
+        [InlineData("Api/Path", false)] // does not start with '/'
+        [InlineData("/Api/Path/<dsd<>", false)] // contains invalid character '<' and '>'
+        public void ListenerConditionPathPatternValidationTest(string value, bool isValid)
+        {
+            var optionSettingItem = new OptionSettingItem("id", "name", "description");
+            optionSettingItem.Validators.Add(GetRegexValidatorConfig("^/[a-zA-Z0-9*?&_\\-.$/~\"'@:+]{0,127}$"));
+            Validate(optionSettingItem, value, isValid);
+        }
+
         private OptionSettingItemValidatorConfig GetRegexValidatorConfig(string regex)
         {
             var regexValidatorConfig = new OptionSettingItemValidatorConfig

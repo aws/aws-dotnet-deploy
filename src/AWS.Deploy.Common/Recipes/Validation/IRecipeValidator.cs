@@ -10,6 +10,6 @@ namespace AWS.Deploy.Common.Recipes.Validation
     /// </summary>
     public interface IRecipeValidator
     {
-        ValidationResult Validate(RecipeDefinition recipe, IDeployToolValidationContext deployValidationContext);
+        ValidationResult Validate(Recommendation recommendation, IDeployToolValidationContext deployValidationContext);
     }
 }
