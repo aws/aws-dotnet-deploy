@@ -7,6 +7,8 @@
 // This class is marked as a partial class. If you add new settings to the recipe file, those settings should be
 // added to partial versions of this class outside of the Generated folder for example in the Configuration folder.
 
+using System.Collections.Generic;
+
 namespace AspNetAppElasticBeanstalkLinux.Configurations
 {
     public partial class Configuration
@@ -56,6 +58,41 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
         /// </summary>
         public ElasticBeanstalkManagedPlatformUpdatesConfiguration ElasticBeanstalkManagedPlatformUpdates { get; set; }
 
+        /// <summary>
+        /// Specifies whether to enable or disable AWS X-Ray tracing support.
+        /// </summary>
+        public bool XRayTracingSupportEnabled { get; set; } = false;
+
+        /// <summary>
+        /// The reverse proxy to use. 
+        /// </summary>
+        public string ReverseProxy { get; set; } = Recipe.REVERSEPROXY_NGINX;
+        
+        /// <summary>
+        /// Specifies whether to enable or disable enhanced health reporting.
+        /// </summary>
+        public string EnhancedHealthReporting { get; set; } = Recipe.ENHANCED_HEALTH_REPORTING;
+
+        /// <summary>
+        /// The health check URL to use.
+        /// </summary>
+        public string HealthCheckURL { get; set; }
+        
+        /// <summary>
+        /// Specifies whether to enable or disable Rolling Updates.
+        /// </summary>
+        public ElasticBeanstalkRollingUpdatesConfiguration ElasticBeanstalkRollingUpdates { get; set; }
+
+        /// <summary>
+        /// The CName Prefix used for the Beanstalk Environment.
+        /// </summary>
+        public string CNamePrefix { get; set; }
+
+        /// <summary>
+        /// The environment variables that are set for the beanstalk environment.
+        /// </summary>
+        public Dictionary<string, string> ElasticBeanstalkEnvironmentVariables { get; set; } = new Dictionary<string, string> { };
+
         /// A parameterless constructor is needed for <see cref="Microsoft.Extensions.Configuration.ConfigurationBuilder"/>
         /// or the classes will fail to initialize.
         /// The warnings are disabled since a parameterless constructor will allow non-nullable properties to be initialized with null values.
@@ -74,8 +111,15 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
             string elasticBeanstalkPlatformArn,
             string ec2KeyPair,
             ElasticBeanstalkManagedPlatformUpdatesConfiguration elasticBeanstalkManagedPlatformUpdates,
+            string healthCheckURL,
+            ElasticBeanstalkRollingUpdatesConfiguration elasticBeanstalkRollingUpdates,
+            string cnamePrefix,
+            Dictionary<string, string> elasticBeanstalkEnvironmentVariables,
             string environmentType = Recipe.ENVIRONMENTTYPE_SINGLEINSTANCE,
-            string loadBalancerType = Recipe.LOADBALANCERTYPE_APPLICATION)
+            string loadBalancerType = Recipe.LOADBALANCERTYPE_APPLICATION,
+            string reverseProxy = Recipe.REVERSEPROXY_NGINX,
+            bool xrayTracingSupportEnabled = false,
+            string enhancedHealthReporting = Recipe.ENHANCED_HEALTH_REPORTING)
         {
             ApplicationIAMRole = applicationIAMRole;
             InstanceType = instanceType;
@@ -84,8 +128,15 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
             ElasticBeanstalkPlatformArn = elasticBeanstalkPlatformArn;
             EC2KeyPair = ec2KeyPair;
             ElasticBeanstalkManagedPlatformUpdates = elasticBeanstalkManagedPlatformUpdates;
+            ElasticBeanstalkRollingUpdates = elasticBeanstalkRollingUpdates;
+            ElasticBeanstalkEnvironmentVariables = elasticBeanstalkEnvironmentVariables;
             EnvironmentType = environmentType;
             LoadBalancerType = loadBalancerType;
+            XRayTracingSupportEnabled = xrayTracingSupportEnabled;
+            ReverseProxy = reverseProxy;
+            EnhancedHealthReporting = enhancedHealthReporting;
+            HealthCheckURL = healthCheckURL;
+            CNamePrefix = cnamePrefix;
         }
     }
 }

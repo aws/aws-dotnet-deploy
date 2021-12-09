@@ -222,6 +222,10 @@
                     "Name": "Logging Bucket",
                     "Description": "S3 bucket to use for storing access logs",
                     "Type": "String",
+                    "TypeHint": "S3BucketName",
+                    "TypeHintData": {
+                        "AllowNoValue": true
+                    },
                     "DefaultValue": true,
                     "AdvancedSetting": true,
                     "Updatable": true,

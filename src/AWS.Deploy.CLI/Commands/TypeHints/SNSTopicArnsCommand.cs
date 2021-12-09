@@ -33,6 +33,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         {
             const string NO_VALUE = "*** Do not select topic ***";
             var currentValue = recommendation.GetOptionSettingValue(optionSetting);
+            var typeHintData = optionSetting.GetTypeHintData<SNSTopicArnsTypeHintData>();
             var currentValueStr = currentValue.ToString() ?? string.Empty;
             var topicArns = await GetResources(recommendation, optionSetting);
 
@@ -43,7 +44,8 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 currentName = currentValueStr.Substring(currentValueStr.LastIndexOf(':') + 1);
             }
 
-            topicNames.Add(NO_VALUE);
+            if (typeHintData?.AllowNoValue ?? false)
+                topicNames.Add(NO_VALUE);
             var userResponse = _consoleUtilities.AskUserToChoose(
                 values: topicNames,
                 title: "Select a SNS topic:",

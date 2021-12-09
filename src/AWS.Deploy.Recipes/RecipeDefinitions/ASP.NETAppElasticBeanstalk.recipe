@@ -74,8 +74,6 @@
         }
     ],
 
-
-
     "OptionSettings": [
         {
             "Id": "BeanstalkApplication",
@@ -100,6 +98,7 @@
                     "Name": "Application Name",
                     "Description": "The Elastic Beanstalk application name.",
                     "Type": "String",
+                    "TypeHint": "ExistingBeanstalkApplication",
                     "DefaultValue": "{StackName}",
                     "AdvancedSetting": false,
                     "Updatable": false,
@@ -141,7 +140,6 @@
             "Description": "The EC2 instance type of the EC2 instances created for the environment.",
             "Type": "String",
             "TypeHint": "InstanceType",
-            "DefaultValue": "",
             "AdvancedSetting": true,
             "Updatable": true
         },
@@ -213,6 +211,10 @@
                     "Name": "Existing Role ARN",
                     "Description": "The ARN of the existing role to use.",
                     "Type": "String",
+                    "TypeHint": "ExistingIAMRole",
+                    "TypeHintData": {
+                        "ServicePrincipal": "elasticbeanstalk.amazonaws.com"
+                    },
                     "AdvancedSetting": false,
                     "Updatable": false,
                     "DependsOn": [
@@ -329,6 +331,226 @@
                     ]
                 }
             ]
+        },
+        {
+            "Id": "XRayTracingSupportEnabled",
+            "Name": "Enable AWS X-Ray Tracing Support",
+            "Description": "AWS X-Ray is a service that collects data about requests that your application serves, and provides tools you can use to view, filter, and gain insights into that data to identify issues and opportunities for optimization. Do you want to enable AWS X-Ray tracing support?",
+            "Type": "Bool",
+            "DefaultValue": false,
+            "AdvancedSetting": true,
+            "Updatable": true
+        },
+        {
+            "Id": "ReverseProxy",
+            "Name": "Reverse Proxy",
+            "Description": "By default Nginx is used as a reverse proxy in front of the .NET Core web server Kestrel. To use Kestrel as the front facing web server then select `none` as the reverse proxy.",
+            "Type": "String",
+            "DefaultValue": "nginx",
+            "AllowedValues": [
+                "nginx",
+                "none"
+            ],
+            "AdvancedSetting": true,
+            "Updatable": true
+        },
+        {
+            "Id": "EnhancedHealthReporting",
+            "Name": "Enhanced Health Reporting",
+            "Description": "Enhanced health reporting provides free real-time application and operating system monitoring of the instances and other resources in your environment.",
+            "Type": "String",
+            "DefaultValue": "enhanced",
+            "AllowedValues": [
+                "enhanced",
+                "basic"
+            ],
+            "ValueMapping": {
+                "enhanced": "Enhanced",
+                "basic": "Basic"
+            },
+            "AdvancedSetting": true,
+            "Updatable": true,
+            "DependsOn": [
+                {
+                    "Id": "ElasticBeanstalkManagedPlatformUpdates.ManagedActionsEnabled",
+                    "Value": false
+                }
+            ]
+        },
+        {
+            "Id": "HealthCheckURL",
+            "Name": "Health Check URL",
+            "Description": "Customize the load balancer health check to ensure that your application, and not just the web server, is in a good state.",
+            "Type": "String",
+            "DefaultValue": "/",
+            "DependsOn": [
+                {
+                    "Id": "EnvironmentType",
+                    "Value": "LoadBalanced"
+                }
+            ],
+            "AdvancedSetting": true,
+            "Updatable": true
+        },
+        {
+            "Id": "ElasticBeanstalkRollingUpdates",
+            "Name": "Rolling Updates",
+            "Description": "When a configuration change requires replacing instances, Elastic Beanstalk can perform the update in batches to avoid downtime while the change is propagated. During a rolling update, capacity is only reduced by the size of a single batch, which you can configure. Elastic Beanstalk takes one batch of instances out of service, terminates them, and then launches a batch with the new configuration. After the new batch starts serving requests, Elastic Beanstalk moves on to the next batch.",
+            "Type": "Object",
+            "TypeHint": "BeanstalkRollingUpdates",
+            "AdvancedSetting": true,
+            "Updatable": true,
+            "DependsOn": [
+                {
+                    "Id": "EnvironmentType",
+                    "Value": "LoadBalanced"
+                }
+            ],
+            "ChildOptionSettings": [
+                {
+                    "Id": "RollingUpdatesEnabled",
+                    "Name": "Enable Rolling Updates",
+                    "Description": "Do you want to enable Rolling Updates?",
+                    "Type": "Bool",
+                    "DefaultValue": false,
+                    "AdvancedSetting": true,
+                    "Updatable": true
+                },
+                {
+                    "Id": "RollingUpdateType",
+                    "Name": "Rolling Update Type",
+                    "Description": "This includes three types: time-based rolling updates, health-based rolling updates, and immutable updates. Time-based rolling updates apply a PauseTime between batches. Health-based rolling updates wait for new instances to pass health checks before moving on to the next batch. Immutable updates launch a full set of instances in a new Auto Scaling group.",
+                    "Type": "String",
+                    "DefaultValue": "Time",
+                    "AllowedValues": [
+                        "Time",
+                        "Health",
+                        "Immutable"
+                    ],
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "ElasticBeanstalkRollingUpdates.RollingUpdatesEnabled",
+                            "Value": true
+                        }
+                    ]
+                },
+                {
+                    "Id": "MaxBatchSize",
+                    "Name": "Max Batch Size",
+                    "Description": "The number of instances included in each batch of the rolling update.",
+                    "Type": "Int",
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "ElasticBeanstalkRollingUpdates.RollingUpdatesEnabled",
+                            "Value": true
+                        }
+                    ],
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": {
+                                "Min": 1,
+                                "Max": 10000,
+                                "AllowEmptyString": true
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Id": "MinInstancesInService",
+                    "Name": "Min Instances In Service",
+                    "Description": "The minimum number of instances that must be in service within the Auto Scaling group while other instances are terminated.",
+                    "Type": "Int",
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "ElasticBeanstalkRollingUpdates.RollingUpdatesEnabled",
+                            "Value": true
+                        }
+                    ],
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": {
+                                "Min": 0,
+                                "Max": 9999,
+                                "AllowEmptyString": true
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Id": "PauseTime",
+                    "Name": "Pause Time",
+                    "Description": "The amount of time (in seconds, minutes, or hours) the Elastic Beanstalk service waits after it completed updates to one batch of instances and before it continues on to the next batch. (ISO8601 duration format: PT#H#M#S where each # is the number of hours, minutes, and/or seconds, respectively.)",
+                    "Type": "String",
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "ElasticBeanstalkRollingUpdates.RollingUpdatesEnabled",
+                            "Value": true
+                        }
+                    ],
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": {
+                                "Regex": "^P([0-9]+(?:[,\\.][0-9]+)?Y)?([0-9]+(?:[,\\.][0-9]+)?M)?([0-9]+(?:[,\\.][0-9]+)?D)?(?:T([0-9]+(?:[,\\.][0-9]+)?H)?([0-9]+(?:[,\\.][0-9]+)?M)?([0-9]+(?:[,\\.][0-9]+)?S)?)?$",
+                                "AllowEmptyString": true,
+                                "ValidationFailedMessage": "Invalid PauseTime. The PauseTime follows the ISO8601 duration format: PT#H#M#S where each # is the number of hours, minutes, and/or seconds, respectively."
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Id": "Timeout",
+                    "Name": "Timeout",
+                    "Description": "The maximum amount of time (in minutes or hours) to wait for all instances in a batch of instances to pass health checks before canceling the update. (ISO8601 duration format: PT#H#M#S where each # is the number of hours, minutes, and/or seconds, respectively.)",
+                    "Type": "String",
+                    "DefaultValue": "PT30M",
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "ElasticBeanstalkRollingUpdates.RollingUpdatesEnabled",
+                            "Value": true
+                        }
+                    ],
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": {
+                                "Regex": "^P([0-9]+(?:[,\\.][0-9]+)?Y)?([0-9]+(?:[,\\.][0-9]+)?M)?([0-9]+(?:[,\\.][0-9]+)?D)?(?:T([0-9]+(?:[,\\.][0-9]+)?H)?([0-9]+(?:[,\\.][0-9]+)?M)?([0-9]+(?:[,\\.][0-9]+)?S)?)?$",
+                                "AllowEmptyString": true,
+                                "ValidationFailedMessage": "Invalid Timeout. The Timeout follows the ISO8601 duration format: PT#H#M#S where each # is the number of hours, minutes, and/or seconds, respectively."
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Id": "CNamePrefix",
+            "Name": "CName Prefix",
+            "Description": "If specified, the environment attempts to use this value as the prefix for the CNAME in your Elastic Beanstalk environment URL. If not specified, the CNAME is generated automatically by appending a random alphanumeric string to the environment name.",
+            "Type": "String",
+            "DefaultValue": "",
+            "AdvancedSetting": true,
+            "Updatable": false
+        },
+        {
+            "Id": "ElasticBeanstalkEnvironmentVariables",
+            "Name": "Environment Variables",
+            "Description": "Configure environment properties for your application.",
+            "Type": "KeyValue",
+            "AdvancedSetting": false,
+            "Updatable": true
         }
     ]
 }

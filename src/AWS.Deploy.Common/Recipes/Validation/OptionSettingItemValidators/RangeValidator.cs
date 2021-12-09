@@ -20,9 +20,13 @@ namespace AWS.Deploy.Common.Recipes.Validation
         /// Supports replacement tokens {{Min}} and {{Max}}
         /// </summary>
         public string ValidationFailedMessage { get; set; } = defaultValidationFailedMessage;
+        public bool AllowEmptyString { get; set; }
 
         public ValidationResult Validate(object input)
         {
+            if (AllowEmptyString && string.IsNullOrEmpty(input?.ToString()))
+                return ValidationResult.Valid();
+
             if (int.TryParse(input?.ToString(), out var result) &&
                 result >= Min &&
                 result <= Max)

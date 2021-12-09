@@ -26,6 +26,10 @@ namespace AspNetAppElasticBeanstalkLinux
 
         public const string LOADBALANCERTYPE_APPLICATION = "application";
 
+        public const string REVERSEPROXY_NGINX = "nginx";
+        
+        public const string ENHANCED_HEALTH_REPORTING = "enhanced";
+
         public IRole? AppIAMRole { get; private set; }
 
         public IRole? BeanstalkServiceRole { get; private set; }
@@ -144,6 +148,18 @@ namespace AspNetAppElasticBeanstalkLinux
                         Namespace = "aws:elasticbeanstalk:managedactions",
                         OptionName = "ManagedActionsEnabled",
                         Value = settings.ElasticBeanstalkManagedPlatformUpdates.ManagedActionsEnabled.ToString().ToLower()
+                   },
+                   new CfnEnvironment.OptionSettingProperty
+                   {
+                        Namespace = "aws:elasticbeanstalk:xray",
+                        OptionName = "XRayEnabled",
+                        Value = settings.XRayTracingSupportEnabled.ToString().ToLower()
+                   },
+                   new CfnEnvironment.OptionSettingProperty
+                   {
+                        Namespace = "aws:elasticbeanstalk:healthreporting:system",
+                        OptionName = "SystemType",
+                        Value = settings.EnhancedHealthReporting
                    }
                 };
 
@@ -167,6 +183,27 @@ namespace AspNetAppElasticBeanstalkLinux
                         Value = settings.LoadBalancerType
                     }
                 );
+
+                if (!string.IsNullOrEmpty(settings.HealthCheckURL))
+                {
+                    optionSettingProperties.Add(
+                        new CfnEnvironment.OptionSettingProperty
+                        {
+                            Namespace = "aws:elasticbeanstalk:application",
+                            OptionName = "Application Healthcheck URL",
+                            Value = settings.HealthCheckURL
+                        }
+                    );
+
+                    optionSettingProperties.Add(
+                        new CfnEnvironment.OptionSettingProperty
+                        {
+                            Namespace = "aws:elasticbeanstalk:environment:process:default",
+                            OptionName = "HealthCheckPath",
+                            Value = settings.HealthCheckURL
+                        }
+                    );
+                }
             }
 
             if (!string.IsNullOrEmpty(settings.EC2KeyPair))
@@ -214,12 +251,92 @@ namespace AspNetAppElasticBeanstalkLinux
                 });
             }
 
+            if (!string.IsNullOrEmpty(settings.ReverseProxy))
+            {
+                optionSettingProperties.Add(
+                    new CfnEnvironment.OptionSettingProperty
+                    {
+                        Namespace = "aws:elasticbeanstalk:environment:proxy",
+                        OptionName = "ProxyServer",
+                        Value = settings.ReverseProxy
+                    }
+                );
+            }
+            
+            if (settings.ElasticBeanstalkRollingUpdates.RollingUpdatesEnabled)
+            {
+                optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
+                {
+                    Namespace = "aws:autoscaling:updatepolicy:rollingupdate",
+                    OptionName = "RollingUpdateEnabled",
+                    Value = settings.ElasticBeanstalkRollingUpdates.RollingUpdatesEnabled.ToString().ToLower()
+                });
+
+                optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
+                {
+                    Namespace = "aws:autoscaling:updatepolicy:rollingupdate",
+                    OptionName = "RollingUpdateType",
+                    Value = settings.ElasticBeanstalkRollingUpdates.RollingUpdateType
+                });
+
+                optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
+                {
+                    Namespace = "aws:autoscaling:updatepolicy:rollingupdate",
+                    OptionName = "Timeout",
+                    Value = settings.ElasticBeanstalkRollingUpdates.Timeout
+                });
+
+                if (settings.ElasticBeanstalkRollingUpdates.MaxBatchSize != null)
+                {
+                    optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
+                    {
+                        Namespace = "aws:autoscaling:updatepolicy:rollingupdate",
+                        OptionName = "MaxBatchSize",
+                        Value = settings.ElasticBeanstalkRollingUpdates.MaxBatchSize.ToString()
+                    });
+                }
+
+                if (settings.ElasticBeanstalkRollingUpdates.MinInstancesInService != null)
+                {
+                    optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
+                    {
+                        Namespace = "aws:autoscaling:updatepolicy:rollingupdate",
+                        OptionName = "MinInstancesInService",
+                        Value = settings.ElasticBeanstalkRollingUpdates.MinInstancesInService.ToString()
+                    });
+                }
+
+                if (settings.ElasticBeanstalkRollingUpdates.PauseTime != null)
+                {
+                    optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
+                    {
+                        Namespace = "aws:autoscaling:updatepolicy:rollingupdate",
+                        OptionName = "PauseTime",
+                        Value = settings.ElasticBeanstalkRollingUpdates.PauseTime
+                    });
+                }
+            }
+
+            if (settings.ElasticBeanstalkEnvironmentVariables != null)
+            {
+                foreach (var (key, value) in settings.ElasticBeanstalkEnvironmentVariables)
+                {
+                    optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
+                    {
+                        Namespace = "aws:elasticbeanstalk:application:environment",
+                        OptionName = key,
+                        Value = value
+                    });
+                }
+            }
+
             BeanstalkEnvironment = new CfnEnvironment(this, nameof(BeanstalkEnvironment), InvokeCustomizeCDKPropsEvent(nameof(BeanstalkEnvironment), this, new CfnEnvironmentProps
             {
                 EnvironmentName = settings.EnvironmentName,
                 ApplicationName = settings.BeanstalkApplication.ApplicationName,
                 PlatformArn = settings.ElasticBeanstalkPlatformArn,
                 OptionSettings = optionSettingProperties.ToArray(),
+                CnamePrefix = !string.IsNullOrEmpty(settings.CNamePrefix) ? settings.CNamePrefix : null,
                 // This line is critical - reference the label created in this same stack
                 VersionLabel = ApplicationVersion.Ref,
             }));
