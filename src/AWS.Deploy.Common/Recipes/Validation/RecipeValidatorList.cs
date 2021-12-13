@@ -8,6 +8,11 @@ namespace AWS.Deploy.Common.Recipes.Validation
         /// <summary>
         /// Must be paired with <see cref="FargateTaskCpuMemorySizeValidator"/>
         /// </summary>
-        FargateTaskSizeCpuMemoryLimits
+        FargateTaskSizeCpuMemoryLimits,
+
+        /// <summary>
+        /// Must be paired with <see cref="MinMaxConstraintValidator"/>
+        /// </summary>
+        MinMaxConstraint
     }
 }

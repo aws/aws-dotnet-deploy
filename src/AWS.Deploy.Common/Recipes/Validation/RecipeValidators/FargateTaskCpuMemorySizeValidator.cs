@@ -37,36 +37,35 @@ namespace AWS.Deploy.Common.Recipes.Validation
                 start += increment;
             }
         }
+        
+        public string CpuOptionSettingsId { get; set; } = "TaskCpu";
 
-        private static readonly string defaultCpuOptionSettingsId = "TaskCpu";
-        private static readonly string defaultMemoryOptionSettingsId = "TaskMemory";
-        private static readonly string defaultValidationFailedMessage =
-            "Cpu value {{cpu}} is not compatible with memory value {{memory}}.  Allowed values are {{memoryList}}";
+        public string MemoryOptionSettingsId { get; set; } = "TaskMemory";
 
         /// <summary>
         /// Supports replacement tokens {{cpu}}, {{memory}}, and {{memoryList}}
         /// </summary>
-        public string ValidationFailedMessage { get; set; } = defaultValidationFailedMessage;
-            
-        public string? InvalidCpuValueValidationFailedMessage {get;set;}
+        public string ValidationFailedMessage { get; set; } =
+            "Cpu value {{cpu}} is not compatible with memory value {{memory}}.  Allowed values are {{memoryList}}";
 
-        public string CpuOptionSettingsId { get; set; } = defaultCpuOptionSettingsId;
-        public string MemoryOptionSettingsId { get; set; } = defaultMemoryOptionSettingsId;
+        public string? InvalidCpuValueValidationFailedMessage { get; set; }
 
         /// <inheritdoc cref="FargateTaskCpuMemorySizeValidator"/>
-        public ValidationResult Validate(RecipeDefinition recipe, IDeployToolValidationContext deployValidationContext)
+        public ValidationResult Validate(Recommendation recommendation, IDeployToolValidationContext deployValidationContext)
         {
-            var cpuItem = recipe.OptionSettings.FirstOrDefault(x => x.Id == CpuOptionSettingsId);
-            var memoryItem = recipe.OptionSettings.FirstOrDefault(x => x.Id == MemoryOptionSettingsId);
+            string cpu;
+            string memory;
 
-            if (null == cpuItem || null == memoryItem)
+            try
+            {
+                cpu = recommendation.GetOptionSettingValue<string>(recommendation.GetOptionSetting(CpuOptionSettingsId));
+                memory = recommendation.GetOptionSettingValue<string>(recommendation.GetOptionSetting(MemoryOptionSettingsId));
+            }
+            catch (OptionSettingItemDoesNotExistException)
             {
                 return ValidationResult.Failed("Could not find a valid value for Task CPU or Task Memory " +
                     "as part of of the ECS Fargate deployment configuration. Please provide a valid value and try again.");
             }
-
-            var cpu = cpuItem.GetValue<string>(new Dictionary<string, string>());
-            var memory = memoryItem.GetValue<string>(new Dictionary<string, string>());
 
             if (!_cpuMemoryMap.ContainsKey(cpu))
             {

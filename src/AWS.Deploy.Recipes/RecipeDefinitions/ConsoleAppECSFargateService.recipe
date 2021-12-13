@@ -93,7 +93,16 @@
     "Validators": [
         {
             "ValidatorType": "FargateTaskSizeCpuMemoryLimits"
-        }],
+        },
+        {
+            "ValidatorType": "MinMaxConstraint",
+            "Configuration":
+            {
+                "MinValueOptionSettingsId": "AutoScaling.MinCapacity",
+                "MaxValueOptionSettingsId": "AutoScaling.MaxCapacity"
+            }
+        }
+    ],
 
     "OptionSettings": [
         {
@@ -446,6 +455,16 @@
                     "DefaultValue": 1,
                     "AdvancedSetting": false,
                     "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration":
+                            {
+                                "Min": 1,
+                                "Max": 5000
+                            }
+                        }
+                    ],
                     "DependsOn": [
                         {
                             "Id": "AutoScaling.Enabled",
@@ -461,6 +480,16 @@
                     "DefaultValue": 3,
                     "AdvancedSetting": false,
                     "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration":
+                            {
+                                "Min": 1,
+                                "Max": 5000
+                            }
+                        }
+                    ],
                     "DependsOn": [
                         {
                             "Id": "AutoScaling.Enabled",
@@ -490,11 +519,21 @@
                 {
                     "Id": "CpuTypeTargetUtilizationPercent",
                     "Name": "CPU Target Utilization",
-                    "Description": "The target cpu utilization that triggers a scaling change.",
+                    "Description": "The target cpu utilization percentage that triggers a scaling change.",
                     "Type": "Double",
                     "DefaultValue": 70,
                     "AdvancedSetting": false,
                     "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration":
+                            {
+                                "Min": 1,
+                                "Max": 100
+                            }
+                        }
+                    ],
                     "DependsOn": [
                         {
                             "Id": "AutoScaling.Enabled",
@@ -514,6 +553,16 @@
                     "DefaultValue": 300,
                     "AdvancedSetting": false,
                     "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration":
+                            {
+                                "Min": 0,
+                                "Max": 3600
+                            }
+                        }
+                    ],
                     "DependsOn": [
                         {
                             "Id": "AutoScaling.Enabled",
@@ -533,6 +582,16 @@
                     "DefaultValue": 300,
                     "AdvancedSetting": false,
                     "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration":
+                            {
+                                "Min": 0,
+                                "Max": 3600
+                            }
+                        }
+                    ],
                     "DependsOn": [
                         {
                             "Id": "AutoScaling.Enabled",
@@ -547,11 +606,21 @@
                 {
                     "Id": "MemoryTypeTargetUtilizationPercent",
                     "Name": "Memory Target Utilization",
-                    "Description": "The target memory utilization that triggers a scaling change.",
+                    "Description": "The target memory utilization percentage that triggers a scaling change.",
                     "Type": "Double",
                     "DefaultValue": 70,
                     "AdvancedSetting": false,
                     "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration":
+                            {
+                                "Min": 1,
+                                "Max": 100
+                            }
+                        }
+                    ],
                     "DependsOn": [
                         {
                             "Id": "AutoScaling.Enabled",
@@ -571,6 +640,16 @@
                     "DefaultValue": 300,
                     "AdvancedSetting": false,
                     "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration":
+                            {
+                                "Min": 0,
+                                "Max": 3600
+                            }
+                        }
+                    ],
                     "DependsOn": [
                         {
                             "Id": "AutoScaling.Enabled",
@@ -590,6 +669,16 @@
                     "DefaultValue": 300,
                     "AdvancedSetting": false,
                     "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration":
+                            {
+                                "Min": 0,
+                                "Max": 3600
+                            }
+                        }
+                    ],
                     "DependsOn": [
                         {
                             "Id": "AutoScaling.Enabled",
