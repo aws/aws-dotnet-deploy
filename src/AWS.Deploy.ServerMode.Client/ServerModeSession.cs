@@ -144,7 +144,7 @@ namespace AWS.Deploy.ServerMode.Client
 
                 var keyInfoStdin = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(keyInfo)));
 
-                var command = $"{deployToolRoot} server-mode --port {port} --parent-pid {currentProcessId}";
+                var command = $"\"{deployToolRoot}\" server-mode --port {port} --parent-pid {currentProcessId}";
                 var startServerTask = _commandLineWrapper.Run(command, keyInfoStdin);
 
                 _baseUrl = $"http://localhost:{port}";
