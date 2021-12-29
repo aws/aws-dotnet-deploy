@@ -3,28 +3,26 @@
     "AWSRegion": "us-west-2",
     "StackName": "MyAppStack",
     "RecipeId": "AspNetAppElasticBeanstalkLinux",
-    "OptionSettingsConfig":
-    {
-        "BeanstalkApplication": 
-        {
+    "OptionSettingsConfig": {
+        "BeanstalkApplication": {
             "CreateNew": true,
             "ApplicationName": "MyApplication"
         },
-        "EnvironmentName": "MyEnvironment",
+        "BeanstalkEnvironment": {
+            "CreateNew": true,
+            "EnvironmentName": "MyEnvironment"
+        },
         "InstanceType": "MyInstance",
         "EnvironmentType": "SingleInstance",
         "LoadBalancerType": "application",
-        "ApplicationIAMRole":
-        {
+        "ApplicationIAMRole": {
             "CreateNew": true
         },
         "ElasticBeanstalkPlatformArn": "MyPlatformArn",
-        "ElasticBeanstalkManagedPlatformUpdates": 
-        {
+        "ElasticBeanstalkManagedPlatformUpdates": {
             "ManagedActionsEnabled": true,
             "PreferredStartTime": "Mon:12:00",
             "UpdateLevel": "minor"
         }
     }
   }
-  
