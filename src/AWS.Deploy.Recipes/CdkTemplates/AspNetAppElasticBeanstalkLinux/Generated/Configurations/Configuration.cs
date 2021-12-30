@@ -29,9 +29,9 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
         public string InstanceType { get; set; }
 
         /// <summary>
-        /// The Elastic Beanstalk environment name.
+        /// The Elastic Beanstalk environment.
         /// </summary>
-        public string EnvironmentName { get; set; }
+        public BeanstalkEnvironmentConfiguration BeanstalkEnvironment { get; set; }
 
         /// <summary>
         /// The Elastic Beanstalk application.
@@ -106,7 +106,7 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
         public Configuration(
             IAMRoleConfiguration applicationIAMRole,
             string instanceType,
-            string environmentName,
+            BeanstalkEnvironmentConfiguration beanstalkEnvironment,
             BeanstalkApplicationConfiguration beanstalkApplication,
             string elasticBeanstalkPlatformArn,
             string ec2KeyPair,
@@ -123,7 +123,7 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
         {
             ApplicationIAMRole = applicationIAMRole;
             InstanceType = instanceType;
-            EnvironmentName = environmentName;
+            BeanstalkEnvironment = beanstalkEnvironment;
             BeanstalkApplication = beanstalkApplication;
             ElasticBeanstalkPlatformArn = elasticBeanstalkPlatformArn;
             EC2KeyPair = ec2KeyPair;
