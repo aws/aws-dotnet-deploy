@@ -425,7 +425,7 @@
                     "title": "Type",
                     "description": "The data type of the setting.",
                     "minLength": 1,
-                    "enum": [ "String", "Int", "Bool", "Object" ]
+                    "enum": [ "String", "Int", "Bool", "Object", "KeyValue" ]
                 },
                 "TypeHint": {
                     "type": "string",

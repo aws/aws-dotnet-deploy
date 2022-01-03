@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Amazon.ElasticBeanstalk;
 using Amazon.ElasticBeanstalk.Model;
 using AWS.Deploy.CLI.TypeHintResponses;
 using AWS.Deploy.Common;
@@ -29,7 +30,9 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         {
             var applicationOptionSetting = recommendation.GetOptionSetting(optionSetting.ParentSettingId);
             var applicationName = recommendation.GetOptionSettingValue(applicationOptionSetting) as string;
-            return await _awsResourceQueryer.ListOfElasticBeanstalkEnvironments(applicationName);
+            var environments = await _awsResourceQueryer.ListOfElasticBeanstalkEnvironments(applicationName);
+            var dotnetPlatformArns = (await _awsResourceQueryer.GetElasticBeanstalkPlatformArns()).Select(x => x.PlatformArn).ToList();
+            return environments.Where(x => x.Status == EnvironmentStatus.Ready && dotnetPlatformArns.Contains(x.PlatformArn)).ToList();
         }
 
         public async Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)

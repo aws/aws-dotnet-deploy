@@ -162,7 +162,13 @@
             "Type": "String",
             "TypeHint": "InstanceType",
             "AdvancedSetting": true,
-            "Updatable": true
+            "Updatable": true,
+            "DependsOn": [
+                {
+                    "Id": "BeanstalkEnvironment.CreateNew",
+                    "Value": true
+                }
+            ]
         },
         {
             "Id": "EnvironmentType",
@@ -179,7 +185,13 @@
                 "LoadBalanced": "Load Balanced"
             },
             "AdvancedSetting": false,
-            "Updatable": false
+            "Updatable": false,
+            "DependsOn": [
+                {
+                    "Id": "BeanstalkEnvironment.CreateNew",
+                    "Value": true
+                }
+            ]
         },
         {
             "Id": "LoadBalancerType",
@@ -201,6 +213,10 @@
                 {
                     "Id": "EnvironmentType",
                     "Value": "LoadBalanced"
+                },
+                {
+                    "Id": "BeanstalkEnvironment.CreateNew",
+                    "Value": true
                 }
             ],
             "AdvancedSetting": true,
@@ -275,6 +291,12 @@
                         "ValidationFailedMessage": "Invalid EC2KeyPair. The EC2KeyPair can conatin all ASCII characters but without leading and trailing spaces"
                     }
                 }
+            ],
+            "DependsOn": [
+                {
+                    "Id": "BeanstalkEnvironment.CreateNew",
+                    "Value": true
+                }
             ]
         },
         {
@@ -286,6 +308,12 @@
             "DefaultValue": "{LatestDotnetBeanstalkPlatformArn}",
             "AdvancedSetting": true,
             "Updatable": false,
+            "DependsOn": [
+                {
+                    "Id": "BeanstalkEnvironment.CreateNew",
+                    "Value": true
+                }
+            ],
             "Validators": [
                 {
                     "ValidatorType": "Regex",
@@ -303,6 +331,12 @@
             "Type": "Object",
             "AdvancedSetting": true,
             "Updatable": true,
+            "DependsOn": [
+                {
+                    "Id": "BeanstalkEnvironment.CreateNew",
+                    "Value": true
+                }
+            ],
             "ChildOptionSettings": [
                 {
                     "Id": "ManagedActionsEnabled",
@@ -360,7 +394,13 @@
             "Type": "Bool",
             "DefaultValue": false,
             "AdvancedSetting": true,
-            "Updatable": true
+            "Updatable": true,
+            "DependsOn": [
+                {
+                    "Id": "BeanstalkEnvironment.CreateNew",
+                    "Value": true
+                }
+            ]
         },
         {
             "Id": "ReverseProxy",
@@ -373,7 +413,13 @@
                 "none"
             ],
             "AdvancedSetting": true,
-            "Updatable": true
+            "Updatable": true,
+            "DependsOn": [
+                {
+                    "Id": "BeanstalkEnvironment.CreateNew",
+                    "Value": true
+                }
+            ]
         },
         {
             "Id": "EnhancedHealthReporting",
@@ -395,6 +441,10 @@
                 {
                     "Id": "ElasticBeanstalkManagedPlatformUpdates.ManagedActionsEnabled",
                     "Value": false
+                },
+                {
+                    "Id": "BeanstalkEnvironment.CreateNew",
+                    "Value": true
                 }
             ]
         },
@@ -408,6 +458,10 @@
                 {
                     "Id": "EnvironmentType",
                     "Value": "LoadBalanced"
+                },
+                {
+                    "Id": "BeanstalkEnvironment.CreateNew",
+                    "Value": true
                 }
             ],
             "AdvancedSetting": true,
@@ -425,6 +479,10 @@
                 {
                     "Id": "EnvironmentType",
                     "Value": "LoadBalanced"
+                },
+                {
+                    "Id": "BeanstalkEnvironment.CreateNew",
+                    "Value": true
                 }
             ],
             "ChildOptionSettings": [
@@ -563,7 +621,13 @@
             "Type": "String",
             "DefaultValue": "",
             "AdvancedSetting": true,
-            "Updatable": false
+            "Updatable": false,
+            "DependsOn": [
+                {
+                    "Id": "BeanstalkEnvironment.CreateNew",
+                    "Value": true
+                }
+            ]
         },
         {
             "Id": "ElasticBeanstalkEnvironmentVariables",
@@ -571,7 +635,13 @@
             "Description": "Configure environment properties for your application.",
             "Type": "KeyValue",
             "AdvancedSetting": false,
-            "Updatable": true
+            "Updatable": true,
+            "DependsOn": [
+                {
+                    "Id": "BeanstalkEnvironment.CreateNew",
+                    "Value": true
+                }
+            ]
         }
     ]
 }

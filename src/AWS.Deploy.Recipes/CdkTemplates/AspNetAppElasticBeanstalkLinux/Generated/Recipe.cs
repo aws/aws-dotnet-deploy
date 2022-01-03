@@ -8,8 +8,10 @@ using Amazon.CDK.AWS.ElasticBeanstalk;
 using Amazon.CDK.AWS.IAM;
 using Amazon.CDK.AWS.S3.Assets;
 using AWS.Deploy.Recipes.CDK.Common;
+using Amazon.CDK.CustomResources;
 
 using AspNetAppElasticBeanstalkLinux.Configurations;
+using Amazon.CDK.AWS.Lambda;
 
 // This is a generated file from the original deployment recipe. It is recommended to not modify this file in order
 // to allow easy updates to the file when the original recipe that this project was created from has updates.
@@ -21,6 +23,9 @@ namespace AspNetAppElasticBeanstalkLinux
 
     public class Recipe : Construct
     {
+        private readonly string _awsAccountId;
+        private readonly string _awsRegion;
+
         public const string ENVIRONMENTTYPE_SINGLEINSTANCE = "SingleInstance";
         public const string ENVIRONMENTTYPE_LOADBALANCED = "LoadBalanced";
 
@@ -49,7 +54,15 @@ namespace AspNetAppElasticBeanstalkLinux
             // change the expected values for the "DisplayedResources" in the corresponding recipe file.
             : base(scope, "Recipe")
         {
+            if (string.IsNullOrEmpty(props.AWSAccountId))
+                throw new InvalidOrMissingConfigurationException($"{nameof(props.AWSAccountId)} cannot be null or empty");
+
+            if (string.IsNullOrEmpty(props.AWSRegion))
+                throw new InvalidOrMissingConfigurationException($"{nameof(props.AWSRegion)} cannot be null or empty");
+
             var settings = props.Settings;
+            _awsAccountId = props.AWSAccountId;
+            _awsRegion = props.AWSRegion;
 
             if (string.IsNullOrEmpty(props.DotnetPublishZipPath))
                 throw new InvalidOrMissingConfigurationException("The provided path containing the dotnet publish zip file is null or empty.");
@@ -330,18 +343,137 @@ namespace AspNetAppElasticBeanstalkLinux
                 }
             }
 
-            if (!settings.BeanstalkEnvironment.CreateNew)
-                throw new InvalidOrMissingConfigurationException("The ability to deploy an Elastic Beanstalk application to an existing environment via a new CloudFormation stack is not supported yet.");
-
-            BeanstalkEnvironment = new CfnEnvironment(this, nameof(BeanstalkEnvironment), InvokeCustomizeCDKPropsEvent(nameof(BeanstalkEnvironment), this, new CfnEnvironmentProps
+            if (settings.BeanstalkEnvironment.CreateNew)
             {
-                EnvironmentName = settings.BeanstalkEnvironment.EnvironmentName,
-                ApplicationName = settings.BeanstalkApplication.ApplicationName,
-                PlatformArn = settings.ElasticBeanstalkPlatformArn,
-                OptionSettings = optionSettingProperties.ToArray(),
-                CnamePrefix = !string.IsNullOrEmpty(settings.CNamePrefix) ? settings.CNamePrefix : null,
-                // This line is critical - reference the label created in this same stack
-                VersionLabel = ApplicationVersion.Ref,
+                BeanstalkEnvironment = new CfnEnvironment(this, nameof(BeanstalkEnvironment), InvokeCustomizeCDKPropsEvent(nameof(BeanstalkEnvironment), this, new CfnEnvironmentProps
+                {
+                    EnvironmentName = settings.BeanstalkEnvironment.EnvironmentName,
+                    ApplicationName = settings.BeanstalkApplication.ApplicationName,
+                    PlatformArn = settings.ElasticBeanstalkPlatformArn,
+                    OptionSettings = optionSettingProperties.ToArray(),
+                    CnamePrefix = !string.IsNullOrEmpty(settings.CNamePrefix) ? settings.CNamePrefix : null,
+                    // This line is critical - reference the label created in this same stack
+                    VersionLabel = ApplicationVersion.Ref,
+                }));
+            }
+            else
+            {
+                UpdateBeanStalkEvironment(settings);
+            }
+        }
+
+        private void UpdateBeanStalkEvironment(Configuration settings)
+        {   if (string.IsNullOrEmpty(settings.BeanstalkApplication?.ApplicationName))
+                throw new InvalidOrMissingConfigurationException($"{nameof(settings.BeanstalkApplication.ApplicationName)} cannot be null or empty.");
+
+            if (string.IsNullOrEmpty(settings.BeanstalkEnvironment?.EnvironmentName))
+                throw new InvalidOrMissingConfigurationException($"{nameof(settings.BeanstalkEnvironment.EnvironmentName)} cannot be null or empty.");
+
+            if (string.IsNullOrEmpty(ApplicationVersion?.Ref))
+                throw new InvalidOrMissingConfigurationException($"{nameof(ApplicationVersion.Ref)} cannot be null or empty.");
+
+            var environmentArn = $"arn:aws:elasticbeanstalk:{_awsRegion}:{_awsAccountId}:environment/{settings.BeanstalkApplication.ApplicationName}/{settings.BeanstalkEnvironment.EnvironmentName}";
+
+            var customResourceProvider = new Provider(this, "EnvironmentUpdateCustomResourceProvider", new ProviderProps
+            {
+                OnEventHandler = GetOnEventHandler(environmentArn),
+                IsCompleteHandler = GetIsCompleteHandler()
+            });
+
+            new CustomResource(this, "EnvironmentUpdateCustomResource", new CustomResourceProps
+            {
+                ServiceToken = customResourceProvider.ServiceToken,
+                Properties = new Dictionary<string, object>()
+                {
+                    #pragma warning disable CS8604 // Disabling null reference warnings because we are explicitly checking for null at the start of the method.
+                    { "ApplicationName", settings.BeanstalkApplication.ApplicationName },
+                    { "EnvironmentName", settings.BeanstalkEnvironment.EnvironmentName },
+                    { "VersionLabel", ApplicationVersion?.Ref }
+                    #pragma warning restore CS8604
+                }
+            });
+        }
+
+        private IFunction GetOnEventHandler(string environmentArn)
+        {
+            IFunction onEventlambdaFunction = new Function(this, "OnEventlambdaFunction", new FunctionProps
+            {
+                Runtime = Runtime.PYTHON_3_9, // execution environment
+                Code = Code.FromAsset("Generated/UpdateBeanstalkEnvironment/OnEventLambda"), // Code loaded from the disk path
+                Handler = "OnEvent.handler", // file is "OnEvent.py", function is "handler"
+                Role = GetOnEventLambdaRole(environmentArn),
+                Timeout = Duration.Seconds(30)
+            });
+
+            return onEventlambdaFunction;
+        }
+
+        private IFunction GetIsCompleteHandler()
+        {
+            IFunction isCompletelambdaFunction = new Function(this, "IsCompletelambdaFunction", new FunctionProps
+            {
+                Runtime = Runtime.PYTHON_3_9, // execution environment
+                Code = Code.FromAsset("Generated/UpdateBeanstalkEnvironment/IsCompleteLambda"), // Code loaded from the disk path
+                Handler = "IsComplete.handler", // file is "IsComplete.py", function is "handler"
+                Role = GetIsCompleteLambdaRole(),
+                Timeout = Duration.Seconds(30)
+            });
+
+            return isCompletelambdaFunction;
+        }
+
+        private IRole GetOnEventLambdaRole(string environmentArn)
+        {
+            return new Role(this, "OnEventlambdaExecutionRole", InvokeCustomizeCDKPropsEvent("OnEventlambdaExecutionRole", this, new RoleProps
+            {
+                AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
+                ManagedPolicies = new[]{ ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole") },
+                InlinePolicies = new Dictionary<string, PolicyDocument>()
+                    {
+                        {
+                            "EnvironmentUpdatePolicy", new PolicyDocument(new PolicyDocumentProps
+                            {
+                                Statements = new[]
+                                {
+                                    new PolicyStatement(new PolicyStatementProps
+                                    {
+                                        Actions = new[]{ "elasticbeanstalk:UpdateEnvironment" },
+                                        Resources = new[]{ environmentArn },
+                                    }),
+                                    new PolicyStatement(new PolicyStatementProps
+                                    {
+                                        Actions = new[]{ "s3:*", "cloudformation:*", "autoScaling:*" },
+                                        Resources = new[]{ "*" },
+                                    })
+                                }
+                            })
+                        }
+                    }
+            }));
+        }
+
+        private IRole GetIsCompleteLambdaRole()
+        {
+            return new Role(this, "IsCompletelambdaExecutionRole", InvokeCustomizeCDKPropsEvent("IsCompletelambdaExecutionRole", this, new RoleProps
+            {
+                AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
+                ManagedPolicies = new[] { ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole") },
+                InlinePolicies = new Dictionary<string, PolicyDocument>()
+                    {
+                        {
+                            "IsEnvironmentUpdateCompletePolicy", new PolicyDocument(new PolicyDocumentProps
+                            {
+                                Statements = new[]
+                                {
+                                    new PolicyStatement(new PolicyStatementProps
+                                    {
+                                        Actions = new[]{ "elasticbeanstalk:DescribeEnvironments" },
+                                        Resources = new[]{ "*" },
+                                    })
+                                }
+                            })
+                        }
+                    }
             }));
         }
     }
