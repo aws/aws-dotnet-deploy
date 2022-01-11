@@ -29,7 +29,7 @@ namespace AWS.Deploy.Common
 
         public DeploymentBundle DeploymentBundle { get; }
 
-        private readonly List<OptionSettingItem> DeploymentBundleSettings = new ();
+        public readonly List<OptionSettingItem> DeploymentBundleSettings = new ();
 
         private readonly Dictionary<string, string> _replacementTokens = new();
 
