@@ -67,7 +67,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
 
             var userDeploymentSettings = UserDeploymentSettings.ReadSettings(configFilePath);
 
-            _stackName = userDeploymentSettings.StackName;
+            _stackName = userDeploymentSettings.ApplicationName;
             _clusterName = userDeploymentSettings.LeafOptionSettingItems["ECSCluster.NewClusterName"];
 
             var deployArgs = new[] { "deploy", "--project-path", projectPath, "--apply", configFilePath, "--silent", "--diagnostics" };
@@ -94,7 +94,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
             Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(listArgs));;
 
             // Verify stack exists in list of deployments
-            var listDeployStdOut = _interactiveService.StdOutReader.ReadAllLines();
+            var listDeployStdOut = _interactiveService.StdOutReader.ReadAllLines().Select(x => x.Split()[0]).ToList();
             Assert.Contains(listDeployStdOut, (deployment) => _stackName.Equals(deployment));
 
             // Arrange input for delete

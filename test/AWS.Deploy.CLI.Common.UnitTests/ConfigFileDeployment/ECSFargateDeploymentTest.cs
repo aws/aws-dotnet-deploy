@@ -25,7 +25,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.ConfigFileDeployment
         {
             Assert.Equal("default", _userDeploymentSettings.AWSProfile);
             Assert.Equal("us-west-2", _userDeploymentSettings.AWSRegion);
-            Assert.Equal("MyAppStack", _userDeploymentSettings.StackName);
+            Assert.Equal("MyAppStack", _userDeploymentSettings.ApplicationName);
             Assert.Equal("AspNetAppEcsFargate", _userDeploymentSettings.RecipeId);
 
             var optionSettingDictionary = _userDeploymentSettings.LeafOptionSettingItems;

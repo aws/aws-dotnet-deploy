@@ -171,4 +171,9 @@ namespace AWS.Deploy.Orchestration
     {
         public DockerInfoException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
+
+    public class FailedToCreateDeploymentCommandInstance : DeployToolException
+    {
+        public FailedToCreateDeploymentCommandInstance(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+    }
 }

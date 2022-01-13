@@ -28,7 +28,7 @@ namespace AWS.Deploy.CLI.ServerMode
 
         public Recommendation? SelectedRecommendation { get; set; }
 
-        public CloudApplication ApplicationDetails { get; } = new CloudApplication(string.Empty, string.Empty);
+        public CloudApplication ApplicationDetails { get; } = new CloudApplication(string.Empty, string.Empty, CloudApplicationResourceType.None, string.Empty);
 
         public Task? DeploymentTask { get; set; }
 

@@ -1,0 +1,88 @@
+{
+    "$schema": "./aws-deploy-recipe-schema.json",
+    "Id": "AspNetAppExistingBeanstalkEnvironment",
+    "Version": "0.1.0",
+    "Name": "ASP.NET Core App to Existing AWS Elastic Beanstalk Environment",
+    "DisableNewDeployments": true,
+    "DeploymentType": "BeanstalkEnvironment",
+    "DeploymentBundle": "DotnetPublishZipFile",
+    "Description": "This ASP.NET Core application will be built and deployed to existing AWS Elastic Beanstalk environment. Recommended if you do not want to deploy your application as a container image.",
+    "ShortDescription": "ASP.NET Core application deployed to AWS Elastic Beanstalk on Linux.",
+    "TargetService": "AWS Elastic Beanstalk",
+
+    "RecipePriority": 0,
+    "RecommendationRules": [
+        {
+            "Tests": [
+                {
+                    "Type": "MSProjectSdkAttribute",
+                    "Condition": {
+                        "Value": "Microsoft.NET.Sdk.Web"
+                    }
+                },
+                {
+                    "Type": "MSProperty",
+                    "Condition": {
+                        "PropertyName": "TargetFramework",
+                        "AllowedValues": [ "netcoreapp2.1", "netcoreapp3.1", "net5.0" ]
+                    }
+                }
+            ],
+            "Effect": {
+                "Pass": { "Include": true },
+                "Fail": {"Include": false}
+            }
+        }
+    ],
+
+    "OptionSettings": [
+        {
+            "Id": "EnhancedHealthReporting",
+            "Name": "Enhanced Health Reporting",
+            "Description": "Enhanced health reporting provides free real-time application and operating system monitoring of the instances and other resources in your environment.",
+            "Type": "String",
+            "DefaultValue": "enhanced",
+            "AllowedValues": [
+                "enhanced",
+                "basic"
+            ],
+            "ValueMapping": {
+                "enhanced": "Enhanced",
+                "basic": "Basic"
+            },
+            "AdvancedSetting": false,
+            "Updatable": true
+        },
+        {
+            "Id": "XRayTracingSupportEnabled",
+            "Name": "Enable AWS X-Ray Tracing Support",
+            "Description": "AWS X-Ray is a service that collects data about requests that your application serves, and provides tools you can use to view, filter, and gain insights into that data to identify issues and opportunities for optimization. Do you want to enable AWS X-Ray tracing support?",
+            "Type": "Bool",
+            "DefaultValue": false,
+            "AdvancedSetting": false,
+            "Updatable": true
+        },
+        {
+            "Id": "ReverseProxy",
+            "Name": "Reverse Proxy",
+            "Description": "By default Nginx is used as a reverse proxy in front of the .NET Core web server Kestrel. To use Kestrel as the front facing web server then select `none` as the reverse proxy.",
+            "Type": "String",
+            "DefaultValue": "nginx",
+            "AllowedValues": [
+                "nginx",
+                "none"
+            ],
+            "AdvancedSetting": false,
+            "Updatable": true
+        },
+        {
+            "Id": "HealthCheckURL",
+            "Name": "Health Check URL",
+            "Description": "Customize the load balancer health check to ensure that your application, and not just the web server, is in a good state.",
+            "Type": "String",
+            "DefaultValue": "/",
+            "AdvancedSetting": false,
+            "Updatable": true
+        }
+    ]
+}

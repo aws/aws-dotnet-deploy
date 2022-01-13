@@ -92,8 +92,8 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             var recommendations = await orchestrator.GenerateDeploymentRecommendations();
             state.NewRecommendations = recommendations;
 
-            // Get all existing applications that were previously deployed using our deploy tool.
-            var allDeployedApplications = await deployedApplicationQueryer.GetExistingDeployedApplications();
+            // Get all existing CloudApplications based on the deploymentTypes filter
+            var allDeployedApplications = await deployedApplicationQueryer.GetExistingDeployedApplications(recommendations.Select(x => x.Recipe.DeploymentType).ToList());
 
             var existingApplications = await deployedApplicationQueryer.GetCompatibleApplications(recommendations, allDeployedApplications, session);
             state.ExistingDeployments = existingApplications;
@@ -354,8 +354,11 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 }
 
                 state.ApplicationDetails.Name = input.NewDeploymentName;
+                state.ApplicationDetails.UniqueIdentifier = string.Empty;
+                state.ApplicationDetails.ResourceType = CloudApplicationResourceType.CloudFormationStack;
                 state.ApplicationDetails.RecipeId = input.NewDeploymentRecipeId;
-                state.SelectedRecommendation.AddReplacementToken(DeployCommand.REPLACE_TOKEN_STACK_NAME, input.NewDeploymentName);
+
+                state.SelectedRecommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_STACK_NAME, input.NewDeploymentName);
             }
             else if(!string.IsNullOrEmpty(input.ExistingDeploymentName))
             {
@@ -378,8 +381,10 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 state.SelectedRecommendation = state.SelectedRecommendation.ApplyPreviousSettings(existingCloudApplicationMetadata.Settings);
 
                 state.ApplicationDetails.Name = input.ExistingDeploymentName;
+                state.ApplicationDetails.UniqueIdentifier = existingDeployment.UniqueIdentifier;
                 state.ApplicationDetails.RecipeId = existingDeployment.RecipeId;
-                state.SelectedRecommendation.AddReplacementToken(DeployCommand.REPLACE_TOKEN_STACK_NAME, input.ExistingDeploymentName);
+                state.ApplicationDetails.ResourceType = existingDeployment.ResourceType;
+                state.SelectedRecommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_STACK_NAME, input.ExistingDeploymentName);
             }
 
             return Ok();
@@ -529,7 +534,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             var displayedResources = await displayedResourcesHandler.GetDeploymentOutputs(state.ApplicationDetails, state.SelectedRecommendation);
 
             var output = new GetDeploymentDetailsOutput(
-                state.ApplicationDetails.StackName,
+                state.ApplicationDetails.Name,
                 displayedResources
                     .Select(x => new DisplayedResourceSummary(x.Id, x.Description, x.Type, x.Data))
                     .ToList());

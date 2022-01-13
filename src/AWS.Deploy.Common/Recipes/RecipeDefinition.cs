@@ -29,6 +29,11 @@ namespace AWS.Deploy.Common.Recipes
         public string Name { get; set; }
 
         /// <summary>
+        /// Indicates if this recipe should be presented as an option during new deployments.
+        /// </summary>
+        public bool DisableNewDeployments { get; set; }
+
+        /// <summary>
         /// Description of the recipe informing the user what this recipe does and why it is recommended.
         /// </summary>
         public string Description { get; set; }

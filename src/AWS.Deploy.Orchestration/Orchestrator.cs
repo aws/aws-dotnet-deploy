@@ -12,6 +12,7 @@ using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.DockerEngine;
 using AWS.Deploy.Orchestration.CDK;
 using AWS.Deploy.Orchestration.Data;
+using AWS.Deploy.Orchestration.DeploymentCommands;
 using AWS.Deploy.Orchestration.LocalUserSettings;
 
 namespace AWS.Deploy.Orchestration
@@ -23,20 +24,18 @@ namespace AWS.Deploy.Orchestration
     /// </summary>
     public class Orchestrator
     {
-        private const string REPLACE_TOKEN_LATEST_DOTNET_BEANSTALK_PLATFORM_ARN = "{LatestDotnetBeanstalkPlatformArn}";
-
-        private readonly ICdkProjectHandler? _cdkProjectHandler;
-        private readonly ICDKManager? _cdkManager;
-        private readonly ICDKVersionDetector? _cdkVersionDetector;
-        private readonly IOrchestratorInteractiveService? _interactiveService;
-        private readonly IAWSResourceQueryer? _awsResourceQueryer;
-        private readonly IDeploymentBundleHandler? _deploymentBundleHandler;
-        private readonly ILocalUserSettingsEngine? _localUserSettingsEngine;
-        private readonly IDockerEngine? _dockerEngine;
-        private readonly IList<string>? _recipeDefinitionPaths;
-        private readonly IDirectoryManager? _directoryManager;
-        private readonly ICustomRecipeLocator? _customRecipeLocator;
-        private readonly OrchestratorSession? _session;
+        internal readonly ICdkProjectHandler? _cdkProjectHandler;
+        internal readonly ICDKManager? _cdkManager;
+        internal readonly ICDKVersionDetector? _cdkVersionDetector;
+        internal readonly IOrchestratorInteractiveService? _interactiveService;
+        internal readonly IAWSResourceQueryer? _awsResourceQueryer;
+        internal readonly IDeploymentBundleHandler? _deploymentBundleHandler;
+        internal readonly ILocalUserSettingsEngine? _localUserSettingsEngine;
+        internal readonly IDockerEngine? _dockerEngine;
+        internal readonly IList<string>? _recipeDefinitionPaths;
+        internal readonly IDirectoryManager? _directoryManager;
+        internal readonly ICustomRecipeLocator? _customRecipeLocator;
+        internal readonly OrchestratorSession? _session;
 
         public Orchestrator(
             OrchestratorSession session,
@@ -122,63 +121,15 @@ namespace AWS.Deploy.Orchestration
                 throw new InvalidOperationException($"{nameof(_awsResourceQueryer)} is null as part of the Orchestrator object");
 
             var latestPlatform = await _awsResourceQueryer.GetLatestElasticBeanstalkPlatformArn();
-            replacements[REPLACE_TOKEN_LATEST_DOTNET_BEANSTALK_PLATFORM_ARN] = latestPlatform.PlatformArn;
+            replacements[Constants.RecipeIdentifier.REPLACE_TOKEN_LATEST_DOTNET_BEANSTALK_PLATFORM_ARN] = latestPlatform.PlatformArn;
 
             return replacements;
         }
 
         public async Task DeployRecommendation(CloudApplication cloudApplication, Recommendation recommendation)
         {
-            if (_interactiveService == null)
-                throw new InvalidOperationException($"{nameof(_interactiveService)} is null as part of the orchestartor object");
-            if (_cdkManager == null)
-                throw new InvalidOperationException($"{nameof(_cdkManager)} is null as part of the orchestartor object");
-            if (_cdkProjectHandler == null)
-                throw new InvalidOperationException($"{nameof(_cdkProjectHandler)} is null as part of the orchestartor object");
-            if (_localUserSettingsEngine == null)
-                throw new InvalidOperationException($"{nameof(_localUserSettingsEngine)} is null as part of the orchestartor object");
-            if (_session == null)
-                throw new InvalidOperationException($"{nameof(_session)} is null as part of the orchestartor object");
-
-            _interactiveService.LogMessageLine(string.Empty);
-            _interactiveService.LogMessageLine($"Initiating deployment: {recommendation.Name}");
-
-            switch (recommendation.Recipe.DeploymentType)
-            {
-                case DeploymentTypes.CdkProject:
-                    if (_cdkVersionDetector == null)
-                    {
-                        throw new InvalidOperationException($"{nameof(_cdkVersionDetector)} must not be null.");
-                    }
-
-                    if (_directoryManager == null)
-                    {
-                        throw new InvalidOperationException($"{nameof(_directoryManager)} must not be null.");
-                    }
-
-                    _interactiveService.LogMessageLine("Configuring AWS Cloud Development Kit (CDK)...");
-                    var cdkProject = await _cdkProjectHandler.ConfigureCdkProject(_session, cloudApplication, recommendation);
-
-                    var projFiles = _directoryManager.GetProjFiles(cdkProject);
-                    var cdkVersion = _cdkVersionDetector.Detect(projFiles);
-
-                    await _cdkManager.EnsureCompatibleCDKExists(Constants.CDK.DeployToolWorkspaceDirectoryRoot, cdkVersion);
-
-                    try
-                    {
-                        await _cdkProjectHandler.DeployCdkProject(_session, cdkProject, recommendation);
-                    }
-                    finally
-                    {
-                        _cdkProjectHandler.DeleteTemporaryCdkProject(_session, cdkProject);
-                    }
-                    break;
-                default:
-                    _interactiveService.LogErrorMessageLine($"Unknown deployment type {recommendation.Recipe.DeploymentType} specified in recipe.");
-                    return;
-            }
-
-            await _localUserSettingsEngine.UpdateLastDeployedStack(cloudApplication.StackName, _session.ProjectDefinition.ProjectName, _session.AWSAccountId, _session.AWSRegion);
+            var deploymentCommand = DeploymentCommandFactory.BuildDeploymentCommand(recommendation.Recipe.DeploymentType);
+            await deploymentCommand.ExecuteAsync(this, cloudApplication, recommendation);
         }
 
         public async Task<bool> CreateContainerDeploymentBundle(CloudApplication cloudApplication, Recommendation recommendation)

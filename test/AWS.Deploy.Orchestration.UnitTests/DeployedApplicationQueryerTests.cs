@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Amazon.CloudFormation;
 using Amazon.CloudFormation.Model;
+using Amazon.ElasticBeanstalk;
+using Amazon.ElasticBeanstalk.Model;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
@@ -39,7 +41,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
         public async Task GetExistingDeployedApplications_ListDeploymentsCall()
         {
             var stack = new Stack {
-                Tags = new List<Tag>() { new Tag {
+                Tags = new List<Amazon.CloudFormation.Model.Tag>() { new Amazon.CloudFormation.Model.Tag {
                     Key = Constants.CloudFormationIdentifier.STACK_TAG,
                     Value = "AspNetAppEcsFargate"
                 } },
@@ -52,16 +54,21 @@ namespace AWS.Deploy.Orchestration.UnitTests
                 .Setup(x => x.GetCloudFormationStacks())
                 .Returns(Task.FromResult(new List<Stack>() { stack }));
 
+            _mockAWSResourceQueryer
+                .Setup(x => x.ListOfElasticBeanstalkEnvironments(It.IsAny<string>()))
+                .Returns(Task.FromResult(new List<EnvironmentDescription>()));
+
             var deployedApplicationQueryer = new DeployedApplicationQueryer(
                 _mockAWSResourceQueryer.Object,
                 _mockLocalUserSettingsEngine.Object,
                 _mockOrchestratorInteractiveService.Object);
 
-            var result = await deployedApplicationQueryer.GetExistingDeployedApplications();
+            var deploymentTypes = new List<DeploymentTypes>() { DeploymentTypes.CdkProject, DeploymentTypes.BeanstalkEnvironment };
+            var result = await deployedApplicationQueryer.GetExistingDeployedApplications(deploymentTypes);
             Assert.Single(result);
 
             var expectedStack = result.First();
-            Assert.Equal("Stack1", expectedStack.StackName);
+            Assert.Equal("Stack1", expectedStack.Name);
         }
 
         [Fact]
@@ -69,7 +76,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
         {
             var stacks = new List<Stack> {
                 new Stack{
-                    Tags = new List<Tag>() { new Tag {
+                    Tags = new List<Amazon.CloudFormation.Model.Tag>() { new Amazon.CloudFormation.Model.Tag {
                         Key = Constants.CloudFormationIdentifier.STACK_TAG,
                         Value = "AspNetAppEcsFargate"
                     } },
@@ -78,7 +85,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
                     StackName = "WebApp"
                 },
                 new Stack{
-                    Tags = new List<Tag>() { new Tag {
+                    Tags = new List<Amazon.CloudFormation.Model.Tag>() { new Amazon.CloudFormation.Model.Tag {
                         Key = Constants.CloudFormationIdentifier.STACK_TAG,
                         Value = "ConsoleAppEcsFargateService"
                     } },
@@ -91,6 +98,10 @@ namespace AWS.Deploy.Orchestration.UnitTests
             _mockAWSResourceQueryer
                 .Setup(x => x.GetCloudFormationStacks())
                 .Returns(Task.FromResult(stacks));
+
+            _mockAWSResourceQueryer
+                .Setup(x => x.ListOfElasticBeanstalkEnvironments(It.IsAny<string>()))
+                .Returns(Task.FromResult(new List<EnvironmentDescription>()));
 
             var deployedApplicationQueryer = new DeployedApplicationQueryer(
                 _mockAWSResourceQueryer.Object,
@@ -117,7 +128,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
             var stacks = new List<Stack> {
                 // Existing stack from the base recipe which should be valid
                 new Stack{
-                    Tags = new List<Tag>() { new Tag {
+                    Tags = new List<Amazon.CloudFormation.Model.Tag>() { new Amazon.CloudFormation.Model.Tag {
                         Key = Constants.CloudFormationIdentifier.STACK_TAG,
                         Value = "AspNetAppEcsFargate"
                     } },
@@ -127,7 +138,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
                 },
                 // Existing stack that was deployed custom deployment project. Should be valid.
                 new Stack{
-                    Tags = new List<Tag>() { new Tag {
+                    Tags = new List<Amazon.CloudFormation.Model.Tag>() { new Amazon.CloudFormation.Model.Tag {
                         Key = Constants.CloudFormationIdentifier.STACK_TAG,
                         Value = "AspNetAppEcsFargate-Custom"
                     } },
@@ -137,7 +148,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
                 },
                 // Stack created from a different recipe and should not be valid.
                 new Stack{
-                    Tags = new List<Tag>() { new Tag {
+                    Tags = new List<Amazon.CloudFormation.Model.Tag>() { new Amazon.CloudFormation.Model.Tag {
                         Key = Constants.CloudFormationIdentifier.STACK_TAG,
                         Value = "ConsoleAppEcsFargateService"
                     } },
@@ -150,6 +161,10 @@ namespace AWS.Deploy.Orchestration.UnitTests
             _mockAWSResourceQueryer
                 .Setup(x => x.GetCloudFormationStacks())
                 .Returns(Task.FromResult(stacks));
+
+            _mockAWSResourceQueryer
+                .Setup(x => x.ListOfElasticBeanstalkEnvironments(It.IsAny<string>()))
+               .Returns(Task.FromResult(new List<EnvironmentDescription>()));
 
             var deployedApplicationQueryer = new DeployedApplicationQueryer(
                 _mockAWSResourceQueryer.Object,
@@ -184,9 +199,9 @@ namespace AWS.Deploy.Orchestration.UnitTests
         [InlineData("AspNetAppEcsFargate", Constants.CloudFormationIdentifier.STACK_DESCRIPTION_PREFIX, "ROLLBACK_COMPLETE")]
         public async Task GetExistingDeployedApplications_InvalidConfigurations(string recipeId, string stackDecription, string deploymentStatus)
         {
-            var tags = new List<Tag>();
+            var tags = new List<Amazon.CloudFormation.Model.Tag>();
             if (!string.IsNullOrEmpty(recipeId))
-                tags.Add(new Tag
+                tags.Add(new Amazon.CloudFormation.Model.Tag
                 {
                     Key = Constants.CloudFormationIdentifier.STACK_TAG,
                     Value = "AspNetAppEcsFargate"
@@ -204,12 +219,190 @@ namespace AWS.Deploy.Orchestration.UnitTests
                 .Setup(x => x.GetCloudFormationStacks())
                 .Returns(Task.FromResult(new List<Stack>() { stack }));
 
+            _mockAWSResourceQueryer
+                .Setup(x => x.ListOfElasticBeanstalkEnvironments(It.IsAny<string>()))
+                .Returns(Task.FromResult(new List<EnvironmentDescription>()));
+
             var deployedApplicationQueryer = new DeployedApplicationQueryer(
                 _mockAWSResourceQueryer.Object,
                 _mockLocalUserSettingsEngine.Object,
                 _mockOrchestratorInteractiveService.Object);
 
-            var result = await deployedApplicationQueryer.GetExistingDeployedApplications();
+            var deploymentTypes = new List<DeploymentTypes>() { DeploymentTypes.CdkProject, DeploymentTypes.BeanstalkEnvironment };
+            var result = await deployedApplicationQueryer.GetExistingDeployedApplications(deploymentTypes);
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public async Task GetExistingDeployedApplications_ContainsValidBeanstalkEnvironments()
+        {
+            var environments = new List<EnvironmentDescription>
+            {
+                new EnvironmentDescription
+                {
+                    EnvironmentName = "env-1",
+                    PlatformArn = "dotnet-platform-arn1",
+                    EnvironmentArn = "env-arn-1",
+                    Status = EnvironmentStatus.Ready
+                },
+                new EnvironmentDescription
+                {
+                    EnvironmentName = "env-2",
+                    PlatformArn = "dotnet-platform-arn1",
+                    EnvironmentArn = "env-arn-2",
+                    Status = EnvironmentStatus.Ready
+                }
+            };
+
+            var platforms = new List<PlatformSummary>
+            {
+                new PlatformSummary
+                {
+                    PlatformArn = "dotnet-platform-arn1"
+                },
+                new PlatformSummary
+                {
+                    PlatformArn = "dotnet-platform-arn2"
+                }
+            };
+
+            _mockAWSResourceQueryer
+                .Setup(x => x.GetCloudFormationStacks())
+                .Returns(Task.FromResult(new List<Stack>()));
+
+            _mockAWSResourceQueryer
+                .Setup(x => x.ListOfElasticBeanstalkEnvironments(It.IsAny<string>()))
+                .Returns(Task.FromResult(environments));
+
+            _mockAWSResourceQueryer
+                .Setup(x => x.GetElasticBeanstalkPlatformArns())
+                .Returns(Task.FromResult(platforms));
+
+            _mockAWSResourceQueryer
+                .Setup(x => x.ListElasticBeanstalkResourceTags(It.IsAny<string>()))
+                .Returns(Task.FromResult(new List<Amazon.ElasticBeanstalk.Model.Tag>()));
+
+            var deployedApplicationQueryer = new DeployedApplicationQueryer(
+                _mockAWSResourceQueryer.Object,
+                _mockLocalUserSettingsEngine.Object,
+                _mockOrchestratorInteractiveService.Object);
+
+            var deploymentTypes = new List<DeploymentTypes>() { DeploymentTypes.CdkProject, DeploymentTypes.BeanstalkEnvironment };
+            var result = await deployedApplicationQueryer.GetExistingDeployedApplications(deploymentTypes);
+            Assert.Contains(result, x => string.Equals("env-1", x.Name));
+            Assert.Contains(result, x => string.Equals("env-2", x.Name));
+        }
+
+        [Fact]
+        public async Task GetExistingDeployedApplication_SkipsEnvironmentsWithIncompatiblePlatformArns()
+        {
+            var environments = new List<EnvironmentDescription>
+            {
+                new EnvironmentDescription
+                {
+                    EnvironmentName = "env",
+                    PlatformArn = "incompatible-platform-arn",
+                    EnvironmentArn = "env-arn",
+                    Status = EnvironmentStatus.Ready
+                }
+            };
+
+            var platforms = new List<PlatformSummary>
+            {
+                new PlatformSummary
+                {
+                    PlatformArn = "dotnet-platform-arn1"
+                },
+                new PlatformSummary
+                {
+                    PlatformArn = "dotnet-platform-arn2"
+                }
+            };
+
+            _mockAWSResourceQueryer
+                .Setup(x => x.GetCloudFormationStacks())
+                .Returns(Task.FromResult(new List<Stack>()));
+
+            _mockAWSResourceQueryer
+                .Setup(x => x.ListOfElasticBeanstalkEnvironments(It.IsAny<string>()))
+                .Returns(Task.FromResult(environments));
+
+            _mockAWSResourceQueryer
+                .Setup(x => x.GetElasticBeanstalkPlatformArns())
+                .Returns(Task.FromResult(platforms));
+
+            _mockAWSResourceQueryer
+                .Setup(x => x.ListElasticBeanstalkResourceTags(It.IsAny<string>()))
+                .Returns(Task.FromResult(new List<Amazon.ElasticBeanstalk.Model.Tag>()));
+
+            var deployedApplicationQueryer = new DeployedApplicationQueryer(
+                _mockAWSResourceQueryer.Object,
+                _mockLocalUserSettingsEngine.Object,
+                _mockOrchestratorInteractiveService.Object);
+
+            var deploymentTypes = new List<DeploymentTypes>() { DeploymentTypes.CdkProject, DeploymentTypes.BeanstalkEnvironment };
+            var result = await deployedApplicationQueryer.GetExistingDeployedApplications(deploymentTypes);
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public async Task GetExistingDeployedApplication_SkipsEnvironmentsCreatedFromTheDeployTool()
+        {
+            var environments = new List<EnvironmentDescription>
+            {
+                new EnvironmentDescription
+                {
+                    EnvironmentName = "env",
+                    PlatformArn = "dotnet-platform-arn1",
+                    EnvironmentArn = "env-arn",
+                    Status = EnvironmentStatus.Ready
+                }
+            };
+
+            var platforms = new List<PlatformSummary>
+            {
+                new PlatformSummary
+                {
+                    PlatformArn = "dotnet-platform-arn1"
+                },
+                new PlatformSummary
+                {
+                    PlatformArn = "dotnet-platform-arn2"
+                }
+            };
+
+            var tags = new List<Amazon.ElasticBeanstalk.Model.Tag>
+            {
+                new Amazon.ElasticBeanstalk.Model.Tag
+                {
+                    Key = Constants.CloudFormationIdentifier.STACK_TAG,
+                    Value = "RecipeId"
+                }
+            };
+
+            _mockAWSResourceQueryer
+                .Setup(x => x.GetCloudFormationStacks())
+                .Returns(Task.FromResult(new List<Stack>()));
+
+            _mockAWSResourceQueryer
+                .Setup(x => x.ListOfElasticBeanstalkEnvironments(It.IsAny<string>()))
+                .Returns(Task.FromResult(environments));
+
+            _mockAWSResourceQueryer
+                .Setup(x => x.GetElasticBeanstalkPlatformArns())
+                .Returns(Task.FromResult(platforms));
+
+            _mockAWSResourceQueryer
+                .Setup(x => x.ListElasticBeanstalkResourceTags("env-arn"))
+                .Returns(Task.FromResult(tags));
+
+            var deployedApplicationQueryer = new DeployedApplicationQueryer(
+                _mockAWSResourceQueryer.Object,
+                _mockLocalUserSettingsEngine.Object,
+                _mockOrchestratorInteractiveService.Object);
+
+            var deploymentTypes = new List<DeploymentTypes>() { DeploymentTypes.CdkProject, DeploymentTypes.BeanstalkEnvironment };
+            var result = await deployedApplicationQueryer.GetExistingDeployedApplications(deploymentTypes);
             Assert.Empty(result);
         }
     }
