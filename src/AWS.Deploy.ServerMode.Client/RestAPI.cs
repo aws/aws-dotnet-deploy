@@ -1477,6 +1477,17 @@ namespace AWS.Deploy.ServerMode.Client
     }
     
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.4.1.0 (Newtonsoft.Json v12.0.0.0)")]
+    public enum DeploymentTypes
+    {
+        [System.Runtime.Serialization.EnumMember(Value = @"CloudFormationStack")]
+        CloudFormationStack = 0,
+    
+        [System.Runtime.Serialization.EnumMember(Value = @"BeanstalkEnvironment")]
+        BeanstalkEnvironment = 1,
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.4.1.0 (Newtonsoft.Json v12.0.0.0)")]
     public partial class DeployToolExceptionSummary 
     {
         [Newtonsoft.Json.JsonProperty("errorCode", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
@@ -1536,6 +1547,13 @@ namespace AWS.Deploy.ServerMode.Client
     
         [Newtonsoft.Json.JsonProperty("updatedByCurrentUser", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool UpdatedByCurrentUser { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("deploymentType", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
+        public DeploymentTypes DeploymentType { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("existingDeploymentId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string ExistingDeploymentId { get; set; }
     
     
     }
@@ -1715,6 +1733,10 @@ namespace AWS.Deploy.ServerMode.Client
         [Newtonsoft.Json.JsonProperty("targetService", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string TargetService { get; set; }
     
+        [Newtonsoft.Json.JsonProperty("deploymentType", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
+        public DeploymentTypes DeploymentType { get; set; }
+    
     
     }
     
@@ -1727,8 +1749,8 @@ namespace AWS.Deploy.ServerMode.Client
         [Newtonsoft.Json.JsonProperty("newDeploymentRecipeId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string NewDeploymentRecipeId { get; set; }
     
-        [Newtonsoft.Json.JsonProperty("existingDeploymentName", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string ExistingDeploymentName { get; set; }
+        [Newtonsoft.Json.JsonProperty("existingDeploymentId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string ExistingDeploymentId { get; set; }
     
     
     }
