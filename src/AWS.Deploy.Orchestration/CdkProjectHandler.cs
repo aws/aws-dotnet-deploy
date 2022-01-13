@@ -105,7 +105,7 @@ namespace AWS.Deploy.Orchestration
         {
             try
             {
-                var stackEvents = await _awsResourceQueryer.GetCloudFormationStackEvents(cloudApplication.StackName);
+                var stackEvents = await _awsResourceQueryer.GetCloudFormationStackEvents(cloudApplication.Name);
                 
                 var failedEvents = stackEvents
                     .Where(x => x.Timestamp >= deploymentStartDate)
@@ -119,7 +119,7 @@ namespace AWS.Deploy.Orchestration
                     throw new FailedToDeployCDKAppException(DeployToolErrorCode.FailedToDeployCdkApplication, errors);
                 }
             }
-            catch (AmazonCloudFormationException exception) when (exception.ErrorCode.Equals("ValidationError") && exception.Message.Equals($"Stack [{cloudApplication.StackName}] does not exist"))
+            catch (AmazonCloudFormationException exception) when (exception.ErrorCode.Equals("ValidationError") && exception.Message.Equals($"Stack [{cloudApplication.Name}] does not exist"))
             {
                 throw new FailedToDeployCDKAppException(DeployToolErrorCode.FailedToCreateCdkStack, "A CloudFormation stack was not created. Check the deployment output for more details.");
             }

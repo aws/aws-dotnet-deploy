@@ -51,7 +51,7 @@ namespace AWS.Deploy.Orchestration
 
             var dockerExecutionDirectory = GetDockerExecutionDirectory(recommendation);
             var tagSuffix = DateTime.UtcNow.Ticks;
-            var imageTag = $"{cloudApplication.StackName.ToLower()}:{tagSuffix}";
+            var imageTag = $"{cloudApplication.Name.ToLower()}:{tagSuffix}";
             var dockerFile = GetDockerFilePath(recommendation);
             var buildArgs = GetDockerBuildArgs(recommendation);
 
@@ -79,7 +79,7 @@ namespace AWS.Deploy.Orchestration
             await InitiateDockerLogin();
 
             var tagSuffix = sourceTag.Split(":")[1];
-            var repository = await SetupECRRepository(cloudApplication.StackName.ToLower());
+            var repository = await SetupECRRepository(cloudApplication.Name.ToLower());
             var targetTag = $"{repository.RepositoryUri}:{tagSuffix}";
 
             await TagDockerImage(sourceTag, targetTag);

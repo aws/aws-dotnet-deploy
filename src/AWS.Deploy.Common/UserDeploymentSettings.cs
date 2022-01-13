@@ -19,7 +19,7 @@ namespace AWS.Deploy.Common
 
         public string? AWSRegion { get; set; }
 
-        public string? StackName { get; set; }
+        public string? ApplicationName { get; set; }
 
         public string? RecipeId { get; set; }
 

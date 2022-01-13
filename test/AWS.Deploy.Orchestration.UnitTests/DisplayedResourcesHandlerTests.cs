@@ -33,7 +33,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
         public DisplayedResourcesHandlerTests()
         {
             _mockAWSResourceQueryer = new Mock<IAWSResourceQueryer>();
-            _cloudApplication = new CloudApplication("StackName", "RecipeId");
+            _cloudApplication = new CloudApplication("StackName", "UniqueId", CloudApplicationResourceType.CloudFormationStack, "RecipeId");
             _displayedResourcesFactory = new DisplayedResourceCommandFactory(_mockAWSResourceQueryer.Object);
             _stackResource = new StackResource();
             _stackResources = new List<StackResource>() { _stackResource };

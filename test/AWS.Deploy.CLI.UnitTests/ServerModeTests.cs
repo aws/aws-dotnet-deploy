@@ -126,5 +126,41 @@ namespace AWS.Deploy.CLI.UnitTests
             var resultRecipe = Assert.IsType<RecipeSummary>(result.Value);
             Assert.Equal(recipe.Id, resultRecipe.Id);
         }
+
+        [Theory]
+        [InlineData(CloudApplicationResourceType.CloudFormationStack, DeploymentTypes.CloudFormationStack)]
+        [InlineData(CloudApplicationResourceType.BeanstalkEnvironment, DeploymentTypes.BeanstalkEnvironment)]
+        public void ExistingDeploymentSummary_ContainsCorrectDeploymentType(CloudApplicationResourceType resourceType, DeploymentTypes expectedDeploymentType)
+        {
+            var existingDeploymentSummary = new ExistingDeploymentSummary(
+                "name",
+                "recipeId",
+                "recipeName",
+                "shortDescription",
+                "description",
+                "targetService",
+                System.DateTime.Now,
+                true,
+                resourceType,
+                "uniqueId");
+
+            Assert.Equal(expectedDeploymentType, existingDeploymentSummary.DeploymentType);
+        }
+
+        [Theory]
+        [InlineData(Deploy.Common.Recipes.DeploymentTypes.CdkProject, DeploymentTypes.CloudFormationStack)]
+        [InlineData(Deploy.Common.Recipes.DeploymentTypes.BeanstalkEnvironment, DeploymentTypes.BeanstalkEnvironment)]
+        public void RecommendationSummary_ContainsCorrectDeploymentType(Deploy.Common.Recipes.DeploymentTypes deploymentType, DeploymentTypes expectedDeploymentType)
+        {
+            var recommendationSummary = new RecommendationSummary(
+                "recipeId",
+                "name",
+                "shortDescription",
+                "description",
+                "targetService",
+                deploymentType);
+
+            Assert.Equal(expectedDeploymentType, recommendationSummary.DeploymentType);
+        }
     }
 }

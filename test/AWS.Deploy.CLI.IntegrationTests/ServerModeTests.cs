@@ -244,6 +244,46 @@ namespace AWS.Deploy.CLI.IntegrationTests
             }
         }
 
+        [Fact]
+        public async Task RecommendationsForNewDeployments_DoesNotIncludeExistingBeanstalkEnvironmentRecipe()
+        {
+            var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
+            var portNumber = 4002;
+            using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ResolveCredentials);
+
+            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
+            var cancelSource = new CancellationTokenSource();
+
+            var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
+
+            try
+            {
+                var baseUrl = $"http://localhost:{portNumber}/";
+                var restClient = new RestAPIClient(baseUrl, httpClient);
+
+                await WaitTillServerModeReady(restClient);
+
+                var startSessionOutput = await restClient.StartDeploymentSessionAsync(new StartDeploymentSessionInput
+                {
+                    AwsRegion = _awsRegion,
+                    ProjectPath = projectPath
+                });
+
+                var sessionId = startSessionOutput.SessionId;
+                Assert.NotNull(sessionId);
+
+                var getRecommendationOutput = await restClient.GetRecommendationsAsync(sessionId);
+                Assert.NotEmpty(getRecommendationOutput.Recommendations);
+
+                var recommendations = getRecommendationOutput.Recommendations;
+                Assert.DoesNotContain(recommendations, x => x.DeploymentType == DeploymentTypes.BeanstalkEnvironment);
+            }
+            finally
+            {
+                cancelSource.Cancel();
+            }
+        }
+
         private async Task<DeploymentStatus> WaitForDeployment(RestAPIClient restApiClient, string sessionId)
         {
             // Do an initial delay to avoid a race condition of the status being checked before the deployment has kicked off.
