@@ -62,7 +62,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
             // Deploy
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
-            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--stack-name", _stackName, "--diagnostics" };
+            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--application-name", _stackName, "--diagnostics" };
             Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
 
             // Verify application is deployed and running
@@ -87,7 +87,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(listArgs));;
 
             // Verify stack exists in list of deployments
-            var listStdOut = _interactiveService.StdOutReader.ReadAllLines();
+            var listStdOut = _interactiveService.StdOutReader.ReadAllLines().Select(x => x.Split()[0]).ToList();
             Assert.Contains(listStdOut, (deployment) => _stackName.Equals(deployment));
 
             // Arrange input for delete

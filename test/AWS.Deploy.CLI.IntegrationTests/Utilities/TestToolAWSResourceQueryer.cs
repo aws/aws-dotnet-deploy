@@ -54,5 +54,6 @@ namespace AWS.Deploy.CLI.IntegrationTests.Utilities
         public Task<List<string>> ListOfSNSTopicArns() => throw new NotImplementedException();
         public Task<List<Amazon.S3.Model.S3Bucket>> ListOfS3Buckets() => throw new NotImplementedException();
         public Task<List<InstanceTypeInfo>> ListOfAvailableInstanceTypes() => throw new NotImplementedException();
+        public Task<List<Amazon.ElasticBeanstalk.Model.Tag>> ListElasticBeanstalkResourceTags(string resourceArn) => throw new NotImplementedException();
     }
 }

@@ -1,5 +1,5 @@
 {
-    "StackName": "EcsFargate{Suffix}",
+    "ApplicationName": "EcsFargate{Suffix}",
     "RecipeId": "AspNetAppEcsFargate",
     "OptionSettingsConfig":{
         "ECSCluster":

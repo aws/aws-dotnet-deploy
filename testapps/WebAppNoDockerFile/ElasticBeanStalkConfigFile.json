@@ -1,5 +1,5 @@
 {
-    "StackName": "ElasticBeanStalk{Suffix}",
+    "ApplicationName": "ElasticBeanStalk{Suffix}",
     "RecipeId": "AspNetAppElasticBeanstalkLinux",
     "OptionSettingsConfig": {
         "BeanstalkApplication": {

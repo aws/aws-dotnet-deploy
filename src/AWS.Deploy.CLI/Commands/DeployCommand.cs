@@ -26,8 +26,7 @@ namespace AWS.Deploy.CLI.Commands
 {
     public class DeployCommand
     {
-        public const string REPLACE_TOKEN_STACK_NAME = "{StackName}";
-
+        
         private readonly IToolInteractiveService _toolInteractiveService;
         private readonly IOrchestratorInteractiveService _orchestratorInteractiveService;
         private readonly ICdkProjectHandler _cdkProjectHandler;
@@ -93,9 +92,9 @@ namespace AWS.Deploy.CLI.Commands
             _systemCapabilityEvaluator = systemCapabilityEvaluator;
         }
 
-        public async Task ExecuteAsync(string stackName, string deploymentProjectPath, UserDeploymentSettings? userDeploymentSettings = null)
+        public async Task ExecuteAsync(string applicationName, string deploymentProjectPath, UserDeploymentSettings? userDeploymentSettings = null)
         {
-            var (orchestrator, selectedRecommendation, cloudApplication) = await InitializeDeployment(stackName, userDeploymentSettings, deploymentProjectPath);
+            var (orchestrator, selectedRecommendation, cloudApplication) = await InitializeDeployment(applicationName, userDeploymentSettings, deploymentProjectPath);
 
             // Verify Docker installation and minimum NodeJS version.
             await EvaluateSystemCapabilities(selectedRecommendation);
@@ -135,13 +134,13 @@ namespace AWS.Deploy.CLI.Commands
         /// <summary>
         /// Initiates a deployment or a re-deployment.
         /// If a new Cloudformation stack name is selected, then a fresh deployment is initiated with the user-selected deployment recipe.
-        /// If an existing Cloudformation stack name is selected, then a re-deployment is initiated with the same deployment recipe.
+        /// If an existing deployment target is selected, then a re-deployment is initiated with the same deployment recipe.
         /// </summary>
-        /// <param name="stackName">The stack name provided via the --stack-name CLI argument</param>
+        /// <param name="applicationName">The cloud application name provided via the --application-name CLI argument</param>
         /// <param name="userDeploymentSettings">The deserialized object from the user provided config file.<see cref="UserDeploymentSettings"/></param>
         /// <param name="deploymentProjectPath">The absolute or relative path of the CDK project that will be used for deployment</param>
         /// <returns>A tuple consisting of the Orchestrator object, Selected Recommendation, Cloud Application metadata.</returns>
-        public async Task<(Orchestrator, Recommendation, CloudApplication)> InitializeDeployment(string stackName, UserDeploymentSettings? userDeploymentSettings, string deploymentProjectPath)
+        public async Task<(Orchestrator, Recommendation, CloudApplication)> InitializeDeployment(string applicationName, UserDeploymentSettings? userDeploymentSettings, string deploymentProjectPath)
         {
             var orchestrator = new Orchestrator(
                     _session,
@@ -161,24 +160,24 @@ namespace AWS.Deploy.CLI.Commands
             var recommendations = await GenerateDeploymentRecommendations(orchestrator, deploymentProjectPath);
 
             // Get all existing applications that were previously deployed using our deploy tool.
-            var allDeployedApplications = await _deployedApplicationQueryer.GetExistingDeployedApplications();
+            var allDeployedApplications = await _deployedApplicationQueryer.GetExistingDeployedApplications(recommendations.Select(x => x.Recipe.DeploymentType).ToList());
 
             // Filter compatible applications that can be re-deployed  using the current set of recommendations.
             var compatibleApplications = await _deployedApplicationQueryer.GetCompatibleApplications(recommendations, allDeployedApplications, _session);
 
-            // Get Cloudformation stack name.
-            var cloudApplicationName = GetCloudApplicationName(stackName, userDeploymentSettings, compatibleApplications);
+            // Get CloudApplication name.
+            var cloudApplicationName = GetCloudApplicationName(applicationName, userDeploymentSettings, compatibleApplications);
 
-            // Find existing application with the same CloudFormation stack name.
+            // Find existing application with the same CloudApplication name.
             var deployedApplication = allDeployedApplications.FirstOrDefault(x => string.Equals(x.Name, cloudApplicationName));
 
             Recommendation? selectedRecommendation = null;
             if (deployedApplication != null)
             {
                 // Verify that the target application can be deployed using the current set of recommendations
-                if (!compatibleApplications.Any(app => app.StackName.Equals(deployedApplication.StackName, StringComparison.Ordinal)))
+                if (!compatibleApplications.Any(app => app.Name.Equals(deployedApplication.Name, StringComparison.Ordinal)))
                 {
-                    var errorMessage = $"{deployedApplication.StackName} already exists as a Cloudformation stack but a compatible recommendation to perform a redeployment was not found";
+                    var errorMessage = $"{deployedApplication.Name} already exists as a {deployedApplication.ResourceType} but a compatible recommendation to perform a redeployment was not found";
                     throw new FailedToFindCompatibleRecipeException(DeployToolErrorCode.CompatibleRecommendationForRedeploymentNotFound, errorMessage);
                 }
 
@@ -193,14 +192,16 @@ namespace AWS.Deploy.CLI.Commands
                 }
                 else
                 {
-                    selectedRecommendation = GetSelectedRecommendation(userDeploymentSettings, recommendations);
+                    // Filter the recommendation list for a NEW deployment with recipes which have the DisableNewDeployments property set to false.
+                    selectedRecommendation = GetSelectedRecommendation(userDeploymentSettings, recommendations.Where(x => !x.Recipe.DisableNewDeployments).ToList());
                 }
             }
 
-            // Apply the user entered stack name to the recommendation so that any default settings based on stack name are applied.
-            selectedRecommendation.AddReplacementToken(REPLACE_TOKEN_STACK_NAME, cloudApplicationName);
+            // Apply the user entered application name to the recommendation so that any default settings based on CloudFormation stack name are applied.
+            // Currently only Cloudformation based recipes require the {StackName} replacement token
+            selectedRecommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_STACK_NAME, cloudApplicationName);
 
-            var cloudApplication = new CloudApplication(cloudApplicationName, selectedRecommendation.Recipe.Id);
+            var cloudApplication = new CloudApplication(cloudApplicationName, string.Empty, deployedApplication?.ResourceType ?? CloudApplicationResourceType.CloudFormationStack, selectedRecommendation.Recipe.Id);
 
             return (orchestrator, selectedRecommendation, cloudApplication);
         }
@@ -270,18 +271,17 @@ namespace AWS.Deploy.CLI.Commands
 
         private async Task<Recommendation> GetSelectedRecommendationFromPreviousDeployment(List<Recommendation> recommendations, CloudApplication deployedApplication, UserDeploymentSettings? userDeploymentSettings, string deploymentProjectPath)
         {
-            var existingCloudApplicationMetadata = await _templateMetadataReader.LoadCloudApplicationMetadata(deployedApplication.Name);
             var deploymentSettingRecipeId = userDeploymentSettings?.RecipeId;
             var selectedRecommendation = await GetRecommendationForRedeployment(recommendations, deployedApplication, deploymentProjectPath);
             if (selectedRecommendation == null)
             {
-                var errorMessage = $"{deployedApplication.StackName} already exists as a Cloudformation stack but a compatible recommendation used to perform a re-deployment was not found.";
+                var errorMessage = $"{deployedApplication.Name} already exists as a {deployedApplication.ResourceType} but a compatible recommendation used to perform a re-deployment was not found.";
                 throw new FailedToFindCompatibleRecipeException(DeployToolErrorCode.CompatibleRecommendationForRedeploymentNotFound, errorMessage);
             }
             if (!string.IsNullOrEmpty(deploymentSettingRecipeId) && !string.Equals(deploymentSettingRecipeId, selectedRecommendation.Recipe.Id, StringComparison.InvariantCultureIgnoreCase))
             {
-                var errorMessage = $"The existing stack {deployedApplication.StackName} was created from a different deployment recommendation. " +
-                    "Deploying to an existing stack must be performed with the original deployment recommendation to avoid unintended destructive changes to the stack.";
+                var errorMessage = $"The existing {deployedApplication.ResourceType} {deployedApplication.Name} was created from a different deployment recommendation. " +
+                    "Deploying to an existing target must be performed with the original deployment recommendation to avoid unintended destructive changes to the resources.";
                 if (_toolInteractiveService.Diagnostics)
                 {
                     errorMessage += Environment.NewLine + $"The original deployment recipe ID was {deployedApplication.RecipeId} and the current deployment recipe ID is {deploymentSettingRecipeId}";
@@ -289,6 +289,12 @@ namespace AWS.Deploy.CLI.Commands
                 throw new InvalidUserDeploymentSettingsException(DeployToolErrorCode.StackCreatedFromDifferentDeploymentRecommendation, errorMessage.Trim());
             }
 
+            // currently the ability to load and apply previous settings is available only if the deployment target is a CloudFormation Stack
+            // Do not have an easy way to capture previous settings without querying multiple APIs for non CloudFormation based deployments
+            if (deployedApplication.ResourceType != CloudApplicationResourceType.CloudFormationStack)
+                return selectedRecommendation;
+
+            var existingCloudApplicationMetadata = await _templateMetadataReader.LoadCloudApplicationMetadata(deployedApplication.Name);
             selectedRecommendation = selectedRecommendation.ApplyPreviousSettings(existingCloudApplicationMetadata.Settings);
 
             var header = $"Loading {deployedApplication.Name} settings:";
@@ -460,32 +466,32 @@ namespace AWS.Deploy.CLI.Commands
             }
         }
 
-        private string GetCloudApplicationName(string? stackName, UserDeploymentSettings? userDeploymentSettings, List<CloudApplication> deployedApplications)
+        private string GetCloudApplicationName(string? applicationName, UserDeploymentSettings? userDeploymentSettings, List<CloudApplication> deployedApplications)
         {
-            // validate the stackName provided by the --stack-name cli argument if present.
-            if (!string.IsNullOrEmpty(stackName))
+            // validate the applicationName provided by the --application-name cli argument if present.
+            if (!string.IsNullOrEmpty(applicationName))
             {
-                if (_cloudApplicationNameGenerator.IsValidName(stackName))
-                    return stackName;
+                if (_cloudApplicationNameGenerator.IsValidName(applicationName))
+                    return applicationName;
 
-                PrintInvalidStackNameMessage();
+                PrintInvalidApplicationNameMessage();
                 throw new InvalidCliArgumentException(DeployToolErrorCode.InvalidCliArguments, "Found invalid CLI arguments");
             }
 
-            if (!string.IsNullOrEmpty(userDeploymentSettings?.StackName))
+            if (!string.IsNullOrEmpty(userDeploymentSettings?.ApplicationName))
             {
-                if (_cloudApplicationNameGenerator.IsValidName(userDeploymentSettings.StackName))
-                    return userDeploymentSettings.StackName;
+                if (_cloudApplicationNameGenerator.IsValidName(userDeploymentSettings.ApplicationName))
+                    return userDeploymentSettings.ApplicationName;
 
-                PrintInvalidStackNameMessage();
+                PrintInvalidApplicationNameMessage();
                 throw new InvalidUserDeploymentSettingsException(DeployToolErrorCode.UserDeploymentInvalidStackName, "Please provide a valid stack name and try again.");
             }
 
             if (_toolInteractiveService.DisableInteractive)
             {
-                var message = "The \"--silent\" CLI argument can only be used if a CDK stack name is provided either via the CLI argument \"--stack-name\" or through a deployment-settings file. " +
-                "Please provide a stack name and try again";
-                throw new InvalidCliArgumentException(DeployToolErrorCode.SilentArgumentNeedsStackNameArgument, message);
+                var message = "The \"--silent\" CLI argument can only be used if a cloud application name is provided either via the CLI argument \"--application-name\" or through a deployment-settings file. " +
+                "Please provide an application name and try again";
+                throw new InvalidCliArgumentException(DeployToolErrorCode.SilentArgumentNeedsApplicationNameArgument, message);
             }
             return AskUserForCloudApplicationName(_session.ProjectDefinition, deployedApplications);
         }
@@ -545,7 +551,7 @@ namespace AWS.Deploy.CLI.Commands
 
                 if (!existingApplications.Any())
                 {
-                    var title = "Name the AWS stack to deploy your application to" + Environment.NewLine +
+                    var title = "Name the AWS CloudFormation stack to deploy your application to" + Environment.NewLine +
                                 "(A stack is a collection of AWS resources that you can manage as a single unit.)" + Environment.NewLine +
                                 "--------------------------------------------------------------------------------";
 
@@ -558,35 +564,37 @@ namespace AWS.Deploy.CLI.Commands
                 }
                 else
                 {
-                    var title = "Select the AWS stack to deploy your application to" + Environment.NewLine +
-                                "(A stack is a collection of AWS resources that you can manage as a single unit.)";
+                    var title = "Select an existing AWS deployment target to deploy your application to." + Environment.NewLine +
+                        "The existing target can be a CloudFormation Stack or an Elastic Beanstalk Environment.";
 
                     var userResponse =
                         _consoleUtilities.AskUserToChooseOrCreateNew(
-                            existingApplications.Select(x => x.Name),
+                            existingApplications.Select(x => x.DisplayName),
                             title,
                             askNewName: true,
                             defaultNewName: defaultName,
-                            defaultChoosePrompt: Constants.CLI.PROMPT_CHOOSE_STACK_NAME,
+                            defaultChoosePrompt: Constants.CLI.PROMPT_CHOOSE_DEPLOYMENT_TARGET,
                             defaultCreateNewPrompt: Constants.CLI.PROMPT_NEW_STACK_NAME,
                             defaultCreateNewLabel: Constants.CLI.CREATE_NEW_STACK_LABEL) ;
 
-                    cloudApplicationName = userResponse.SelectedOption ?? userResponse.NewName;
+                    // Since the selected option will be the display name, we need to extract the actual name out of it.
+                    // Ex - DisplayName = "MyAppStack (CloudFormationStack)", ActualName = "MyAppStack"
+                    cloudApplicationName = userResponse.SelectedOption?.Split().FirstOrDefault() ?? userResponse.NewName;
                 }
 
                 if (!string.IsNullOrEmpty(cloudApplicationName) &&
                     _cloudApplicationNameGenerator.IsValidName(cloudApplicationName))
                     return cloudApplicationName;
 
-                PrintInvalidStackNameMessage();
+                PrintInvalidApplicationNameMessage();
             }
         }
 
-        private void PrintInvalidStackNameMessage()
+        private void PrintInvalidApplicationNameMessage()
         {
             _toolInteractiveService.WriteLine();
             _toolInteractiveService.WriteErrorLine(
-                "Invalid stack name. A stack name can contain only alphanumeric characters (case-sensitive) and hyphens. " +
+                "Invalid application name. The application name can contain only alphanumeric characters (case-sensitive) and hyphens. " +
                 "It must start with an alphabetic character and can't be longer than 128 characters");
         }
 

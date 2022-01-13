@@ -33,17 +33,28 @@
             "description": "The unique id for the recipe. This value should never been change once the recipe is released because it will be stored in user config files.",
             "minLength": 1
         },
+        "Version": {
+            "type": "string",
+            "title": "Version string for the recipe",
+            "description": "Version string for the recipe. Its value will be incremented when the recipe is updated.",
+            "minLength": 1
+        },
         "Name": {
             "type": "string",
             "title": "Name",
             "description": "The name that will be showed to the user when choosing which recipe to choose for deployment.",
             "minLength": 1
         },
+        "DisableNewDeployments": {
+            "type": "boolean",
+            "title": "DisableNewDeployments",
+            "description": "A boolean value that indicates if this recipe should be presented as an option during new deployments."
+        },
         "DeploymentType": {
             "type": "string",
             "title": "Deployment type",
             "description": "The technology used to deploy the project.",
-            "enum": [ "CdkProject" ]
+            "enum": [ "CdkProject",  "BeanstalkEnvironment"]
         },
         "DeploymentBundle": {
             "type": "string",

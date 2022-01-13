@@ -11,23 +11,28 @@ namespace AWS.Deploy.Common
     public class CloudApplication
     {
         /// <summary>
-        /// Name of the CloudApplication
-        /// used to create CloudFormation stack
+        /// Name of the CloudApplication resource
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// Name of CloudFormation stack
+        /// The unique Id to identify the CloudApplication.
+        /// The ID is set to the StackId if the CloudApplication is an existing Cloudformation stack.
+        /// The ID is set to the EnvironmentArn if the CloudApplication is an existing Elastic Beanstalk environment.
+        /// The ID is set to string.Empty for new CloudApplications.
         /// </summary>
-        /// <remarks>
-        /// <see cref="Name"/> and <see cref="StackName"/> are two different properties and just happens to be same value at this moment.
-        /// </remarks>
-        public string StackName => Name;
+        public string UniqueIdentifier { get; set; }
 
         /// <summary>
-        /// The id of the AWS .NET deployment tool recipe used to create the cloud application.
+        /// The id of the AWS .NET deployment tool recipe used to create or re-deploy the cloud application.
         /// </summary>
         public string RecipeId { get; set; }
+
+        /// <summary>
+        /// indicates the type of the AWS resource which serves as the deployment target.
+        /// Current supported values are None, CloudFormationStack and BeanstalkEnvironment.
+        /// </summary>
+        public CloudApplicationResourceType ResourceType { get; set; }
 
         /// <summary>
         /// Last updated time of CloudFormation stack
@@ -40,14 +45,21 @@ namespace AWS.Deploy.Common
         public bool UpdatedByCurrentUser { get; set; }
 
         /// <summary>
+        /// This name is shown to the user when the CloudApplication is presented as an existing re-deployment target.
+        /// </summary>
+        public string DisplayName => $"{Name} ({ResourceType})";
+
+        /// <summary>
         /// Display the name of the Cloud Application
         /// </summary>
         /// <returns></returns>
         public override string ToString() => Name;
 
-        public CloudApplication(string name, string recipeId, DateTime? lastUpdatedTime = null)
+        public CloudApplication(string name, string uniqueIdentifier, CloudApplicationResourceType resourceType, string recipeId, DateTime? lastUpdatedTime = null)
         {
             Name = name;
+            UniqueIdentifier = uniqueIdentifier;
+            ResourceType = resourceType;
             RecipeId = recipeId;
             LastUpdatedTime = lastUpdatedTime;
         }

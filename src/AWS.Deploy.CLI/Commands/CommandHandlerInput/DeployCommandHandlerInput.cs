@@ -13,7 +13,7 @@ namespace AWS.Deploy.CLI.Commands.CommandHandlerInput
         public string? Profile { get; set; }
         public string? Region { get; set; }
         public string? ProjectPath { get; set; }
-        public string? StackName { get; set; }
+        public string? ApplicationName { get; set; }
         public string? Apply { get; set; }
         public bool Diagnostics { get; set; }
         public bool Silent { get; set; }

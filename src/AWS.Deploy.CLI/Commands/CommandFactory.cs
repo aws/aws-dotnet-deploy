@@ -36,7 +36,7 @@ namespace AWS.Deploy.CLI.Commands
         private static readonly Option<string> _optionProfile = new("--profile", "AWS credential profile used to make calls to AWS.");
         private static readonly Option<string> _optionRegion = new("--region", "AWS region to deploy the application to. For example, us-west-2.");
         private static readonly Option<string> _optionProjectPath = new("--project-path", () => Directory.GetCurrentDirectory(), "Path to the project to deploy.");
-        private static readonly Option<string> _optionStackName = new("--stack-name", "Name the AWS stack to deploy your application to.");
+        private static readonly Option<string> _optionApplicationName = new("--application-name", "Name of the cloud application. If you choose to deploy via CloudFormation, this name will be used to identify the CloudFormation stack.");
         private static readonly Option<bool> _optionDiagnosticLogging = new(new[] { "-d", "--diagnostics" }, "Enable diagnostic output.");
         private static readonly Option<string> _optionApply = new("--apply", "Path to the deployment settings file to be applied.");
         private static readonly Option<bool> _optionDisableInteractive = new(new[] { "-s", "--silent" }, "Disable interactivity to deploy without any prompts for user input.");
@@ -153,7 +153,7 @@ namespace AWS.Deploy.CLI.Commands
                 deployCommand.Add(_optionProfile);
                 deployCommand.Add(_optionRegion);
                 deployCommand.Add(_optionProjectPath);
-                deployCommand.Add(_optionStackName);
+                deployCommand.Add(_optionApplicationName);
                 deployCommand.Add(_optionApply);
                 deployCommand.Add(_optionDiagnosticLogging);
                 deployCommand.Add(_optionDisableInteractive);
@@ -224,7 +224,7 @@ namespace AWS.Deploy.CLI.Commands
                         deploymentProjectPath = Path.GetFullPath(deploymentProjectPath, targetApplicationDirectoryPath);
                     }
 
-                    await deploy.ExecuteAsync(input.StackName ?? "", deploymentProjectPath, userDeploymentSettings);
+                    await deploy.ExecuteAsync(input.ApplicationName ?? string.Empty, deploymentProjectPath, userDeploymentSettings);
 
                     return CommandReturnCodes.SUCCESS;
                 }

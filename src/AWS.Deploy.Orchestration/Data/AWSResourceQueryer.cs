@@ -50,7 +50,8 @@ namespace AWS.Deploy.Orchestration.Data
         Task<Amazon.S3.Model.WebsiteConfiguration> GetS3BucketWebSiteConfiguration(string bucketName);
         Task<List<Cluster>> ListOfECSClusters();
         Task<List<ApplicationDescription>> ListOfElasticBeanstalkApplications();
-        Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(string? applicationName);
+        Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(string? applicationName = null);
+        Task<List<Amazon.ElasticBeanstalk.Model.Tag>> ListElasticBeanstalkResourceTags(string resourceArn);
         Task<List<KeyPairInfo>> ListOfEC2KeyPairs();
         Task<string> CreateEC2KeyPair(string keyName, string saveLocation);
         Task<List<Role>> ListOfIAMRoles(string? servicePrincipal);
@@ -240,13 +241,10 @@ namespace AWS.Deploy.Orchestration.Data
             return applications.Applications;
         }
 
-        public async Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(string? applicationName)
+        public async Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(string? applicationName = null)
         {
             var beanstalkClient = _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>();
             var environments = new List<EnvironmentDescription>();
-
-            if (string.IsNullOrEmpty(applicationName))
-                return environments;
 
             var request = new DescribeEnvironmentsRequest
             {
@@ -263,6 +261,17 @@ namespace AWS.Deploy.Orchestration.Data
             } while (!string.IsNullOrEmpty(request.NextToken));
 
             return environments;
+        }
+
+        public async Task<List<Amazon.ElasticBeanstalk.Model.Tag>> ListElasticBeanstalkResourceTags(string resourceArn)
+        {
+            var beanstalkClient = _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>();
+            var response = await beanstalkClient.ListTagsForResourceAsync(new Amazon.ElasticBeanstalk.Model.ListTagsForResourceRequest
+            {
+                ResourceArn = resourceArn
+            });
+
+            return response.ResourceTags;
         }
 
         public async Task<List<KeyPairInfo>> ListOfEC2KeyPairs()
