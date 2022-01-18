@@ -39,6 +39,7 @@ namespace AWS.Deploy.Orchestration.Data
 {
     public interface IAWSResourceQueryer
     {
+        Task<List<StackEvent>> GetCloudFormationStackEvents(string stackName);
         Task<List<InstanceTypeInfo>> ListOfAvailableInstanceTypes();
         Task<Amazon.AppRunner.Model.Service> DescribeAppRunnerService(string serviceArn);
         Task<List<StackResource>> DescribeCloudFormationResources(string stackName);
@@ -77,6 +78,22 @@ namespace AWS.Deploy.Orchestration.Data
         public AWSResourceQueryer(IAWSClientFactory awsClientFactory)
         {
             _awsClientFactory = awsClientFactory;
+        }
+
+        public async Task<List<StackEvent>> GetCloudFormationStackEvents(string stackName)
+        {
+            var cfClient = _awsClientFactory.GetAWSClient<IAmazonCloudFormation>();
+            var stackEvents = new List<StackEvent>();
+            var listInstanceTypesPaginator = cfClient.Paginators.DescribeStackEvents(new DescribeStackEventsRequest {
+                StackName = stackName
+            });
+
+            await foreach (var response in listInstanceTypesPaginator.Responses)
+            {
+                stackEvents.AddRange(response.StackEvents);
+            }
+
+            return stackEvents;
         }
 
         public async Task<List<InstanceTypeInfo>> ListOfAvailableInstanceTypes()
