@@ -166,7 +166,7 @@ namespace AWS.Deploy.Orchestration
 
                     try
                     {
-                        await _cdkProjectHandler.DeployCdkProject(_session, cdkProject, recommendation);
+                        await _cdkProjectHandler.DeployCdkProject(_session, cloudApplication, cdkProject, recommendation);
                     }
                     finally
                     {

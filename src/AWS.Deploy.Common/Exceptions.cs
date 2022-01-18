@@ -90,7 +90,8 @@ namespace AWS.Deploy.Common
         CompatibleRecommendationForRedeploymentNotFound = 10006800,
         InvalidSaveDirectoryForCdkProject = 10006900,
         FailedToFindDeploymentProjectRecipeId = 10007000,
-        UnexpectedError = 10007100
+        UnexpectedError = 10007100,
+        FailedToCreateCdkStack = 10007200
     }
 
     public class ProjectFileNotFoundException : DeployToolException
