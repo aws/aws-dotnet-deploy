@@ -23,24 +23,24 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             _consoleUtilities = consoleUtilities;
         }
 
-        private async Task<List<InstanceTypeInfo>?> GetData(Recommendation recommendation, OptionSettingItem optionSetting)
+        private async Task<List<InstanceTypeInfo>?> GetData()
         {
             return await _awsResourceQueryer.ListOfAvailableInstanceTypes();
         }
 
         public async Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
         {
-            var instanceType = await GetData(recommendation, optionSetting);
+            var instanceType = await GetData();
+
             return instanceType?
+                .OrderBy(x => x.InstanceType.Value)
                 .Select(x => new TypeHintResource(x.InstanceType.Value, x.InstanceType.Value))
-                .Distinct()
-                .OrderBy(x => x)
                 .ToList();
         }
 
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
-            var instanceTypes = await GetData(recommendation, optionSetting);
+            var instanceTypes = await GetData();
             var instanceTypeDefaultValue = recommendation.GetOptionSettingDefaultValue<string>(optionSetting);
             if (instanceTypes == null)
             {

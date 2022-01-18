@@ -144,7 +144,7 @@ namespace AWS.Deploy.ServerMode.Client
 
                 var keyInfoStdin = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(keyInfo)));
 
-                var command = $"{deployToolRoot} server-mode --port {port} --parent-pid {currentProcessId}";
+                var command = $"\"{deployToolRoot}\" server-mode --port {port} --parent-pid {currentProcessId}";
                 var startServerTask = _commandLineWrapper.Run(command, keyInfoStdin);
 
                 _baseUrl = $"http://localhost:{port}";
@@ -183,6 +183,27 @@ namespace AWS.Deploy.ServerMode.Client
 
             var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(credentialsGenerator, _aes);
             restApiClient = new RestAPIClient(_baseUrl, httpClient);
+            return true;
+        }
+
+        /// <summary>
+        /// Builds <see cref="IRestAPIClient"/> client based on a deploy tool server mode running on the specified port.
+        /// </summary>
+        public static bool TryGetRestAPIClient(int port, Aes? aes, Func<Task<AWSCredentials>> credentialsGenerator, out IRestAPIClient? restApiClient)
+        {
+            // This ensures that deploy tool CLI doesn't try on the in-use port
+            // because server availability task will return success response for
+            // an in-use port
+            if (!IsPortInUse(port))
+            {
+                restApiClient = null;
+                throw new PortUnavailableException($"There is no running process on port {port}.");
+            }
+
+            var baseUrl = $"http://localhost:{port}";
+
+            var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(credentialsGenerator, aes);
+            restApiClient = new RestAPIClient(baseUrl, httpClient);
             return true;
         }
 

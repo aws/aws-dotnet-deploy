@@ -330,9 +330,12 @@ namespace AspNetAppElasticBeanstalkLinux
                 }
             }
 
+            if (!settings.BeanstalkEnvironment.CreateNew)
+                throw new InvalidOrMissingConfigurationException("The ability to deploy an Elastic Beanstalk application to an existing environment via a new CloudFormation stack is not supported yet.");
+
             BeanstalkEnvironment = new CfnEnvironment(this, nameof(BeanstalkEnvironment), InvokeCustomizeCDKPropsEvent(nameof(BeanstalkEnvironment), this, new CfnEnvironmentProps
             {
-                EnvironmentName = settings.EnvironmentName,
+                EnvironmentName = settings.BeanstalkEnvironment.EnvironmentName,
                 ApplicationName = settings.BeanstalkApplication.ApplicationName,
                 PlatformArn = settings.ElasticBeanstalkPlatformArn,
                 OptionSettings = optionSettingProperties.ToArray(),

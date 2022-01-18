@@ -65,6 +65,14 @@
     "Validators": [
         {
             "ValidatorType": "FargateTaskSizeCpuMemoryLimits"
+        },
+        {
+            "ValidatorType": "MinMaxConstraint",
+            "Configuration":
+            {
+                "MinValueOptionSettingsId": "AutoScaling.MinCapacity",
+                "MaxValueOptionSettingsId": "AutoScaling.MaxCapacity"
+            }
         }
     ],
 
@@ -420,6 +428,17 @@
                     "DefaultValue": null,
                     "AdvancedSetting": false,
                     "Updatable": false,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": 
+                            {
+                                "Regex": "arn:[^:]+:elasticloadbalancing:[^:]*:[0-9]{12}:loadbalancer/.+",
+                                "AllowEmptyString": true,
+                                "ValidationFailedMessage": "Invalid load balancer ARN. The ARN should contain the arn:[PARTITION]:elasticloadbalancing namespace, followed by the Region of the load balancer, the AWS account ID of the load balancer owner, the loadbalancer namespace, and then the load balancer name. For example, arn:aws:elasticloadbalancing:us-west-2:123456789012:loadbalancer/app/my-load-balancer/50dc6c495c0c9188"
+                            }
+                        }
+                    ],
                     "DependsOn": [
                         {
                             "Id": "LoadBalancer.CreateNew",
@@ -434,7 +453,17 @@
                     "Type": "Int",
                     "DefaultValue": 60,
                     "AdvancedSetting": true,
-                    "Updatable": true
+                    "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": 
+                            {
+                                "Min": 0,
+                                "Max": 3600 
+                            }
+                        }
+                    ]
                 },
                 {
                     "Id": "HealthCheckPath",
@@ -448,11 +477,21 @@
                 {
                     "Id": "HealthCheckInternval",
                     "Name": "Health Check Interval",
-                    "Description": "The number of consecutive health check successes required before considering an unhealthy target healthy.",
+                    "Description": "The approximate interval, in seconds, between health checks of an individual instance.",
                     "Type": "Int",
                     "DefaultValue": 30,
                     "AdvancedSetting": true,
-                    "Updatable": true
+                    "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": 
+                            {
+                                "Min": 5,
+                                "Max": 300 
+                            }
+                        }
+                    ]
                 },
                 {
                     "Id": "HealthyThresholdCount",
@@ -461,7 +500,17 @@
                     "Type": "Int",
                     "DefaultValue": 5,
                     "AdvancedSetting": true,
-                    "Updatable": true
+                    "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": 
+                            {
+                                "Min": 2,
+                                "Max": 10 
+                            }
+                        }
+                    ]
                 },
                 {
                     "Id": "UnhealthyThresholdCount",
@@ -470,7 +519,17 @@
                     "Type": "Int",
                     "DefaultValue": 2,
                     "AdvancedSetting": true,
-                    "Updatable": true
+                    "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": 
+                            {
+                                "Min": 2,
+                                "Max": 10 
+                            }
+                        }
+                    ]
                 },
                 {
                     "Id": "ListenerConditionType",
@@ -499,6 +558,17 @@
                     "DefaultValue": null,
                     "AdvancedSetting": false,
                     "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": 
+                            {
+                                "Regex": "^/[a-zA-Z0-9*?&_\\-.$/~\"'@:+]{0,127}$",
+                                "AllowEmptyString": true,
+                                "ValidationFailedMessage": "Invalid listener condition path. The path is case-sensitive and can be up to 128. It starts with '/' and consists of alpha-numeric characters, wildcards (* and ?), & (using &amp;), and the following special characters: '_-.$/~\"'@:+'"
+                            }
+                        }
+                    ],
                     "DependsOn": [
                         {
                             "Id": "LoadBalancer.CreateNew",
@@ -514,10 +584,20 @@
                     "Id": "ListenerConditionPriority",
                     "Name": "Listener Condition Priority",
                     "Description": "Priority of the condition rule. The value must be unique for the Load Balancer listener.",
-                    "Type": "Double",
+                    "Type": "Int",
                     "DefaultValue": 100,
                     "AdvancedSetting": false,
                     "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": 
+                            {
+                                "Min": 1,
+                                "Max": 50000
+                            }
+                        }
+                    ],
                     "DependsOn": [
                         {
                             "Id": "LoadBalancer.CreateNew",
@@ -556,6 +636,16 @@
                     "DefaultValue": 3,
                     "AdvancedSetting": false,
                     "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": 
+                            {
+                                "Min": 1,
+                                "Max": 5000
+                            }
+                        }
+                    ],
                     "DependsOn": [
                         {
                             "Id": "AutoScaling.Enabled",
@@ -571,6 +661,16 @@
                     "DefaultValue": 6,
                     "AdvancedSetting": false,
                     "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": 
+                            {
+                                "Min": 1,
+                                "Max": 5000
+                            }
+                        }
+                    ],
                     "DependsOn": [
                         {
                             "Id": "AutoScaling.Enabled",
@@ -601,11 +701,21 @@
                 {
                     "Id": "CpuTypeTargetUtilizationPercent",
                     "Name": "CPU Target Utilization",
-                    "Description": "The target cpu utilization that triggers a scaling change.",
+                    "Description": "The target cpu utilization percentage that triggers a scaling change.",
                     "Type": "Double",
                     "DefaultValue": 70,
                     "AdvancedSetting": false,
                     "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": 
+                            {
+                                "Min": 1,
+                                "Max": 100
+                            }
+                        }
+                    ],
                     "DependsOn": [
                         {
                             "Id": "AutoScaling.Enabled",
@@ -625,6 +735,16 @@
                     "DefaultValue": 300,
                     "AdvancedSetting": false,
                     "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": 
+                            {
+                                "Min": 0,
+                                "Max": 3600
+                            }
+                        }
+                    ],
                     "DependsOn": [
                         {
                             "Id": "AutoScaling.Enabled",
@@ -644,6 +764,16 @@
                     "DefaultValue": 300,
                     "AdvancedSetting": false,
                     "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": 
+                            {
+                                "Min": 0,
+                                "Max": 3600
+                            }
+                        }
+                    ],
                     "DependsOn": [
                         {
                             "Id": "AutoScaling.Enabled",
@@ -658,11 +788,21 @@
                 {
                     "Id": "MemoryTypeTargetUtilizationPercent",
                     "Name": "Memory Target Utilization",
-                    "Description": "The target memory utilization that triggers a scaling change.",
+                    "Description": "The target memory utilization percentage that triggers a scaling change.",
                     "Type": "Double",
                     "DefaultValue": 70,
                     "AdvancedSetting": false,
                     "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": 
+                            {
+                                "Min": 1,
+                                "Max": 100
+                            }
+                        }
+                    ],
                     "DependsOn": [
                         {
                             "Id": "AutoScaling.Enabled",
@@ -682,6 +822,16 @@
                     "DefaultValue": 300,
                     "AdvancedSetting": false,
                     "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": 
+                            {
+                                "Min": 0,
+                                "Max": 3600
+                            }
+                        }
+                    ],
                     "DependsOn": [
                         {
                             "Id": "AutoScaling.Enabled",
@@ -701,6 +851,16 @@
                     "DefaultValue": 300,
                     "AdvancedSetting": false,
                     "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": 
+                            {
+                                "Min": 0,
+                                "Max": 3600
+                            }
+                        }
+                    ],
                     "DependsOn": [
                         {
                             "Id": "AutoScaling.Enabled",
@@ -720,6 +880,15 @@
                     "DefaultValue": 1000,
                     "AdvancedSetting": false,
                     "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": 
+                            {
+                                "Min": 1
+                            }
+                        }
+                    ],
                     "DependsOn": [
                         {
                             "Id": "AutoScaling.Enabled",
@@ -739,6 +908,16 @@
                     "DefaultValue": 300,
                     "AdvancedSetting": false,
                     "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": 
+                            {
+                                "Min": 0,
+                                "Max": 3600
+                            }
+                        }
+                    ],
                     "DependsOn": [
                         {
                             "Id": "AutoScaling.Enabled",
@@ -758,6 +937,16 @@
                     "DefaultValue": 300,
                     "AdvancedSetting": false,
                     "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": 
+                            {
+                                "Min": 0,
+                                "Max": 3600
+                            }
+                        }
+                    ],
                     "DependsOn": [
                         {
                             "Id": "AutoScaling.Enabled",

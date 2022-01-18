@@ -417,7 +417,7 @@ namespace AWS.Deploy.CLI.Commands
             var validatorFailedResults =
                         recommendation.Recipe
                             .BuildValidators()
-                            .Select(validator => validator.Validate(recommendation.Recipe, _session))
+                            .Select(validator => validator.Validate(recommendation, _session))
                             .Where(x => !x.IsValid)
                             .ToList();
 
@@ -692,7 +692,7 @@ namespace AWS.Deploy.CLI.Commands
                     var validatorFailedResults =
                         recommendation.Recipe
                             .BuildValidators()
-                            .Select(validator => validator.Validate(recommendation.Recipe, _session))
+                            .Select(validator => validator.Validate(recommendation, _session))
                             .Where(x => !x.IsValid)
                             .ToList();
 

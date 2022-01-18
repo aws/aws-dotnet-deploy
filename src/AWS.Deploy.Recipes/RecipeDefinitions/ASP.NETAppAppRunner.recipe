@@ -63,16 +63,36 @@
             "TypeHint": "AppRunnerService",
             "AdvancedSetting": false,
             "Updatable": false,
-            "DefaultValue": "{StackName}-service"
+            "DefaultValue": "{StackName}-service",
+            "Validators": [
+                {
+                    "ValidatorType": "Regex",
+                    "Configuration": 
+                    {
+                        "Regex": "^([A-Za-z0-9][A-Za-z0-9_-]{3,39})$",
+                        "ValidationFailedMessage": "Invalid service name. The service name must be between 4 and 40 characters in length and can contain uppercase and lowercase letters, numbers, hyphen(-) and underscore(_). It must start with a letter or a number."
+                    }
+                }
+            ]
         },
         {
             "Id": "Port",
             "Name": "Port",
             "Description": "The port the container is listening for requests on.",
             "Type": "Int",
-            "DefaultValue": "80",
+            "DefaultValue": 80,
             "AdvancedSetting": false,
-            "Updatable": true
+            "Updatable": true,
+            "Validators": [
+                {
+                    "ValidatorType": "Range",
+                    "Configuration": 
+                    {
+                        "Min": 0,
+                        "Max": 51200
+                    }
+                }
+            ]
         },
         {
             "Id": "StartCommand",
@@ -114,6 +134,16 @@
                     },
                     "AdvancedSetting": false,
                     "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": 
+                            {
+                                "Regex": "arn:(aws|aws-us-gov|aws-cn|aws-iso|aws-iso-b):iam::[0-9]{12}:(role|role/service-role)/[\\w+=,.@\\-/]{1,1000}",
+                                "ValidationFailedMessage": "Invalid IAM Role ARN. The ARN should contain the arn:[PARTITION]:iam namespace, followed by the account ID, and then the resource path. For example - arn:aws:iam::123456789012:role/S3Access is a valid IAM Role ARN. For more information visit https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-apprunner-service-authenticationconfiguration.html"
+                            }
+                        }
+                    ],
                     "DependsOn": [
                         {
                             "Id": "ApplicationIAMRole.CreateNew",
@@ -155,6 +185,16 @@
                     },
                     "AdvancedSetting": false,
                     "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": 
+                            {
+                                "Regex": "arn:(aws|aws-us-gov|aws-cn|aws-iso|aws-iso-b):iam::[0-9]{12}:(role|role/service-role)/[\\w+=,.@\\-/]{1,1000}",
+                                "ValidationFailedMessage": "Invalid IAM Role ARN. The ARN should contain the arn:[PARTITION]:iam namespace, followed by the account ID, and then the resource path. For example - arn:aws:iam::123456789012:role/S3Access is a valid IAM Role ARN. For more information visit https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-apprunner-service-authenticationconfiguration.html"
+                            }
+                        }
+                    ],
                     "DependsOn": [
                         {
                             "Id": "ServiceAccessIAMRole.CreateNew",
@@ -206,7 +246,17 @@
             "Description": "The ARN of the KMS key that's used for encryption of application logs.",
             "Type": "String",
             "AdvancedSetting": true,
-            "Updatable": false
+            "Updatable": false,
+            "Validators": [
+                {
+                    "ValidatorType": "Regex",
+                    "Configuration": 
+                    {
+                        "Regex": "arn:aws(-[\\w]+)*:kms:[a-z\\-]+-[0-9]{1}:[0-9]{12}:key/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
+                        "ValidationFailedMessage": "Invalid KMS key ARN. The ARN should contain the arn:[PARTITION]:kms namespace, followed by the region, account ID, and then the key-id. For example - arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab is a valid KMS key ARN. For more information visit https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-apprunner-service-encryptionconfiguration.html"
+                    }
+                }
+            ]
         },
         {
             "Id": "HealthCheckProtocol",
@@ -242,7 +292,17 @@
             "Type": "Int",
             "DefaultValue": 5,
             "AdvancedSetting": true,
-            "Updatable": true
+            "Updatable": true,
+            "Validators": [
+                {
+                    "ValidatorType":"Range",
+                    "Configuration": 
+                    {
+                        "Min": 1,
+                        "Max": 20
+                    }
+                }
+            ]
         },
         {
             "Id": "HealthCheckTimeout",
@@ -251,7 +311,17 @@
             "Type": "Int",
             "DefaultValue": 2,
             "AdvancedSetting": true,
-            "Updatable": true
+            "Updatable": true,
+            "Validators": [
+                {
+                    "ValidatorType":"Range",
+                    "Configuration": 
+                    {
+                        "Min": 1,
+                        "Max": 20
+                    }
+                }
+            ]
         },
         {
             "Id": "HealthCheckHealthyThreshold",
@@ -260,7 +330,17 @@
             "Type": "Int",
             "DefaultValue": 3,
             "AdvancedSetting": true,
-            "Updatable": true
+            "Updatable": true,
+            "Validators": [
+                {
+                    "ValidatorType":"Range",
+                    "Configuration": 
+                    {
+                        "Min": 1,
+                        "Max": 20
+                    }
+                }
+            ]
         },
         {
             "Id": "HealthCheckUnhealthyThreshold",
@@ -269,7 +349,17 @@
             "Type": "Int",
             "DefaultValue": 3,
             "AdvancedSetting": true,
-            "Updatable": true
+            "Updatable": true,
+            "Validators": [
+                {
+                    "ValidatorType":"Range",
+                    "Configuration": 
+                    {
+                        "Min": 1,
+                        "Max": 20
+                    }
+                }
+            ]
         }
     ]
 }

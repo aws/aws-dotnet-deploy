@@ -255,7 +255,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var beanstalkRecommendation = recommendations.FirstOrDefault(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
 
-            var beanstalEnvNameSetting = beanstalkRecommendation.Recipe.OptionSettings.FirstOrDefault(x => string.Equals("EnvironmentName", x.Id));
+            var beanstalEnvNameSetting = beanstalkRecommendation.GetOptionSetting("BeanstalkEnvironment.EnvironmentName");
 
             beanstalkRecommendation.AddReplacementToken("{StackName}", "MyAppStack");
             Assert.Equal("MyAppStack-dev", beanstalkRecommendation.GetOptionSettingValue<string>(beanstalEnvNameSetting));

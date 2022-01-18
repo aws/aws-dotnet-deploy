@@ -334,7 +334,8 @@
                     "ValidatorType": {
                         "type": "string",
                         "enum": [
-                            "FargateTaskSizeCpuMemoryLimits"
+                            "FargateTaskSizeCpuMemoryLimits",
+                            "MinMaxConstraint"
                         ]
                     }
                 },
@@ -354,6 +355,28 @@
                                             "type": "string"
                                         },
                                         "MemoryOptionSettingsId":{
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": { "ValidatorType": { "const": "MinMaxConstraint" } }
+                        },
+                        "then": {
+                            "properties": {
+                                "Configuration": {
+                                    "properties": {
+                                        "ValidationFailedMessage": {
+                                            "type": "string"
+                                        },
+                                        "MinValueOptionSettingsId":{
+                                            "type": "string"
+                                        },
+                                        "MaxValueOptionSettingsId":{
                                             "type": "string"
                                         }
                                     }
@@ -516,6 +539,9 @@
                                                 },
                                                 "Max": {
                                                     "type": "integer"
+                                                },
+                                                "AllowEmptyString": {
+                                                    "type": "boolean"
                                                 },
                                                 "ValidationFailedMessage": {
                                                     "type": "string"

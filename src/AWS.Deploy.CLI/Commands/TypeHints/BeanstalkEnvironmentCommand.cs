@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Amazon.ElasticBeanstalk.Model;
+using AWS.Deploy.CLI.TypeHintResponses;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.TypeHintData;
@@ -39,16 +40,24 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
-            var currentValue = recommendation.GetOptionSettingValue(optionSetting);
             var environments = await GetData(recommendation, optionSetting);
+            var currentTypeHintResponse = recommendation.GetOptionSettingValue<BeanstalkEnvironmentTypeHintResponse>(optionSetting);
 
-            var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(
-                options: environments.Select(env => env.EnvironmentName),
-                title: "Select Elastic Beanstalk environment to deploy to:",
-                askNewName: true,
-                defaultNewName: currentValue.ToString() ?? "");
-            return userResponse.SelectedOption ?? userResponse.NewName
-                ?? throw new UserPromptForNameReturnedNullException(DeployToolErrorCode.BeanstalkEnvPromptForNameReturnedNull, "The user response for a new environment name was null.");
+            var userInputConfiguration = new UserInputConfiguration<EnvironmentDescription>(
+                env => env.EnvironmentName,
+                app => app.EnvironmentName.Equals(currentTypeHintResponse?.EnvironmentName),
+                currentTypeHintResponse.EnvironmentName)
+            {
+                AskNewName = true,
+            };
+
+            var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(environments, "Select Elastic Beanstalk environment to deploy to:", userInputConfiguration);
+
+            return new BeanstalkEnvironmentTypeHintResponse(
+                userResponse.CreateNew,
+                userResponse.SelectedOption?.EnvironmentName ?? userResponse.NewName
+                    ?? throw new UserPromptForNameReturnedNullException(DeployToolErrorCode.BeanstalkAppPromptForNameReturnedNull, "The user response for a new environment name was null.")
+                );
         }
     }
 }

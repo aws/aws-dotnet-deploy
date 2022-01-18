@@ -31,7 +31,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.ConfigFileDeployment
             var optionSettingDictionary = _userDeploymentSettings.LeafOptionSettingItems;
             Assert.Equal("True", optionSettingDictionary["BeanstalkApplication.CreateNew"]);
             Assert.Equal("MyApplication", optionSettingDictionary["BeanstalkApplication.ApplicationName"]);
-            Assert.Equal("MyEnvironment", optionSettingDictionary["EnvironmentName"]);
+            Assert.Equal("MyEnvironment", optionSettingDictionary["BeanstalkEnvironment.EnvironmentName"]);
             Assert.Equal("MyInstance", optionSettingDictionary["InstanceType"]);
             Assert.Equal("SingleInstance", optionSettingDictionary["EnvironmentType"]);
             Assert.Equal("application", optionSettingDictionary["LoadBalancerType"]);

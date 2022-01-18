@@ -111,7 +111,7 @@ namespace AWS.Deploy.Orchestration
                     capabilities.Add(new SystemCapability("Docker", false, false)
                     {
                         InstallationUrl = "https://docs.docker.com/engine/install/",
-                        Message = "The selected deployment option requires Docker, which was not detected. Please install and start the appropriate version of Docker for you OS: https://docs.docker.com/engine/install/"
+                        Message = "The selected deployment option requires Docker, which was not detected. Please install and start the appropriate version of Docker for your OS: https://docs.docker.com/engine/install/"
                     });
                 }
                 else if (!systemCapabilities.DockerInfo.DockerContainerType.Equals("linux", StringComparison.OrdinalIgnoreCase))
