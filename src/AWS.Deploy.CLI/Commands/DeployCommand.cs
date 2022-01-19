@@ -21,6 +21,7 @@ using AWS.Deploy.Orchestration.DisplayedResources;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Orchestration.LocalUserSettings;
 using Newtonsoft.Json;
+using AWS.Deploy.Orchestration.ServiceHandlers;
 
 namespace AWS.Deploy.CLI.Commands
 {
@@ -47,6 +48,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly IDirectoryManager _directoryManager;
         private readonly IFileManager _fileManager;
         private readonly ICDKVersionDetector _cdkVersionDetector;
+        private readonly IAWSServiceHandler _awsServiceHandler;
 
         public DeployCommand(
             IToolInteractiveService toolInteractiveService,
@@ -68,7 +70,8 @@ namespace AWS.Deploy.CLI.Commands
             ISystemCapabilityEvaluator systemCapabilityEvaluator,
             OrchestratorSession session,
             IDirectoryManager directoryManager,
-            IFileManager fileManager)
+            IFileManager fileManager,
+            IAWSServiceHandler awsServiceHandler)
         {
             _toolInteractiveService = toolInteractiveService;
             _orchestratorInteractiveService = orchestratorInteractiveService;
@@ -90,6 +93,7 @@ namespace AWS.Deploy.CLI.Commands
             _cdkManager = cdkManager;
             _customRecipeLocator = customRecipeLocator;
             _systemCapabilityEvaluator = systemCapabilityEvaluator;
+            _awsServiceHandler = awsServiceHandler;
         }
 
         public async Task ExecuteAsync(string applicationName, string deploymentProjectPath, UserDeploymentSettings? userDeploymentSettings = null)
@@ -154,7 +158,9 @@ namespace AWS.Deploy.CLI.Commands
                     _dockerEngine,
                     _customRecipeLocator,
                     new List<string> { RecipeLocator.FindRecipeDefinitionsPath() },
-                    _directoryManager);
+                    _fileManager,
+                    _directoryManager,
+                    _awsServiceHandler);
 
             // Determine what recommendations are possible for the project.
             var recommendations = await GenerateDeploymentRecommendations(orchestrator, deploymentProjectPath);
@@ -201,7 +207,7 @@ namespace AWS.Deploy.CLI.Commands
             // Currently only Cloudformation based recipes require the {StackName} replacement token
             selectedRecommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_STACK_NAME, cloudApplicationName);
 
-            var cloudApplication = new CloudApplication(cloudApplicationName, string.Empty, deployedApplication?.ResourceType ?? CloudApplicationResourceType.CloudFormationStack, selectedRecommendation.Recipe.Id);
+            var cloudApplication = new CloudApplication(cloudApplicationName, deployedApplication?.UniqueIdentifier ?? string.Empty, deployedApplication?.ResourceType ?? CloudApplicationResourceType.CloudFormationStack, selectedRecommendation.Recipe.Id);
 
             return (orchestrator, selectedRecommendation, cloudApplication);
         }
@@ -289,15 +295,15 @@ namespace AWS.Deploy.CLI.Commands
                 throw new InvalidUserDeploymentSettingsException(DeployToolErrorCode.StackCreatedFromDifferentDeploymentRecommendation, errorMessage.Trim());
             }
 
-            // currently the ability to load and apply previous settings is available only if the deployment target is a CloudFormation Stack
-            // Do not have an easy way to capture previous settings without querying multiple APIs for non CloudFormation based deployments
-            if (deployedApplication.ResourceType != CloudApplicationResourceType.CloudFormationStack)
-                return selectedRecommendation;
+            IDictionary<string, object> previousSettings;
+            if (deployedApplication.ResourceType == CloudApplicationResourceType.CloudFormationStack)
+                previousSettings = (await _templateMetadataReader.LoadCloudApplicationMetadata(deployedApplication.Name)).Settings;
+            else
+                previousSettings = (await _deployedApplicationQueryer.GetPreviousSettings(deployedApplication));
 
-            var existingCloudApplicationMetadata = await _templateMetadataReader.LoadCloudApplicationMetadata(deployedApplication.Name);
-            selectedRecommendation = selectedRecommendation.ApplyPreviousSettings(existingCloudApplicationMetadata.Settings);
+            selectedRecommendation = selectedRecommendation.ApplyPreviousSettings(previousSettings);
 
-            var header = $"Loading {deployedApplication.Name} settings:";
+            var header = $"Loading {deployedApplication.DisplayName} settings:";
 
             _toolInteractiveService.WriteLine(header);
             _toolInteractiveService.WriteLine(new string('-', header.Length));

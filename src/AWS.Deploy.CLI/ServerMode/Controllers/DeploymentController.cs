@@ -32,6 +32,7 @@ using AWS.Deploy.Orchestration.LocalUserSettings;
 using AWS.Deploy.CLI.Commands;
 using AWS.Deploy.CLI.Commands.TypeHints;
 using AWS.Deploy.Common.TypeHintData;
+using AWS.Deploy.Orchestration.ServiceHandlers;
 
 namespace AWS.Deploy.CLI.ServerMode.Controllers
 {
@@ -612,7 +613,9 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                                         serviceProvider.GetRequiredService<IFileManager>()),
                                     serviceProvider.GetRequiredService<ICustomRecipeLocator>(),
                                     new List<string> { RecipeLocator.FindRecipeDefinitionsPath() },
-                                    serviceProvider.GetRequiredService<IDirectoryManager>()
+                                    serviceProvider.GetRequiredService<IFileManager>(),
+                                    serviceProvider.GetRequiredService<IDirectoryManager>(),
+                                    serviceProvider.GetRequiredService<IAWSServiceHandler>()
                                 );
         }
     }

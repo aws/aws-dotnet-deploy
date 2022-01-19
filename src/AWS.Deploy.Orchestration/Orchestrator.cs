@@ -14,6 +14,8 @@ using AWS.Deploy.Orchestration.CDK;
 using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.DeploymentCommands;
 using AWS.Deploy.Orchestration.LocalUserSettings;
+using AWS.Deploy.Orchestration.ServiceHandlers;
+using AWS.Deploy.Orchestration.Utilities;
 
 namespace AWS.Deploy.Orchestration
 {
@@ -33,9 +35,11 @@ namespace AWS.Deploy.Orchestration
         internal readonly ILocalUserSettingsEngine? _localUserSettingsEngine;
         internal readonly IDockerEngine? _dockerEngine;
         internal readonly IList<string>? _recipeDefinitionPaths;
+        internal readonly IFileManager? _fileManager;
         internal readonly IDirectoryManager? _directoryManager;
         internal readonly ICustomRecipeLocator? _customRecipeLocator;
         internal readonly OrchestratorSession? _session;
+        internal readonly IAWSServiceHandler? _awsServiceHandler;
 
         public Orchestrator(
             OrchestratorSession session,
@@ -49,7 +53,9 @@ namespace AWS.Deploy.Orchestration
             IDockerEngine dockerEngine,
             ICustomRecipeLocator customRecipeLocator,
             IList<string> recipeDefinitionPaths,
-            IDirectoryManager directoryManager)
+            IFileManager fileManager,
+            IDirectoryManager directoryManager,
+            IAWSServiceHandler awsServiceHandler)
         {
             _session = session;
             _interactiveService = interactiveService;
@@ -62,7 +68,9 @@ namespace AWS.Deploy.Orchestration
             _customRecipeLocator = customRecipeLocator;
             _recipeDefinitionPaths = recipeDefinitionPaths;
             _localUserSettingsEngine = localUserSettingsEngine;
+            _fileManager = fileManager;
             _directoryManager = directoryManager;
+            _awsServiceHandler = awsServiceHandler;
         }
 
         public Orchestrator(OrchestratorSession session, IList<string> recipeDefinitionPaths)

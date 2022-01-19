@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Amazon.CloudFormation;
 using Amazon.ElasticBeanstalk;
+using Amazon.ElasticBeanstalk.Model;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
@@ -32,6 +33,11 @@ namespace AWS.Deploy.Orchestration.Utilities
         /// Checks if the given recommendation can be used for a redeployment to an existing cloudformation stack.
         /// </summary>
         bool IsCompatible(CloudApplication application, Recommendation recommendation);
+
+        /// <summary>
+        /// Gets the current option settings associated with the cloud application. This method is only used for non-CloudFormation based cloud applications.
+        /// </summary>
+        Task<IDictionary<string, object>> GetPreviousSettings(CloudApplication application);
     }
 
     public class DeployedApplicationQueryer : IDeployedApplicationQueryer
@@ -66,8 +72,6 @@ namespace AWS.Deploy.Orchestration.Utilities
         /// <summary>
         /// Filters the applications that can be re-deployed using the current set of available recommendations.
         /// </summary>
-        /// <param name="allDeployedApplications"></param>
-        /// <param name="recommendations"></param>
         /// <returns>A list of <see cref="CloudApplication"/> that are compatible for a re-deployment</returns>
         public async Task<List<CloudApplication>> GetCompatibleApplications(List<Recommendation> recommendations, List<CloudApplication>? allDeployedApplications = null, OrchestratorSession? session = null)
         {
@@ -130,6 +134,23 @@ namespace AWS.Deploy.Orchestration.Utilities
                 return string.Equals(recommendation.Recipe.Id, application.RecipeId, StringComparison.Ordinal) || string.Equals(recommendation.Recipe.BaseRecipeId, application.RecipeId, StringComparison.Ordinal);
             }
             return string.Equals(recommendation.Recipe.Id, application.RecipeId, StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// Gets the current option settings associated with the cloud application.This method is only used for non-CloudFormation based cloud applications.
+        /// </summary>
+        public async Task<IDictionary<string, object>> GetPreviousSettings(CloudApplication application)
+        {
+            IDictionary<string, object> previousSettings;
+            switch (application.ResourceType)
+            {
+                case CloudApplicationResourceType.BeanstalkEnvironment:
+                    previousSettings = await GetBeanstalkEnvironmentConfigurationSettings(application.Name);
+                    break;
+                default:
+                    throw new InvalidOperationException($"Cannot fetch existing option settings for the following {nameof(CloudApplicationResourceType)}: {application.ResourceType}");
+            }
+            return previousSettings;
         }
 
         /// <summary>
@@ -204,10 +225,36 @@ namespace AWS.Deploy.Orchestration.Utilities
                 if (tags.Any(x => string.Equals(x.Key, Constants.CloudFormationIdentifier.STACK_TAG)))
                     continue;
 
-                validEnvironments.Add(new CloudApplication(env.EnvironmentName, env.EnvironmentArn, CloudApplicationResourceType.BeanstalkEnvironment, Constants.RecipeIdentifier.EXISTING_BEANSTALK_ENVIRONMENT_RECIPE_ID, env.DateUpdated));
+                validEnvironments.Add(new CloudApplication(env.EnvironmentName, env.EnvironmentId, CloudApplicationResourceType.BeanstalkEnvironment, Constants.RecipeIdentifier.EXISTING_BEANSTALK_ENVIRONMENT_RECIPE_ID, env.DateUpdated));
             }
 
             return validEnvironments;
+        }
+
+        private async Task<IDictionary<string, object>> GetBeanstalkEnvironmentConfigurationSettings(string environmentName)
+        {
+            IDictionary<string, object> optionSettings = new Dictionary<string, object>();
+            var configurationSettings = await _awsResourceQueryer.GetBeanstalkEnvironmentConfigurationSettings(environmentName);
+
+            foreach (var tuple in Constants.ElasticBeanstalk.OptionSettingQueryList)
+            {
+                var configurationSetting = GetBeanstalkEnvironmentConfigurationSetting(configurationSettings, tuple.OptionSettingNameSpace, tuple.OptionSettingName);
+
+                if (string.IsNullOrEmpty(configurationSetting?.Value))
+                    continue;
+
+                optionSettings[tuple.OptionSettingId] = configurationSetting.Value;
+            }
+
+            return optionSettings;
+        }
+
+        private ConfigurationOptionSetting GetBeanstalkEnvironmentConfigurationSetting(List<ConfigurationOptionSetting> configurationSettings, string optionNameSpace, string optionName)
+        {
+            var configurationSetting = configurationSettings
+                .FirstOrDefault(x => string.Equals(optionNameSpace, x.Namespace) && string.Equals(optionName, x.OptionName));
+
+            return configurationSetting;
         }
     }
 }

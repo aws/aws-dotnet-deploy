@@ -13,6 +13,7 @@ using AWS.Deploy.Orchestration.CDK;
 using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.DisplayedResources;
 using AWS.Deploy.Orchestration.LocalUserSettings;
+using AWS.Deploy.Orchestration.ServiceHandlers;
 using AWS.Deploy.Orchestration.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -58,6 +59,9 @@ namespace AWS.Deploy.CLI.Extensions
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(ILocalUserSettingsEngine), typeof(LocalUserSettingsEngine), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICommandFactory), typeof(CommandFactory), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICDKVersionDetector), typeof(CDKVersionDetector), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(IAWSServiceHandler), typeof(AWSServiceHandler), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(IS3Handler), typeof(AWSS3Handler), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(IElasticBeanstalkHandler), typeof(AWSElasticBeanstalkHandler), lifetime));
 
             var packageJsonTemplate = typeof(PackageJsonGenerator).Assembly.ReadEmbeddedFile(PackageJsonGenerator.TemplateIdentifier);
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IPackageJsonGenerator), (serviceProvider) => new PackageJsonGenerator(packageJsonTemplate), lifetime));

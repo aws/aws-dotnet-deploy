@@ -15,6 +15,9 @@ namespace AWS.Deploy.Common.IO
         Task<string> ReadAllTextAsync(string path);
         Task<string[]> ReadAllLinesAsync(string path);
         Task WriteAllTextAsync(string filePath, string contents, CancellationToken cancellationToken = default);
+        FileStream OpenRead(string filePath);
+        string GetExtension(string filePath);
+        long GetSizeInBytes(string filePath);
     }
 
     /// <summary>
@@ -30,6 +33,12 @@ namespace AWS.Deploy.Common.IO
 
         public Task WriteAllTextAsync(string filePath, string contents, CancellationToken cancellationToken) =>
             File.WriteAllTextAsync(filePath, contents, cancellationToken);
+
+        public FileStream OpenRead(string filePath) => File.OpenRead(filePath);
+
+        public string GetExtension(string filePath) => Path.GetExtension(filePath);
+
+        public long GetSizeInBytes(string filePath) => new FileInfo(filePath).Length;
 
         private bool IsFileValid(string filePath)
         {

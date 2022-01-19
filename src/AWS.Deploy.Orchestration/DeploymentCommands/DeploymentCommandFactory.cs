@@ -22,14 +22,14 @@ namespace AWS.Deploy.Orchestration.DeploymentCommands
             if (!_deploymentCommandTypeMapping.ContainsKey(deploymentType))
             {
                 var message = $"Failed to create an instance of type {nameof(IDeploymentCommand)}. {deploymentType} does not exist as a key in {_deploymentCommandTypeMapping}.";
-                throw new FailedToCreateDeploymentCommandInstance(DeployToolErrorCode.FailedToCreateDeploymentCommandInstance, message);
+                throw new FailedToCreateDeploymentCommandInstanceException(DeployToolErrorCode.FailedToCreateDeploymentCommandInstance, message);
             }
                 
             var deploymentCommandInstance = Activator.CreateInstance(_deploymentCommandTypeMapping[deploymentType]);
             if (deploymentCommandInstance == null || deploymentCommandInstance is not IDeploymentCommand)
             {
                 var message = $"Failed to create an instance of type {_deploymentCommandTypeMapping[deploymentType]}.";
-                throw new FailedToCreateDeploymentCommandInstance(DeployToolErrorCode.FailedToCreateDeploymentCommandInstance, message);
+                throw new FailedToCreateDeploymentCommandInstanceException(DeployToolErrorCode.FailedToCreateDeploymentCommandInstance, message);
             }
 
             return (IDeploymentCommand)deploymentCommandInstance;
