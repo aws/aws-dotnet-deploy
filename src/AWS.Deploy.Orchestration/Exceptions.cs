@@ -1,6 +1,7 @@
 
 using System;
 using AWS.Deploy.Common;
+using AWS.Deploy.Orchestration.DeploymentCommands;
 
 namespace AWS.Deploy.Orchestration
 {
@@ -172,8 +173,27 @@ namespace AWS.Deploy.Orchestration
         public DockerInfoException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
-    public class FailedToCreateDeploymentCommandInstance : DeployToolException
+    /// <summary>
+    /// Throw if could not create an instance of <see cref="IDeploymentCommand"/>
+    /// </summary>
+    public class FailedToCreateDeploymentCommandInstanceException : DeployToolException
     {
-        public FailedToCreateDeploymentCommandInstance(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+        public FailedToCreateDeploymentCommandInstanceException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+    }
+
+    /// <summary>
+    /// Throw if an error occured while calling a S3 API.
+    /// </summary>
+    public class S3Exception : DeployToolException
+    {
+        public S3Exception(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+    }
+
+    /// <summary>
+    /// Throw if an error occured while calling an Elastic Beanstalk API.
+    /// </summary>
+    public class ElasticBeanstalkException : DeployToolException
+    {
+        public ElasticBeanstalkException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 }

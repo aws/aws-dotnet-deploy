@@ -42,7 +42,7 @@ namespace AWS.Deploy.Orchestration.Data
         Task<List<InstanceTypeInfo>> ListOfAvailableInstanceTypes();
         Task<Amazon.AppRunner.Model.Service> DescribeAppRunnerService(string serviceArn);
         Task<List<StackResource>> DescribeCloudFormationResources(string stackName);
-        Task<EnvironmentDescription> DescribeElasticBeanstalkEnvironment(string environmentId);
+        Task<EnvironmentDescription> DescribeElasticBeanstalkEnvironment(string environmentName);
         Task<Amazon.ElasticLoadBalancingV2.Model.LoadBalancer> DescribeElasticLoadBalancer(string loadBalancerArn);
         Task<List<Amazon.ElasticLoadBalancingV2.Model.Listener>> DescribeElasticLoadBalancerListeners(string loadBalancerArn);
         Task<DescribeRuleResponse> DescribeCloudWatchRule(string ruleName);
@@ -69,6 +69,7 @@ namespace AWS.Deploy.Orchestration.Data
         Task<List<string>> ListOfSQSQueuesUrls();
         Task<List<string>> ListOfSNSTopicArns();
         Task<List<Amazon.S3.Model.S3Bucket>> ListOfS3Buckets();
+        Task<List<ConfigurationOptionSetting>> GetBeanstalkEnvironmentConfigurationSettings(string environmentName);
     }
 
     public class AWSResourceQueryer : IAWSResourceQueryer
@@ -119,17 +120,17 @@ namespace AWS.Deploy.Orchestration.Data
             return resources.StackResources;
         }
 
-        public async Task<EnvironmentDescription> DescribeElasticBeanstalkEnvironment(string environmentId)
+        public async Task<EnvironmentDescription> DescribeElasticBeanstalkEnvironment(string environmentName)
         {
             var beanstalkClient = _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>();
 
             var environment = await beanstalkClient.DescribeEnvironmentsAsync(new DescribeEnvironmentsRequest {
-                EnvironmentNames = new List<string> { environmentId }
+                EnvironmentNames = new List<string> { environmentName }
             });
 
             if (!environment.Environments.Any())
             {
-                throw new AWSResourceNotFoundException(DeployToolErrorCode.BeanstalkEnvironmentDoesNotExist, $"The elastic beanstalk environment '{environmentId}' does not exist.");
+                throw new AWSResourceNotFoundException(DeployToolErrorCode.BeanstalkEnvironmentDoesNotExist, $"The elastic beanstalk environment '{environmentName}' does not exist.");
             }
 
             return environment.Environments.First();
@@ -516,6 +517,28 @@ namespace AWS.Deploy.Orchestration.Data
             }
 
             return buckets;
+        }
+
+        public async Task<List<ConfigurationOptionSetting>> GetBeanstalkEnvironmentConfigurationSettings(string environmentName)
+        {
+            var optionSetting = new List<ConfigurationOptionSetting>();
+            var environmentDescription = await DescribeElasticBeanstalkEnvironment(environmentName);
+            var client = _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>();
+            var response = await client.DescribeConfigurationSettingsAsync(new DescribeConfigurationSettingsRequest
+            {
+                ApplicationName = environmentDescription.ApplicationName,
+                EnvironmentName = environmentName
+            });
+
+            foreach (var settingDescription in response.ConfigurationSettings)
+            {
+                foreach (var setting in settingDescription.OptionSettings)
+                {
+                    optionSetting.Add(setting);
+                }
+            }
+
+            return optionSetting;
         }
     }
 }

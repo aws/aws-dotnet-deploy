@@ -405,5 +405,54 @@ namespace AWS.Deploy.Orchestration.UnitTests
             var result = await deployedApplicationQueryer.GetExistingDeployedApplications(deploymentTypes);
             Assert.Empty(result);
         }
+
+        [Fact]
+        public async Task GetPreviousSettings_BeanstalkEnvironment()
+        {
+            var application = new CloudApplication("name", "Id", CloudApplicationResourceType.BeanstalkEnvironment, "recipe");
+            var configurationSettings = new List<ConfigurationOptionSetting>
+            {
+                new ConfigurationOptionSetting
+                {
+                    Namespace = Constants.ElasticBeanstalk.EnhancedHealthReportingOptionNameSpace,
+                    OptionName = Constants.ElasticBeanstalk.EnhancedHealthReportingOptionName,
+                    Value = "enhanced"
+                },
+                new ConfigurationOptionSetting
+                {
+                    OptionName = Constants.ElasticBeanstalk.HealthCheckURLOptionName,
+                    Namespace = Constants.ElasticBeanstalk.HealthCheckURLOptionNameSpace,
+                    Value = "/"
+                },
+                new ConfigurationOptionSetting
+                {
+                    OptionName = Constants.ElasticBeanstalk.ProxyOptionName,
+                    Namespace = Constants.ElasticBeanstalk.ProxyOptionNameSpace,
+                    Value = "nginx"
+                },
+                new ConfigurationOptionSetting
+                {
+                    OptionName = Constants.ElasticBeanstalk.XRayTracingOptionName,
+                    Namespace = Constants.ElasticBeanstalk.XRayTracingOptionNameSpace,
+                    Value = "false"
+                }
+            };
+
+            _mockAWSResourceQueryer
+                .Setup(x => x.GetBeanstalkEnvironmentConfigurationSettings(It.IsAny<string>()))
+                .Returns(Task.FromResult(configurationSettings));
+
+            var deployedApplicationQueryer = new DeployedApplicationQueryer(
+                _mockAWSResourceQueryer.Object,
+                _mockLocalUserSettingsEngine.Object,
+                _mockOrchestratorInteractiveService.Object);
+
+            var optionSettings = await deployedApplicationQueryer.GetPreviousSettings(application);
+
+            Assert.Equal("enhanced", optionSettings[Constants.ElasticBeanstalk.EnhancedHealthReportingOptionId]);
+            Assert.Equal("/", optionSettings[Constants.ElasticBeanstalk.HealthCheckURLOptionId]);
+            Assert.Equal("nginx", optionSettings[Constants.ElasticBeanstalk.ProxyOptionId]);
+            Assert.Equal("false", optionSettings[Constants.ElasticBeanstalk.XRayTracingOptionId]);
+        }
     }
 }

@@ -23,6 +23,7 @@ using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.DeploymentManifest;
 using AWS.Deploy.Orchestration.DisplayedResources;
 using AWS.Deploy.Orchestration.LocalUserSettings;
+using AWS.Deploy.Orchestration.ServiceHandlers;
 
 namespace AWS.Deploy.CLI.Commands
 {
@@ -69,6 +70,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly ICustomRecipeLocator _customRecipeLocator;
         private readonly ILocalUserSettingsEngine _localUserSettingsEngine;
         private readonly ICDKVersionDetector _cdkVersionDetector;
+        private readonly IAWSServiceHandler _awsServiceHandler;
 
         public CommandFactory(
             IToolInteractiveService toolInteractiveService,
@@ -93,7 +95,8 @@ namespace AWS.Deploy.CLI.Commands
             IDeploymentManifestEngine deploymentManifestEngine,
             ICustomRecipeLocator customRecipeLocator,
             ILocalUserSettingsEngine localUserSettingsEngine,
-            ICDKVersionDetector cdkVersionDetector)
+            ICDKVersionDetector cdkVersionDetector,
+            IAWSServiceHandler awsServiceHandler)
         {
             _toolInteractiveService = toolInteractiveService;
             _orchestratorInteractiveService = orchestratorInteractiveService;
@@ -118,6 +121,7 @@ namespace AWS.Deploy.CLI.Commands
             _customRecipeLocator = customRecipeLocator;
             _localUserSettingsEngine = localUserSettingsEngine;
             _cdkVersionDetector = cdkVersionDetector;
+            _awsServiceHandler = awsServiceHandler;
         }
 
         public Command BuildRootCommand()
@@ -216,7 +220,8 @@ namespace AWS.Deploy.CLI.Commands
                         _systemCapabilityEvaluator,
                         session,
                         _directoryManager,
-                        _fileManager);
+                        _fileManager,
+                        _awsServiceHandler);
 
                     var deploymentProjectPath = input.DeploymentProject ?? string.Empty;
                     if (!string.IsNullOrEmpty(deploymentProjectPath))

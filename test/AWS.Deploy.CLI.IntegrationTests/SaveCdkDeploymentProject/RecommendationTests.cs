@@ -23,6 +23,8 @@ using Newtonsoft.Json;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.CLI.IntegrationTests.Services;
 using AWS.Deploy.Orchestration.LocalUserSettings;
+using AWS.Deploy.Orchestration.Utilities;
+using AWS.Deploy.Orchestration.ServiceHandlers;
 
 namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 {
@@ -224,7 +226,9 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
                 new Mock<IDockerEngine>().Object,
                 customRecipeLocator,
                 new List<string> { RecipeLocator.FindRecipeDefinitionsPath() },
-                directoryManager);
+                fileManager,
+                directoryManager,
+                new Mock<IAWSServiceHandler>().Object);
         }
 
         private async Task<string> GetCustomRecipeId(string recipeFilePath)
