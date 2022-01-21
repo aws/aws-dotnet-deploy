@@ -118,6 +118,11 @@ namespace AWS.Deploy.Common.Recipes
             {
                 _valueOverride = valueOverride;
             }
+            else if (Type.Equals(OptionSettingValueType.KeyValue))
+            {
+                var deserialized = JsonConvert.DeserializeObject<Dictionary<string, string>>(valueOverride?.ToString() ?? "");
+                _valueOverride = deserialized;
+            }
             else if (valueOverride is string valueOverrideString)
             {
                 if (bool.TryParse(valueOverrideString, out var valueOverrideBool))
