@@ -91,7 +91,8 @@ namespace AWS.Deploy.Common
         InvalidSaveDirectoryForCdkProject = 10006900,
         FailedToFindDeploymentProjectRecipeId = 10007000,
         UnexpectedError = 10007100,
-        FailedToCreateCdkStack = 10007200
+        FailedToCreateCdkStack = 10007200,
+        FailedToFindElasticBeanstalkSolutionStack = 10007300
     }
 
     public class ProjectFileNotFoundException : DeployToolException

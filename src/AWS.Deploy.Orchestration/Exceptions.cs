@@ -171,4 +171,12 @@ namespace AWS.Deploy.Orchestration
     {
         public DockerInfoException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
+
+    /// <summary>
+    /// Throw if unable to find an Elastic Beanstalk .NET solution stack.
+    /// </summary>
+    public class FailedToFindElasticBeanstalkSolutionStackException : DeployToolException
+    {
+        public FailedToFindElasticBeanstalkSolutionStackException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+    }
 }

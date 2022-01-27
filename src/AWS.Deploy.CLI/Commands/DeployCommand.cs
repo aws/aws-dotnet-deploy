@@ -26,8 +26,6 @@ namespace AWS.Deploy.CLI.Commands
 {
     public class DeployCommand
     {
-        public const string REPLACE_TOKEN_STACK_NAME = "{StackName}";
-
         private readonly IToolInteractiveService _toolInteractiveService;
         private readonly IOrchestratorInteractiveService _orchestratorInteractiveService;
         private readonly ICdkProjectHandler _cdkProjectHandler;
@@ -197,8 +195,7 @@ namespace AWS.Deploy.CLI.Commands
                 }
             }
 
-            // Apply the user entered stack name to the recommendation so that any default settings based on stack name are applied.
-            selectedRecommendation.AddReplacementToken(REPLACE_TOKEN_STACK_NAME, cloudApplicationName);
+            await orchestrator.ApplyAllReplacementTokens(selectedRecommendation, cloudApplicationName);
 
             var cloudApplication = new CloudApplication(cloudApplicationName, selectedRecommendation.Recipe.Id);
 

@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using AWS.Deploy.Common.Extensions;
 using AWS.Deploy.Common.Recipes;
 
@@ -31,7 +32,7 @@ namespace AWS.Deploy.Common
 
         public readonly List<OptionSettingItem> DeploymentBundleSettings = new ();
 
-        private readonly Dictionary<string, string> _replacementTokens = new();
+        public readonly Dictionary<string, string> ReplacementTokens = new();
 
         public Recommendation(RecipeDefinition recipe, ProjectDefinition projectDefinition, List<OptionSettingItem> deploymentBundleSettings, int computedPriority, Dictionary<string, string> additionalReplacements)
         {
@@ -44,10 +45,30 @@ namespace AWS.Deploy.Common
             DeploymentBundle = new DeploymentBundle();
             DeploymentBundleSettings = deploymentBundleSettings;
 
+            CollectRecommendationReplacementTokens(Recipe.OptionSettings);
+
             foreach (var replacement in additionalReplacements)
             {
-                if (!_replacementTokens.ContainsKey(replacement.Key))
-                    _replacementTokens[replacement.Key] = replacement.Value;
+                ReplacementTokens[replacement.Key] = replacement.Value;
+            }
+        }
+
+        private void CollectRecommendationReplacementTokens(List<OptionSettingItem> optionSettings)
+        {
+            foreach (var optionSetting in optionSettings)
+            {
+                string defaultValue = optionSetting.DefaultValue?.ToString() ?? "";
+                Regex regex = new Regex(@"^.*\{[\w\d]+\}.*$");
+                Match match = regex.Match(defaultValue);
+
+                if (match.Success)
+                {
+                    var replacement = defaultValue.Substring(defaultValue.IndexOf("{"), defaultValue.IndexOf("}") + 1);
+                    ReplacementTokens[replacement] = "";
+                }
+
+                if (optionSetting.ChildOptionSettings.Any())
+                    CollectRecommendationReplacementTokens(optionSetting.ChildOptionSettings);
             }
         }
 
@@ -62,7 +83,7 @@ namespace AWS.Deploy.Common
 
         public void AddReplacementToken(string key, string value)
         {
-            _replacementTokens[key] = value;
+            ReplacementTokens[key] = value;
         }
 
         private void ApplyPreviousSettings(Recommendation recommendation, IDictionary<string, object> previousSettings)
@@ -134,7 +155,7 @@ namespace AWS.Deploy.Common
                     displayableOptionSettings.Add(childOptionSetting.Id, IsOptionSettingDisplayable(childOptionSetting));
                 }
             }
-            return optionSetting.GetValue<T>(_replacementTokens, displayableOptionSettings);
+            return optionSetting.GetValue<T>(ReplacementTokens, displayableOptionSettings);
         }
 
         public object GetOptionSettingValue(OptionSettingItem optionSetting)
@@ -147,17 +168,17 @@ namespace AWS.Deploy.Common
                     displayableOptionSettings.Add(childOptionSetting.Id, IsOptionSettingDisplayable(childOptionSetting));
                 }
             }
-            return optionSetting.GetValue(_replacementTokens, displayableOptionSettings);
+            return optionSetting.GetValue(ReplacementTokens, displayableOptionSettings);
         }
 
         public T? GetOptionSettingDefaultValue<T>(OptionSettingItem optionSetting)
         {
-            return optionSetting.GetDefaultValue<T>(_replacementTokens);
+            return optionSetting.GetDefaultValue<T>(ReplacementTokens);
         }
 
         public object? GetOptionSettingDefaultValue(OptionSettingItem optionSetting)
         {
-            return optionSetting.GetDefaultValue(_replacementTokens);
+            return optionSetting.GetDefaultValue(ReplacementTokens);
         }
 
         /// <summary>

@@ -23,8 +23,6 @@ namespace AWS.Deploy.Orchestration
     /// </summary>
     public class Orchestrator
     {
-        private const string REPLACE_TOKEN_LATEST_DOTNET_BEANSTALK_PLATFORM_ARN = "{LatestDotnetBeanstalkPlatformArn}";
-
         private readonly ICdkProjectHandler? _cdkProjectHandler;
         private readonly ICDKManager? _cdkManager;
         private readonly ICDKVersionDetector? _cdkVersionDetector;
@@ -85,8 +83,7 @@ namespace AWS.Deploy.Orchestration
 
             var customRecipePaths = await LocateCustomRecipePaths(targetApplicationFullPath, solutionDirectoryPath);
             var engine = new RecommendationEngine.RecommendationEngine(_recipeDefinitionPaths.Union(customRecipePaths), _session);
-            var additionalReplacements = await GetReplacements();
-            return await engine.ComputeRecommendations(additionalReplacements);
+            return await engine.ComputeRecommendations();
         }
 
         public async Task<List<Recommendation>> GenerateRecommendationsToSaveDeploymentProject()
@@ -110,21 +107,24 @@ namespace AWS.Deploy.Orchestration
                 throw new InvalidCliArgumentException(DeployToolErrorCode.DeploymentProjectPathNotFound, $"The path '{deploymentProjectPath}' does not exists on the file system. Please provide a valid deployment project path and try again.");
 
             var engine = new RecommendationEngine.RecommendationEngine(new List<string> { deploymentProjectPath }, _session);
-            var additionalReplacements = await GetReplacements();
-            return await engine.ComputeRecommendations(additionalReplacements);
+            return await engine.ComputeRecommendations();
         }
 
-        public async Task<Dictionary<string, string>> GetReplacements()
+        public async Task ApplyAllReplacementTokens(Recommendation recommendation, string cloudApplicationName)
         {
-            var replacements = new Dictionary<string, string>();
+            if (recommendation.ReplacementTokens.ContainsKey(Constants.CLI.REPLACE_TOKEN_LATEST_DOTNET_BEANSTALK_PLATFORM_ARN))
+            {
+                if (_awsResourceQueryer == null)
+                    throw new InvalidOperationException($"{nameof(_awsResourceQueryer)} is null as part of the Orchestrator object");
 
-            if (_awsResourceQueryer == null)
-                throw new InvalidOperationException($"{nameof(_awsResourceQueryer)} is null as part of the Orchestrator object");
-
-            var latestPlatform = await _awsResourceQueryer.GetLatestElasticBeanstalkPlatformArn();
-            replacements[REPLACE_TOKEN_LATEST_DOTNET_BEANSTALK_PLATFORM_ARN] = latestPlatform.PlatformArn;
-
-            return replacements;
+                var latestPlatform = await _awsResourceQueryer.GetLatestElasticBeanstalkPlatformArn();
+                recommendation.AddReplacementToken(Constants.CLI.REPLACE_TOKEN_LATEST_DOTNET_BEANSTALK_PLATFORM_ARN, latestPlatform.PlatformArn);
+            }
+            if (recommendation.ReplacementTokens.ContainsKey(Constants.CLI.REPLACE_TOKEN_STACK_NAME))
+            {
+                // Apply the user entered stack name to the recommendation so that any default settings based on stack name are applied.
+                recommendation.AddReplacementToken(Constants.CLI.REPLACE_TOKEN_STACK_NAME, cloudApplicationName);
+            }
         }
 
         public async Task DeployRecommendation(CloudApplication cloudApplication, Recommendation recommendation)
