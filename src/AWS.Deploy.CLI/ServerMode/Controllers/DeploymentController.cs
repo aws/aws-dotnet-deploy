@@ -344,6 +344,9 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 return NotFound($"Session ID {sessionId} not found.");
             }
 
+            var serviceProvider = CreateSessionServiceProvider(state);
+            var orchestrator = CreateOrchestrator(state, serviceProvider);
+
             if(!string.IsNullOrEmpty(input.NewDeploymentRecipeId) &&
                !string.IsNullOrEmpty(input.NewDeploymentName))
             {
@@ -355,11 +358,10 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
                 state.ApplicationDetails.Name = input.NewDeploymentName;
                 state.ApplicationDetails.RecipeId = input.NewDeploymentRecipeId;
-                state.SelectedRecommendation.AddReplacementToken(DeployCommand.REPLACE_TOKEN_STACK_NAME, input.NewDeploymentName);
+                await orchestrator.ApplyAllReplacementTokens(state.SelectedRecommendation, input.NewDeploymentName);
             }
             else if(!string.IsNullOrEmpty(input.ExistingDeploymentName))
             {
-                var serviceProvider = CreateSessionServiceProvider(state);
                 var templateMetadataReader = serviceProvider.GetRequiredService<ITemplateMetadataReader>();
 
                 var existingDeployment = state.ExistingDeployments?.FirstOrDefault(x => string.Equals(input.ExistingDeploymentName, x.Name));
@@ -379,7 +381,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
                 state.ApplicationDetails.Name = input.ExistingDeploymentName;
                 state.ApplicationDetails.RecipeId = existingDeployment.RecipeId;
-                state.SelectedRecommendation.AddReplacementToken(DeployCommand.REPLACE_TOKEN_STACK_NAME, input.ExistingDeploymentName);
+                await orchestrator.ApplyAllReplacementTokens(state.SelectedRecommendation, input.ExistingDeploymentName);
             }
 
             return Ok();

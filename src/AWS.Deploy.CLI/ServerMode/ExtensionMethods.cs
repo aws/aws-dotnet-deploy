@@ -7,6 +7,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Security.Claims;
 using Amazon.Runtime;
+using Microsoft.AspNetCore.Builder;
+using System.Net;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
+using System.Text.Json;
+using AWS.Deploy.CLI.ServerMode.Models;
+using AWS.Deploy.Common;
 
 namespace AWS.Deploy.CLI.ServerMode
 {
@@ -33,6 +40,38 @@ namespace AWS.Deploy.CLI.ServerMode
             }
 
             return new BasicAWSCredentials(awsAccessKeyId, awsSecretKey);
+        }
+
+        public static void ConfigureExceptionHandler(this IApplicationBuilder app)
+        {
+            app.UseExceptionHandler(error =>
+            {
+                error.Run(async context =>
+                {
+                    context.Response.StatusCode = (int) HttpStatusCode.InternalServerError;
+                    context.Response.ContentType = "application/json";
+                    var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
+                    if (contextFeature != null)
+                    {
+                        var exceptionString = "";
+                        if (contextFeature.Error is DeployToolException deployToolException)
+                        {
+                            exceptionString = JsonSerializer.Serialize(
+                                new DeployToolExceptionSummary(
+                                    deployToolException.ErrorCode.ToString(),
+                                    deployToolException.Message));
+                        }
+                        else
+                        {
+                            exceptionString = JsonSerializer.Serialize(
+                                new DeployToolExceptionSummary(
+                                    DeployToolErrorCode.UnexpectedError.ToString(),
+                                    contextFeature.Error?.Message ?? string.Empty));
+                        }
+                        await context.Response.WriteAsync(exceptionString);
+                    }
+                });
+            });
         }
     }
 }

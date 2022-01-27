@@ -84,6 +84,8 @@ namespace AWS.Deploy.CLI.ServerMode
 
             app.UseSwagger();
 
+            app.ConfigureExceptionHandler();
+
             app.UseRouting();
 
             app.UseAuthentication();

@@ -381,7 +381,7 @@ namespace AWS.Deploy.Orchestration.Data
 
             if (!platforms.Any())
             {
-                throw new AmazonElasticBeanstalkException(".NET Core Solution Stack doesn't exist.");
+                throw new FailedToFindElasticBeanstalkSolutionStackException(DeployToolErrorCode.FailedToFindElasticBeanstalkSolutionStack, "Cannot use Elastic Beanstalk deployments because we cannot find a .NET Core Solution Stack to use. One possible reason could be that Elastic Beanstalk is not enabled in your region if you are using a non-default region.");
             }
 
             return platforms.First();
