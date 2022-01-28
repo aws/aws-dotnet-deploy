@@ -29,4 +29,12 @@ namespace AWS.Deploy.CLI.ServerMode
     {
         public InvalidEncryptionKeyInfoException(string message, Exception? innerException = null) : base(message, innerException) { }
     }
+
+    /// <summary>
+    /// Throw if could not find deployment targets mapping.
+    /// </summary>
+    public class FailedToFindDeploymentTargetsMappingException : Exception
+    {
+        public FailedToFindDeploymentTargetsMappingException(string message, Exception? innerException = null) : base(message, innerException) { }
+    }
 }

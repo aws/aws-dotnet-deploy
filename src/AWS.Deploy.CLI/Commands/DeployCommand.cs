@@ -299,7 +299,7 @@ namespace AWS.Deploy.CLI.Commands
             if (deployedApplication.ResourceType == CloudApplicationResourceType.CloudFormationStack)
                 previousSettings = (await _templateMetadataReader.LoadCloudApplicationMetadata(deployedApplication.Name)).Settings;
             else
-                previousSettings = (await _deployedApplicationQueryer.GetPreviousSettings(deployedApplication));
+                previousSettings = await _deployedApplicationQueryer.GetPreviousSettings(deployedApplication);
 
             selectedRecommendation = selectedRecommendation.ApplyPreviousSettings(previousSettings);
 
