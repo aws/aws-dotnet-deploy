@@ -27,7 +27,8 @@ namespace AWS.Deploy.ServerMode.Client.UnitTests
         public async Task Start()
         {
             // Arrange
-            MockCommandLineWrapperRun(0, TimeSpan.FromSeconds(100));
+            var runResult = new RunResult { ExitCode = 0 };
+            MockCommandLineWrapperRun(runResult, TimeSpan.FromSeconds(100));
             MockHttpGet(HttpStatusCode.OK);
 
             // Act
@@ -44,7 +45,8 @@ namespace AWS.Deploy.ServerMode.Client.UnitTests
         public async Task Start_PortUnavailable()
         {
             // Arrange
-            MockCommandLineWrapperRun(-100);
+            var runResult = new RunResult { ExitCode = -100 };
+            MockCommandLineWrapperRun(runResult);
             MockHttpGet(HttpStatusCode.NotFound, TimeSpan.FromSeconds(5));
 
             // Act & Assert
@@ -58,7 +60,8 @@ namespace AWS.Deploy.ServerMode.Client.UnitTests
         public async Task Start_HttpGetThrows()
         {
             // Arrange
-            MockCommandLineWrapperRun(0, TimeSpan.FromSeconds(100));
+            var runResult = new RunResult { ExitCode = 0 };
+            MockCommandLineWrapperRun(runResult, TimeSpan.FromSeconds(100));
             MockHttpGetThrows();
 
             // Act & Assert
@@ -72,7 +75,8 @@ namespace AWS.Deploy.ServerMode.Client.UnitTests
         public async Task Start_HttpGetForbidden()
         {
             // Arrange
-            MockCommandLineWrapperRun(0, TimeSpan.FromSeconds(100));
+            var runResult = new RunResult { ExitCode = 0 };
+            MockCommandLineWrapperRun(runResult, TimeSpan.FromSeconds(100));
             MockHttpGet(HttpStatusCode.Forbidden);
 
             // Act & Assert
@@ -96,7 +100,8 @@ namespace AWS.Deploy.ServerMode.Client.UnitTests
         public async Task IsAlive_GetAsyncThrows()
         {
             // Arrange
-            MockCommandLineWrapperRun(0, TimeSpan.FromSeconds(100));
+            var runResult = new RunResult { ExitCode = 0 };
+            MockCommandLineWrapperRun(runResult, TimeSpan.FromSeconds(100));
             MockHttpGet(HttpStatusCode.OK);
             await _serverModeSession.Start(CancellationToken.None);
 
@@ -113,7 +118,8 @@ namespace AWS.Deploy.ServerMode.Client.UnitTests
         public async Task IsAlive_HttpResponseSuccess()
         {
             // Arrange
-            MockCommandLineWrapperRun(0, TimeSpan.FromSeconds(100));
+            var runResult = new RunResult { ExitCode = 0 };
+            MockCommandLineWrapperRun(runResult, TimeSpan.FromSeconds(100));
             MockHttpGet(HttpStatusCode.OK);
             await _serverModeSession.Start(CancellationToken.None);
 
@@ -128,7 +134,8 @@ namespace AWS.Deploy.ServerMode.Client.UnitTests
         public async Task IsAlive_HttpResponseFailure()
         {
             // Arrange
-            MockCommandLineWrapperRun(0, TimeSpan.FromSeconds(100));
+            var runResult = new RunResult { ExitCode = 0 };
+            MockCommandLineWrapperRun(runResult, TimeSpan.FromSeconds(100));
             MockHttpGet(HttpStatusCode.OK);
             await _serverModeSession.Start(CancellationToken.None);
 
@@ -145,7 +152,8 @@ namespace AWS.Deploy.ServerMode.Client.UnitTests
         public async Task TryGetRestAPIClient()
         {
             // Arrange
-            MockCommandLineWrapperRun(0, TimeSpan.FromSeconds(100));
+            var runResult = new RunResult { ExitCode = 0 };
+            MockCommandLineWrapperRun(runResult, TimeSpan.FromSeconds(100));
             MockHttpGet(HttpStatusCode.OK);
             await _serverModeSession.Start(CancellationToken.None);
 
@@ -161,7 +169,8 @@ namespace AWS.Deploy.ServerMode.Client.UnitTests
         public void TryGetRestAPIClient_WithoutStart()
         {
             // Arrange
-            MockCommandLineWrapperRun(0, TimeSpan.FromSeconds(100));
+            var runResult = new RunResult { ExitCode = 0 };
+            MockCommandLineWrapperRun(runResult, TimeSpan.FromSeconds(100));
             MockHttpGet(HttpStatusCode.OK);
 
             // Act
@@ -176,7 +185,8 @@ namespace AWS.Deploy.ServerMode.Client.UnitTests
         public async Task TryGetDeploymentCommunicationClient()
         {
             // Arrange
-            MockCommandLineWrapperRun(0, TimeSpan.FromSeconds(100));
+            var runResult = new RunResult { ExitCode = 0 };
+            MockCommandLineWrapperRun(runResult, TimeSpan.FromSeconds(100));
             MockHttpGet(HttpStatusCode.OK);
             await _serverModeSession.Start(CancellationToken.None);
 
@@ -228,15 +238,15 @@ namespace AWS.Deploy.ServerMode.Client.UnitTests
                     ItExpr.IsAny<CancellationToken>())
                 .Throws(new Exception());
 
-        private void MockCommandLineWrapperRun(int statusCode) =>
+        private void MockCommandLineWrapperRun(RunResult runResult) =>
             _commandLineWrapper
                 .Setup(wrapper => wrapper.Run(It.IsAny<string>(), It.IsAny<string[]>()))
-                .ReturnsAsync(statusCode);
+                .ReturnsAsync(runResult);
 
-        private void MockCommandLineWrapperRun(int statusCode, TimeSpan delay) =>
+        private void MockCommandLineWrapperRun(RunResult runResult, TimeSpan delay) =>
             _commandLineWrapper
                 .Setup(wrapper => wrapper.Run(It.IsAny<string>(), It.IsAny<string[]>()))
-                .ReturnsAsync(statusCode, delay);
+                .ReturnsAsync(runResult, delay);
 
         private Task<AWSCredentials> CredentialGenerator() => throw new NotImplementedException();
     }
