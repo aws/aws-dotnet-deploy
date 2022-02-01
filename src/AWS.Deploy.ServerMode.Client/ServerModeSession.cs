@@ -164,9 +164,12 @@ namespace AWS.Deploy.ServerMode.Client
 
                 // For -100 errors, we want to check all the ports in the configured port range
                 // If the error code other than -100, this is an unexpected exit code.
-                if (startServerTask.Result != TCP_PORT_ERROR)
+                if (startServerTask.Result.ExitCode != TCP_PORT_ERROR)
                 {
-                    throw new InternalServerModeException($"\"{command}\" failed for unknown reason.");
+                    throw new InternalServerModeException(
+                        string.IsNullOrEmpty(startServerTask.Result.StandardError) ?
+                        $"\"{command}\" failed for unknown reason." :
+                        startServerTask.Result.StandardError);
                 }
             }
 
