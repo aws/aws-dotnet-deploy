@@ -17,11 +17,14 @@ namespace AWS.Deploy.Common
             _awsOptionsAction = awsOptionsAction;
         }
 
-        public T GetAWSClient<T>() where T : IAmazonService
+        public T GetAWSClient<T>(string? awsRegion = null) where T : IAmazonService
         {
             var awsOptions = new AWSOptions();
 
             _awsOptionsAction?.Invoke(awsOptions);
+
+            if (!string.IsNullOrEmpty(awsRegion))
+                awsOptions.Region = RegionEndpoint.GetBySystemName(awsRegion);
 
             return awsOptions.CreateServiceClient<T>();
         }

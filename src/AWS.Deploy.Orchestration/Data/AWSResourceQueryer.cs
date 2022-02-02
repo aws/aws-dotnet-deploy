@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Amazon;
 using Amazon.CloudFormation;
 using Amazon.CloudFormation.Model;
 using Amazon.CloudFront;
@@ -63,7 +64,7 @@ namespace AWS.Deploy.Orchestration.Data
         Task<List<Repository>> GetECRRepositories(List<string> repositoryNames);
         Task<Repository> CreateECRRepository(string repositoryName);
         Task<List<Stack>> GetCloudFormationStacks();
-        Task<GetCallerIdentityResponse> GetCallerIdentity();
+        Task<GetCallerIdentityResponse> GetCallerIdentity(string awsRegion);
         Task<List<Amazon.ElasticLoadBalancingV2.Model.LoadBalancer>> ListOfLoadBalancers(LoadBalancerTypeEnum loadBalancerType);
         Task<Distribution> GetCloudFrontDistribution(string distributionId);
         Task<List<string>> ListOfDyanmoDBTables();
@@ -448,10 +449,44 @@ namespace AWS.Deploy.Orchestration.Data
             return await cloudFormationClient.Paginators.DescribeStacks(new DescribeStacksRequest()).Stacks.ToListAsync();
         }
 
-        public async Task<GetCallerIdentityResponse> GetCallerIdentity()
+        public async Task<GetCallerIdentityResponse> GetCallerIdentity(string awsRegion)
         {
-            using var stsClient = _awsClientFactory.GetAWSClient<IAmazonSecurityTokenService>();
-            return await stsClient.GetCallerIdentityAsync(new GetCallerIdentityRequest());
+            var request = new GetCallerIdentityRequest();
+
+            try
+            {
+                using var stsClient = _awsClientFactory.GetAWSClient<IAmazonSecurityTokenService>(awsRegion);
+                return await stsClient.GetCallerIdentityAsync(request);
+            }
+            catch (Exception ex)
+            {
+                var regionEndpointPartition = RegionEndpoint.GetBySystemName(awsRegion).PartitionName ?? String.Empty;
+                if (regionEndpointPartition.Equals("aws") && !awsRegion.Equals(Constants.CLI.DEFAULT_STS_AWS_REGION))
+                {
+                    try
+                    {
+                        using var stsClient = _awsClientFactory.GetAWSClient<IAmazonSecurityTokenService>(Constants.CLI.DEFAULT_STS_AWS_REGION);
+                        await stsClient.GetCallerIdentityAsync(request);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new UnableToAccessAWSRegionException(
+                           DeployToolErrorCode.UnableToAccessAWSRegion,
+                           $"We were unable to access the AWS region '{awsRegion}'. Make sure you have correct permissions for that region and the region is accessible.",
+                           e);
+                    }
+
+                    throw new UnableToAccessAWSRegionException(
+                        DeployToolErrorCode.OptInRegionDisabled,
+                        $"We were unable to access the Opt-In region '{awsRegion}'. Please enable the AWS Region '{awsRegion}' and try again. Additional details could be found at https://docs.aws.amazon.com/general/latest/gr/rande-manage.html",
+                        ex);
+                }
+
+                throw new UnableToAccessAWSRegionException(
+                   DeployToolErrorCode.UnableToAccessAWSRegion,
+                   $"We were unable to access the AWS region '{awsRegion}'. Make sure you have correct permissions for that region and the region is accessible.",
+                   ex);
+            }
         }
 
         public async Task<List<Amazon.ElasticLoadBalancingV2.Model.LoadBalancer>> ListOfLoadBalancers(Amazon.ElasticLoadBalancingV2.LoadBalancerTypeEnum loadBalancerType)

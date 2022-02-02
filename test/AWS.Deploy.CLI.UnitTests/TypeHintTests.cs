@@ -44,7 +44,7 @@ namespace AWS.Deploy.CLI.UnitTests
                     .Returns(ddbPaginators.Object);
 
             var awsClientFactory = new Mock<IAWSClientFactory>();
-            awsClientFactory.Setup(x => x.GetAWSClient<IAmazonDynamoDB>())
+            awsClientFactory.Setup(x => x.GetAWSClient<IAmazonDynamoDB>(It.IsAny<string>()))
                     .Returns(ddbClient.Object);
 
             var awsResourceQueryer = new AWSResourceQueryer(awsClientFactory.Object);
@@ -74,7 +74,7 @@ namespace AWS.Deploy.CLI.UnitTests
                     .Returns(sqsPaginators.Object);
 
             var awsClientFactory = new Mock<IAWSClientFactory>();
-            awsClientFactory.Setup(x => x.GetAWSClient<IAmazonSQS>())
+            awsClientFactory.Setup(x => x.GetAWSClient<IAmazonSQS>(It.IsAny<string>()))
                     .Returns(sqsClient.Object);
 
             var awsResourceQueryer = new AWSResourceQueryer(awsClientFactory.Object);
@@ -104,7 +104,7 @@ namespace AWS.Deploy.CLI.UnitTests
                     .Returns(snsPaginators.Object);
 
             var awsClientFactory = new Mock<IAWSClientFactory>();
-            awsClientFactory.Setup(x => x.GetAWSClient<IAmazonSimpleNotificationService>())
+            awsClientFactory.Setup(x => x.GetAWSClient<IAmazonSimpleNotificationService>(It.IsAny<string>()))
                     .Returns(snsClient.Object);
 
             var awsResourceQueryer = new AWSResourceQueryer(awsClientFactory.Object);
@@ -126,7 +126,7 @@ namespace AWS.Deploy.CLI.UnitTests
                     .Returns(Task.FromResult(new ListBucketsResponse { Buckets = new List<S3Bucket> { new S3Bucket {BucketName = "Bucket1" }, new S3Bucket { BucketName = "Bucket2" } } }));
 
             var awsClientFactory = new Mock<IAWSClientFactory>();
-            awsClientFactory.Setup(x => x.GetAWSClient<IAmazonS3>())
+            awsClientFactory.Setup(x => x.GetAWSClient<IAmazonS3>(It.IsAny<string>()))
                     .Returns(s3Client.Object);
 
             var awsResourceQueryer = new AWSResourceQueryer(awsClientFactory.Object);
