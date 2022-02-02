@@ -187,7 +187,7 @@ namespace AWS.Deploy.CLI.Commands
                     _commandLineWrapper.RegisterAWSContext(awsCredentials, awsRegion);
                     _awsClientFactory.RegisterAWSContext(awsCredentials, awsRegion);
 
-                    var callerIdentity = await _awsResourceQueryer.GetCallerIdentity();
+                    var callerIdentity = await _awsResourceQueryer.GetCallerIdentity(awsRegion);
 
                     var session = new OrchestratorSession(
                         projectDefinition,
@@ -299,7 +299,7 @@ namespace AWS.Deploy.CLI.Commands
                     {
                         var projectDefinition = await _projectParserUtility.Parse(input.ProjectPath ?? string.Empty);
 
-                        var callerIdentity = await _awsResourceQueryer.GetCallerIdentity();
+                        var callerIdentity = await _awsResourceQueryer.GetCallerIdentity(awsRegion);
 
                         session = new OrchestratorSession(
                             projectDefinition,
@@ -369,6 +369,8 @@ namespace AWS.Deploy.CLI.Commands
                         awsOptions.Credentials = awsCredentials;
                         awsOptions.Region = RegionEndpoint.GetBySystemName(awsRegion);
                     });
+
+                    await _awsResourceQueryer.GetCallerIdentity(awsRegion);
 
                     var listDeploymentsCommand = new ListDeploymentsCommand(_toolInteractiveService, _deployedApplicationQueryer);
 

@@ -79,7 +79,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 output.SessionId,
                 input.ProjectPath,
                 input.AWSRegion,
-                (await awsResourceQueryer.GetCallerIdentity()).Account,
+                (await awsResourceQueryer.GetCallerIdentity(input.AWSRegion)).Account,
                 await _projectParserUtility.Parse(input.ProjectPath)
                 );
 

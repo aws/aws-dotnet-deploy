@@ -204,4 +204,12 @@ namespace AWS.Deploy.Orchestration
     {
         public ElasticBeanstalkException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
+    
+    /// <summary>
+    /// Throw if unable to access the specified AWS Region.
+    /// </summary>
+    public class UnableToAccessAWSRegionException : DeployToolException
+    {
+        public UnableToAccessAWSRegionException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+    }
 }

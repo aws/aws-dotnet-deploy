@@ -6,6 +6,10 @@ namespace AWS.Deploy.Constants
 {
     internal static class CLI
     {
+        // Represents the default STS AWS region that is used for the purposes of
+        // retrieving the caller identity and determining if a user is in an opt-in region.
+        public const string DEFAULT_STS_AWS_REGION = "us-east-1";
+
         public const string CREATE_NEW_LABEL = "*** Create new ***";
         public const string DEFAULT_LABEL = "*** Default ***";
         public const string EMPTY_LABEL = "*** Empty ***";

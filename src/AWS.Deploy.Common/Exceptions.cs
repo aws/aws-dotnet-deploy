@@ -98,7 +98,9 @@ namespace AWS.Deploy.Common
         FailedS3Upload = 10007600,
         FailedToCreateElasticBeanstalkApplicationVersion = 10007700,
         FailedToUpdateElasticBeanstalkEnvironment = 10007800,
-        FailedToCreateElasticBeanstalkStorageLocation = 10007900
+        FailedToCreateElasticBeanstalkStorageLocation = 10007900,
+        UnableToAccessAWSRegion = 10008000,
+        OptInRegionDisabled = 10008100,
     }
 
     public class ProjectFileNotFoundException : DeployToolException

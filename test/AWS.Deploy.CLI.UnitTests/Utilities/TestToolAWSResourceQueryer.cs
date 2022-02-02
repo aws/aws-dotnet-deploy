@@ -12,6 +12,7 @@ using Amazon.ECR.Model;
 using Amazon.ElasticBeanstalk.Model;
 using Amazon.ElasticLoadBalancingV2;
 using Amazon.IdentityManagement.Model;
+using Amazon.Runtime;
 using Amazon.S3;
 using Amazon.SecurityToken.Model;
 using AWS.Deploy.Orchestration;
@@ -26,7 +27,6 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
         public Task<string> CreateEC2KeyPair(string keyName, string saveLocation) => throw new NotImplementedException();
         public Task<Repository> CreateECRRepository(string repositoryName) => throw new NotImplementedException();
         public Task<List<Stack>> GetCloudFormationStacks() => throw new NotImplementedException();
-        public Task<GetCallerIdentityResponse> GetCallerIdentity() => throw new NotImplementedException();
 
         public Task<List<AuthorizationData>> GetECRAuthorizationToken()
         {
@@ -82,5 +82,6 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
         public Task<List<StackEvent>> GetCloudFormationStackEvents(string stackName) => throw new NotImplementedException();
         public Task<List<Amazon.ElasticBeanstalk.Model.Tag>> ListElasticBeanstalkResourceTags(string resourceArn) => throw new NotImplementedException();
         public Task<List<ConfigurationOptionSetting>> GetBeanstalkEnvironmentConfigurationSettings(string environmentId) => throw new NotImplementedException();
+        public Task<GetCallerIdentityResponse> GetCallerIdentity(string awsRegion) => throw new NotImplementedException();
     }
 }
