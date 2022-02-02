@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
+using AWS.Deploy.Common.IO;
 using AWS.Deploy.Orchestration.CDK;
 using AWS.Deploy.Orchestration.Utilities;
 using Xunit;
@@ -13,12 +14,14 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
     {
         private readonly TestCommandLineWrapper _commandLineWrapper;
         private readonly CDKInstaller _cdkInstaller;
+        private readonly IDirectoryManager _directoryManager;
         private const string _workingDirectory = @"c:\fake\path";
 
         public CDKInstallerTests()
         {
             _commandLineWrapper = new TestCommandLineWrapper();
-            _cdkInstaller = new CDKInstaller(_commandLineWrapper);
+            _directoryManager = new TestDirectoryManager();
+            _cdkInstaller = new CDKInstaller(_commandLineWrapper, _directoryManager);
         }
 
         [Fact]
