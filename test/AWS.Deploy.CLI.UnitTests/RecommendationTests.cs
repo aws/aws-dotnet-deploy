@@ -264,6 +264,34 @@ namespace AWS.Deploy.CLI.UnitTests
             Assert.Equal("CustomAppStack-dev", beanstalkRecommendation.GetOptionSettingValue<string>(beanstalEnvNameSetting));
         }
 
+        [Fact]
+        public async Task GetKeyValueOptionSettingServerMode()
+        {
+            var engine = await BuildRecommendationEngine("WebAppNoDockerFile");
+
+            var recommendations = await engine.ComputeRecommendations();
+
+            var beanstalkRecommendation = recommendations.FirstOrDefault(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+
+            var envVarsSetting = beanstalkRecommendation.GetOptionSetting("ElasticBeanstalkEnvironmentVariables");
+
+            Assert.Equal(OptionSettingValueType.KeyValue, envVarsSetting.Type);
+        }
+
+        [Fact]
+        public async Task GetKeyValueOptionSettingConfigFile()
+        {
+            var engine = await BuildRecommendationEngine("WebAppNoDockerFile");
+
+            var recommendations = await engine.ComputeRecommendations();
+
+            var beanstalkRecommendation = recommendations.FirstOrDefault(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+
+            var envVarsSetting = beanstalkRecommendation.GetOptionSetting("ElasticBeanstalkEnvironmentVariables.Key");
+
+            Assert.Equal(OptionSettingValueType.KeyValue, envVarsSetting.Type);
+        }
+
         [Theory]
         [MemberData(nameof(ShouldIncludeTestCases))]
         public void ShouldIncludeTests(RuleEffect effect, bool testPass, bool expectedResult)

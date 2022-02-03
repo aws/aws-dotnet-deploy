@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Amazon;
 using Amazon.CloudFormation;
 using Amazon.CloudFormation.Model;
 using Amazon.CloudFront;
@@ -39,10 +40,11 @@ namespace AWS.Deploy.Orchestration.Data
 {
     public interface IAWSResourceQueryer
     {
+        Task<List<StackEvent>> GetCloudFormationStackEvents(string stackName);
         Task<List<InstanceTypeInfo>> ListOfAvailableInstanceTypes();
         Task<Amazon.AppRunner.Model.Service> DescribeAppRunnerService(string serviceArn);
         Task<List<StackResource>> DescribeCloudFormationResources(string stackName);
-        Task<EnvironmentDescription> DescribeElasticBeanstalkEnvironment(string environmentId);
+        Task<EnvironmentDescription> DescribeElasticBeanstalkEnvironment(string environmentName);
         Task<Amazon.ElasticLoadBalancingV2.Model.LoadBalancer> DescribeElasticLoadBalancer(string loadBalancerArn);
         Task<List<Amazon.ElasticLoadBalancingV2.Model.Listener>> DescribeElasticLoadBalancerListeners(string loadBalancerArn);
         Task<DescribeRuleResponse> DescribeCloudWatchRule(string ruleName);
@@ -50,7 +52,8 @@ namespace AWS.Deploy.Orchestration.Data
         Task<Amazon.S3.Model.WebsiteConfiguration> GetS3BucketWebSiteConfiguration(string bucketName);
         Task<List<Cluster>> ListOfECSClusters();
         Task<List<ApplicationDescription>> ListOfElasticBeanstalkApplications();
-        Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(string? applicationName);
+        Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(string? applicationName = null);
+        Task<List<Amazon.ElasticBeanstalk.Model.Tag>> ListElasticBeanstalkResourceTags(string resourceArn);
         Task<List<KeyPairInfo>> ListOfEC2KeyPairs();
         Task<string> CreateEC2KeyPair(string keyName, string saveLocation);
         Task<List<Role>> ListOfIAMRoles(string? servicePrincipal);
@@ -61,13 +64,14 @@ namespace AWS.Deploy.Orchestration.Data
         Task<List<Repository>> GetECRRepositories(List<string> repositoryNames);
         Task<Repository> CreateECRRepository(string repositoryName);
         Task<List<Stack>> GetCloudFormationStacks();
-        Task<GetCallerIdentityResponse> GetCallerIdentity();
+        Task<GetCallerIdentityResponse> GetCallerIdentity(string awsRegion);
         Task<List<Amazon.ElasticLoadBalancingV2.Model.LoadBalancer>> ListOfLoadBalancers(LoadBalancerTypeEnum loadBalancerType);
         Task<Distribution> GetCloudFrontDistribution(string distributionId);
         Task<List<string>> ListOfDyanmoDBTables();
         Task<List<string>> ListOfSQSQueuesUrls();
         Task<List<string>> ListOfSNSTopicArns();
         Task<List<Amazon.S3.Model.S3Bucket>> ListOfS3Buckets();
+        Task<List<ConfigurationOptionSetting>> GetBeanstalkEnvironmentConfigurationSettings(string environmentName);
     }
 
     public class AWSResourceQueryer : IAWSResourceQueryer
@@ -77,6 +81,22 @@ namespace AWS.Deploy.Orchestration.Data
         public AWSResourceQueryer(IAWSClientFactory awsClientFactory)
         {
             _awsClientFactory = awsClientFactory;
+        }
+
+        public async Task<List<StackEvent>> GetCloudFormationStackEvents(string stackName)
+        {
+            var cfClient = _awsClientFactory.GetAWSClient<IAmazonCloudFormation>();
+            var stackEvents = new List<StackEvent>();
+            var listInstanceTypesPaginator = cfClient.Paginators.DescribeStackEvents(new DescribeStackEventsRequest {
+                StackName = stackName
+            });
+
+            await foreach (var response in listInstanceTypesPaginator.Responses)
+            {
+                stackEvents.AddRange(response.StackEvents);
+            }
+
+            return stackEvents;
         }
 
         public async Task<List<InstanceTypeInfo>> ListOfAvailableInstanceTypes()
@@ -118,17 +138,17 @@ namespace AWS.Deploy.Orchestration.Data
             return resources.StackResources;
         }
 
-        public async Task<EnvironmentDescription> DescribeElasticBeanstalkEnvironment(string environmentId)
+        public async Task<EnvironmentDescription> DescribeElasticBeanstalkEnvironment(string environmentName)
         {
             var beanstalkClient = _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>();
 
             var environment = await beanstalkClient.DescribeEnvironmentsAsync(new DescribeEnvironmentsRequest {
-                EnvironmentNames = new List<string> { environmentId }
+                EnvironmentNames = new List<string> { environmentName }
             });
 
             if (!environment.Environments.Any())
             {
-                throw new AWSResourceNotFoundException(DeployToolErrorCode.BeanstalkEnvironmentDoesNotExist, $"The elastic beanstalk environment '{environmentId}' does not exist.");
+                throw new AWSResourceNotFoundException(DeployToolErrorCode.BeanstalkEnvironmentDoesNotExist, $"The elastic beanstalk environment '{environmentName}' does not exist.");
             }
 
             return environment.Environments.First();
@@ -240,13 +260,10 @@ namespace AWS.Deploy.Orchestration.Data
             return applications.Applications;
         }
 
-        public async Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(string? applicationName)
+        public async Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(string? applicationName = null)
         {
             var beanstalkClient = _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>();
             var environments = new List<EnvironmentDescription>();
-
-            if (string.IsNullOrEmpty(applicationName))
-                return environments;
 
             var request = new DescribeEnvironmentsRequest
             {
@@ -263,6 +280,17 @@ namespace AWS.Deploy.Orchestration.Data
             } while (!string.IsNullOrEmpty(request.NextToken));
 
             return environments;
+        }
+
+        public async Task<List<Amazon.ElasticBeanstalk.Model.Tag>> ListElasticBeanstalkResourceTags(string resourceArn)
+        {
+            var beanstalkClient = _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>();
+            var response = await beanstalkClient.ListTagsForResourceAsync(new Amazon.ElasticBeanstalk.Model.ListTagsForResourceRequest
+            {
+                ResourceArn = resourceArn
+            });
+
+            return response.ResourceTags;
         }
 
         public async Task<List<KeyPairInfo>> ListOfEC2KeyPairs()
@@ -364,7 +392,7 @@ namespace AWS.Deploy.Orchestration.Data
 
             if (!platforms.Any())
             {
-                throw new AmazonElasticBeanstalkException(".NET Core Solution Stack doesn't exist.");
+                throw new FailedToFindElasticBeanstalkSolutionStackException(DeployToolErrorCode.FailedToFindElasticBeanstalkSolutionStack, "Cannot use Elastic Beanstalk deployments because we cannot find a .NET Core Solution Stack to use. One possible reason could be that Elastic Beanstalk is not enabled in your region if you are using a non-default region.");
             }
 
             return platforms.First();
@@ -421,10 +449,44 @@ namespace AWS.Deploy.Orchestration.Data
             return await cloudFormationClient.Paginators.DescribeStacks(new DescribeStacksRequest()).Stacks.ToListAsync();
         }
 
-        public async Task<GetCallerIdentityResponse> GetCallerIdentity()
+        public async Task<GetCallerIdentityResponse> GetCallerIdentity(string awsRegion)
         {
-            using var stsClient = _awsClientFactory.GetAWSClient<IAmazonSecurityTokenService>();
-            return await stsClient.GetCallerIdentityAsync(new GetCallerIdentityRequest());
+            var request = new GetCallerIdentityRequest();
+
+            try
+            {
+                using var stsClient = _awsClientFactory.GetAWSClient<IAmazonSecurityTokenService>(awsRegion);
+                return await stsClient.GetCallerIdentityAsync(request);
+            }
+            catch (Exception ex)
+            {
+                var regionEndpointPartition = RegionEndpoint.GetBySystemName(awsRegion).PartitionName ?? String.Empty;
+                if (regionEndpointPartition.Equals("aws") && !awsRegion.Equals(Constants.CLI.DEFAULT_STS_AWS_REGION))
+                {
+                    try
+                    {
+                        using var stsClient = _awsClientFactory.GetAWSClient<IAmazonSecurityTokenService>(Constants.CLI.DEFAULT_STS_AWS_REGION);
+                        await stsClient.GetCallerIdentityAsync(request);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new UnableToAccessAWSRegionException(
+                           DeployToolErrorCode.UnableToAccessAWSRegion,
+                           $"We were unable to access the AWS region '{awsRegion}'. Make sure you have correct permissions for that region and the region is accessible.",
+                           e);
+                    }
+
+                    throw new UnableToAccessAWSRegionException(
+                        DeployToolErrorCode.OptInRegionDisabled,
+                        $"We were unable to access the Opt-In region '{awsRegion}'. Please enable the AWS Region '{awsRegion}' and try again. Additional details could be found at https://docs.aws.amazon.com/general/latest/gr/rande-manage.html",
+                        ex);
+                }
+
+                throw new UnableToAccessAWSRegionException(
+                   DeployToolErrorCode.UnableToAccessAWSRegion,
+                   $"We were unable to access the AWS region '{awsRegion}'. Make sure you have correct permissions for that region and the region is accessible.",
+                   ex);
+            }
         }
 
         public async Task<List<Amazon.ElasticLoadBalancingV2.Model.LoadBalancer>> ListOfLoadBalancers(Amazon.ElasticLoadBalancingV2.LoadBalancerTypeEnum loadBalancerType)
@@ -507,6 +569,28 @@ namespace AWS.Deploy.Orchestration.Data
             }
 
             return buckets;
+        }
+
+        public async Task<List<ConfigurationOptionSetting>> GetBeanstalkEnvironmentConfigurationSettings(string environmentName)
+        {
+            var optionSetting = new List<ConfigurationOptionSetting>();
+            var environmentDescription = await DescribeElasticBeanstalkEnvironment(environmentName);
+            var client = _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>();
+            var response = await client.DescribeConfigurationSettingsAsync(new DescribeConfigurationSettingsRequest
+            {
+                ApplicationName = environmentDescription.ApplicationName,
+                EnvironmentName = environmentName
+            });
+
+            foreach (var settingDescription in response.ConfigurationSettings)
+            {
+                foreach (var setting in settingDescription.OptionSettings)
+                {
+                    optionSetting.Add(setting);
+                }
+            }
+
+            return optionSetting;
         }
     }
 }

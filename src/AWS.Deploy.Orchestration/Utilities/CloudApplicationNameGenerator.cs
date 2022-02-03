@@ -70,7 +70,7 @@ namespace AWS.Deploy.Orchestration.Utilities
             var suffix = 1;
             while (suffix < 100)
             {
-                if (existingApplications.All(x => x.StackName != recommendation) && IsValidName(recommendation))
+                if (existingApplications.All(x => x.Name != recommendation) && IsValidName(recommendation))
                     return recommendation;
 
                 recommendation = $"{recommendedPrefix}{suffix++}";

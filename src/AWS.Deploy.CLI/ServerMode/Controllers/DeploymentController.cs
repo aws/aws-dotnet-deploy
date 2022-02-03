@@ -32,6 +32,7 @@ using AWS.Deploy.Orchestration.LocalUserSettings;
 using AWS.Deploy.CLI.Commands;
 using AWS.Deploy.CLI.Commands.TypeHints;
 using AWS.Deploy.Common.TypeHintData;
+using AWS.Deploy.Orchestration.ServiceHandlers;
 
 namespace AWS.Deploy.CLI.ServerMode.Controllers
 {
@@ -78,7 +79,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 output.SessionId,
                 input.ProjectPath,
                 input.AWSRegion,
-                (await awsResourceQueryer.GetCallerIdentity()).Account,
+                (await awsResourceQueryer.GetCallerIdentity(input.AWSRegion)).Account,
                 await _projectParserUtility.Parse(input.ProjectPath)
                 );
 
@@ -92,8 +93,8 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             var recommendations = await orchestrator.GenerateDeploymentRecommendations();
             state.NewRecommendations = recommendations;
 
-            // Get all existing applications that were previously deployed using our deploy tool.
-            var allDeployedApplications = await deployedApplicationQueryer.GetExistingDeployedApplications();
+            // Get all existing CloudApplications based on the deploymentTypes filter
+            var allDeployedApplications = await deployedApplicationQueryer.GetExistingDeployedApplications(recommendations.Select(x => x.Recipe.DeploymentType).ToList());
 
             var existingApplications = await deployedApplicationQueryer.GetCompatibleApplications(recommendations, allDeployedApplications, session);
             state.ExistingDeployments = existingApplications;
@@ -137,12 +138,16 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             state.NewRecommendations ??= await orchestrator.GenerateDeploymentRecommendations();
             foreach (var recommendation in state.NewRecommendations)
             {
+                if (recommendation.Recipe.DisableNewDeployments)
+                    continue;
+
                 output.Recommendations.Add(new RecommendationSummary(
                     recipeId: recommendation.Recipe.Id,
                     name: recommendation.Name,
                     shortDescription: recommendation.ShortDescription,
                     description: recommendation.Description,
-                    targetService: recommendation.Recipe.TargetService
+                    targetService: recommendation.Recipe.TargetService,
+                    deploymentType: recommendation.Recipe.DeploymentType
                     ));
             }
 
@@ -324,7 +329,9 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                     description: recommendation.Description,
                     targetService: recommendation.Recipe.TargetService,
                     lastUpdatedTime: deployment.LastUpdatedTime,
-                    updatedByCurrentUser: deployment.UpdatedByCurrentUser));
+                    updatedByCurrentUser: deployment.UpdatedByCurrentUser,
+                    resourceType: deployment.ResourceType,
+                    uniqueIdentifier: deployment.UniqueIdentifier));
             }
 
             return Ok(output);
@@ -344,6 +351,9 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 return NotFound($"Session ID {sessionId} not found.");
             }
 
+            var serviceProvider = CreateSessionServiceProvider(state);
+            var orchestrator = CreateOrchestrator(state, serviceProvider);
+
             if(!string.IsNullOrEmpty(input.NewDeploymentRecipeId) &&
                !string.IsNullOrEmpty(input.NewDeploymentName))
             {
@@ -354,18 +364,20 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 }
 
                 state.ApplicationDetails.Name = input.NewDeploymentName;
+                state.ApplicationDetails.UniqueIdentifier = string.Empty;
+                state.ApplicationDetails.ResourceType = CloudApplicationResourceType.CloudFormationStack;
                 state.ApplicationDetails.RecipeId = input.NewDeploymentRecipeId;
-                state.SelectedRecommendation.AddReplacementToken(DeployCommand.REPLACE_TOKEN_STACK_NAME, input.NewDeploymentName);
+                await orchestrator.ApplyAllReplacementTokens(state.SelectedRecommendation, input.NewDeploymentName);
             }
-            else if(!string.IsNullOrEmpty(input.ExistingDeploymentName))
+            else if(!string.IsNullOrEmpty(input.ExistingDeploymentId))
             {
-                var serviceProvider = CreateSessionServiceProvider(state);
                 var templateMetadataReader = serviceProvider.GetRequiredService<ITemplateMetadataReader>();
+                var deployedApplicationQueryer = serviceProvider.GetRequiredService<IDeployedApplicationQueryer>();
 
-                var existingDeployment = state.ExistingDeployments?.FirstOrDefault(x => string.Equals(input.ExistingDeploymentName, x.Name));
+                var existingDeployment = state.ExistingDeployments?.FirstOrDefault(x => string.Equals(input.ExistingDeploymentId, x.UniqueIdentifier));
                 if (existingDeployment == null)
                 {
-                    return NotFound($"Existing deployment {input.ExistingDeploymentName} not found.");
+                    return NotFound($"Existing deployment {input.ExistingDeploymentId} not found.");
                 }
 
                 state.SelectedRecommendation = state.NewRecommendations?.FirstOrDefault(x => string.Equals(existingDeployment.RecipeId, x.Recipe.Id));
@@ -374,12 +386,18 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                     return NotFound($"Recommendation {input.NewDeploymentRecipeId} used in existing deployment {existingDeployment.RecipeId} not found.");
                 }
 
-                var existingCloudApplicationMetadata = await templateMetadataReader.LoadCloudApplicationMetadata(input.ExistingDeploymentName);
-                state.SelectedRecommendation = state.SelectedRecommendation.ApplyPreviousSettings(existingCloudApplicationMetadata.Settings);
+                IDictionary<string, object> previousSettings;
+                if (existingDeployment.ResourceType == CloudApplicationResourceType.CloudFormationStack)
+                    previousSettings = (await templateMetadataReader.LoadCloudApplicationMetadata(existingDeployment.Name)).Settings;
+                else
+                    previousSettings = await deployedApplicationQueryer.GetPreviousSettings(existingDeployment);
 
-                state.ApplicationDetails.Name = input.ExistingDeploymentName;
+                state.SelectedRecommendation = state.SelectedRecommendation.ApplyPreviousSettings(previousSettings);
+
+                state.ApplicationDetails.Name = existingDeployment.Name;
+                state.ApplicationDetails.UniqueIdentifier = existingDeployment.UniqueIdentifier;
                 state.ApplicationDetails.RecipeId = existingDeployment.RecipeId;
-                state.SelectedRecommendation.AddReplacementToken(DeployCommand.REPLACE_TOKEN_STACK_NAME, input.ExistingDeploymentName);
+                await orchestrator.ApplyAllReplacementTokens(state.SelectedRecommendation, existingDeployment.Name);
             }
 
             return Ok();
@@ -529,7 +547,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             var displayedResources = await displayedResourcesHandler.GetDeploymentOutputs(state.ApplicationDetails, state.SelectedRecommendation);
 
             var output = new GetDeploymentDetailsOutput(
-                state.ApplicationDetails.StackName,
+                state.ApplicationDetails.Name,
                 displayedResources
                     .Select(x => new DisplayedResourceSummary(x.Id, x.Description, x.Type, x.Data))
                     .ToList());
@@ -607,7 +625,9 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                                         serviceProvider.GetRequiredService<IFileManager>()),
                                     serviceProvider.GetRequiredService<ICustomRecipeLocator>(),
                                     new List<string> { RecipeLocator.FindRecipeDefinitionsPath() },
-                                    serviceProvider.GetRequiredService<IDirectoryManager>()
+                                    serviceProvider.GetRequiredService<IFileManager>(),
+                                    serviceProvider.GetRequiredService<IDirectoryManager>(),
+                                    serviceProvider.GetRequiredService<IAWSServiceHandler>()
                                 );
         }
     }

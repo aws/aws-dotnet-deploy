@@ -23,7 +23,7 @@ namespace AWS.Deploy.Common
         ProjectPathNotFound = 10000100,
         ProjectParserNoSdkAttribute = 10000200,
         InvalidCliArguments = 10000300,
-        SilentArgumentNeedsStackNameArgument = 10000400,
+        SilentArgumentNeedsApplicationNameArgument = 10000400,
         SilentArgumentNeedsDeploymentRecipe = 10000500,
         DeploymentProjectPathNotFound = 10000600,
         RuleHasInvalidTestType = 10000700,
@@ -90,7 +90,17 @@ namespace AWS.Deploy.Common
         CompatibleRecommendationForRedeploymentNotFound = 10006800,
         InvalidSaveDirectoryForCdkProject = 10006900,
         FailedToFindDeploymentProjectRecipeId = 10007000,
-        UnexpectedError = 10007100
+        UnexpectedError = 10007100,
+        FailedToCreateCdkStack = 10007200,
+        FailedToFindElasticBeanstalkSolutionStack = 10007300,
+        FailedToCreateDeploymentCommandInstance = 10007400,
+        FailedToFindElasticBeanstalkApplication = 10007500,
+        FailedS3Upload = 10007600,
+        FailedToCreateElasticBeanstalkApplicationVersion = 10007700,
+        FailedToUpdateElasticBeanstalkEnvironment = 10007800,
+        FailedToCreateElasticBeanstalkStorageLocation = 10007900,
+        UnableToAccessAWSRegion = 10008000,
+        OptInRegionDisabled = 10008100,
     }
 
     public class ProjectFileNotFoundException : DeployToolException

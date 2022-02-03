@@ -1,6 +1,7 @@
 
 using System;
 using AWS.Deploy.Common;
+using AWS.Deploy.Orchestration.DeploymentCommands;
 
 namespace AWS.Deploy.Orchestration
 {
@@ -170,5 +171,45 @@ namespace AWS.Deploy.Orchestration
     public class DockerInfoException : DeployToolException
     {
         public DockerInfoException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+    }
+
+    /// <summary>
+    /// Throw if unable to find an Elastic Beanstalk .NET solution stack.
+    /// </summary>
+    public class FailedToFindElasticBeanstalkSolutionStackException : DeployToolException
+    {
+        public FailedToFindElasticBeanstalkSolutionStackException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+    }
+
+    /// <summary>
+    /// Throw if could not create an instance of <see cref="IDeploymentCommand"/>
+    /// </summary>
+    public class FailedToCreateDeploymentCommandInstanceException : DeployToolException
+    {
+        public FailedToCreateDeploymentCommandInstanceException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+    }
+
+    /// <summary>
+    /// Throw if an error occured while calling a S3 API.
+    /// </summary>
+    public class S3Exception : DeployToolException
+    {
+        public S3Exception(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+    }
+
+    /// <summary>
+    /// Throw if an error occured while calling an Elastic Beanstalk API.
+    /// </summary>
+    public class ElasticBeanstalkException : DeployToolException
+    {
+        public ElasticBeanstalkException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+    }
+    
+    /// <summary>
+    /// Throw if unable to access the specified AWS Region.
+    /// </summary>
+    public class UnableToAccessAWSRegionException : DeployToolException
+    {
+        public UnableToAccessAWSRegionException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 }

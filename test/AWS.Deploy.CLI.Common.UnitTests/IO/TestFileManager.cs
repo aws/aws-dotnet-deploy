@@ -36,6 +36,10 @@ namespace AWS.Deploy.CLI.Common.UnitTests.IO
             InMemoryStore[filePath] = contents;
             return Task.CompletedTask;
         }
+
+        public FileStream OpenRead(string filePath) => throw new NotImplementedException();
+        public string GetExtension(string filePath) => throw new NotImplementedException();
+        public long GetSizeInBytes(string filePath) => throw new NotImplementedException();
     }
 
     public static class TestFileManagerExtensions

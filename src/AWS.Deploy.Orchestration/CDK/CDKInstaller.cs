@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.IO;
 using AWS.Deploy.Orchestration.Utilities;
 
 namespace AWS.Deploy.Orchestration.CDK
@@ -35,15 +36,20 @@ namespace AWS.Deploy.Orchestration.CDK
     public class CDKInstaller : ICDKInstaller
     {
         private readonly ICommandLineWrapper _commandLineWrapper;
+        private readonly IDirectoryManager _directoryManager;
 
-        public CDKInstaller(ICommandLineWrapper commandLineWrapper)
+        public CDKInstaller(ICommandLineWrapper commandLineWrapper, IDirectoryManager directoryManager)
         {
             _commandLineWrapper = commandLineWrapper;
+            _directoryManager = directoryManager;
         }
 
         public async Task<TryGetResult<Version>> GetVersion(string workingDirectory)
         {
             const string command = "npx --no-install cdk --version";
+
+            if (!_directoryManager.Exists(workingDirectory))
+                _directoryManager.CreateDirectory(workingDirectory);
 
             TryRunResult result;
 

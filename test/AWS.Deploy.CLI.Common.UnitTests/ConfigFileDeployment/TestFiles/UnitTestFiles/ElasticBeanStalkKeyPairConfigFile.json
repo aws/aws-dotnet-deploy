@@ -1,7 +1,7 @@
 {
     "AWSProfile": "default",
     "AWSRegion": "us-west-2",
-    "StackName": "MyAppStack",
+    "ApplicationName": "MyAppStack",
     "RecipeId": "AspNetAppElasticBeanstalkLinux",
     "OptionSettingsConfig": {
         "BeanstalkApplication": {

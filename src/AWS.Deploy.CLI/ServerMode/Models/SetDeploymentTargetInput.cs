@@ -13,6 +13,6 @@ namespace AWS.Deploy.CLI.ServerMode.Models
 
         public string? NewDeploymentRecipeId { get; set; }
 
-        public string? ExistingDeploymentName { get; set; }
+        public string? ExistingDeploymentId { get; set; }
     }
 }

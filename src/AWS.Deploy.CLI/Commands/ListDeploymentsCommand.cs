@@ -1,7 +1,9 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestration.Utilities;
 
 namespace AWS.Deploy.CLI.Commands
@@ -26,10 +28,11 @@ namespace AWS.Deploy.CLI.Commands
             _interactiveService.WriteLine("Cloud Applications:");
             _interactiveService.WriteLine("-------------------");
 
-            var existingApplications = await _deployedApplicationQueryer.GetExistingDeployedApplications();
+            var deploymentTypes = new List<DeploymentTypes>(){ DeploymentTypes.CdkProject, DeploymentTypes.BeanstalkEnvironment };
+            var existingApplications = await _deployedApplicationQueryer.GetExistingDeployedApplications(deploymentTypes);
             foreach (var app in existingApplications)
             {
-                _interactiveService.WriteLine(app.Name);
+                _interactiveService.WriteLine(app.DisplayName);
             }
         }
     }

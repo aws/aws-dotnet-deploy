@@ -19,7 +19,7 @@ namespace AWS.Deploy.Orchestration
 
             // General Settings
             var appSettingsContainer = new RecipeProps<Dictionary<string, object>>(
-                cloudApplication.StackName,
+                cloudApplication.Name,
                 projectPath,
                 recommendation.Recipe.Id,
                 recommendation.Recipe.Version,
