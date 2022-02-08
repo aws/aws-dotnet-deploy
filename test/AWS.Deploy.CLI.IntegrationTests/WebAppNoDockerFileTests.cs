@@ -91,9 +91,8 @@ namespace AWS.Deploy.CLI.IntegrationTests
             Assert.Contains(listStdOut, (deployment) => _stackName.Equals(deployment));
 
             // Arrange input for delete
-            await _interactiveService.StdInWriter.WriteAsync("y"); // Confirm delete
-            await _interactiveService.StdInWriter.FlushAsync();
-            var deleteArgs = new[] { "delete-deployment", _stackName, "--diagnostics" };
+            // Use --silent flag to delete without user prompts
+            var deleteArgs = new[] { "delete-deployment", _stackName, "--diagnostics", "--silent" };
 
             // Delete
             Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deleteArgs));;
