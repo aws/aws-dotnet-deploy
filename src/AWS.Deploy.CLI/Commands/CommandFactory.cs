@@ -40,7 +40,7 @@ namespace AWS.Deploy.CLI.Commands
         private static readonly Option<string> _optionApplicationName = new("--application-name", "Name of the cloud application. If you choose to deploy via CloudFormation, this name will be used to identify the CloudFormation stack.");
         private static readonly Option<bool> _optionDiagnosticLogging = new(new[] { "-d", "--diagnostics" }, "Enable diagnostic output.");
         private static readonly Option<string> _optionApply = new("--apply", "Path to the deployment settings file to be applied.");
-        private static readonly Option<bool> _optionDisableInteractive = new(new[] { "-s", "--silent" }, "Disable interactivity to deploy without any prompts for user input.");
+        private static readonly Option<bool> _optionDisableInteractive = new(new[] { "-s", "--silent" }, "Disable interactivity to execute commands without any prompts for user input.");
         private static readonly Option<string> _optionOutputDirectory = new(new[] { "-o", "--output" }, "Directory path in which the CDK deployment project will be saved.");
         private static readonly Option<string> _optionProjectDisplayName = new(new[] { "--project-display-name" }, "The name of the deployment project that will be displayed in the list of available deployment options.");
         private static readonly Option<string> _optionDeploymentProject = new(new[] { "--deployment-project" }, "The absolute or relative path of the CDK project that will be used for deployment");
@@ -268,6 +268,7 @@ namespace AWS.Deploy.CLI.Commands
                 deleteCommand.Add(_optionRegion);
                 deleteCommand.Add(_optionProjectPath);
                 deleteCommand.Add(_optionDiagnosticLogging);
+                deleteCommand.Add(_optionDisableInteractive);
                 deleteCommand.AddArgument(new Argument("deployment-name"));
             }
 
@@ -276,6 +277,7 @@ namespace AWS.Deploy.CLI.Commands
                 try
                 {
                     _toolInteractiveService.Diagnostics = input.Diagnostics;
+                    _toolInteractiveService.DisableInteractive = input.Silent;
 
                     var awsCredentials = await _awsUtilities.ResolveAWSCredentials(input.Profile);
                     var awsRegion = _awsUtilities.ResolveAWSRegion(input.Region);

@@ -57,7 +57,10 @@ namespace AWS.Deploy.CLI.Commands
                 return;
             }
 
-            var confirmDelete = _consoleUtilities.AskYesNoQuestion($"Are you sure you want to delete {stackName}?", YesNo.No);
+            var confirmDelete =  _interactiveService.DisableInteractive
+                ? YesNo.Yes
+                : _consoleUtilities.AskYesNoQuestion($"Are you sure you want to delete {stackName}?", YesNo.No);
+
             if (confirmDelete == YesNo.No)
             {
                 return;
