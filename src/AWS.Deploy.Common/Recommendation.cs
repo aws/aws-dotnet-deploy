@@ -45,7 +45,7 @@ namespace AWS.Deploy.Common
             DeploymentBundle = new DeploymentBundle();
             DeploymentBundleSettings = deploymentBundleSettings;
 
-            CollectRecommendationReplacementTokens(Recipe.OptionSettings);
+            CollectRecommendationReplacementTokens(GetConfigurableOptionSettingItems().ToList());
 
             foreach (var replacement in additionalReplacements)
             {

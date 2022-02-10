@@ -1,0 +1,55 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Amazon.ECR.Model;
+using AWS.Deploy.Common;
+using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.TypeHintData;
+using AWS.Deploy.Orchestration.Data;
+
+namespace AWS.Deploy.CLI.Commands.TypeHints
+{
+    public class ECRRepositoryCommand : ITypeHintCommand
+    {
+        private readonly IAWSResourceQueryer _awsResourceQueryer;
+        private readonly IConsoleUtilities _consoleUtilities;
+
+        public ECRRepositoryCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities)
+        {
+            _awsResourceQueryer = awsResourceQueryer;
+            _consoleUtilities = consoleUtilities;
+        }
+
+        public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
+        {
+            var repositories = await GetData();
+            var currentRepositoryName = recommendation.GetOptionSettingValue<string>(optionSetting);
+
+            var userInputConfiguration = new UserInputConfiguration<Repository>(
+                rep => rep.RepositoryName,
+                rep => rep.RepositoryName.Equals(currentRepositoryName),
+                currentRepositoryName)
+            {
+                AskNewName = true,
+            };
+
+            var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(repositories, "Select ECR Repository:", userInputConfiguration);
+
+            return userResponse.SelectedOption?.RepositoryName ?? userResponse.NewName
+                ?? throw new UserPromptForNameReturnedNullException(DeployToolErrorCode.ECRRepositoryPromptForNameReturnedNull, "The user response for an ECR Repository was null");
+        }
+        public async Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
+        {
+            var repositories = await GetData();
+            return repositories.Select(x => new TypeHintResource(x.RepositoryName, x.RepositoryName)).ToList();
+        }
+
+        private async Task<List<Repository>> GetData()
+        {
+            return await _awsResourceQueryer.GetECRRepositories();
+        }
+    }
+}

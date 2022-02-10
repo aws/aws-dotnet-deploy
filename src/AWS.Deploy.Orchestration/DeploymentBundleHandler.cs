@@ -19,7 +19,7 @@ namespace AWS.Deploy.Orchestration
     {
         Task<string> BuildDockerImage(CloudApplication cloudApplication, Recommendation recommendation);
         Task<string> CreateDotnetPublishZip(Recommendation recommendation);
-        Task PushDockerImageToECR(CloudApplication cloudApplication, Recommendation recommendation, string sourceTag);
+        Task PushDockerImageToECR(Recommendation recommendation, string repositoryName, string sourceTag);
     }
 
     public class DeploymentBundleHandler : IDeploymentBundleHandler
@@ -71,7 +71,7 @@ namespace AWS.Deploy.Orchestration
             return imageTag;
         }
 
-        public async Task PushDockerImageToECR(CloudApplication cloudApplication, Recommendation recommendation, string sourceTag)
+        public async Task PushDockerImageToECR(Recommendation recommendation, string repositoryName, string sourceTag)
         {
             _interactiveService.LogMessageLine(string.Empty);
             _interactiveService.LogMessageLine("Pushing the docker image to ECR repository...");
@@ -79,7 +79,7 @@ namespace AWS.Deploy.Orchestration
             await InitiateDockerLogin();
 
             var tagSuffix = sourceTag.Split(":")[1];
-            var repository = await SetupECRRepository(cloudApplication.Name.ToLower());
+            var repository = await SetupECRRepository(repositoryName);
             var targetTag = $"{repository.RepositoryUri}:{tagSuffix}";
 
             await TagDockerImage(sourceTag, targetTag);
