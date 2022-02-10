@@ -18,8 +18,5 @@ namespace AWS.Deploy.Constants
         public const string PROMPT_CHOOSE_DEPLOYMENT_TARGET = "Choose deployment target";
 
         public const string CLI_APP_NAME = "AWS .NET Deployment Tool";
-
-        public const string REPLACE_TOKEN_LATEST_DOTNET_BEANSTALK_PLATFORM_ARN = "{LatestDotnetBeanstalkPlatformArn}";
-        public const string REPLACE_TOKEN_STACK_NAME = "{StackName}";
     }
 }

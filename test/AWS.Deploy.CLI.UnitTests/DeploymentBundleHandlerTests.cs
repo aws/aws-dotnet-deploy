@@ -99,11 +99,11 @@ namespace AWS.Deploy.CLI.UnitTests
             var projectPath = SystemIOUtilities.ResolvePath("ConsoleAppTask");
             var project = await _projectDefinitionParser.Parse(projectPath);
             var recommendation = new Recommendation(_recipeDefinition, project, new List<OptionSettingItem>(), 100, new Dictionary<string, string>());
+            var repositoryName = "repository";
 
-            var cloudApplication = new CloudApplication("ConsoleAppTask", string.Empty, CloudApplicationResourceType.CloudFormationStack, string.Empty);
-            await _deploymentBundleHandler.PushDockerImageToECR(cloudApplication, recommendation, "ConsoleAppTask:latest");
+            await _deploymentBundleHandler.PushDockerImageToECR(recommendation, repositoryName, "ConsoleAppTask:latest");
 
-            Assert.Equal(cloudApplication.Name.ToLower(), recommendation.DeploymentBundle.ECRRepositoryName);
+            Assert.Equal(repositoryName, recommendation.DeploymentBundle.ECRRepositoryName);
         }
 
         [Fact]
