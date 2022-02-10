@@ -61,7 +61,7 @@ namespace AWS.Deploy.Orchestration.Data
         Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns();
         Task<PlatformSummary> GetLatestElasticBeanstalkPlatformArn();
         Task<List<AuthorizationData>> GetECRAuthorizationToken();
-        Task<List<Repository>> GetECRRepositories(List<string> repositoryNames);
+        Task<List<Repository>> GetECRRepositories(List<string>? repositoryNames = null);
         Task<Repository> CreateECRRepository(string repositoryName);
         Task<List<Stack>> GetCloudFormationStacks();
         Task<GetCallerIdentityResponse> GetCallerIdentity(string awsRegion);
@@ -407,7 +407,7 @@ namespace AWS.Deploy.Orchestration.Data
             return response.AuthorizationData;
         }
 
-        public async Task<List<Repository>> GetECRRepositories(List<string> repositoryNames)
+        public async Task<List<Repository>> GetECRRepositories(List<string>? repositoryNames = null)
         {
             var ecrClient = _awsClientFactory.GetAWSClient<IAmazonECR>();
 

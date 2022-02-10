@@ -124,6 +124,19 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             Validate(optionSettingItem, value, isValid);
         }
 
+        [Theory]
+        [InlineData("myrepo123", true)]
+        [InlineData("myrepo123.a/b", true)]
+        [InlineData("MyRepo", false)] // cannot contain uppercase letters
+        [InlineData("myrepo123@", false)] // cannot contain @
+        [InlineData("myrepo123.a//b", false)] // cannot contain consecutive slashes.
+        public void ECRRepositoryNameValidationTest(string value, bool isValid)
+        {
+            var optionSettingItem = new OptionSettingItem("id", "name", "description");
+            optionSettingItem.Validators.Add(GetRegexValidatorConfig("^(?:[a-z0-9]+(?:[._-][a-z0-9]+)*/)*[a-z0-9]+(?:[._-][a-z0-9]+)*$"));
+            Validate(optionSettingItem, value, isValid);
+        }
+
         private OptionSettingItemValidatorConfig GetRegexValidatorConfig(string regex)
         {
             var regexValidatorConfig = new OptionSettingItemValidatorConfig
