@@ -397,6 +397,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 state.ApplicationDetails.Name = existingDeployment.Name;
                 state.ApplicationDetails.UniqueIdentifier = existingDeployment.UniqueIdentifier;
                 state.ApplicationDetails.RecipeId = existingDeployment.RecipeId;
+                state.ApplicationDetails.ResourceType = existingDeployment.ResourceType;
                 await orchestrator.ApplyAllReplacementTokens(state.SelectedRecommendation, existingDeployment.Name);
             }
 
