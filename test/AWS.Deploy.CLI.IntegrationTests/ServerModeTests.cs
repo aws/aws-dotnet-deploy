@@ -4,16 +4,12 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Amazon.CloudFormation;
-using Amazon.CloudFormation.Model;
-using Amazon.ECS;
 using Amazon.Runtime;
-using Amazon.Runtime.CredentialManagement;
 using AWS.Deploy.CLI.Commands;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.CLI.Extensions;
@@ -235,6 +231,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
                 Assert.Equal(fargateRecommendation.ShortDescription, existingDeployment.ShortDescription);
                 Assert.Equal(fargateRecommendation.Description, existingDeployment.Description);
                 Assert.Equal(fargateRecommendation.TargetService, existingDeployment.TargetService);
+                Assert.Equal(DeploymentTypes.CloudFormationStack, existingDeployment.DeploymentType);
             }
             finally
             {
