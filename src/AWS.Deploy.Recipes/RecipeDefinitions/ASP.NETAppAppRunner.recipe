@@ -140,6 +140,7 @@
                             "Configuration": 
                             {
                                 "Regex": "arn:(aws|aws-us-gov|aws-cn|aws-iso|aws-iso-b):iam::[0-9]{12}:(role|role/service-role)/[\\w+=,.@\\-/]{1,1000}",
+                                "AllowEmptyString": true,
                                 "ValidationFailedMessage": "Invalid IAM Role ARN. The ARN should contain the arn:[PARTITION]:iam namespace, followed by the account ID, and then the resource path. For example - arn:aws:iam::123456789012:role/S3Access is a valid IAM Role ARN. For more information visit https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-apprunner-service-authenticationconfiguration.html"
                             }
                         }
@@ -191,6 +192,7 @@
                             "Configuration": 
                             {
                                 "Regex": "arn:(aws|aws-us-gov|aws-cn|aws-iso|aws-iso-b):iam::[0-9]{12}:(role|role/service-role)/[\\w+=,.@\\-/]{1,1000}",
+                                "AllowEmptyString": true,
                                 "ValidationFailedMessage": "Invalid IAM Role ARN. The ARN should contain the arn:[PARTITION]:iam namespace, followed by the account ID, and then the resource path. For example - arn:aws:iam::123456789012:role/S3Access is a valid IAM Role ARN. For more information visit https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-apprunner-service-authenticationconfiguration.html"
                             }
                         }
@@ -253,6 +255,7 @@
                     "Configuration": 
                     {
                         "Regex": "arn:aws(-[\\w]+)*:kms:[a-z\\-]+-[0-9]{1}:[0-9]{12}:key/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
+                        "AllowEmptyString": true,
                         "ValidationFailedMessage": "Invalid KMS key ARN. The ARN should contain the arn:[PARTITION]:kms namespace, followed by the region, account ID, and then the key-id. For example - arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab is a valid KMS key ARN. For more information visit https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-apprunner-service-encryptionconfiguration.html"
                     }
                 }
