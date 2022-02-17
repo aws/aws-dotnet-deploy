@@ -8,18 +8,18 @@ namespace AWS.Deploy.CLI.ServerMode.Models
     public class GetDeploymentDetailsOutput
     {
         /// <summary>
-        /// The CloudFormation Stack ID
+        /// The CloudApplication Name
         /// </summary>
-        public string StackId { get; set; }
+        public string CloudApplicationName { get; set; }
 
         /// <summary>
         /// The list of displayed resources based on the recipe definition
         /// </summary>
         public List<DisplayedResourceSummary> DisplayedResources { get; set; }
 
-        public GetDeploymentDetailsOutput(string stackId, List<DisplayedResourceSummary> displayedResources)
+        public GetDeploymentDetailsOutput(string cloudApplicationName, List<DisplayedResourceSummary> displayedResources)
         {
-            StackId = stackId;
+            CloudApplicationName = cloudApplicationName;
             DisplayedResources = displayedResources;
         }
     }

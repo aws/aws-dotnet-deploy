@@ -209,12 +209,23 @@ namespace AWS.Deploy.CLI.Commands
 
                 // Ask the user for a new Cloud Application name based on the deployment type of the recipe.
                 if (string.IsNullOrEmpty(cloudApplicationName))
-                    cloudApplicationName = AskForNewCloudApplicationName(selectedRecommendation.Recipe.DeploymentType, compatibleApplications);
+                {
+                    // Don't prompt for a new name if a user just wants to push images to ECR
+                    // The ECR repository name is already configurable as part of the recipe option settings.
+                    if (selectedRecommendation.Recipe.DeploymentType == DeploymentTypes.ElasticContainerRegistryImage)
+                    {
+                        cloudApplicationName = _cloudApplicationNameGenerator.GenerateValidName(_session.ProjectDefinition, compatibleApplications);
+                    }
+                    else
+                    {
+                        cloudApplicationName = AskForNewCloudApplicationName(selectedRecommendation.Recipe.DeploymentType, compatibleApplications);
+                    }
+                }
             }
 
             await orchestrator.ApplyAllReplacementTokens(selectedRecommendation, cloudApplicationName);
 
-            var cloudApplication = new CloudApplication(cloudApplicationName, deployedApplication?.UniqueIdentifier ?? string.Empty, deployedApplication?.ResourceType ?? CloudApplicationResourceType.CloudFormationStack, selectedRecommendation.Recipe.Id);
+            var cloudApplication = new CloudApplication(cloudApplicationName, deployedApplication?.UniqueIdentifier ?? string.Empty, orchestrator.GetCloudApplicationResourceType(selectedRecommendation.Recipe.DeploymentType), selectedRecommendation.Recipe.Id);
 
             return (orchestrator, selectedRecommendation, cloudApplication);
         }
@@ -570,6 +581,9 @@ namespace AWS.Deploy.CLI.Commands
                 {
                     case DeploymentTypes.CdkProject:
                         inputPrompt = Constants.CLI.PROMPT_NEW_STACK_NAME;
+                        break;
+                    case DeploymentTypes.ElasticContainerRegistryImage:
+                        inputPrompt = Constants.CLI.PROMPT_ECR_REPOSITORY_NAME;
                         break;
                     default:
                         throw new InvalidOperationException($"The {nameof(DeploymentTypes)} {deploymentType} does not have an input prompt");

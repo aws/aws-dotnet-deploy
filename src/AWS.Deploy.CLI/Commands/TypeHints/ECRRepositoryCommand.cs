@@ -16,11 +16,13 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
     {
         private readonly IAWSResourceQueryer _awsResourceQueryer;
         private readonly IConsoleUtilities _consoleUtilities;
+        private readonly IToolInteractiveService _toolInteractiveService;
 
-        public ECRRepositoryCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities)
+        public ECRRepositoryCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities, IToolInteractiveService toolInteractiveService)
         {
             _awsResourceQueryer = awsResourceQueryer;
             _consoleUtilities = consoleUtilities;
+            _toolInteractiveService = toolInteractiveService;
         }
 
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
@@ -37,6 +39,12 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             };
 
             var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(repositories, "Select ECR Repository:", userInputConfiguration);
+
+            if (!string.IsNullOrEmpty(userResponse.NewName) && repositories.Any(x => x.RepositoryName.Equals(userResponse.NewName)))
+            {
+                _toolInteractiveService.WriteErrorLine($"The ECR repository {userResponse.NewName} already exists.");
+                return await Execute(recommendation, optionSetting);
+            }
 
             return userResponse.SelectedOption?.RepositoryName ?? userResponse.NewName
                 ?? throw new UserPromptForNameReturnedNullException(DeployToolErrorCode.ECRRepositoryPromptForNameReturnedNull, "The user response for an ECR Repository was null");

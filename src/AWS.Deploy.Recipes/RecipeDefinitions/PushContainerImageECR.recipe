@@ -1,0 +1,50 @@
+{
+    "$schema": "./aws-deploy-recipe-schema.json",
+    "Id": "PushContainerImageEcr",
+    "Version": "0.1.0",
+    "Name": "Push Container Images to Amazon Elastic Container Registry",
+    "DeploymentType": "ElasticContainerRegistryImage",
+    "DeploymentBundle": "Container",
+    "Description": "This will push the Docker container image to Amazon Elastic Container Registry (Amazon ECR)",
+    "ShortDescription": "Push container images to Amazon Elastic Container Registry",
+    "TargetService": "Amazon Elastic Container Service",
+
+    "RecipePriority": 0,
+    "RecommendationRules": [
+        {
+            "Tests": [
+                {
+                    "Type": "FileExists",
+                    "Condition": {
+                        "FileName": "Dockerfile"
+                    }
+                }
+            ],
+            "Effect": {
+                "Pass": { "Include": true },
+                "Fail": {"Include": false}
+            }
+        }
+    ],
+
+    "OptionSettings": [
+        {
+            "Id": "ImageTag",
+            "Name": "Image Tag",
+            "Description": "This tag will be associated to the container images which are pushed to Amazon Elastic Container Registry.",
+            "Type": "String",
+            "DefaultValue": "{DefaultECRImageTag}",
+            "AdvancedSetting": false,
+            "Updatable": true,
+            "Validators": [
+                {
+                    "ValidatorType": "Regex",
+                    "Configuration": {
+                        "Regex": "^[a-zA-Z0-9][a-zA-Z0-9.-_]{0,127}$",
+                        "ValidationFailedMessage": "Invalid image tag. The image tag can only contain uppercase and lowercase letters, digits, dashes, period and underscore. It may contain a maximum of 128 characters and cannot start with a special character."
+                    }
+                }
+            ]
+        }
+    ]
+}

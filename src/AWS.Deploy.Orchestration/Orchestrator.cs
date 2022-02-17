@@ -138,6 +138,10 @@ namespace AWS.Deploy.Orchestration
             {
                 recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_ECR_REPOSITORY_NAME, cloudApplicationName.ToLower());
             }
+            if (recommendation.ReplacementTokens.ContainsKey(Constants.RecipeIdentifier.REPLACE_TOKEN_ECR_IMAGE_TAG))
+            {
+                recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_ECR_IMAGE_TAG, DateTime.UtcNow.Ticks.ToString());
+            }
         }
 
         public async Task DeployRecommendation(CloudApplication cloudApplication, Recommendation recommendation)
@@ -172,8 +176,20 @@ namespace AWS.Deploy.Orchestration
 
             try
             {
-                var imageTag = await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation);
                 var respositoryName = recommendation.GetOptionSettingValue<string>(recommendation.GetOptionSetting("ECRRepositoryName"));
+
+                string imageTag;
+                try
+                {
+                    var tagSuffix = recommendation.GetOptionSettingValue<string>(recommendation.GetOptionSetting("ImageTag"));
+                    imageTag = $"{respositoryName}:{tagSuffix}";
+                }
+                catch (OptionSettingItemDoesNotExistException)
+                {
+                    imageTag = $"{respositoryName}:{DateTime.UtcNow.Ticks}";
+                }
+
+                await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation, imageTag);
                 await _deploymentBundleHandler.PushDockerImageToECR(recommendation, respositoryName, imageTag);
             }
             catch(DockerBuildFailedException ex)
@@ -215,6 +231,25 @@ namespace AWS.Deploy.Orchestration
             }
 
             return true;
+        }
+
+        public CloudApplicationResourceType GetCloudApplicationResourceType(DeploymentTypes deploymentType)
+        {
+            switch (deploymentType)
+            {
+                case DeploymentTypes.CdkProject:
+                    return CloudApplicationResourceType.CloudFormationStack;
+
+                case DeploymentTypes.BeanstalkEnvironment:
+                    return CloudApplicationResourceType.BeanstalkEnvironment;
+
+                case DeploymentTypes.ElasticContainerRegistryImage:
+                    return CloudApplicationResourceType.ElasticContainerRegistryImage;
+
+                default:
+                    var errorMessage = $"Failed to find ${nameof(CloudApplicationResourceType)} from {nameof(DeploymentTypes)} {deploymentType}";
+                    throw new FailedToFindCloudApplicationResourceType(DeployToolErrorCode.FailedToFindCloudApplicationResourceType, errorMessage);
+            }
         }
 
         private async Task<List<string>> LocateCustomRecipePaths(string targetApplicationFullPath, string solutionDirectoryPath)

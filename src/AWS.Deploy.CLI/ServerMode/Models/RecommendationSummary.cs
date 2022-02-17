@@ -12,7 +12,8 @@ namespace AWS.Deploy.CLI.ServerMode.Models
         private readonly Dictionary<Common.Recipes.DeploymentTypes, DeploymentTypes> _deploymentTargetsMapping = new()
         {
             { Common.Recipes.DeploymentTypes.CdkProject, DeploymentTypes.CloudFormationStack },
-            { Common.Recipes.DeploymentTypes.BeanstalkEnvironment, DeploymentTypes.BeanstalkEnvironment }
+            { Common.Recipes.DeploymentTypes.BeanstalkEnvironment, DeploymentTypes.BeanstalkEnvironment },
+            { Common.Recipes.DeploymentTypes.ElasticContainerRegistryImage, DeploymentTypes.ElasticContainerRegistryImage }
         };
 
         public string RecipeId { get; set; }

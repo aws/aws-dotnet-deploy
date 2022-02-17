@@ -101,7 +101,9 @@ namespace AWS.Deploy.Common
         FailedToCreateElasticBeanstalkStorageLocation = 10007900,
         UnableToAccessAWSRegion = 10008000,
         OptInRegionDisabled = 10008100,
-        ECRRepositoryPromptForNameReturnedNull = 10008200
+        ECRRepositoryPromptForNameReturnedNull = 10008200,
+        FailedToFindCloudApplicationResourceType = 10008300,
+        ECRRepositoryDoesNotExist = 10008400
     }
 
     public class ProjectFileNotFoundException : DeployToolException
