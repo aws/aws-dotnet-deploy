@@ -14,7 +14,8 @@ namespace AWS.Deploy.Orchestration.DeploymentCommands
         private static readonly Dictionary<DeploymentTypes, Type> _deploymentCommandTypeMapping = new()
         {
             { DeploymentTypes.CdkProject, typeof(CdkDeploymentCommand) },
-            { DeploymentTypes.BeanstalkEnvironment, typeof(BeanstalkEnvironmentDeploymentCommand) }
+            { DeploymentTypes.BeanstalkEnvironment, typeof(BeanstalkEnvironmentDeploymentCommand) },
+            { DeploymentTypes.ElasticContainerRegistryImage, typeof(ElasticContainerRegistryPushCommand) }
         };
 
         public static IDeploymentCommand BuildDeploymentCommand(DeploymentTypes deploymentType)

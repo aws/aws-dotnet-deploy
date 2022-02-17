@@ -6,6 +6,7 @@ namespace AWS.Deploy.CLI.ServerMode.Models
     public enum DeploymentTypes
     {
         CloudFormationStack,
-        BeanstalkEnvironment
+        BeanstalkEnvironment,
+        ElasticContainerRegistryImage
     }
 }

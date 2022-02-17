@@ -15,7 +15,8 @@ namespace AWS.Deploy.Common
             new()
             {
                 { CloudApplicationResourceType.CloudFormationStack, "CloudFormation Stack" },
-                { CloudApplicationResourceType.BeanstalkEnvironment, "Elastic Beanstalk Environment" }
+                { CloudApplicationResourceType.BeanstalkEnvironment, "Elastic Beanstalk Environment" },
+                { CloudApplicationResourceType.ElasticContainerRegistryImage, "ECR Repository" }
             };
 
         /// <summary>

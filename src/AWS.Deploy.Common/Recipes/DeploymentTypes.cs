@@ -6,6 +6,7 @@ namespace AWS.Deploy.Common.Recipes
     public enum DeploymentTypes
     {
         CdkProject,
-        BeanstalkEnvironment
+        BeanstalkEnvironment,
+        ElasticContainerRegistryImage
     }
 }

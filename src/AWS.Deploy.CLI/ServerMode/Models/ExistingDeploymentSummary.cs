@@ -14,7 +14,8 @@ namespace AWS.Deploy.CLI.ServerMode.Models
         private readonly Dictionary<CloudApplicationResourceType, DeploymentTypes> _deploymentTargetsMapping = new()
         {
             { CloudApplicationResourceType.CloudFormationStack, DeploymentTypes.CloudFormationStack },
-            { CloudApplicationResourceType.BeanstalkEnvironment, DeploymentTypes.BeanstalkEnvironment }
+            { CloudApplicationResourceType.BeanstalkEnvironment, DeploymentTypes.BeanstalkEnvironment },
+            { CloudApplicationResourceType.ElasticContainerRegistryImage, DeploymentTypes.ElasticContainerRegistryImage}
         };
 
         public string Name { get; set; }

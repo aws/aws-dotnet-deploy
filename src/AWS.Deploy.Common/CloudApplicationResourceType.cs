@@ -11,6 +11,7 @@ namespace AWS.Deploy.Common
     {
         None,
         CloudFormationStack,
-        BeanstalkEnvironment
+        BeanstalkEnvironment,
+        ElasticContainerRegistryImage
     }
 }

@@ -54,7 +54,7 @@
             "type": "string",
             "title": "Deployment type",
             "description": "The technology used to deploy the project.",
-            "enum": [ "CdkProject",  "BeanstalkEnvironment"]
+            "enum": [ "CdkProject",  "BeanstalkEnvironment", "ElasticContainerRegistryImage"]
         },
         "DeploymentBundle": {
             "type": "string",
