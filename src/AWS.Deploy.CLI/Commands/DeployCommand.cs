@@ -145,6 +145,8 @@ namespace AWS.Deploy.CLI.Commands
         /// <returns>A tuple consisting of the Orchestrator object, Selected Recommendation, Cloud Application metadata.</returns>
         public async Task<(Orchestrator, Recommendation, CloudApplication)> InitializeDeployment(string applicationName, UserDeploymentSettings? userDeploymentSettings, string deploymentProjectPath)
         {
+            string cloudApplicationName;
+
             var orchestrator = new Orchestrator(
                     _session,
                     _orchestratorInteractiveService,
@@ -170,8 +172,12 @@ namespace AWS.Deploy.CLI.Commands
             // Filter compatible applications that can be re-deployed  using the current set of recommendations.
             var compatibleApplications = await _deployedApplicationQueryer.GetCompatibleApplications(recommendations, allDeployedApplications, _session);
 
-            // Get CloudApplication name.
-            var cloudApplicationName = GetCloudApplicationName(applicationName, userDeploymentSettings, compatibleApplications);
+            // Try finding the CloudApplication name via the --application-name CLI argument or user provided config settings.
+            cloudApplicationName = GetCloudApplicationNameFromDeploymentSettings(applicationName, userDeploymentSettings);
+
+            // Prompt the user with a choice to re-deploy to existing targets or deploy to a new cloud application.
+            if (string.IsNullOrEmpty(cloudApplicationName))
+                cloudApplicationName = AskForCloudApplicationNameFromDeployedApplications(compatibleApplications);
 
             // Find existing application with the same CloudApplication name.
             var deployedApplication = allDeployedApplications.FirstOrDefault(x => string.Equals(x.Name, cloudApplicationName));
@@ -200,6 +206,10 @@ namespace AWS.Deploy.CLI.Commands
                     // Filter the recommendation list for a NEW deployment with recipes which have the DisableNewDeployments property set to false.
                     selectedRecommendation = GetSelectedRecommendation(userDeploymentSettings, recommendations.Where(x => !x.Recipe.DisableNewDeployments).ToList());
                 }
+
+                // Ask the user for a new Cloud Application name based on the deployment type of the recipe.
+                if (string.IsNullOrEmpty(cloudApplicationName))
+                    cloudApplicationName = AskForNewCloudApplicationName(selectedRecommendation.Recipe.DeploymentType, compatibleApplications);
             }
 
             await orchestrator.ApplyAllReplacementTokens(selectedRecommendation, cloudApplicationName);
@@ -469,9 +479,11 @@ namespace AWS.Deploy.CLI.Commands
             }
         }
 
-        private string GetCloudApplicationName(string? applicationName, UserDeploymentSettings? userDeploymentSettings, List<CloudApplication> deployedApplications)
+        // This method tries to find the cloud application name via the user provided CLI arguments or deployment config file.
+        // If a name is not present at either of the places then return string.empty
+        private string GetCloudApplicationNameFromDeploymentSettings(string? applicationName, UserDeploymentSettings? userDeploymentSettings)
         {
-            // validate the applicationName provided by the --application-name cli argument if present.
+            // validate and return the applicationName provided by the --application-name cli argument if present.
             if (!string.IsNullOrEmpty(applicationName))
             {
                 if (_cloudApplicationNameGenerator.IsValidName(applicationName))
@@ -481,22 +493,100 @@ namespace AWS.Deploy.CLI.Commands
                 throw new InvalidCliArgumentException(DeployToolErrorCode.InvalidCliArguments, "Found invalid CLI arguments");
             }
 
+            // validate and return the applicationName from the deployment settings if present.
             if (!string.IsNullOrEmpty(userDeploymentSettings?.ApplicationName))
             {
                 if (_cloudApplicationNameGenerator.IsValidName(userDeploymentSettings.ApplicationName))
                     return userDeploymentSettings.ApplicationName;
 
                 PrintInvalidApplicationNameMessage();
-                throw new InvalidUserDeploymentSettingsException(DeployToolErrorCode.UserDeploymentInvalidStackName, "Please provide a valid stack name and try again.");
+                throw new InvalidUserDeploymentSettingsException(DeployToolErrorCode.UserDeploymentInvalidStackName, "Please provide a valid cloud application name and try again.");
             }
 
+            return string.Empty;
+        }
+
+        // This method prompts the user to select a CloudApplication name for existing deployments or create a new one.
+        // If a user chooses to create a new CloudApplication, then this method returns string.Empty
+        private string AskForCloudApplicationNameFromDeployedApplications(List<CloudApplication> deployedApplications)
+        {
+            if (!deployedApplications.Any())
+                return string.Empty;
+
+            var title = "Select an existing AWS deployment target to deploy your application to.";
+
+            var userInputConfiguration = new UserInputConfiguration<CloudApplication>(
+                app => app.DisplayName,
+                app => app.DisplayName.Equals(deployedApplications.First().DisplayName))
+            {
+                AskNewName = false,
+                CanBeEmpty = false
+            };
+
+            var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(
+                options: deployedApplications,
+                title: title,
+                userInputConfiguration: userInputConfiguration,
+                defaultChoosePrompt: Constants.CLI.PROMPT_CHOOSE_DEPLOYMENT_TARGET,
+                defaultCreateNewLabel: Constants.CLI.CREATE_NEW_APPLICATION_LABEL);
+
+            var cloudApplicationName = userResponse.SelectedOption != null ? userResponse.SelectedOption.Name : string.Empty;
+            return cloudApplicationName;
+        }
+
+        // This method prompts the user for a new CloudApplication name and also generate a valid default name by respecting existing applications.
+        private string AskForNewCloudApplicationName(DeploymentTypes deploymentType, List<CloudApplication> deployedApplications)
+        {
             if (_toolInteractiveService.DisableInteractive)
             {
                 var message = "The \"--silent\" CLI argument can only be used if a cloud application name is provided either via the CLI argument \"--application-name\" or through a deployment-settings file. " +
                 "Please provide an application name and try again";
                 throw new InvalidCliArgumentException(DeployToolErrorCode.SilentArgumentNeedsApplicationNameArgument, message);
             }
-            return AskUserForCloudApplicationName(_session.ProjectDefinition, deployedApplications);
+
+            var defaultName = "";
+
+            try
+            {
+                defaultName = _cloudApplicationNameGenerator.GenerateValidName(_session.ProjectDefinition, deployedApplications);
+            }
+            catch (Exception exception)
+            {
+                _toolInteractiveService.WriteDebugLine(exception.PrettyPrint());
+            }
+
+            var cloudApplicationName = "";
+
+            while (true)
+            {
+                _toolInteractiveService.WriteLine();
+
+                var title = "Name the Cloud Application to deploy your project to" + Environment.NewLine +
+                            "--------------------------------------------------------------------------------";
+
+                string inputPrompt;
+
+                switch (deploymentType)
+                {
+                    case DeploymentTypes.CdkProject:
+                        inputPrompt = Constants.CLI.PROMPT_NEW_STACK_NAME;
+                        break;
+                    default:
+                        throw new InvalidOperationException($"The {nameof(DeploymentTypes)} {deploymentType} does not have an input prompt");
+                }
+
+                cloudApplicationName =
+                    _consoleUtilities.AskUserForValue(
+                        title,
+                        defaultName,
+                        allowEmpty: false,
+                        defaultAskValuePrompt: inputPrompt);
+
+                if (!string.IsNullOrEmpty(cloudApplicationName) && _cloudApplicationNameGenerator.IsValidName(cloudApplicationName))
+                    return cloudApplicationName;
+
+                PrintInvalidApplicationNameMessage();
+            }
         }
 
         /// <summary>
@@ -531,66 +621,6 @@ namespace AWS.Deploy.CLI.Commands
             _toolInteractiveService.WriteLine();
             _toolInteractiveService.WriteLine($"Configuring Recommendation with: '{selectedRecommendation.Name}'.");
             return selectedRecommendation;
-        }
-
-        private string AskUserForCloudApplicationName(ProjectDefinition project, List<CloudApplication> existingApplications)
-        {
-            var defaultName = "";
-
-            try
-            {
-                defaultName = _cloudApplicationNameGenerator.GenerateValidName(project, existingApplications);
-            }
-            catch (Exception exception)
-            {
-                _toolInteractiveService.WriteDebugLine(exception.PrettyPrint());
-            }
-
-            var cloudApplicationName = "";
-
-            while (true)
-            {
-                _toolInteractiveService.WriteLine();
-
-                if (!existingApplications.Any())
-                {
-                    var title = "Name the AWS CloudFormation stack to deploy your application to" + Environment.NewLine +
-                                "(A stack is a collection of AWS resources that you can manage as a single unit.)" + Environment.NewLine +
-                                "--------------------------------------------------------------------------------";
-
-                    cloudApplicationName =
-                        _consoleUtilities.AskUserForValue(
-                            title,
-                            defaultName,
-                            allowEmpty: false,
-                            defaultAskValuePrompt: Constants.CLI.PROMPT_NEW_STACK_NAME);
-                }
-                else
-                {
-                    var title = "Select an existing AWS deployment target to deploy your application to." + Environment.NewLine +
-                        "The existing target can be a CloudFormation Stack or an Elastic Beanstalk Environment.";
-
-                    var userResponse =
-                        _consoleUtilities.AskUserToChooseOrCreateNew(
-                            existingApplications.Select(x => x.DisplayName),
-                            title,
-                            askNewName: true,
-                            defaultNewName: defaultName,
-                            defaultChoosePrompt: Constants.CLI.PROMPT_CHOOSE_DEPLOYMENT_TARGET,
-                            defaultCreateNewPrompt: Constants.CLI.PROMPT_NEW_STACK_NAME,
-                            defaultCreateNewLabel: Constants.CLI.CREATE_NEW_STACK_LABEL) ;
-
-                    // Since the selected option will be the display name, we need to extract the actual name out of it.
-                    // Ex - DisplayName = "MyAppStack (CloudFormationStack)", ActualName = "MyAppStack"
-                    cloudApplicationName = userResponse.SelectedOption?.Split().FirstOrDefault() ?? userResponse.NewName;
-                }
-
-                if (!string.IsNullOrEmpty(cloudApplicationName) &&
-                    _cloudApplicationNameGenerator.IsValidName(cloudApplicationName))
-                    return cloudApplicationName;
-
-                PrintInvalidApplicationNameMessage();
-            }
         }
 
         private void PrintInvalidApplicationNameMessage()
