@@ -15,11 +15,13 @@ namespace ConsoleAppEcsFargateService.Configurations
 {
     public partial class AutoScalingConfiguration
     {
+        const int defaultCooldown = 300;
+
         public bool Enabled { get; set; }
 
-        public int MinCapacity { get; set; }
+        public int MinCapacity { get; set; } = 1;
 
-        public int MaxCapacity { get; set; }
+        public int MaxCapacity { get; set; } = 3;
 
         public enum ScalingTypeEnum { Cpu, Memory }
 
@@ -27,19 +29,19 @@ namespace ConsoleAppEcsFargateService.Configurations
 
 
 
-        public double CpuTypeTargetUtilizationPercent { get; set; }
+        public double CpuTypeTargetUtilizationPercent { get; set; } = 70;
 
-        public int CpuTypeScaleInCooldownSeconds { get; set; }
+        public int CpuTypeScaleInCooldownSeconds { get; set; } = defaultCooldown;
 
-        public int CpuTypeScaleOutCooldownSeconds { get; set; }
+        public int CpuTypeScaleOutCooldownSeconds { get; set; } = defaultCooldown;
 
 
 
-        public int MemoryTypeTargetUtilizationPercent { get; set; }
+        public int MemoryTypeTargetUtilizationPercent { get; set; } = 70;
 
-        public int MemoryTypeScaleInCooldownSeconds { get; set; }
+        public int MemoryTypeScaleInCooldownSeconds { get; set; } = defaultCooldown;
 
-        public int MemoryTypeScaleOutCooldownSeconds { get; set; }
+        public int MemoryTypeScaleOutCooldownSeconds { get; set; } = defaultCooldown;
 
         /// A parameterless constructor is needed for <see cref="Microsoft.Extensions.Configuration.ConfigurationBuilder"/>
         /// or the classes will fail to initialize.
