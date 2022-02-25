@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Amazon.CDK;
 using AWS.Deploy.Recipes.CDK.Common;
 using ConsoleAppEcsFargateService.Configurations;
+using Constructs;
 
 namespace ConsoleAppEcsFargateService
 {

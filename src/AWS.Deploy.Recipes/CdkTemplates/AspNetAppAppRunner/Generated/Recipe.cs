@@ -12,6 +12,7 @@ using AspNetAppAppRunner.Configurations;
 
 using CfnService = Amazon.CDK.AWS.AppRunner.CfnService;
 using CfnServiceProps = Amazon.CDK.AWS.AppRunner.CfnServiceProps;
+using Constructs;
 
 // This is a generated file from the original deployment recipe. It is recommended to not modify this file in order
 // to allow easy updates to the file when the original recipe that this project was created from has updates.

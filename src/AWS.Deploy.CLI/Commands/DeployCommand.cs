@@ -377,6 +377,8 @@ namespace AWS.Deploy.CLI.Commands
                 var recipeFilePath = recipeFiles.First();
                 var recipeBody = await _fileManager.ReadAllTextAsync(recipeFilePath);
                 var recipe = JsonConvert.DeserializeObject<RecipeDefinition>(recipeBody);
+                if (recipe == null)
+                    throw new FailedToDeserializeException(DeployToolErrorCode.FailedToDeserializeDeploymentProjectRecipe, $"Failed to deserialize Deployment Project Recipe '{recipeFilePath}'");
                 return recipe.Id;
             }
             catch (Exception ex)

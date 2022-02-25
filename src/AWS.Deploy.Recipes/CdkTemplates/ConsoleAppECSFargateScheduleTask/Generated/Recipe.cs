@@ -16,6 +16,7 @@ using ConsoleAppECSFargateScheduleTask.Configurations;
 
 using Protocol = Amazon.CDK.AWS.ECS.Protocol;
 using Schedule = Amazon.CDK.AWS.ApplicationAutoScaling.Schedule;
+using Constructs;
 
 // This is a generated file from the original deployment recipe. It is recommended to not modify this file in order
 // to allow easy updates to the file when the original recipe that this project was created from has updates.

@@ -118,7 +118,7 @@ namespace AWS.Deploy.CLI.ServerMode
                 var decryptedBytes = encryptionProvider.Decrypt(base64Bytes, base64IV);
                 var json = Encoding.UTF8.GetString(decryptedBytes);
 
-                var authParameters = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+                var authParameters = JsonConvert.DeserializeObject<Dictionary<string, string>>(json) ?? new Dictionary<string, string>();
 
                 // Validate the issue date and request id are valid.
                 var validateResult = ValidateAuthParameters(authParameters);

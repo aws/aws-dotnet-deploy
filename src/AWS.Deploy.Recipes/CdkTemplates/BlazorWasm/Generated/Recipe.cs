@@ -14,6 +14,7 @@ using Amazon.CDK.AWS.S3;
 using Amazon.CDK.AWS.S3.Deployment;
 using AWS.Deploy.Recipes.CDK.Common;
 using BlazorWasm.Configurations;
+using Constructs;
 
 // This is a generated file from the original deployment recipe. It is recommended to not modify this file in order
 // to allow easy updates to the file when the original recipe that this project was created from has updates.

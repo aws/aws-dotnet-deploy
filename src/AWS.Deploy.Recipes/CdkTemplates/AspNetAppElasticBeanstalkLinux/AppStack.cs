@@ -8,7 +8,7 @@ using Amazon.CDK.AWS.ElasticBeanstalk;
 using AWS.Deploy.Recipes.CDK.Common;
 
 using AspNetAppElasticBeanstalkLinux.Configurations;
-
+using Constructs;
 
 namespace AspNetAppElasticBeanstalkLinux
 {

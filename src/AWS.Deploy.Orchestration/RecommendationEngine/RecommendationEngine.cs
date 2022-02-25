@@ -34,6 +34,8 @@ namespace AWS.Deploy.Orchestration.RecommendationEngine
                     {
                         var content = File.ReadAllText(recipeFile);
                         var definition = JsonConvert.DeserializeObject<RecipeDefinition>(content);
+                        if (definition == null)
+                            throw new FailedToDeserializeException(DeployToolErrorCode.FailedToDeserializeRecipe, $"Failed to Deserialize Recipe [{recipeFile}]");
                         definition.RecipePath = recipeFile;
                         if (!uniqueRecipeId.Contains(definition.Id))
                         {
@@ -43,7 +45,7 @@ namespace AWS.Deploy.Orchestration.RecommendationEngine
                     }
                     catch (Exception e)
                     {
-                        throw new Exception($"Failed to Deserialize Recipe [{recipeFile}]: {e.Message}", e);
+                        throw new FailedToDeserializeException(DeployToolErrorCode.FailedToDeserializeRecipe, $"Failed to Deserialize Recipe [{recipeFile}]: {e.Message}", e);
                     }
                 }
             }
@@ -90,12 +92,14 @@ namespace AWS.Deploy.Orchestration.RecommendationEngine
                     {
                         var content = File.ReadAllText(deploymentBundleFile);
                         var definition = JsonConvert.DeserializeObject<DeploymentBundleDefinition>(content);
+                        if (definition == null)
+                            throw new FailedToDeserializeException(DeployToolErrorCode.FailedToDeserializeDeploymentBundle, $"Failed to Deserialize Deployment Bundle [{deploymentBundleFile}]");
                         if (definition.Type.Equals(deploymentBundleTypes))
                             return definition.Parameters;
                     }
                     catch (Exception e)
                     {
-                        throw new Exception($"Failed to Deserialize Deployment Bundle [{deploymentBundleFile}]: {e.Message}", e);
+                        throw new FailedToDeserializeException(DeployToolErrorCode.FailedToDeserializeDeploymentBundle, $"Failed to Deserialize Deployment Bundle [{deploymentBundleFile}]: {e.Message}", e);
                     }
                 }
             }
