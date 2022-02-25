@@ -121,18 +121,22 @@ namespace AWS.Deploy.Orchestration
 
         public async Task ApplyAllReplacementTokens(Recommendation recommendation, string cloudApplicationName)
         {
-            if (recommendation.ReplacementTokens.ContainsKey(Constants.CLI.REPLACE_TOKEN_LATEST_DOTNET_BEANSTALK_PLATFORM_ARN))
+            if (recommendation.ReplacementTokens.ContainsKey(Constants.RecipeIdentifier.REPLACE_TOKEN_LATEST_DOTNET_BEANSTALK_PLATFORM_ARN))
             {
                 if (_awsResourceQueryer == null)
                     throw new InvalidOperationException($"{nameof(_awsResourceQueryer)} is null as part of the Orchestrator object");
 
                 var latestPlatform = await _awsResourceQueryer.GetLatestElasticBeanstalkPlatformArn();
-                recommendation.AddReplacementToken(Constants.CLI.REPLACE_TOKEN_LATEST_DOTNET_BEANSTALK_PLATFORM_ARN, latestPlatform.PlatformArn);
+                recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_LATEST_DOTNET_BEANSTALK_PLATFORM_ARN, latestPlatform.PlatformArn);
             }
-            if (recommendation.ReplacementTokens.ContainsKey(Constants.CLI.REPLACE_TOKEN_STACK_NAME))
+            if (recommendation.ReplacementTokens.ContainsKey(Constants.RecipeIdentifier.REPLACE_TOKEN_STACK_NAME))
             {
                 // Apply the user entered stack name to the recommendation so that any default settings based on stack name are applied.
-                recommendation.AddReplacementToken(Constants.CLI.REPLACE_TOKEN_STACK_NAME, cloudApplicationName);
+                recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_STACK_NAME, cloudApplicationName);
+            }
+            if (recommendation.ReplacementTokens.ContainsKey(Constants.RecipeIdentifier.REPLACE_TOKEN_ECR_REPOSITORY_NAME))
+            {
+                recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_ECR_REPOSITORY_NAME, cloudApplicationName.ToLower());
             }
         }
 
@@ -169,8 +173,8 @@ namespace AWS.Deploy.Orchestration
             try
             {
                 var imageTag = await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation);
-
-                await _deploymentBundleHandler.PushDockerImageToECR(cloudApplication, recommendation, imageTag);
+                var respositoryName = recommendation.GetOptionSettingValue<string>(recommendation.GetOptionSetting("ECRRepositoryName"));
+                await _deploymentBundleHandler.PushDockerImageToECR(recommendation, respositoryName, imageTag);
             }
             catch(DockerBuildFailedException ex)
             {

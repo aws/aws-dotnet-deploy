@@ -30,6 +30,7 @@ namespace AWS.Deploy.Common.Recipes
         ExistingIAMRole,
         ExistingECSCluster,
         ExistingVpc,
-        ExistingBeanstalkApplication
+        ExistingBeanstalkApplication,
+        ECRRepository
     };
 }
