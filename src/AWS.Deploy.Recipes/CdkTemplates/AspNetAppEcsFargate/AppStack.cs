@@ -8,6 +8,7 @@ using Amazon.CDK.AWS.ECS;
 using AWS.Deploy.Recipes.CDK.Common;
 
 using AspNetAppEcsFargate.Configurations;
+using Constructs;
 
 namespace AspNetAppEcsFargate
 {

@@ -223,6 +223,8 @@ namespace AWS.Deploy.CLI.Commands
 
             var recipeBody = await _fileManager.ReadAllTextAsync(recipePath);
             var recipe = JsonConvert.DeserializeObject<RecipeDefinition>(recipeBody);
+            if (recipe == null)
+                throw new FailedToDeserializeException(DeployToolErrorCode.FailedToDeserializeDeploymentProjectRecipe, "Failed to deserialize deployment project recipe");
             
             var recipeName = string.IsNullOrEmpty(projectDisplayName) ?
                 $"Deployment project for {targetApplicationDirectoryName} to {recommendation.Recipe.TargetService}"

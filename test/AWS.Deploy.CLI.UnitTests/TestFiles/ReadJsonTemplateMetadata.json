@@ -1,0 +1,242 @@
+{
+  "Description": "AWSDotnetDeployCDKStack",
+  "Metadata": {
+    "aws-dotnet-deploy-settings": "{\"ApplicationIAMRole\":{\"CreateNew\":true,\"RoleArn\":null},\"EnvironmentType\":\"SingleInstance\",\"InstanceType\":\"\",\"BeanstalkEnvironment\":{\"CreateNew\":true,\"EnvironmentName\":\"WebApp1-dev\"},\"BeanstalkApplication\":{\"CreateNew\":true,\"ApplicationName\":\"WebApp1\"},\"ElasticBeanstalkPlatformArn\":\"arn:aws:elasticbeanstalk:us-west-2::platform/.NET Core running on 64bit Amazon Linux 2/2.2.10\",\"LoadBalancerType\":\"application\",\"EC2KeyPair\":\"\",\"ElasticBeanstalkManagedPlatformUpdates\":{\"ManagedActionsEnabled\":true,\"PreferredStartTime\":\"Sun:00:00\",\"UpdateLevel\":\"minor\"},\"XRayTracingSupportEnabled\":false,\"ReverseProxy\":\"nginx\",\"EnhancedHealthReporting\":\"enhanced\",\"HealthCheckURL\":\"/\",\"ElasticBeanstalkRollingUpdates\":{\"RollingUpdatesEnabled\":false,\"RollingUpdateType\":\"Time\",\"MaxBatchSize\":null,\"MinInstancesInService\":null,\"PauseTime\":null,\"Timeout\":\"PT30M\"},\"CNamePrefix\":\"\",\"ElasticBeanstalkEnvironmentVariables\":{}}",
+    "aws-dotnet-deploy-recipe-id": "AspNetAppElasticBeanstalkLinux",
+    "aws-dotnet-deploy-recipe-version": "0.1.0"
+  },
+  "Resources": {
+    "RecipeAppIAMRole9E73EEFA": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ec2.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/AWSElasticBeanstalkWebTier"
+              ]
+            ]
+          },
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/AWSElasticBeanstalkWorkerTier"
+              ]
+            ]
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "WebApp1/Recipe/AppIAMRole/Resource"
+      }
+    },
+    "RecipeEc2InstanceProfileB2CA3751": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Roles": [
+          {
+            "Ref": "RecipeAppIAMRole9E73EEFA"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "WebApp1/Recipe/Ec2InstanceProfile"
+      }
+    },
+    "RecipeApplicationVersion145C922C": {
+      "Type": "AWS::ElasticBeanstalk::ApplicationVersion",
+      "Properties": {
+        "ApplicationName": "WebApp1",
+        "SourceBundle": {
+          "S3Bucket": "cdk-hnb659fds-assets-536721586275-us-west-2",
+          "S3Key": "27f72bcf50e915a0a8244ffc6fca94c7d749075af4cb984352fb075c29f93a15.zip"
+        }
+      },
+      "DependsOn": [
+        "RecipeBeanstalkApplication3558EA83"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "WebApp1/Recipe/ApplicationVersion"
+      }
+    },
+    "RecipeBeanstalkApplication3558EA83": {
+      "Type": "AWS::ElasticBeanstalk::Application",
+      "Properties": {
+        "ApplicationName": "WebApp1"
+      },
+      "Metadata": {
+        "aws:cdk:path": "WebApp1/Recipe/BeanstalkApplication"
+      }
+    },
+    "RecipeBeanstalkServiceRole62B7EC28": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "elasticbeanstalk.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/AWSElasticBeanstalkManagedUpdatesCustomerRolePolicy"
+              ]
+            ]
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "WebApp1/Recipe/BeanstalkServiceRole/Resource"
+      }
+    },
+    "RecipeBeanstalkEnvironment83CC12DE": {
+      "Type": "AWS::ElasticBeanstalk::Environment",
+      "Properties": {
+        "ApplicationName": "WebApp1",
+        "EnvironmentName": "WebApp1-dev",
+        "OptionSettings": [
+          {
+            "Namespace": "aws:autoscaling:launchconfiguration",
+            "OptionName": "IamInstanceProfile",
+            "Value": {
+              "Fn::GetAtt": [
+                "RecipeEc2InstanceProfileB2CA3751",
+                "Arn"
+              ]
+            }
+          },
+          {
+            "Namespace": "aws:elasticbeanstalk:environment",
+            "OptionName": "EnvironmentType",
+            "Value": "SingleInstance"
+          },
+          {
+            "Namespace": "aws:elasticbeanstalk:managedactions",
+            "OptionName": "ManagedActionsEnabled",
+            "Value": "true"
+          },
+          {
+            "Namespace": "aws:elasticbeanstalk:xray",
+            "OptionName": "XRayEnabled",
+            "Value": "false"
+          },
+          {
+            "Namespace": "aws:elasticbeanstalk:healthreporting:system",
+            "OptionName": "SystemType",
+            "Value": "enhanced"
+          },
+          {
+            "Namespace": "aws:elasticbeanstalk:environment",
+            "OptionName": "ServiceRole",
+            "Value": {
+              "Fn::GetAtt": [
+                "RecipeBeanstalkServiceRole62B7EC28",
+                "Arn"
+              ]
+            }
+          },
+          {
+            "Namespace": "aws:elasticbeanstalk:managedactions",
+            "OptionName": "PreferredStartTime",
+            "Value": "Sun:00:00"
+          },
+          {
+            "Namespace": "aws:elasticbeanstalk:managedactions:platformupdate",
+            "OptionName": "UpdateLevel",
+            "Value": "minor"
+          },
+          {
+            "Namespace": "aws:elasticbeanstalk:environment:proxy",
+            "OptionName": "ProxyServer",
+            "Value": "nginx"
+          }
+        ],
+        "PlatformArn": "arn:aws:elasticbeanstalk:us-west-2::platform/.NET Core running on 64bit Amazon Linux 2/2.2.10",
+        "VersionLabel": {
+          "Ref": "RecipeApplicationVersion145C922C"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "WebApp1/Recipe/BeanstalkEnvironment"
+      }
+    },
+    "CDKMetadata": {
+      "Type": "AWS::CDK::Metadata",
+      "Properties": {
+        "Analytics": "v2:deflate64:H4sIAAAAAAAA/1WOMW/CQAyFfwv7xSHJzACUoQuqALEiczXI5OJDZweGKP+dC22HysMnv2c9vxqqBuYzfGrhv9si8BmGvaFvXZZOgzYnVCVTWE5w2sCq9y3ZCpUcYwfDLgZy64v88VPUUDx9pXjhQKOjgGrsz4STE1oY8tXyfg/s0TjKkZJmuP/qtG7kwSlKR2Lj6N4Ncrcry/X9kDT2yecPH9G2ZGUDFdR1CdvNYR0T5bDiN3vxyF5ZwXya2U2Zi9SLcUew++ELysMt3wgBAAA="
+      },
+      "Metadata": {
+        "aws:cdk:path": "WebApp1/CDKMetadata/Default"
+      }
+    }
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+    }
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5"
+                  ],
+                  {
+                    "Ref": "BootstrapVersion"
+                  }
+                ]
+              }
+            ]
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+        }
+      ]
+    }
+  }
+}

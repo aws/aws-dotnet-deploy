@@ -4,10 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Constructs;
 
 namespace AWS.Deploy.Recipes.CDK.Common
 {
-    public delegate void CustomizePropsDelegate<GeneratedConstruct>(CustomizePropsEventArgs<GeneratedConstruct> evnt) where GeneratedConstruct : Amazon.CDK.Construct;
+    public delegate void CustomizePropsDelegate<GeneratedConstruct>(CustomizePropsEventArgs<GeneratedConstruct> evnt) where GeneratedConstruct : Construct;
 
     /// <summary>
     /// Event object created after each CDK constructor properties object is created in the recipe's container construct.
@@ -15,7 +16,7 @@ namespace AWS.Deploy.Recipes.CDK.Common
     /// making the properties immutable.
     /// </summary>
     /// <typeparam name="GeneratedConstruct"></typeparam>
-    public class CustomizePropsEventArgs<GeneratedConstruct> where GeneratedConstruct : Amazon.CDK.Construct
+    public class CustomizePropsEventArgs<GeneratedConstruct> where GeneratedConstruct : Construct
     {
         /// <summary>
         /// The CDK props object about to be used to create the CDK construct
@@ -41,7 +42,7 @@ namespace AWS.Deploy.Recipes.CDK.Common
         }
     }
 
-    public class CDKRecipeCustomizer<GeneratedConstruct> where GeneratedConstruct : Amazon.CDK.Construct
+    public class CDKRecipeCustomizer<GeneratedConstruct> where GeneratedConstruct : Construct
     {
         /// <summary>
         /// Event called whenever a CDK construct property object is created. Subscribers to the event can customize

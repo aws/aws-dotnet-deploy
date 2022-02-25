@@ -45,14 +45,45 @@ namespace AWS.Deploy.Orchestration.Utilities
 
             var response = await client.GetTemplateAsync(request);
 
-            return ReadSettings(response.TemplateBody);
+            if(IsJsonCFTemplate(response.TemplateBody))
+                return ReadSettingsFromJSONCFTemplate(response.TemplateBody);
+            else
+                return ReadSettingsFromYAMLCFTemplate(response.TemplateBody);
         }
 
         /// <summary>
-        /// Read the AWS .NET deployment tool metadata from the CloudFormation template.
+        /// Read the AWS .NET deployment tool metadata from the CloudFormation template which is in JSON format.
         /// </summary>
         /// <returns></returns>
-        private static CloudApplicationMetadata ReadSettings(string templateBody)
+        private static CloudApplicationMetadata ReadSettingsFromJSONCFTemplate(string templateBody)
+        {
+            try
+            {
+                var cfTemplate = JsonConvert.DeserializeObject<CFTemplate>(templateBody);
+
+                var cloudApplicationMetadata = new CloudApplicationMetadata(
+                    cfTemplate?.Metadata?[Constants.CloudFormationIdentifier.STACK_METADATA_RECIPE_ID] ??
+                        throw new Exception("Error parsing existing application's metadata to retrieve Recipe ID."),
+                    cfTemplate?.Metadata?[Constants.CloudFormationIdentifier.STACK_METADATA_RECIPE_VERSION] ??
+                        throw new Exception("Error parsing existing application's metadata to retrieve Recipe Version.")
+                    );
+
+                var jsonString = cfTemplate.Metadata[Constants.CloudFormationIdentifier.STACK_METADATA_SETTINGS];
+                cloudApplicationMetadata.Settings = JsonConvert.DeserializeObject<IDictionary<string, object>>(jsonString ?? "") ?? new Dictionary<string, object>();
+
+                return cloudApplicationMetadata;
+            }
+            catch (Exception e)
+            {
+                throw new ParsingExistingCloudApplicationMetadataException(DeployToolErrorCode.ErrorParsingApplicationMetadata, "Error parsing existing application's metadata", e);
+            }
+        }
+
+        /// <summary>
+        /// Read the AWS .NET deployment tool metadata from the CloudFormation template which is in YAML format.
+        /// </summary>
+        /// <returns></returns>
+        private static CloudApplicationMetadata ReadSettingsFromYAMLCFTemplate(string templateBody)
         {
             try
             {
@@ -72,7 +103,7 @@ namespace AWS.Deploy.Orchestration.Utilities
                     );
 
                 var jsonString = ((YamlScalarNode)metadataNode.Children[new YamlScalarNode(Constants.CloudFormationIdentifier.STACK_METADATA_SETTINGS)]).Value;
-                cloudApplicationMetadata.Settings = JsonConvert.DeserializeObject<IDictionary<string, object>>(jsonString ?? "");
+                cloudApplicationMetadata.Settings = JsonConvert.DeserializeObject<IDictionary<string, object>>(jsonString ?? "") ?? new Dictionary<string, object>();
 
                 return cloudApplicationMetadata;
             }
@@ -118,5 +149,23 @@ namespace AWS.Deploy.Orchestration.Utilities
 
             return builder.ToString();
         }
+
+        private bool IsJsonCFTemplate(string templateBody)
+        {
+            try
+            {
+                JsonConvert.DeserializeObject(templateBody);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+    }
+
+    public class CFTemplate
+    {
+        public Dictionary<string, string>? Metadata { get; set; }
     }
 }

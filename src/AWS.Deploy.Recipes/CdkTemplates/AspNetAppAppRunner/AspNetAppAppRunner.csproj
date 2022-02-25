@@ -24,9 +24,7 @@
 
   <ItemGroup>
     <!-- CDK Construct Library dependencies -->
-    <PackageReference Include="Amazon.CDK" Version="1.128.0" />
-    <PackageReference Include="Amazon.CDK.AWS.AppRunner" Version="1.128.0" />
-    <PackageReference Include="Amazon.CDK.AWS.ECS.Patterns" Version="1.128.0" />
+    <PackageReference Include="Amazon.CDK.Lib" Version="2.13.0" />
 
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.7" />
 
