@@ -94,7 +94,7 @@ Choose deployment option (recommended default: 1)
 ## Supported application types
 
 ### ASP.NET Core web applications
-ASP.NET Core applications can be deployed either to virtual servers with AWS Elastic Beanstalk or containers with Amazon Elastic Container Service (Amazon ECS). If you wish to deploy your application as a container and your project does not yet have a `Dockerfile` one will be generated for you into your project during deployment.
+ASP.NET Core applications can be deployed either to virtual servers with AWS Elastic Beanstalk or containers with Amazon Elastic Container Service (Amazon ECS) and AWS App Runner. If you wish to deploy your application as a container and your project does not yet have a `Dockerfile` one will be generated for you into your project during deployment.
 Using the deployment tool, you will be able to deploy ASP.NET Core web applications to AWS using the AWS Cloud Development Kit (CDK). 
 For users coming from the previous AWS Visual Studio Toolkit experience who have previous Elastic Beanstalk deployments and environments, you will be able to use the deployment tool to deploy to those environments.
 
@@ -115,6 +115,17 @@ Programs that are meant to run indefinitely can be deployed as an Amazon ECS ser
 
 ### Schedule tasks
 Programs that need to run periodically, for example, once every hour, can be deployed as a schedule task using Amazon ECS and Amazon CloudWatch Events. The application will be deployed as a container image. If your project does not yet have a `Dockerfile`, one will be generated for you into your project during deployment.
+
+## Supported AWS Services
+
+### AWS Elastic Beanstalk
+AWS Elastic Beanstalk is an easy-to-use service for deploying and scaling web applications and services. Elastic Beanstalk automatically handles the deployment, from capacity provisioning, load balancing, auto-scaling to application health monitoring. At the same time, you retain full control over the AWS resources powering your application and can access the underlying resources at any time
+
+### Amazon Elastic Container Service
+Amazon ECS is a fully managed container orchestration service that helps you easily deploy, manage, and scale containerized applications. It deeply integrates with the rest of the AWS platform to provide a secure and easy-to-use solution for running container workloads in the cloud and now on your infrastructure with Amazon ECS Anywhere.
+
+### AWS App Runner
+AWS App Runner is a fully managed service that makes it easy for developers to quickly deploy containerized web applications and APIs, at scale and with no prior infrastructure experience required. Start with your source code or a container image. App Runner builds and deploys the web application automatically, load balances traffic with encryption, scales to meet your traffic needs, and makes it easy for your services to communicate with other AWS services and applications that run in a private Amazon VPC. With App Runner, rather than thinking about servers or scaling, you have more time to focus on your applications.
 
 ## Getting Help
 
