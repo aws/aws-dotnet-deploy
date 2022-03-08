@@ -26,8 +26,24 @@
         }
     ],
 
-    "RecipePriority": 110,
+    "RecipePriority": -1,
     "RecommendationRules": [
+
+        {
+            "Tests": [
+                {
+                    "Type": "MSProperty",
+                    "Condition": {
+                        "PropertyName": "TargetFramework",
+                        "AllowedValues": [ "netcoreapp2.1", "netcoreapp3.1", "net5.0", "net6.0" ]
+                    }
+                }
+            ],
+            "Effect": {
+                "Fail": { "Include": false }
+            }
+        },
+
         {
             "Tests": [
                 {
@@ -39,20 +55,39 @@
                 {
                     "Type": "MSProperty",
                     "Condition": {
-                        "PropertyName": "TargetFramework",
-                        "AllowedValues": [ "netcoreapp2.1", "netcoreapp3.1", "net5.0", "net6.0" ]
-                    }
-                },
-                {
-                    "Type": "MSProperty",
-                    "Condition": {
                         "PropertyName": "OutputType",
                         "AllowedValues": [ "Exe" ]
                     }
                 }
             ],
             "Effect": {
-                "Pass": { "Include": true }
+                "Pass": {
+                    "PriorityAdjustment": 111,
+                    "Include": true
+                },
+                "Fail": {
+                    "Include": true
+                }
+            }
+        },
+
+        {
+            "Tests": [
+                {
+                    "Type": "MSProjectSdkAttribute",
+                    "Condition": {
+                        "Value": "Microsoft.NET.Sdk.Worker"
+                    }
+                }
+            ],
+            "Effect": {
+                "Pass": {
+                    "PriorityAdjustment": 111,
+                    "Include": true
+                },
+                "Fail": {
+                    "Include": true
+                }
             }
         },
 

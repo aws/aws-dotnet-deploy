@@ -113,6 +113,19 @@ namespace AWS.Deploy.CLI.UnitTests
             Assert.NotNull(blazorRecommendation);
         }
 
+        [Fact]
+        public async Task WorkerServiceTest()
+        {
+            var engine = await BuildRecommendationEngine("WorkerServiceExample");
+
+            var recommendations = await engine.ComputeRecommendations();
+
+            Assert.Single(recommendations);
+            recommendations
+                .Any(r => r.Recipe.Id == Constants.CONSOLE_APP_FARGATE_SERVICE_RECIPE_ID)
+                .ShouldBeTrue("Failed to receive Recommendation: " + Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+        }
+
 
         [Fact]
         public async Task ValueMappingWithDefaultValue()
