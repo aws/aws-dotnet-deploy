@@ -7,6 +7,7 @@ using Amazon.CDK.AWS.CloudFront;
 using AWS.Deploy.Recipes.CDK.Common;
 
 using BlazorWasm.Configurations;
+using Constructs;
 
 namespace BlazorWasm
 {

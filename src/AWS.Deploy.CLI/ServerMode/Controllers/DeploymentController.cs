@@ -365,7 +365,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
                 state.ApplicationDetails.Name = input.NewDeploymentName;
                 state.ApplicationDetails.UniqueIdentifier = string.Empty;
-                state.ApplicationDetails.ResourceType = CloudApplicationResourceType.CloudFormationStack;
+                state.ApplicationDetails.ResourceType = orchestrator.GetCloudApplicationResourceType(state.SelectedRecommendation.Recipe.DeploymentType);
                 state.ApplicationDetails.RecipeId = input.NewDeploymentRecipeId;
                 await orchestrator.ApplyAllReplacementTokens(state.SelectedRecommendation, input.NewDeploymentName);
             }

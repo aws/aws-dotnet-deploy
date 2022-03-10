@@ -1485,6 +1485,9 @@ namespace AWS.Deploy.ServerMode.Client
         [System.Runtime.Serialization.EnumMember(Value = @"BeanstalkEnvironment")]
         BeanstalkEnvironment = 1,
     
+        [System.Runtime.Serialization.EnumMember(Value = @"ElasticContainerRegistryImage")]
+        ElasticContainerRegistryImage = 2,
+    
     }
     
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.4.1.0 (Newtonsoft.Json v12.0.0.0)")]

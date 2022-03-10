@@ -40,11 +40,13 @@ namespace AWS.Deploy.Orchestration
                         {
                             var content = File.ReadAllText(recipeDefinitionFile);
                             var definition = JsonConvert.DeserializeObject<RecipeDefinition>(content);
+                            if (definition == null)
+                                throw new FailedToDeserializeException(DeployToolErrorCode.FailedToDeserializeRecipe, $"Failed to Deserialize Recipe Definition [{recipeDefinitionFile}]");
                             recipeDefinitions.Add(definition);
                         }
                         catch (Exception e)
                         {
-                            throw new Exception($"Failed to Deserialize Recipe Definition [{recipeDefinitionFile}]: {e.Message}", e);
+                            throw new FailedToDeserializeException(DeployToolErrorCode.FailedToDeserializeRecipe, $"Failed to Deserialize Recipe Definition [{recipeDefinitionFile}]: {e.Message}", e);
                         }
                     }
                 }

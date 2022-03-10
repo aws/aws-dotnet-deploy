@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using ConsoleAppECSFargateScheduleTask.Configurations;
 using Protocol = Amazon.CDK.AWS.ECS.Protocol;
 using Schedule = Amazon.CDK.AWS.ApplicationAutoScaling.Schedule;
+using Constructs;
 
 namespace ConsoleAppECSFargateScheduleTask
 {

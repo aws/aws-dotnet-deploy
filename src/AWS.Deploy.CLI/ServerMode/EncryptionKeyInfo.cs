@@ -36,9 +36,9 @@ namespace AWS.Deploy.CLI.ServerMode
             try
             {
                 var json = Encoding.UTF8.GetString(Convert.FromBase64String(input));
-                var keyInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<EncryptionKeyInfo>(json);
+                var keyInfo = JsonConvert.DeserializeObject<EncryptionKeyInfo>(json);
 
-                if(string.IsNullOrEmpty(keyInfo.Key))
+                if(string.IsNullOrEmpty(keyInfo?.Key))
                 {
                     throw new InvalidEncryptionKeyInfoException("The symmetric key is missing a \"Key\" attribute.");
                 }

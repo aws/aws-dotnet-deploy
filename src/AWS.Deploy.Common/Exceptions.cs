@@ -101,7 +101,12 @@ namespace AWS.Deploy.Common
         FailedToCreateElasticBeanstalkStorageLocation = 10007900,
         UnableToAccessAWSRegion = 10008000,
         OptInRegionDisabled = 10008100,
-        ECRRepositoryPromptForNameReturnedNull = 10008200
+        ECRRepositoryPromptForNameReturnedNull = 10008200,
+        FailedToFindCloudApplicationResourceType = 10008300,
+        ECRRepositoryDoesNotExist = 10008400,
+        FailedToDeserializeRecipe = 10008500,
+        FailedToDeserializeDeploymentBundle = 10008600,
+        FailedToDeserializeDeploymentProjectRecipe = 10008700
     }
 
     public class ProjectFileNotFoundException : DeployToolException
@@ -206,6 +211,7 @@ namespace AWS.Deploy.Common
         public InvalidProjectPathException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
+    /// <summary>
     /// Throw if an invalid <see cref="UserDeploymentSettings"/> is used.
     /// </summary>
     public class InvalidUserDeploymentSettingsException : DeployToolException
@@ -220,12 +226,21 @@ namespace AWS.Deploy.Common
     {
         public NoDeploymentBundleDefinitionsFoundException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
-    
+
+    /// <summary>
     /// Exception thrown if a failure occured while trying to update the deployment manifest file.
     /// </summary>
     public class FailedToUpdateDeploymentManifestFileException : DeployToolException
     {
         public FailedToUpdateDeploymentManifestFileException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+    }
+
+    /// <summary>
+    /// Exception thrown if a failure occured while trying to deserialize a file.
+    /// </summary>
+    public class FailedToDeserializeException : DeployToolException
+    {
+        public FailedToDeserializeException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     public static class ExceptionExtensions

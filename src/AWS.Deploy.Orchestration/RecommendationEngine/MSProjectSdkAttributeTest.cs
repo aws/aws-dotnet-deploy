@@ -15,7 +15,16 @@ namespace AWS.Deploy.Orchestration.RecommendationEngine
 
         public override Task<bool> Execute(RecommendationTestInput input)
         {
-            var result = string.Equals(input.ProjectDefinition.SdkType, input.Test.Condition.Value, StringComparison.InvariantCultureIgnoreCase);
+            bool result = false;
+            if(!string.IsNullOrEmpty(input.Test.Condition.Value))
+            {
+                result = string.Equals(input.ProjectDefinition.SdkType, input.Test.Condition.Value, StringComparison.InvariantCultureIgnoreCase);
+            }
+            else if(input.Test.Condition.AllowedValues?.Count > 0)
+            {
+                result = input.Test.Condition.AllowedValues.Contains(input.ProjectDefinition.SdkType);
+            }
+
             return Task.FromResult(result);
         }
     }

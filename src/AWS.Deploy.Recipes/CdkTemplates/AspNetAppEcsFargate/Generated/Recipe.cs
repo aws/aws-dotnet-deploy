@@ -11,6 +11,7 @@ using AWS.Deploy.Recipes.CDK.Common;
 using AspNetAppEcsFargate.Configurations;
 using Amazon.CDK.AWS.ECR;
 using System.Linq;
+using Constructs;
 
 
 // This is a generated file from the original deployment recipe. It is recommended to not modify this file in order

@@ -72,6 +72,7 @@ namespace AWS.Deploy.Orchestration.Data
         Task<List<string>> ListOfSNSTopicArns();
         Task<List<Amazon.S3.Model.S3Bucket>> ListOfS3Buckets();
         Task<List<ConfigurationOptionSetting>> GetBeanstalkEnvironmentConfigurationSettings(string environmentName);
+        Task<Repository> DescribeECRRepository(string respositoryName);
     }
 
     public class AWSResourceQueryer : IAWSResourceQueryer
@@ -418,10 +419,12 @@ namespace AWS.Deploy.Orchestration.Data
 
             try
             {
-                return await ecrClient.Paginators
+                return (await ecrClient.Paginators
                     .DescribeRepositories(request)
                     .Repositories
-                    .ToListAsync();
+                    .ToListAsync())
+                    .OrderByDescending(x => x.CreatedAt)
+                    .ToList();
             }
             catch (RepositoryNotFoundException)
             {
@@ -591,6 +594,26 @@ namespace AWS.Deploy.Orchestration.Data
             }
 
             return optionSetting;
+        }
+
+        public async Task<Repository> DescribeECRRepository(string respositoryName)
+        {
+            var client = _awsClientFactory.GetAWSClient<IAmazonECR>();
+
+            DescribeRepositoriesResponse response;
+            try
+            {
+                response = await client.DescribeRepositoriesAsync(new DescribeRepositoriesRequest
+                {
+                    RepositoryNames = new List<string> { respositoryName }
+                });
+            }
+            catch (RepositoryNotFoundException ex)
+            {
+                throw new AWSResourceNotFoundException(DeployToolErrorCode.ECRRepositoryDoesNotExist, $"The ECR repository {respositoryName} does not exist.", ex);
+            }
+
+            return response.Repositories.First();
         }
     }
 }

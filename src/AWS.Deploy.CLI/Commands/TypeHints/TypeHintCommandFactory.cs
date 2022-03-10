@@ -59,7 +59,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 { OptionSettingTypeHint.SNSTopicArn, new SNSTopicArnsCommand(awsResourceQueryer, consoleUtilities) },
                 { OptionSettingTypeHint.S3BucketName, new S3BucketNameCommand(awsResourceQueryer, consoleUtilities) },
                 { OptionSettingTypeHint.InstanceType, new InstanceTypeCommand(awsResourceQueryer, consoleUtilities) },
-                { OptionSettingTypeHint.ECRRepository,  new ECRRepositoryCommand(awsResourceQueryer, consoleUtilities)}
+                { OptionSettingTypeHint.ECRRepository,  new ECRRepositoryCommand(awsResourceQueryer, consoleUtilities, toolInteractiveService) }
             };
         }
 

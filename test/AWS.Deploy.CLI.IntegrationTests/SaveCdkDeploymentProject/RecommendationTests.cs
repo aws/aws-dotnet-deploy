@@ -52,11 +52,12 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             var recommendations = await orchestrator.GenerateDeploymentRecommendations();
 
             // ASSERT
-            recommendations.Count.ShouldEqual(4);
+            recommendations.Count.ShouldEqual(5);
             recommendations[0].Name.ShouldEqual("ASP.NET Core App to Amazon ECS using Fargate"); // default recipe
             recommendations[1].Name.ShouldEqual("ASP.NET Core App to AWS App Runner"); // default recipe
             recommendations[2].Name.ShouldEqual("ASP.NET Core App to AWS Elastic Beanstalk on Linux"); // default recipe
             recommendations[3].Name.ShouldEqual("ASP.NET Core App to Existing AWS Elastic Beanstalk Environment"); // default recipe
+            recommendations[4].Name.ShouldEqual("Push Container Images to Amazon Elastic Container Registry"); // default recipe
         }
 
         [Fact]
@@ -88,13 +89,14 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             var recommendations = await orchestrator.GenerateDeploymentRecommendations();
 
             // ASSERT - Recipes are ordered by priority
-            recommendations.Count.ShouldEqual(6);
+            recommendations.Count.ShouldEqual(7);
             recommendations[0].Name.ShouldEqual(customEcsRecipeName); // custom recipe
             recommendations[1].Name.ShouldEqual(customEbsRecipeName); // custom recipe
             recommendations[2].Name.ShouldEqual("ASP.NET Core App to Amazon ECS using Fargate"); // default recipe
             recommendations[3].Name.ShouldEqual("ASP.NET Core App to AWS App Runner"); // default recipe
             recommendations[4].Name.ShouldEqual("ASP.NET Core App to AWS Elastic Beanstalk on Linux"); // default recipe
             recommendations[5].Name.ShouldEqual("ASP.NET Core App to Existing AWS Elastic Beanstalk Environment"); // default recipe
+            recommendations[6].Name.ShouldEqual("Push Container Images to Amazon Elastic Container Registry"); // default recipe
 
             // ASSERT - Recipe paths
             recommendations[0].Recipe.RecipePath.ShouldEqual(Path.Combine(saveDirectoryPathEcsProject, "ECS-CDK.recipe"));

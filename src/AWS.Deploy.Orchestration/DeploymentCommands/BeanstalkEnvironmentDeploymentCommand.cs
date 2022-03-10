@@ -56,6 +56,7 @@ namespace AWS.Deploy.Orchestration.DeploymentCommands
                 throw new ElasticBeanstalkException(DeployToolErrorCode.FailedToUpdateElasticBeanstalkEnvironment, "Failed to update the Elastic Beanstalk environment");
             }
         }
+
         public async Task<List<DisplayedResourceItem>> GetDeploymentOutputsAsync(IDisplayedResourcesHandler displayedResourcesHandler, CloudApplication cloudApplication, Recommendation recommendation)
         {
             var displayedResources = new List<DisplayedResourceItem>();

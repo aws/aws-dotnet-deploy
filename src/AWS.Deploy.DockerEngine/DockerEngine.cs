@@ -129,7 +129,17 @@ namespace AWS.Deploy.DockerEngine
         {
             var content = ProjectUtilities.ReadDockerFileConfig();
             var definitions = JsonConvert.DeserializeObject<List<ImageDefinition>>(content);
-            var mappings = definitions.FirstOrDefault(x => x.SdkType.Equals(_project.SdkType));
+
+            var sdkType = _project.SdkType;
+
+            // For the Microsoft.NET.Sdk.Workersdk type we want to use the same container as Microsoft.NET.Sdk since a project
+            // using Microsoft.NET.Sdk.Worker is still just a regular console application.
+            if (string.Equals(sdkType, "Microsoft.NET.Sdk.Worker", StringComparison.OrdinalIgnoreCase))
+            {
+                sdkType = "Microsoft.NET.Sdk";
+            }
+
+            var mappings = definitions.FirstOrDefault(x => x.SdkType.Equals(sdkType));
             if (mappings == null)
                 throw new UnsupportedProjectException(DeployToolErrorCode.NoValidDockerMappingForSdkType, $"The project with SDK Type {_project.SdkType} is not supported.");
 

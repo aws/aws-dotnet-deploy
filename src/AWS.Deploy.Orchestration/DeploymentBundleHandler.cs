@@ -17,7 +17,7 @@ namespace AWS.Deploy.Orchestration
 {
     public interface IDeploymentBundleHandler
     {
-        Task<string> BuildDockerImage(CloudApplication cloudApplication, Recommendation recommendation);
+        Task BuildDockerImage(CloudApplication cloudApplication, Recommendation recommendation, string imageTag);
         Task<string> CreateDotnetPublishZip(Recommendation recommendation);
         Task PushDockerImageToECR(Recommendation recommendation, string repositoryName, string sourceTag);
     }
@@ -44,21 +44,18 @@ namespace AWS.Deploy.Orchestration
             _zipFileManager = zipFileManager;
         }
 
-        public async Task<string> BuildDockerImage(CloudApplication cloudApplication, Recommendation recommendation)
+        public async Task BuildDockerImage(CloudApplication cloudApplication, Recommendation recommendation, string imageTag)
         {
             _interactiveService.LogMessageLine(string.Empty);
             _interactiveService.LogMessageLine("Building the docker image...");
 
             var dockerExecutionDirectory = GetDockerExecutionDirectory(recommendation);
-            var tagSuffix = DateTime.UtcNow.Ticks;
-            var imageTag = $"{cloudApplication.Name.ToLower()}:{tagSuffix}";
             var dockerFile = GetDockerFilePath(recommendation);
             var buildArgs = GetDockerBuildArgs(recommendation);
 
             var dockerBuildCommand = $"docker build -t {imageTag} -f \"{dockerFile}\"{buildArgs} .";
             _interactiveService.LogMessageLine($"Docker Execution Directory: {Path.GetFullPath(dockerExecutionDirectory)}");
             _interactiveService.LogMessageLine($"Docker Build Command: {dockerBuildCommand}");
-
 
             recommendation.DeploymentBundle.DockerExecutionDirectory = dockerExecutionDirectory;
 
@@ -67,8 +64,6 @@ namespace AWS.Deploy.Orchestration
             {
                 throw new DockerBuildFailedException(DeployToolErrorCode.DockerBuildFailed, result.StandardError ?? "");
             }
-
-            return imageTag;
         }
 
         public async Task PushDockerImageToECR(Recommendation recommendation, string repositoryName, string sourceTag)

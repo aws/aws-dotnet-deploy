@@ -212,4 +212,12 @@ namespace AWS.Deploy.Orchestration
     {
         public UnableToAccessAWSRegionException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
+
+    /// <summary>
+    /// Throw if unable to determine the CloudApplication resource type
+    /// </summary>
+    public class FailedToFindCloudApplicationResourceType : DeployToolException
+    {
+        public FailedToFindCloudApplicationResourceType(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+    }
 }
