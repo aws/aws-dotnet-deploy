@@ -363,6 +363,89 @@
                     }
                 }
             ]
+        },
+        {
+            "Id": "VPCConnector",
+            "Name": "VPC Connector",
+            "Description": "App Runner requires this resource when you want to associate your App Runner service to a custom Amazon Virtual Private Cloud (Amazon VPC).",
+            "Type": "Object",
+            "AdvancedSetting": true,
+            "Updatable": true,
+            "ChildOptionSettings": [
+                {
+                    "Id": "CreateNew",
+                    "Name": "Create New VPC Connector",
+                    "Description": "Do you want to create a new VPC Connector?",
+                    "Type": "Bool",
+                    "DefaultValue": false,
+                    "AdvancedSetting": false,
+                    "Updatable": true
+                },
+                {
+                    "Id": "VpcConnectorId",
+                    "Name": "Existing VPC Connector ID",
+                    "Description": "The ID of the existing VPC Connector to use.",
+                    "Type": "String",
+                    "TypeHint": "ExistingVpcConnector",
+                    "DefaultValue": null,
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "VPCConnector.CreateNew",
+                            "Value": false
+                        }
+                    ]
+                },
+                {
+                    "Id": "Subnets",
+                    "Name": "Subnets",
+                    "Description": "A list of IDs of subnets that App Runner should use when it associates your service with a custom Amazon VPC. Specify IDs of subnets of a single Amazon VPC. App Runner determines the Amazon VPC from the subnets you specify.",
+                    "Type": "List",
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": {
+                                "Regex": "^subnet-([0-9a-f]{8}|[0-9a-f]{17})$",
+                                "AllowEmptyString": true,
+                                "ValidationFailedMessage": "Invalid Subnet ID. The Subnet ID must start with the \"subnet-\" prefix, followed by either 8 or 17 characters consisting of digits and letters(lower-case) from a to f. For example subnet-abc88de9 is a valid Subnet ID."
+                            }
+                        }
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "VPCConnector.CreateNew",
+                            "Value": true
+                        }
+                    ]
+                },
+                {
+                    "Id": "SecurityGroups",
+                    "Name": "SecurityGroups",
+                    "Description": "A list of IDs of security groups that App Runner should use for access to AWS resources under the specified subnets. If not specified, App Runner uses the default security group of the Amazon VPC. The default security group allows all outbound traffic.",
+                    "Type": "List",
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": {
+                                "Regex": "^sg-([0-9a-f]{8}|[0-9a-f]{17})$",
+                                "AllowEmptyString": true,
+                                "ValidationFailedMessage": "Invalid Security Group ID. The Security Group ID must start with the \"sg-\" prefix, followed by either 8 or 17 characters consisting of digits and letters(lower-case) from a to f. For example sg-abc88de9 is a valid Security Group ID."
+                            }
+                        }
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "VPCConnector.CreateNew",
+                            "Value": true
+                        }
+                    ]
+                }
+            ]
         }
     ]
 }
