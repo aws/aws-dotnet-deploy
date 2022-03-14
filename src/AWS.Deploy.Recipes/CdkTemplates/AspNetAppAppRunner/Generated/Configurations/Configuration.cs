@@ -17,6 +17,11 @@ namespace AspNetAppAppRunner.Configurations
         public IAMRoleConfiguration ApplicationIAMRole { get; set; }
 
         /// <summary>
+        /// App Runner requires this resource when you want to associate your App Runner service to a custom Amazon Virtual Private Cloud (Amazon VPC).
+        /// </summary>
+        public VPCConnectorConfiguration VPCConnector { get; set; }
+
+        /// <summary>
         /// The Identity and Access Management (IAM) role that provides the AWS App Runner service access to pull the container image from ECR.
         /// </summary>
         public IAMRoleConfiguration ServiceAccessIAMRole { get; set; }
@@ -93,6 +98,7 @@ namespace AspNetAppAppRunner.Configurations
 
         public Configuration(
             IAMRoleConfiguration applicationIAMRole,
+            VPCConnectorConfiguration vpcConnector,
             IAMRoleConfiguration serviceAccessIAMRole,
             string serviceName,
             int? port,
@@ -101,6 +107,7 @@ namespace AspNetAppAppRunner.Configurations
             string memory)
         {
             ApplicationIAMRole = applicationIAMRole;
+            VPCConnector = vpcConnector;
             ServiceAccessIAMRole = serviceAccessIAMRole;
             ServiceName = serviceName;
             Port = port ?? 80;

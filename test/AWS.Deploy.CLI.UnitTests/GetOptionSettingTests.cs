@@ -84,5 +84,44 @@ namespace AWS.Deploy.CLI.UnitTests
 
             Assert.Equal(displayableCount, elasticBeanstalkManagedPlatformUpdatesValue.Count);
         }
+
+        [Fact]
+        public async Task GetOptionSettingTests_ListType_InvalidValue()
+        {
+            var engine = await BuildRecommendationEngine("WebAppNoDockerFile");
+
+            var recommendations = await engine.ComputeRecommendations();
+
+            var appRunnerRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_APPRUNNER_ID);
+
+            var subnets = appRunnerRecommendation.GetOptionSetting("VPCConnector.Subnets");
+            var securityGroups = appRunnerRecommendation.GetOptionSetting("VPCConnector.SecurityGroups");
+
+            Assert.Throws<ValidationFailedException>(() => subnets.SetValueOverride(new SortedSet<string>(){ "subnet1" }));
+            Assert.Throws<ValidationFailedException>(() => securityGroups.SetValueOverride(new SortedSet<string>(){ "securityGroup1" }));
+        }
+
+        [Fact]
+        public async Task GetOptionSettingTests_ListType()
+        {
+            var engine = await BuildRecommendationEngine("WebAppNoDockerFile");
+
+            var recommendations = await engine.ComputeRecommendations();
+
+            var appRunnerRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_APPRUNNER_ID);
+
+            var subnets = appRunnerRecommendation.GetOptionSetting("VPCConnector.Subnets");
+            var emptySubnetsValue = appRunnerRecommendation.GetOptionSettingValue(subnets);
+
+            subnets.SetValueOverride(new SortedSet<string>(){ "subnet-1234abcd" });
+            var subnetsValue = appRunnerRecommendation.GetOptionSettingValue(subnets);
+
+            var emptySubnetsString = Assert.IsType<string>(emptySubnetsValue);
+            Assert.True(string.IsNullOrEmpty(emptySubnetsString));
+
+            var subnetsList = Assert.IsType<SortedSet<string>>(subnetsValue);
+            Assert.Single(subnetsList);
+            Assert.Contains("subnet-1234abcd", subnetsList);
+        }
     }
 }

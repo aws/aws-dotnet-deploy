@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using System.Linq;
 using Amazon.CDK;
 using Amazon.CDK.AWS.AppRunner;
 using Amazon.CDK.AWS.IAM;
@@ -30,13 +31,33 @@ namespace AspNetAppAppRunner
 
         public IRole? TaskRole { get; private set; }
 
+        public CfnVpcConnector? VPCConnector { get; private set; }
+
         public Recipe(Construct scope, IRecipeProps<Configuration> props)
             // The "Recipe" construct ID will be used as part of the CloudFormation logical ID. If the value is changed this will
             // change the expected values for the "DisplayedResources" in the corresponding recipe file.
             : base(scope, "Recipe")
         {
+            ConfigureVPCConnector(props.Settings);
             ConfigureIAMRoles(props.Settings);
             ConfigureAppRunnerService(props);
+        }
+
+        private void ConfigureVPCConnector(Configuration settings)
+        {
+            if (settings.VPCConnector.CreateNew)
+            {
+                if (settings.VPCConnector.Subnets.Count == 0)
+                    throw new InvalidOrMissingConfigurationException("The provided list of Subnets is null or empty.");
+
+                VPCConnector = new CfnVpcConnector(this, nameof(VPCConnector), InvokeCustomizeCDKPropsEvent(nameof(VPCConnector), this, new CfnVpcConnectorProps
+                {
+                    Subnets = settings.VPCConnector.Subnets.ToArray(),
+
+                    // the properties below are optional
+                    SecurityGroups = settings.VPCConnector.SecurityGroups.ToArray()
+                }));
+            }
         }
 
         private void ConfigureIAMRoles(Configuration settings)
@@ -114,6 +135,18 @@ namespace AspNetAppAppRunner
                     }
                 }
             };
+
+            if ((settings.VPCConnector.CreateNew && VPCConnector != null) || !string.IsNullOrEmpty(settings.VPCConnector.VpcConnectorId))
+            {
+                appRunnerServiceProp.NetworkConfiguration = new CfnService.NetworkConfigurationProperty
+                {
+                    EgressConfiguration = new CfnService.EgressConfigurationProperty
+                    {
+                        EgressType = "VPC",
+                        VpcConnectorArn = VPCConnector != null ? VPCConnector.AttrVpcConnectorArn : settings.VPCConnector.VpcConnectorId
+                    }
+                };
+            }
 
             if (!string.IsNullOrEmpty(settings.EncryptionKmsKey))
             {
