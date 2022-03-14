@@ -114,13 +114,18 @@ namespace AWS.Deploy.Common.Recipes
                 !AllowedValues.Contains(valueOverride.ToString() ?? ""))
                 throw new InvalidOverrideValueException(DeployToolErrorCode.InvalidValueForOptionSettingItem, $"Invalid value for option setting item '{Name}'");
 
-            if (valueOverride is bool || valueOverride is int || valueOverride is long || valueOverride is double || valueOverride is Dictionary<string, string>)
+            if (valueOverride is bool || valueOverride is int || valueOverride is long || valueOverride is double || valueOverride is Dictionary<string, string> || valueOverride is SortedSet<string>)
             {
                 _valueOverride = valueOverride;
             }
             else if (Type.Equals(OptionSettingValueType.KeyValue))
             {
                 var deserialized = JsonConvert.DeserializeObject<Dictionary<string, string>>(valueOverride?.ToString() ?? "");
+                _valueOverride = deserialized;
+            }
+            else if (Type.Equals(OptionSettingValueType.List))
+            {
+                var deserialized = JsonConvert.DeserializeObject<SortedSet<string>>(valueOverride?.ToString() ?? "");
                 _valueOverride = deserialized;
             }
             else if (valueOverride is string valueOverrideString)
