@@ -32,6 +32,7 @@ namespace AWS.Deploy.CLI
         YesNo AskYesNoQuestion(string question, YesNo? defaultValue = default);
         void DisplayValues(Dictionary<string, object> objectValues, string indent);
         Dictionary<string, string> AskUserForKeyValue(Dictionary<string, string> keyValue);
+        SortedSet<string> AskUserForList(SortedSet<string> listValue);
     }
 
     public class ConsoleUtilities : IConsoleUtilities
@@ -307,6 +308,59 @@ namespace AWS.Deploy.CLI
             return userValue;
         }
 
+        public SortedSet<string> AskUserForList(SortedSet<string> listValues)
+        {
+            listValues ??= new SortedSet<string>();
+
+            if (listValues.Count == 0)
+            {
+                AskToAddListItem(listValues);
+                return listValues;
+            }
+
+            const string ADD = "Add new";
+            const string UPDATE = "Update existing";
+            const string DELETE = "Delete existing";
+            const string NOOP = "No action";
+            var operations = new List<string> { ADD, UPDATE, DELETE, NOOP };
+
+            var selectedOperation = AskUserToChoose(operations, "Select which operation you want to perform:", NOOP);
+
+            if (selectedOperation.Equals(ADD))
+                AskToAddListItem(listValues);
+            else if (selectedOperation.Equals(UPDATE))
+                AskToUpdateListItem(listValues);
+            else if (selectedOperation.Equals(DELETE))
+                AskToDeleteListItem(listValues);
+
+            return listValues;
+        }
+
+        private void AskToAddListItem(SortedSet<string> listValues)
+        {
+            _interactiveService.WriteLine("Enter a value:");
+            var listValue = _interactiveService.ReadLine()?.Trim() ?? "";
+            if (!string.IsNullOrEmpty(listValue))
+                listValues.Add(listValue);
+        }
+
+        private void AskToUpdateListItem(SortedSet<string> listValues)
+        {
+            var selectedItem = AskUserToChoose(listValues.ToList(), "Select the value you wish to update:", null);
+            var selectedValue = AskUserForValue("Enter the updated value:", selectedItem, true);
+            if (!string.IsNullOrEmpty(selectedValue))
+            {
+                listValues.Remove(selectedItem);
+                listValues.Add(selectedValue);
+            }
+        }
+
+        private void AskToDeleteListItem(SortedSet<string> listValues)
+        {
+            var selectedItem = AskUserToChoose(listValues.ToList(), "Select the value you wish to delete:", null);
+            listValues.Remove(selectedItem);
+        }
+
         public Dictionary<string, string> AskUserForKeyValue(Dictionary<string, string> keyValue)
         {
             keyValue ??= new Dictionary<string, string>();
@@ -468,6 +522,14 @@ namespace AWS.Deploy.CLI
                 {
                     _interactiveService.WriteLine($"{indent}{key}");
                     DisplayValues(childObjectValue, $"{indent}\t");
+                }
+                else if (value is SortedSet<string> listValues)
+                {
+                    _interactiveService.WriteLine($"{indent}{key}:");
+                    foreach (var listValue in listValues)
+                    {
+                        _interactiveService.WriteLine($"{indent}\t{listValue}");
+                    }
                 }
                 else if (value is string stringValue)
                 {
