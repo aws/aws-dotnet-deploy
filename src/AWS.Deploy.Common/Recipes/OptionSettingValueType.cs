@@ -10,6 +10,7 @@ namespace AWS.Deploy.Common.Recipes
         Double,
         Bool,
         KeyValue,
-        Object
+        Object,
+        List
     };
 }

@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Amazon;
+using Amazon.AppRunner.Model;
 using Amazon.CloudFormation;
 using Amazon.CloudFormation.Model;
 using Amazon.CloudFront;
@@ -73,6 +74,7 @@ namespace AWS.Deploy.Orchestration.Data
         Task<List<Amazon.S3.Model.S3Bucket>> ListOfS3Buckets();
         Task<List<ConfigurationOptionSetting>> GetBeanstalkEnvironmentConfigurationSettings(string environmentName);
         Task<Repository> DescribeECRRepository(string respositoryName);
+        Task<List<VpcConnector>> DescribeAppRunnerVpcConnectors();
     }
 
     public class AWSResourceQueryer : IAWSResourceQueryer
@@ -112,6 +114,13 @@ namespace AWS.Deploy.Orchestration.Data
             }
 
             return instanceTypes;
+        }
+
+        public async Task<List<VpcConnector>> DescribeAppRunnerVpcConnectors()
+        {
+            var appRunnerClient = _awsClientFactory.GetAWSClient<Amazon.AppRunner.IAmazonAppRunner>();
+            var connections = await appRunnerClient.ListVpcConnectorsAsync(new Amazon.AppRunner.Model.ListVpcConnectorsRequest());
+            return connections.VpcConnectors;
         }
 
         public async Task<Amazon.AppRunner.Model.Service> DescribeAppRunnerService(string serviceArn)
