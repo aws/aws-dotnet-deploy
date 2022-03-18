@@ -14,6 +14,8 @@ using AspNetAppAppRunner.Configurations;
 using CfnService = Amazon.CDK.AWS.AppRunner.CfnService;
 using CfnServiceProps = Amazon.CDK.AWS.AppRunner.CfnServiceProps;
 using Constructs;
+using System.Linq;
+using System.Collections.Generic;
 
 // This is a generated file from the original deployment recipe. It is recommended to not modify this file in order
 // to allow easy updates to the file when the original recipe that this project was created from has updates.
@@ -114,6 +116,17 @@ namespace AspNetAppAppRunner
             var ecrRepository = Repository.FromRepositoryName(this, "ECRRepository", props.ECRRepositoryName);
 
             Configuration settings = props.Settings;
+
+            var runtimeEnvironmentVariables = new List<CfnService.IKeyValuePairProperty>();
+            foreach (var variable in settings.AppRunnerEnvironmentVariables)
+            {
+                runtimeEnvironmentVariables.Add(new CfnService.KeyValuePairProperty
+                {
+                    Name = variable.Key,
+                    Value = variable.Value
+                });
+            }
+
             var appRunnerServiceProp = new CfnServiceProps
             {
                 ServiceName = settings.ServiceName,
@@ -130,7 +143,8 @@ namespace AspNetAppAppRunner
                         ImageConfiguration = new CfnService.ImageConfigurationProperty
                         {
                             Port = settings.Port.ToString(),
-                            StartCommand = !string.IsNullOrWhiteSpace(settings.StartCommand) ? settings.StartCommand : null
+                            StartCommand = !string.IsNullOrWhiteSpace(settings.StartCommand) ? settings.StartCommand : null,
+                            RuntimeEnvironmentVariables = runtimeEnvironmentVariables
                         }
                     }
                 }
