@@ -446,6 +446,14 @@
                     ]
                 }
             ]
+        },
+        {
+            "Id": "AppRunnerEnvironmentVariables",
+            "Name": "Environment Variables",
+            "Description": "Configure environment properties for your application.",
+            "Type": "KeyValue",
+            "AdvancedSetting": false,
+            "Updatable": true
         }
     ]
 }
