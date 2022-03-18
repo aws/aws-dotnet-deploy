@@ -125,7 +125,8 @@ namespace ConsoleAppECSFargateScheduleTask
             AppContainerDefinition = new ContainerDefinitionOptions
             {
                 Image = ContainerImage.FromEcrRepository(ecrRepository, props.ECRImageTag),
-                Logging = AppLogging
+                Logging = AppLogging,
+                Environment = settings.ECSEnvironmentVariables
             };
 
             AppTaskDefinition.AddContainer(nameof(AppContainerDefinition), InvokeCustomizeCDKPropsEvent(nameof(AppContainerDefinition), this, AppContainerDefinition));
