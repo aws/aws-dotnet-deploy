@@ -7,6 +7,8 @@
 // This class is marked as a partial class. If you add new settings to the recipe file, those settings should be
 // added to partial versions of this class outside of the Generated folder for example in the Configuration folder.
 
+using System.Collections.Generic;
+
 namespace AspNetAppAppRunner.Configurations
 {
     public partial class Configuration
@@ -86,6 +88,11 @@ namespace AspNetAppAppRunner.Configurations
         /// </summary>
         public string Memory { get; set; }
 
+        /// <summary>
+        /// The environment variables that are set for the AppRunner environment.
+        /// </summary>
+        public Dictionary<string, string> AppRunnerEnvironmentVariables { get; set; } = new Dictionary<string, string> { };
+
         /// A parameterless constructor is needed for <see cref="Microsoft.Extensions.Configuration.ConfigurationBuilder"/>
         /// or the classes will fail to initialize.
         /// The warnings are disabled since a parameterless constructor will allow non-nullable properties to be initialized with null values.
@@ -104,7 +111,8 @@ namespace AspNetAppAppRunner.Configurations
             int? port,
             string healthCheckProtocol,
             string cpu,
-            string memory)
+            string memory,
+            Dictionary<string, string> appRunnerEnvironmentVariables)
         {
             ApplicationIAMRole = applicationIAMRole;
             VPCConnector = vpcConnector;
@@ -114,6 +122,7 @@ namespace AspNetAppAppRunner.Configurations
             HealthCheckProtocol = healthCheckProtocol;
             Cpu = cpu;
             Memory = memory;
+            AppRunnerEnvironmentVariables = appRunnerEnvironmentVariables;
         }
     }
 }
