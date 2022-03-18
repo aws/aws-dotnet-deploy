@@ -383,6 +383,14 @@
                 "29696": "29 GB",
                 "30720": "30 GB"
             }
+        },
+        {
+            "Id": "ECSEnvironmentVariables",
+            "Name": "Environment Variables",
+            "Description": "Configure environment properties for your application.",
+            "Type": "KeyValue",
+            "AdvancedSetting": false,
+            "Updatable": true
         }
     ]
 }

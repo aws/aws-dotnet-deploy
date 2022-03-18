@@ -150,7 +150,8 @@ namespace AspNetAppEcsFargate
             AppContainerDefinition = AppTaskDefinition.AddContainer(nameof(AppContainerDefinition), InvokeCustomizeCDKPropsEvent(nameof(AppContainerDefinition), this, new ContainerDefinitionOptions
             {
                 Image = ContainerImage.FromEcrRepository(EcrRepository, recipeConfiguration.ECRImageTag),
-                Logging = AppLogging
+                Logging = AppLogging,
+                Environment = settings.ECSEnvironmentVariables
             }));
 
             AppContainerDefinition.AddPortMappings(new PortMapping
