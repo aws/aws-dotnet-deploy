@@ -92,14 +92,14 @@ namespace AWS.Deploy.Orchestration
                 {
                     capabilities.Add(new SystemCapability("NodeJS", false, false) {
                         InstallationUrl = "https://nodejs.org/en/download/",
-                        Message = "The selected deployment uses the AWS CDK, which requires Node.js. The latest LTS version of Node.js is recommended and can be installed from https://nodejs.org/en/download/. Specifically, AWS CDK requires 10.13.0+ to work properly."
+                        Message = $"The selected deployment uses the AWS CDK, which requires Node.js. AWS CDK requires {MinimumNodeJSVersion} of Node.js or later, and the latest LTS version is recommended."
                     });
                 }
                 else if (systemCapabilities.NodeJsVersion < MinimumNodeJSVersion)
                 {
                     capabilities.Add(new SystemCapability("NodeJS", false, false) {
                         InstallationUrl = "https://nodejs.org/en/download/",
-                        Message = $"The selected deployment uses the AWS CDK, which requires version of Node.js higher than your current installation ({systemCapabilities.NodeJsVersion}). The latest LTS version of Node.js is recommended and can be installed from https://nodejs.org/en/download/. Specifically, AWS CDK requires 10.3+ to work properly."
+                        Message = $"The selected deployment uses the AWS CDK, which requires a version of Node.js higher than your current installation ({systemCapabilities.NodeJsVersion}). AWS CDK requires {MinimumNodeJSVersion} of Node.js or later, and the latest LTS version is recommended."
                     });
                 }
             }
@@ -111,7 +111,7 @@ namespace AWS.Deploy.Orchestration
                     capabilities.Add(new SystemCapability("Docker", false, false)
                     {
                         InstallationUrl = "https://docs.docker.com/engine/install/",
-                        Message = "The selected deployment option requires Docker, which was not detected. Please install and start the appropriate version of Docker for your OS: https://docs.docker.com/engine/install/"
+                        Message = "The selected deployment option requires Docker, which was not detected. Please install and start the appropriate version of Docker for your OS."
                     });
                 }
                 else if (!systemCapabilities.DockerInfo.DockerContainerType.Equals("linux", StringComparison.OrdinalIgnoreCase))

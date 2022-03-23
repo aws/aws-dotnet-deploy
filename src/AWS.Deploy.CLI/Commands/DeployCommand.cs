@@ -241,7 +241,7 @@ namespace AWS.Deploy.CLI.Commands
             var missingCapabilitiesMessage = "";
             foreach (var capability in systemCapabilities)
             {
-                missingCapabilitiesMessage = $"{missingCapabilitiesMessage}{capability.GetMessage()}{Environment.NewLine}";
+                missingCapabilitiesMessage = $"{missingCapabilitiesMessage}{Environment.NewLine}{capability.GetMessage()}{Environment.NewLine}";
             }
 
             if (systemCapabilities.Any())
