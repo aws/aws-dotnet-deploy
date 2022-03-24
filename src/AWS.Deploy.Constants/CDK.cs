@@ -21,6 +21,6 @@ namespace AWS.Deploy.Constants
         /// <summary>
         /// Default version of CDK CLI
         /// </summary>
-        public static readonly Version DefaultCDKVersion = Version.Parse("1.107.0");
+        public static readonly Version DefaultCDKVersion = Version.Parse("2.13.0");
     }
 }
