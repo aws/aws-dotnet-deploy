@@ -18,9 +18,9 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
         }
 
         [Theory]
-        [InlineData("MixedReferences", "1.109.0")]
-        [InlineData("SameReferences", "1.108.0")]
-        [InlineData("NoReferences", "1.107.0")]
+        [InlineData("MixedReferences", "2.15.0")]
+        [InlineData("SameReferences", "2.14.0")]
+        [InlineData("NoReferences", "2.13.0")]
         public void Detect_CSProjPath(string fileName, string expectedVersion)
         {
             var csprojPath = Path.Combine("CDK", "CSProjFiles", fileName);
@@ -38,7 +38,7 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
                 "NoReferences"
             }.Select(fileName => Path.Combine("CDK", "CSProjFiles", fileName));
             var version = _cdkVersionDetector.Detect(csprojPaths);
-            Assert.Equal("1.109.0", version.ToString());
+            Assert.Equal("2.15.0", version.ToString());
         }
     }
 }

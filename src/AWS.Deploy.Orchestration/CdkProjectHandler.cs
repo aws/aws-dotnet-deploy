@@ -81,6 +81,7 @@ namespace AWS.Deploy.Orchestration
 
             // Ensure region is bootstrapped
             await _commandLineWrapper.Run($"npx cdk bootstrap aws://{session.AWSAccountId}/{session.AWSRegion}",
+                workingDirectory: cdkProjectPath,
                 needAwsCredentials: true);
 
             var appSettingsFilePath = Path.Combine(cdkProjectPath, "appsettings.json");
