@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
+using AWS.Deploy.Common.Recipes;
 
 namespace AWS.Deploy.CLI
 {
@@ -19,6 +20,7 @@ namespace AWS.Deploy.CLI
 
     public interface IConsoleUtilities
     {
+        SortedSet<string> AskUserForList<T>(UserInputConfiguration<T> userInputConfiguration, List<T> availableData, OptionSettingItem optionSetting, Recommendation recommendation);
         Recommendation AskToChooseRecommendation(IList<Recommendation> recommendations);
         string AskUserToChoose(IList<string> values, string title, string? defaultValue, string? defaultChoosePrompt = null);
         T AskUserToChoose<T>(IList<T> options, string title, T defaultValue, string? defaultChoosePrompt = null)
@@ -44,6 +46,63 @@ namespace AWS.Deploy.CLI
         {
             _interactiveService = interactiveService;
             _directoryManager = directoryManager;
+        }
+
+        /// <summary>
+        /// This method is used to display a list of values and allow the user to select multiple values.
+        /// The user will have the ability to add and delete values from the list.
+        /// </summary>
+        public SortedSet<string> AskUserForList<T>(
+            UserInputConfiguration<T> userInputConfiguration,
+            List<T> availableData,
+            OptionSettingItem optionSetting,
+            Recommendation recommendation)
+        {
+            const string ADD = "Add new";
+            const string DELETE = "Delete existing";
+            const string NOOP = "No action";
+            var operations = new List<string> { ADD, DELETE, NOOP };
+
+            var currentOptionSettingValue = recommendation.GetOptionSettingValue<SortedSet<string>>(optionSetting) ?? new SortedSet<string>();
+
+            while (true)
+            {
+                _interactiveService.WriteLine();
+                if (currentOptionSettingValue.Any())
+                {
+                    _interactiveService.WriteLine("Selected values:");
+                    var currentOptionSettingValueList = currentOptionSettingValue.ToList();
+                    for (int i = 1; i <= currentOptionSettingValueList.Count; i++)
+                    {
+                        var padLength = i.ToString().Length;
+                        _interactiveService.WriteLine($"{i.ToString().PadRight(padLength)}: {currentOptionSettingValueList[i-1]}");
+                    }
+                    _interactiveService.WriteLine();
+                }
+
+                var selectedOperation = AskUserToChoose(operations, "Select which operation you want to perform:", NOOP);
+                _interactiveService.WriteLine();
+
+                if (selectedOperation.Equals(ADD))
+                {
+                    var userResponse = AskUserToChooseOrCreateNew(availableData, "Select value:", userInputConfiguration);
+                    if (userResponse.SelectedOption != null)
+                        currentOptionSettingValue.Add(userInputConfiguration.IDSelector(userResponse.SelectedOption));
+                }
+                else if (selectedOperation.Equals(DELETE) && currentOptionSettingValue.Any())
+                {
+                    var selectedItem = AskUserToChoose(currentOptionSettingValue.ToList(), "Select the value you wish to delete:", null);
+                    currentOptionSettingValue.Remove(selectedItem);
+                }
+                else if (selectedOperation.Equals(NOOP))
+                {
+                    break;
+                }
+            }
+
+            _interactiveService.WriteLine();
+
+            return currentOptionSettingValue;
         }
 
         public Recommendation AskToChooseRecommendation(IList<Recommendation> recommendations)
@@ -179,9 +238,10 @@ namespace AWS.Deploy.CLI
         public UserResponse<string> AskUserToChooseOrCreateNew(IEnumerable<string> options, string title, bool askNewName = true, string defaultNewName = "", bool canBeEmpty = false, string? defaultChoosePrompt = null, string? defaultCreateNewPrompt = null, string? defaultCreateNewLabel = null)
         {
             var configuration = new UserInputConfiguration<string>(
-                option => option,
-                option => option.Contains(option),
-                defaultNewName)
+                idSelector: option => option,
+                displaySelector: option => option,
+                defaultSelector: option => option.Contains(option),
+                defaultNewName: defaultNewName)
             {
                 AskNewName = askNewName,
                 CanBeEmpty = canBeEmpty
@@ -215,7 +275,7 @@ namespace AWS.Deploy.CLI
                     displayOptionStrings.Insert(0, Constants.CLI.EMPTY_LABEL);
                 if (userInputConfiguration.CreateNew)
                     displayOptionStrings.Add(createNewLabel);
-                
+
                 var selectedString = AskUserToChoose(displayOptionStrings, title, defaultValue, defaultChoosePrompt);
 
                 if (selectedString == Constants.CLI.EMPTY_LABEL)
