@@ -61,5 +61,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.Utilities
         public Task<GetCallerIdentityResponse> GetCallerIdentity(string awsRegion) => throw new NotImplementedException();
         public Task<Repository> DescribeECRRepository(string respositoryName) => throw new NotImplementedException();
         public Task<List<VpcConnector>> DescribeAppRunnerVpcConnectors() => throw new NotImplementedException();
+        public Task<List<Subnet>> DescribeSubnets(string vpcID = null) => throw new NotImplementedException();
+        public Task<List<SecurityGroup>> DescribeSecurityGroups(string vpcID = null) => throw new NotImplementedException();
     }
 }

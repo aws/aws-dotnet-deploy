@@ -40,9 +40,10 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             var currentVpcConnector = recommendation.GetOptionSettingValue<string>(optionSetting);
 
             var userInputConfiguration = new UserInputConfiguration<VpcConnector>(
-                vpcConnector => vpcConnector.VpcConnectorName,
-                vpcConnector => vpcConnector.VpcConnectorArn.Equals(currentVpcConnector),
-                currentVpcConnector)
+                idSelector: vpcConnector => vpcConnector.VpcConnectorArn,
+                displaySelector: vpcConnector => vpcConnector.VpcConnectorName,
+                defaultSelector: vpcConnector => vpcConnector.VpcConnectorArn.Equals(currentVpcConnector),
+                defaultNewName: currentVpcConnector)
             {
                 CanBeEmpty = true,
                 CreateNew = false

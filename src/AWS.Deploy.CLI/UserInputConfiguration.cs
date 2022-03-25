@@ -14,6 +14,12 @@ namespace AWS.Deploy.CLI
     {
         /// <summary>
         /// Func to select string property from the option type
+        /// which is returned as the ID of the selected option.
+        /// </summary>
+        public Func<T, string> IDSelector;
+
+        /// <summary>
+        /// Func to select string property from the option type
         /// which is displayed to the user.
         /// </summary>
         public Func<T, string> DisplaySelector;
@@ -63,10 +69,12 @@ namespace AWS.Deploy.CLI
         public bool EmptyOption { get; set; }
 
         public UserInputConfiguration(
+            Func<T, string> idSelector,
             Func<T, string> displaySelector,
             Func<T, bool> defaultSelector,
             string defaultNewName = "")
         {
+            IDSelector = idSelector;
             DisplaySelector = displaySelector;
             DefaultSelector = defaultSelector;
             DefaultNewName = defaultNewName;
