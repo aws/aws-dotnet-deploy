@@ -9,8 +9,12 @@ using Xunit;
 using Amazon.Runtime;
 using AWS.Deploy.CLI.Utilities;
 using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Amazon.EC2.Model;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
+using AWS.Deploy.CLI.UnitTests.Utilities;
 
 namespace AWS.Deploy.CLI.UnitTests
 {
@@ -38,6 +42,57 @@ namespace AWS.Deploy.CLI.UnitTests
         };
 
         [Fact]
+        public async Task AskUserForList()
+        {
+            var engine = await HelperFunctions.BuildRecommendationEngine(
+                "WebAppWithDockerFile",
+                new FileManager(),
+                new DirectoryManager(),
+                "us-west-2",
+                "123456789012",
+                "default"
+            );
+
+            var recommendations = await engine.ComputeRecommendations();
+
+            var appRunnerRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_APPRUNNER_ID);
+
+            var subnetsOptionSetting = appRunnerRecommendation.GetOptionSetting("VPCConnector.Subnets");
+            var interactiveServices = new TestToolInteractiveServiceImpl(new List<string>
+            {
+                "1",
+                "1",
+                "1",
+                "2",
+                "3"
+            });
+            var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager);
+            var userInputConfiguration = new UserInputConfiguration<Subnet>(
+                option => option.SubnetId,
+                option => option.SubnetId,
+                option => false)
+            {
+                AskNewName = true
+            };
+            var availableData = new List<Subnet>()
+            {
+                new Subnet()
+                {
+                    SubnetId = "subnet1"
+                },
+                new Subnet()
+                {
+                    SubnetId = "subnet2"
+                }
+            };
+            var userResponse = consoleUtilities.AskUserForList<Subnet>(userInputConfiguration, availableData, subnetsOptionSetting, appRunnerRecommendation);
+
+            Assert.Equal(2, userResponse.Count);
+            Assert.Contains("subnet1", userResponse);
+            Assert.Contains("subnet2", userResponse);
+        }
+
+        [Fact]
         public void AskUserToChooseOrCreateNew()
         {
             var interactiveServices = new TestToolInteractiveServiceImpl(new List<string>
@@ -47,6 +102,7 @@ namespace AWS.Deploy.CLI.UnitTests
             });
             var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager);
             var userInputConfiguration = new UserInputConfiguration<OptionItem>(
+                option => option.DisplayName,
                 option => option.DisplayName,
                 option => option.Identifier.Equals("Identifier2"),
                 "NewIdentifier")
@@ -78,6 +134,7 @@ namespace AWS.Deploy.CLI.UnitTests
             });
             var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager);
             var userInputConfiguration = new UserInputConfiguration<OptionItem>(
+                option => option.DisplayName,
                 option => option.DisplayName,
                 option => option.Identifier.Equals("Identifier2"),
                 "NewIdentifier")

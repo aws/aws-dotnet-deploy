@@ -24,6 +24,11 @@ namespace AspNetAppAppRunner.Configurations
         public string? VpcConnectorId { get; set; }
 
         /// <summary>
+        /// The VPC ID to use for the App Runner service.
+        /// </summary>
+        public string? VpcId { get; set; }
+
+        /// <summary>
         /// A list of IDs of subnets that App Runner should use when it associates your service with a custom Amazon VPC.
         /// Specify IDs of subnets of a single Amazon VPC. App Runner determines the Amazon VPC from the subnets you specify.
         /// </summary>

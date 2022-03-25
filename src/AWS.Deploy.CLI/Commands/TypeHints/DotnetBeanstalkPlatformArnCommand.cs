@@ -42,8 +42,9 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             var platformArns = await GetData();
 
             var userInputConfiguration = new UserInputConfiguration<PlatformSummary>(
-                platform => $"{platform.PlatformBranchName} v{platform.PlatformVersion}",
-                platform => platform.PlatformArn.Equals(currentValue))
+                idSelector: platform => platform.PlatformArn,
+                displaySelector: platform => $"{platform.PlatformBranchName} v{platform.PlatformVersion}",
+                defaultSelector: platform => platform.PlatformArn.Equals(currentValue))
             {
                 CreateNew = false
             };

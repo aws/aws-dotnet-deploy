@@ -45,9 +45,10 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             var currentTypeHintResponse = recommendation.GetOptionSettingValue<BeanstalkApplicationTypeHintResponse>(optionSetting);
 
             var userInputConfiguration = new UserInputConfiguration<ApplicationDescription>(
-                app => app.ApplicationName,
-                app => app.ApplicationName.Equals(currentTypeHintResponse?.ApplicationName),
-                currentTypeHintResponse.ApplicationName)
+                idSelector: app => app.ApplicationName,
+                displaySelector: app => app.ApplicationName,
+                defaultSelector: app => app.ApplicationName.Equals(currentTypeHintResponse?.ApplicationName),
+                defaultNewName: currentTypeHintResponse.ApplicationName)
             {
                 AskNewName = true,
             };
