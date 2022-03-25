@@ -369,6 +369,7 @@
             "Name": "VPC Connector",
             "Description": "App Runner requires this resource when you want to associate your App Runner service to a custom Amazon Virtual Private Cloud (Amazon VPC).",
             "Type": "Object",
+            "TypeHint": "VPCConnector",
             "AdvancedSetting": true,
             "Updatable": true,
             "ChildOptionSettings": [
@@ -398,10 +399,37 @@
                     ]
                 },
                 {
+                    "Id": "VpcId",
+                    "Name": "VPC ID",
+                    "Description": "A list of VPC IDs that App Runner should use when it associates your service with a custom Amazon VPC.",
+                    "TypeHint": "ExistingVpc",
+                    "DefaultValue": null,
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": {
+                                "Regex": "^vpc-([0-9a-f]{8}|[0-9a-f]{17})$",
+                                "AllowEmptyString": true,
+                                "ValidationFailedMessage": "Invalid VPC ID. The VPC ID must start with the \"vpc-\" prefix, followed by either 8 or 17 characters consisting of digits and letters(lower-case) from a to f. For example vpc-abc88de9 is a valid VPC ID."
+                            }
+                        }
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "VPCConnector.CreateNew",
+                            "Value": true
+                        }
+                    ]
+                },
+                {
                     "Id": "Subnets",
                     "Name": "Subnets",
                     "Description": "A list of IDs of subnets that App Runner should use when it associates your service with a custom Amazon VPC. Specify IDs of subnets of a single Amazon VPC. App Runner determines the Amazon VPC from the subnets you specify.",
                     "Type": "List",
+                    "TypeHint": "ExistingSubnets",
+                    "ParentSettingId": "VPCConnector.VpcId",
                     "AdvancedSetting": false,
                     "Updatable": true,
                     "Validators": [
@@ -426,6 +454,8 @@
                     "Name": "SecurityGroups",
                     "Description": "A list of IDs of security groups that App Runner should use for access to AWS resources under the specified subnets. If not specified, App Runner uses the default security group of the Amazon VPC. The default security group allows all outbound traffic.",
                     "Type": "List",
+                    "TypeHint": "ExistingSecurityGroups",
+                    "ParentSettingId": "VPCConnector.VpcId",
                     "AdvancedSetting": false,
                     "Updatable": true,
                     "Validators": [

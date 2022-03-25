@@ -18,7 +18,16 @@ namespace AWS.Deploy.Common.Extensions
         {
             try
             {
-                inputList = JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(obj));
+                string serializedObject = "";
+                if (obj is string)
+                {
+                    serializedObject = obj.ToString() ?? string.Empty;
+                }
+                else
+                {
+                    serializedObject = JsonConvert.SerializeObject(obj);
+                }
+                inputList = JsonConvert.DeserializeObject<T>(serializedObject);
 
                 if (inputList == null)
                     return false;

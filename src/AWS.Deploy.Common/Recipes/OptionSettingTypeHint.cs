@@ -32,6 +32,9 @@ namespace AWS.Deploy.Common.Recipes
         ExistingVpc,
         ExistingBeanstalkApplication,
         ECRRepository,
-        ExistingVpcConnector
+        ExistingVpcConnector,
+        ExistingSubnets,
+        ExistingSecurityGroups,
+        VPCConnector
     };
 }

@@ -60,7 +60,10 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 { OptionSettingTypeHint.S3BucketName, new S3BucketNameCommand(awsResourceQueryer, consoleUtilities) },
                 { OptionSettingTypeHint.InstanceType, new InstanceTypeCommand(awsResourceQueryer, consoleUtilities) },
                 { OptionSettingTypeHint.ECRRepository,  new ECRRepositoryCommand(awsResourceQueryer, consoleUtilities, toolInteractiveService) },
-                { OptionSettingTypeHint.ExistingVpcConnector,  new ExistingVpcConnectorCommand(awsResourceQueryer, consoleUtilities) }
+                { OptionSettingTypeHint.ExistingVpcConnector,  new ExistingVpcConnectorCommand(awsResourceQueryer, consoleUtilities) },
+                { OptionSettingTypeHint.ExistingSubnets,  new ExistingSubnetsCommand(awsResourceQueryer, consoleUtilities) },
+                { OptionSettingTypeHint.ExistingSecurityGroups,  new ExistingSecurityGroupsCommand(awsResourceQueryer, consoleUtilities) },
+                { OptionSettingTypeHint.VPCConnector,  new VPCConnectorCommand(awsResourceQueryer, consoleUtilities, toolInteractiveService) }
             };
         }
 

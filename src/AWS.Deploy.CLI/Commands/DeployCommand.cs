@@ -533,8 +533,9 @@ namespace AWS.Deploy.CLI.Commands
             var title = "Select an existing AWS deployment target to deploy your application to.";
 
             var userInputConfiguration = new UserInputConfiguration<CloudApplication>(
-                app => app.DisplayName,
-                app => app.DisplayName.Equals(deployedApplications.First().DisplayName))
+                idSelector: app => app.DisplayName,
+                displaySelector: app => app.DisplayName,
+                defaultSelector: app => app.DisplayName.Equals(deployedApplications.First().DisplayName))
             {
                 AskNewName = false,
                 CanBeEmpty = false
@@ -811,8 +812,9 @@ namespace AWS.Deploy.CLI.Commands
             if (setting.AllowedValues?.Count > 0)
             {
                 var userInputConfig = new UserInputConfiguration<string>(
-                    x => setting.ValueMapping.ContainsKey(x) ? setting.ValueMapping[x] : x,
-                    x => x.Equals(currentValue))
+                    idSelector: x => x,
+                    displaySelector: x => setting.ValueMapping.ContainsKey(x) ? setting.ValueMapping[x] : x,
+                    defaultSelector: x => x.Equals(currentValue))
                 {
                     CreateNew = false
                 };
@@ -900,7 +902,8 @@ namespace AWS.Deploy.CLI.Commands
 
                 displayValue = ((IDisplayable?)response)?.ToDisplayString();
             }
-            else
+
+            if (displayValue == null)
             {
                 var value = recommendation.GetOptionSettingValue(optionSetting);
                 objectValues = value as Dictionary<string, object>;

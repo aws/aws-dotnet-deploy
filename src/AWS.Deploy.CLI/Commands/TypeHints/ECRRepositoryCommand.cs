@@ -31,9 +31,10 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             var currentRepositoryName = recommendation.GetOptionSettingValue<string>(optionSetting);
 
             var userInputConfiguration = new UserInputConfiguration<Repository>(
-                rep => rep.RepositoryName,
-                rep => rep.RepositoryName.Equals(currentRepositoryName),
-                currentRepositoryName)
+                idSelector: rep => rep.RepositoryName,
+                displaySelector: rep => rep.RepositoryName,
+                defaultSelector: rep => rep.RepositoryName.Equals(currentRepositoryName),
+                defaultNewName: currentRepositoryName)
             {
                 AskNewName = true,
             };
