@@ -105,5 +105,54 @@ namespace AWS.Deploy.Orchestration.UnitTests.Utilities
             // ASSERT
             recommendation.ShouldEqual(expectedRecommendation);
         }
+
+        [Fact]
+        public async Task SuggestsValidNameAndRespectsExistingApplications_ProjectWithNumber()
+        {
+            // ARRANGE
+            var projectFile = "SuperTest1";
+            var expectedRecommendation = $"SuperTest2";
+
+            var projectPath = _fakeFileManager.AddEmptyProjectFile($"c:\\{projectFile}.csproj");
+
+            var projectDefinition = await _projectDefinitionParser.Parse(projectPath);
+
+            var existingApplication = new List<CloudApplication>
+            {
+                new CloudApplication(projectFile, string.Empty, CloudApplicationResourceType.CloudFormationStack, string.Empty)
+            };
+
+            // ACT
+            var recommendation = _cloudApplicationNameGenerator.GenerateValidName(projectDefinition, existingApplication);
+
+            // ASSERT
+            recommendation.ShouldEqual(expectedRecommendation);
+        }
+
+        [Fact]
+        public async Task SuggestsValidNameAndRespectsExistingApplications_MultipleProjectWithNumber()
+        {
+            // ARRANGE
+            var projectFile = "SuperTest1";
+            var projectFile2 = "SuperTest2";
+            var expectedRecommendation = $"SuperTest3";
+
+            var projectPath = _fakeFileManager.AddEmptyProjectFile($"c:\\{projectFile}.csproj");
+            var projectPath2 = _fakeFileManager.AddEmptyProjectFile($"c:\\{projectFile2}.csproj");
+
+            var projectDefinition = await _projectDefinitionParser.Parse(projectPath);
+
+            var existingApplication = new List<CloudApplication>
+            {
+                new CloudApplication(projectFile, string.Empty, CloudApplicationResourceType.CloudFormationStack, string.Empty),
+                new CloudApplication(projectFile2, string.Empty, CloudApplicationResourceType.CloudFormationStack, string.Empty)
+            };
+
+            // ACT
+            var recommendation = _cloudApplicationNameGenerator.GenerateValidName(projectDefinition, existingApplication);
+
+            // ASSERT
+            recommendation.ShouldEqual(expectedRecommendation);
+        }
     }
 }
