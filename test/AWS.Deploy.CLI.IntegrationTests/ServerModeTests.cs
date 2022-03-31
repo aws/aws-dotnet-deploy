@@ -281,6 +281,35 @@ namespace AWS.Deploy.CLI.IntegrationTests
             }
         }
 
+        [Fact]
+        public async Task ShutdownViaRestClient()
+        {
+            var portNumber = 4003;
+            var cancelSource = new CancellationTokenSource();
+            using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ResolveCredentials);
+            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
+
+            var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
+
+            try
+            {
+                var baseUrl = $"http://localhost:{portNumber}/";
+                var restClient = new RestAPIClient(baseUrl, httpClient);
+
+                await WaitTillServerModeReady(restClient);
+
+                await restClient.ShutdownAsync();
+                Thread.Sleep(100);
+
+                // Expecting System.Net.Http.HttpRequestException : No connection could be made because the target machine actively refused it.
+                await Assert.ThrowsAsync<System.Net.Http.HttpRequestException>(async () => await restClient.HealthAsync());
+            }
+            finally
+            {
+                cancelSource.Cancel();
+            }
+        }
+
         private async Task<DeploymentStatus> WaitForDeployment(RestAPIClient restApiClient, string sessionId)
         {
             // Do an initial delay to avoid a race condition of the status being checked before the deployment has kicked off.
