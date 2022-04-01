@@ -65,6 +65,26 @@ namespace AWS.Deploy.CLI.UnitTests
         }
 
         [Fact]
+        public async Task WebApiNET6()
+        {
+            var engine = await BuildRecommendationEngine("WebApiNET6");
+
+            var recommendations = await engine.ComputeRecommendations();
+
+            recommendations
+                .Any(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID)
+                .ShouldBeTrue("Failed to receive Recommendation: " + Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+
+            recommendations
+                .Any(r => r.Recipe.Id == Constants.ASPNET_CORE_ASPNET_CORE_FARGATE_RECIPE_ID)
+                .ShouldBeTrue("Failed to receive Recommendation: " + Constants.ASPNET_CORE_ASPNET_CORE_FARGATE_RECIPE_ID);
+
+            recommendations
+                .Any(r => r.Recipe.Id == Constants.ASPNET_CORE_APPRUNNER_ID)
+                .ShouldBeTrue("Failed to receive Recommendation: " + Constants.ASPNET_CORE_APPRUNNER_ID);
+        }
+
+        [Fact]
         public async Task WebAppWithDockerFileTest()
         {
 
