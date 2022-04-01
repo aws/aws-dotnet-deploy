@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="Amazon.CDK" Version="1.108.0" />
-    <PackageReference Include="Amazon.CDK.AWS.AppRunner" Version="1.108.0" />
-    <PackageReference Include="Amazon.CDK.AWS.ECS.Patterns" Version="1.108.0" />
+    <PackageReference Include="Amazon.CDK" Version="2.14.0" />
+    <PackageReference Include="Amazon.CDK.AWS.AppRunner" Version="2.14.0" />
+    <PackageReference Include="Amazon.CDK.AWS.ECS.Patterns" Version="2.14.0" />
   </ItemGroup>
 
 </Project>

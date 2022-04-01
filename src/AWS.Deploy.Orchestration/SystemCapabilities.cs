@@ -48,7 +48,12 @@ namespace AWS.Deploy.Orchestration
         public string GetMessage()
         {
             if (!string.IsNullOrEmpty(Message))
-                return Message;
+            {
+                if (!string.IsNullOrEmpty(InstallationUrl))
+                    return $"{Message} {InstallationUrl}";
+                else
+                    return Message;
+            }
 
             var availabilityMessage = Available ? "and available" : "but not available";
             var installationMessage = Installed ? $"installed {availabilityMessage}" : "not installed";

@@ -7,6 +7,7 @@ namespace AWS.Deploy.CLI.UnitTests
     {
         public const string ASPNET_CORE_ASPNET_CORE_FARGATE_RECIPE_ID = "AspNetAppEcsFargate";
         public const string ASPNET_CORE_BEANSTALK_RECIPE_ID = "AspNetAppElasticBeanstalkLinux";
+        public const string ASPNET_CORE_APPRUNNER_ID = "AspNetAppAppRunner";
 
         public const string CONSOLE_APP_FARGATE_SERVICE_RECIPE_ID = "ConsoleAppEcsFargateService";
         public const string CONSOLE_APP_FARGATE_SCHEDULE_TASK_RECIPE_ID = "ConsoleAppEcsFargateScheduleTask";

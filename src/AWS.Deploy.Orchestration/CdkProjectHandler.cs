@@ -79,11 +79,12 @@ namespace AWS.Deploy.Orchestration
 
             _interactiveService.LogMessageLine("Deploying AWS CDK project");
 
-            // Ensure region is bootstrapped
-            await _commandLineWrapper.Run($"npx cdk bootstrap aws://{session.AWSAccountId}/{session.AWSRegion}",
-                needAwsCredentials: true);
-
             var appSettingsFilePath = Path.Combine(cdkProjectPath, "appsettings.json");
+
+            // Ensure region is bootstrapped
+            await _commandLineWrapper.Run($"npx cdk bootstrap aws://{session.AWSAccountId}/{session.AWSRegion} -c {Constants.CloudFormationIdentifier.SETTINGS_PATH_CDK_CONTEXT_PARAMETER}=\"{appSettingsFilePath}\"",
+                workingDirectory: cdkProjectPath,
+                needAwsCredentials: true);
 
             var deploymentStartDate = DateTime.Now;
             // Handover to CDK command line tool
