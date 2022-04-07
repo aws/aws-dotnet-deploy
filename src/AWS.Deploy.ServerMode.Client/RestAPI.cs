@@ -1664,6 +1664,9 @@ namespace AWS.Deploy.ServerMode.Client
         [Newtonsoft.Json.JsonProperty("typeHint", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string TypeHint { get; set; }
     
+        [Newtonsoft.Json.JsonProperty("typeHintData", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.Generic.IDictionary<string, object> TypeHintData { get; set; }
+    
         [Newtonsoft.Json.JsonProperty("advanced", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool Advanced { get; set; }
     
