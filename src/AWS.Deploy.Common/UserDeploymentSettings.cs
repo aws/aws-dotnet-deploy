@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -53,6 +54,13 @@ namespace AWS.Deploy.Common
         /// <param name="node">The current node that is being processed.</param>
         private void TraverseRootToLeaf(JToken node)
         {
+            if (!string.IsNullOrEmpty(node.Path) && node.Type.ToString().Equals("Array"))
+            {
+                var list = node.Values<string>().Select(x => x.ToString()).ToList();
+                LeafOptionSettingItems.Add(node.Path, JsonConvert.SerializeObject(list));
+                return;
+            }
+
             if (!node.HasValues)
             {
                 // The only way to reach a leaf node of type object is if the object is empty.

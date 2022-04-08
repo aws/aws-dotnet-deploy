@@ -45,8 +45,9 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             var keyPairs = await GetData();
 
             var userInputConfiguration = new UserInputConfiguration<KeyPairInfo>(
-                kp => kp.KeyName,
-                kp => kp.KeyName.Equals(currentValue)
+                idSelector: kp => kp.KeyName,
+                displaySelector: kp => kp.KeyName,
+                defaultSelector: kp => kp.KeyName.Equals(currentValue)
                 )
             {
                 AskNewName = true,

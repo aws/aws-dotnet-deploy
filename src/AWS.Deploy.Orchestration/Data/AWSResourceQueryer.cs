@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Amazon;
+using Amazon.AppRunner.Model;
 using Amazon.CloudFormation;
 using Amazon.CloudFormation.Model;
 using Amazon.CloudFront;
@@ -73,6 +74,9 @@ namespace AWS.Deploy.Orchestration.Data
         Task<List<Amazon.S3.Model.S3Bucket>> ListOfS3Buckets();
         Task<List<ConfigurationOptionSetting>> GetBeanstalkEnvironmentConfigurationSettings(string environmentName);
         Task<Repository> DescribeECRRepository(string respositoryName);
+        Task<List<VpcConnector>> DescribeAppRunnerVpcConnectors();
+        Task<List<Subnet>> DescribeSubnets(string? vpcID = null);
+        Task<List<SecurityGroup>> DescribeSecurityGroups(string? vpcID = null);
     }
 
     public class AWSResourceQueryer : IAWSResourceQueryer
@@ -82,6 +86,62 @@ namespace AWS.Deploy.Orchestration.Data
         public AWSResourceQueryer(IAWSClientFactory awsClientFactory)
         {
             _awsClientFactory = awsClientFactory;
+        }
+
+        /// <summary>
+        /// List the available subnets
+        /// If <see cref="vpcID"/> is specified, the list of subnets is filtered by the VPC.
+        /// </summary>
+        public async Task<List<Subnet>> DescribeSubnets(string? vpcID = null)
+        {
+            var ec2Client = _awsClientFactory.GetAWSClient<IAmazonEC2>();
+
+            var request = new DescribeSubnetsRequest();
+            if (vpcID != null)
+                request.Filters = new List<Filter>()
+                {
+                    new Filter()
+                    {
+                        Name = "vpc-id",
+                        Values = new List<string> { vpcID }
+                    }
+                };
+
+            if (string.IsNullOrEmpty(vpcID))
+                return new List<Subnet>();
+
+            return await ec2Client.Paginators
+                .DescribeSubnets(request)
+                .Subnets
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// List the available security groups
+        /// If <see cref="vpcID"/> is specified, the list of security groups is filtered by the VPC.
+        /// </summary>
+        public async Task<List<SecurityGroup>> DescribeSecurityGroups(string? vpcID = null)
+        {
+            var ec2Client = _awsClientFactory.GetAWSClient<IAmazonEC2>();
+            var request = new DescribeSecurityGroupsRequest();
+            // If a subnets IDs list is not specified, all security groups wil be returned.
+            if (vpcID != null)
+                request.Filters = new List<Filter>()
+                {
+                    new Filter()
+                    {
+                        Name = "vpc-id",
+                        Values = new List<string> { vpcID }
+                    }
+                };
+
+            if (string.IsNullOrEmpty(vpcID))
+                return new List<SecurityGroup>();
+
+            return await ec2Client.Paginators
+                .DescribeSecurityGroups(request)
+                .SecurityGroups
+                .ToListAsync();
         }
 
         public async Task<List<StackEvent>> GetCloudFormationStackEvents(string stackName)
@@ -112,6 +172,13 @@ namespace AWS.Deploy.Orchestration.Data
             }
 
             return instanceTypes;
+        }
+
+        public async Task<List<VpcConnector>> DescribeAppRunnerVpcConnectors()
+        {
+            var appRunnerClient = _awsClientFactory.GetAWSClient<Amazon.AppRunner.IAmazonAppRunner>();
+            var connections = await appRunnerClient.ListVpcConnectorsAsync(new Amazon.AppRunner.Model.ListVpcConnectorsRequest());
+            return connections.VpcConnectors;
         }
 
         public async Task<Amazon.AppRunner.Model.Service> DescribeAppRunnerService(string serviceArn)

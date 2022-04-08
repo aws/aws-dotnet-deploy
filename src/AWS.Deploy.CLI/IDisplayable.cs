@@ -11,10 +11,11 @@ namespace AWS.Deploy.CLI
     /// which allows custom CLI display logic.
     /// </summary>
     /// <remarks>
+    /// If the method <see cref="ToDisplayString"/> returns null, the default display method is used.
     /// If a type hint response doesn't implement <see cref="IDisplayable"/>, it is displayed similar to a JSON dictionary indented by level.
     /// </remarks>
     public interface IDisplayable
     {
-        string ToDisplayString();
+        string? ToDisplayString();
     }
 }

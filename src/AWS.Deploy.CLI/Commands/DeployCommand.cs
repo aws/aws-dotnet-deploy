@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using AWS.Deploy.CLI.Commands.TypeHints;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.Extensions;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Recipes.Validation;
 using AWS.Deploy.DockerEngine;
@@ -430,6 +431,9 @@ namespace AWS.Deploy.CLI.Commands
                                 existingValue[optionSettingKey] = optionSettingValue;
                                 settingValue = existingValue;
                                 break;
+                            case OptionSettingValueType.List:
+                                settingValue = JsonConvert.DeserializeObject<SortedSet<string>>(optionSettingValue) ?? new SortedSet<string>();
+                                break;
                             default:
                                 throw new InvalidOverrideValueException(DeployToolErrorCode.InvalidValueForOptionSettingItem, $"Invalid value {optionSettingValue} for option setting item {optionSettingJsonPath}");
                         }
@@ -529,8 +533,9 @@ namespace AWS.Deploy.CLI.Commands
             var title = "Select an existing AWS deployment target to deploy your application to.";
 
             var userInputConfiguration = new UserInputConfiguration<CloudApplication>(
-                app => app.DisplayName,
-                app => app.DisplayName.Equals(deployedApplications.First().DisplayName))
+                idSelector: app => app.DisplayName,
+                displaySelector: app => app.DisplayName,
+                defaultSelector: app => app.DisplayName.Equals(deployedApplications.First().DisplayName))
             {
                 AskNewName = false,
                 CanBeEmpty = false
@@ -807,8 +812,9 @@ namespace AWS.Deploy.CLI.Commands
             if (setting.AllowedValues?.Count > 0)
             {
                 var userInputConfig = new UserInputConfiguration<string>(
-                    x => setting.ValueMapping.ContainsKey(x) ? setting.ValueMapping[x] : x,
-                    x => x.Equals(currentValue))
+                    idSelector: x => x,
+                    displaySelector: x => setting.ValueMapping.ContainsKey(x) ? setting.ValueMapping[x] : x,
+                    defaultSelector: x => x.Equals(currentValue))
                 {
                     CreateNew = false
                 };
@@ -842,6 +848,12 @@ namespace AWS.Deploy.CLI.Commands
                         case OptionSettingValueType.KeyValue:
                             settingValue = _consoleUtilities.AskUserForKeyValue(!string.IsNullOrEmpty(currentValue.ToString()) ? (Dictionary<string, string>) currentValue : new Dictionary<string, string>());
                             break;
+                        case OptionSettingValueType.List:
+                            var valueList = new SortedSet<string>();
+                            if (!string.IsNullOrEmpty(currentValue.ToString()))
+                                valueList = ((SortedSet<string>) currentValue).DeepCopy();
+                            settingValue = _consoleUtilities.AskUserForList(valueList);
+                            break;
                         case OptionSettingValueType.Object:
                             foreach (var childSetting in setting.ChildOptionSettings)
                             {
@@ -863,8 +875,7 @@ namespace AWS.Deploy.CLI.Commands
                 }
                 catch (ValidationFailedException ex)
                 {
-                    _toolInteractiveService.WriteErrorLine(
-                        $"Value [{settingValue}] is not valid: {ex.Message}");
+                    _toolInteractiveService.WriteErrorLine(ex.Message);
 
                     await ConfigureDeploymentFromCli(recommendation, setting);
                 }
@@ -881,6 +892,7 @@ namespace AWS.Deploy.CLI.Commands
             object? displayValue = null;
             Dictionary<string, string>? keyValuePair = null;
             Dictionary<string, object>? objectValues = null;
+            SortedSet<string>? listValues = null;
             if (typeHintResponseType != null)
             {
                 var methodInfo = typeof(Recommendation)
@@ -890,12 +902,14 @@ namespace AWS.Deploy.CLI.Commands
 
                 displayValue = ((IDisplayable?)response)?.ToDisplayString();
             }
-            else
+
+            if (displayValue == null)
             {
                 var value = recommendation.GetOptionSettingValue(optionSetting);
                 objectValues = value as Dictionary<string, object>;
                 keyValuePair = value as Dictionary<string, string>;
-                displayValue = objectValues == null && keyValuePair == null ? value : string.Empty;
+                listValues = value as SortedSet<string>;
+                displayValue = objectValues == null && keyValuePair == null && listValues == null ? value : string.Empty;
             }
 
             if (mode == DisplayOptionSettingsMode.Editable)
@@ -912,6 +926,14 @@ namespace AWS.Deploy.CLI.Commands
                 foreach (var (key, value) in keyValuePair)
                 {
                     _toolInteractiveService.WriteLine($"\t{key}: {value}");
+                }
+            }
+
+            if (listValues != null)
+            {
+                foreach (var value in listValues)
+                {
+                    _toolInteractiveService.WriteLine($"\t{value}");
                 }
             }
 

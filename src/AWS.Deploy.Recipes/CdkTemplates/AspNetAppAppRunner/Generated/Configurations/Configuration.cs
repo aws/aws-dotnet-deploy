@@ -7,6 +7,8 @@
 // This class is marked as a partial class. If you add new settings to the recipe file, those settings should be
 // added to partial versions of this class outside of the Generated folder for example in the Configuration folder.
 
+using System.Collections.Generic;
+
 namespace AspNetAppAppRunner.Configurations
 {
     public partial class Configuration
@@ -15,6 +17,11 @@ namespace AspNetAppAppRunner.Configurations
         /// The Identity and Access Management Role that provides AWS credentials to the application to access AWS services
         /// </summary>
         public IAMRoleConfiguration ApplicationIAMRole { get; set; }
+
+        /// <summary>
+        /// App Runner requires this resource when you want to associate your App Runner service to a custom Amazon Virtual Private Cloud (Amazon VPC).
+        /// </summary>
+        public VPCConnectorConfiguration VPCConnector { get; set; }
 
         /// <summary>
         /// The Identity and Access Management (IAM) role that provides the AWS App Runner service access to pull the container image from ECR.
@@ -81,6 +88,11 @@ namespace AspNetAppAppRunner.Configurations
         /// </summary>
         public string Memory { get; set; }
 
+        /// <summary>
+        /// The environment variables that are set for the AppRunner environment.
+        /// </summary>
+        public Dictionary<string, string> AppRunnerEnvironmentVariables { get; set; } = new Dictionary<string, string> { };
+
         /// A parameterless constructor is needed for <see cref="Microsoft.Extensions.Configuration.ConfigurationBuilder"/>
         /// or the classes will fail to initialize.
         /// The warnings are disabled since a parameterless constructor will allow non-nullable properties to be initialized with null values.
@@ -93,20 +105,24 @@ namespace AspNetAppAppRunner.Configurations
 
         public Configuration(
             IAMRoleConfiguration applicationIAMRole,
+            VPCConnectorConfiguration vpcConnector,
             IAMRoleConfiguration serviceAccessIAMRole,
             string serviceName,
             int? port,
             string healthCheckProtocol,
             string cpu,
-            string memory)
+            string memory,
+            Dictionary<string, string> appRunnerEnvironmentVariables)
         {
             ApplicationIAMRole = applicationIAMRole;
+            VPCConnector = vpcConnector;
             ServiceAccessIAMRole = serviceAccessIAMRole;
             ServiceName = serviceName;
             Port = port ?? 80;
             HealthCheckProtocol = healthCheckProtocol;
             Cpu = cpu;
             Memory = memory;
+            AppRunnerEnvironmentVariables = appRunnerEnvironmentVariables;
         }
     }
 }

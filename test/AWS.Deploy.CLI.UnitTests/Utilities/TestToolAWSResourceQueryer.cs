@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Amazon.AppRunner.Model;
 using Amazon.CloudFormation.Model;
 using Amazon.CloudFront.Model;
 using Amazon.CloudWatchEvents.Model;
@@ -84,5 +85,8 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
         public Task<List<ConfigurationOptionSetting>> GetBeanstalkEnvironmentConfigurationSettings(string environmentId) => throw new NotImplementedException();
         public Task<GetCallerIdentityResponse> GetCallerIdentity(string awsRegion) => throw new NotImplementedException();
         public Task<Repository> DescribeECRRepository(string respositoryName) => throw new NotImplementedException();
+        public Task<List<VpcConnector>> DescribeAppRunnerVpcConnectors() => throw new NotImplementedException();
+        public Task<List<Subnet>> DescribeSubnets(string vpcID = null) => throw new NotImplementedException();
+        public Task<List<SecurityGroup>> DescribeSecurityGroups(string vpcID = null) => throw new NotImplementedException();
     }
 }

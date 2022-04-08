@@ -1,7 +1,9 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.\r
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using AWS.Deploy.Common.Extensions;
 
 namespace AWS.Deploy.Common.Recipes.Validation
 {
@@ -24,6 +26,26 @@ namespace AWS.Deploy.Common.Recipes.Validation
             var regex = new Regex(Regex);
 
             var message = ValidationFailedMessage.Replace("{{Regex}}", Regex);
+
+
+            if (input?.TryDeserialize<SortedSet<string>>(out var inputList) ?? false)
+            {
+                foreach (var item in inputList!)
+                {
+                    var valid = regex.IsMatch(item) || (AllowEmptyString && string.IsNullOrEmpty(item));
+                    if (!valid)
+                        return new ValidationResult
+                        {
+                            IsValid = false,
+                            ValidationFailedMessage = message
+                        };
+                }
+                return new ValidationResult
+                {
+                    IsValid = true,
+                    ValidationFailedMessage = message
+                };
+            }
 
             return new ValidationResult
             {
