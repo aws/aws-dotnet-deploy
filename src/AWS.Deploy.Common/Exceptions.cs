@@ -106,7 +106,8 @@ namespace AWS.Deploy.Common
         ECRRepositoryDoesNotExist = 10008400,
         FailedToDeserializeRecipe = 10008500,
         FailedToDeserializeDeploymentBundle = 10008600,
-        FailedToDeserializeDeploymentProjectRecipe = 10008700
+        FailedToDeserializeDeploymentProjectRecipe = 10008700,
+        FailedToRunCDKBootstrap = 10008800
     }
 
     public class ProjectFileNotFoundException : DeployToolException

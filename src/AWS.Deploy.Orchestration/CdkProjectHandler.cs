@@ -82,9 +82,15 @@ namespace AWS.Deploy.Orchestration
             var appSettingsFilePath = Path.Combine(cdkProjectPath, "appsettings.json");
 
             // Ensure region is bootstrapped
-            await _commandLineWrapper.Run($"npx cdk bootstrap aws://{session.AWSAccountId}/{session.AWSRegion} -c {Constants.CloudFormationIdentifier.SETTINGS_PATH_CDK_CONTEXT_PARAMETER}=\"{appSettingsFilePath}\"",
+            var cdkBootstrap = await _commandLineWrapper.TryRunWithResult($"npx cdk bootstrap aws://{session.AWSAccountId}/{session.AWSRegion} -c {Constants.CloudFormationIdentifier.SETTINGS_PATH_CDK_CONTEXT_PARAMETER}=\"{appSettingsFilePath}\"",
                 workingDirectory: cdkProjectPath,
-                needAwsCredentials: true);
+                needAwsCredentials: true,
+                redirectIO: true,
+                streamOutputToInteractiveService: true);
+
+            if (cdkBootstrap.ExitCode != 0)
+                throw new FailedToDeployCDKAppException(DeployToolErrorCode.FailedToRunCDKBootstrap, "The AWS CDK Bootstrap, which is the process of provisioning initial resources for the deployment environment, has failed. Please review the output above for additional details [and check out our troubleshooting guide for the most common failure reasons]. You can learn more about CDK bootstrapping at https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html.");
+
 
             var deploymentStartDate = DateTime.Now;
             // Handover to CDK command line tool
