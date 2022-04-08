@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Amazon.CloudFormation;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.Extensions;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Orchestration.CDK;
 using AWS.Deploy.Orchestration.Data;
@@ -105,7 +106,7 @@ namespace AWS.Deploy.Orchestration
             var appSettingsFilePath = Path.Combine(cdkProjectPath, "appsettings.json");
 
             // Ensure region is bootstrapped
-            var cdkBootstrap = await _commandLineWrapper.TryRunWithResult($"npx cdk bootstrap aws://{session.AWSAccountId}/{session.AWSRegion} -c {Constants.CloudFormationIdentifier.SETTINGS_PATH_CDK_CONTEXT_PARAMETER}=\"{appSettingsFilePath}\"",
+            var cdkBootstrap = await _commandLineWrapper.TryRunWithResult($"npx cdk bootstrap aws://{session.AWSAccountId}/{session.AWSRegion} -c {Constants.CloudFormationIdentifier.SETTINGS_PATH_CDK_CONTEXT_PARAMETER}=\"{appSettingsFilePath}\" --template \"{Constants.CDK.CDKBootstrapTemplatePath}\"",
                 workingDirectory: cdkProjectPath,
                 needAwsCredentials: true,
                 redirectIO: true,
