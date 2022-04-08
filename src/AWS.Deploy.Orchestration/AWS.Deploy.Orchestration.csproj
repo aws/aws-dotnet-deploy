@@ -38,6 +38,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="CDK\package.json.template" />
+    <EmbeddedResource Include="CDK\CDKBootstrapTemplate.yaml" />
   </ItemGroup>
 
   <Import Project="..\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems" Label="Shared" />
