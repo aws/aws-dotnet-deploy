@@ -12,7 +12,6 @@ namespace AWS.Deploy.CLI.Commands.CommandHandlerInput
     {
         public string? Profile { get; set; }
         public string? Region { get; set; }
-        public string? ProjectPath { get; set; }
         public bool Diagnostics { get; set; }
     }
 }
