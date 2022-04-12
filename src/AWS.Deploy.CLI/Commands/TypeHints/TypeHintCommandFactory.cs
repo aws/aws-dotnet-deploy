@@ -45,7 +45,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 { OptionSettingTypeHint.IAMRole, new IAMRoleCommand(awsResourceQueryer, consoleUtilities) },
                 { OptionSettingTypeHint.ExistingIAMRole, new IAMRoleCommand(awsResourceQueryer, consoleUtilities) },
                 { OptionSettingTypeHint.Vpc, new VpcCommand(awsResourceQueryer, consoleUtilities) },
-                { OptionSettingTypeHint.ExistingVpc, new VpcCommand(awsResourceQueryer, consoleUtilities) },
+                { OptionSettingTypeHint.ExistingVpc, new ExistingVpcCommand(awsResourceQueryer, consoleUtilities) },
                 { OptionSettingTypeHint.DotnetPublishAdditionalBuildArguments, new DotnetPublishArgsCommand(consoleUtilities) },
                 { OptionSettingTypeHint.DotnetPublishSelfContainedBuild, new DotnetPublishSelfContainedBuildCommand(consoleUtilities) },
                 { OptionSettingTypeHint.DotnetPublishBuildConfiguration, new DotnetPublishBuildConfigurationCommand(consoleUtilities) },

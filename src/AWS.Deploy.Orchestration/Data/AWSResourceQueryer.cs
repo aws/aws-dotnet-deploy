@@ -98,6 +98,10 @@ namespace AWS.Deploy.Orchestration.Data
 
             var request = new DescribeSubnetsRequest();
             if (vpcID != null)
+            {
+                if (string.IsNullOrEmpty(vpcID))
+                    return new List<Subnet>();
+
                 request.Filters = new List<Filter>()
                 {
                     new Filter()
@@ -106,9 +110,7 @@ namespace AWS.Deploy.Orchestration.Data
                         Values = new List<string> { vpcID }
                     }
                 };
-
-            if (string.IsNullOrEmpty(vpcID))
-                return new List<Subnet>();
+            }
 
             return await ec2Client.Paginators
                 .DescribeSubnets(request)
@@ -126,6 +128,10 @@ namespace AWS.Deploy.Orchestration.Data
             var request = new DescribeSecurityGroupsRequest();
             // If a subnets IDs list is not specified, all security groups wil be returned.
             if (vpcID != null)
+            {
+                if (string.IsNullOrEmpty(vpcID))
+                    return new List<SecurityGroup>();
+
                 request.Filters = new List<Filter>()
                 {
                     new Filter()
@@ -134,9 +140,7 @@ namespace AWS.Deploy.Orchestration.Data
                         Values = new List<string> { vpcID }
                     }
                 };
-
-            if (string.IsNullOrEmpty(vpcID))
-                return new List<SecurityGroup>();
+            }
 
             return await ec2Client.Paginators
                 .DescribeSecurityGroups(request)

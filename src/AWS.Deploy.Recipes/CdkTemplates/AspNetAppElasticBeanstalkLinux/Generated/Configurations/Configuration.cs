@@ -98,6 +98,22 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
         /// </summary>
         public Dictionary<string, string> ElasticBeanstalkEnvironmentVariables { get; set; } = new Dictionary<string, string> { };
 
+        /// <summary>
+        /// Virtual Private Cloud to launch container instance into a virtual network.
+        /// </summary>
+        public string VpcId { get; set; }
+
+        /// <summary>
+        /// A list of IDs of subnets that Elastic Beanstalk should use when it associates your environment with a custom Amazon VPC.
+        /// Specify IDs of subnets of a single Amazon VPC.
+        /// </summary>
+        public SortedSet<string> Subnets { get; set; } = new SortedSet<string>();
+
+        /// <summary>
+        /// Lists the Amazon EC2 security groups to assign to the EC2 instances in the Auto Scaling group to define firewall rules for the instances.
+        /// </summary>
+        public SortedSet<string> SecurityGroups { get; set; } = new SortedSet<string>();
+
         /// A parameterless constructor is needed for <see cref="Microsoft.Extensions.Configuration.ConfigurationBuilder"/>
         /// or the classes will fail to initialize.
         /// The warnings are disabled since a parameterless constructor will allow non-nullable properties to be initialized with null values.
@@ -121,6 +137,9 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
             ElasticBeanstalkRollingUpdatesConfiguration elasticBeanstalkRollingUpdates,
             string cnamePrefix,
             Dictionary<string, string> elasticBeanstalkEnvironmentVariables,
+            string vpcId,
+            SortedSet<string> subnets,
+            SortedSet<string> securityGroups,
             string environmentType = Recipe.ENVIRONMENTTYPE_SINGLEINSTANCE,
             string loadBalancerType = Recipe.LOADBALANCERTYPE_APPLICATION,
             string reverseProxy = Recipe.REVERSEPROXY_NGINX,
@@ -137,6 +156,9 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
             ElasticBeanstalkManagedPlatformUpdates = elasticBeanstalkManagedPlatformUpdates;
             ElasticBeanstalkRollingUpdates = elasticBeanstalkRollingUpdates;
             ElasticBeanstalkEnvironmentVariables = elasticBeanstalkEnvironmentVariables;
+            VpcId = vpcId;
+            Subnets = subnets;
+            SecurityGroups = securityGroups;
             EnvironmentType = environmentType;
             LoadBalancerType = loadBalancerType;
             XRayTracingSupportEnabled = xrayTracingSupportEnabled;
