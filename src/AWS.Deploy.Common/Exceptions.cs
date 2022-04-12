@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
-using System.Reflection;
 using AWS.Deploy.Common.Recipes;
-using AWS.Deploy.Common.Recipes.Validation;
 
 namespace AWS.Deploy.Common
 {
@@ -107,7 +105,8 @@ namespace AWS.Deploy.Common
         FailedToDeserializeRecipe = 10008500,
         FailedToDeserializeDeploymentBundle = 10008600,
         FailedToDeserializeDeploymentProjectRecipe = 10008700,
-        FailedToRunCDKBootstrap = 10008800
+        FailedToRunCDKBootstrap = 10008800,
+        FailedToGetCredentialsForProfile = 10008900
     }
 
     public class ProjectFileNotFoundException : DeployToolException
