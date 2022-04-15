@@ -67,18 +67,19 @@ namespace AWS.Deploy.Orchestration.Utilities
 
             // make sure the recommendation doesn't exist already in existingApplications
             var recommendation = recommendedPrefix;
-            var suffix = 0;
+            var suffixString = "";
             var recommendationCharArray = recommendation.ToCharArray();
             for (var i = recommendationCharArray.Length - 1; i >= 0; i--)
             {
                 if (char.IsDigit(recommendationCharArray[i]))
-                    suffix = suffix * 10 + (recommendationCharArray[i] - '0');
+                    suffixString = $"{recommendationCharArray[i]}{suffixString}";
                 else
                     break;
             }
 
-            var prefix = suffix != 0 ? recommendation[..^suffix.ToString().Length] : recommendedPrefix;
-            while (suffix < 100)
+            var prefix = !string.IsNullOrEmpty(suffixString) ? recommendation[..^suffixString.Length] : recommendedPrefix;
+            var suffix = !string.IsNullOrEmpty(suffixString) ? int.Parse(suffixString): 0;
+            while (suffix < int.MaxValue)
             {
                 if (existingApplications.All(x => x.Name != recommendation) && IsValidName(recommendation))
                     return recommendation;
