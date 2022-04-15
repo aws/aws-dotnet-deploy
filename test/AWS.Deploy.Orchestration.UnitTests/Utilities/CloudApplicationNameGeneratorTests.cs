@@ -106,13 +106,12 @@ namespace AWS.Deploy.Orchestration.UnitTests.Utilities
             recommendation.ShouldEqual(expectedRecommendation);
         }
 
-        [Fact]
-        public async Task SuggestsValidNameAndRespectsExistingApplications_ProjectWithNumber()
+        [Theory]
+        [InlineData("SuperTest", "SuperTest1")]
+        [InlineData("SuperTest1", "SuperTest2")]
+        [InlineData("SuperTest2022", "SuperTest2023")]
+        public async Task SuggestsValidNameAndRespectsExistingApplications_ProjectWithNumber(string projectFile, string expectedRecommendation)
         {
-            // ARRANGE
-            var projectFile = "SuperTest1";
-            var expectedRecommendation = $"SuperTest2";
-
             var projectPath = _fakeFileManager.AddEmptyProjectFile($"c:\\{projectFile}.csproj");
 
             var projectDefinition = await _projectDefinitionParser.Parse(projectPath);
@@ -121,6 +120,26 @@ namespace AWS.Deploy.Orchestration.UnitTests.Utilities
             {
                 new CloudApplication(projectFile, string.Empty, CloudApplicationResourceType.CloudFormationStack, string.Empty)
             };
+
+            // ACT
+            var recommendation = _cloudApplicationNameGenerator.GenerateValidName(projectDefinition, existingApplication);
+
+            // ASSERT
+            recommendation.ShouldEqual(expectedRecommendation);
+        }
+
+        [Fact]
+        public async Task SuggestsValidNameAndRespectsExistingApplications_NoExistingCloudApplication()
+        {
+            // ARRANGE
+            var projectFile = "SuperTest";
+            var expectedRecommendation = $"{projectFile}";
+
+            var projectPath = _fakeFileManager.AddEmptyProjectFile($"c:\\{projectFile}.csproj");
+
+            var projectDefinition = await _projectDefinitionParser.Parse(projectPath);
+
+            var existingApplication = new List<CloudApplication> ();
 
             // ACT
             var recommendation = _cloudApplicationNameGenerator.GenerateValidName(projectDefinition, existingApplication);
