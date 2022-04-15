@@ -1,6 +1,8 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System.IO;
+
 namespace AWS.Deploy.Common
 {
     /// <summary>
@@ -17,6 +19,11 @@ namespace AWS.Deploy.Common
         /// The list of additional dotnet publish args passed to the target application.
         /// </summary>
         public string DockerBuildArgs { get; set; } = "";
+
+        /// <summary>
+        /// The path to the Dockerfile. This can either be an absolute path or relative to the project directory.
+        /// </summary>
+        public string DockerfilePath { get; set; } = "";
 
         /// <summary>
         /// The ECR Repository Name where the docker image will be pushed to.

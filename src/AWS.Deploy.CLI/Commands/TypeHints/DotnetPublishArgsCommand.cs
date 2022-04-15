@@ -31,7 +31,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                     _optionSettingHandler.GetOptionSettingValue<string>(recommendation, optionSetting),
                     allowEmpty: true,
                     resetValue: _optionSettingHandler.GetOptionSettingDefaultValue<string>(recommendation, optionSetting) ?? "",
-                    validators: async publishArgs => await ValidateDotnetPublishArgs(publishArgs))
+                    validators: async publishArgs => await ValidateDotnetPublishArgs(publishArgs, recommendation))
                 .ToString()
                 .Replace("\"", "\"\"");
 
@@ -48,15 +48,15 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         /// <param name="publishArgs">The user specified Dotnet build arguments.</param>
         public async Task OverrideValue(Recommendation recommendation, string publishArgs)
         {
-            var resultString = await ValidateDotnetPublishArgs(publishArgs);
+            var resultString = await ValidateDotnetPublishArgs(publishArgs, recommendation);
             if (!string.IsNullOrEmpty(resultString))
                 throw new InvalidOverrideValueException(DeployToolErrorCode.InvalidDotnetPublishArgs, resultString);
             recommendation.DeploymentBundle.DotnetPublishAdditionalBuildArguments = publishArgs.Replace("\"", "\"\"");
         }
 
-        private async Task<string> ValidateDotnetPublishArgs(string publishArgs)
+        private async Task<string> ValidateDotnetPublishArgs(string publishArgs, Recommendation recommendation)
         {
-            var validationResult = await new DotnetPublishArgsValidator().Validate(publishArgs);
+            var validationResult = await new DotnetPublishArgsValidator().Validate(publishArgs, recommendation);
 
             if (validationResult.IsValid)
             {

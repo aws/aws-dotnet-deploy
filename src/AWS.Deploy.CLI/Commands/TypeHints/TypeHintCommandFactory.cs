@@ -69,6 +69,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 { OptionSettingTypeHint.ExistingSubnets,  ActivatorUtilities.CreateInstance<ExistingSubnetsCommand>(serviceProvider) },
                 { OptionSettingTypeHint.ExistingSecurityGroups, ActivatorUtilities.CreateInstance<ExistingSecurityGroupsCommand>(serviceProvider) },
                 { OptionSettingTypeHint.VPCConnector, ActivatorUtilities.CreateInstance<VPCConnectorCommand>(serviceProvider) },
+                { OptionSettingTypeHint.FilePath, ActivatorUtilities.CreateInstance<FilePathCommand>(serviceProvider) },
             };
         }
 

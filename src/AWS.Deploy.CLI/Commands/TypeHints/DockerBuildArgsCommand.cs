@@ -31,7 +31,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                     _optionSettingHandler.GetOptionSettingValue<string>(recommendation, optionSetting),
                     allowEmpty: true,
                     resetValue: _optionSettingHandler.GetOptionSettingDefaultValue<string>(recommendation, optionSetting) ?? "",
-                    validators: async buildArgs => await ValidateBuildArgs(buildArgs))
+                    validators: async buildArgs => await ValidateBuildArgs(buildArgs, recommendation))
                 .ToString()
                 .Replace("\"", "\"\"");
 
@@ -47,15 +47,15 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         /// <param name="dockerBuildArgs">Arguments to be passed when performing a Docker build</param>
         public async Task OverrideValue(Recommendation recommendation, string dockerBuildArgs)
         {
-            var resultString = await ValidateBuildArgs(dockerBuildArgs);
+            var resultString = await ValidateBuildArgs(dockerBuildArgs, recommendation);
             if (!string.IsNullOrEmpty(resultString))
                 throw new InvalidOverrideValueException(DeployToolErrorCode.InvalidDockerBuildArgs, resultString);
             recommendation.DeploymentBundle.DockerBuildArgs = dockerBuildArgs;
         }
 
-        private async Task<string> ValidateBuildArgs(string buildArgs)
+        private async Task<string> ValidateBuildArgs(string buildArgs, Recommendation recommendation)
         {
-            var validationResult = await new DockerBuildArgsValidator().Validate(buildArgs);
+            var validationResult = await new DockerBuildArgsValidator().Validate(buildArgs, recommendation);
 
             if (validationResult.IsValid)
             {

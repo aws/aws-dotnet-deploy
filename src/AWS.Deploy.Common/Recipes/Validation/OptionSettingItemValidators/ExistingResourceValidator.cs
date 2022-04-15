@@ -22,7 +22,7 @@ namespace AWS.Deploy.Common.Recipes.Validation
             _awsResourceQueryer = awsResourceQueryer;
         }
 
-        public async Task<ValidationResult> Validate(object input)
+        public async Task<ValidationResult> Validate(object input, Recommendation recommendation)
         {
             if (string.IsNullOrEmpty(ResourceType))
                 throw new MissingValidatorConfigurationException(DeployToolErrorCode.MissingValidatorConfiguration, $"The validator of type '{typeof(ExistingResourceValidator)}' is missing the configuration property '{nameof(ResourceType)}'.");

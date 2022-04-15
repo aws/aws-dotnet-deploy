@@ -14,5 +14,21 @@ namespace AWS.Deploy.Constants
         public const string REPLACE_TOKEN_LATEST_DOTNET_BEANSTALK_PLATFORM_ARN = "{LatestDotnetBeanstalkPlatformArn}";
         public const string REPLACE_TOKEN_ECR_REPOSITORY_NAME = "{DefaultECRRepositoryName}";
         public const string REPLACE_TOKEN_ECR_IMAGE_TAG = "{DefaultECRImageTag}";
+        public const string REPLACE_TOKEN_DOCKERFILE_PATH = "{DockerfilePath}";
+
+        /// <summary>
+        /// Id for the 'dotnet publish --configuration' recipe option
+        /// </summary>
+        public const string DotnetPublishConfigurationOptionId = "DotnetBuildConfiguration";
+
+        /// <summary>
+        /// Id for the additional args for 'dotnet publish' recipe option
+        /// </summary>
+        public const string DotnetPublishArgsOptionId = "DotnetPublishArgs";
+
+        /// <summary>
+        /// Id for the 'dotnet build --self-contained' recipe option
+        /// </summary>
+        public const string DotnetPublishSelfContainedBuildOptionId = "SelfContainedBuild";
     }
 }

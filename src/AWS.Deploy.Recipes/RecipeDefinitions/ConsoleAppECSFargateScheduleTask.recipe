@@ -93,6 +93,9 @@
     "Validators": [
         {
             "ValidatorType": "FargateTaskSizeCpuMemoryLimits"
+        },
+        {
+            "ValidatorType": "ValidDockerfilePath"
         }
     ],
     "Categories": [
