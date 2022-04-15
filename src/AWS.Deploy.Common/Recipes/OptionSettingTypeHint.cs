@@ -35,6 +35,7 @@ namespace AWS.Deploy.Common.Recipes
         ExistingVpcConnector,
         ExistingSubnets,
         ExistingSecurityGroups,
-        VPCConnector
+        VPCConnector,
+        FilePath
     };
 }

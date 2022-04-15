@@ -29,4 +29,6 @@
     <PackageReference Include="AWSSDK.ElasticLoadBalancingV2" Version="3.7.0.48" />
   </ItemGroup>
 
+  <Import Project="..\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems" Label="Shared" />
+
 </Project>

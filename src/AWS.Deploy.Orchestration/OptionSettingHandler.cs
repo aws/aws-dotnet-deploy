@@ -43,7 +43,7 @@ namespace AWS.Deploy.Orchestration
 
                 var optionSettingValue = GetOptionSettingValue(recommendation, optionSetting);
                 settingValidatorFailedResults.AddRange(_validatorFactory.BuildValidators(optionSetting)
-                    .Select(async validator => await validator.Validate(optionSettingValue))
+                    .Select(async validator => await validator.Validate(optionSettingValue, recommendation))
                     .Select(x => x.Result)
                     .Where(x => !x.IsValid)
                     .ToList());
@@ -99,22 +99,25 @@ namespace AWS.Deploy.Orchestration
         {
             switch (optionSettingItem.Id)
             {
-                case "DockerExecutionDirectory":
+                case Constants.Docker.DockerExecutionDirectoryOptionId:
                     recommendation.DeploymentBundle.DockerExecutionDirectory = value.ToString() ?? string.Empty;
                     break;
-                case "DockerBuildArgs":
+                case Constants.Docker.DockerfileOptionId:
+                    recommendation.DeploymentBundle.DockerfilePath = value.ToString() ?? string.Empty;
+                    break;
+                case Constants.Docker.DockerBuildArgsOptionId:
                     recommendation.DeploymentBundle.DockerBuildArgs = value.ToString() ?? string.Empty;
                     break;
-                case "ECRRepositoryName":
+                case Constants.Docker.ECRRepositoryNameOptionId:
                     recommendation.DeploymentBundle.ECRRepositoryName = value.ToString() ?? string.Empty;
                     break;
-                case "DotnetBuildConfiguration":
+                case Constants.RecipeIdentifier.DotnetPublishConfigurationOptionId:
                     recommendation.DeploymentBundle.DotnetPublishBuildConfiguration = value.ToString() ?? string.Empty;
                     break;
-                case "DotnetPublishArgs":
+                case Constants.RecipeIdentifier.DotnetPublishArgsOptionId:
                     recommendation.DeploymentBundle.DotnetPublishAdditionalBuildArguments = value.ToString() ?? string.Empty;
                     break;
-                case "SelfContainedBuild":
+                case Constants.RecipeIdentifier.DotnetPublishSelfContainedBuildOptionId:
                     recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild = Convert.ToBoolean(value);
                     break;
                 default:

@@ -24,7 +24,7 @@ namespace AWS.Deploy.Common.Recipes.Validation
         /// </summary>
         /// <param name="input">Path to validate</param>
         /// <returns>Valid if the directory exists, invalid otherwise</returns>
-        public Task<ValidationResult> Validate(object input)
+        public Task<ValidationResult> Validate(object input, Recommendation recommendation)
         {
             var executionDirectory = (string)input;
 

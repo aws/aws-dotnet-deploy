@@ -17,6 +17,26 @@
             ]
         },
         {
+            "Id": "DockerfilePath",
+            "Name": "Dockerfile Path",
+            "Description": "Specify a path to a Dockerfile as either an absolute path or a path relative to the project.",
+            "Type": "String",
+            "TypeHint": "FilePath",
+            "TypeHintData": {
+                "Filter": "All files (*.*)|*.*",
+                "CheckFileExists": true,
+                "Title": "Select a Dockerfile"
+            },
+            "DefaultValue": "{DockerfilePath}",
+            "AdvancedSetting": true,
+            "Updatable": true,
+            "Validators": [
+                {
+                    "ValidatorType": "FileExists"
+                }
+            ]
+        },
+        {
             "Id": "DockerExecutionDirectory",
             "Name": "Docker Execution Directory",
             "Description": "Specifies the docker execution directory where the docker build command will be executed from.",

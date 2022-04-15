@@ -11,6 +11,7 @@ using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.Extensions;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.Utilities;
 using AWS.Deploy.DockerEngine;
 using AWS.Deploy.Orchestration.CDK;
 using AWS.Deploy.Orchestration.Data;
@@ -185,6 +186,13 @@ namespace AWS.Deploy.Orchestration
             {
                 recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_ECR_IMAGE_TAG, DateTime.UtcNow.Ticks.ToString());
             }
+            if (recommendation.ReplacementTokens.ContainsKey(Constants.RecipeIdentifier.REPLACE_TOKEN_DOCKERFILE_PATH))
+            {
+                if (_deploymentBundleHandler != null && DockerUtilities.TryGetDefaultDockerfile(recommendation, _fileManager, out var defaultDockerfilePath))
+                {
+                    recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_DOCKERFILE_PATH, defaultDockerfilePath);
+                }
+            }
         }
 
         public async Task DeployRecommendation(CloudApplication cloudApplication, Recommendation recommendation)
@@ -196,7 +204,7 @@ namespace AWS.Deploy.Orchestration
         public async Task CreateDeploymentBundle(CloudApplication cloudApplication, Recommendation recommendation)
         {
             if (_interactiveService == null)
-                throw new InvalidOperationException($"{nameof(_interactiveService)} is null as part of the orchestartor object");
+                throw new InvalidOperationException($"{nameof(_interactiveService)} is null as part of the orchestrator object");
 
             if (recommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.Container)
             {
@@ -233,11 +241,13 @@ namespace AWS.Deploy.Orchestration
             if (_dockerEngine == null)
                 throw new InvalidOperationException($"{nameof(_dockerEngine)} is null as part of the orchestartor object");
             if (_deploymentBundleHandler == null)
-                throw new InvalidOperationException($"{nameof(_deploymentBundleHandler)} is null as part of the orchestartor object");
+                throw new InvalidOperationException($"{nameof(_deploymentBundleHandler)} is null as part of the orchestrator object");
             if (_optionSettingHandler == null)
-                throw new InvalidOperationException($"{nameof(_optionSettingHandler)} is null as part of the orchestartor object");
+                throw new InvalidOperationException($"{nameof(_optionSettingHandler)} is null as part of the orchestrator object");
+            if (_fileManager == null)
+                throw new InvalidOperationException($"{nameof(_fileManager)} is null as part of the orchestrator object");
 
-            if (!recommendation.ProjectDefinition.HasDockerFile)
+            if (!DockerUtilities.TryGetDockerfile(recommendation, _fileManager, out _))
             {
                 _interactiveService.LogInfoMessage("Generating Dockerfile...");
                 try
@@ -255,12 +265,12 @@ namespace AWS.Deploy.Orchestration
 
             // Read this from the OptionSetting instead of recommendation.DeploymentBundle.
             // When its value comes from a replacement token, it wouldn't have been set back to the DeploymentBundle 
-            var respositoryName = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, "ECRRepositoryName"));
+            var respositoryName = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, Constants.Docker.ECRRepositoryNameOptionId));
 
             string imageTag;
             try
             {
-                var tagSuffix = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, "ImageTag"));
+                var tagSuffix = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, Constants.Docker.ImageTagOptionId));
                 imageTag = $"{respositoryName}:{tagSuffix}";
             }
             catch (OptionSettingItemDoesNotExistException)

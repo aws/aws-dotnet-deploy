@@ -31,8 +31,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.IO
         public void Delete(string path, bool recursive = false) =>
             throw new NotImplementedException("If your test needs this method, you'll need to implement this.");
 
-        public bool ExistsInsideDirectory(string parentDirectoryPath, string childPath) =>
-            throw new NotImplementedException("If your test needs this method, you'll need to implement this.");
+        public bool ExistsInsideDirectory(string parentDirectoryPath, string childPath) => childPath.Contains(parentDirectoryPath + Path.DirectorySeparatorChar, StringComparison.InvariantCulture);
 
         public bool Exists(string path)
         {

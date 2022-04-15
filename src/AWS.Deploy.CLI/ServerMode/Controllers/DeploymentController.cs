@@ -726,7 +726,8 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                                     serviceProvider.GetRequiredService<ILocalUserSettingsEngine>(),
                                     new DockerEngine.DockerEngine(
                                         session.ProjectDefinition,
-                                        serviceProvider.GetRequiredService<IFileManager>()),
+                                        serviceProvider.GetRequiredService<IFileManager>(),
+                                        serviceProvider.GetRequiredService<IDirectoryManager>()),
                                     serviceProvider.GetRequiredService<IRecipeHandler>(),
                                     serviceProvider.GetRequiredService<IFileManager>(),
                                     serviceProvider.GetRequiredService<IDirectoryManager>(),

@@ -11,6 +11,8 @@ using Amazon.ECR.Model;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.IO;
+using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.Utilities;
 using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.Utilities;
 
@@ -30,19 +32,22 @@ namespace AWS.Deploy.Orchestration
         private readonly IOrchestratorInteractiveService _interactiveService;
         private readonly IDirectoryManager _directoryManager;
         private readonly IZipFileManager _zipFileManager;
+        private readonly IFileManager _fileManager;
 
         public DeploymentBundleHandler(
             ICommandLineWrapper commandLineWrapper,
             IAWSResourceQueryer awsResourceQueryer,
             IOrchestratorInteractiveService interactiveService,
             IDirectoryManager directoryManager,
-            IZipFileManager zipFileManager)
+            IZipFileManager zipFileManager,
+            IFileManager fileManager)
         {
             _commandLineWrapper = commandLineWrapper;
             _awsResourceQueryer = awsResourceQueryer;
             _interactiveService = interactiveService;
             _directoryManager = directoryManager;
             _zipFileManager = zipFileManager;
+            _fileManager = fileManager;
         }
 
         public async Task BuildDockerImage(CloudApplication cloudApplication, Recommendation recommendation, string imageTag)
@@ -51,13 +56,14 @@ namespace AWS.Deploy.Orchestration
             _interactiveService.LogInfoMessage("Building the docker image...");
 
             var dockerExecutionDirectory = GetDockerExecutionDirectory(recommendation);
-            var dockerFile = GetDockerFilePath(recommendation);
             var buildArgs = GetDockerBuildArgs(recommendation);
+            DockerUtilities.TryGetAbsoluteDockerfile(recommendation, _fileManager, _directoryManager, out var dockerFile);
 
             var dockerBuildCommand = $"docker build -t {imageTag} -f \"{dockerFile}\"{buildArgs} .";
             _interactiveService.LogInfoMessage($"Docker Execution Directory: {Path.GetFullPath(dockerExecutionDirectory)}");
             _interactiveService.LogInfoMessage($"Docker Build Command: {dockerBuildCommand}");
 
+            recommendation.DeploymentBundle.DockerfilePath = dockerFile;
             recommendation.DeploymentBundle.DockerExecutionDirectory = dockerExecutionDirectory;
 
             var result = await _commandLineWrapper.TryRunWithResult(dockerBuildCommand, dockerExecutionDirectory, streamOutputToInteractiveService: true);
@@ -140,23 +146,23 @@ namespace AWS.Deploy.Orchestration
 
         /// <summary>
         /// Determines the appropriate docker execution directory for the project.
-        /// By default, the docker execution directory is at solution level.
-        /// If no solution is available, the dockerfile directory is used.
+        /// In order of precedence:
+        /// 1. DeploymentBundle.DockerExecutionDirectory, if already set
+        /// 2. The solution level if ProjectDefinition.ProjectSolutionPath is set
+        /// 3. The project directory
         /// </summary>
         /// <param name="recommendation"></param>
         private string GetDockerExecutionDirectory(Recommendation recommendation)
         {
             var dockerExecutionDirectory = recommendation.DeploymentBundle.DockerExecutionDirectory;
-            var dockerFileDirectory = new FileInfo(recommendation.ProjectPath).Directory?.FullName;
-            if (dockerFileDirectory == null)
-                throw new InvalidProjectPathException(DeployToolErrorCode.ProjectPathNotFound, "The project path is invalid.");
+            var projectDirectory = recommendation.GetProjectDirectory();
             var projectSolutionPath = recommendation.ProjectDefinition.ProjectSolutionPath;
 
             if (string.IsNullOrEmpty(dockerExecutionDirectory))
             {
                 if (string.IsNullOrEmpty(projectSolutionPath))
                 {
-                    dockerExecutionDirectory = new FileInfo(dockerFileDirectory).FullName;
+                    dockerExecutionDirectory = new FileInfo(projectDirectory).FullName;
                 }
                 else
                 {
@@ -166,15 +172,6 @@ namespace AWS.Deploy.Orchestration
             }
 
             return dockerExecutionDirectory;
-        }
-
-        private string GetDockerFilePath(Recommendation recommendation)
-        {
-            var dockerFileDirectory = new FileInfo(recommendation.ProjectPath).Directory?.FullName;
-            if (dockerFileDirectory == null)
-                throw new InvalidProjectPathException(DeployToolErrorCode.ProjectPathNotFound, "The project path is invalid.");
-
-            return Path.Combine(dockerFileDirectory, "Dockerfile");
         }
 
         private string GetDockerBuildArgs(Recommendation recommendation)

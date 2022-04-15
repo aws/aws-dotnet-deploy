@@ -16,7 +16,7 @@ namespace AWS.Deploy.Common.Recipes.Validation
         /// </summary>
         /// <param name="input">Additional publish arguments</param>
         /// <returns>Valid if the arguments don't interfere with the deploy tool, invalid otherwise</returns>
-        public Task<ValidationResult> Validate(object input)
+        public Task<ValidationResult> Validate(object input, Recommendation recommendation)
         {
             var publishArgs = Convert.ToString(input);
             var errorMessage = string.Empty;

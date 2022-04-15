@@ -51,7 +51,6 @@
                 "Fail": { "Include": true }
             }
         }
-
     ],
     "Categories": [
         {
@@ -83,6 +82,11 @@
             "Id": "EnvVariables",
             "DisplayName": "Environment Variables",
             "Order": 60
+        }
+    ],
+    "Validators": [
+        {
+            "ValidatorType": "ValidDockerfilePath"
         }
     ],
     "OptionSettings": [

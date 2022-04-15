@@ -352,7 +352,8 @@
                         "type": "string",
                         "enum": [
                             "FargateTaskSizeCpuMemoryLimits",
-                            "MinMaxConstraint"
+                            "MinMaxConstraint",
+                            "ValidDockerfilePath"
                         ]
                     }
                 },
@@ -607,7 +608,8 @@
                                     "DirectoryExists",
                                     "DockerBuildArgs",
                                     "DotnetPublishArgs",
-                                    "ExistingResource"
+                                    "ExistingResource",
+                                    "FileExists"
                                 ]
                             }
                         },

@@ -52,13 +52,15 @@ namespace AWS.Deploy.Common.Recipes.Validation
             { OptionSettingItemValidatorList.DirectoryExists, typeof(DirectoryExistsValidator) },
             { OptionSettingItemValidatorList.DockerBuildArgs, typeof(DockerBuildArgsValidator) },
             { OptionSettingItemValidatorList.DotnetPublishArgs, typeof(DotnetPublishArgsValidator) },
-            { OptionSettingItemValidatorList.ExistingResource, typeof(ExistingResourceValidator) }
+            { OptionSettingItemValidatorList.ExistingResource, typeof(ExistingResourceValidator) },
+            { OptionSettingItemValidatorList.FileExists, typeof(FileExistsValidator) }
         };
 
         private static readonly Dictionary<RecipeValidatorList, Type> _recipeValidatorTypeMapping = new()
         {
             { RecipeValidatorList.FargateTaskSizeCpuMemoryLimits, typeof(FargateTaskCpuMemorySizeValidator) },
             { RecipeValidatorList.MinMaxConstraint, typeof(MinMaxConstraintValidator) },
+            { RecipeValidatorList.ValidDockerfilePath, typeof(DockerfilePathValidator) }
         };
 
         public IOptionSettingItemValidator[] BuildValidators(OptionSettingItem optionSettingItem, Func<OptionSettingItemValidatorConfig, bool>? filter = null)
@@ -73,7 +75,7 @@ namespace AWS.Deploy.Common.Recipes.Validation
         public IRecipeValidator[] BuildValidators(RecipeDefinition recipeDefinition)
         {
             return recipeDefinition.Validators
-                .Select(v => Activate(v.ValidatorType, v.Configuration,_recipeValidatorTypeMapping))
+                .Select(v => Activate(v.ValidatorType, v.Configuration, _recipeValidatorTypeMapping))
                 .OfType<IRecipeValidator>()
                 .ToArray();
         }

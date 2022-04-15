@@ -72,6 +72,9 @@
                 "MinValueOptionSettingsId": "AutoScaling.MinCapacity",
                 "MaxValueOptionSettingsId": "AutoScaling.MaxCapacity"
             }
+        },
+        {
+            "ValidatorType": "ValidDockerfilePath"
         }
     ],
     "Categories": [
