@@ -96,6 +96,27 @@ namespace AspNetAppElasticBeanstalkLinux
                     AppIAMRole.RoleName
                 }
             }));
+
+            if (settings.ServiceIAMRole.CreateNew)
+            {
+                BeanstalkServiceRole = new Role(this, nameof(BeanstalkServiceRole), InvokeCustomizeCDKPropsEvent(nameof(BeanstalkServiceRole), this, new RoleProps
+                {
+                    AssumedBy = new ServicePrincipal("elasticbeanstalk.amazonaws.com"),
+
+                    ManagedPolicies = new[]
+                    {
+                        ManagedPolicy.FromAwsManagedPolicyName("AWSElasticBeanstalkManagedUpdatesCustomerRolePolicy"),
+                        ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSElasticBeanstalkEnhancedHealth")
+                    }
+                }));
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(settings.ServiceIAMRole.RoleArn))
+                    throw new InvalidOrMissingConfigurationException("The provided Service IAM Role ARN is null or empty.");
+
+                BeanstalkServiceRole = Role.FromRoleArn(this, nameof(BeanstalkServiceRole), settings.ServiceIAMRole.RoleArn);
+            }
         }
 
         private void ConfigureApplication(Configuration settings)
@@ -221,14 +242,8 @@ namespace AspNetAppElasticBeanstalkLinux
 
             if (settings.ElasticBeanstalkManagedPlatformUpdates.ManagedActionsEnabled)
             {
-                BeanstalkServiceRole = new Role(this, nameof(BeanstalkServiceRole), InvokeCustomizeCDKPropsEvent(nameof(BeanstalkServiceRole), this, new RoleProps
-                {
-                    AssumedBy = new ServicePrincipal("elasticbeanstalk.amazonaws.com"),
-                    ManagedPolicies = new[]
-                    {
-                        ManagedPolicy.FromAwsManagedPolicyName("AWSElasticBeanstalkManagedUpdatesCustomerRolePolicy")
-                    }
-                }));
+                if (BeanstalkServiceRole == null)
+                    throw new InvalidOrMissingConfigurationException("The Elastic Beanstalk service role cannot be null");
 
                 optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
                 {

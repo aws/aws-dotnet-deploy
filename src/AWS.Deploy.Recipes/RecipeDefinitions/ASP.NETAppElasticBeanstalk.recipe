@@ -258,6 +258,57 @@
             ]
         },
         {
+            "Id": "ServiceIAMRole",
+            "Name": "Service IAM Role",
+            "Description": "A service role is the IAM role that Elastic Beanstalk assumes when calling other services on your behalf.",
+            "Type": "Object",
+            "TypeHint": "IAMRole",
+            "TypeHintData": {
+                "ServicePrincipal": "elasticbeanstalk.amazonaws.com"
+            },
+            "AdvancedSetting": false,
+            "Updatable": false,
+            "ChildOptionSettings": [
+                {
+                    "Id": "CreateNew",
+                    "Name": "Create New Role",
+                    "Description": "Do you want to create a new role?",
+                    "Type": "Bool",
+                    "DefaultValue": true,
+                    "AdvancedSetting": false,
+                    "Updatable": false
+                },
+                {
+                    "Id": "RoleArn",
+                    "Name": "Existing Role ARN",
+                    "Description": "The ARN of the existing role to use.",
+                    "Type": "String",
+                    "TypeHint": "ExistingIAMRole",
+                    "TypeHintData": {
+                        "ServicePrincipal": "elasticbeanstalk.amazonaws.com"
+                    },
+                    "AdvancedSetting": false,
+                    "Updatable": false,
+                    "DependsOn": [
+                        {
+                            "Id": "ServiceIAMRole.CreateNew",
+                            "Value": false
+                        }
+                    ],
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration" : {
+                                "Regex": "arn:.+:iam::[0-9]{12}:.+",
+                                "AllowEmptyString": true,
+                                "ValidationFailedMessage": "Invalid IAM Role ARN. The ARN should contain the arn:[PARTITION]:iam namespace, followed by the account ID, and then the resource path. For example - arn:aws:iam::123456789012:role/S3Access is a valid IAM Role ARN. For more information visit https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-arns"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
             "Id": "EC2KeyPair",
             "Name": "Key Pair",
             "Description": "The EC2 key pair used to SSH into EC2 instances for the Elastic Beanstalk environment.",
