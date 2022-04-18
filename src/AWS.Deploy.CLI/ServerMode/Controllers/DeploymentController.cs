@@ -440,6 +440,43 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         }
 
         /// <summary>
+        /// Creates the CloudFormation template that will be used by CDK for the deployment.
+        /// This operation returns the CloudFormation template that is created for this deployment.
+        /// </summary>
+        [HttpGet("session/<sessionId>/cftemplate")]
+        [SwaggerOperation(OperationId = "GenerateCloudFormationTemplate")]
+        [SwaggerResponse(200, type: typeof(GenerateCloudFormationTemplateOutput))]
+        [Authorize]
+        public async Task<IActionResult> GenerateCloudFormationTemplate(string sessionId)
+        {
+            var state = _stateServer.Get(sessionId);
+            if (state == null)
+            {
+                return NotFound($"Session ID {sessionId} not found.");
+            }
+
+            var serviceProvider = CreateSessionServiceProvider(state);
+
+            var orchestratorSession = CreateOrchestratorSession(state);
+
+            var orchestrator = CreateOrchestrator(state, serviceProvider);
+
+            var cdkProjectHandler = CreateCdkProjectHandler(state, serviceProvider);
+
+            if (state.SelectedRecommendation == null)
+                throw new SelectedRecommendationIsNullException("The selected recommendation is null or invalid.");
+
+            if (!state.SelectedRecommendation.Recipe.DeploymentType.Equals(Common.Recipes.DeploymentTypes.CdkProject))
+                throw new SelectedRecommendationIsIncompatibleException($"We cannot generate a CloudFormation template for the selected recommendation as it is not of type '{nameof(Models.DeploymentTypes.CloudFormationStack)}'.");
+
+            var task = new DeployRecommendationTask(orchestratorSession, orchestrator, state.ApplicationDetails, state.SelectedRecommendation);
+            var cloudFormationTemplate = await task.GenerateCloudFormationTemplate(cdkProjectHandler);
+            var output = new GenerateCloudFormationTemplateOutput(cloudFormationTemplate);
+
+            return Ok(output);
+        }
+
+        /// <summary>
         /// Begin execution of the deployment.
         /// </summary>
         [HttpPost("session/<sessionId>/execute")]
@@ -454,6 +491,8 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             }
 
             var serviceProvider = CreateSessionServiceProvider(state);
+
+            var orchestratorSession = CreateOrchestratorSession(state);
 
             var orchestrator = CreateOrchestrator(state, serviceProvider);
 
@@ -473,7 +512,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             if (capabilities.Any())
                 return Problem($"Unable to start deployment due to missing system capabilities.{Environment.NewLine}{missingCapabilitiesMessage}");
 
-            var task = new DeployRecommendationTask(orchestrator, state.ApplicationDetails, state.SelectedRecommendation);
+            var task = new DeployRecommendationTask(orchestratorSession, orchestrator, state.ApplicationDetails, state.SelectedRecommendation);
             state.DeploymentTask = task.Execute();
 
             return Ok();
@@ -601,6 +640,21 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                     throw new FailedToRetrieveAWSCredentialsException("The tool was not able to retrieve the AWS Credentials."),
                 state.AWSRegion,
                 state.AWSAccountId);
+        }
+
+        private CdkProjectHandler CreateCdkProjectHandler(SessionState state, IServiceProvider? serviceProvider = null)
+        {
+            if (serviceProvider == null)
+            {
+                serviceProvider = CreateSessionServiceProvider(state);
+            }
+
+            return new CdkProjectHandler(
+                serviceProvider.GetRequiredService<IOrchestratorInteractiveService>(),
+                serviceProvider.GetRequiredService<ICommandLineWrapper>(),
+                serviceProvider.GetRequiredService<IAWSResourceQueryer>(),
+                serviceProvider.GetRequiredService<IFileManager>()
+                );
         }
 
         private Orchestrator CreateOrchestrator(SessionState state, IServiceProvider? serviceProvider = null, AWSCredentials? awsCredentials = null)

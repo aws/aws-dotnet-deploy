@@ -106,7 +106,9 @@ namespace AWS.Deploy.Common
         FailedToDeserializeDeploymentBundle = 10008600,
         FailedToDeserializeDeploymentProjectRecipe = 10008700,
         FailedToRunCDKBootstrap = 10008800,
-        FailedToGetCredentialsForProfile = 10008900
+        FailedToGetCredentialsForProfile = 10008900,
+        FailedToRunCDKDiff = 10009000,
+        FailedToCreateCDKProject = 10009100
     }
 
     public class ProjectFileNotFoundException : DeployToolException

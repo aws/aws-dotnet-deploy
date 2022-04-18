@@ -9,15 +9,19 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Amazon.CloudFormation;
+using Amazon.CloudFormation.Model;
 using Amazon.Runtime;
 using AWS.Deploy.CLI.Commands;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.CLI.Extensions;
 using AWS.Deploy.CLI.IntegrationTests.Extensions;
 using AWS.Deploy.CLI.IntegrationTests.Helpers;
-using AWS.Deploy.CLI.IntegrationTests.Services;
+using AWS.Deploy.CLI.TypeHintResponses;
+using AWS.Deploy.Common;
+using AWS.Deploy.Orchestration.Utilities;
 using AWS.Deploy.ServerMode.Client;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using Newtonsoft.Json;
 using Xunit;
 
@@ -28,18 +32,17 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
         private bool _isDisposed;
         private string _stackName;
         private readonly IServiceProvider _serviceProvider;
-        private readonly CloudFormationHelper _cloudFormationHelper;
 
         private readonly string _awsRegion;
         private readonly TestAppManager _testAppManager;
-        private readonly InMemoryInteractiveService _interactiveService;
+
+        private readonly Mock<IAWSClientFactory> _mockAWSClientFactory;
+        private readonly Mock<IAmazonCloudFormation> _mockCFClient;
 
         public GetApplyOptionSettings()
         {
-            _interactiveService = new InMemoryInteractiveService();
-
-            var cloudFormationClient = new AmazonCloudFormationClient(Amazon.RegionEndpoint.USWest2);
-            _cloudFormationHelper = new CloudFormationHelper(cloudFormationClient);
+            _mockAWSClientFactory = new Mock<IAWSClientFactory>();
+            _mockCFClient = new Mock<IAmazonCloudFormation>();
 
             var serviceCollection = new ServiceCollection();
 
@@ -53,24 +56,20 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
             _testAppManager = new TestAppManager();
         }
 
+        public TemplateMetadataReader GetTemplateMetadataReader(string templateBody)
+        {
+            var templateMetadataReader = new TemplateMetadataReader(_mockAWSClientFactory.Object);
+            var cfResponse = new GetTemplateResponse();
+            cfResponse.TemplateBody = templateBody;
+            _mockAWSClientFactory.Setup(x => x.GetAWSClient<IAmazonCloudFormation>(It.IsAny<string>())).Returns(_mockCFClient.Object);
+            _mockCFClient.Setup(x => x.GetTemplateAsync(It.IsAny<GetTemplateRequest>(), It.IsAny<CancellationToken>())).ReturnsAsync(cfResponse);
+            return templateMetadataReader;
+        }
+
         public Task<AWSCredentials> ResolveCredentials()
         {
             var testCredentials = FallbackCredentialsFactory.GetCredentials();
             return Task.FromResult<AWSCredentials>(testCredentials);
-        }
-
-        private async Task<DeploymentStatus> WaitForDeployment(RestAPIClient restApiClient, string sessionId)
-        {
-            // Do an initial delay to avoid a race condition of the status being checked before the deployment has kicked off.
-            await Task.Delay(TimeSpan.FromSeconds(3));
-
-            await WaitUntilHelper.WaitUntil(async () =>
-            {
-                DeploymentStatus status = (await restApiClient.GetDeploymentStatusAsync(sessionId)).Status; ;
-                return status != DeploymentStatus.Executing;
-            }, TimeSpan.FromSeconds(1), TimeSpan.FromMinutes(15));
-
-            return (await restApiClient.GetDeploymentStatusAsync(sessionId)).Status;
         }
 
         [Fact]
@@ -130,12 +129,13 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
                 Assert.Empty(subnetsResourcesEmpty.Resources);
                 Assert.Empty(securityGroupsResourcesEmpty.Resources);
 
+                var vpcId = vpcResources.Resources.First().SystemName;
                 await restClient.ApplyConfigSettingsAsync(sessionId, new ApplyConfigSettingsInput()
                 {
                     UpdatedSettings = new Dictionary<string, string>()
                     {
                         {"VPCConnector.CreateNew", "true"},
-                        {"VPCConnector.VpcId", vpcResources.Resources.First().SystemName}
+                        {"VPCConnector.VpcId", vpcId}
                     }
                 });
 
@@ -144,48 +144,31 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
                 Assert.NotEmpty(subnetsResources.Resources);
                 Assert.NotEmpty(securityGroupsResources.Resources);
 
+                var subnet = subnetsResources.Resources.Last().SystemName;
+                var securityGroup = securityGroupsResources.Resources.First().SystemName;
                 var setConfigResult = await restClient.ApplyConfigSettingsAsync(sessionId, new ApplyConfigSettingsInput()
                 {
                     UpdatedSettings = new Dictionary<string, string>()
                     {
-                        {"VPCConnector.Subnets", JsonConvert.SerializeObject(new List<string>{subnetsResources.Resources.Last().SystemName})},
-                        {"VPCConnector.SecurityGroups", JsonConvert.SerializeObject(new List<string>{securityGroupsResources.Resources.Last().SystemName})}
+                        {"VPCConnector.Subnets", JsonConvert.SerializeObject(new List<string>{subnet})},
+                        {"VPCConnector.SecurityGroups", JsonConvert.SerializeObject(new List<string>{securityGroup})}
                     }
                 });
 
-                await restClient.StartDeploymentAsync(sessionId);
+                var generateCloudFormationTemplateResponse = await restClient.GenerateCloudFormationTemplateAsync(sessionId);
 
-                await WaitForDeployment(restClient, sessionId);
+                var metadata = await GetAppSettingsFromCFTemplate(generateCloudFormationTemplateResponse.CloudFormationTemplate, _stackName);
 
-                var stackStatus = await _cloudFormationHelper.GetStackStatus(_stackName);
-                Assert.Equal(StackStatus.CREATE_COMPLETE, stackStatus);
-
-                Assert.True(logOutput.Length > 0);
-                Assert.Contains("Initiating deployment", logOutput.ToString());
-
-                var redeploymentSessionOutput = await restClient.StartDeploymentSessionAsync(new StartDeploymentSessionInput
-                {
-                    AwsRegion = _awsRegion,
-                    ProjectPath = projectPath
-                });
-
-                var redeploymentSessionId = redeploymentSessionOutput.SessionId;
-
-                var existingDeployments = await restClient.GetExistingDeploymentsAsync(redeploymentSessionId);
-                var existingDeployment = existingDeployments.ExistingDeployments.First(x => string.Equals(_stackName, x.Name));
-
-                Assert.Equal(_stackName, existingDeployment.Name);
-                Assert.Equal(appRunnerRecommendation.RecipeId, existingDeployment.RecipeId);
-                Assert.Equal(appRunnerRecommendation.Name, existingDeployment.RecipeName);
-                Assert.Equal(appRunnerRecommendation.ShortDescription, existingDeployment.ShortDescription);
-                Assert.Equal(appRunnerRecommendation.Description, existingDeployment.Description);
-                Assert.Equal(appRunnerRecommendation.TargetService, existingDeployment.TargetService);
-                Assert.Equal(DeploymentTypes.CloudFormationStack, existingDeployment.DeploymentType);
+                Assert.True(metadata.Settings.ContainsKey("VPCConnector"));
+                var vpcConnector = JsonConvert.DeserializeObject<VPCConnectorTypeHintResponse>(metadata.Settings["VPCConnector"].ToString());
+                Assert.True(vpcConnector.CreateNew);
+                Assert.Equal(vpcId, vpcConnector.VpcId);
+                Assert.Contains<string>(subnet, vpcConnector.Subnets);
+                Assert.Contains<string>(securityGroup, vpcConnector.SecurityGroups);
             }
             finally
             {
                 cancelSource.Cancel();
-                await _cloudFormationHelper.DeleteStack(_stackName);
                 _stackName = null;
             }
         }
@@ -208,6 +191,12 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
             }, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(10));
         }
 
+        private async Task<CloudApplicationMetadata> GetAppSettingsFromCFTemplate(string cloudFormationTemplate, string stackName)
+        {
+            var templateMetadataReader = GetTemplateMetadataReader(cloudFormationTemplate);
+            return await templateMetadataReader.LoadCloudApplicationMetadata(stackName);
+        }
+
         public void Dispose()
         {
             Dispose(true);
@@ -217,20 +206,6 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
         protected virtual void Dispose(bool disposing)
         {
             if (_isDisposed) return;
-
-            if (disposing)
-            {
-                if(!string.IsNullOrEmpty(_stackName))
-                {
-                    var isStackDeleted = _cloudFormationHelper.IsStackDeleted(_stackName).GetAwaiter().GetResult();
-                    if (!isStackDeleted)
-                    {
-                        _cloudFormationHelper.DeleteStack(_stackName).GetAwaiter().GetResult();
-                    }
-
-                    _interactiveService.ReadStdOutStartToEnd();
-                }
-            }
 
             _isDisposed = true;
         }

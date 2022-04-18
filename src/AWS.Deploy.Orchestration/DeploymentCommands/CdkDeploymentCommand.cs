@@ -48,7 +48,7 @@ namespace AWS.Deploy.Orchestration.DeploymentCommands
             }
             finally
             {
-                orchestrator._cdkProjectHandler.DeleteTemporaryCdkProject(orchestrator._session, cdkProject);
+                orchestrator._cdkProjectHandler.DeleteTemporaryCdkProject(cdkProject);
             }
 
             await orchestrator._localUserSettingsEngine.UpdateLastDeployedStack(cloudApplication.Name, orchestrator._session.ProjectDefinition.ProjectName, orchestrator._session.AWSAccountId, orchestrator._session.AWSRegion);

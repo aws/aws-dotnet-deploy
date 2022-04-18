@@ -142,6 +142,14 @@ namespace AWS.Deploy.Orchestration
     }
 
     /// <summary>
+    /// Exception thrown if the 'cdk diff' command failed.
+    /// </summary>
+    public class FailedToRunCDKDiffException : DeployToolException
+    {
+        public FailedToRunCDKDiffException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+    }
+
+    /// <summary>
     /// Exception thrown if an AWS Resource is not found or does not exist.
     /// </summary>
     public class AWSResourceNotFoundException : DeployToolException
@@ -219,5 +227,13 @@ namespace AWS.Deploy.Orchestration
     public class FailedToFindCloudApplicationResourceType : DeployToolException
     {
         public FailedToFindCloudApplicationResourceType(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+    }
+
+    /// <summary>
+    /// Throw if we are unable to generate a CDK Project
+    /// </summary>
+    public class FailedToCreateCDKProjectException : DeployToolException
+    {
+        public FailedToCreateCDKProjectException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 }
