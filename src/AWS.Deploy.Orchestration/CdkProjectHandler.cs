@@ -19,7 +19,8 @@ namespace AWS.Deploy.Orchestration
         Task<string> ConfigureCdkProject(OrchestratorSession session, CloudApplication cloudApplication, Recommendation recommendation);
         string CreateCdkProject(Recommendation recommendation, OrchestratorSession session, string? saveDirectoryPath = null);
         Task DeployCdkProject(OrchestratorSession session, CloudApplication cloudApplication, string cdkProjectPath, Recommendation recommendation);
-        void DeleteTemporaryCdkProject(OrchestratorSession session, string cdkProjectPath);
+        void DeleteTemporaryCdkProject(string cdkProjectPath);
+        Task<string> PerformCdkDiff(string cdkProjectPath, CloudApplication cloudApplication);
     }
 
     public class CdkProjectHandler : ICdkProjectHandler
@@ -29,17 +30,20 @@ namespace AWS.Deploy.Orchestration
         private readonly CdkAppSettingsSerializer _appSettingsBuilder;
         private readonly IDirectoryManager _directoryManager;
         private readonly IAWSResourceQueryer _awsResourceQueryer;
+        private readonly IFileManager _fileManager;
 
         public CdkProjectHandler(
             IOrchestratorInteractiveService interactiveService,
             ICommandLineWrapper commandLineWrapper,
-            IAWSResourceQueryer awsResourceQueryer)
+            IAWSResourceQueryer awsResourceQueryer,
+            IFileManager fileManager)
         {
             _interactiveService = interactiveService;
             _commandLineWrapper = commandLineWrapper;
             _awsResourceQueryer = awsResourceQueryer;
             _appSettingsBuilder = new CdkAppSettingsSerializer();
             _directoryManager = new DirectoryManager();
+            _fileManager = fileManager;
         }
 
         public async Task<string> ConfigureCdkProject(OrchestratorSession session, CloudApplication cloudApplication, Recommendation recommendation)
@@ -67,6 +71,25 @@ namespace AWS.Deploy.Orchestration
             await appSettingsFile.WriteAsync(appSettingsBody);
 
             return cdkProjectPath;
+        }
+
+        /// <summary>
+        /// Run 'cdk diff' on the deployment project <param name="cdkProjectPath"/> to get the CF template that will be used by CDK to deploy the application.
+        /// </summary>
+        /// <returns>The CloudFormation template that is created for this deployment.</returns>
+        public async Task<string> PerformCdkDiff(string cdkProjectPath, CloudApplication cloudApplication)
+        {
+            var appSettingsFilePath = Path.Combine(cdkProjectPath, "appsettings.json");
+
+            var cdkDiff = await _commandLineWrapper.TryRunWithResult($"npx cdk diff -c {Constants.CloudFormationIdentifier.SETTINGS_PATH_CDK_CONTEXT_PARAMETER}=\"{appSettingsFilePath}\"",
+                workingDirectory: cdkProjectPath,
+                needAwsCredentials: true);
+
+            if (cdkDiff.ExitCode != 0)
+                throw new FailedToRunCDKDiffException(DeployToolErrorCode.FailedToRunCDKDiff, "The CDK Diff command encountered an error and failed.");
+
+            var templateFilePath = Path.Combine(cdkProjectPath, "cdk.out", $"{cloudApplication.Name}.template.json");
+            return await _fileManager.ReadAllTextAsync(templateFilePath);
         }
 
         public async Task DeployCdkProject(OrchestratorSession session, CloudApplication cloudApplication, string cdkProjectPath, Recommendation recommendation)
@@ -161,7 +184,7 @@ namespace AWS.Deploy.Orchestration
             return saveCdkDirectoryPath;
         }
 
-        public void DeleteTemporaryCdkProject(OrchestratorSession session, string cdkProjectPath)
+        public void DeleteTemporaryCdkProject(string cdkProjectPath)
         {
             var parentPath = Path.GetFullPath(Constants.CDK.ProjectsDirectory);
             cdkProjectPath = Path.GetFullPath(cdkProjectPath);
