@@ -213,7 +213,7 @@
             "Type": "Object",
             "TypeHint": "IAMRole",
             "TypeHintData": {
-                "ServicePrincipal": "elasticbeanstalk.amazonaws.com"
+                "ServicePrincipal": "ec2.amazonaws.com"
             },
             "AdvancedSetting": false,
             "Updatable": false,
@@ -234,7 +234,7 @@
                     "Type": "String",
                     "TypeHint": "ExistingIAMRole",
                     "TypeHintData": {
-                        "ServicePrincipal": "elasticbeanstalk.amazonaws.com"
+                        "ServicePrincipal": "ec2.amazonaws.com"
                     },
                     "AdvancedSetting": false,
                     "Updatable": false,
