@@ -19,6 +19,11 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
         public IAMRoleConfiguration ApplicationIAMRole { get; set; }
 
         /// <summary>
+        /// A service role is the IAM role that Elastic Beanstalk assumes when calling other services on your behalf
+        /// </summary>
+        public IAMRoleConfiguration ServiceIAMRole { get; set; }
+
+        /// <summary>
         /// The type of environment for the Elastic Beanstalk application.
         /// </summary>
         public string EnvironmentType { get; set; } = Recipe.ENVIRONMENTTYPE_SINGLEINSTANCE;
@@ -105,6 +110,7 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
 
         public Configuration(
             IAMRoleConfiguration applicationIAMRole,
+            IAMRoleConfiguration serviceIAMRole,
             string instanceType,
             BeanstalkEnvironmentConfiguration beanstalkEnvironment,
             BeanstalkApplicationConfiguration beanstalkApplication,
@@ -122,6 +128,7 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
             string enhancedHealthReporting = Recipe.ENHANCED_HEALTH_REPORTING)
         {
             ApplicationIAMRole = applicationIAMRole;
+            ServiceIAMRole = serviceIAMRole;
             InstanceType = instanceType;
             BeanstalkEnvironment = beanstalkEnvironment;
             BeanstalkApplication = beanstalkApplication;
