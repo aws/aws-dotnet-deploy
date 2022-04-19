@@ -20,6 +20,8 @@ namespace AWS.Deploy.CLI.ServerMode.Models
 
         public string? TypeHint { get; set; }
 
+        public Dictionary<string, object> TypeHintData { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+
         public bool Advanced { get; set; }
 
         public bool ReadOnly { get; set; }
