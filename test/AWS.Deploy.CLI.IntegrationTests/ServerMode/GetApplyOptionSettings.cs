@@ -20,6 +20,7 @@ using AWS.Deploy.CLI.TypeHintResponses;
 using AWS.Deploy.Common;
 using AWS.Deploy.Orchestration.Utilities;
 using AWS.Deploy.ServerMode.Client;
+using AWS.Deploy.Common.TypeHintData;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Newtonsoft.Json;
@@ -75,7 +76,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
         [Fact]
         public async Task GetAndApplyAppRunnerSettings_VPCConnector()
         {
-            _stackName = $"ServerModeWebFargate{Guid.NewGuid().ToString().Split('-').Last()}";
+            _stackName = $"ServerModeWebAppRunner{Guid.NewGuid().ToString().Split('-').Last()}";
 
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
             var portNumber = 4001;
@@ -92,35 +93,12 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
 
                 await WaitTillServerModeReady(restClient);
 
-                var startSessionOutput = await restClient.StartDeploymentSessionAsync(new StartDeploymentSessionInput
-                {
-                    AwsRegion = _awsRegion,
-                    ProjectPath = projectPath
-                });
-
-                var sessionId = startSessionOutput.SessionId;
-                Assert.NotNull(sessionId);
-
-                var signalRClient = new DeploymentCommunicationClient(baseUrl);
-                await signalRClient.JoinSession(sessionId);
+                var sessionId = await StartDeploymentSession(restClient, projectPath);
 
                 var logOutput = new StringBuilder();
-                signalRClient.ReceiveLogAllLogAction = (line) =>
-                {
-                    logOutput.AppendLine(line);
-                };
+                await SetupSignalRConnection(baseUrl, sessionId, logOutput);
 
-                var getRecommendationOutput = await restClient.GetRecommendationsAsync(sessionId);
-                Assert.NotEmpty(getRecommendationOutput.Recommendations);
-
-                var appRunnerRecommendation = getRecommendationOutput.Recommendations.FirstOrDefault(x => string.Equals(x.RecipeId, "AspNetAppAppRunner"));
-                Assert.NotNull(appRunnerRecommendation);
-
-                await restClient.SetDeploymentTargetAsync(sessionId, new SetDeploymentTargetInput
-                {
-                    NewDeploymentName = _stackName,
-                    NewDeploymentRecipeId = appRunnerRecommendation.RecipeId
-                });
+                var appRunnerRecommendation = await GetRecommendationsAndSelectAppRunner(restClient, sessionId);
 
                 var vpcResources = await restClient.GetConfigSettingResourcesAsync(sessionId, "VPCConnector.VpcId");
                 var subnetsResourcesEmpty = await restClient.GetConfigSettingResourcesAsync(sessionId, "VPCConnector.Subnets");
@@ -173,6 +151,45 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
             }
         }
 
+        [Fact]
+        public async Task GetAppRunnerConfigSettings_TypeHintData()
+        {
+            _stackName = $"ServerModeWebAppRunner{Guid.NewGuid().ToString().Split('-').Last()}";
+
+            var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
+            var portNumber = 4002;
+            using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ResolveCredentials);
+
+            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
+            var cancelSource = new CancellationTokenSource();
+
+            var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
+            try
+            {
+                var baseUrl = $"http://localhost:{portNumber}/";
+                var restClient = new RestAPIClient(baseUrl, httpClient);
+
+                await WaitTillServerModeReady(restClient);
+
+                var sessionId = await StartDeploymentSession(restClient, projectPath);
+
+                var logOutput = new StringBuilder();
+                await SetupSignalRConnection(baseUrl, sessionId, logOutput);
+
+                await GetRecommendationsAndSelectAppRunner(restClient, sessionId);
+
+                var configSettings = restClient.GetConfigSettingsAsync(sessionId);
+                Assert.NotEmpty(configSettings.Result.OptionSettings);
+                var iamRoleSetting = Assert.Single(configSettings.Result.OptionSettings, o => o.Id == "ApplicationIAMRole");
+                Assert.NotEmpty(iamRoleSetting.TypeHintData);
+                Assert.Equal("tasks.apprunner.amazonaws.com", iamRoleSetting.TypeHintData[nameof(IAMRoleTypeHintData.ServicePrincipal)]);
+            }
+            finally
+            {
+                cancelSource.Cancel();
+                _stackName = null;
+            }
+        }
 
         private async Task WaitTillServerModeReady(RestAPIClient restApiClient)
         {
@@ -195,6 +212,45 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
         {
             var templateMetadataReader = GetTemplateMetadataReader(cloudFormationTemplate);
             return await templateMetadataReader.LoadCloudApplicationMetadata(stackName);
+        }
+
+        private async Task<string> StartDeploymentSession(RestAPIClient restClient, string projectPath)
+        {
+            var startSessionOutput = await restClient.StartDeploymentSessionAsync(new StartDeploymentSessionInput
+            {
+                AwsRegion = _awsRegion,
+                ProjectPath = projectPath
+            });
+
+            var sessionId = startSessionOutput.SessionId;
+            Assert.NotNull(sessionId);
+            return sessionId;
+        }
+
+        private static async Task SetupSignalRConnection(string baseUrl, string sessionId, StringBuilder logOutput)
+        {
+            var signalRClient = new DeploymentCommunicationClient(baseUrl);
+            await signalRClient.JoinSession(sessionId);
+
+            signalRClient.ReceiveLogAllLogAction = (line) => { logOutput.AppendLine(line); };
+        }
+
+        private async Task<RecommendationSummary> GetRecommendationsAndSelectAppRunner(RestAPIClient restClient, string sessionId)
+        {
+            var getRecommendationOutput = await restClient.GetRecommendationsAsync(sessionId);
+            Assert.NotEmpty(getRecommendationOutput.Recommendations);
+
+            var appRunnerRecommendation =
+                getRecommendationOutput.Recommendations.FirstOrDefault(x => string.Equals(x.RecipeId, "AspNetAppAppRunner"));
+            Assert.NotNull(appRunnerRecommendation);
+
+            await restClient.SetDeploymentTargetAsync(sessionId,
+                new SetDeploymentTargetInput
+                {
+                    NewDeploymentName = _stackName,
+                    NewDeploymentRecipeId = appRunnerRecommendation.RecipeId
+                });
+            return appRunnerRecommendation;
         }
 
         public void Dispose()

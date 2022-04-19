@@ -193,6 +193,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 var settingSummary = new OptionSettingItemSummary(setting.Id, setting.Name, setting.Description, setting.Type.ToString())
                 {
                     TypeHint = setting.TypeHint?.ToString(),
+                    TypeHintData = setting.TypeHintData,
                     Value = recommendation.GetOptionSettingValue(setting),
                     Advanced = setting.AdvancedSetting,
                     ReadOnly = recommendation.IsExistingCloudApplication && !setting.Updatable,
