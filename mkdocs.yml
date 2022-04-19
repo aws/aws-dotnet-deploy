@@ -1,0 +1,47 @@
+site_name: AWS .NET deployment tool
+site_description: 'Deploy .NET applications on AWS'
+site_url: 'https://aws.github.io/aws-dotnet-deploy/'
+repo_name: 'aws/aws-dotnet-deploy'
+repo_url: 'https://github.com/aws/aws-dotnet-deploy'
+edit_uri: 'edit/main/site/content'
+copyright: '&copy; 2022, Amazon Web Services, Inc. or its affiliates. All rights reserved.'
+docs_dir: 'site/content'
+site_dir: 'docs'
+
+nav:
+  - Overview: index.md
+  - Documentation:
+    - Getting Started: 
+      - Pre-requisites: docs/getting-started/pre-requisites.md
+      - Installing the tool: docs/getting-started/installation.md
+    - Supported AWS computes:
+      - Amazon ECS: docs/aws-computes/ecs.md
+      - AWS Elastic Beanstalk: docs/aws-computes/beanstalk.md
+      - AWS App Runner: docs/aws-computes/app-runner.md
+      - Amazon S3: docs/aws-computes/s3.md
+    - Features:
+      - Recipe: docs/features/recipe.md
+      - Recommendation Engine: docs/features/recommendation-engine.md
+      - Deployment Project: docs/features/deployment-project.md
+      - Auto-generated Dockerfile: docs/features/autogen-dockerfile.md
+    - Tutorials:
+      - Deploying ASP.NET Core Application: docs/tutorials/deploy-webapp.md
+      - Deploying Blazor WebAssembly Application: docs/tutorials/deploy-blazorapp.md
+      - Deploying Console Service: docs/tutorials/deploy-console-service.md
+      - Deploying Console Task: docs/tutorials/deploy-console-task.md
+      - Pushing Image to ECS: docs/tutorials/push-image-ecr.md
+      - Automating Deployments: docs/tutorials/automate-deployments.md
+      - Listing Deployments: docs/tutorials/list-deployments.md
+      - Deleting Deployment: docs/tutorials/delete-deployment.md
+  - Troubleshooting Guide: troubleshooting-guide.md
+  - Contributing to the project: contributing.md
+
+theme:
+  name: material
+  palette:
+    primary: white
+  font: false
+  language: en
+  features:
+    - tabs
+    - instant
