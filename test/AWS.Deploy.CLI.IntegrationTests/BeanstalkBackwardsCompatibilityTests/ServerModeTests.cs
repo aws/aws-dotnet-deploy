@@ -58,6 +58,8 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests
 
                 Assert.Equal(_fixture.EnvironmentName, existingDeployment.Name);
                 Assert.Equal(BEANSTALK_ENVIRONMENT_RECIPE_ID, existingDeployment.RecipeId);
+                Assert.Null(existingDeployment.BaseRecipeId);
+                Assert.False(existingDeployment.IsPersistedDeploymentProject);
                 Assert.Equal(_fixture.EnvironmentId, existingDeployment.ExistingDeploymentId);
                 Assert.Equal(DeploymentTypes.BeanstalkEnvironment, existingDeployment.DeploymentType);
 
