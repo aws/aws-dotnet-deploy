@@ -89,6 +89,8 @@ namespace AWS.Deploy.CLI.IntegrationTests
                 Assert.NotEmpty(getRecommendationOutput.Recommendations);
                 var beanstalkRecommendation = getRecommendationOutput.Recommendations.FirstOrDefault();
                 Assert.Equal("AspNetAppElasticBeanstalkLinux", beanstalkRecommendation.RecipeId);
+                Assert.Null(beanstalkRecommendation.BaseRecipeId);
+                Assert.False(beanstalkRecommendation.IsPersistedDeploymentProject);
                 Assert.NotNull(beanstalkRecommendation.ShortDescription);
                 Assert.NotNull(beanstalkRecommendation.Description);
                 Assert.True(beanstalkRecommendation.ShortDescription.Length < beanstalkRecommendation.Description.Length);
@@ -227,6 +229,8 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
                 Assert.Equal(_stackName, existingDeployment.Name);
                 Assert.Equal(fargateRecommendation.RecipeId, existingDeployment.RecipeId);
+                Assert.Null(fargateRecommendation.BaseRecipeId);
+                Assert.False(fargateRecommendation.IsPersistedDeploymentProject);
                 Assert.Equal(fargateRecommendation.Name, existingDeployment.RecipeName);
                 Assert.Equal(fargateRecommendation.ShortDescription, existingDeployment.ShortDescription);
                 Assert.Equal(fargateRecommendation.Description, existingDeployment.Description);

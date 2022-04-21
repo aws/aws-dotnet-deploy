@@ -142,8 +142,10 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                     continue;
 
                 output.Recommendations.Add(new RecommendationSummary(
+                    baseRecipeId: recommendation.Recipe.BaseRecipeId,
                     recipeId: recommendation.Recipe.Id,
                     name: recommendation.Name,
+                    isPersistedDeploymentProject: recommendation.Recipe.PersistedDeploymentProject,
                     shortDescription: recommendation.ShortDescription,
                     description: recommendation.Description,
                     targetService: recommendation.Recipe.TargetService,
@@ -324,8 +326,10 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
                 output.ExistingDeployments.Add(new ExistingDeploymentSummary(
                     name: deployment.Name,
+                    baseRecipeId: recommendation.Recipe.BaseRecipeId,
                     recipeId: deployment.RecipeId,
                     recipeName: recommendation.Name,
+                    isPersistedDeploymentProject: recommendation.Recipe.PersistedDeploymentProject,
                     shortDescription: recommendation.ShortDescription,
                     description: recommendation.Description,
                     targetService: recommendation.Recipe.TargetService,
