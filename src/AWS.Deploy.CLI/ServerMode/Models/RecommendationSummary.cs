@@ -16,24 +16,30 @@ namespace AWS.Deploy.CLI.ServerMode.Models
             { Common.Recipes.DeploymentTypes.ElasticContainerRegistryImage, DeploymentTypes.ElasticContainerRegistryImage }
         };
 
+        public string? BaseRecipeId { get; set; }
         public string RecipeId { get; set; }
         public string Name { get; set; }
+        public bool IsPersistedDeploymentProject { get; set; }
         public string ShortDescription { get; set; }
         public string Description { get; set; }
         public string TargetService { get; set; }
         public DeploymentTypes DeploymentType { get; set; }
 
         public RecommendationSummary(
+            string? baseRecipeId,
             string recipeId,
             string name,
+            bool isPersistedDeploymentProject,
             string shortDescription,
             string description,
             string targetService,
             Common.Recipes.DeploymentTypes deploymentType
         )
         {
+            BaseRecipeId = baseRecipeId;
             RecipeId = recipeId;
             Name = name;
+            IsPersistedDeploymentProject = isPersistedDeploymentProject;
             ShortDescription = shortDescription;
             Description = description;
             TargetService = targetService;

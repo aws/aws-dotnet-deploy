@@ -134,8 +134,10 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var existingDeploymentSummary = new ExistingDeploymentSummary(
                 "name",
+                "baseRecipeId",
                 "recipeId",
                 "recipeName",
+                false,
                 "shortDescription",
                 "description",
                 "targetService",
@@ -153,8 +155,10 @@ namespace AWS.Deploy.CLI.UnitTests
         public void RecommendationSummary_ContainsCorrectDeploymentType(Deploy.Common.Recipes.DeploymentTypes deploymentType, DeploymentTypes expectedDeploymentType)
         {
             var recommendationSummary = new RecommendationSummary(
+                "baseRecipeId",
                 "recipeId",
                 "name",
+                false,
                 "shortDescription",
                 "description",
                 "targetService",
