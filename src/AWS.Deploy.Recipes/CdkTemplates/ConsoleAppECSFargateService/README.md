@@ -4,7 +4,7 @@ This .NET project is a deployment project used by the AWS deploy tool to deploy 
 up of 2 parts.
 
 First is a *.recipe file which defines all of the settings for deployment project. The recipe file is what
-the AWS.Deploy.CLI tool and the AWS Toolkit for Visual Studio use to drive the user experience to deploy a .NET application
+the AWS.Deploy.Tools and the AWS Toolkit for Visual Studio use to drive the user experience to deploy a .NET application
 with this deployment project.
 
 The second part of the deployment project is a .NET AWS CDK project which defines the AWS infrastructure that the
@@ -26,7 +26,7 @@ In a regular CDK project the CDK CLI, acquired from NPM, would be used to execut
 tool deployment projects are made of both a recipe and a CDK project you should not use the CDK CLI directly on
 the deployment project.
 
-The AWS deploy tool from either AWS.Deploy.CLI tool package or AWS Toolkit for Visual Studio
+The AWS deploy tool from either AWS.Deploy.Tools package or AWS Toolkit for Visual Studio
 should be used to drive the experience. The AWS deploy tool will take care of acquiring the CDK CLI and executing the
 CDK CLI passing in all of the settings gathered in the AWS deploy tool.
 
@@ -44,7 +44,7 @@ file for information on how to customize the CDK project.
 ## Can I add more settings to the recipe?
 
 As you customize the deployment project you might want to present the user's of the deployment project more
-settings that will be displayed in the AWS.Deploy.CLI tool package or AWS Toolkit for Visual Studio. The recipe
+settings that will be displayed in the AWS.Deploy.Tools package or AWS Toolkit for Visual Studio. The recipe
 file in the deployment project can be modified to add new settings. Below is the link to the JSON schema for the
 recipe.
 
