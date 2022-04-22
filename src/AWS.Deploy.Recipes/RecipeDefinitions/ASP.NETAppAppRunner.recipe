@@ -402,6 +402,7 @@
                     "Id": "VpcId",
                     "Name": "VPC ID",
                     "Description": "A list of VPC IDs that App Runner should use when it associates your service with a custom Amazon VPC.",
+                    "Type": "String",
                     "TypeHint": "ExistingVpc",
                     "DefaultValue": null,
                     "AdvancedSetting": false,
