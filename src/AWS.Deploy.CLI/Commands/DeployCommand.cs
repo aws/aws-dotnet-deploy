@@ -603,10 +603,12 @@ namespace AWS.Deploy.CLI.Commands
                         allowEmpty: false,
                         defaultAskValuePrompt: inputPrompt);
 
-                if (!string.IsNullOrEmpty(cloudApplicationName) && _cloudApplicationNameGenerator.IsValidName(cloudApplicationName))
+                if (string.IsNullOrEmpty(cloudApplicationName) || !_cloudApplicationNameGenerator.IsValidName(cloudApplicationName))
+                    PrintInvalidApplicationNameMessage();
+                else if (deployedApplications.Any(x => x.Name.Equals(cloudApplicationName)))
+                    PrintApplicationNameAlreadyExistsMessage();
+                else
                     return cloudApplicationName;
-
-                PrintInvalidApplicationNameMessage();
             }
         }
 
@@ -650,6 +652,14 @@ namespace AWS.Deploy.CLI.Commands
             _toolInteractiveService.WriteErrorLine(
                 "Invalid application name. The application name can contain only alphanumeric characters (case-sensitive) and hyphens. " +
                 "It must start with an alphabetic character and can't be longer than 128 characters");
+        }
+
+        private void PrintApplicationNameAlreadyExistsMessage()
+        {
+            _toolInteractiveService.WriteLine();
+            _toolInteractiveService.WriteErrorLine(
+                "Invalid application name. There already exists a CloudFormation stack with the name you provided. " +
+                "Please choose another application name.");
         }
 
         private bool ConfirmDeployment(Recommendation recommendation)

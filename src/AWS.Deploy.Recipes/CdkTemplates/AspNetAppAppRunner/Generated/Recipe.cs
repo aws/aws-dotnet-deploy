@@ -14,7 +14,6 @@ using AspNetAppAppRunner.Configurations;
 using CfnService = Amazon.CDK.AWS.AppRunner.CfnService;
 using CfnServiceProps = Amazon.CDK.AWS.AppRunner.CfnServiceProps;
 using Constructs;
-using System.Linq;
 using System.Collections.Generic;
 
 // This is a generated file from the original deployment recipe. It is recommended to not modify this file in order

@@ -353,7 +353,6 @@ namespace AWS.Deploy.CLI.Commands
             {
                 listCommand.Add(_optionProfile);
                 listCommand.Add(_optionRegion);
-                listCommand.Add(_optionProjectPath);
                 listCommand.Add(_optionDiagnosticLogging);
             }
 

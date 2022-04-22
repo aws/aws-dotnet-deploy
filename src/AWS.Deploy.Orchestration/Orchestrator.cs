@@ -79,6 +79,11 @@ namespace AWS.Deploy.Orchestration
             _recipeDefinitionPaths = recipeDefinitionPaths;
         }
 
+        /// <summary>
+        /// Method that generates the list of recommendations to deploy with.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public async Task<List<Recommendation>> GenerateDeploymentRecommendations()
         {
             if (_recipeDefinitionPaths == null)
@@ -95,6 +100,11 @@ namespace AWS.Deploy.Orchestration
             return await engine.ComputeRecommendations();
         }
 
+        /// <summary>
+        /// Method to generate the list of recommendations to create deployment projects for.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public async Task<List<Recommendation>> GenerateRecommendationsToSaveDeploymentProject()
         {
             if (_recipeDefinitionPaths == null)
@@ -103,9 +113,18 @@ namespace AWS.Deploy.Orchestration
                 throw new InvalidOperationException($"{nameof(_session)} is null as part of the orchestartor object");
 
             var engine = new RecommendationEngine.RecommendationEngine(_recipeDefinitionPaths, _session);
-            return await engine.ComputeRecommendations();
+            var compatibleRecommendations = await engine.ComputeRecommendations();
+            var cdkRecommendations = compatibleRecommendations.Where(x => x.Recipe.DeploymentType == DeploymentTypes.CdkProject).ToList();
+            return cdkRecommendations;
         }
 
+        /// <summary>
+        /// Include in the list of recommendations the recipe the deploymentProjectPath implements.
+        /// </summary>
+        /// <param name="deploymentProjectPath"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        /// <exception cref="InvalidCliArgumentException"></exception>
         public async Task<List<Recommendation>> GenerateRecommendationsFromSavedDeploymentProject(string deploymentProjectPath)
         {
             if (_session == null)

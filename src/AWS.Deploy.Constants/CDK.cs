@@ -22,5 +22,10 @@ namespace AWS.Deploy.Constants
         /// Default version of CDK CLI
         /// </summary>
         public static readonly Version DefaultCDKVersion = Version.Parse("2.13.0");
+
+        /// <summary>
+        /// The file path of the CDK bootstrap template to be used
+        /// </summary>
+        public static string CDKBootstrapTemplatePath => Path.Combine(DeployToolWorkspaceDirectoryRoot, "CDKBootstrapTemplate.yaml");
     }
 }
