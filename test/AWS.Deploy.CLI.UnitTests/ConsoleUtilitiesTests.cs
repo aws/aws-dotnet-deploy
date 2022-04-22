@@ -157,6 +157,37 @@ namespace AWS.Deploy.CLI.UnitTests
         }
 
         [Fact]
+        public void AskUserToChooseOrCreateNewNoOptions()
+        {
+            var interactiveServices = new TestToolInteractiveServiceImpl(new List<string>
+            {
+                "1"
+            });
+            var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager);
+            var userInputConfiguration = new UserInputConfiguration<OptionItem>(
+                option => option.DisplayName,
+                option => option.DisplayName,
+                option => option.Identifier.Equals("Identifier2"),
+                "NewIdentifier")
+            {
+                AskNewName = false,
+                CreateNew = true,
+                EmptyOption = false
+            };
+            var userResponse = consoleUtilities.AskUserToChooseOrCreateNew(Array.Empty<OptionItem>(), "Title", userInputConfiguration);
+
+            Assert.Equal("Title", interactiveServices.OutputMessages[0]);
+
+            Assert.True(interactiveServices.OutputContains("Title"));
+            Assert.True(interactiveServices.OutputContains("1: *** Create new *** (default)"));
+
+            Assert.True(userResponse.CreateNew);
+            Assert.Null(userResponse.SelectedOption);
+            Assert.Null(userResponse.NewName);
+            Assert.False(userResponse.IsEmpty);
+        }
+
+        [Fact]
         public void AskUserToChooseStringsPickDefault()
         {
             var interactiveServices = new TestToolInteractiveServiceImpl(new List<string> { "" });

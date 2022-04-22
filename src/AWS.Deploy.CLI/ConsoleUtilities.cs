@@ -268,14 +268,27 @@ namespace AWS.Deploy.CLI
                     defaultValue = userInputConfiguration.CreateNew || !options.Any() ? createNewLabel : userInputConfiguration.DisplaySelector(options.First());
             }
 
-            if (optionStrings.Any())
-            {
-                var displayOptionStrings = new List<string>(optionStrings);
-                if (userInputConfiguration.EmptyOption)
-                    displayOptionStrings.Insert(0, Constants.CLI.EMPTY_LABEL);
-                if (userInputConfiguration.CreateNew)
-                    displayOptionStrings.Add(createNewLabel);
+            var displayOptionStrings = new List<string>();
 
+            // add empty option at the top if configured
+            if (userInputConfiguration.EmptyOption)
+            {
+                displayOptionStrings.Add(Constants.CLI.EMPTY_LABEL);
+            }
+
+            // add all the options, this can be empty list if there are no options
+            // e.g. selecting a role for a service when there are no roles with a service principal
+            displayOptionStrings.AddRange(optionStrings);
+
+            // add create new option at the bottom if configured
+            if (userInputConfiguration.CreateNew)
+            {
+                displayOptionStrings.Add(createNewLabel);
+            }
+
+            // if list contains any options, ask user to choose one
+            if (displayOptionStrings.Any())
+            {
                 var selectedString = AskUserToChoose(displayOptionStrings, title, defaultValue, defaultChoosePrompt);
 
                 if (selectedString == Constants.CLI.EMPTY_LABEL)
