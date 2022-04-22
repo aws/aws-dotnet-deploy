@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AWS.Deploy.CLI.Utilities;
@@ -37,6 +38,26 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
         {
             _inMemoryInteractiveService  = new InMemoryInteractiveService();
             _commandLineWrapper = new CommandLineWrapper(_inMemoryInteractiveService);
+        }
+
+        [Fact]
+        public async Task GenerateRecommendationsForDeploymentProject()
+        {
+            // ARRANGE
+            var tempDirectoryPath = new TestAppManager().GetProjectPath(string.Empty);
+            var webAppWithDockerFilePath = Path.Combine(tempDirectoryPath, "testapps", "WebAppWithDockerFile");
+            var orchestrator = await GetOrchestrator(webAppWithDockerFilePath);
+            await _commandLineWrapper.Run("git init", tempDirectoryPath);
+
+            // ACT
+            var recommendations = await orchestrator.GenerateRecommendationsToSaveDeploymentProject();
+
+            // ASSERT
+            var anyNonCdkRecommendations = recommendations.Where(x => x.Recipe.DeploymentType != DeploymentTypes.CdkProject);
+            Assert.False(anyNonCdkRecommendations.Any());
+
+            Assert.NotNull(recommendations.FirstOrDefault(x => x.Recipe.Id == "AspNetAppEcsFargate"));
+            Assert.NotNull(recommendations.FirstOrDefault(x => x.Recipe.Id == "AspNetAppElasticBeanstalkLinux"));
         }
 
         [Fact]
