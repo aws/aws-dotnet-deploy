@@ -45,9 +45,22 @@ namespace AWS.Deploy.ServerMode.Client
                 throw new InvalidOperationException();
             }
 
-            foreach (var line in stdIn)
+            try
             {
-                await process.StandardInput.WriteLineAsync(line).ConfigureAwait(false);
+                foreach (var line in stdIn)
+                {
+                    await process.StandardInput.WriteLineAsync(line).ConfigureAwait(false);
+                }
+            }
+            catch (Exception ex)
+            {
+                process.Kill();
+
+                return await Task.FromResult(new RunResult
+                {
+                    ExitCode = -1,
+                    StandardError = ex.Message
+                }).ConfigureAwait(false);
             }
 
             process.OutputDataReceived += (sender, e) =>
