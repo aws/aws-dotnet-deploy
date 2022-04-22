@@ -80,8 +80,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             var directoryManager = new DirectoryManager();
             var fileManager = new FileManager();
             var deploymentManifestEngine = new DeploymentManifestEngine(directoryManager, fileManager);
-            var commandLineWrapper = new CommandLineWrapper(_inMemoryInteractiveService);
-            return new CustomRecipeLocator(deploymentManifestEngine, _inMemoryInteractiveService, commandLineWrapper, directoryManager);
+            return new CustomRecipeLocator(deploymentManifestEngine, _inMemoryInteractiveService, directoryManager);
         }
 
         protected virtual void Dispose(bool disposing)

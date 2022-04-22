@@ -23,20 +23,14 @@ namespace AWS.Deploy.Orchestration
     /// </summary>
     public class CustomRecipeLocator : ICustomRecipeLocator
     {
-        private const string GIT_STATUS_COMMAND = "git worktree list";
-        private const string SVN_STATUS_COMMAND = "svn status";
-
         private readonly string _ignorePathSubstring = Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar;
         private readonly IOrchestratorInteractiveService _orchestratorInteractiveService;
-        private readonly ICommandLineWrapper _commandLineWrapper;
         private readonly IDeploymentManifestEngine _deploymentManifestEngine;
         private readonly IDirectoryManager _directoryManager;
 
-        public CustomRecipeLocator(IDeploymentManifestEngine deploymentManifestEngine, IOrchestratorInteractiveService orchestratorInteractiveService,
-            ICommandLineWrapper commandLineWrapper, IDirectoryManager directoryManager)
+        public CustomRecipeLocator(IDeploymentManifestEngine deploymentManifestEngine, IOrchestratorInteractiveService orchestratorInteractiveService, IDirectoryManager directoryManager)
         {
             _orchestratorInteractiveService = orchestratorInteractiveService;
-            _commandLineWrapper = commandLineWrapper;
             _deploymentManifestEngine = deploymentManifestEngine;
             _directoryManager = directoryManager;
         }
@@ -55,13 +49,19 @@ namespace AWS.Deploy.Orchestration
             foreach (var recipePath in await LocateRecipePathsFromManifestFile(targetApplicationFullPath))
             {
                 if (ContainsRecipeFile(recipePath))
+                {
+                    _orchestratorInteractiveService.LogMessageLine($"Found custom recipe file at: {recipePath}");
                     customRecipePaths.Add(recipePath);
+                }
             }
 
             foreach (var recipePath in LocateAlternateRecipePaths(targetApplicationFullPath, solutionDirectoryPath))
             {
                 if (ContainsRecipeFile(recipePath))
+                {
+                    _orchestratorInteractiveService.LogMessageLine($"Found custom recipe file at: {recipePath}");
                     customRecipePaths.Add(recipePath);
+                }
             }
 
             return customRecipePaths;
@@ -88,9 +88,9 @@ namespace AWS.Deploy.Orchestration
         }
 
         /// <summary>
-        /// Fetches custom recipe paths from other locations that are monitored by the same source control root
-        /// as the target application that needs to be deployed.
-        /// If the target application is not under source control then it scans the sub-directories of the solution folder for custom recipes.
+        /// Fetches custom recipe paths from other locations that are monitored by the same source control root as the target application that needs to be deployed.
+        /// If the target application is not under source control, then it scans the sub-directories of the solution folder for custom recipes.
+        /// If source control root directory is equal to the file system root, then it scans the sub-directories of the solution folder for custom recipes.
         /// </summary>
         /// <param name="targetApplicationFullPath">The absolute path to the target application csproj or fsproj file</param>
         /// <param name="solutionDirectoryPath">The absolute path of the directory which contains the solution file for the target application</param>
@@ -98,16 +98,11 @@ namespace AWS.Deploy.Orchestration
         private List<string> LocateAlternateRecipePaths(string targetApplicationFullPath, string solutionDirectoryPath )
         {
             var targetApplicationDirectoryPath = _directoryManager.GetDirectoryInfo(targetApplicationFullPath).Parent.FullName;
-            string? rootDirectoryPath;
+            var fileSystemRootPath = _directoryManager.GetDirectoryInfo(targetApplicationDirectoryPath).Root.FullName;
+            var rootDirectoryPath = GetSourceControlRootDirectory(targetApplicationDirectoryPath);
 
-            if (IsDirectoryUnderSourceControl(targetApplicationDirectoryPath))
-            {
-                rootDirectoryPath = GetSourceControlRootDirectory(targetApplicationDirectoryPath);
-            }
-            else
-            {
+            if (string.IsNullOrEmpty(rootDirectoryPath) || string.Equals(rootDirectoryPath, fileSystemRootPath))
                 rootDirectoryPath = solutionDirectoryPath;
-            }
 
             return GetRecipePathsFromRootDirectory(rootDirectoryPath);
         }
@@ -121,9 +116,20 @@ namespace AWS.Deploy.Orchestration
         private List<string> GetRecipePathsFromRootDirectory(string? rootDirectoryPath)
         {
             var recipePaths = new List<string>();
+
             if (!string.IsNullOrEmpty(rootDirectoryPath) && _directoryManager.Exists(rootDirectoryPath))
             {
-                foreach (var recipeFilePath in _directoryManager.GetFiles(rootDirectoryPath, "*.recipe", SearchOption.AllDirectories))
+                var recipePathList = new List<string>();
+                try
+                {
+                    recipePathList = _directoryManager.GetFiles(rootDirectoryPath, "*.recipe", SearchOption.AllDirectories).ToList();
+                }
+                catch (Exception e)
+                {
+                    _orchestratorInteractiveService.LogMessageLine($"Failed to find custom recipe paths starting from {rootDirectoryPath}. Encountered the following exception: {e.GetType()}");
+                }
+
+                foreach (var recipeFilePath in recipePathList)
                 {
                     if (recipeFilePath.Contains(_ignorePathSubstring))
                         continue;
@@ -134,45 +140,28 @@ namespace AWS.Deploy.Orchestration
         }
 
         /// <summary>
-        /// This method finds the root directory that is monitored by the same source control as the current directory.
-        /// </summary>
-        /// <param name="currentDirectoryPath">The absolute path of the current directory</param>
-        /// <returns>The source control root directory absolute path.</returns>
-        private string? GetSourceControlRootDirectory(string currentDirectoryPath)
-        {
-            var possibleRootDirectoryPath = currentDirectoryPath;
-            while (IsDirectoryUnderSourceControl(currentDirectoryPath))
-            {
-                possibleRootDirectoryPath = currentDirectoryPath;
-                var currentDirectoryInfo = _directoryManager.GetDirectoryInfo(currentDirectoryPath);
-                if (currentDirectoryInfo.Parent == null)
-                {
-                    break;
-                }
-                currentDirectoryPath = currentDirectoryInfo.Parent.FullName;
-            }
-            return possibleRootDirectoryPath;
-        }
-
-        /// <summary>
-        /// Helper method to find if the directory is monitored by a source control system.
+        /// Helper method to find the source control root directory of the current directory path.
+        /// If the current directory is not monitored by any source control system, then it returns string.Empty
         /// </summary>
         /// <param name="directoryPath">An absolute directory path.</param>
-        /// <returns></returns>
-        private bool IsDirectoryUnderSourceControl(string? directoryPath)
+        /// <returns> First parent directory path that contains a ".git" folder or string.Empty if cannot find any</returns>
+        private string GetSourceControlRootDirectory(string? directoryPath)
         {
             var currentDir = directoryPath;
             while(currentDir != null)
             {
                 if(_directoryManager.GetDirectories(currentDir, ".git").Any())
                 {
-                    return true;
+                    var sourceControlRootDirectory = _directoryManager.GetDirectoryInfo(currentDir).FullName;
+                    _orchestratorInteractiveService.LogMessageLine($"source control root directory found at: {sourceControlRootDirectory}");
+                    return sourceControlRootDirectory;
                 }
 
                 currentDir = _directoryManager.GetDirectoryInfo(currentDir).Parent?.FullName;
             }
 
-            return false;
+            _orchestratorInteractiveService.LogMessageLine($"could not find any source control root directory");
+            return string.Empty;
         }
 
         /// <summary>

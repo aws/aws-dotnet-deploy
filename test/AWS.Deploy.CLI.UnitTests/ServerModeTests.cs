@@ -57,8 +57,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var deploymentManifestEngine = new DeploymentManifestEngine(directoryManager, fileManager);
             var consoleInteractiveServiceImpl = new ConsoleInteractiveServiceImpl();
             var consoleOrchestratorLogger = new ConsoleOrchestratorLogger(consoleInteractiveServiceImpl);
-            var commandLineWrapper = new CommandLineWrapper(consoleOrchestratorLogger);
-            var customRecipeLocator = new CustomRecipeLocator(deploymentManifestEngine, consoleOrchestratorLogger, commandLineWrapper, directoryManager);
+            var customRecipeLocator = new CustomRecipeLocator(deploymentManifestEngine, consoleOrchestratorLogger, directoryManager);
             var projectDefinitionParser = new ProjectDefinitionParser(fileManager, directoryManager);
 
             var recipeController = new RecipeController(customRecipeLocator, projectDefinitionParser);
@@ -75,8 +74,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var deploymentManifestEngine = new DeploymentManifestEngine(directoryManager, fileManager);
             var consoleInteractiveServiceImpl = new ConsoleInteractiveServiceImpl();
             var consoleOrchestratorLogger = new ConsoleOrchestratorLogger(consoleInteractiveServiceImpl);
-            var commandLineWrapper = new CommandLineWrapper(consoleOrchestratorLogger);
-            var customRecipeLocator = new CustomRecipeLocator(deploymentManifestEngine, consoleOrchestratorLogger, commandLineWrapper, directoryManager);
+            var customRecipeLocator = new CustomRecipeLocator(deploymentManifestEngine, consoleOrchestratorLogger, directoryManager);
             var projectDefinitionParser = new ProjectDefinitionParser(fileManager, directoryManager);
 
             var recipeController = new RecipeController(customRecipeLocator, projectDefinitionParser);
