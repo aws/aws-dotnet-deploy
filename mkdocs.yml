@@ -20,6 +20,7 @@ nav:
       - AWS App Runner: docs/aws-computes/app-runner.md
       - Amazon S3: docs/aws-computes/s3.md
     - Features:
+      - JSON configuration file: docs/features/config-file.md
       - Recipe: docs/features/recipe.md
       - Recommendation Engine: docs/features/recommendation-engine.md
       - Deployment Project: docs/features/deployment-project.md
