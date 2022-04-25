@@ -34,18 +34,18 @@ The deployment tool is distributed as a .NET Tool from NuGet.org. The installati
 To install the deployment tool, use the dotnet tool install command:
 
 ```
-dotnet tool install -g aws.deploy.cli
+dotnet tool install -g aws.deploy.tools
 ```
 
 To update to the latest version of the deployment tool, use the dotnet tool update command.
 
 ```
-dotnet tool update -g aws.deploy.cli
+dotnet tool update -g aws.deploy.tools
 ```
 
 To uninstall it, simply type:
 ```
-dotnet tool uninstall -g aws.deploy.cli
+dotnet tool uninstall -g aws.deploy.tools
 ```
 
 Once you install the tool, you can view the list of available commands by typing:

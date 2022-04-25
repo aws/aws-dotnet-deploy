@@ -8,7 +8,7 @@
     <PackAsTool>true</PackAsTool>
     <Description>Opinionated tooling that simplifies deployment of .NET applications with minimum AWS knowledge.</Description>
     <Product>AWS .NET deployment tool</Product>
-    <PackageId>AWS.Deploy.CLI</PackageId>
+    <PackageId>AWS.Deploy.Tools</PackageId>
     <PackageTags>AWS;Amazon;ElasticBeanstalk;ECS;Deploy</PackageTags>
     <AssemblyName>AWS.Deploy.CLI</AssemblyName>
     <RootNamespace>AWS.Deploy.CLI</RootNamespace>
