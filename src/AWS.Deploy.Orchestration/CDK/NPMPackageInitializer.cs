@@ -71,7 +71,7 @@ namespace AWS.Deploy.Orchestration.CDK
 
         public async Task Initialize(string workingDirectory, Version cdkVersion)
         {
-            _interactiveService.LogDebugLine($"Creating package.json at {workingDirectory}.");
+            _interactiveService.LogDebugMessage($"Creating package.json at {workingDirectory}.");
             var packageJsonFileContent = _packageJsonGenerator.Generate(cdkVersion);
             var packageJsonFilePath = Path.Combine(workingDirectory, _packageJsonFileName);
 

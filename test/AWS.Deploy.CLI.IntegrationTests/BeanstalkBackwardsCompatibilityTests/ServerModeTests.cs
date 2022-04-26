@@ -65,10 +65,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests
                 await signalRClient.JoinSession(sessionId);
 
                 var logOutput = new StringBuilder();
-                signalRClient.ReceiveLogAllLogAction = (line) =>
-                {
-                    logOutput.AppendLine(line);
-                };
+                AWS.Deploy.CLI.IntegrationTests.ServerModeTests.RegisterSignalRMessageCallbacks(signalRClient, logOutput);
 
                 await restClient.SetDeploymentTargetAsync(sessionId, new SetDeploymentTargetInput
                 {

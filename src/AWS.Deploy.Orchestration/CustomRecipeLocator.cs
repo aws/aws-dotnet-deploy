@@ -50,7 +50,7 @@ namespace AWS.Deploy.Orchestration
             {
                 if (ContainsRecipeFile(recipePath))
                 {
-                    _orchestratorInteractiveService.LogMessageLine($"Found custom recipe file at: {recipePath}");
+                    _orchestratorInteractiveService.LogInfoMessage($"Found custom recipe file at: {recipePath}");
                     customRecipePaths.Add(recipePath);
                 }
             }
@@ -59,7 +59,7 @@ namespace AWS.Deploy.Orchestration
             {
                 if (ContainsRecipeFile(recipePath))
                 {
-                    _orchestratorInteractiveService.LogMessageLine($"Found custom recipe file at: {recipePath}");
+                    _orchestratorInteractiveService.LogInfoMessage($"Found custom recipe file at: {recipePath}");
                     customRecipePaths.Add(recipePath);
                 }
             }
@@ -80,8 +80,8 @@ namespace AWS.Deploy.Orchestration
             }
             catch
             {
-                _orchestratorInteractiveService.LogMessageLine(Environment.NewLine);
-                _orchestratorInteractiveService.LogErrorMessageLine("Failed to load custom deployment recommendations " +
+                _orchestratorInteractiveService.LogErrorMessage(Environment.NewLine);
+                _orchestratorInteractiveService.LogErrorMessage("Failed to load custom deployment recommendations " +
                    "from the deployment-manifest file due to an error while trying to deserialze the file.");
                 return await Task.FromResult(new List<string>());
             }
@@ -126,7 +126,7 @@ namespace AWS.Deploy.Orchestration
                 }
                 catch (Exception e)
                 {
-                    _orchestratorInteractiveService.LogMessageLine($"Failed to find custom recipe paths starting from {rootDirectoryPath}. Encountered the following exception: {e.GetType()}");
+                    _orchestratorInteractiveService.LogInfoMessage($"Failed to find custom recipe paths starting from {rootDirectoryPath}. Encountered the following exception: {e.GetType()}");
                 }
 
                 foreach (var recipeFilePath in recipePathList)
@@ -153,14 +153,14 @@ namespace AWS.Deploy.Orchestration
                 if(_directoryManager.GetDirectories(currentDir, ".git").Any())
                 {
                     var sourceControlRootDirectory = _directoryManager.GetDirectoryInfo(currentDir).FullName;
-                    _orchestratorInteractiveService.LogMessageLine($"source control root directory found at: {sourceControlRootDirectory}");
+                    _orchestratorInteractiveService.LogDebugMessage($"Source control root directory found at: {sourceControlRootDirectory}");
                     return sourceControlRootDirectory;
                 }
 
                 currentDir = _directoryManager.GetDirectoryInfo(currentDir).Parent?.FullName;
             }
 
-            _orchestratorInteractiveService.LogMessageLine($"could not find any source control root directory");
+            _orchestratorInteractiveService.LogDebugMessage($"Could not find any source control root directory");
             return string.Empty;
         }
 

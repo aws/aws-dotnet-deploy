@@ -180,7 +180,7 @@ namespace AWS.Deploy.Orchestration
 
             if (!recommendation.ProjectDefinition.HasDockerFile)
             {
-                _interactiveService.LogMessageLine("Generating Dockerfile...");
+                _interactiveService.LogInfoMessage("Generating Dockerfile...");
                 try
                 {
                     _dockerEngine.GenerateDockerFile();
@@ -209,14 +209,16 @@ namespace AWS.Deploy.Orchestration
                 }
 
                 await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation, imageTag);
+
+                _interactiveService.LogSectionStart("Pushing container image to Elastic Container Registry (ECR)", "Using the docker CLI to log on to ECR and push the local image to ECR.");
                 await _deploymentBundleHandler.PushDockerImageToECR(recommendation, respositoryName, imageTag);
             }
             catch(DockerBuildFailedException ex)
             {
-                _interactiveService.LogErrorMessageLine("We were unable to build the docker image due to the following error:");
-                _interactiveService.LogErrorMessageLine(ex.Message);
-                _interactiveService.LogErrorMessageLine("Docker builds usually fail due to executing them from a working directory that is incompatible with the Dockerfile.");
-                _interactiveService.LogErrorMessageLine("You can try setting the 'Docker Execution Directory' in the option settings.");
+                _interactiveService.LogErrorMessage("We were unable to build the docker image due to the following error:");
+                _interactiveService.LogErrorMessage(ex.Message);
+                _interactiveService.LogErrorMessage("Docker builds usually fail due to executing them from a working directory that is incompatible with the Dockerfile.");
+                _interactiveService.LogErrorMessage("You can try setting the 'Docker Execution Directory' in the option settings.");
                 return false;
             }
 
@@ -236,16 +238,16 @@ namespace AWS.Deploy.Orchestration
             }
             catch (DotnetPublishFailedException exception)
             {
-                _interactiveService.LogErrorMessageLine("We were unable to package the application using 'dotnet publish' due to the following error:");
-                _interactiveService.LogErrorMessageLine(exception.Message);
-                _interactiveService.LogDebugLine(exception.PrettyPrint());
+                _interactiveService.LogErrorMessage("We were unable to package the application using 'dotnet publish' due to the following error:");
+                _interactiveService.LogErrorMessage(exception.Message);
+                _interactiveService.LogDebugMessage(exception.PrettyPrint());
                 return false;
             }
             catch (FailedToCreateZipFileException exception)
             {
-                _interactiveService.LogErrorMessageLine("We were unable to create a zip archive of the packaged application.");
-                _interactiveService.LogErrorMessageLine("Normally this indicates a problem running the \"zip\" utility. Make sure that application is installed and available in your PATH.");
-                _interactiveService.LogDebugLine(exception.PrettyPrint());
+                _interactiveService.LogErrorMessage("We were unable to create a zip archive of the packaged application.");
+                _interactiveService.LogErrorMessage("Normally this indicates a problem running the \"zip\" utility. Make sure that application is installed and available in your PATH.");
+                _interactiveService.LogDebugMessage(exception.PrettyPrint());
                 return false;
             }
 

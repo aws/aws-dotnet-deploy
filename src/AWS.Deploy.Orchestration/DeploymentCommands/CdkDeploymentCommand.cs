@@ -31,10 +31,8 @@ namespace AWS.Deploy.Orchestration.DeploymentCommands
             if (orchestrator._directoryManager == null)
                 throw new InvalidOperationException($"{nameof(orchestrator._directoryManager)} must not be null.");
 
-            orchestrator._interactiveService.LogMessageLine(string.Empty);
-            orchestrator._interactiveService.LogMessageLine($"Initiating deployment: {recommendation.Name}");
-
-            orchestrator._interactiveService.LogMessageLine("Configuring AWS Cloud Development Kit (CDK)...");
+            orchestrator._interactiveService.LogSectionStart("Configuring AWS Cloud Development Kit (CDK)",
+                "Ensure a compatible CDK version is installed and the CDK bootstrap CloudFormation stack has been created. A CDK project to perform the deployment is generated unless an existing deployment project was selected.");
             var cdkProject = await orchestrator._cdkProjectHandler.ConfigureCdkProject(orchestrator._session, cloudApplication, recommendation);
 
             var projFiles = orchestrator._directoryManager.GetProjFiles(cdkProject);

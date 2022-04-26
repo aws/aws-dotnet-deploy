@@ -46,16 +46,16 @@ namespace AWS.Deploy.Orchestration
 
         public async Task BuildDockerImage(CloudApplication cloudApplication, Recommendation recommendation, string imageTag)
         {
-            _interactiveService.LogMessageLine(string.Empty);
-            _interactiveService.LogMessageLine("Building the docker image...");
+            _interactiveService.LogInfoMessage(string.Empty);
+            _interactiveService.LogInfoMessage("Building the docker image...");
 
             var dockerExecutionDirectory = GetDockerExecutionDirectory(recommendation);
             var dockerFile = GetDockerFilePath(recommendation);
             var buildArgs = GetDockerBuildArgs(recommendation);
 
             var dockerBuildCommand = $"docker build -t {imageTag} -f \"{dockerFile}\"{buildArgs} .";
-            _interactiveService.LogMessageLine($"Docker Execution Directory: {Path.GetFullPath(dockerExecutionDirectory)}");
-            _interactiveService.LogMessageLine($"Docker Build Command: {dockerBuildCommand}");
+            _interactiveService.LogInfoMessage($"Docker Execution Directory: {Path.GetFullPath(dockerExecutionDirectory)}");
+            _interactiveService.LogInfoMessage($"Docker Build Command: {dockerBuildCommand}");
 
             recommendation.DeploymentBundle.DockerExecutionDirectory = dockerExecutionDirectory;
 
@@ -68,8 +68,8 @@ namespace AWS.Deploy.Orchestration
 
         public async Task PushDockerImageToECR(Recommendation recommendation, string repositoryName, string sourceTag)
         {
-            _interactiveService.LogMessageLine(string.Empty);
-            _interactiveService.LogMessageLine("Pushing the docker image to ECR repository...");
+            _interactiveService.LogInfoMessage(string.Empty);
+            _interactiveService.LogInfoMessage("Pushing the docker image to ECR repository...");
 
             await InitiateDockerLogin();
 
@@ -87,8 +87,8 @@ namespace AWS.Deploy.Orchestration
 
         public async Task<string> CreateDotnetPublishZip(Recommendation recommendation)
         {
-            _interactiveService.LogMessageLine(string.Empty);
-            _interactiveService.LogMessageLine("Creating Dotnet Publish Zip file...");
+            _interactiveService.LogInfoMessage(string.Empty);
+            _interactiveService.LogInfoMessage("Creating Dotnet Publish Zip file...");
 
             var publishDirectoryInfo = _directoryManager.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
             var additionalArguments = recommendation.DeploymentBundle.DotnetPublishAdditionalBuildArguments;
