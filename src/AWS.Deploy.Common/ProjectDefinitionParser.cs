@@ -62,7 +62,14 @@ namespace AWS.Deploy.Common
 
             if (!_fileManager.Exists(projectPath))
             {
-                throw new ProjectFileNotFoundException(DeployToolErrorCode.ProjectPathNotFound, $"A project was not found at the path {projectPath}.");
+                throw new ProjectFileNotFoundException(DeployToolErrorCode.ProjectPathNotFound, $"Failed to find a valid .csproj or .fsproj file at path {projectPath}");
+            }
+
+            var extension = Path.GetExtension(projectPath);
+            if (!string.Equals(extension, ".csproj") && !string.Equals(extension, ".fsproj"))
+            {
+                var errorMeesage = $"Invalid project path {projectPath}. The project path must point to a .csproj or .fsproj file";
+                throw new ProjectFileNotFoundException(DeployToolErrorCode.ProjectPathNotFound, errorMeesage);
             }
 
             var xmlProjectFile = new XmlDocument();
