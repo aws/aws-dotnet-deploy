@@ -169,17 +169,22 @@ namespace AWS.Deploy.CLI.IntegrationTests.Services
             }
         }
 
-        public void LogErrorMessageLine(string message)
+        public void LogSectionStart(string message, string description)
         {
             WriteLine(message);
         }
 
-        public void LogMessageLine(string message)
+        public void LogErrorMessage(string message)
         {
             WriteLine(message);
         }
 
-        public void LogDebugLine(string message)
+        public void LogInfoMessage(string message)
+        {
+            WriteLine(message);
+        }
+
+        public void LogDebugMessage(string message)
         {
             WriteLine(message);
         }

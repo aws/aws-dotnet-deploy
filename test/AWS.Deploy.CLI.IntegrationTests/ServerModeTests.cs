@@ -189,10 +189,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
                 await signalRClient.JoinSession(sessionId);
 
                 var logOutput = new StringBuilder();
-                signalRClient.ReceiveLogAllLogAction = (line) =>
-                {
-                    logOutput.AppendLine(line);
-                };
+                RegisterSignalRMessageCallbacks(signalRClient, logOutput);
 
                 var getRecommendationOutput = await restClient.GetRecommendationsAsync(sessionId);
                 Assert.NotEmpty(getRecommendationOutput.Recommendations);
@@ -214,7 +211,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
                 Assert.Equal(StackStatus.CREATE_COMPLETE, stackStatus);
 
                 Assert.True(logOutput.Length > 0);
-                Assert.Contains("Initiating deployment", logOutput.ToString());
+                Assert.Contains("Pushing container image", logOutput.ToString());
 
                 var redeploymentSessionOutput = await restClient.StartDeploymentSessionAsync(new StartDeploymentSessionInput
                 {
@@ -312,6 +309,24 @@ namespace AWS.Deploy.CLI.IntegrationTests
             {
                 cancelSource.Cancel();
             }
+        }
+
+        internal static void RegisterSignalRMessageCallbacks(DeploymentCommunicationClient signalRClient, StringBuilder logOutput)
+        {
+            signalRClient.ReceiveLogSectionStart = (message, description) =>
+            {
+                logOutput.AppendLine(new string('*', message.Length));
+                logOutput.AppendLine(message);
+                logOutput.AppendLine(new string('*', message.Length));
+            };
+            signalRClient.ReceiveLogInfoMessage = (message) =>
+            {
+                logOutput.AppendLine(message);
+            };
+            signalRClient.ReceiveLogErrorMessage = (message) =>
+            {
+                logOutput.AppendLine(message);
+            };
         }
 
         private async Task<DeploymentStatus> WaitForDeployment(RestAPIClient restApiClient, string sessionId)
