@@ -18,6 +18,8 @@ namespace AWS.Deploy.ServerMode.Client
 
         Action<string>? ReceiveLogInfoMessage { get; set; }
 
+        Action<string, string>? ReceiveLogSectionStart { get; set; }
+
         Task JoinSession(string sessionId);
     }
 

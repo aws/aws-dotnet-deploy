@@ -311,7 +311,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             }
         }
 
-        internal static void RegisterSignalRMessageCallbacks(DeploymentCommunicationClient signalRClient, StringBuilder logOutput)
+        internal static void RegisterSignalRMessageCallbacks(IDeploymentCommunicationClient signalRClient, StringBuilder logOutput)
         {
             signalRClient.ReceiveLogSectionStart = (message, description) =>
             {
