@@ -57,8 +57,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var deploymentManifestEngine = new DeploymentManifestEngine(directoryManager, fileManager);
             var consoleInteractiveServiceImpl = new ConsoleInteractiveServiceImpl();
             var consoleOrchestratorLogger = new ConsoleOrchestratorLogger(consoleInteractiveServiceImpl);
-            var commandLineWrapper = new CommandLineWrapper(consoleOrchestratorLogger);
-            var customRecipeLocator = new CustomRecipeLocator(deploymentManifestEngine, consoleOrchestratorLogger, commandLineWrapper, directoryManager);
+            var customRecipeLocator = new CustomRecipeLocator(deploymentManifestEngine, consoleOrchestratorLogger, directoryManager);
             var projectDefinitionParser = new ProjectDefinitionParser(fileManager, directoryManager);
 
             var recipeController = new RecipeController(customRecipeLocator, projectDefinitionParser);
@@ -75,8 +74,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var deploymentManifestEngine = new DeploymentManifestEngine(directoryManager, fileManager);
             var consoleInteractiveServiceImpl = new ConsoleInteractiveServiceImpl();
             var consoleOrchestratorLogger = new ConsoleOrchestratorLogger(consoleInteractiveServiceImpl);
-            var commandLineWrapper = new CommandLineWrapper(consoleOrchestratorLogger);
-            var customRecipeLocator = new CustomRecipeLocator(deploymentManifestEngine, consoleOrchestratorLogger, commandLineWrapper, directoryManager);
+            var customRecipeLocator = new CustomRecipeLocator(deploymentManifestEngine, consoleOrchestratorLogger, directoryManager);
             var projectDefinitionParser = new ProjectDefinitionParser(fileManager, directoryManager);
 
             var recipeController = new RecipeController(customRecipeLocator, projectDefinitionParser);
@@ -134,8 +132,10 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var existingDeploymentSummary = new ExistingDeploymentSummary(
                 "name",
+                "baseRecipeId",
                 "recipeId",
                 "recipeName",
+                false,
                 "shortDescription",
                 "description",
                 "targetService",
@@ -153,8 +153,10 @@ namespace AWS.Deploy.CLI.UnitTests
         public void RecommendationSummary_ContainsCorrectDeploymentType(Deploy.Common.Recipes.DeploymentTypes deploymentType, DeploymentTypes expectedDeploymentType)
         {
             var recommendationSummary = new RecommendationSummary(
+                "baseRecipeId",
                 "recipeId",
                 "name",
+                false,
                 "shortDescription",
                 "description",
                 "targetService",

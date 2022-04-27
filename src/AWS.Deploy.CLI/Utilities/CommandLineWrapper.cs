@@ -89,7 +89,7 @@ namespace AWS.Deploy.CLI.Utilities
                 {
                     if(streamOutputToInteractiveService)
                     {
-                        _interactiveService.LogMessageLine(e.Data);
+                        _interactiveService.LogInfoMessage(e.Data);
                     }
 
                     strOutput.AppendLine(e.Data);
@@ -99,7 +99,7 @@ namespace AWS.Deploy.CLI.Utilities
                 {
                     if(streamOutputToInteractiveService)
                     {
-                        _interactiveService.LogMessageLine(e.Data);
+                        _interactiveService.LogInfoMessage(e.Data);
                     }
 
                     strError.AppendLine(e.Data);

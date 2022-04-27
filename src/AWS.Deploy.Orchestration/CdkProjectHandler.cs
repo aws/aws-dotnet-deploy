@@ -61,7 +61,7 @@ namespace AWS.Deploy.Orchestration
             else
             {
                 // Create a new temporary CDK project for a new deployment
-                _interactiveService.LogMessageLine("Generating AWS Cloud Development Kit (AWS CDK) deployment project");
+                _interactiveService.LogInfoMessage("Generating AWS Cloud Development Kit (AWS CDK) deployment project");
                 cdkProjectPath = CreateCdkProject(recommendation, session);
             }
 
@@ -101,8 +101,6 @@ namespace AWS.Deploy.Orchestration
                 { EnvironmentVariableKeys.AWS_EXECUTION_ENV, recipeInfo }
             };
 
-            _interactiveService.LogMessageLine("Deploying AWS CDK project");
-
             var appSettingsFilePath = Path.Combine(cdkProjectPath, "appsettings.json");
 
             // Ensure region is bootstrapped
@@ -115,6 +113,9 @@ namespace AWS.Deploy.Orchestration
             if (cdkBootstrap.ExitCode != 0)
                 throw new FailedToDeployCDKAppException(DeployToolErrorCode.FailedToRunCDKBootstrap, "The AWS CDK Bootstrap, which is the process of provisioning initial resources for the deployment environment, has failed. Please review the output above for additional details [and check out our troubleshooting guide for the most common failure reasons]. You can learn more about CDK bootstrapping at https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html.");
 
+
+            _interactiveService.LogSectionStart("Deploying AWS CDK project",
+                "Use the CDK project to create or update the AWS CloudFormation stack and deploy the project to the AWS resources in the stack.");
 
             var deploymentStartDate = DateTime.Now;
             // Handover to CDK command line tool
@@ -181,7 +182,7 @@ namespace AWS.Deploy.Orchestration
             var templateEngine = new TemplateEngine();
             templateEngine.GenerateCDKProjectFromTemplate(recommendation, session, saveCdkDirectoryPath, assemblyName);
 
-            _interactiveService.LogDebugLine($"Saving AWS CDK deployment project to: {saveCdkDirectoryPath}");
+            _interactiveService.LogDebugMessage($"Saving AWS CDK deployment project to: {saveCdkDirectoryPath}");
             return saveCdkDirectoryPath;
         }
 
@@ -199,8 +200,8 @@ namespace AWS.Deploy.Orchestration
             }
             catch (Exception exception)
             {
-                _interactiveService.LogDebugLine(exception.PrettyPrint());
-                _interactiveService.LogErrorMessageLine($"We were unable to delete the temporary project that was created for this deployment. Please manually delete it at this location: {cdkProjectPath}");
+                _interactiveService.LogDebugMessage(exception.PrettyPrint());
+                _interactiveService.LogErrorMessage($"We were unable to delete the temporary project that was created for this deployment. Please manually delete it at this location: {cdkProjectPath}");
             }
         }
     }

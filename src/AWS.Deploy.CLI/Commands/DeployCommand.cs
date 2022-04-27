@@ -121,8 +121,7 @@ namespace AWS.Deploy.CLI.Commands
 
         private void DisplayOutputResources(List<DisplayedResourceItem> displayedResourceItems)
         {
-            _toolInteractiveService.WriteLine("Resources");
-            _toolInteractiveService.WriteLine("---------");
+            _orchestratorInteractiveService.LogSectionStart("AWS Resource Details", null);
             foreach (var resource in displayedResourceItems)
             {
                 _toolInteractiveService.WriteLine($"{resource.Description}:");
@@ -677,6 +676,9 @@ namespace AWS.Deploy.CLI.Commands
         {
             if (selectedRecommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.Container)
             {
+                _orchestratorInteractiveService.LogSectionStart("Creating deployment image",
+                    "Using the docker CLI to perform a docker build to create a container image.");
+
                 while (!await orchestrator.CreateContainerDeploymentBundle(cloudApplication, selectedRecommendation))
                 {
                     if (_toolInteractiveService.DisableInteractive)
@@ -710,6 +712,9 @@ namespace AWS.Deploy.CLI.Commands
             }
             else if (selectedRecommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.DotnetPublishZipFile)
             {
+                _orchestratorInteractiveService.LogSectionStart("Creating deployment zip bundle",
+                    "Using the dotnet CLI build the project and zip the publish artifacts.");
+
                 var dotnetPublishDeploymentBundleResult = await orchestrator.CreateDotnetPublishDeploymentBundle(selectedRecommendation);
                 if (!dotnetPublishDeploymentBundleResult)
                     throw new FailedToCreateDeploymentBundleException(DeployToolErrorCode.FailedToCreateDotnetPublishDeploymentBundle, "Failed to create a deployment bundle");

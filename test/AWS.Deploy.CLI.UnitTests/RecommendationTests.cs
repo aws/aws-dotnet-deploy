@@ -420,6 +420,52 @@ namespace AWS.Deploy.CLI.UnitTests
         }
 
         [Fact]
+        public async Task IsDisplayable_NotEmptyOperation()
+        {
+            var engine = await BuildRecommendationEngine("WebAppNoDockerFile");
+
+            var recommendations = await engine.ComputeRecommendations();
+
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var vpcIdOptionSetting = beanstalkRecommendation.GetOptionSetting("VpcId");
+            var subnetsSetting = beanstalkRecommendation.GetOptionSetting("Subnets");
+
+            // Before dependency aren't satisfied
+            Assert.True(beanstalkRecommendation.IsOptionSettingDisplayable(vpcIdOptionSetting));
+            Assert.False(beanstalkRecommendation.IsOptionSettingDisplayable(subnetsSetting));
+
+            // Satisfy dependencies
+            vpcIdOptionSetting.SetValueOverride("vpc-1234abcd");
+            Assert.True(beanstalkRecommendation.IsOptionSettingDisplayable(subnetsSetting));
+        }
+
+        [Fact]
+        public async Task IsDisplayable_NotEmptyOperation_ListType()
+        {
+            var engine = await BuildRecommendationEngine("WebAppNoDockerFile");
+
+            var recommendations = await engine.ComputeRecommendations();
+
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var vpcIdOptionSetting = beanstalkRecommendation.GetOptionSetting("VpcId");
+            var subnetsSetting = beanstalkRecommendation.GetOptionSetting("Subnets");
+            var securityGroupsSetting = beanstalkRecommendation.GetOptionSetting("SecurityGroups");
+
+            // Before dependency aren't satisfied
+            Assert.True(beanstalkRecommendation.IsOptionSettingDisplayable(vpcIdOptionSetting));
+            Assert.False(beanstalkRecommendation.IsOptionSettingDisplayable(subnetsSetting));
+            Assert.False(beanstalkRecommendation.IsOptionSettingDisplayable(securityGroupsSetting));
+
+            // Satisfy 1 dependency
+            vpcIdOptionSetting.SetValueOverride("vpc-1234abcd");
+            Assert.False(beanstalkRecommendation.IsOptionSettingDisplayable(securityGroupsSetting));
+
+            // Satisfy 2 dependencies
+            subnetsSetting.SetValueOverride(new SortedSet<string> { "subnet-1234abcd" });
+            Assert.True(beanstalkRecommendation.IsOptionSettingDisplayable(securityGroupsSetting));
+        }
+
+        [Fact]
         public void LoadAvailableRecommendationTests()
         {
             var tests = RecommendationTestFactory.LoadAvailableTests();

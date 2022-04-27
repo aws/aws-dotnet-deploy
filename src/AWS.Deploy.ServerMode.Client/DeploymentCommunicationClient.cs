@@ -12,13 +12,11 @@ namespace AWS.Deploy.ServerMode.Client
 {
     public interface IDeploymentCommunicationClient : IDisposable
     {
-        Action<string>? ReceiveLogDebugLine { get; set; }
+        Action<string>? ReceiveLogDebugMessage { get; set; }
 
-        Action<string>? ReceiveLogErrorMessageLine { get; set; }
+        Action<string>? ReceiveLogErrorMessage { get; set; }
 
-        Action<string>? ReceiveLogMessageLineAction { get; set; }
-
-        Action<string>? ReceiveLogAllLogAction { get; set; }
+        Action<string>? ReceiveLogInfoMessage { get; set; }
 
         Task JoinSession(string sessionId);
     }
@@ -30,11 +28,11 @@ namespace AWS.Deploy.ServerMode.Client
         private bool _initialized = false;
         private readonly HubConnection _connection;
 
-        public Action<string>? ReceiveLogDebugLine { get; set; }
-        public Action<string>? ReceiveLogErrorMessageLine { get; set; }
-        public Action<string>? ReceiveLogMessageLineAction { get; set; }
+        public Action<string>? ReceiveLogDebugMessage { get; set; }
+        public Action<string>? ReceiveLogErrorMessage { get; set; }
+        public Action<string>? ReceiveLogInfoMessage { get; set; }
+        public Action<string, string>? ReceiveLogSectionStart { get; set; }
 
-        public Action<string>? ReceiveLogAllLogAction { get; set; }
 
         public DeploymentCommunicationClient(string baseUrl)
         {
@@ -44,22 +42,24 @@ namespace AWS.Deploy.ServerMode.Client
                 .WithAutomaticReconnect()
                 .Build();
 
-            _connection.On<string>("OnLogDebugLine", (message) =>
+            _connection.On<string>("OnLogDebugMessage", (message) =>
             {
-                ReceiveLogDebugLine?.Invoke(message);
-                ReceiveLogAllLogAction?.Invoke(message);
+                ReceiveLogDebugMessage?.Invoke(message);
             });
 
-            _connection.On<string>("OnLogErrorMessageLine", (message) =>
+            _connection.On<string>("OnLogErrorMessage", (message) =>
             {
-                ReceiveLogErrorMessageLine?.Invoke(message);
-                ReceiveLogAllLogAction?.Invoke(message);
+                ReceiveLogErrorMessage?.Invoke(message);
             });
 
-            _connection.On<string>("OnLogMessageLine", (message) =>
+            _connection.On<string>("OnLogInfoMessage", (message) =>
             {
-                ReceiveLogMessageLineAction?.Invoke(message);
-                ReceiveLogAllLogAction?.Invoke(message);
+                ReceiveLogInfoMessage?.Invoke(message);
+            });
+
+            _connection.On<string, string>("OnLogSectionStart", (message, description) =>
+            {
+                ReceiveLogSectionStart?.Invoke(message, description);
             });
         }
 

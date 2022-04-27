@@ -60,7 +60,7 @@ namespace AWS.Deploy.Orchestration.CDK
                 var installedCdkVersion = await _cdkInstaller.GetVersion(workingDirectory);
                 if (installedCdkVersion.Success && installedCdkVersion.Result?.CompareTo(cdkVersion) >= 0)
                 {
-                    _interactiveService.LogDebugLine($"CDK version {installedCdkVersion.Result} found in global node_modules.");
+                    _interactiveService.LogDebugMessage($"CDK version {installedCdkVersion.Result} found in global node_modules.");
                     return;
                 }
 

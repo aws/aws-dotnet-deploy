@@ -232,7 +232,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
             var signalRClient = new DeploymentCommunicationClient(baseUrl);
             await signalRClient.JoinSession(sessionId);
 
-            signalRClient.ReceiveLogAllLogAction = (line) => { logOutput.AppendLine(line); };
+            AWS.Deploy.CLI.IntegrationTests.ServerModeTests.RegisterSignalRMessageCallbacks(signalRClient, logOutput);
         }
 
         private async Task<RecommendationSummary> GetRecommendationsAndSelectAppRunner(RestAPIClient restClient, string sessionId)

@@ -199,11 +199,49 @@ namespace AWS.Deploy.Common
                 var dependsOnOptionSetting = GetOptionSetting(dependency.Id);
                 var dependsOnOptionSettingValue = GetOptionSettingValue(dependsOnOptionSetting);
                 if (
-                    dependsOnOptionSetting != null &&
-                    dependsOnOptionSettingValue != null &&
-                    !dependsOnOptionSettingValue.Equals(dependency.Value))
+                    dependsOnOptionSetting != null)
                 {
-                    return false;
+                    if (dependsOnOptionSettingValue == null)
+                    {
+                        if (dependency.Operation == null ||
+                               dependency.Operation == PropertyDependencyOperationType.Equals)
+                        {
+                            if (dependency.Value != null)
+                                return false;
+                        }
+                        else if (dependency.Operation == PropertyDependencyOperationType.NotEmpty)
+                        {
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        if (dependency.Operation == null ||
+                               dependency.Operation == PropertyDependencyOperationType.Equals)
+                        {
+                            if (!dependsOnOptionSettingValue.Equals(dependency.Value))
+                                return false;
+                        }
+                        else if (dependency.Operation == PropertyDependencyOperationType.NotEmpty)
+                        {
+                            if (dependsOnOptionSetting.Type == OptionSettingValueType.List &&
+                                dependsOnOptionSettingValue.TryDeserialize<SortedSet<string>>(out var listValue) &&
+                                !listValue.Any())
+                            {
+                                return false;
+                            }
+                            else if (dependsOnOptionSetting.Type == OptionSettingValueType.KeyValue &&
+                                dependsOnOptionSettingValue.TryDeserialize<Dictionary<string, string>>(out var keyValue) &&
+                                !keyValue.Any())
+                            {
+                                return false;
+                            }
+                            else if (string.IsNullOrEmpty(dependsOnOptionSettingValue?.ToString()))
+                            {
+                                return false;
+                            }
+                        }
+                    }
                 }
             }
 

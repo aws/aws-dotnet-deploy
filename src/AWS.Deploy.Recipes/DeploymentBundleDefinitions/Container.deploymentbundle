@@ -23,8 +23,8 @@
         },
         {
             "Id": "ECRRepositoryName",
-            "Name": "ECS Repository Name",
-            "Description": "Specifies the ECR repository where the docker images will be stored",
+            "Name": "ECR Repository Name",
+            "Description": "Specifies the ECR repository where the Docker images will be stored",
             "Type": "String",
             "TypeHint": "ECRRepository",
             "DefaultValue": "{DefaultECRRepositoryName}",

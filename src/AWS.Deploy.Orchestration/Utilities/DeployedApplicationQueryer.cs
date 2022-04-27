@@ -107,13 +107,13 @@ namespace AWS.Deploy.Orchestration.Utilities
                 }
                 catch (FailedToUpdateLocalUserSettingsFileException ex)
                 {
-                    _orchestratorInteractiveService.LogErrorMessageLine(ex.Message);
-                    _orchestratorInteractiveService.LogDebugLine(ex.PrettyPrint());
+                    _orchestratorInteractiveService.LogErrorMessage(ex.Message);
+                    _orchestratorInteractiveService.LogDebugMessage(ex.PrettyPrint());
                 }
                 catch (InvalidLocalUserSettingsFileException ex)
                 {
-                    _orchestratorInteractiveService.LogErrorMessageLine(ex.Message);
-                    _orchestratorInteractiveService.LogDebugLine(ex.PrettyPrint());
+                    _orchestratorInteractiveService.LogErrorMessage(ex.Message);
+                    _orchestratorInteractiveService.LogDebugMessage(ex.PrettyPrint());
                 }
             }
 

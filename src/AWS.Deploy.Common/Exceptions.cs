@@ -108,7 +108,8 @@ namespace AWS.Deploy.Common
         FailedToRunCDKBootstrap = 10008800,
         FailedToGetCredentialsForProfile = 10008900,
         FailedToRunCDKDiff = 10009000,
-        FailedToCreateCDKProject = 10009100
+        FailedToCreateCDKProject = 10009100,
+        ResourceQuery = 10009200
     }
 
     public class ProjectFileNotFoundException : DeployToolException
@@ -244,6 +245,15 @@ namespace AWS.Deploy.Common
     {
         public FailedToDeserializeException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
+
+    /// <summary>
+    /// Exception thrown if a failure occured while querying resources in AWS. It must be used in conjunction with <see cref="DeployToolErrorCode.ResourceQuery"/>.
+    /// </summary>
+    public class ResourceQueryException : DeployToolException
+    {
+        public ResourceQueryException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+    }
+
 
     public static class ExceptionExtensions
     {

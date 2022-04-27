@@ -1,6 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.\r
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
@@ -19,16 +20,13 @@ namespace AWS.Deploy.CLI.Utilities
 
     public class ProjectParserUtility : IProjectParserUtility
     {
-        private readonly IToolInteractiveService _toolInteractiveService;
         private readonly IProjectDefinitionParser _projectDefinitionParser;
         private readonly IDirectoryManager _directoryManager;
 
         public ProjectParserUtility(
-            IToolInteractiveService toolInteractiveService,
             IProjectDefinitionParser projectDefinitionParser,
             IDirectoryManager directoryManager)
         {
-            _toolInteractiveService = toolInteractiveService;
             _projectDefinitionParser = projectDefinitionParser;
             _directoryManager = directoryManager;
         }
@@ -41,14 +39,16 @@ namespace AWS.Deploy.CLI.Utilities
             }
             catch (ProjectFileNotFoundException ex)
             {
-                var files = _directoryManager.GetFiles(projectPath, "*.sln");
-                var errorMessage = string.Empty;
-
-                if (files.Any())
-                    errorMessage =  "This directory contains a solution file, but the tool requires a project file. " +
-                    "Please run the tool from the directory that contains a .csproj/.fsproj or provide a path to the .csproj/.fsproj via --project-path flag.";
-                else
-                    errorMessage = $"A project was not found at the path {projectPath}";
+                var errorMessage = ex.Message;
+                if (_directoryManager.Exists(projectPath))
+                {
+                    var files = _directoryManager.GetFiles(projectPath, "*.sln").ToList();
+                    if (files.Any())
+                    {
+                        errorMessage = "This directory contains a solution file, but the tool requires a project file. " +
+                                                "Please run the tool from the directory that contains a .csproj/.fsproj or provide a path to the .csproj/.fsproj via --project-path flag.";
+                    }
+                }
 
                 throw new FailedToFindDeployableTargetException(DeployToolErrorCode.FailedToFindDeployableTarget, errorMessage, ex);
             }

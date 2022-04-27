@@ -11,6 +11,8 @@ using AWS.Deploy.Recipes.CDK.Common;
 
 using AspNetAppElasticBeanstalkLinux.Configurations;
 using Constructs;
+using System.Linq;
+using Amazon.CDK.AWS.EC2;
 
 // This is a generated file from the original deployment recipe. It is recommended to not modify this file in order
 // to allow easy updates to the file when the original recipe that this project was created from has updates.
@@ -343,6 +345,36 @@ namespace AspNetAppElasticBeanstalkLinux
                         OptionName = key,
                         Value = value
                     });
+                }
+            }
+
+            if (!string.IsNullOrEmpty(settings.VpcId))
+            {
+                optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
+                {
+                    Namespace = "aws:ec2:vpc",
+                    OptionName = "VPCId",
+                    Value = settings.VpcId
+                });
+
+                if (settings.Subnets.Any())
+                {
+                    optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
+                    {
+                        Namespace = "aws:ec2:vpc",
+                        OptionName = "Subnets",
+                        Value = string.Join(",", settings.Subnets)
+                    });
+
+                    if (settings.SecurityGroups.Any())
+                    {
+                        optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
+                        {
+                            Namespace = "aws:autoscaling:launchconfiguration",
+                            OptionName = "SecurityGroups",
+                            Value = string.Join(",", settings.SecurityGroups)
+                        });
+                    }
                 }
             }
 
