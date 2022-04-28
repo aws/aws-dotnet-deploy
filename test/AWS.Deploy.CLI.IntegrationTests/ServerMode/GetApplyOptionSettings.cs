@@ -79,7 +79,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
             _stackName = $"ServerModeWebAppRunner{Guid.NewGuid().ToString().Split('-').Last()}";
 
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
-            var portNumber = 4001;
+            var portNumber = 4021;
             using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ResolveCredentials);
 
             var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);

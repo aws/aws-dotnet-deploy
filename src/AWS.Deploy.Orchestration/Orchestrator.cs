@@ -169,7 +169,44 @@ namespace AWS.Deploy.Orchestration
             await deploymentCommand.ExecuteAsync(this, cloudApplication, recommendation);
         }
 
-        public async Task<bool> CreateContainerDeploymentBundle(CloudApplication cloudApplication, Recommendation recommendation)
+        public async Task CreateDeploymentBundle(CloudApplication cloudApplication, Recommendation recommendation)
+        {
+            if (_interactiveService == null)
+                throw new InvalidOperationException($"{nameof(_recipeDefinitionPaths)} is null as part of the orchestartor object");
+            if (_directoryManager == null)
+                throw new InvalidOperationException($"{nameof(_directoryManager)} is null as part of the orchestartor object");
+
+            if (recommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.Container)
+            {
+                _interactiveService.LogSectionStart("Creating deployment image",
+                    "Using the docker CLI to perform a docker build to create a container image.");
+
+                if (!await CreateContainerDeploymentBundle(cloudApplication, recommendation))
+                {
+                    if (!recommendation.ProjectDefinition.HasDockerFile)
+                    {
+                        var projectDirectory = _directoryManager.GetDirectoryInfo(recommendation.ProjectPath).Parent.FullName;
+                        var dockerfilePath = Path.Combine(projectDirectory, "Dockerfile");
+                        var errorMessage = $"Failed to create a container image from generated Docker file. " +
+                            $"Please edit the Dockerfile at {dockerfilePath} to correct the required build steps for the project. Common errors are missing project dependencies not included in the Dockerfile.";
+
+                        throw new FailedToCreateDeploymentBundleException(DeployToolErrorCode.FailedToCreateContainerDeploymentBundleFromGeneratedDockerFile, errorMessage);
+                    }
+                    throw new FailedToCreateDeploymentBundleException(DeployToolErrorCode.FailedToCreateContainerDeploymentBundle, "Failed to create a deployment bundle");
+                }
+            }
+            else if (recommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.DotnetPublishZipFile)
+            {
+                _interactiveService.LogSectionStart("Creating deployment zip bundle",
+                    "Using the dotnet CLI build the project and zip the publish artifacts.");
+
+                var dotnetPublishDeploymentBundleResult = await CreateDotnetPublishDeploymentBundle(recommendation);
+                if (!dotnetPublishDeploymentBundleResult)
+                    throw new FailedToCreateDeploymentBundleException(DeployToolErrorCode.FailedToCreateDotnetPublishDeploymentBundle, "Failed to create a deployment bundle");
+            }
+        }
+
+        private async Task<bool> CreateContainerDeploymentBundle(CloudApplication cloudApplication, Recommendation recommendation)
         {
             if (_interactiveService == null)
                 throw new InvalidOperationException($"{nameof(_recipeDefinitionPaths)} is null as part of the orchestartor object");
@@ -225,7 +262,7 @@ namespace AWS.Deploy.Orchestration
             return true;
         }
 
-        public async Task<bool> CreateDotnetPublishDeploymentBundle(Recommendation recommendation)
+        private async Task<bool> CreateDotnetPublishDeploymentBundle(Recommendation recommendation)
         {
             if (_deploymentBundleHandler == null)
                 throw new InvalidOperationException($"{nameof(_deploymentBundleHandler)} is null as part of the orchestartor object");
