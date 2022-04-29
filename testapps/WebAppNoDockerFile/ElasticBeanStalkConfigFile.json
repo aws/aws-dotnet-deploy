@@ -7,7 +7,6 @@
             "ApplicationName": "MyApplication{Suffix}"
         },
         "BeanstalkEnvironment": {
-            "CreateNew": true,
             "EnvironmentName": "MyEnvironment{Suffix}"
         },
         "EnvironmentType": "LoadBalanced",

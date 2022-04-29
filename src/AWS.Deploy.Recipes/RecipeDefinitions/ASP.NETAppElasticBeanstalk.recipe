@@ -98,15 +98,47 @@
                     "Name": "Application Name",
                     "Description": "The Elastic Beanstalk application name.",
                     "Type": "String",
+                    "DefaultValue": "{StackName}",
+                    "AdvancedSetting": false,
+                    "Updatable": false,
+                    "DependsOn": [
+                        {
+                            "Id": "BeanstalkApplication.CreateNew",
+                            "Value": true
+                        }
+                    ],
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": {
+                                "Regex": "^[^/]{1,100}$",
+                                "AllowEmptyString": true,
+                                "ValidationFailedMessage": "Invalid Application Name. The Application name can contain up to 100 Unicode characters, not including forward slash (/)."
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Id": "ExistingApplicationName",
+                    "Name": "Application Name",
+                    "Description": "The Elastic Beanstalk application name.",
+                    "Type": "String",
                     "TypeHint": "ExistingBeanstalkApplication",
                     "DefaultValue": "{StackName}",
                     "AdvancedSetting": false,
                     "Updatable": false,
+                    "DependsOn": [
+                        {
+                            "Id": "BeanstalkApplication.CreateNew",
+                            "Value": false
+                        }
+                    ],
                     "Validators": [
                         {
                             "ValidatorType": "Regex",
-                            "Configuration" : {
+                            "Configuration": {
                                 "Regex": "^[^/]{1,100}$",
+                                "AllowEmptyString": true,
                                 "ValidationFailedMessage": "Invalid Application Name. The Application name can contain up to 100 Unicode characters, not including forward slash (/)."
                             }
                         }
@@ -120,26 +152,15 @@
             "Name": "Environment Name",
             "Description": "The Elastic Beanstalk environment name.",
             "Type": "Object",
-            "TypeHint": "BeanstalkEnvironment",
             "AdvancedSetting": false,
             "Updatable": false,
             "ChildOptionSettings": [
-                {
-                    "Id": "CreateNew",
-                    "Name": "Create new Elastic Beanstalk environment",
-                    "Description": "Do you want to create a new environment?",
-                    "Type": "Bool",
-                    "DefaultValue": true,
-                    "AdvancedSetting": false,
-                    "Updatable": false
-                },
                 {
                     "Id": "EnvironmentName",
                     "ParentSettingId": "BeanstalkApplication.ApplicationName",
                     "Name": "Environment Name",
                     "Description": "The Elastic Beanstalk environment name.",
                     "Type": "String",
-                    "TypeHint": "BeanstalkEnvironment",
                     "DefaultValue": "{StackName}-dev",
                     "AdvancedSetting": false,
                     "Updatable": false,

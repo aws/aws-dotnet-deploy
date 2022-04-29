@@ -11,9 +11,7 @@ using AWS.Deploy.CLI.TypeHintResponses;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.TypeHintData;
-using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.Data;
-using Newtonsoft.Json;
 
 namespace AWS.Deploy.CLI.Commands.TypeHints
 {
@@ -48,18 +46,26 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 idSelector: app => app.ApplicationName,
                 displaySelector: app => app.ApplicationName,
                 defaultSelector: app => app.ApplicationName.Equals(currentTypeHintResponse?.ApplicationName),
-                defaultNewName: currentTypeHintResponse.ApplicationName)
+                defaultNewName: currentTypeHintResponse.ApplicationName ?? String.Empty)
             {
                 AskNewName = true,
             };
 
             var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(applications, "Select Elastic Beanstalk application to deploy to:", userInputConfiguration);
 
-            return new BeanstalkApplicationTypeHintResponse(
-                userResponse.CreateNew,
-                userResponse.SelectedOption?.ApplicationName ?? userResponse.NewName
-                    ?? throw new UserPromptForNameReturnedNullException(DeployToolErrorCode.BeanstalkAppPromptForNameReturnedNull, "The user response for a new application name was null.")
-                );
+            var response = new BeanstalkApplicationTypeHintResponse(userResponse.CreateNew);
+            if(userResponse.CreateNew)
+            {
+                response.ApplicationName = userResponse.NewName ??
+                    throw new UserPromptForNameReturnedNullException(DeployToolErrorCode.BeanstalkAppPromptForNameReturnedNull, "The user response for a new application name was null.");
+            }
+            else
+            {
+                response.ExistingApplicationName = userResponse.SelectedOption?.ApplicationName ??
+                    throw new UserPromptForNameReturnedNullException(DeployToolErrorCode.BeanstalkAppPromptForNameReturnedNull, "The user response existing application name was null.");
+            }
+
+            return response;
         }
     }
 }
