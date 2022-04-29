@@ -12,8 +12,10 @@ nav:
   - Overview: index.md
   - Documentation:
     - Getting Started: 
-      - Pre-requisites: docs/getting-started/pre-requisites.md
+      - Setting up your environment: docs/getting-started/pre-requisites.md
       - Installing the tool: docs/getting-started/installation.md
+      - Setting up credentials: docs/getting-started/setup-creds.md
+      - Running the tool: docs/getting-started/run-tool.md
     - Supported AWS computes:
       - Amazon ECS: docs/aws-computes/ecs.md
       - AWS Elastic Beanstalk: docs/aws-computes/beanstalk.md
