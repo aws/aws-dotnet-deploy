@@ -63,8 +63,8 @@ namespace AspNetAppElasticBeanstalkLinux
             });
 
             ConfigureIAM(settings);
-            ConfigureApplication(settings);
-            ConfigureBeanstalkEnvironment(settings);
+            var beanstalkApplicationName = ConfigureApplication(settings);
+            ConfigureBeanstalkEnvironment(settings, beanstalkApplicationName);
         }
 
         private void ConfigureIAM(Configuration settings)
@@ -121,16 +121,41 @@ namespace AspNetAppElasticBeanstalkLinux
             }
         }
 
-        private void ConfigureApplication(Configuration settings)
+        private string ConfigureApplication(Configuration settings)
         {
             if (ApplicationAsset == null)
                 throw new InvalidOperationException($"{nameof(ApplicationAsset)} has not been set.");
+
+            string beanstalkApplicationName;
+            if(settings.BeanstalkApplication.CreateNew)
+            {
+                if (settings.BeanstalkApplication.ApplicationName == null)
+                    throw new InvalidOperationException($"{nameof(settings.BeanstalkApplication.ApplicationName)} has not been set.");
+
+                beanstalkApplicationName = settings.BeanstalkApplication.ApplicationName;
+            }
+            else
+            {
+                // This check is here for deployments that were initially done with an older version of the project.
+                // In those deployments the existing application name was persisted in the ApplicationName property.
+                if (settings.BeanstalkApplication.ExistingApplicationName == null && settings.BeanstalkApplication.ApplicationName != null)
+                {
+                    beanstalkApplicationName = settings.BeanstalkApplication.ApplicationName;
+                }
+                else
+                {
+                    if (settings.BeanstalkApplication.ExistingApplicationName == null)
+                        throw new InvalidOperationException($"{nameof(settings.BeanstalkApplication.ExistingApplicationName)} has not been set.");
+
+                    beanstalkApplicationName = settings.BeanstalkApplication.ExistingApplicationName;
+                }
+            }
 
             // Create an app version from the S3 asset defined above
             // The S3 "putObject" will occur first before CF generates the template
             ApplicationVersion = new CfnApplicationVersion(this, nameof(ApplicationVersion), InvokeCustomizeCDKPropsEvent(nameof(ApplicationVersion), this, new CfnApplicationVersionProps
             {
-                ApplicationName = settings.BeanstalkApplication.ApplicationName,
+                ApplicationName = beanstalkApplicationName,
                 SourceBundle = new CfnApplicationVersion.SourceBundleProperty
                 {
                     S3Bucket = ApplicationAsset.S3BucketName,
@@ -142,14 +167,16 @@ namespace AspNetAppElasticBeanstalkLinux
             {
                 BeanstalkApplication = new CfnApplication(this, nameof(BeanstalkApplication), InvokeCustomizeCDKPropsEvent(nameof(BeanstalkApplication), this, new CfnApplicationProps
                 {
-                    ApplicationName = settings.BeanstalkApplication.ApplicationName
+                    ApplicationName = beanstalkApplicationName
                 }));
 
                 ApplicationVersion.AddDependsOn(BeanstalkApplication);
             }
+
+            return beanstalkApplicationName;
         }
 
-        private void ConfigureBeanstalkEnvironment(Configuration settings)
+        private void ConfigureBeanstalkEnvironment(Configuration settings, string beanstalkApplicationName)
         {
             if (Ec2InstanceProfile == null)
                 throw new InvalidOperationException($"{nameof(Ec2InstanceProfile)} has not been set. The {nameof(ConfigureIAM)} method should be called before {nameof(ConfigureBeanstalkEnvironment)}");
@@ -378,13 +405,10 @@ namespace AspNetAppElasticBeanstalkLinux
                 }
             }
 
-            if (!settings.BeanstalkEnvironment.CreateNew)
-                throw new InvalidOrMissingConfigurationException("The ability to deploy an Elastic Beanstalk application to an existing environment via a new CloudFormation stack is not supported yet.");
-
             BeanstalkEnvironment = new CfnEnvironment(this, nameof(BeanstalkEnvironment), InvokeCustomizeCDKPropsEvent(nameof(BeanstalkEnvironment), this, new CfnEnvironmentProps
             {
                 EnvironmentName = settings.BeanstalkEnvironment.EnvironmentName,
-                ApplicationName = settings.BeanstalkApplication.ApplicationName,
+                ApplicationName = beanstalkApplicationName,
                 PlatformArn = settings.ElasticBeanstalkPlatformArn,
                 OptionSettings = optionSettingProperties.ToArray(),
                 CnamePrefix = !string.IsNullOrEmpty(settings.CNamePrefix) ? settings.CNamePrefix : null,

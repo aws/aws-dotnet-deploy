@@ -12,7 +12,8 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
     public partial class BeanstalkApplicationConfiguration
     {
         public bool CreateNew { get; set; }
-        public string ApplicationName { get; set; }
+        public string? ApplicationName { get; set; }
+        public string? ExistingApplicationName { get; set; }
 
         /// A parameterless constructor is needed for <see cref="Microsoft.Extensions.Configuration.ConfigurationBuilder"/>
         /// or the classes will fail to initialize.
@@ -25,11 +26,9 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
 #nullable restore warnings
 
         public BeanstalkApplicationConfiguration(
-            bool createNew,
-            string applicationName)
+            bool createNew)
         {
             CreateNew = createNew;
-            ApplicationName = applicationName;
         }
     }
 }
