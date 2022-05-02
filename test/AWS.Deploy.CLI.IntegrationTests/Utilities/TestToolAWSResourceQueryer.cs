@@ -36,6 +36,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.Utilities
         public Task<Amazon.ElasticLoadBalancingV2.Model.LoadBalancer> DescribeElasticLoadBalancer(string loadBalancerArn) => throw new NotImplementedException();
         public Task<List<Amazon.ElasticLoadBalancingV2.Model.Listener>> DescribeElasticLoadBalancerListeners(string loadBalancerArn) => throw new NotImplementedException();
         public Task<List<Stack>> GetCloudFormationStacks() => throw new NotImplementedException();
+        public Task<Stack> GetCloudFormationStack(string stackName) => throw new NotImplementedException();
         public Task<List<AuthorizationData>> GetECRAuthorizationToken() => throw new NotImplementedException();
         public Task<List<Repository>> GetECRRepositories(List<string> repositoryNames) => throw new NotImplementedException();
         public Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns() => throw new NotImplementedException();
@@ -63,5 +64,6 @@ namespace AWS.Deploy.CLI.IntegrationTests.Utilities
         public Task<List<VpcConnector>> DescribeAppRunnerVpcConnectors() => throw new NotImplementedException();
         public Task<List<Subnet>> DescribeSubnets(string vpcID = null) => throw new NotImplementedException();
         public Task<List<SecurityGroup>> DescribeSecurityGroups(string vpcID = null) => throw new NotImplementedException();
+        public Task<string?> GetParameterStoreTextValue(string parameterName) => throw new NotImplementedException();
     }
 }

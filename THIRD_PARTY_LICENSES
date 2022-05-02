@@ -18,6 +18,7 @@
 ** AWSSDK.Extensions.NETCore.Setup; version 3.7.1 -- https://www.nuget.org/packages/AWSSDK.Extensions.NETCore.Setup
 ** AWSSDK.IdentityManagement; version 3.7.2.25 -- https://www.nuget.org/packages/AWSSDK.IdentityManagement
 ** AWSSDK.SecurityToken; version 3.7.1.35 -- https://www.nuget.org/packages/AWSSDK.SecurityToken
+** AWSSDK.SimpleSystemsManagement; version 3.7.16 -- https://www.nuget.org/packages/AWSSDK.SimpleSystemsManagement
 ** Constructs; version 10.0.0 -- https://www.nuget.org/packages/Constructs
 ** Amazon.CDK.Lib; version 2.13.0 -- https://www.nuget.org/packages/Amazon.CDK.Lib/
 ** Amazon.JSII.Runtime; version 1.54.0 -- https://www.nuget.org/packages/Amazon.JSII.Runtime
