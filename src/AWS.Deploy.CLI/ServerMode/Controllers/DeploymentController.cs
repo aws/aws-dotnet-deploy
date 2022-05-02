@@ -468,13 +468,15 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
             var cdkProjectHandler = CreateCdkProjectHandler(state, serviceProvider);
 
+            var directoryManager = new DirectoryManager();
+
             if (state.SelectedRecommendation == null)
                 throw new SelectedRecommendationIsNullException("The selected recommendation is null or invalid.");
 
             if (!state.SelectedRecommendation.Recipe.DeploymentType.Equals(Common.Recipes.DeploymentTypes.CdkProject))
                 throw new SelectedRecommendationIsIncompatibleException($"We cannot generate a CloudFormation template for the selected recommendation as it is not of type '{nameof(Models.DeploymentTypes.CloudFormationStack)}'.");
 
-            var task = new DeployRecommendationTask(orchestratorSession, orchestrator, state.ApplicationDetails, state.SelectedRecommendation);
+            var task = new DeployRecommendationTask(orchestratorSession, orchestrator, state.ApplicationDetails, state.SelectedRecommendation, directoryManager);
             var cloudFormationTemplate = await task.GenerateCloudFormationTemplate(cdkProjectHandler);
             var output = new GenerateCloudFormationTemplateOutput(cloudFormationTemplate);
 
@@ -501,6 +503,8 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
             var orchestrator = CreateOrchestrator(state, serviceProvider);
 
+            var directoryManager = new DirectoryManager();
+
             if (state.SelectedRecommendation == null)
                 throw new SelectedRecommendationIsNullException("The selected recommendation is null or invalid.");
 
@@ -517,7 +521,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             if (capabilities.Any())
                 return Problem($"Unable to start deployment due to missing system capabilities.{Environment.NewLine}{missingCapabilitiesMessage}");
 
-            var task = new DeployRecommendationTask(orchestratorSession, orchestrator, state.ApplicationDetails, state.SelectedRecommendation);
+            var task = new DeployRecommendationTask(orchestratorSession, orchestrator, state.ApplicationDetails, state.SelectedRecommendation, directoryManager);
             state.DeploymentTask = task.Execute();
 
             return Ok();
