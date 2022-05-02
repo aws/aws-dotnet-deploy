@@ -706,6 +706,15 @@ namespace AWS.Deploy.CLI.Commands
                     }
                     else
                     {
+                        if (!selectedRecommendation.ProjectDefinition.HasDockerFile)
+                        {
+                            var projectDirectory = _directoryManager.GetDirectoryInfo(selectedRecommendation.ProjectPath).Parent.FullName;
+                            var dockerfilePath = Path.Combine(projectDirectory, "Dockerfile");
+                            var errorMessage = $"Failed to create a container image from generated Docker file. " +
+                                $"Please edit the Dockerfile at {dockerfilePath} to correct the required build steps for the project. Common errors are missing project dependencies not included in the Dockerfile.";
+
+                            throw new FailedToCreateDeploymentBundleException(DeployToolErrorCode.FailedToCreateContainerDeploymentBundleFromGeneratedDockerFile, errorMessage);
+                        }
                         throw new FailedToCreateDeploymentBundleException(DeployToolErrorCode.FailedToCreateContainerDeploymentBundle, "Failed to create a deployment bundle");
                     }
                 }

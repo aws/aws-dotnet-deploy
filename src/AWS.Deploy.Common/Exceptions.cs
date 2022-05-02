@@ -109,7 +109,8 @@ namespace AWS.Deploy.Common
         FailedToGetCredentialsForProfile = 10008900,
         FailedToRunCDKDiff = 10009000,
         FailedToCreateCDKProject = 10009100,
-        ResourceQuery = 10009200
+        ResourceQuery = 10009200,
+        FailedToCreateContainerDeploymentBundleFromGeneratedDockerFile = 10009300
     }
 
     public class ProjectFileNotFoundException : DeployToolException
