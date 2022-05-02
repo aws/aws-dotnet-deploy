@@ -103,15 +103,22 @@ namespace AWS.Deploy.Orchestration
 
             var appSettingsFilePath = Path.Combine(cdkProjectPath, "appsettings.json");
 
-            // Ensure region is bootstrapped
-            var cdkBootstrap = await _commandLineWrapper.TryRunWithResult($"npx cdk bootstrap aws://{session.AWSAccountId}/{session.AWSRegion} -c {Constants.CloudFormationIdentifier.SETTINGS_PATH_CDK_CONTEXT_PARAMETER}=\"{appSettingsFilePath}\" --template \"{Constants.CDK.CDKBootstrapTemplatePath}\"",
-                workingDirectory: cdkProjectPath,
-                needAwsCredentials: true,
-                redirectIO: true,
-                streamOutputToInteractiveService: true);
+            if (await DetermineIfCDKBootstrapShouldRun())
+            {
+                // Ensure region is bootstrapped
+                var cdkBootstrap = await _commandLineWrapper.TryRunWithResult($"npx cdk bootstrap aws://{session.AWSAccountId}/{session.AWSRegion} -c {Constants.CloudFormationIdentifier.SETTINGS_PATH_CDK_CONTEXT_PARAMETER}=\"{appSettingsFilePath}\" --template \"{Constants.CDK.CDKBootstrapTemplatePath}\"",
+                    workingDirectory: cdkProjectPath,
+                    needAwsCredentials: true,
+                    redirectIO: true,
+                    streamOutputToInteractiveService: true);
 
-            if (cdkBootstrap.ExitCode != 0)
-                throw new FailedToDeployCDKAppException(DeployToolErrorCode.FailedToRunCDKBootstrap, "The AWS CDK Bootstrap, which is the process of provisioning initial resources for the deployment environment, has failed. Please review the output above for additional details [and check out our troubleshooting guide for the most common failure reasons]. You can learn more about CDK bootstrapping at https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html.");
+                if (cdkBootstrap.ExitCode != 0)
+                    throw new FailedToDeployCDKAppException(DeployToolErrorCode.FailedToRunCDKBootstrap, "The AWS CDK Bootstrap, which is the process of provisioning initial resources for the deployment environment, has failed. Please review the output above for additional details [and check out our troubleshooting guide for the most common failure reasons]. You can learn more about CDK bootstrapping at https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html.");
+            }
+            else
+            {
+                _interactiveService.LogInfoMessage("Confirmed CDK Bootstrap CloudFormation stack already exists.");
+            }
 
 
             _interactiveService.LogSectionStart("Deploying AWS CDK project",
@@ -120,7 +127,7 @@ namespace AWS.Deploy.Orchestration
             var deploymentStartDate = DateTime.Now;
             // Handover to CDK command line tool
             // Use a CDK Context parameter to specify the settings file that has been serialized.
-            var cdkDeploy = await _commandLineWrapper.TryRunWithResult( $"npx cdk deploy --require-approval never -c {Constants.CloudFormationIdentifier.SETTINGS_PATH_CDK_CONTEXT_PARAMETER}=\"{appSettingsFilePath}\"",
+            var cdkDeploy = await _commandLineWrapper.TryRunWithResult($"npx cdk deploy --require-approval never -c {Constants.CloudFormationIdentifier.SETTINGS_PATH_CDK_CONTEXT_PARAMETER}=\"{appSettingsFilePath}\"",
                 workingDirectory: cdkProjectPath,
                 environmentVariables: environmentVariables,
                 needAwsCredentials: true,
@@ -131,6 +138,34 @@ namespace AWS.Deploy.Orchestration
 
             if (cdkDeploy.ExitCode != 0)
                 throw new FailedToDeployCDKAppException(DeployToolErrorCode.FailedToDeployCdkApplication, "We had an issue deploying your application to AWS. Check the deployment output for more details.");
+        }
+
+        public async Task<bool> DetermineIfCDKBootstrapShouldRun()
+        {
+            var stack = await _awsResourceQueryer.GetCloudFormationStack(AWS.Deploy.Constants.CDK.CDKBootstrapStackName);
+            if (stack == null)
+            {
+                _interactiveService.LogDebugMessage("CDK Bootstrap stack not found.");
+                return true;
+            }
+
+            var qualiferParameter = stack.Parameters.FirstOrDefault(x => string.Equals("Qualifier", x.ParameterKey));
+            if (qualiferParameter == null || string.IsNullOrEmpty(qualiferParameter.ParameterValue))
+            {
+                _interactiveService.LogDebugMessage("CDK Bootstrap SSM parameter store value missing.");
+                return true;
+            }
+
+            var bootstrapVersionStr = await _awsResourceQueryer.GetParameterStoreTextValue($"/cdk-bootstrap/{qualiferParameter.ParameterValue}/version");
+            if (string.IsNullOrEmpty(bootstrapVersionStr) ||
+                !int.TryParse(bootstrapVersionStr, out var bootstrapVersion) ||
+                bootstrapVersion < AWS.Deploy.Constants.CDK.CDKTemplateVersion)
+            {
+                _interactiveService.LogDebugMessage($"CDK Bootstrap version is out of date: \"{AWS.Deploy.Constants.CDK.CDKTemplateVersion}\" < \"{bootstrapVersionStr}\".");
+                return true;
+            }
+
+            return false;
         }
 
         private async Task CheckCdkDeploymentFailure(CloudApplication cloudApplication, DateTime deploymentStartDate)

@@ -35,6 +35,8 @@ using Amazon.SecurityToken;
 using Amazon.SecurityToken.Model;
 using Amazon.SimpleNotificationService;
 using Amazon.SimpleNotificationService.Model;
+using Amazon.SimpleSystemsManagement;
+using Amazon.SimpleSystemsManagement.Model;
 using Amazon.SQS;
 using Amazon.SQS.Model;
 using AWS.Deploy.Common;
@@ -67,6 +69,7 @@ namespace AWS.Deploy.Orchestration.Data
         Task<List<Repository>> GetECRRepositories(List<string>? repositoryNames = null);
         Task<Repository> CreateECRRepository(string repositoryName);
         Task<List<Stack>> GetCloudFormationStacks();
+        Task<Stack?> GetCloudFormationStack(string stackName);
         Task<GetCallerIdentityResponse> GetCallerIdentity(string awsRegion);
         Task<List<Amazon.ElasticLoadBalancingV2.Model.LoadBalancer>> ListOfLoadBalancers(LoadBalancerTypeEnum loadBalancerType);
         Task<Distribution> GetCloudFrontDistribution(string distributionId);
@@ -79,6 +82,7 @@ namespace AWS.Deploy.Orchestration.Data
         Task<List<VpcConnector>> DescribeAppRunnerVpcConnectors();
         Task<List<Subnet>> DescribeSubnets(string? vpcID = null);
         Task<List<SecurityGroup>> DescribeSecurityGroups(string? vpcID = null);
+        Task<string?> GetParameterStoreTextValue(string parameterName);
     }
 
     public class AWSResourceQueryer : IAWSResourceQueryer
@@ -561,6 +565,25 @@ namespace AWS.Deploy.Orchestration.Data
                 .Stacks.ToListAsync());
         }
 
+        public async Task<Stack?> GetCloudFormationStack(string stackName)
+        {
+            using var cloudFormationClient = _awsClientFactory.GetAWSClient<IAmazonCloudFormation>();
+            return await HandleException(async () =>
+            {
+                try
+                {
+                    var request = new DescribeStacksRequest { StackName = stackName };
+                    var response = await cloudFormationClient.DescribeStacksAsync(request);
+                    return response.Stacks.FirstOrDefault();
+                }
+                // CloudFormation throws a BadRequest exception if the stack does not exist
+                catch (AmazonCloudFormationException e) when (e.StatusCode == System.Net.HttpStatusCode.BadRequest)
+                {
+                    return null;
+                }
+            });
+        }
+
         public async Task<GetCallerIdentityResponse> GetCallerIdentity(string awsRegion)
         {
             var request = new GetCallerIdentityRequest();
@@ -697,6 +720,24 @@ namespace AWS.Deploy.Orchestration.Data
                 }
 
                 return response.Repositories.First();
+            });
+        }
+
+        public async Task<string?> GetParameterStoreTextValue(string parameterName)
+        {
+            var client = _awsClientFactory.GetAWSClient<IAmazonSimpleSystemsManagement>();
+            return await HandleException(async () =>
+            {
+                try
+                {
+                    var request = new GetParameterRequest { Name = parameterName };
+                    var response = await client.GetParameterAsync(request);
+                    return response.Parameter.Value;
+                }
+                catch (ParameterNotFoundException)
+                {
+                    return null;
+                }
             });
         }
 

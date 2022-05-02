@@ -27,5 +27,15 @@ namespace AWS.Deploy.Constants
         /// The file path of the CDK bootstrap template to be used
         /// </summary>
         public static string CDKBootstrapTemplatePath => Path.Combine(DeployToolWorkspaceDirectoryRoot, "CDKBootstrapTemplate.yaml");
+
+        /// <summary>
+        /// The version number CDK bootstrap specified in CDKBootstrapTemplate.yaml
+        /// </summary>
+        public const int CDKTemplateVersion = 12;
+
+        /// <summary>
+        /// The name of the CDK bootstrap CloudFormation stack
+        /// </summary>
+        public const string CDKBootstrapStackName = "CDKToolkit";
     }
 }
