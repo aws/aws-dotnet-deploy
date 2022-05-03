@@ -24,7 +24,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests
         public async Task DeployToExistingBeanstalkEnvironment()
         {
             var projectPath = _fixture.TestAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
-            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--application-name", _fixture.EnvironmentName, "--diagnostics", "--silent" };
+            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--application-name", _fixture.EnvironmentName, "--diagnostics", "--silent", "--region", "us-west-2" };
             Assert.Equal(CommandReturnCodes.SUCCESS, await _fixture.App.Run(deployArgs));
 
             var environmentDescription = await _fixture.AWSResourceQueryer.DescribeElasticBeanstalkEnvironment(_fixture.EnvironmentName);

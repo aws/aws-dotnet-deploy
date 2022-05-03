@@ -30,7 +30,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests
         public async Task DeployToExistingBeanstalkEnvironment()
         {
             var projectPath = _fixture.TestAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
-            var portNumber = 4001;
+            var portNumber = 4031;
             using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ResolveCredentials);
 
             var serverCommand = new ServerModeCommand(_fixture.ToolInteractiveService, portNumber, null, true);

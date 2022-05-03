@@ -674,50 +674,41 @@ namespace AWS.Deploy.CLI.Commands
 
         private async Task CreateDeploymentBundle(Orchestrator orchestrator, Recommendation selectedRecommendation, CloudApplication cloudApplication)
         {
-            if (selectedRecommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.Container)
+            try
             {
-                _orchestratorInteractiveService.LogSectionStart("Creating deployment image",
-                    "Using the docker CLI to perform a docker build to create a container image.");
-
-                while (!await orchestrator.CreateContainerDeploymentBundle(cloudApplication, selectedRecommendation))
+                await orchestrator.CreateDeploymentBundle(cloudApplication, selectedRecommendation);
+            }
+            catch(FailedToCreateDeploymentBundleException ex) when (ex.ErrorCode == DeployToolErrorCode.FailedToCreateContainerDeploymentBundle)
+            {
+                if (_toolInteractiveService.DisableInteractive)
                 {
-                    if (_toolInteractiveService.DisableInteractive)
-                    {
-                        var errorMessage = "Failed to build Docker Image." + Environment.NewLine;
-                        errorMessage += "Docker builds usually fail due to executing them from a working directory that is incompatible with the Dockerfile." + Environment.NewLine;
-                        errorMessage += "Specify a valid Docker execution directory as part of the deployment settings file and try again.";
-                        throw new DockerBuildFailedException(DeployToolErrorCode.DockerBuildFailed, errorMessage);
-                    }
+                    var errorMessage = "Failed to build Docker Image." + Environment.NewLine;
+                    errorMessage += "Docker builds usually fail due to executing them from a working directory that is incompatible with the Dockerfile." + Environment.NewLine;
+                    errorMessage += "Specify a valid Docker execution directory as part of the deployment settings file and try again.";
+                    throw new DockerBuildFailedException(DeployToolErrorCode.DockerBuildFailed, errorMessage);
+                }
 
-                    _toolInteractiveService.WriteLine(string.Empty);
-                    var answer = _consoleUtilities.AskYesNoQuestion("Do you want to go back and modify the current configuration?", "false");
-                    if (answer == YesNo.Yes)
+                _toolInteractiveService.WriteLine(string.Empty);
+                var answer = _consoleUtilities.AskYesNoQuestion("Do you want to go back and modify the current configuration?", "false");
+                if (answer == YesNo.Yes)
+                {
+                    string dockerExecutionDirectory;
+                    do
                     {
-                        var dockerExecutionDirectory =
-                        _consoleUtilities.AskUserForValue(
+                        dockerExecutionDirectory = _consoleUtilities.AskUserForValue(
                             "Enter the docker execution directory where the docker build command will be executed from:",
                             selectedRecommendation.DeploymentBundle.DockerExecutionDirectory,
                             allowEmpty: true);
 
                         if (!_directoryManager.Exists(dockerExecutionDirectory))
-                            continue;
+                        {
+                            _toolInteractiveService.WriteErrorLine($"Error, directory does not exist \"{dockerExecutionDirectory}\"");
+                        }
+                    } while (!_directoryManager.Exists(dockerExecutionDirectory));
 
-                        selectedRecommendation.DeploymentBundle.DockerExecutionDirectory = dockerExecutionDirectory;
-                    }
-                    else
-                    {
-                        throw new FailedToCreateDeploymentBundleException(DeployToolErrorCode.FailedToCreateContainerDeploymentBundle, "Failed to create a deployment bundle");
-                    }
+                    selectedRecommendation.DeploymentBundle.DockerExecutionDirectory = dockerExecutionDirectory;
+                    await CreateDeploymentBundle(orchestrator, selectedRecommendation, cloudApplication);
                 }
-            }
-            else if (selectedRecommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.DotnetPublishZipFile)
-            {
-                _orchestratorInteractiveService.LogSectionStart("Creating deployment zip bundle",
-                    "Using the dotnet CLI build the project and zip the publish artifacts.");
-
-                var dotnetPublishDeploymentBundleResult = await orchestrator.CreateDotnetPublishDeploymentBundle(selectedRecommendation);
-                if (!dotnetPublishDeploymentBundleResult)
-                    throw new FailedToCreateDeploymentBundleException(DeployToolErrorCode.FailedToCreateDotnetPublishDeploymentBundle, "Failed to create a deployment bundle");
             }
         }
 

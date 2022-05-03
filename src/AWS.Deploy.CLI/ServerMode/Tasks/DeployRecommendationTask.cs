@@ -28,7 +28,7 @@ namespace AWS.Deploy.CLI.ServerMode.Tasks
 
         public async Task Execute()
         {
-            await CreateDeploymentBundle();
+            await _orchestrator.CreateDeploymentBundle(_cloudApplication, _selectedRecommendation);
             await _orchestrator.DeployRecommendation(_cloudApplication, _selectedRecommendation);
         }
 
@@ -42,7 +42,8 @@ namespace AWS.Deploy.CLI.ServerMode.Tasks
             if (cdkProjectHandler == null)
                 throw new FailedToCreateCDKProjectException(DeployToolErrorCode.FailedToCreateCDKProject, $"We could not create a CDK deployment project due to a missing dependency '{nameof(cdkProjectHandler)}'.");
 
-            await CreateDeploymentBundle();
+            await _orchestrator.CreateDeploymentBundle(_cloudApplication, _selectedRecommendation);
+
             var cdkProject = await cdkProjectHandler.ConfigureCdkProject(_orchestratorSession, _cloudApplication, _selectedRecommendation);
             try
             {
@@ -51,22 +52,6 @@ namespace AWS.Deploy.CLI.ServerMode.Tasks
             finally
             {
                 cdkProjectHandler.DeleteTemporaryCdkProject(cdkProject);
-            }
-        }
-
-        private async Task CreateDeploymentBundle()
-        {
-            if (_selectedRecommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.Container)
-            {
-                var dockerBuildDeploymentBundleResult = await _orchestrator.CreateContainerDeploymentBundle(_cloudApplication, _selectedRecommendation);
-                if (!dockerBuildDeploymentBundleResult)
-                    throw new FailedToCreateDeploymentBundleException(DeployToolErrorCode.FailedToCreateContainerDeploymentBundle, "Failed to create a deployment bundle");
-            }
-            else if (_selectedRecommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.DotnetPublishZipFile)
-            {
-                var dotnetPublishDeploymentBundleResult = await _orchestrator.CreateDotnetPublishDeploymentBundle(_selectedRecommendation);
-                if (!dotnetPublishDeploymentBundleResult)
-                    throw new FailedToCreateDeploymentBundleException(DeployToolErrorCode.FailedToCreateDotnetPublishDeploymentBundle, "Failed to create a deployment bundle");
             }
         }
     }

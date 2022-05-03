@@ -11,7 +11,6 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
 {
     public partial class BeanstalkEnvironmentConfiguration
     {
-        public bool CreateNew { get; set; }
         public string EnvironmentName { get; set; }
 
         /// A parameterless constructor is needed for <see cref="Microsoft.Extensions.Configuration.ConfigurationBuilder"/>
@@ -25,10 +24,8 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
 #nullable restore warnings
 
         public BeanstalkEnvironmentConfiguration(
-            bool createNew,
             string environmentName)
         {
-            CreateNew = createNew;
             EnvironmentName = environmentName;
         }
     }

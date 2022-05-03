@@ -12,16 +12,21 @@ namespace AWS.Deploy.CLI.TypeHintResponses
     public class BeanstalkApplicationTypeHintResponse : IDisplayable
     {
         public bool CreateNew { get; set; }
-        public string ApplicationName { get; set; }
+        public string? ApplicationName { get; set; }
+        public string? ExistingApplicationName { get; set; }
 
         public BeanstalkApplicationTypeHintResponse(
-            bool createNew,
-            string applicationName)
+            bool createNew)
         {
             CreateNew = createNew;
-            ApplicationName = applicationName;
         }
 
-        public string ToDisplayString() => ApplicationName;
+        public string ToDisplayString()
+        {
+            if (CreateNew)
+                return ApplicationName!;
+            else
+                return ExistingApplicationName!;
+        }
     }
 }

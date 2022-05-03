@@ -162,7 +162,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             _stackName = $"ServerModeWebFargate{Guid.NewGuid().ToString().Split('-').Last()}";
 
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
-            var portNumber = 4001;
+            var portNumber = 4011;
             using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ResolveCredentials);
 
             var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
@@ -211,6 +211,11 @@ namespace AWS.Deploy.CLI.IntegrationTests
                 Assert.Equal(StackStatus.CREATE_COMPLETE, stackStatus);
 
                 Assert.True(logOutput.Length > 0);
+
+                // Make sure section header is return to output log
+                Assert.Contains("Creating deployment image", logOutput.ToString());
+
+                // Make sure normal log messages are returned to output log
                 Assert.Contains("Pushing container image", logOutput.ToString());
 
                 var redeploymentSessionOutput = await restClient.StartDeploymentSessionAsync(new StartDeploymentSessionInput
@@ -311,7 +316,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             }
         }
 
-        internal static void RegisterSignalRMessageCallbacks(DeploymentCommunicationClient signalRClient, StringBuilder logOutput)
+        internal static void RegisterSignalRMessageCallbacks(IDeploymentCommunicationClient signalRClient, StringBuilder logOutput)
         {
             signalRClient.ReceiveLogSectionStart = (message, description) =>
             {
@@ -334,13 +339,21 @@ namespace AWS.Deploy.CLI.IntegrationTests
             // Do an initial delay to avoid a race condition of the status being checked before the deployment has kicked off.
             await Task.Delay(TimeSpan.FromSeconds(3));
 
+            GetDeploymentStatusOutput output = null;
+
             await WaitUntilHelper.WaitUntil(async () =>
             {
-                DeploymentStatus status = (await restApiClient.GetDeploymentStatusAsync(sessionId)).Status; ;
-                return status != DeploymentStatus.Executing;
+                output = (await restApiClient.GetDeploymentStatusAsync(sessionId));
+
+                return output.Status != DeploymentStatus.Executing;
             }, TimeSpan.FromSeconds(1), TimeSpan.FromMinutes(15));
 
-            return (await restApiClient.GetDeploymentStatusAsync(sessionId)).Status;
+            if (output.Exception != null)
+            {
+                throw new Exception("Error waiting on stack status: " + output.Exception.Message);
+            }
+
+            return output.Status;
         }
 
 
