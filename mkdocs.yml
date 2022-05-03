@@ -36,15 +36,23 @@ nav:
       - Automating Deployments: docs/tutorials/automate-deployments.md
       - Listing Deployments: docs/tutorials/list-deployments.md
       - Deleting Deployment: docs/tutorials/delete-deployment.md
-  - Troubleshooting Guide: troubleshooting-guide.md
+  - Troubleshooting Guide:
+    - Missing Dependencies: troubleshooting-guide/missing-dependencies.md
+    - Docker Issues: troubleshooting-guide/docker-issues.md
+    - Other Issues: troubleshooting-guide/other-issues.md
   - Contributing to the project: contributing.md
 
 theme:
   name: material
+  custom_dir: site/overrides
   palette:
-    primary: white
+    primary: indigo
   font: false
   language: en
   features:
     - tabs
     - instant
+    - navigation.tabs
+  icon:
+    logo: aws-logo-light
+  favicon: assets/images/aws-logo-light.svg
