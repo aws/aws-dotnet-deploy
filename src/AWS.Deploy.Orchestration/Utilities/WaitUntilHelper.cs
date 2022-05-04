@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace AWS.Deploy.CLI.IntegrationTests.Helpers
+namespace AWS.Deploy.Orchestration.Utilities
 {
     public static class WaitUntilHelper
     {
@@ -15,11 +16,11 @@ namespace AWS.Deploy.CLI.IntegrationTests.Helpers
         /// <param name="frequency">Interval between the two executions of the task</param>
         /// <param name="timeout">Interval for timeout, if timeout passes, methods throws <see cref="TimeoutException"/></param>
         /// <exception cref="TimeoutException">Throws when timeout passes</exception>
-        public static async Task WaitUntil(Func<Task<bool>> predicate, TimeSpan frequency, TimeSpan timeout)
+        public static async Task WaitUntil(Func<Task<bool>> predicate, TimeSpan frequency, TimeSpan timeout, CancellationToken cancellationToken = default)
         {
             var waitTask = Task.Run(async () =>
             {
-                while (!await predicate())
+                while (!cancellationToken.IsCancellationRequested && !await predicate())
                 {
                     await Task.Delay(frequency);
                 }

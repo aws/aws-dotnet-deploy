@@ -163,12 +163,15 @@ namespace AWS.Deploy.Orchestration.Data
         public async Task<List<StackEvent>> GetCloudFormationStackEvents(string stackName)
         {
             var cfClient = _awsClientFactory.GetAWSClient<IAmazonCloudFormation>();
-            var listInstanceTypesPaginator = cfClient.Paginators.DescribeStackEvents(new DescribeStackEventsRequest
+            var request = new DescribeStackEventsRequest
             {
                 StackName = stackName
-            });
+            };
 
-            return await HandleException(async () => await listInstanceTypesPaginator.StackEvents.ToListAsync());
+            return await HandleException(async () => await cfClient.Paginators
+                .DescribeStackEvents(request)
+                .StackEvents
+                .ToListAsync());
         }
 
         public async Task<List<InstanceTypeInfo>> ListOfAvailableInstanceTypes()

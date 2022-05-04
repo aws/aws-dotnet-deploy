@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Amazon.Runtime;
 using AWS.Deploy.CLI.Commands;
-using AWS.Deploy.CLI.IntegrationTests.Helpers;
+using AWS.Deploy.Orchestration.Utilities;
 using AWS.Deploy.ServerMode.Client;
 using Xunit;
 
