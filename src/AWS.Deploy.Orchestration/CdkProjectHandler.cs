@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Amazon.CloudFormation;
 using AWS.Deploy.Common;
@@ -13,6 +14,7 @@ using AWS.Deploy.Orchestration.CDK;
 using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.Utilities;
 using AWS.Deploy.Recipes.CDK.Common;
+using Stack = Amazon.CloudFormation.Model.Stack;
 
 namespace AWS.Deploy.Orchestration
 {
@@ -126,20 +128,48 @@ namespace AWS.Deploy.Orchestration
             _interactiveService.LogSectionStart("Deploying AWS CDK project",
                 "Use the CDK project to create or update the AWS CloudFormation stack and deploy the project to the AWS resources in the stack.");
 
-            var deploymentStartDate = DateTime.Now;
             // Handover to CDK command line tool
             // Use a CDK Context parameter to specify the settings file that has been serialized.
-            var cdkDeploy = await _commandLineWrapper.TryRunWithResult($"npx cdk deploy --require-approval never -c {Constants.CloudFormationIdentifier.SETTINGS_PATH_CDK_CONTEXT_PARAMETER}=\"{appSettingsFilePath}\"",
+            var cdkDeployTask = _commandLineWrapper.TryRunWithResult( $"npx cdk deploy --require-approval never -c {Constants.CloudFormationIdentifier.SETTINGS_PATH_CDK_CONTEXT_PARAMETER}=\"{appSettingsFilePath}\"",
                 workingDirectory: cdkProjectPath,
                 environmentVariables: environmentVariables,
                 needAwsCredentials: true,
                 redirectIO: true,
                 streamOutputToInteractiveService: true);
 
-            await CheckCdkDeploymentFailure(cloudApplication, deploymentStartDate);
+            var cancellationTokenSource = new CancellationTokenSource();
+            var retrieveStackIdTask = RetrieveStackId(cloudApplication, cancellationTokenSource.Token);
 
+            var deploymentStartDate = DateTime.UtcNow;
+            var firstCompletedTask = await Task.WhenAny(cdkDeployTask, retrieveStackIdTask);
+            // Deployment end date is captured at this point after 1 of the 2 running tasks yields.
+            var deploymentEndDate = DateTime.UtcNow;
+
+            TryRunResult? cdkDeploy = null;
+            if (firstCompletedTask == retrieveStackIdTask)
+            {
+                // If retrieveStackIdTask completes first, that means a stack was created and exists in CloudFormation.
+                // We can proceed with checking for deployment failures.
+                var stackId = cloudApplication.Name;
+                if (!retrieveStackIdTask.IsFaulted)
+                    stackId = retrieveStackIdTask.Result;
+                cdkDeploy = await cdkDeployTask;
+                // We recapture the deployment end date at this point after the deployment task completes.
+                deploymentEndDate = DateTime.UtcNow;
+                await CheckCdkDeploymentFailure(stackId, deploymentStartDate, deploymentEndDate);
+            }
+            else
+            {
+                // If cdkDeployTask completes first, that means 'cdk deploy' failed before creating a stack in CloudFormation.
+                // In this case, we skip checking for deployment failures since a stack does not exist.
+
+                cdkDeploy = cdkDeployTask.Result;
+                cancellationTokenSource.Cancel();
+            }
+
+            var deploymentTotalTime = Math.Round((deploymentEndDate - deploymentStartDate).TotalSeconds, 2);
             if (cdkDeploy.ExitCode != 0)
-                throw new FailedToDeployCDKAppException(DeployToolErrorCode.FailedToDeployCdkApplication, "We had an issue deploying your application to AWS. Check the deployment output for more details.");
+                throw new FailedToDeployCDKAppException(DeployToolErrorCode.FailedToDeployCdkApplication, $"We had an issue deploying your application to AWS. Check the deployment output for more details. Deployment took {deploymentTotalTime}s.");
         }
 
         public async Task<bool> DetermineIfCDKBootstrapShouldRun()
@@ -170,17 +200,41 @@ namespace AWS.Deploy.Orchestration
             return false;
         }
 
-        private async Task CheckCdkDeploymentFailure(CloudApplication cloudApplication, DateTime deploymentStartDate)
+        private async Task<string> RetrieveStackId(CloudApplication cloudApplication, CancellationToken cancellationToken)
+        {
+            Stack? stack = null;
+            await WaitUntilHelper.WaitUntil(async () =>
+            {
+                try
+                {
+                    stack = await _awsResourceQueryer.GetCloudFormationStack(cloudApplication.Name);
+                    return stack != null;
+                }
+                catch (ResourceQueryException exception) when (exception.InnerException != null && exception.InnerException.Message.Equals($"Stack with id {cloudApplication.Name} does not exist"))
+                {
+                    return false;
+                }
+            }, TimeSpan.FromSeconds(3), TimeSpan.FromMinutes(5), cancellationToken);
+
+            return stack?.StackId ?? throw new ResourceQueryException(DeployToolErrorCode.FailedToRetrieveStackId, "We were unable to retrieve the CloudFormation stack identifier.");
+        }
+
+        private async Task CheckCdkDeploymentFailure(string stackId, DateTime deploymentStartDate, DateTime deploymentEndDate)
         {
             try
             {
-                var stackEvents = await _awsResourceQueryer.GetCloudFormationStackEvents(cloudApplication.Name);
-                
+                var stackEvents = await _awsResourceQueryer.GetCloudFormationStackEvents(stackId);
+
                 var failedEvents = stackEvents
-                    .Where(x => x.Timestamp >= deploymentStartDate)
+                    .Where(x => x.Timestamp.ToUniversalTime() >= deploymentStartDate)
                     .Where(x =>
                         x.ResourceStatus.Equals(ResourceStatus.CREATE_FAILED) ||
-                        x.ResourceStatus.Equals(ResourceStatus.UPDATE_FAILED)
+                        x.ResourceStatus.Equals(ResourceStatus.DELETE_FAILED) ||
+                        x.ResourceStatus.Equals(ResourceStatus.UPDATE_FAILED) ||
+                        x.ResourceStatus.Equals(ResourceStatus.IMPORT_FAILED) ||
+                        x.ResourceStatus.Equals(ResourceStatus.IMPORT_ROLLBACK_FAILED) ||
+                        x.ResourceStatus.Equals(ResourceStatus.UPDATE_ROLLBACK_FAILED) ||
+                        x.ResourceStatus.Equals(ResourceStatus.ROLLBACK_FAILED)
                     );
                 if (failedEvents.Any())
                 {
@@ -188,9 +242,10 @@ namespace AWS.Deploy.Orchestration
                     throw new FailedToDeployCDKAppException(DeployToolErrorCode.FailedToDeployCdkApplication, errors);
                 }
             }
-            catch (AmazonCloudFormationException exception) when (exception.ErrorCode.Equals("ValidationError") && exception.Message.Equals($"Stack [{cloudApplication.Name}] does not exist"))
+            catch (ResourceQueryException exception) when (exception.InnerException != null && exception.InnerException.Message.Equals($"Stack [{stackId}] does not exist"))
             {
-                throw new FailedToDeployCDKAppException(DeployToolErrorCode.FailedToCreateCdkStack, "A CloudFormation stack was not created. Check the deployment output for more details.");
+                var deploymentTotalTime = Math.Round((deploymentEndDate - deploymentStartDate).TotalSeconds, 2);
+                throw new FailedToDeployCDKAppException(DeployToolErrorCode.FailedToCreateCdkStack, $"A CloudFormation stack was not created. Check the deployment output for more details. Deployment took {deploymentTotalTime}s.");
             }
         }
 
