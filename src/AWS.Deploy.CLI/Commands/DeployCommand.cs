@@ -505,7 +505,7 @@ namespace AWS.Deploy.CLI.Commands
                 if (_cloudApplicationNameGenerator.IsValidName(applicationName))
                     return applicationName;
 
-                PrintInvalidApplicationNameMessage();
+                PrintInvalidApplicationNameMessage(applicationName);
                 throw new InvalidCliArgumentException(DeployToolErrorCode.InvalidCliArguments, "Found invalid CLI arguments");
             }
 
@@ -515,7 +515,7 @@ namespace AWS.Deploy.CLI.Commands
                 if (_cloudApplicationNameGenerator.IsValidName(userDeploymentSettings.ApplicationName))
                     return userDeploymentSettings.ApplicationName;
 
-                PrintInvalidApplicationNameMessage();
+                PrintInvalidApplicationNameMessage(userDeploymentSettings.ApplicationName);
                 throw new InvalidUserDeploymentSettingsException(DeployToolErrorCode.UserDeploymentInvalidStackName, "Please provide a valid cloud application name and try again.");
             }
 
@@ -603,7 +603,7 @@ namespace AWS.Deploy.CLI.Commands
                         defaultAskValuePrompt: inputPrompt);
 
                 if (string.IsNullOrEmpty(cloudApplicationName) || !_cloudApplicationNameGenerator.IsValidName(cloudApplicationName))
-                    PrintInvalidApplicationNameMessage();
+                    PrintInvalidApplicationNameMessage(cloudApplicationName);
                 else if (deployedApplications.Any(x => x.Name.Equals(cloudApplicationName)))
                     PrintApplicationNameAlreadyExistsMessage();
                 else
@@ -645,12 +645,10 @@ namespace AWS.Deploy.CLI.Commands
             return selectedRecommendation;
         }
 
-        private void PrintInvalidApplicationNameMessage()
+        private void PrintInvalidApplicationNameMessage(string name)
         {
             _toolInteractiveService.WriteLine();
-            _toolInteractiveService.WriteErrorLine(
-                "Invalid application name. The application name can contain only alphanumeric characters (case-sensitive) and hyphens. " +
-                "It must start with an alphabetic character and can't be longer than 128 characters");
+            _toolInteractiveService.WriteErrorLine(_cloudApplicationNameGenerator.InvalidNameMessage(name));
         }
 
         private void PrintApplicationNameAlreadyExistsMessage()
