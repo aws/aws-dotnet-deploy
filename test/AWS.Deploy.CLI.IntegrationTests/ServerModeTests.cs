@@ -316,6 +316,61 @@ namespace AWS.Deploy.CLI.IntegrationTests
             }
         }
 
+        [Theory]
+        [InlineData("1234MyAppStack")] // cannot start with a number
+        [InlineData("MyApp@Stack/123")] // cannot contain special characters
+        [InlineData("")] // cannot be empty
+        [InlineData("stackstackstackstackstackstackstackstackstackstackstackstackstackstackstackstackstackstackstackstackstackstackstackstackstackstack")] // cannot contain more than 128 characters
+        public async Task InvalidStackName_ThrowsException(string invalidStackName)
+        {
+            var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
+            var portNumber = 4012;
+            using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ResolveCredentials);
+
+            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
+            var cancelSource = new CancellationTokenSource();
+
+            var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
+            try
+            {
+                var baseUrl = $"http://localhost:{portNumber}/";
+                var restClient = new RestAPIClient(baseUrl, httpClient);
+
+                await WaitTillServerModeReady(restClient);
+
+                var startSessionOutput = await restClient.StartDeploymentSessionAsync(new StartDeploymentSessionInput
+                {
+                    AwsRegion = _awsRegion,
+                    ProjectPath = projectPath
+                });
+
+                var sessionId = startSessionOutput.SessionId;
+                var getRecommendationOutput = await restClient.GetRecommendationsAsync(sessionId);
+                var fargateRecommendation = getRecommendationOutput.Recommendations.FirstOrDefault(x => string.Equals(x.RecipeId, "AspNetAppEcsFargate"));
+
+                try
+                {
+                    await restClient.SetDeploymentTargetAsync(sessionId, new SetDeploymentTargetInput
+                    {
+                        NewDeploymentName = invalidStackName,
+                        NewDeploymentRecipeId = fargateRecommendation.RecipeId
+                    });
+                }
+                catch (ApiException ex)
+                {
+                    Assert.Equal(400, ex.StatusCode);
+
+                    var errorMessage = $"Invalid cloud application name {invalidStackName}. The application name can contain only alphanumeric characters (case-sensitive) and hyphens. " +
+                        "It must start with an alphabetic character and can't be longer than 128 characters";
+                    Assert.Contains(errorMessage, ex.Response);
+                }
+            }
+            finally
+            {
+                cancelSource.Cancel();
+            }
+        }
+
         internal static void RegisterSignalRMessageCallbacks(IDeploymentCommunicationClient signalRClient, StringBuilder logOutput)
         {
             signalRClient.ReceiveLogSectionStart = (message, description) =>

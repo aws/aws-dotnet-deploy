@@ -26,6 +26,11 @@ namespace AWS.Deploy.Orchestration.Utilities
         /// https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-using-console-create-stack-parameters.html
         /// </summary>
         bool IsValidName(string name);
+
+        /// <summary>
+        /// The message that should be displayed when an invalid name is passed
+        /// </summary>
+        string InvalidNameMessage(string name);
     }
 
     public class CloudApplicationNameGenerator : ICloudApplicationNameGenerator
@@ -94,5 +99,11 @@ namespace AWS.Deploy.Orchestration.Utilities
         /// https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-using-console-create-stack-parameters.html
         /// </remarks>>
         public bool IsValidName(string name) => _validatorRegex.IsMatch(name);
+
+        public string InvalidNameMessage(string name)
+        {
+            return $"Invalid cloud application name {name}. The application name can contain only alphanumeric characters (case-sensitive) and hyphens. " +
+                "It must start with an alphabetic character and can't be longer than 128 characters";
+        }
     }
 }

@@ -358,21 +358,33 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
             var serviceProvider = CreateSessionServiceProvider(state);
             var orchestrator = CreateOrchestrator(state, serviceProvider);
+            var cloudApplicationNameGenerator = serviceProvider.GetRequiredService<ICloudApplicationNameGenerator>();
 
-            if(!string.IsNullOrEmpty(input.NewDeploymentRecipeId) &&
-               !string.IsNullOrEmpty(input.NewDeploymentName))
+            if (!string.IsNullOrEmpty(input.NewDeploymentRecipeId))
             {
+                var newDeploymentName = input.NewDeploymentName ?? string.Empty;
+
                 state.SelectedRecommendation = state.NewRecommendations?.FirstOrDefault(x => string.Equals(input.NewDeploymentRecipeId, x.Recipe.Id));
-                if(state.SelectedRecommendation == null)
+                if (state.SelectedRecommendation == null)
                 {
                     return NotFound($"Recommendation {input.NewDeploymentRecipeId} not found.");
                 }
 
-                state.ApplicationDetails.Name = input.NewDeploymentName;
+                if (state.SelectedRecommendation.Recipe.DeploymentType != Common.Recipes.DeploymentTypes.ElasticContainerRegistryImage)
+                {
+                    // We only validate the name when the recipe deployment type is not ElasticContainerRegistryImage.
+                    // This is because pushing images to ECR does not need a cloud application name.
+                    if (!cloudApplicationNameGenerator.IsValidName(newDeploymentName))
+                    {
+                        return ValidationProblem(cloudApplicationNameGenerator.InvalidNameMessage(newDeploymentName));
+                    }
+                }
+
+                state.ApplicationDetails.Name = newDeploymentName;
                 state.ApplicationDetails.UniqueIdentifier = string.Empty;
                 state.ApplicationDetails.ResourceType = orchestrator.GetCloudApplicationResourceType(state.SelectedRecommendation.Recipe.DeploymentType);
                 state.ApplicationDetails.RecipeId = input.NewDeploymentRecipeId;
-                await orchestrator.ApplyAllReplacementTokens(state.SelectedRecommendation, input.NewDeploymentName);
+                await orchestrator.ApplyAllReplacementTokens(state.SelectedRecommendation, newDeploymentName);
             }
             else if(!string.IsNullOrEmpty(input.ExistingDeploymentId))
             {
