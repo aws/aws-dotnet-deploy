@@ -41,11 +41,13 @@ namespace AWS.Deploy.CLI
     {
         private readonly IToolInteractiveService _interactiveService;
         private readonly IDirectoryManager _directoryManager;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
-        public ConsoleUtilities(IToolInteractiveService interactiveService, IDirectoryManager directoryManager)
+        public ConsoleUtilities(IToolInteractiveService interactiveService, IDirectoryManager directoryManager, IOptionSettingHandler optionSettingHandler)
         {
             _interactiveService = interactiveService;
             _directoryManager = directoryManager;
+            _optionSettingHandler = optionSettingHandler;
         }
 
         /// <summary>
@@ -63,7 +65,7 @@ namespace AWS.Deploy.CLI
             const string NOOP = "No action";
             var operations = new List<string> { ADD, DELETE, NOOP };
 
-            var currentOptionSettingValue = recommendation.GetOptionSettingValue<SortedSet<string>>(optionSetting) ?? new SortedSet<string>();
+            var currentOptionSettingValue = _optionSettingHandler.GetOptionSettingValue<SortedSet<string>>(recommendation, optionSetting) ?? new SortedSet<string>();
 
             while (true)
             {

@@ -24,6 +24,7 @@ using AWS.Deploy.Common.DeploymentManifest;
 using AWS.Deploy.Orchestration.DisplayedResources;
 using AWS.Deploy.Orchestration.LocalUserSettings;
 using AWS.Deploy.Orchestration.ServiceHandlers;
+using AWS.Deploy.Common.Recipes;
 
 namespace AWS.Deploy.CLI.Commands
 {
@@ -47,6 +48,7 @@ namespace AWS.Deploy.CLI.Commands
         private static readonly object s_root_command_lock = new();
         private static readonly object s_child_command_lock = new();
 
+        private readonly IServiceProvider _serviceProvider;
         private readonly IToolInteractiveService _toolInteractiveService;
         private readonly IOrchestratorInteractiveService _orchestratorInteractiveService;
         private readonly ICDKManager _cdkManager;
@@ -71,8 +73,10 @@ namespace AWS.Deploy.CLI.Commands
         private readonly ILocalUserSettingsEngine _localUserSettingsEngine;
         private readonly ICDKVersionDetector _cdkVersionDetector;
         private readonly IAWSServiceHandler _awsServiceHandler;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
         public CommandFactory(
+            IServiceProvider serviceProvider,
             IToolInteractiveService toolInteractiveService,
             IOrchestratorInteractiveService orchestratorInteractiveService,
             ICDKManager cdkManager,
@@ -96,8 +100,10 @@ namespace AWS.Deploy.CLI.Commands
             ICustomRecipeLocator customRecipeLocator,
             ILocalUserSettingsEngine localUserSettingsEngine,
             ICDKVersionDetector cdkVersionDetector,
-            IAWSServiceHandler awsServiceHandler)
+            IAWSServiceHandler awsServiceHandler,
+            IOptionSettingHandler optionSettingHandler)
         {
+            _serviceProvider = serviceProvider;
             _toolInteractiveService = toolInteractiveService;
             _orchestratorInteractiveService = orchestratorInteractiveService;
             _cdkManager = cdkManager;
@@ -122,6 +128,7 @@ namespace AWS.Deploy.CLI.Commands
             _localUserSettingsEngine = localUserSettingsEngine;
             _cdkVersionDetector = cdkVersionDetector;
             _awsServiceHandler = awsServiceHandler;
+            _optionSettingHandler = optionSettingHandler;
         }
 
         public Command BuildRootCommand()
@@ -201,6 +208,7 @@ namespace AWS.Deploy.CLI.Commands
                     var dockerEngine = new DockerEngine.DockerEngine(projectDefinition, _fileManager);
 
                     var deploy = new DeployCommand(
+                        _serviceProvider,
                         _toolInteractiveService,
                         _orchestratorInteractiveService,
                         _cdkProjectHandler,
@@ -221,7 +229,8 @@ namespace AWS.Deploy.CLI.Commands
                         session,
                         _directoryManager,
                         _fileManager,
-                        _awsServiceHandler);
+                        _awsServiceHandler,
+                        _optionSettingHandler);
 
                     var deploymentProjectPath = input.DeploymentProject ?? string.Empty;
                     if (!string.IsNullOrEmpty(deploymentProjectPath))

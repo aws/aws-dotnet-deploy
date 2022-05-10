@@ -15,11 +15,13 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
     {
         private readonly IConsoleUtilities _consoleUtilities;
         private readonly IDirectoryManager _directoryManager;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
-        public DockerExecutionDirectoryCommand(IConsoleUtilities consoleUtilities, IDirectoryManager directoryManager)
+        public DockerExecutionDirectoryCommand(IConsoleUtilities consoleUtilities, IDirectoryManager directoryManager, IOptionSettingHandler optionSettingHandler)
         {
             _consoleUtilities = consoleUtilities;
             _directoryManager = directoryManager;
+            _optionSettingHandler = optionSettingHandler;
         }
 
         public Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting) => Task.FromResult<List<TypeHintResource>?>(null);
@@ -29,9 +31,9 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             var settingValue = _consoleUtilities
                 .AskUserForValue(
                     string.Empty,
-                    recommendation.GetOptionSettingValue<string>(optionSetting),
+                    _optionSettingHandler.GetOptionSettingValue<string>(recommendation, optionSetting),
                     allowEmpty: true,
-                    resetValue: recommendation.GetOptionSettingDefaultValue<string>(optionSetting) ?? "",
+                    resetValue: _optionSettingHandler.GetOptionSettingDefaultValue<string>(recommendation, optionSetting) ?? "",
                     validators: executionDirectory => ValidateExecutionDirectory(executionDirectory));
 
             recommendation.DeploymentBundle.DockerExecutionDirectory = settingValue;

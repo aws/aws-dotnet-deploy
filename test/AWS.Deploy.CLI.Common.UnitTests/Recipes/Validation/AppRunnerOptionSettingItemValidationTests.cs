@@ -7,6 +7,7 @@ using System.Text;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Recipes.Validation;
+using AWS.Deploy.Orchestration;
 using Should;
 using Xunit;
 
@@ -14,6 +15,13 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
 {
     public class AppRunnerOptionSettingItemValidationTests
     {
+        private readonly IOptionSettingHandler _optionSettingHandler;
+
+        public AppRunnerOptionSettingItemValidationTests()
+        {
+            _optionSettingHandler = new OptionSettingHandler();
+        }
+
         [Theory]
         [InlineData("abcdef1234", true)]
         [InlineData("abc123def45", true)]
@@ -62,7 +70,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             ValidationFailedException exception = null;
             try
             {
-                optionSettingItem.SetValueOverride(value);
+                _optionSettingHandler.SetOptionSettingValue(optionSettingItem, value);
             }
             catch (ValidationFailedException e)
             {

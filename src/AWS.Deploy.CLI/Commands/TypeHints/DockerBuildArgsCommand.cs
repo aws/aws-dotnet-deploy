@@ -13,10 +13,12 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
     public class DockerBuildArgsCommand : ITypeHintCommand
     {
         private readonly IConsoleUtilities _consoleUtilities;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
-        public DockerBuildArgsCommand(IConsoleUtilities consoleUtilities)
+        public DockerBuildArgsCommand(IConsoleUtilities consoleUtilities, IOptionSettingHandler optionSettingHandler)
         {
             _consoleUtilities = consoleUtilities;
+            _optionSettingHandler = optionSettingHandler;
         }
 
         public Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting) => Task.FromResult<List<TypeHintResource>?>(null);
@@ -26,9 +28,9 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             var settingValue = _consoleUtilities
                 .AskUserForValue(
                     string.Empty,
-                    recommendation.GetOptionSettingValue<string>(optionSetting),
+                    _optionSettingHandler.GetOptionSettingValue<string>(recommendation, optionSetting),
                     allowEmpty: true,
-                    resetValue: recommendation.GetOptionSettingDefaultValue<string>(optionSetting) ?? "",
+                    resetValue: _optionSettingHandler.GetOptionSettingDefaultValue<string>(recommendation, optionSetting) ?? "",
                     validators: buildArgs => ValidateBuildArgs(buildArgs))
                 .ToString()
                 .Replace("\"", "\"\"");

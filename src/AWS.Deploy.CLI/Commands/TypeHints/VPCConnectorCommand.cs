@@ -19,12 +19,14 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         private readonly IAWSResourceQueryer _awsResourceQueryer;
         private readonly IConsoleUtilities _consoleUtilities;
         private readonly IToolInteractiveService _toolInteractiveService;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
-        public VPCConnectorCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities, IToolInteractiveService toolInteractiveService)
+        public VPCConnectorCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities, IToolInteractiveService toolInteractiveService, IOptionSettingHandler optionSettingHandler)
         {
             _awsResourceQueryer = awsResourceQueryer;
             _consoleUtilities = consoleUtilities;
             _toolInteractiveService = toolInteractiveService;
+            _optionSettingHandler = optionSettingHandler;
         }
 
         private async Task<List<VpcConnector>> GetData()
@@ -42,7 +44,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         {
             _toolInteractiveService.WriteLine();
             var createNewOptionSetting = optionSetting.ChildOptionSettings.First(x => x.Id.Equals("CreateNew"));
-            var createNew = recommendation.GetOptionSettingValue<string>(createNewOptionSetting) ?? "false";
+            var createNew = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, createNewOptionSetting) ?? "false";
             var createNewVPCConnectorAnswer = _consoleUtilities.AskYesNoQuestion("Do you want to create a new VPC Connector?", createNew);
             var createNewVPCConnector = createNewVPCConnectorAnswer == YesNo.Yes;
 
@@ -53,7 +55,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 _toolInteractiveService.WriteLine();
 
                 var vpcOptionSetting = optionSetting.ChildOptionSettings.First(x => x.Id.Equals("VpcId"));
-                var currentVpcValue = recommendation.GetOptionSettingValue(vpcOptionSetting).ToString();
+                var currentVpcValue = _optionSettingHandler.GetOptionSettingValue(recommendation, vpcOptionSetting).ToString();
                 var userInputConfigurationVPCs = new UserInputConfiguration<Vpc>(
                     idSelector: vpc => vpc.VpcId,
                     displaySelector: vpc => vpc.VpcId,

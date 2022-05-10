@@ -11,9 +11,42 @@ using Newtonsoft.Json.Converters;
 namespace AWS.Deploy.Common.Recipes
 {
     /// <summary>
+    /// Defines a contract for <see cref="OptionSettingItem"/> for getters and setters.
+    /// </summary>
+    public interface IOptionSettingItem
+    {
+        /// <summary>
+        /// Retrieve the value of an <see cref="OptionSettingItem"/> as a specified type.
+        /// </summary>
+        T GetValue<T>(IDictionary<string, string> replacementTokens, IDictionary<string, bool>? displayableOptionSettings = null);
+
+        /// <summary>
+        /// Retrieve the value of an <see cref="OptionSettingItem"/> as an object.
+        /// </summary>
+        object GetValue(IDictionary<string, string> replacementTokens, IDictionary<string, bool>? displayableOptionSettings = null);
+
+        /// <summary>
+        /// Retrieve the default value of an <see cref="OptionSettingItem"/> as a specified type.
+        /// </summary>
+        T? GetDefaultValue<T>(IDictionary<string, string> replacementTokens);
+
+        /// <summary>
+        /// Retrieve the default value of an <see cref="OptionSettingItem"/> as an object.
+        /// </summary>
+        object? GetDefaultValue(IDictionary<string, string> replacementTokens);
+
+        /// <summary>
+        /// Set the value of an <see cref="OptionSettingItem"/> while validating the provided input.
+        /// </summary>
+        /// <param name="optionSettingHandler"></param>
+        /// <param name="value"></param>
+        void SetValue(IOptionSettingHandler optionSettingHandler, object value);
+    }
+
+    /// <summary>
     /// Container for the setting values
     /// </summary>
-    public partial class OptionSettingItem
+    public partial class OptionSettingItem : IOptionSettingItem
     {
         /// <summary>
         /// The unique id of setting. This value will be persisted in other config files so its value should never change once a recipe is released.
@@ -54,6 +87,11 @@ namespace AWS.Deploy.Common.Recipes
         /// The default value used for the recipe if the user doesn't override the value.
         /// </summary>
         public object? DefaultValue { get; set; }
+
+        /// <summary>
+        /// The value used for the recipe if it is set by the user.
+        /// </summary>
+        private object? _value { get; set; }
 
         /// <summary>
         /// UI can use this to reduce the amount of settings to show to the user when confirming the recommendation. This can make it so the user sees only the most important settings

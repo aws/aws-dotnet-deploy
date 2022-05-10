@@ -11,6 +11,8 @@ using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.CLI.TypeHintResponses;
 using AWS.Deploy.CLI.UnitTests.Utilities;
 using AWS.Deploy.Common.IO;
+using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.Data;
 using Moq;
 using Xunit;
@@ -22,12 +24,14 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
         private readonly Mock<IAWSResourceQueryer> _mockAWSResourceQueryer;
         private readonly IDirectoryManager _directoryManager;
         private readonly IToolInteractiveService _toolInteractiveService;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
         public VPCConnectorCommandTest()
         {
             _mockAWSResourceQueryer = new Mock<IAWSResourceQueryer>();
             _directoryManager = new TestDirectoryManager();
             _toolInteractiveService = new TestToolInteractiveServiceImpl();
+            _optionSettingHandler = new OptionSettingHandler();
         }
 
         [Fact]
@@ -46,11 +50,11 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
 
             var appRunnerRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_APPRUNNER_ID);
 
-            var vpcConnectorOptionSetting = appRunnerRecommendation.GetOptionSetting("VPCConnector");
+            var vpcConnectorOptionSetting = _optionSettingHandler.GetOptionSetting(appRunnerRecommendation, "VPCConnector");
 
             var interactiveServices = new TestToolInteractiveServiceImpl(new List<string>());
-            var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager);
-            var command = new VPCConnectorCommand(_mockAWSResourceQueryer.Object, consoleUtilities, _toolInteractiveService);
+            var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager, _optionSettingHandler);
+            var command = new VPCConnectorCommand(_mockAWSResourceQueryer.Object, consoleUtilities, _toolInteractiveService, _optionSettingHandler);
 
             _mockAWSResourceQueryer
                 .Setup(x => x.DescribeAppRunnerVpcConnectors())
@@ -86,15 +90,15 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
 
             var appRunnerRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_APPRUNNER_ID);
 
-            var vpcConnectorOptionSetting = appRunnerRecommendation.GetOptionSetting("VPCConnector");
+            var vpcConnectorOptionSetting = _optionSettingHandler.GetOptionSetting(appRunnerRecommendation, "VPCConnector");
 
             var interactiveServices = new TestToolInteractiveServiceImpl(new List<string>
             {
                 "n",
                 "1"
             });
-            var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager);
-            var command = new VPCConnectorCommand(_mockAWSResourceQueryer.Object, consoleUtilities, _toolInteractiveService);
+            var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager, _optionSettingHandler);
+            var command = new VPCConnectorCommand(_mockAWSResourceQueryer.Object, consoleUtilities, _toolInteractiveService, _optionSettingHandler);
 
             _mockAWSResourceQueryer
                 .Setup(x => x.DescribeAppRunnerVpcConnectors())
@@ -132,7 +136,7 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
 
             var appRunnerRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_APPRUNNER_ID);
 
-            var vpcConnectorOptionSetting = appRunnerRecommendation.GetOptionSetting("VPCConnector");
+            var vpcConnectorOptionSetting = _optionSettingHandler.GetOptionSetting(appRunnerRecommendation, "VPCConnector");
 
             var interactiveServices = new TestToolInteractiveServiceImpl(new List<string>
             {
@@ -145,8 +149,8 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
                 "1",
                 "3"
             });
-            var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager);
-            var command = new VPCConnectorCommand(_mockAWSResourceQueryer.Object, consoleUtilities, _toolInteractiveService);
+            var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager, _optionSettingHandler);
+            var command = new VPCConnectorCommand(_mockAWSResourceQueryer.Object, consoleUtilities, _toolInteractiveService, _optionSettingHandler);
 
             _mockAWSResourceQueryer
                 .Setup(x => x.GetListOfVpcs())

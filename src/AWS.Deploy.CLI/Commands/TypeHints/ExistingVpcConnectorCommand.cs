@@ -16,11 +16,13 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
     {
         private readonly IAWSResourceQueryer _awsResourceQueryer;
         private readonly IConsoleUtilities _consoleUtilities;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
-        public ExistingVpcConnectorCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities)
+        public ExistingVpcConnectorCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities, IOptionSettingHandler optionSettingHandler)
         {
             _awsResourceQueryer = awsResourceQueryer;
             _consoleUtilities = consoleUtilities;
+            _optionSettingHandler = optionSettingHandler;
         }
 
         private async Task<List<VpcConnector>> GetData()
@@ -37,7 +39,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var vpcConnectors = await GetData();
-            var currentVpcConnector = recommendation.GetOptionSettingValue<string>(optionSetting);
+            var currentVpcConnector = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, optionSetting);
 
             var userInputConfiguration = new UserInputConfiguration<VpcConnector>(
                 idSelector: vpcConnector => vpcConnector.VpcConnectorArn,

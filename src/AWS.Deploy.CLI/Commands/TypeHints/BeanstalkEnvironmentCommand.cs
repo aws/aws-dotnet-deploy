@@ -18,17 +18,19 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
     {
         private readonly IAWSResourceQueryer _awsResourceQueryer;
         private readonly IConsoleUtilities _consoleUtilities;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
-        public BeanstalkEnvironmentCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities)
+        public BeanstalkEnvironmentCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities, IOptionSettingHandler optionSettingHandler)
         {
             _awsResourceQueryer = awsResourceQueryer;
             _consoleUtilities = consoleUtilities;
+            _optionSettingHandler = optionSettingHandler;
         }
 
         private async Task<List<EnvironmentDescription>> GetData(Recommendation recommendation, OptionSettingItem optionSetting)
         {
-            var applicationOptionSetting = recommendation.GetOptionSetting(optionSetting.ParentSettingId);
-            var applicationName = recommendation.GetOptionSettingValue(applicationOptionSetting) as string;
+            var applicationOptionSetting = _optionSettingHandler.GetOptionSetting(recommendation, optionSetting.ParentSettingId);
+            var applicationName = _optionSettingHandler.GetOptionSettingValue(recommendation, applicationOptionSetting) as string;
             return await _awsResourceQueryer.ListOfElasticBeanstalkEnvironments(applicationName);
         }
 
@@ -41,7 +43,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var environments = await GetData(recommendation, optionSetting);
-            var currentTypeHintResponse = recommendation.GetOptionSettingValue<BeanstalkEnvironmentTypeHintResponse>(optionSetting);
+            var currentTypeHintResponse = _optionSettingHandler.GetOptionSettingValue<BeanstalkEnvironmentTypeHintResponse>(recommendation, optionSetting);
 
             var userInputConfiguration = new UserInputConfiguration<EnvironmentDescription>(
                 idSelector: env => env.EnvironmentName,
