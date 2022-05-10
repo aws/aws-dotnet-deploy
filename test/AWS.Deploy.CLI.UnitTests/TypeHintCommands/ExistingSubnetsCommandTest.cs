@@ -9,6 +9,8 @@ using AWS.Deploy.CLI.Commands.TypeHints;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.CLI.UnitTests.Utilities;
 using AWS.Deploy.Common.IO;
+using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.Data;
 using Moq;
 using Xunit;
@@ -19,11 +21,13 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
     {
         private readonly Mock<IAWSResourceQueryer> _mockAWSResourceQueryer;
         private readonly IDirectoryManager _directoryManager;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
         public ExistingSubnetsCommandTest()
         {
             _mockAWSResourceQueryer = new Mock<IAWSResourceQueryer>();
             _directoryManager = new TestDirectoryManager();
+            _optionSettingHandler = new OptionSettingHandler();
         }
 
         [Fact]
@@ -42,11 +46,11 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
 
             var appRunnerRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_APPRUNNER_ID);
 
-            var subnetsOptionSetting = appRunnerRecommendation.GetOptionSetting("VPCConnector.Subnets");
+            var subnetsOptionSetting = _optionSettingHandler.GetOptionSetting(appRunnerRecommendation, "VPCConnector.Subnets");
 
             var interactiveServices = new TestToolInteractiveServiceImpl(new List<string>());
-            var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager);
-            var command = new ExistingSubnetsCommand(_mockAWSResourceQueryer.Object, consoleUtilities);
+            var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager, _optionSettingHandler);
+            var command = new ExistingSubnetsCommand(_mockAWSResourceQueryer.Object, consoleUtilities, _optionSettingHandler);
 
             _mockAWSResourceQueryer
                 .Setup(x => x.DescribeSubnets(It.IsAny<string>()))
@@ -81,7 +85,7 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
 
             var appRunnerRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_APPRUNNER_ID);
 
-            var subnetsOptionSetting = appRunnerRecommendation.GetOptionSetting("VPCConnector.Subnets");
+            var subnetsOptionSetting = _optionSettingHandler.GetOptionSetting(appRunnerRecommendation, "VPCConnector.Subnets");
 
             var interactiveServices = new TestToolInteractiveServiceImpl(new List<string>
             {
@@ -89,8 +93,8 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
                 "1",
                 "3"
             });
-            var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager);
-            var command = new ExistingSubnetsCommand(_mockAWSResourceQueryer.Object, consoleUtilities);
+            var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager, _optionSettingHandler);
+            var command = new ExistingSubnetsCommand(_mockAWSResourceQueryer.Object, consoleUtilities, _optionSettingHandler);
 
             _mockAWSResourceQueryer
                 .Setup(x => x.DescribeSubnets(It.IsAny<string>()))

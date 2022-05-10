@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.Extensions;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.DockerEngine;
@@ -40,6 +41,7 @@ namespace AWS.Deploy.Orchestration
         internal readonly ICustomRecipeLocator? _customRecipeLocator;
         internal readonly OrchestratorSession? _session;
         internal readonly IAWSServiceHandler? _awsServiceHandler;
+        private readonly IOptionSettingHandler? _optionSettingHandler;
 
         public Orchestrator(
             OrchestratorSession session,
@@ -55,7 +57,8 @@ namespace AWS.Deploy.Orchestration
             IList<string> recipeDefinitionPaths,
             IFileManager fileManager,
             IDirectoryManager directoryManager,
-            IAWSServiceHandler awsServiceHandler)
+            IAWSServiceHandler awsServiceHandler,
+            IOptionSettingHandler optionSettingHandler)
         {
             _session = session;
             _interactiveService = interactiveService;
@@ -71,6 +74,7 @@ namespace AWS.Deploy.Orchestration
             _fileManager = fileManager;
             _directoryManager = directoryManager;
             _awsServiceHandler = awsServiceHandler;
+            _optionSettingHandler = optionSettingHandler;
         }
 
         public Orchestrator(OrchestratorSession session, IList<string> recipeDefinitionPaths)
@@ -136,6 +140,28 @@ namespace AWS.Deploy.Orchestration
 
             var engine = new RecommendationEngine.RecommendationEngine(new List<string> { deploymentProjectPath }, _session);
             return await engine.ComputeRecommendations();
+        }
+
+        /// <summary>
+        /// Creates a deep copy of the recommendation object and applies the previous settings to that recommendation.
+        /// </summary>
+        public Recommendation ApplyRecommendationPreviousSettings(Recommendation recommendation, IDictionary<string, object> previousSettings)
+        {
+            if (_optionSettingHandler == null)
+                throw new InvalidOperationException($"{nameof(_optionSettingHandler)} is null as part of the orchestartor object");
+
+            var recommendationCopy = recommendation.DeepCopy();
+            recommendationCopy.IsExistingCloudApplication = true;
+
+            foreach (var optionSetting in recommendationCopy.Recipe.OptionSettings)
+            {
+                if (previousSettings.TryGetValue(optionSetting.Id, out var value))
+                {
+                    _optionSettingHandler.SetOptionSettingValue(optionSetting, value);
+                }
+            }
+
+            return recommendationCopy;
         }
 
         public async Task ApplyAllReplacementTokens(Recommendation recommendation, string cloudApplicationName)
@@ -214,6 +240,8 @@ namespace AWS.Deploy.Orchestration
                 throw new InvalidOperationException($"{nameof(_dockerEngine)} is null as part of the orchestartor object");
             if (_deploymentBundleHandler == null)
                 throw new InvalidOperationException($"{nameof(_deploymentBundleHandler)} is null as part of the orchestartor object");
+            if (_optionSettingHandler == null)
+                throw new InvalidOperationException($"{nameof(_optionSettingHandler)} is null as part of the orchestartor object");
 
             if (!recommendation.ProjectDefinition.HasDockerFile)
             {
@@ -232,12 +260,12 @@ namespace AWS.Deploy.Orchestration
 
             try
             {
-                var respositoryName = recommendation.GetOptionSettingValue<string>(recommendation.GetOptionSetting("ECRRepositoryName"));
+                var respositoryName = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, "ECRRepositoryName"));
 
                 string imageTag;
                 try
                 {
-                    var tagSuffix = recommendation.GetOptionSettingValue<string>(recommendation.GetOptionSetting("ImageTag"));
+                    var tagSuffix = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, "ImageTag"));
                     imageTag = $"{respositoryName}:{tagSuffix}";
                 }
                 catch (OptionSettingItemDoesNotExistException)

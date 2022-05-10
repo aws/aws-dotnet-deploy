@@ -4,6 +4,7 @@
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Recipes.Validation;
+using AWS.Deploy.Orchestration;
 using Should;
 using Xunit;
 using Xunit.Abstractions;
@@ -12,6 +13,13 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
 {
     public class ECSFargateOptionSettingItemValidationTests
     {
+        private readonly IOptionSettingHandler _optionSettingHandler;
+
+        public ECSFargateOptionSettingItemValidationTests()
+        {
+            _optionSettingHandler = new OptionSettingHandler();
+        }
+
         [Theory]
         [InlineData("arn:aws:ecs:us-east-1:012345678910:cluster/test", true)]
         [InlineData("arn:aws-cn:ecs:us-east-1:012345678910:cluster/test", true)]
@@ -169,7 +177,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             ValidationFailedException exception = null;
             try
             {
-                optionSettingItem.SetValueOverride(value);
+                _optionSettingHandler.SetOptionSettingValue(optionSettingItem, value);
             }
             catch (ValidationFailedException e)
             {

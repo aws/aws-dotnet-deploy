@@ -10,6 +10,7 @@ using Amazon.ElasticBeanstalk;
 using Amazon.ElasticBeanstalk.Model;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
+using AWS.Deploy.Common.Recipes;
 
 namespace AWS.Deploy.Orchestration.ServiceHandlers
 {
@@ -26,12 +27,14 @@ namespace AWS.Deploy.Orchestration.ServiceHandlers
         private readonly IAWSClientFactory _awsClientFactory;
         private readonly IOrchestratorInteractiveService _interactiveService;
         private readonly IFileManager _fileManager;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
-        public AWSElasticBeanstalkHandler(IAWSClientFactory awsClientFactory, IOrchestratorInteractiveService interactiveService, IFileManager fileManager)
+        public AWSElasticBeanstalkHandler(IAWSClientFactory awsClientFactory, IOrchestratorInteractiveService interactiveService, IFileManager fileManager, IOptionSettingHandler optionSettingHandler)
         {
             _awsClientFactory = awsClientFactory;
             _interactiveService = interactiveService;
             _fileManager = fileManager;
+            _optionSettingHandler = optionSettingHandler;
         }
 
         public async Task<S3Location> CreateApplicationStorageLocationAsync(string applicationName, string versionLabel, string deploymentPackage)
@@ -82,7 +85,7 @@ namespace AWS.Deploy.Orchestration.ServiceHandlers
 
             foreach (var tuple in Constants.ElasticBeanstalk.OptionSettingQueryList)
             {
-                var optionSetting = recommendation.GetOptionSetting(tuple.OptionSettingId);
+                var optionSetting = _optionSettingHandler.GetOptionSetting(recommendation, tuple.OptionSettingId);
 
                 if (!optionSetting.Updatable)
                     continue;

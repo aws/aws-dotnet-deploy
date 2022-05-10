@@ -14,15 +14,15 @@ namespace AWS.Deploy.Common.Recipes.Validation
         public string MaxValueOptionSettingsId { get; set; } = string.Empty;
         public string ValidationFailedMessage { get; set; } = "The value specified for {{MinValueOptionSettingsId}} must be less than or equal to the value specified for {{MaxValueOptionSettingsId}}";
 
-        public ValidationResult Validate(Recommendation recommendation, IDeployToolValidationContext deployValidationContext)
+        public ValidationResult Validate(Recommendation recommendation, IDeployToolValidationContext deployValidationContext, IOptionSettingHandler optionSettingHandler)
         {
             double minVal;
             double maxValue;
 
             try
             {
-                minVal = recommendation.GetOptionSettingValue<double>(recommendation.GetOptionSetting(MinValueOptionSettingsId));
-                maxValue = recommendation.GetOptionSettingValue<double>(recommendation.GetOptionSetting(MaxValueOptionSettingsId));
+                minVal = optionSettingHandler.GetOptionSettingValue<double>(recommendation, optionSettingHandler.GetOptionSetting(recommendation, MinValueOptionSettingsId));
+                maxValue = optionSettingHandler.GetOptionSettingValue<double>(recommendation, optionSettingHandler.GetOptionSetting(recommendation, MaxValueOptionSettingsId));
             }
             catch (OptionSettingItemDoesNotExistException)
             {

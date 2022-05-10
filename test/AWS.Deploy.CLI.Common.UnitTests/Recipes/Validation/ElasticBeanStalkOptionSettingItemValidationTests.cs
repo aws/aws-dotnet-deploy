@@ -4,6 +4,7 @@
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Recipes.Validation;
+using AWS.Deploy.Orchestration;
 using Should;
 using Xunit;
 
@@ -11,6 +12,13 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
 {
     public class ElasticBeanStalkOptionSettingItemValidationTests
     {
+        private readonly IOptionSettingHandler _optionSettingHandler;
+
+        public ElasticBeanStalkOptionSettingItemValidationTests()
+        {
+            _optionSettingHandler = new OptionSettingHandler();
+        }
+
         [Theory]
         [InlineData("12345sas", true)]
         [InlineData("435&*abc@3123", true)]
@@ -125,7 +133,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
 
             try
             {
-                optionSettingItem.SetValueOverride(value);
+                _optionSettingHandler.SetOptionSettingValue(optionSettingItem, value);
             }
             catch (ValidationFailedException e)
             {

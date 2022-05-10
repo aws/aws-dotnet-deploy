@@ -8,6 +8,7 @@ using Amazon.Runtime;
 using AWS.Deploy.CLI.UnitTests.Utilities;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
+using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.RecommendationEngine;
 using AWS.Deploy.Recipes;
@@ -18,6 +19,13 @@ namespace AWS.Deploy.CLI.UnitTests
 {
     public class GetOptionSettingTests
     {
+        private readonly IOptionSettingHandler _optionSettingHandler;
+
+        public GetOptionSettingTests()
+        {
+            _optionSettingHandler = new OptionSettingHandler();
+        }
+
         private async Task<RecommendationEngine> BuildRecommendationEngine(string testProjectName)
         {
             var fullPath = SystemIOUtilities.ResolvePath(testProjectName);
@@ -46,7 +54,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
 
-            var optionSetting = beanstalkRecommendation.GetOptionSetting(jsonPath);
+            var optionSetting = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, jsonPath);
 
             Assert.NotNull(optionSetting);
             Assert.Equal(optionSetting.Id, targetId);
@@ -62,7 +70,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
 
-            Assert.Throws<OptionSettingItemDoesNotExistException>(() => beanstalkRecommendation.GetOptionSetting(jsonPath));
+            Assert.Throws<OptionSettingItemDoesNotExistException>(() => _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, jsonPath));
         }
 
         [Theory]
@@ -76,11 +84,11 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
 
-            var managedActionsEnabled = beanstalkRecommendation.GetOptionSetting($"{optionSetting}.{childSetting}");
-            managedActionsEnabled.SetValueOverride(childValue);
+            var managedActionsEnabled = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, $"{optionSetting}.{childSetting}");
+            _optionSettingHandler.SetOptionSettingValue(managedActionsEnabled, childValue);
 
-            var elasticBeanstalkManagedPlatformUpdates = beanstalkRecommendation.GetOptionSetting(optionSetting);
-            var elasticBeanstalkManagedPlatformUpdatesValue = beanstalkRecommendation.GetOptionSettingValue<Dictionary<string, object>>(elasticBeanstalkManagedPlatformUpdates);
+            var elasticBeanstalkManagedPlatformUpdates = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, optionSetting);
+            var elasticBeanstalkManagedPlatformUpdatesValue = _optionSettingHandler.GetOptionSettingValue<Dictionary<string, object>>(beanstalkRecommendation, elasticBeanstalkManagedPlatformUpdates);
 
             Assert.Equal(displayableCount, elasticBeanstalkManagedPlatformUpdatesValue.Count);
         }
@@ -94,11 +102,11 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var appRunnerRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_APPRUNNER_ID);
 
-            var subnets = appRunnerRecommendation.GetOptionSetting("VPCConnector.Subnets");
-            var securityGroups = appRunnerRecommendation.GetOptionSetting("VPCConnector.SecurityGroups");
+            var subnets = _optionSettingHandler.GetOptionSetting(appRunnerRecommendation, "VPCConnector.Subnets");
+            var securityGroups = _optionSettingHandler.GetOptionSetting(appRunnerRecommendation, "VPCConnector.SecurityGroups");
 
-            Assert.Throws<ValidationFailedException>(() => subnets.SetValueOverride(new SortedSet<string>(){ "subnet1" }));
-            Assert.Throws<ValidationFailedException>(() => securityGroups.SetValueOverride(new SortedSet<string>(){ "securityGroup1" }));
+            Assert.Throws<ValidationFailedException>(() => _optionSettingHandler.SetOptionSettingValue(subnets, new SortedSet<string>(){ "subnet1" }));
+            Assert.Throws<ValidationFailedException>(() => _optionSettingHandler.SetOptionSettingValue(securityGroups, new SortedSet<string>(){ "securityGroup1" }));
         }
 
         [Fact]
@@ -110,11 +118,11 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var appRunnerRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_APPRUNNER_ID);
 
-            var subnets = appRunnerRecommendation.GetOptionSetting("VPCConnector.Subnets");
-            var emptySubnetsValue = appRunnerRecommendation.GetOptionSettingValue(subnets);
+            var subnets = _optionSettingHandler.GetOptionSetting(appRunnerRecommendation, "VPCConnector.Subnets");
+            var emptySubnetsValue = _optionSettingHandler.GetOptionSettingValue(appRunnerRecommendation, subnets);
 
-            subnets.SetValueOverride(new SortedSet<string>(){ "subnet-1234abcd" });
-            var subnetsValue = appRunnerRecommendation.GetOptionSettingValue(subnets);
+            _optionSettingHandler.SetOptionSettingValue(subnets, new SortedSet<string>(){ "subnet-1234abcd" });
+            var subnetsValue = _optionSettingHandler.GetOptionSettingValue(appRunnerRecommendation, subnets);
 
             var emptySubnetsString = Assert.IsType<string>(emptySubnetsValue);
             Assert.True(string.IsNullOrEmpty(emptySubnetsString));

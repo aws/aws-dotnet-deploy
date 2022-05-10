@@ -20,11 +20,13 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
     {
         private readonly IAWSResourceQueryer _awsResourceQueryer;
         private readonly IConsoleUtilities _consoleUtilities;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
-        public ExistingApplicationLoadBalancerCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities)
+        public ExistingApplicationLoadBalancerCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities, IOptionSettingHandler optionSettingHandler)
         {
             _awsResourceQueryer = awsResourceQueryer;
             _consoleUtilities = consoleUtilities;
+            _optionSettingHandler = optionSettingHandler;
         }
 
         private async Task<List<LoadBalancer>> GetData()
@@ -41,7 +43,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var loadBalancers = await GetData();
-            var currentValue = recommendation.GetOptionSettingValue<string>(optionSetting);
+            var currentValue = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, optionSetting);
 
             var userInputConfiguration = new UserInputConfiguration<LoadBalancer>(
                 idSelector: loadBalancer => loadBalancer.LoadBalancerArn,

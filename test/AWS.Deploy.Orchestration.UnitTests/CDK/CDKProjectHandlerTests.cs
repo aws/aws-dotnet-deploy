@@ -11,11 +11,19 @@ using Moq;
 using Xunit;
 using Amazon.CloudFormation.Model;
 using System.Collections.Generic;
+using AWS.Deploy.Common.Recipes;
 
 namespace AWS.Deploy.Orchestration.UnitTests.CDK
 {
     public class CDKProjectHandlerTests
     {
+        private readonly IOptionSettingHandler _optionSettingHandler;
+
+        public CDKProjectHandlerTests()
+        {
+            _optionSettingHandler = new OptionSettingHandler();
+        }
+
         [Fact]
         public async Task CheckCDKBootstrap_DoesNotExist()
         {
@@ -27,7 +35,7 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
             awsResourceQuery.Setup(x => x.GetCloudFormationStack(It.IsAny<string>())).Returns(Task.FromResult<Stack>(null));
 
 
-            var cdkProjectHandler = new CdkProjectHandler(interactiveService.Object, commandLineWrapper.Object, awsResourceQuery.Object, fileManager.Object);
+            var cdkProjectHandler = new CdkProjectHandler(interactiveService.Object, commandLineWrapper.Object, awsResourceQuery.Object, fileManager.Object, _optionSettingHandler);
 
             Assert.True(await cdkProjectHandler.DetermineIfCDKBootstrapShouldRun());
         }
@@ -43,7 +51,7 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
             awsResourceQuery.Setup(x => x.GetCloudFormationStack(It.IsAny<string>())).Returns(Task.FromResult<Stack>(new Stack { Parameters = new List<Parameter>() }));
 
 
-            var cdkProjectHandler = new CdkProjectHandler(interactiveService.Object, commandLineWrapper.Object, awsResourceQuery.Object, fileManager.Object);
+            var cdkProjectHandler = new CdkProjectHandler(interactiveService.Object, commandLineWrapper.Object, awsResourceQuery.Object, fileManager.Object, _optionSettingHandler);
 
             Assert.True(await cdkProjectHandler.DetermineIfCDKBootstrapShouldRun());
         }
@@ -60,7 +68,7 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
                 new Stack { Parameters = new List<Parameter>() { new Parameter { ParameterKey = "Qualifier", ParameterValue = "q1" } } }));
 
 
-            var cdkProjectHandler = new CdkProjectHandler(interactiveService.Object, commandLineWrapper.Object, awsResourceQuery.Object, fileManager.Object);
+            var cdkProjectHandler = new CdkProjectHandler(interactiveService.Object, commandLineWrapper.Object, awsResourceQuery.Object, fileManager.Object, _optionSettingHandler);
 
             Assert.True(await cdkProjectHandler.DetermineIfCDKBootstrapShouldRun());
         }
@@ -79,7 +87,7 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
             awsResourceQuery.Setup(x => x.GetParameterStoreTextValue(It.IsAny<string>())).Returns(Task.FromResult<string>("1"));
 
 
-            var cdkProjectHandler = new CdkProjectHandler(interactiveService.Object, commandLineWrapper.Object, awsResourceQuery.Object, fileManager.Object);
+            var cdkProjectHandler = new CdkProjectHandler(interactiveService.Object, commandLineWrapper.Object, awsResourceQuery.Object, fileManager.Object, _optionSettingHandler);
 
             Assert.True(await cdkProjectHandler.DetermineIfCDKBootstrapShouldRun());
         }
@@ -98,7 +106,7 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
             awsResourceQuery.Setup(x => x.GetParameterStoreTextValue(It.IsAny<string>())).Returns(Task.FromResult<string>("100"));
 
 
-            var cdkProjectHandler = new CdkProjectHandler(interactiveService.Object, commandLineWrapper.Object, awsResourceQuery.Object, fileManager.Object);
+            var cdkProjectHandler = new CdkProjectHandler(interactiveService.Object, commandLineWrapper.Object, awsResourceQuery.Object, fileManager.Object, _optionSettingHandler);
 
             Assert.False(await cdkProjectHandler.DetermineIfCDKBootstrapShouldRun());
         }
@@ -117,7 +125,7 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
             awsResourceQuery.Setup(x => x.GetParameterStoreTextValue(It.IsAny<string>())).Returns(Task.FromResult<string>(AWS.Deploy.Constants.CDK.CDKTemplateVersion.ToString()));
 
 
-            var cdkProjectHandler = new CdkProjectHandler(interactiveService.Object, commandLineWrapper.Object, awsResourceQuery.Object, fileManager.Object);
+            var cdkProjectHandler = new CdkProjectHandler(interactiveService.Object, commandLineWrapper.Object, awsResourceQuery.Object, fileManager.Object, _optionSettingHandler);
 
             Assert.False(await cdkProjectHandler.DetermineIfCDKBootstrapShouldRun());
         }

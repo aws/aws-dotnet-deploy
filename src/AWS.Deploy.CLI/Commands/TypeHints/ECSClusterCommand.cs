@@ -19,11 +19,13 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
     {
         private readonly IAWSResourceQueryer _awsResourceQueryer;
         private readonly IConsoleUtilities _consoleUtilities;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
-        public ECSClusterCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities)
+        public ECSClusterCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities, IOptionSettingHandler optionSettingHandler)
         {
             _awsResourceQueryer = awsResourceQueryer;
             _consoleUtilities = consoleUtilities;
+            _optionSettingHandler = optionSettingHandler;
         }
 
         private async Task<List<Cluster>> GetData()
@@ -40,7 +42,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var clusters = await GetData();
-            var currentTypeHintResponse = recommendation.GetOptionSettingValue<ECSClusterTypeHintResponse>(optionSetting);
+            var currentTypeHintResponse = _optionSettingHandler.GetOptionSettingValue<ECSClusterTypeHintResponse>(recommendation, optionSetting);
 
             var userInputConfiguration = new UserInputConfiguration<Cluster>(
                 idSelector: cluster => cluster.ClusterArn,

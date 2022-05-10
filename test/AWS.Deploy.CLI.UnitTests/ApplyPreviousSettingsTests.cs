@@ -17,11 +17,21 @@ using Moq;
 using Newtonsoft.Json;
 using Xunit;
 using Assert = Should.Core.Assertions.Assert;
+using AWS.Deploy.Common.Recipes;
 
 namespace AWS.Deploy.CLI.UnitTests
 {
     public class ApplyPreviousSettingsTests
     {
+        private readonly IOptionSettingHandler _optionSettingHandler;
+        private readonly Orchestrator _orchestrator;
+
+        public ApplyPreviousSettingsTests()
+        {
+            _optionSettingHandler = new OptionSettingHandler();
+            _orchestrator = new Orchestrator(null, null, null, null, null, null, null, null, null, null, null, null, null, null, _optionSettingHandler);
+        }
+
         private async Task<RecommendationEngine> BuildRecommendationEngine(string testProjectName)
         {
             var fullPath = SystemIOUtilities.ResolvePath(testProjectName);
@@ -63,10 +73,10 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var settings = JsonConvert.DeserializeObject<Dictionary<string, object>>(serializedSettings);
 
-            beanstalkRecommendation = beanstalkRecommendation.ApplyPreviousSettings(settings);
+            beanstalkRecommendation = _orchestrator.ApplyRecommendationPreviousSettings(beanstalkRecommendation, settings);
 
             var applicationIAMRoleOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("ApplicationIAMRole"));
-            var typeHintResponse = beanstalkRecommendation.GetOptionSettingValue<IAMRoleTypeHintResponse>(applicationIAMRoleOptionSetting);
+            var typeHintResponse = _optionSettingHandler.GetOptionSettingValue<IAMRoleTypeHintResponse>(beanstalkRecommendation, applicationIAMRoleOptionSetting);
 
             Assert.Equal(roleArn, typeHintResponse.RoleArn);
             Assert.Equal(createNew, typeHintResponse.CreateNew);
@@ -97,13 +107,13 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var settings = JsonConvert.DeserializeObject<Dictionary<string, object>>(serializedSettings);
 
-            fargateRecommendation = fargateRecommendation.ApplyPreviousSettings(settings);
+            fargateRecommendation = _orchestrator.ApplyRecommendationPreviousSettings(fargateRecommendation, settings);
 
             var vpcOptionSetting = fargateRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("Vpc"));
 
-            Assert.Equal(isDefault, fargateRecommendation.GetOptionSettingValue(vpcOptionSetting.ChildOptionSettings.First(optionSetting => optionSetting.Id.Equals("IsDefault"))));
-            Assert.Equal(createNew, fargateRecommendation.GetOptionSettingValue(vpcOptionSetting.ChildOptionSettings.First(optionSetting => optionSetting.Id.Equals("CreateNew"))));
-            Assert.Equal(vpcId, fargateRecommendation.GetOptionSettingValue(vpcOptionSetting.ChildOptionSettings.First(optionSetting => optionSetting.Id.Equals("VpcId"))));
+            Assert.Equal(isDefault, _optionSettingHandler.GetOptionSettingValue(fargateRecommendation, vpcOptionSetting.ChildOptionSettings.First(optionSetting => optionSetting.Id.Equals("IsDefault"))));
+            Assert.Equal(createNew, _optionSettingHandler.GetOptionSettingValue(fargateRecommendation, vpcOptionSetting.ChildOptionSettings.First(optionSetting => optionSetting.Id.Equals("CreateNew"))));
+            Assert.Equal(vpcId, _optionSettingHandler.GetOptionSettingValue(fargateRecommendation, vpcOptionSetting.ChildOptionSettings.First(optionSetting => optionSetting.Id.Equals("VpcId"))));
         }
     }
 }

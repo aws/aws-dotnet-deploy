@@ -8,6 +8,7 @@ using Amazon.CloudFormation;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Extensions;
 using AWS.Deploy.Common.IO;
+using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestration.CDK;
 using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.Utilities;
@@ -37,12 +38,13 @@ namespace AWS.Deploy.Orchestration
             IOrchestratorInteractiveService interactiveService,
             ICommandLineWrapper commandLineWrapper,
             IAWSResourceQueryer awsResourceQueryer,
-            IFileManager fileManager)
+            IFileManager fileManager,
+            IOptionSettingHandler optionSettingHandler)
         {
             _interactiveService = interactiveService;
             _commandLineWrapper = commandLineWrapper;
             _awsResourceQueryer = awsResourceQueryer;
-            _appSettingsBuilder = new CdkAppSettingsSerializer();
+            _appSettingsBuilder = new CdkAppSettingsSerializer(optionSettingHandler);
             _directoryManager = new DirectoryManager();
             _fileManager = fileManager;
         }

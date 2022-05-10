@@ -12,10 +12,12 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
     public class DotnetPublishBuildConfigurationCommand : ITypeHintCommand
     {
         private readonly IConsoleUtilities _consoleUtilities;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
-        public DotnetPublishBuildConfigurationCommand(IConsoleUtilities consoleUtilities)
+        public DotnetPublishBuildConfigurationCommand(IConsoleUtilities consoleUtilities, IOptionSettingHandler optionSettingHandler)
         {
             _consoleUtilities = consoleUtilities;
+            _optionSettingHandler = optionSettingHandler;
         }
 
         public Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting) => Task.FromResult<List<TypeHintResource>?>(null);
@@ -25,9 +27,9 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             var settingValue =
                 _consoleUtilities.AskUserForValue(
                     string.Empty,
-                    recommendation.GetOptionSettingValue<string>(optionSetting),
+                    _optionSettingHandler.GetOptionSettingValue<string>(recommendation, optionSetting),
                     allowEmpty: false,
-                    resetValue: recommendation.GetOptionSettingDefaultValue<string>(optionSetting) ?? "");
+                    resetValue: _optionSettingHandler.GetOptionSettingDefaultValue<string>(recommendation, optionSetting) ?? "");
             recommendation.DeploymentBundle.DotnetPublishBuildConfiguration = settingValue;
             return Task.FromResult<object>(settingValue);
         }

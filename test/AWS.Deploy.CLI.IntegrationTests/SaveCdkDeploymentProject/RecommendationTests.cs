@@ -250,7 +250,8 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
                 new List<string> { RecipeLocator.FindRecipeDefinitionsPath() },
                 fileManager,
                 directoryManager,
-                new Mock<IAWSServiceHandler>().Object);
+                new Mock<IAWSServiceHandler>().Object,
+                new OptionSettingHandler());
         }
 
         private async Task<string> GetCustomRecipeId(string recipeFilePath)

@@ -16,11 +16,13 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
     {
         private readonly IAWSResourceQueryer _awsResourceQueryer;
         private readonly IConsoleUtilities _consoleUtilities;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
-        public SQSQueueUrlCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities)
+        public SQSQueueUrlCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities, IOptionSettingHandler optionSettingHandler)
         {
             _awsResourceQueryer = awsResourceQueryer;
             _consoleUtilities = consoleUtilities;
+            _optionSettingHandler = optionSettingHandler;
         }
 
         public async Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
@@ -32,7 +34,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             const string NO_VALUE = "*** Do not select queue ***";
-            var currentValue = recommendation.GetOptionSettingValue(optionSetting);
+            var currentValue = _optionSettingHandler.GetOptionSettingValue(recommendation, optionSetting);
             var typeHintData = optionSetting.GetTypeHintData<SQSQueueUrlTypeHintData>();
             var currentValueStr = currentValue.ToString() ?? string.Empty;
             var queueUrls = await GetResources(recommendation, optionSetting);
