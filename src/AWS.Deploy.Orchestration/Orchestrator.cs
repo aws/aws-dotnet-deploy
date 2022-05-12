@@ -199,40 +199,36 @@ namespace AWS.Deploy.Orchestration
         {
             if (_interactiveService == null)
                 throw new InvalidOperationException($"{nameof(_recipeDefinitionPaths)} is null as part of the orchestartor object");
-            if (_directoryManager == null)
-                throw new InvalidOperationException($"{nameof(_directoryManager)} is null as part of the orchestartor object");
 
             if (recommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.Container)
             {
                 _interactiveService.LogSectionStart("Creating deployment image",
                     "Using the docker CLI to perform a docker build to create a container image.");
-
-                if (!await CreateContainerDeploymentBundle(cloudApplication, recommendation))
+                try
                 {
-                    if (!recommendation.ProjectDefinition.HasDockerFile)
-                    {
-                        var projectDirectory = _directoryManager.GetDirectoryInfo(recommendation.ProjectPath).Parent.FullName;
-                        var dockerfilePath = Path.Combine(projectDirectory, "Dockerfile");
-                        var errorMessage = $"Failed to create a container image from generated Docker file. " +
-                            $"Please edit the Dockerfile at {dockerfilePath} to correct the required build steps for the project. Common errors are missing project dependencies not included in the Dockerfile.";
-
-                        throw new FailedToCreateDeploymentBundleException(DeployToolErrorCode.FailedToCreateContainerDeploymentBundleFromGeneratedDockerFile, errorMessage);
-                    }
-                    throw new FailedToCreateDeploymentBundleException(DeployToolErrorCode.FailedToCreateContainerDeploymentBundle, "Failed to create a deployment bundle");
+                    await CreateContainerDeploymentBundle(cloudApplication, recommendation);
+                }
+                catch (DeployToolException ex)
+                {
+                    throw new FailedToCreateDeploymentBundleException(ex.ErrorCode, ex.Message, ex);
                 }
             }
             else if (recommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.DotnetPublishZipFile)
             {
                 _interactiveService.LogSectionStart("Creating deployment zip bundle",
                     "Using the dotnet CLI build the project and zip the publish artifacts.");
-
-                var dotnetPublishDeploymentBundleResult = await CreateDotnetPublishDeploymentBundle(recommendation);
-                if (!dotnetPublishDeploymentBundleResult)
-                    throw new FailedToCreateDeploymentBundleException(DeployToolErrorCode.FailedToCreateDotnetPublishDeploymentBundle, "Failed to create a deployment bundle");
+                try
+                {
+                    await CreateDotnetPublishDeploymentBundle(recommendation);
+                }
+                catch (DeployToolException ex)
+                {
+                    throw new FailedToCreateDeploymentBundleException(ex.ErrorCode, ex.Message, ex);
+                }
             }
         }
 
-        private async Task<bool> CreateContainerDeploymentBundle(CloudApplication cloudApplication, Recommendation recommendation)
+        private async Task CreateContainerDeploymentBundle(CloudApplication cloudApplication, Recommendation recommendation)
         {
             if (_interactiveService == null)
                 throw new InvalidOperationException($"{nameof(_recipeDefinitionPaths)} is null as part of the orchestartor object");
@@ -252,71 +248,40 @@ namespace AWS.Deploy.Orchestration
                 }
                 catch (DockerEngineExceptionBase ex)
                 {
-                    throw new FailedToGenerateDockerFileException(DeployToolErrorCode.FailedToGenerateDockerFile, "Failed to generate a docker file", ex);
+                    var errorMessage = "Failed to generate a docker file due to the following error:" + Environment.NewLine + ex.Message;
+                    throw new FailedToGenerateDockerFileException(DeployToolErrorCode.FailedToGenerateDockerFile, errorMessage, ex);
                 }
             }
 
             _dockerEngine.DetermineDockerExecutionDirectory(recommendation);
 
+            var respositoryName = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, "ECRRepositoryName"));
+
+            string imageTag;
             try
             {
-                var respositoryName = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, "ECRRepositoryName"));
-
-                string imageTag;
-                try
-                {
-                    var tagSuffix = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, "ImageTag"));
-                    imageTag = $"{respositoryName}:{tagSuffix}";
-                }
-                catch (OptionSettingItemDoesNotExistException)
-                {
-                    imageTag = $"{respositoryName}:{DateTime.UtcNow.Ticks}";
-                }
-
-                await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation, imageTag);
-
-                _interactiveService.LogSectionStart("Pushing container image to Elastic Container Registry (ECR)", "Using the docker CLI to log on to ECR and push the local image to ECR.");
-                await _deploymentBundleHandler.PushDockerImageToECR(recommendation, respositoryName, imageTag);
+                var tagSuffix = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, "ImageTag"));
+                imageTag = $"{respositoryName}:{tagSuffix}";
             }
-            catch(DockerBuildFailedException ex)
+            catch (OptionSettingItemDoesNotExistException)
             {
-                _interactiveService.LogErrorMessage("We were unable to build the docker image due to the following error:");
-                _interactiveService.LogErrorMessage(ex.Message);
-                _interactiveService.LogErrorMessage("Docker builds usually fail due to executing them from a working directory that is incompatible with the Dockerfile.");
-                _interactiveService.LogErrorMessage("You can try setting the 'Docker Execution Directory' in the option settings.");
-                return false;
+                imageTag = $"{respositoryName}:{DateTime.UtcNow.Ticks}";
             }
 
-            return true;
+            await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation, imageTag);
+
+            _interactiveService.LogSectionStart("Pushing container image to Elastic Container Registry (ECR)", "Using the docker CLI to log on to ECR and push the local image to ECR.");
+            await _deploymentBundleHandler.PushDockerImageToECR(recommendation, respositoryName, imageTag);
         }
 
-        private async Task<bool> CreateDotnetPublishDeploymentBundle(Recommendation recommendation)
+        private async Task CreateDotnetPublishDeploymentBundle(Recommendation recommendation)
         {
             if (_deploymentBundleHandler == null)
                 throw new InvalidOperationException($"{nameof(_deploymentBundleHandler)} is null as part of the orchestartor object");
             if (_interactiveService == null)
                 throw new InvalidOperationException($"{nameof(_interactiveService)} is null as part of the orchestartor object");
 
-            try
-            {
-                await _deploymentBundleHandler.CreateDotnetPublishZip(recommendation);
-            }
-            catch (DotnetPublishFailedException exception)
-            {
-                _interactiveService.LogErrorMessage("We were unable to package the application using 'dotnet publish' due to the following error:");
-                _interactiveService.LogErrorMessage(exception.Message);
-                _interactiveService.LogDebugMessage(exception.PrettyPrint());
-                return false;
-            }
-            catch (FailedToCreateZipFileException exception)
-            {
-                _interactiveService.LogErrorMessage("We were unable to create a zip archive of the packaged application.");
-                _interactiveService.LogErrorMessage("Normally this indicates a problem running the \"zip\" utility. Make sure that application is installed and available in your PATH.");
-                _interactiveService.LogDebugMessage(exception.PrettyPrint());
-                return false;
-            }
-
-            return true;
+            await _deploymentBundleHandler.CreateDotnetPublishZip(recommendation);
         }
 
         public CloudApplicationResourceType GetCloudApplicationResourceType(DeploymentTypes deploymentType)
