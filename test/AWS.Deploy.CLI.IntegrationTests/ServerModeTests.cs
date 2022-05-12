@@ -157,6 +157,49 @@ namespace AWS.Deploy.CLI.IntegrationTests
         }
 
         [Fact]
+        public async Task SetInvalidCloudFormationStackName()
+        {
+            var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
+            var portNumber = 4080;
+            using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ResolveCredentials);
+
+            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
+            var cancelSource = new CancellationTokenSource();
+
+            var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
+            try
+            {
+                var restClient = new RestAPIClient($"http://localhost:{portNumber}/", httpClient);
+                await WaitTillServerModeReady(restClient);
+
+                var startSessionOutput = await restClient.StartDeploymentSessionAsync(new StartDeploymentSessionInput
+                {
+                    AwsRegion = _awsRegion,
+                    ProjectPath = projectPath
+                });
+
+                var sessionId = startSessionOutput.SessionId;
+                Assert.NotNull(sessionId);
+
+                var getRecommendationOutput = await restClient.GetRecommendationsAsync(sessionId);
+                Assert.NotEmpty(getRecommendationOutput.Recommendations);
+                var beanstalkRecommendation = getRecommendationOutput.Recommendations.FirstOrDefault();
+
+                var exception = await Assert.ThrowsAsync<ApiException<ProblemDetails>>(() => restClient.SetDeploymentTargetAsync(sessionId, new SetDeploymentTargetInput
+                {
+                    NewDeploymentRecipeId = beanstalkRecommendation.RecipeId,
+                    NewDeploymentName = "Hello$World"
+                }));
+
+                Assert.Contains("Invalid cloud application name Hello$World.", exception.Result.Detail);
+            }
+            finally
+            {
+                cancelSource.Cancel();
+            }
+        }
+
+        [Fact]
         public async Task WebFargateDeploymentNoConfigChanges()
         {
             _stackName = $"ServerModeWebFargate{Guid.NewGuid().ToString().Split('-').Last()}";
@@ -348,22 +391,17 @@ namespace AWS.Deploy.CLI.IntegrationTests
                 var getRecommendationOutput = await restClient.GetRecommendationsAsync(sessionId);
                 var fargateRecommendation = getRecommendationOutput.Recommendations.FirstOrDefault(x => string.Equals(x.RecipeId, "AspNetAppEcsFargate"));
 
-                try
+                var exception = await Assert.ThrowsAsync<ApiException<ProblemDetails>>(() => restClient.SetDeploymentTargetAsync(sessionId, new SetDeploymentTargetInput
                 {
-                    await restClient.SetDeploymentTargetAsync(sessionId, new SetDeploymentTargetInput
-                    {
-                        NewDeploymentName = invalidStackName,
-                        NewDeploymentRecipeId = fargateRecommendation.RecipeId
-                    });
-                }
-                catch (ApiException ex)
-                {
-                    Assert.Equal(400, ex.StatusCode);
+                    NewDeploymentName = invalidStackName,
+                    NewDeploymentRecipeId = fargateRecommendation.RecipeId
+                }));
 
-                    var errorMessage = $"Invalid cloud application name {invalidStackName}. The application name can contain only alphanumeric characters (case-sensitive) and hyphens. " +
-                        "It must start with an alphabetic character and can't be longer than 128 characters";
-                    Assert.Contains(errorMessage, ex.Response);
-                }
+                Assert.Equal(400, exception.StatusCode);
+
+                var errorMessage = $"Invalid cloud application name {invalidStackName}. The application name can contain only alphanumeric characters (case-sensitive) and hyphens. " +
+                    "It must start with an alphabetic character and can't be longer than 128 characters";
+                Assert.Contains(errorMessage, exception.Result.Detail);
             }
             finally
             {
