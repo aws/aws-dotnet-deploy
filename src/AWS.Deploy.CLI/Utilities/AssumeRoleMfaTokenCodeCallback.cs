@@ -13,14 +13,14 @@ namespace AWS.Deploy.CLI.Utilities
     /// <summary>
     /// Handle the callback from AWSCredentials when an MFA token code is required.
     /// </summary>
-    internal class AssumeRoleMfaTokenCodeCallback
+    public class AssumeRoleMfaTokenCodeCallback
     {
         private readonly AssumeRoleAWSCredentialsOptions _options;
         private readonly IToolInteractiveService _toolInteractiveService;
         private readonly IDirectoryManager _directoryManager;
         private readonly IOptionSettingHandler _optionSettingHandler;
 
-        internal AssumeRoleMfaTokenCodeCallback(IToolInteractiveService toolInteractiveService, IDirectoryManager directoryManager, IOptionSettingHandler optionSettingHandler, AssumeRoleAWSCredentialsOptions options)
+        public AssumeRoleMfaTokenCodeCallback(IToolInteractiveService toolInteractiveService, IDirectoryManager directoryManager, IOptionSettingHandler optionSettingHandler, AssumeRoleAWSCredentialsOptions options)
         {
             _toolInteractiveService = toolInteractiveService;
             _options = options;
@@ -28,7 +28,7 @@ namespace AWS.Deploy.CLI.Utilities
             _optionSettingHandler = optionSettingHandler;
         }
 
-        internal string Execute()
+        public string Execute()
         {
             _toolInteractiveService.WriteLine();
             _toolInteractiveService.WriteLine($"Enter MFA code for {_options.MfaSerialNumber}: ");

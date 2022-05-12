@@ -684,15 +684,15 @@ namespace AWS.Deploy.CLI.Commands
             {
                 await orchestrator.CreateDeploymentBundle(cloudApplication, selectedRecommendation);
             }
-            catch(FailedToCreateDeploymentBundleException ex) when (ex.ErrorCode == DeployToolErrorCode.FailedToCreateContainerDeploymentBundle)
+            catch(FailedToCreateDeploymentBundleException ex) when (ex.ErrorCode == DeployToolErrorCode.DockerBuildFailed)
             {
                 if (_toolInteractiveService.DisableInteractive)
                 {
-                    var errorMessage = "Failed to build Docker Image." + Environment.NewLine;
-                    errorMessage += "Docker builds usually fail due to executing them from a working directory that is incompatible with the Dockerfile." + Environment.NewLine;
-                    errorMessage += "Specify a valid Docker execution directory as part of the deployment settings file and try again.";
-                    throw new DockerBuildFailedException(DeployToolErrorCode.DockerBuildFailed, errorMessage);
+                    throw ex;
                 }
+
+                _toolInteractiveService.WriteLine("Docker builds usually fail due to executing them from a working directory that is incompatible with the Dockerfile." +
+                            " You can try setting the 'Docker Execution Directory' in the option settings.");
 
                 _toolInteractiveService.WriteLine(string.Empty);
                 var answer = _consoleUtilities.AskYesNoQuestion("Do you want to go back and modify the current configuration?", "false");
@@ -714,6 +714,10 @@ namespace AWS.Deploy.CLI.Commands
 
                     selectedRecommendation.DeploymentBundle.DockerExecutionDirectory = dockerExecutionDirectory;
                     await CreateDeploymentBundle(orchestrator, selectedRecommendation, cloudApplication);
+                }
+                else
+                {
+                    throw ex;
                 }
             }
         }

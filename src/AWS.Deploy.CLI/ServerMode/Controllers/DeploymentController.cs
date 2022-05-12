@@ -121,6 +121,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         [HttpGet("session/<sessionId>/recommendations")]
         [SwaggerOperation(OperationId = "GetRecommendations")]
         [SwaggerResponse(200, type: typeof(GetRecommendationsOutput))]
+        [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound)]
         [Authorize]
         public async Task<IActionResult> GetRecommendations(string sessionId)
         {
@@ -162,6 +163,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         [HttpGet("session/<sessionId>/settings")]
         [SwaggerOperation(OperationId = "GetConfigSettings")]
         [SwaggerResponse(200, type: typeof(GetOptionSettingsOutput))]
+        [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound)]
         [Authorize]
         public IActionResult GetConfigSettings(string sessionId)
         {
@@ -222,6 +224,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         [HttpPut("session/<sessionId>/settings")]
         [SwaggerOperation(OperationId = "ApplyConfigSettings")]
         [SwaggerResponse(200, type: typeof(ApplyConfigSettingsOutput))]
+        [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound)]
         [Authorize]
         public IActionResult ApplyConfigSettings(string sessionId, [FromBody] ApplyConfigSettingsInput input)
         {
@@ -260,6 +263,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         [HttpGet("session/<sessionId>/settings/<configSettingId>/resources")]
         [SwaggerOperation(OperationId = "GetConfigSettingResources")]
         [SwaggerResponse(200, type: typeof(GetConfigSettingResourcesOutput))]
+        [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound)]
         [Authorize]
         public async Task<IActionResult> GetConfigSettingResources(string sessionId, string configSettingId)
         {
@@ -302,6 +306,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         [HttpGet("session/<sessionId>/deployments")]
         [SwaggerOperation(OperationId = "GetExistingDeployments")]
         [SwaggerResponse(200, type: typeof(GetExistingDeploymentsOutput))]
+        [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound)]
         [Authorize]
         public async Task<IActionResult> GetExistingDeployments(string sessionId)
         {
@@ -353,6 +358,8 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         /// </summary>
         [HttpPost("session/<sessionId>")]
         [SwaggerOperation(OperationId = "SetDeploymentTarget")]
+        [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound)]
+        [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status400BadRequest)]
         [Authorize]
         public async Task<IActionResult> SetDeploymentTarget(string sessionId, [FromBody] SetDeploymentTargetInput input)
         {
@@ -434,6 +441,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         [HttpPost("session/<sessionId>/compatiblity")]
         [SwaggerOperation(OperationId = "GetCompatibility")]
         [SwaggerResponse(200, type: typeof(GetCompatibilityOutput))]
+        [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound)]
         [Authorize]
         public async Task<IActionResult> GetCompatibility(string sessionId)
         {
@@ -470,6 +478,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         [HttpGet("session/<sessionId>/cftemplate")]
         [SwaggerOperation(OperationId = "GenerateCloudFormationTemplate")]
         [SwaggerResponse(200, type: typeof(GenerateCloudFormationTemplateOutput))]
+        [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound)]
         [Authorize]
         public async Task<IActionResult> GenerateCloudFormationTemplate(string sessionId)
         {
@@ -505,6 +514,8 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         /// </summary>
         [HttpPost("session/<sessionId>/execute")]
         [SwaggerOperation(OperationId = "StartDeployment")]
+        [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound)]
+        [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status424FailedDependency)]
         [Authorize]
         public async Task<IActionResult> StartDeployment(string sessionId)
         {
@@ -534,7 +545,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             }
 
             if (capabilities.Any())
-                return Problem($"Unable to start deployment due to missing system capabilities.{Environment.NewLine}{missingCapabilitiesMessage}");
+                return Problem($"Unable to start deployment due to missing system capabilities.{Environment.NewLine}{missingCapabilitiesMessage}", statusCode: Microsoft.AspNetCore.Http.StatusCodes.Status424FailedDependency);
 
             var task = new DeployRecommendationTask(orchestratorSession, orchestrator, state.ApplicationDetails, state.SelectedRecommendation);
             state.DeploymentTask = task.Execute();
@@ -548,6 +559,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         [HttpGet("session/<sessionId>/execute")]
         [SwaggerOperation(OperationId = "GetDeploymentStatus")]
         [SwaggerResponse(200, type: typeof(GetDeploymentStatusOutput))]
+        [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound)]
         [Authorize]
         public IActionResult GetDeploymentStatus(string sessionId)
         {
@@ -591,6 +603,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         [HttpGet("session/<sessionId>/details")]
         [SwaggerOperation(OperationId = "GetDeploymentDetails")]
         [SwaggerResponse(200, type: typeof(GetDeploymentDetailsOutput))]
+        [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound)]
         [Authorize]
         public async Task<IActionResult> GetDeploymentDetails(string sessionId)
         {

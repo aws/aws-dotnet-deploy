@@ -62,7 +62,14 @@ namespace AWS.Deploy.Orchestration.Utilities
             var command = $"{zipCLI} {args}";
             var result = await _commandLineWrapper.TryRunWithResult(command, sourceDirectoryName);
             if (result.ExitCode != 0)
-                throw new FailedToCreateZipFileException(DeployToolErrorCode.ZipUtilityFailedToZip, "\"zip\" utility program has failed to create a zip archive.");
+            {
+                var errorMessage = "We were unable to create a zip archive of the packaged application.";
+                if (!string.IsNullOrEmpty(result.StandardError))
+                    errorMessage = $"We were unable to create a zip archive of the packaged application due to the following reason:{Environment.NewLine}{result.StandardError}";
+
+                errorMessage += $"{Environment.NewLine}Normally this indicates a problem running the \"zip\" utility. Make sure that application is installed and available in your PATH.";
+                throw new FailedToCreateZipFileException(DeployToolErrorCode.ZipUtilityFailedToZip, errorMessage);
+            }
         }
 
         /// <summary>
