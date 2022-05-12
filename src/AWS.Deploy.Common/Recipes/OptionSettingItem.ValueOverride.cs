@@ -12,8 +12,6 @@ namespace AWS.Deploy.Common.Recipes
     /// <see cref="GetValue{T}"/>, <see cref="GetValue"/> and <see cref="SetValueOverride"/> methods
     public partial class OptionSettingItem
     {
-        private object? _valueOverride = null;
-
         public T GetValue<T>(IDictionary<string, string> replacementTokens, IDictionary<string, bool>? displayableOptionSettings = null)
         {
             var value = GetValue(replacementTokens, displayableOptionSettings);
@@ -23,9 +21,9 @@ namespace AWS.Deploy.Common.Recipes
 
         public object GetValue(IDictionary<string, string> replacementTokens, IDictionary<string, bool>? displayableOptionSettings = null)
         {
-            if (_valueOverride != null)
+            if (_value != null)
             {
-                return _valueOverride;
+                return _value;
             }
 
             if (Type == OptionSettingValueType.Object)
@@ -94,7 +92,7 @@ namespace AWS.Deploy.Common.Recipes
         /// Thrown if one or more <see cref="Validators"/> determine
         /// <paramref name="valueOverride"/> is not valid.
         /// </exception>
-        public void SetValueOverride(object valueOverride)
+        public void SetValue(IOptionSettingHandler optionSettingHandler, object valueOverride)
         {
             var isValid = true;
             var validationFailedMessage = string.Empty;
@@ -116,31 +114,31 @@ namespace AWS.Deploy.Common.Recipes
 
             if (valueOverride is bool || valueOverride is int || valueOverride is long || valueOverride is double || valueOverride is Dictionary<string, string> || valueOverride is SortedSet<string>)
             {
-                _valueOverride = valueOverride;
+                _value = valueOverride;
             }
             else if (Type.Equals(OptionSettingValueType.KeyValue))
             {
                 var deserialized = JsonConvert.DeserializeObject<Dictionary<string, string>>(valueOverride?.ToString() ?? "");
-                _valueOverride = deserialized;
+                _value = deserialized;
             }
             else if (Type.Equals(OptionSettingValueType.List))
             {
                 var deserialized = JsonConvert.DeserializeObject<SortedSet<string>>(valueOverride?.ToString() ?? "");
-                _valueOverride = deserialized;
+                _value = deserialized;
             }
             else if (valueOverride is string valueOverrideString)
             {
                 if (bool.TryParse(valueOverrideString, out var valueOverrideBool))
                 {
-                    _valueOverride = valueOverrideBool;
+                    _value = valueOverrideBool;
                 }
                 else if (int.TryParse(valueOverrideString, out var valueOverrideInt))
                 {
-                    _valueOverride = valueOverrideInt;
+                    _value = valueOverrideInt;
                 }
                 else
                 {
-                    _valueOverride = valueOverrideString;
+                    _value = valueOverrideString;
                 }
             }
             else
@@ -150,7 +148,7 @@ namespace AWS.Deploy.Common.Recipes
                 {
                     if (deserialized.TryGetValue(childOptionSetting.Id, out var childValueOverride))
                     {
-                        childOptionSetting.SetValueOverride(childValueOverride);
+                        optionSettingHandler.SetOptionSettingValue(childOptionSetting, childValueOverride);
                     }
                 }
             }

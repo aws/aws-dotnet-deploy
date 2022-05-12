@@ -23,11 +23,13 @@ using AWS.Deploy.Common.IO;
 using AWS.Deploy.Orchestration.LocalUserSettings;
 using Newtonsoft.Json;
 using AWS.Deploy.Orchestration.ServiceHandlers;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AWS.Deploy.CLI.Commands
 {
     public class DeployCommand
     {
+        private readonly IServiceProvider _serviceProvider;
         private readonly IToolInteractiveService _toolInteractiveService;
         private readonly IOrchestratorInteractiveService _orchestratorInteractiveService;
         private readonly ICdkProjectHandler _cdkProjectHandler;
@@ -49,8 +51,10 @@ namespace AWS.Deploy.CLI.Commands
         private readonly IFileManager _fileManager;
         private readonly ICDKVersionDetector _cdkVersionDetector;
         private readonly IAWSServiceHandler _awsServiceHandler;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
         public DeployCommand(
+            IServiceProvider serviceProvider,
             IToolInteractiveService toolInteractiveService,
             IOrchestratorInteractiveService orchestratorInteractiveService,
             ICdkProjectHandler cdkProjectHandler,
@@ -71,8 +75,10 @@ namespace AWS.Deploy.CLI.Commands
             OrchestratorSession session,
             IDirectoryManager directoryManager,
             IFileManager fileManager,
-            IAWSServiceHandler awsServiceHandler)
+            IAWSServiceHandler awsServiceHandler,
+            IOptionSettingHandler optionSettingHandler)
         {
+            _serviceProvider = serviceProvider;
             _toolInteractiveService = toolInteractiveService;
             _orchestratorInteractiveService = orchestratorInteractiveService;
             _cdkProjectHandler = cdkProjectHandler;
@@ -94,6 +100,7 @@ namespace AWS.Deploy.CLI.Commands
             _customRecipeLocator = customRecipeLocator;
             _systemCapabilityEvaluator = systemCapabilityEvaluator;
             _awsServiceHandler = awsServiceHandler;
+            _optionSettingHandler = optionSettingHandler;
         }
 
         public async Task ExecuteAsync(string applicationName, string deploymentProjectPath, UserDeploymentSettings? userDeploymentSettings = null)
@@ -161,7 +168,8 @@ namespace AWS.Deploy.CLI.Commands
                     new List<string> { RecipeLocator.FindRecipeDefinitionsPath() },
                     _fileManager,
                     _directoryManager,
-                    _awsServiceHandler);
+                    _awsServiceHandler,
+                    _optionSettingHandler);
 
             // Determine what recommendations are possible for the project.
             var recommendations = await GenerateDeploymentRecommendations(orchestrator, deploymentProjectPath);
@@ -193,7 +201,7 @@ namespace AWS.Deploy.CLI.Commands
                 }
 
                 // preset settings for deployment based on last deployment.
-                selectedRecommendation = await GetSelectedRecommendationFromPreviousDeployment(recommendations, deployedApplication, userDeploymentSettings, deploymentProjectPath);
+                selectedRecommendation = await GetSelectedRecommendationFromPreviousDeployment(orchestrator, recommendations, deployedApplication, userDeploymentSettings, deploymentProjectPath);
             }
             else
             {
@@ -293,7 +301,7 @@ namespace AWS.Deploy.CLI.Commands
             return recommendations;
         }
 
-        private async Task<Recommendation> GetSelectedRecommendationFromPreviousDeployment(List<Recommendation> recommendations, CloudApplication deployedApplication, UserDeploymentSettings? userDeploymentSettings, string deploymentProjectPath)
+        private async Task<Recommendation> GetSelectedRecommendationFromPreviousDeployment(Orchestrator orchestrator, List<Recommendation> recommendations, CloudApplication deployedApplication, UserDeploymentSettings? userDeploymentSettings, string deploymentProjectPath)
         {
             var deploymentSettingRecipeId = userDeploymentSettings?.RecipeId;
             var selectedRecommendation = await GetRecommendationForRedeployment(recommendations, deployedApplication, deploymentProjectPath);
@@ -319,7 +327,7 @@ namespace AWS.Deploy.CLI.Commands
             else
                 previousSettings = await _deployedApplicationQueryer.GetPreviousSettings(deployedApplication);
 
-            selectedRecommendation = selectedRecommendation.ApplyPreviousSettings(previousSettings);
+            selectedRecommendation = orchestrator.ApplyRecommendationPreviousSettings(selectedRecommendation, previousSettings);
 
             var header = $"Loading {deployedApplication.DisplayName} settings:";
 
@@ -329,7 +337,7 @@ namespace AWS.Deploy.CLI.Commands
                 selectedRecommendation
                     .Recipe
                     .OptionSettings
-                    .Where(x => selectedRecommendation.IsSummaryDisplayable(x))
+                    .Where(x => _optionSettingHandler.IsSummaryDisplayable(selectedRecommendation, x))
                     .ToArray();
 
             foreach (var setting in optionSettings)
@@ -399,7 +407,7 @@ namespace AWS.Deploy.CLI.Commands
                 var optionSettingJsonPath = entry.Key;
                 var optionSettingValue = entry.Value;
 
-                var optionSetting = recommendation.GetOptionSetting(optionSettingJsonPath);
+                var optionSetting = _optionSettingHandler.GetOptionSetting(recommendation, optionSettingJsonPath);
 
                 if (optionSetting == null)
                     throw new OptionSettingItemDoesNotExistException(DeployToolErrorCode.OptionSettingItemDoesNotExistInRecipe, $"The Option Setting Item {optionSettingJsonPath} does not exist.");
@@ -425,7 +433,7 @@ namespace AWS.Deploy.CLI.Commands
                                 break;
                             case OptionSettingValueType.KeyValue:
                                 var optionSettingKey = optionSettingJsonPath.Split(".").Last();
-                                var existingValue = recommendation.GetOptionSettingValue<Dictionary<string, string>>(optionSetting);
+                                var existingValue = _optionSettingHandler.GetOptionSettingValue<Dictionary<string, string>>(recommendation, optionSetting);
                                 existingValue ??= new Dictionary<string, string>();
                                 existingValue[optionSettingKey] = optionSettingValue;
                                 settingValue = existingValue;
@@ -443,7 +451,7 @@ namespace AWS.Deploy.CLI.Commands
                         throw new InvalidOverrideValueException(DeployToolErrorCode.InvalidValueForOptionSettingItem, $"Invalid value {optionSettingValue} for option setting item {optionSettingJsonPath}");
                     }
 
-                    optionSetting.SetValueOverride(settingValue);
+                    _optionSettingHandler.SetOptionSettingValue(optionSetting, settingValue);
 
                     SetDeploymentBundleOptionSetting(recommendation, optionSetting.Id, settingValue);
                 }
@@ -452,7 +460,7 @@ namespace AWS.Deploy.CLI.Commands
             var validatorFailedResults =
                         recommendation.Recipe
                             .BuildValidators()
-                            .Select(validator => validator.Validate(recommendation, _session))
+                            .Select(validator => validator.Validate(recommendation, _session, _optionSettingHandler))
                             .Where(x => !x.IsValid)
                             .ToList();
 
@@ -476,19 +484,19 @@ namespace AWS.Deploy.CLI.Commands
             switch (optionSettingId)
             {
                 case "DockerExecutionDirectory":
-                    new DockerExecutionDirectoryCommand(_consoleUtilities, _directoryManager).OverrideValue(recommendation, settingValue.ToString() ?? "");
+                    ActivatorUtilities.CreateInstance<DockerExecutionDirectoryCommand>(_serviceProvider).OverrideValue(recommendation, settingValue.ToString() ?? "");
                     break;
                 case "DockerBuildArgs":
-                    new DockerBuildArgsCommand(_consoleUtilities).OverrideValue(recommendation, settingValue.ToString() ?? "");
+                    ActivatorUtilities.CreateInstance<DockerBuildArgsCommand>(_serviceProvider).OverrideValue(recommendation, settingValue.ToString() ?? "");
                     break;
                 case "DotnetBuildConfiguration":
-                    new DotnetPublishBuildConfigurationCommand(_consoleUtilities).Overridevalue(recommendation, settingValue.ToString() ?? "");
+                    ActivatorUtilities.CreateInstance<DotnetPublishBuildConfigurationCommand>(_serviceProvider).Overridevalue(recommendation, settingValue.ToString() ?? "");
                     break;
                 case "DotnetPublishArgs":
-                    new DotnetPublishArgsCommand(_consoleUtilities).OverrideValue(recommendation, settingValue.ToString() ?? "");
+                    ActivatorUtilities.CreateInstance<DotnetPublishArgsCommand>(_serviceProvider).OverrideValue(recommendation, settingValue.ToString() ?? "");
                     break;
                 case "SelfContainedBuild":
-                    new DotnetPublishSelfContainedBuildCommand(_consoleUtilities).OverrideValue(recommendation, (bool)settingValue);
+                    ActivatorUtilities.CreateInstance<DotnetPublishSelfContainedBuildCommand>(_serviceProvider).OverrideValue(recommendation, (bool)settingValue);
                     break;
                 default:
                     return;
@@ -505,7 +513,7 @@ namespace AWS.Deploy.CLI.Commands
                 if (_cloudApplicationNameGenerator.IsValidName(applicationName))
                     return applicationName;
 
-                PrintInvalidApplicationNameMessage();
+                PrintInvalidApplicationNameMessage(applicationName);
                 throw new InvalidCliArgumentException(DeployToolErrorCode.InvalidCliArguments, "Found invalid CLI arguments");
             }
 
@@ -515,7 +523,7 @@ namespace AWS.Deploy.CLI.Commands
                 if (_cloudApplicationNameGenerator.IsValidName(userDeploymentSettings.ApplicationName))
                     return userDeploymentSettings.ApplicationName;
 
-                PrintInvalidApplicationNameMessage();
+                PrintInvalidApplicationNameMessage(userDeploymentSettings.ApplicationName);
                 throw new InvalidUserDeploymentSettingsException(DeployToolErrorCode.UserDeploymentInvalidStackName, "Please provide a valid cloud application name and try again.");
             }
 
@@ -603,7 +611,7 @@ namespace AWS.Deploy.CLI.Commands
                         defaultAskValuePrompt: inputPrompt);
 
                 if (string.IsNullOrEmpty(cloudApplicationName) || !_cloudApplicationNameGenerator.IsValidName(cloudApplicationName))
-                    PrintInvalidApplicationNameMessage();
+                    PrintInvalidApplicationNameMessage(cloudApplicationName);
                 else if (deployedApplications.Any(x => x.Name.Equals(cloudApplicationName)))
                     PrintApplicationNameAlreadyExistsMessage();
                 else
@@ -645,12 +653,10 @@ namespace AWS.Deploy.CLI.Commands
             return selectedRecommendation;
         }
 
-        private void PrintInvalidApplicationNameMessage()
+        private void PrintInvalidApplicationNameMessage(string name)
         {
             _toolInteractiveService.WriteLine();
-            _toolInteractiveService.WriteErrorLine(
-                "Invalid application name. The application name can contain only alphanumeric characters (case-sensitive) and hyphens. " +
-                "It must start with an alphabetic character and can't be longer than 128 characters");
+            _toolInteractiveService.WriteErrorLine(_cloudApplicationNameGenerator.InvalidNameMessage(name));
         }
 
         private void PrintApplicationNameAlreadyExistsMessage()
@@ -725,7 +731,7 @@ namespace AWS.Deploy.CLI.Commands
 
                 var optionSettings =
                     configurableOptionSettings
-                        .Where(x => (!recommendation.IsExistingCloudApplication || x.Updatable) && (!x.AdvancedSetting || showAdvancedSettings) && recommendation.IsOptionSettingDisplayable(x))
+                        .Where(x => (!recommendation.IsExistingCloudApplication || x.Updatable) && (!x.AdvancedSetting || showAdvancedSettings) && _optionSettingHandler.IsOptionSettingDisplayable(recommendation, x))
                         .ToArray();
 
                 for (var i = 1; i <= optionSettings.Length; i++)
@@ -760,7 +766,7 @@ namespace AWS.Deploy.CLI.Commands
                     var validatorFailedResults =
                         recommendation.Recipe
                             .BuildValidators()
-                            .Select(validator => validator.Validate(recommendation, _session))
+                            .Select(validator => validator.Validate(recommendation, _session, _optionSettingHandler))
                             .Where(x => !x.IsValid)
                             .ToList();
 
@@ -795,7 +801,7 @@ namespace AWS.Deploy.CLI.Commands
         enum DisplayOptionSettingsMode { Editable, Readonly }
         private void DisplayOptionSetting(Recommendation recommendation, OptionSettingItem optionSetting, int optionSettingNumber, int optionSettingsCount, DisplayOptionSettingsMode mode)
         {
-            var value = recommendation.GetOptionSettingValue(optionSetting);
+            var value = _optionSettingHandler.GetOptionSettingValue(recommendation, optionSetting);
 
             Type? typeHintResponseType = null;
             if (optionSetting.Type == OptionSettingValueType.Object)
@@ -813,7 +819,7 @@ namespace AWS.Deploy.CLI.Commands
             _toolInteractiveService.WriteLine($"{setting.Name}:");
             _toolInteractiveService.WriteLine($"{setting.Description}");
 
-            object currentValue = recommendation.GetOptionSettingValue(setting);
+            object currentValue = _optionSettingHandler.GetOptionSettingValue(recommendation, setting);
             object? settingValue = null;
             if (setting.AllowedValues?.Count > 0)
             {
@@ -845,10 +851,10 @@ namespace AWS.Deploy.CLI.Commands
                         case OptionSettingValueType.String:
                         case OptionSettingValueType.Int:
                         case OptionSettingValueType.Double:
-                            settingValue = _consoleUtilities.AskUserForValue(string.Empty, currentValue.ToString() ?? "", allowEmpty: true, resetValue: recommendation.GetOptionSettingDefaultValue<string>(setting) ?? "");
+                            settingValue = _consoleUtilities.AskUserForValue(string.Empty, currentValue.ToString() ?? "", allowEmpty: true, resetValue: _optionSettingHandler.GetOptionSettingDefaultValue<string>(recommendation, setting) ?? "");
                             break;
                         case OptionSettingValueType.Bool:
-                            var answer = _consoleUtilities.AskYesNoQuestion(string.Empty, recommendation.GetOptionSettingValue(setting).ToString());
+                            var answer = _consoleUtilities.AskYesNoQuestion(string.Empty, _optionSettingHandler.GetOptionSettingValue(recommendation, setting).ToString());
                             settingValue = answer == YesNo.Yes ? "true" : "false";
                             break;
                         case OptionSettingValueType.KeyValue:
@@ -863,7 +869,7 @@ namespace AWS.Deploy.CLI.Commands
                         case OptionSettingValueType.Object:
                             foreach (var childSetting in setting.ChildOptionSettings)
                             {
-                                if (recommendation.IsOptionSettingDisplayable(childSetting))
+                                if (_optionSettingHandler.IsOptionSettingDisplayable(recommendation, childSetting))
                                     await ConfigureDeploymentFromCli(recommendation, childSetting);
                             }
                             break;
@@ -877,7 +883,7 @@ namespace AWS.Deploy.CLI.Commands
             {
                 try
                 {
-                    setting.SetValueOverride(settingValue);
+                    _optionSettingHandler.SetOptionSettingValue(setting, settingValue);
                 }
                 catch (ValidationFailedException ex)
                 {
@@ -889,7 +895,7 @@ namespace AWS.Deploy.CLI.Commands
         }
 
         /// <summary>
-        /// Uses reflection to call <see cref="Recommendation.GetOptionSettingValue{T}" /> with the Object type option setting value
+        /// Uses reflection to call <see cref="IOptionSettingHandler.GetOptionSettingValue{T}" /> with the Object type option setting value
         /// This allows to use a generic implementation to display Object type option setting values without casting the response to
         /// the specific TypeHintResponse type.
         /// </summary>
@@ -901,17 +907,17 @@ namespace AWS.Deploy.CLI.Commands
             SortedSet<string>? listValues = null;
             if (typeHintResponseType != null)
             {
-                var methodInfo = typeof(Recommendation)
-                    .GetMethod(nameof(Recommendation.GetOptionSettingValue), 1, new[] { typeof(OptionSettingItem) });
+                var methodInfo = typeof(IOptionSettingHandler)
+                    .GetMethod(nameof(IOptionSettingHandler.GetOptionSettingValue), 1, new[] { typeof(Recommendation), typeof(OptionSettingItem) });
                 var genericMethodInfo = methodInfo?.MakeGenericMethod(typeHintResponseType);
-                var response = genericMethodInfo?.Invoke(recommendation, new object[] { optionSetting });
+                var response = genericMethodInfo?.Invoke(_optionSettingHandler, new object[] { recommendation, optionSetting });
 
                 displayValue = ((IDisplayable?)response)?.ToDisplayString();
             }
 
             if (displayValue == null)
             {
-                var value = recommendation.GetOptionSettingValue(optionSetting);
+                var value = _optionSettingHandler.GetOptionSettingValue(recommendation, optionSetting);
                 objectValues = value as Dictionary<string, object>;
                 keyValuePair = value as Dictionary<string, string>;
                 listValues = value as SortedSet<string>;

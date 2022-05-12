@@ -21,6 +21,7 @@ namespace AWS.Deploy.CLI.UnitTests
     public class SetOptionSettingTests
     {
         private readonly List<Recommendation> _recommendations;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
         public SetOptionSettingTests()
         {
@@ -39,6 +40,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, session);
             _recommendations = engine.ComputeRecommendations().GetAwaiter().GetResult();
+            _optionSettingHandler = new OptionSettingHandler();
         }
 
         /// <summary>
@@ -51,9 +53,9 @@ namespace AWS.Deploy.CLI.UnitTests
             var recommendation = _recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
 
             var optionSetting = recommendation.Recipe.OptionSettings.First(x => x.Id.Equals("EnvironmentType"));
-            optionSetting.SetValueOverride(optionSetting.AllowedValues.First());
+            _optionSettingHandler.SetOptionSettingValue(optionSetting, optionSetting.AllowedValues.First());
 
-            Assert.Equal(optionSetting.AllowedValues.First(), recommendation.GetOptionSettingValue<string>(optionSetting));
+            Assert.Equal(optionSetting.AllowedValues.First(), _optionSettingHandler.GetOptionSettingValue<string>(recommendation, optionSetting));
         }
 
         /// <summary>
@@ -68,7 +70,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var recommendation = _recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
 
             var optionSetting = recommendation.Recipe.OptionSettings.First(x => x.Id.Equals("EnvironmentType"));
-            Assert.Throws<InvalidOverrideValueException>(() => optionSetting.SetValueOverride(optionSetting.ValueMapping.Values.First()));
+            Assert.Throws<InvalidOverrideValueException>(() => _optionSettingHandler.SetOptionSettingValue(optionSetting, optionSetting.ValueMapping.Values.First()));
         }
 
         [Fact]
@@ -78,9 +80,9 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var optionSetting = recommendation.Recipe.OptionSettings.First(x => x.Id.Equals("ElasticBeanstalkEnvironmentVariables"));
             var values = new Dictionary<string, string>() { { "key", "value" } };
-            optionSetting.SetValueOverride(values);
+            _optionSettingHandler.SetOptionSettingValue(optionSetting, values);
 
-            Assert.Equal(values, recommendation.GetOptionSettingValue<Dictionary<string, string>>(optionSetting));
+            Assert.Equal(values, _optionSettingHandler.GetOptionSettingValue<Dictionary<string, string>>(recommendation, optionSetting));
         }
 
         [Fact]
@@ -91,9 +93,9 @@ namespace AWS.Deploy.CLI.UnitTests
             var optionSetting = recommendation.Recipe.OptionSettings.First(x => x.Id.Equals("ElasticBeanstalkEnvironmentVariables"));
             var dictionary = new Dictionary<string, string>() { { "key", "value" } };
             var dictionaryString = JsonConvert.SerializeObject(dictionary);
-            optionSetting.SetValueOverride(dictionaryString);
+            _optionSettingHandler.SetOptionSettingValue(optionSetting, dictionaryString);
 
-            Assert.Equal(dictionary, recommendation.GetOptionSettingValue<Dictionary<string, string>>(optionSetting));
+            Assert.Equal(dictionary, _optionSettingHandler.GetOptionSettingValue<Dictionary<string, string>>(recommendation, optionSetting));
         }
 
         [Fact]
@@ -102,7 +104,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var recommendation = _recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
 
             var optionSetting = recommendation.Recipe.OptionSettings.First(x => x.Id.Equals("ElasticBeanstalkEnvironmentVariables"));
-            Assert.Throws<JsonReaderException>(() => optionSetting.SetValueOverride("string"));
+            Assert.Throws<JsonReaderException>(() => _optionSettingHandler.SetOptionSettingValue(optionSetting, "string"));
         }
     }
 }

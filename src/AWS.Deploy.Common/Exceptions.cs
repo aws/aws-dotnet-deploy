@@ -110,7 +110,8 @@ namespace AWS.Deploy.Common
         FailedToRunCDKDiff = 10009000,
         FailedToCreateCDKProject = 10009100,
         ResourceQuery = 10009200,
-        FailedToCreateContainerDeploymentBundleFromGeneratedDockerFile = 10009300
+        FailedToCreateContainerDeploymentBundleFromGeneratedDockerFile = 10009300,
+        FailedToRetrieveStackId = 10009400
     }
 
     public class ProjectFileNotFoundException : DeployToolException

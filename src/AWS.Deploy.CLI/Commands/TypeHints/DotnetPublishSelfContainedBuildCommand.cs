@@ -12,17 +12,19 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
     public class DotnetPublishSelfContainedBuildCommand : ITypeHintCommand
     {
         private readonly IConsoleUtilities _consoleUtilities;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
-        public DotnetPublishSelfContainedBuildCommand(IConsoleUtilities consoleUtilities)
+        public DotnetPublishSelfContainedBuildCommand(IConsoleUtilities consoleUtilities, IOptionSettingHandler optionSettingHandler)
         {
             _consoleUtilities = consoleUtilities;
+            _optionSettingHandler = optionSettingHandler;
         }
 
         public Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting) => Task.FromResult<List<TypeHintResource>?>(null);
 
         public Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
-            var answer = _consoleUtilities.AskYesNoQuestion(string.Empty, recommendation.GetOptionSettingValue<string>(optionSetting));
+            var answer = _consoleUtilities.AskYesNoQuestion(string.Empty, _optionSettingHandler.GetOptionSettingValue<string>(recommendation, optionSetting));
             recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild = answer == YesNo.Yes;
             var result = answer == YesNo.Yes ? "true" : "false";
             return Task.FromResult<object>(result);

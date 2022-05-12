@@ -8,6 +8,7 @@ using AWS.Deploy.Common;
 using AWS.Deploy.Common.DeploymentManifest;
 using AWS.Deploy.Common.Extensions;
 using AWS.Deploy.Common.IO;
+using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.CDK;
 using AWS.Deploy.Orchestration.Data;
@@ -62,6 +63,7 @@ namespace AWS.Deploy.CLI.Extensions
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IAWSServiceHandler), typeof(AWSServiceHandler), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IS3Handler), typeof(AWSS3Handler), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IElasticBeanstalkHandler), typeof(AWSElasticBeanstalkHandler), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(IOptionSettingHandler), typeof(OptionSettingHandler), lifetime));
 
             var packageJsonTemplate = typeof(PackageJsonGenerator).Assembly.ReadEmbeddedFile(PackageJsonGenerator.TemplateIdentifier);
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IPackageJsonGenerator), (serviceProvider) => new PackageJsonGenerator(packageJsonTemplate), lifetime));

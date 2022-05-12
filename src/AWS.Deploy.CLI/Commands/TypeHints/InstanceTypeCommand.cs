@@ -16,11 +16,13 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
     {
         private readonly IAWSResourceQueryer _awsResourceQueryer;
         private readonly IConsoleUtilities _consoleUtilities;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
-        public InstanceTypeCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities)
+        public InstanceTypeCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities, IOptionSettingHandler optionSettingHandler)
         {
             _awsResourceQueryer = awsResourceQueryer;
             _consoleUtilities = consoleUtilities;
+            _optionSettingHandler = optionSettingHandler;
         }
 
         private async Task<List<InstanceTypeInfo>?> GetData()
@@ -41,7 +43,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var instanceTypes = await GetData();
-            var instanceTypeDefaultValue = recommendation.GetOptionSettingDefaultValue<string>(optionSetting);
+            var instanceTypeDefaultValue = _optionSettingHandler.GetOptionSettingDefaultValue<string>(recommendation, optionSetting);
             if (instanceTypes == null)
             {
                 return _consoleUtilities.AskUserForValue("Select EC2 Instance Type:", instanceTypeDefaultValue ?? string.Empty, true);

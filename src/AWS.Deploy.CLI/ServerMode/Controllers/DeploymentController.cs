@@ -177,16 +177,18 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             }
 
             var orchestrator = CreateOrchestrator(state);
+            var serviceProvider = CreateSessionServiceProvider(state);
+            var optionSettingHandler = serviceProvider.GetRequiredService<IOptionSettingHandler>();
 
             var configurableOptionSettings = state.SelectedRecommendation.GetConfigurableOptionSettingItems();
 
             var output = new GetOptionSettingsOutput();
-            output.OptionSettings = ListOptionSettingSummary(state.SelectedRecommendation, configurableOptionSettings);
+            output.OptionSettings = ListOptionSettingSummary(optionSettingHandler, state.SelectedRecommendation, configurableOptionSettings);
 
             return Ok(output);
         }
 
-        private List<OptionSettingItemSummary> ListOptionSettingSummary(Recommendation recommendation, IEnumerable<OptionSettingItem> configurableOptionSettings)
+        private List<OptionSettingItemSummary> ListOptionSettingSummary(IOptionSettingHandler optionSettingHandler, Recommendation recommendation, IEnumerable<OptionSettingItem> configurableOptionSettings)
         {
             var optionSettingItems = new List<OptionSettingItemSummary>();
 
@@ -196,14 +198,14 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 {
                     TypeHint = setting.TypeHint?.ToString(),
                     TypeHintData = setting.TypeHintData,
-                    Value = recommendation.GetOptionSettingValue(setting),
+                    Value = optionSettingHandler.GetOptionSettingValue(recommendation, setting),
                     Advanced = setting.AdvancedSetting,
                     ReadOnly = recommendation.IsExistingCloudApplication && !setting.Updatable,
-                    Visible = recommendation.IsOptionSettingDisplayable(setting),
-                    SummaryDisplayable = recommendation.IsSummaryDisplayable(setting),
+                    Visible = optionSettingHandler.IsOptionSettingDisplayable(recommendation, setting),
+                    SummaryDisplayable = optionSettingHandler.IsSummaryDisplayable(recommendation, setting),
                     AllowedValues = setting.AllowedValues,
                     ValueMapping = setting.ValueMapping,
-                    ChildOptionSettings = ListOptionSettingSummary(recommendation, setting.ChildOptionSettings)
+                    ChildOptionSettings = ListOptionSettingSummary(optionSettingHandler, recommendation, setting.ChildOptionSettings)
                 };
 
                 optionSettingItems.Add(settingSummary);
@@ -234,14 +236,17 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 return NotFound($"A deployment target is not set for Session ID {sessionId}.");
             }
 
+            var serviceProvider = CreateSessionServiceProvider(state);
+            var optionSettingHandler = serviceProvider.GetRequiredService<IOptionSettingHandler>();
+
             var output = new ApplyConfigSettingsOutput();
 
             foreach (var updatedSetting in input.UpdatedSettings)
             {
                 try
                 {
-                    var setting = state.SelectedRecommendation.GetOptionSetting(updatedSetting.Key);
-                    setting.SetValueOverride(updatedSetting.Value);
+                    var setting = optionSettingHandler.GetOptionSetting(state.SelectedRecommendation, updatedSetting.Key);
+                    optionSettingHandler.SetOptionSettingValue(setting, updatedSetting.Value);
                 }
                 catch (Exception ex)
                 {
@@ -270,8 +275,9 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
             var serviceProvider = CreateSessionServiceProvider(state);
             var typeHintCommandFactory = serviceProvider.GetRequiredService<ITypeHintCommandFactory>();
+            var optionSettingHandler = serviceProvider.GetRequiredService<IOptionSettingHandler>();
 
-            var configSetting = state.SelectedRecommendation.GetOptionSetting(configSettingId);
+            var configSetting = optionSettingHandler.GetOptionSetting(state.SelectedRecommendation, configSettingId);
 
             if (configSetting.TypeHint.HasValue && typeHintCommandFactory.GetCommand(configSetting.TypeHint.Value) is var typeHintCommand && typeHintCommand != null)
             {
@@ -358,26 +364,39 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
             var serviceProvider = CreateSessionServiceProvider(state);
             var orchestrator = CreateOrchestrator(state, serviceProvider);
+            var cloudApplicationNameGenerator = serviceProvider.GetRequiredService<ICloudApplicationNameGenerator>();
 
-            if(!string.IsNullOrEmpty(input.NewDeploymentRecipeId) &&
-               !string.IsNullOrEmpty(input.NewDeploymentName))
+            if (!string.IsNullOrEmpty(input.NewDeploymentRecipeId))
             {
+                var newDeploymentName = input.NewDeploymentName ?? string.Empty;
+
                 state.SelectedRecommendation = state.NewRecommendations?.FirstOrDefault(x => string.Equals(input.NewDeploymentRecipeId, x.Recipe.Id));
-                if(state.SelectedRecommendation == null)
+                if (state.SelectedRecommendation == null)
                 {
                     return NotFound($"Recommendation {input.NewDeploymentRecipeId} not found.");
                 }
 
-                state.ApplicationDetails.Name = input.NewDeploymentName;
+                if (state.SelectedRecommendation.Recipe.DeploymentType != Common.Recipes.DeploymentTypes.ElasticContainerRegistryImage)
+                {
+                    // We only validate the name when the recipe deployment type is not ElasticContainerRegistryImage.
+                    // This is because pushing images to ECR does not need a cloud application name.
+                    if (!cloudApplicationNameGenerator.IsValidName(newDeploymentName))
+                    {
+                        return ValidationProblem(cloudApplicationNameGenerator.InvalidNameMessage(newDeploymentName));
+                    }
+                }
+
+                state.ApplicationDetails.Name = newDeploymentName;
                 state.ApplicationDetails.UniqueIdentifier = string.Empty;
                 state.ApplicationDetails.ResourceType = orchestrator.GetCloudApplicationResourceType(state.SelectedRecommendation.Recipe.DeploymentType);
                 state.ApplicationDetails.RecipeId = input.NewDeploymentRecipeId;
-                await orchestrator.ApplyAllReplacementTokens(state.SelectedRecommendation, input.NewDeploymentName);
+                await orchestrator.ApplyAllReplacementTokens(state.SelectedRecommendation, newDeploymentName);
             }
             else if(!string.IsNullOrEmpty(input.ExistingDeploymentId))
             {
                 var templateMetadataReader = serviceProvider.GetRequiredService<ITemplateMetadataReader>();
                 var deployedApplicationQueryer = serviceProvider.GetRequiredService<IDeployedApplicationQueryer>();
+                var optionSettingHandler = serviceProvider.GetRequiredService<IOptionSettingHandler>();
 
                 var existingDeployment = state.ExistingDeployments?.FirstOrDefault(x => string.Equals(input.ExistingDeploymentId, x.UniqueIdentifier));
                 if (existingDeployment == null)
@@ -397,7 +416,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 else
                     previousSettings = await deployedApplicationQueryer.GetPreviousSettings(existingDeployment);
 
-                state.SelectedRecommendation = state.SelectedRecommendation.ApplyPreviousSettings(previousSettings);
+                state.SelectedRecommendation = orchestrator.ApplyRecommendationPreviousSettings(state.SelectedRecommendation, previousSettings);
 
                 state.ApplicationDetails.Name = existingDeployment.Name;
                 state.ApplicationDetails.UniqueIdentifier = existingDeployment.UniqueIdentifier;
@@ -658,7 +677,8 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 serviceProvider.GetRequiredService<IOrchestratorInteractiveService>(),
                 serviceProvider.GetRequiredService<ICommandLineWrapper>(),
                 serviceProvider.GetRequiredService<IAWSResourceQueryer>(),
-                serviceProvider.GetRequiredService<IFileManager>()
+                serviceProvider.GetRequiredService<IFileManager>(),
+                serviceProvider.GetRequiredService<IOptionSettingHandler>()
                 );
         }
 
@@ -687,7 +707,8 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                                     new List<string> { RecipeLocator.FindRecipeDefinitionsPath() },
                                     serviceProvider.GetRequiredService<IFileManager>(),
                                     serviceProvider.GetRequiredService<IDirectoryManager>(),
-                                    serviceProvider.GetRequiredService<IAWSServiceHandler>()
+                                    serviceProvider.GetRequiredService<IAWSServiceHandler>(),
+                                    serviceProvider.GetRequiredService<IOptionSettingHandler>()
                                 );
         }
     }

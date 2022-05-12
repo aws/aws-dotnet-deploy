@@ -17,18 +17,20 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         private readonly IAWSResourceQueryer _awsResourceQueryer;
         private readonly IConsoleUtilities _consoleUtilities;
         private readonly IToolInteractiveService _toolInteractiveService;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
-        public ECRRepositoryCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities, IToolInteractiveService toolInteractiveService)
+        public ECRRepositoryCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities, IToolInteractiveService toolInteractiveService, IOptionSettingHandler optionSettingHandler)
         {
             _awsResourceQueryer = awsResourceQueryer;
             _consoleUtilities = consoleUtilities;
             _toolInteractiveService = toolInteractiveService;
+            _optionSettingHandler = optionSettingHandler;
         }
 
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var repositories = await GetData();
-            var currentRepositoryName = recommendation.GetOptionSettingValue<string>(optionSetting);
+            var currentRepositoryName = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, optionSetting);
 
             var userInputConfiguration = new UserInputConfiguration<Repository>(
                 idSelector: rep => rep.RepositoryName,

@@ -51,15 +51,15 @@ namespace AWS.Deploy.Common.Recipes.Validation
         public string? InvalidCpuValueValidationFailedMessage { get; set; }
 
         /// <inheritdoc cref="FargateTaskCpuMemorySizeValidator"/>
-        public ValidationResult Validate(Recommendation recommendation, IDeployToolValidationContext deployValidationContext)
+        public ValidationResult Validate(Recommendation recommendation, IDeployToolValidationContext deployValidationContext, IOptionSettingHandler optionSettingHandler)
         {
             string cpu;
             string memory;
 
             try
             {
-                cpu = recommendation.GetOptionSettingValue<string>(recommendation.GetOptionSetting(CpuOptionSettingsId));
-                memory = recommendation.GetOptionSettingValue<string>(recommendation.GetOptionSetting(MemoryOptionSettingsId));
+                cpu = optionSettingHandler.GetOptionSettingValue<string>(recommendation, optionSettingHandler.GetOptionSetting(recommendation, CpuOptionSettingsId));
+                memory = optionSettingHandler.GetOptionSettingValue<string>(recommendation, optionSettingHandler.GetOptionSetting(recommendation, MemoryOptionSettingsId));
             }
             catch (OptionSettingItemDoesNotExistException)
             {

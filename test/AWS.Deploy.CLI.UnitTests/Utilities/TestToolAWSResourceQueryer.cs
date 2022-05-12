@@ -89,6 +89,6 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
         public Task<List<VpcConnector>> DescribeAppRunnerVpcConnectors() => throw new NotImplementedException();
         public Task<List<Subnet>> DescribeSubnets(string vpcID = null) => throw new NotImplementedException();
         public Task<List<SecurityGroup>> DescribeSecurityGroups(string vpcID = null) => throw new NotImplementedException();
-        public Task<string?> GetParameterStoreTextValue(string parameterName) => throw new NotImplementedException();
+        public Task<string> GetParameterStoreTextValue(string parameterName) => throw new NotImplementedException();
     }
 }

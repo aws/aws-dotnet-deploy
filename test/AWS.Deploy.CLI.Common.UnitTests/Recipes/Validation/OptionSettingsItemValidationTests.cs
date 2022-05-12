@@ -4,6 +4,7 @@
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Recipes.Validation;
+using AWS.Deploy.Orchestration;
 using Should;
 using Xunit;
 using Xunit.Abstractions;
@@ -20,10 +21,12 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
     public class OptionSettingsItemValidationTests
     {
         private readonly ITestOutputHelper _output;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
         public OptionSettingsItemValidationTests(ITestOutputHelper output)
         {
             _output = output;
+            _optionSettingHandler = new OptionSettingHandler();
         }
 
         [Theory]
@@ -57,7 +60,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             // ACT
             try
             {
-                optionSettingItem.SetValueOverride(invalidValue);
+                _optionSettingHandler.SetOptionSettingValue(optionSettingItem, invalidValue);
             }
             catch (ValidationFailedException e)
             {
@@ -93,7 +96,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             // ACT
             try
             {
-                optionSettingItem.SetValueOverride(invalidValue);
+                _optionSettingHandler.SetOptionSettingValue(optionSettingItem, invalidValue);
             }
             catch (ValidationFailedException e)
             {
@@ -135,7 +138,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             // ACT
             try
             {
-                optionSettingItem.SetValueOverride(validValue);
+                _optionSettingHandler.SetOptionSettingValue(optionSettingItem, validValue);
             }
             catch (ValidationFailedException e)
             {
@@ -179,7 +182,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             // ACT
             try
             {
-                optionSettingItem.SetValueOverride(invalidValue);
+                _optionSettingHandler.SetOptionSettingValue(optionSettingItem, invalidValue);
             }
             catch (ValidationFailedException e)
             {

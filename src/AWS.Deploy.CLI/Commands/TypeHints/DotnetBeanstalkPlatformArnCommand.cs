@@ -18,11 +18,13 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
     {
         private readonly IAWSResourceQueryer _awsResourceQueryer;
         private readonly IConsoleUtilities _consoleUtilities;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
-        public DotnetBeanstalkPlatformArnCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities)
+        public DotnetBeanstalkPlatformArnCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities, IOptionSettingHandler optionSettingHandler)
         {
             _awsResourceQueryer = awsResourceQueryer;
             _consoleUtilities = consoleUtilities;
+            _optionSettingHandler = optionSettingHandler;
         }
 
         private async Task<List<PlatformSummary>> GetData()
@@ -38,7 +40,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
-            var currentValue = recommendation.GetOptionSettingValue(optionSetting);
+            var currentValue = _optionSettingHandler.GetOptionSettingValue(recommendation, optionSetting);
             var platformArns = await GetData();
 
             var userInputConfiguration = new UserInputConfiguration<PlatformSummary>(

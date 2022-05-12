@@ -16,11 +16,13 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
     {
         private readonly IAWSResourceQueryer _awsResourceQueryer;
         private readonly IConsoleUtilities _consoleUtilities;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
-        public ExistingSubnetsCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities)
+        public ExistingSubnetsCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities, IOptionSettingHandler optionSettingHandler)
         {
             _awsResourceQueryer = awsResourceQueryer;
             _consoleUtilities = consoleUtilities;
+            _optionSettingHandler = optionSettingHandler;
         }
 
         private async Task<List<Subnet>> GetData(Recommendation recommendation, OptionSettingItem optionSetting)
@@ -28,8 +30,8 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             string? vpcId = null;
             if (!string.IsNullOrEmpty(optionSetting.ParentSettingId))
             {
-                var vpcIdOptionSetting = recommendation.GetOptionSetting(optionSetting.ParentSettingId);
-                vpcId = recommendation.GetOptionSettingValue<string>(vpcIdOptionSetting);
+                var vpcIdOptionSetting = _optionSettingHandler.GetOptionSetting(recommendation, optionSetting.ParentSettingId);
+                vpcId = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, vpcIdOptionSetting);
             }
             return await _awsResourceQueryer.DescribeSubnets(vpcId);
         }
