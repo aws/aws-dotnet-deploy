@@ -1,6 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ using AWS.Deploy.CLI.UnitTests.Utilities;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.Recipes.Validation;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.RecommendationEngine;
 using AWS.Deploy.Recipes;
@@ -25,11 +27,13 @@ namespace AWS.Deploy.CLI.UnitTests
         private OrchestratorSession _session;
         private readonly IDirectoryManager _directoryManager;
         private readonly IOptionSettingHandler _optionSettingHandler;
+        private readonly IServiceProvider _serviceProvider;
 
         public RecommendationTests()
         {
             _directoryManager = new TestDirectoryManager();
-            _optionSettingHandler = new OptionSettingHandler();
+            _serviceProvider = new Mock<IServiceProvider>().Object;
+            _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider));
         }
 
         private async Task<RecommendationEngine> BuildRecommendationEngine(string testProjectName)

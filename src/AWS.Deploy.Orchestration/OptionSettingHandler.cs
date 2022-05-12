@@ -6,11 +6,19 @@ using System.Linq;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Extensions;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.Recipes.Validation;
 
 namespace AWS.Deploy.Orchestration
 {
     public class OptionSettingHandler : IOptionSettingHandler
     {
+        private readonly IValidatorFactory _validatorFactory;
+
+        public OptionSettingHandler(IValidatorFactory validatorFactory)
+        {
+            _validatorFactory = validatorFactory;
+        }
+
         /// <summary>
         /// Assigns a value to the OptionSettingItem.
         /// </summary>
@@ -20,7 +28,7 @@ namespace AWS.Deploy.Orchestration
         /// </exception>
         public void SetOptionSettingValue(OptionSettingItem optionSettingItem, object value)
         {
-            optionSettingItem.SetValue(this, value);
+            optionSettingItem.SetValue(this, value, _validatorFactory.BuildValidators(optionSettingItem));
         }
 
         /// <summary>

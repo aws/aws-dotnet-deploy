@@ -38,9 +38,10 @@ namespace AWS.Deploy.Common.Recipes
         /// <summary>
         /// Set the value of an <see cref="OptionSettingItem"/> while validating the provided input.
         /// </summary>
-        /// <param name="optionSettingHandler"></param>
-        /// <param name="value"></param>
-        void SetValue(IOptionSettingHandler optionSettingHandler, object value);
+        /// <param name="optionSettingHandler">Handler use to set any child option settings</param>
+        /// <param name="value">Value to set</param>
+        /// /// <param name="validators">Validators for this item</param>
+        void SetValue(IOptionSettingHandler optionSettingHandler, object value, IOptionSettingItemValidator[] validators);
     }
 
     /// <summary>
