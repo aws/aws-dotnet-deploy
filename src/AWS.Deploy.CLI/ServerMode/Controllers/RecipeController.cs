@@ -35,6 +35,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         [HttpGet("{recipeId}")]
         [SwaggerOperation(OperationId = "GetRecipe")]
         [SwaggerResponse(200, type: typeof(RecipeSummary))]
+        [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetRecipe(string recipeId, [FromQuery] string? projectPath = null)
         {
             if (string.IsNullOrEmpty(recipeId))
