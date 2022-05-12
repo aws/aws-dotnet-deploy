@@ -26,6 +26,7 @@ using AWS.Deploy.CLI.IntegrationTests.Services;
 using AWS.Deploy.Orchestration.LocalUserSettings;
 using AWS.Deploy.Orchestration.Utilities;
 using AWS.Deploy.Orchestration.ServiceHandlers;
+using AWS.Deploy.Common.Recipes.Validation;
 
 namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 {
@@ -251,7 +252,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
                 fileManager,
                 directoryManager,
                 new Mock<IAWSServiceHandler>().Object,
-                new OptionSettingHandler());
+                new OptionSettingHandler(new Mock<IValidatorFactory>().Object));
         }
 
         private async Task<string> GetCustomRecipeId(string recipeFilePath)

@@ -5,8 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Amazon.Runtime.Internal;
+using AWS.Deploy.CLI.Common.UnitTests.IO;
+using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Recipes.Validation;
+using Moq;
 using Newtonsoft.Json;
 using Should;
 using Xunit;
@@ -21,6 +24,20 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
     /// </summary>
     public class ValidatorFactoryTests
     {
+        private readonly IOptionSettingHandler _optionSettingHandler;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly IValidatorFactory _validatorFactory;
+
+        public ValidatorFactoryTests()
+        {
+            _optionSettingHandler = new Mock<IOptionSettingHandler>().Object;
+
+            var mockServiceProvider = new Mock<IServiceProvider>();
+            mockServiceProvider.Setup(x => x.GetService(typeof(IOptionSettingHandler))).Returns(_optionSettingHandler);
+            _serviceProvider = mockServiceProvider.Object;
+            _validatorFactory = new ValidatorFactory(_serviceProvider);
+        }
+
         [Fact]
         public void HasABindingForAllOptionSettingItemValidators()
         {
@@ -42,7 +59,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             };
 
             // ACT
-            var validators = optionSettingItem.BuildValidators();
+            var validators = _validatorFactory.BuildValidators(optionSettingItem);
 
             // ASSERT
             validators.Length.ShouldEqual(allValidators.Length);
@@ -70,7 +87,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             };
 
             // ACT
-            var validators = recipeDefinition.BuildValidators();
+            var validators = _validatorFactory.BuildValidators(recipeDefinition);
 
             // ASSERT
             validators.Length.ShouldEqual(allValidators.Length);
@@ -106,7 +123,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             var deserialized = JsonConvert.DeserializeObject<OptionSettingItem>(json);
 
             // ACT
-            var validators = deserialized.BuildValidators();
+            var validators = _validatorFactory.BuildValidators(deserialized);
 
             // ASSERT
             validators.Length.ShouldEqual(1);
@@ -155,7 +172,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             // ACT
             try
             {
-                validators = deserialized.BuildValidators();
+                validators = _validatorFactory.BuildValidators(deserialized);
             }
             catch (Exception e)
             {

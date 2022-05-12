@@ -25,6 +25,7 @@ using AWS.Deploy.Orchestration.DisplayedResources;
 using AWS.Deploy.Orchestration.LocalUserSettings;
 using AWS.Deploy.Orchestration.ServiceHandlers;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.Recipes.Validation;
 
 namespace AWS.Deploy.CLI.Commands
 {
@@ -74,6 +75,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly ICDKVersionDetector _cdkVersionDetector;
         private readonly IAWSServiceHandler _awsServiceHandler;
         private readonly IOptionSettingHandler _optionSettingHandler;
+        private readonly IValidatorFactory _validatorFactory;
 
         public CommandFactory(
             IServiceProvider serviceProvider,
@@ -101,7 +103,8 @@ namespace AWS.Deploy.CLI.Commands
             ILocalUserSettingsEngine localUserSettingsEngine,
             ICDKVersionDetector cdkVersionDetector,
             IAWSServiceHandler awsServiceHandler,
-            IOptionSettingHandler optionSettingHandler)
+            IOptionSettingHandler optionSettingHandler,
+            IValidatorFactory validatorFactory)
         {
             _serviceProvider = serviceProvider;
             _toolInteractiveService = toolInteractiveService;
@@ -129,6 +132,7 @@ namespace AWS.Deploy.CLI.Commands
             _cdkVersionDetector = cdkVersionDetector;
             _awsServiceHandler = awsServiceHandler;
             _optionSettingHandler = optionSettingHandler;
+            _validatorFactory = validatorFactory;
         }
 
         public Command BuildRootCommand()
@@ -230,7 +234,8 @@ namespace AWS.Deploy.CLI.Commands
                         _directoryManager,
                         _fileManager,
                         _awsServiceHandler,
-                        _optionSettingHandler);
+                        _optionSettingHandler,
+                        _validatorFactory);
 
                     var deploymentProjectPath = input.DeploymentProject ?? string.Empty;
                     if (!string.IsNullOrEmpty(deploymentProjectPath))

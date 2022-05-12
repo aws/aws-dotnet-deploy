@@ -12,16 +12,19 @@ using Xunit;
 using Amazon.CloudFormation.Model;
 using System.Collections.Generic;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.Recipes.Validation;
 
 namespace AWS.Deploy.Orchestration.UnitTests.CDK
 {
     public class CDKProjectHandlerTests
     {
         private readonly IOptionSettingHandler _optionSettingHandler;
+        private readonly IServiceProvider _serviceProvider;
 
         public CDKProjectHandlerTests()
         {
-            _optionSettingHandler = new OptionSettingHandler();
+            _serviceProvider = new Mock<IServiceProvider>().Object;
+            _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider));
         }
 
         [Fact]

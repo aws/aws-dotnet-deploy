@@ -18,6 +18,7 @@ using Newtonsoft.Json;
 using Xunit;
 using Assert = Should.Core.Assertions.Assert;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.Recipes.Validation;
 
 namespace AWS.Deploy.CLI.UnitTests
 {
@@ -25,10 +26,13 @@ namespace AWS.Deploy.CLI.UnitTests
     {
         private readonly IOptionSettingHandler _optionSettingHandler;
         private readonly Orchestrator _orchestrator;
+        private readonly IServiceProvider _serviceProvider;
+
 
         public ApplyPreviousSettingsTests()
         {
-            _optionSettingHandler = new OptionSettingHandler();
+            _serviceProvider = new Mock<IServiceProvider>().Object;
+            _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider));
             _orchestrator = new Orchestrator(null, null, null, null, null, null, null, null, null, null, null, null, null, null, _optionSettingHandler);
         }
 

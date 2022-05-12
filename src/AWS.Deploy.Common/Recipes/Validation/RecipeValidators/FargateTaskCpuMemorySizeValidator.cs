@@ -20,6 +20,13 @@ namespace AWS.Deploy.Common.Recipes.Validation
     /// </summary>
     public class FargateTaskCpuMemorySizeValidator : IRecipeValidator
     {
+        private readonly IOptionSettingHandler _optionSettingHandler;
+
+        public FargateTaskCpuMemorySizeValidator(IOptionSettingHandler optionSettingHandler)
+        {
+            _optionSettingHandler = optionSettingHandler;
+        }
+
         private readonly Dictionary<string, string[]> _cpuMemoryMap = new()
         {
             { "256", new[] { "512", "1024", "2048" } },
@@ -51,15 +58,15 @@ namespace AWS.Deploy.Common.Recipes.Validation
         public string? InvalidCpuValueValidationFailedMessage { get; set; }
 
         /// <inheritdoc cref="FargateTaskCpuMemorySizeValidator"/>
-        public ValidationResult Validate(Recommendation recommendation, IDeployToolValidationContext deployValidationContext, IOptionSettingHandler optionSettingHandler)
+        public ValidationResult Validate(Recommendation recommendation, IDeployToolValidationContext deployValidationContext)
         {
             string cpu;
             string memory;
 
             try
             {
-                cpu = optionSettingHandler.GetOptionSettingValue<string>(recommendation, optionSettingHandler.GetOptionSetting(recommendation, CpuOptionSettingsId));
-                memory = optionSettingHandler.GetOptionSettingValue<string>(recommendation, optionSettingHandler.GetOptionSetting(recommendation, MemoryOptionSettingsId));
+                cpu = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, CpuOptionSettingsId));
+                memory = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, MemoryOptionSettingsId));
             }
             catch (OptionSettingItemDoesNotExistException)
             {

@@ -52,6 +52,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly ICDKVersionDetector _cdkVersionDetector;
         private readonly IAWSServiceHandler _awsServiceHandler;
         private readonly IOptionSettingHandler _optionSettingHandler;
+        private readonly IValidatorFactory _validatorFactory;
 
         public DeployCommand(
             IServiceProvider serviceProvider,
@@ -76,7 +77,8 @@ namespace AWS.Deploy.CLI.Commands
             IDirectoryManager directoryManager,
             IFileManager fileManager,
             IAWSServiceHandler awsServiceHandler,
-            IOptionSettingHandler optionSettingHandler)
+            IOptionSettingHandler optionSettingHandler,
+            IValidatorFactory validatorFactory)
         {
             _serviceProvider = serviceProvider;
             _toolInteractiveService = toolInteractiveService;
@@ -101,6 +103,7 @@ namespace AWS.Deploy.CLI.Commands
             _systemCapabilityEvaluator = systemCapabilityEvaluator;
             _awsServiceHandler = awsServiceHandler;
             _optionSettingHandler = optionSettingHandler;
+            _validatorFactory = validatorFactory;
         }
 
         public async Task ExecuteAsync(string applicationName, string deploymentProjectPath, UserDeploymentSettings? userDeploymentSettings = null)
@@ -458,9 +461,8 @@ namespace AWS.Deploy.CLI.Commands
             }
 
             var validatorFailedResults =
-                        recommendation.Recipe
-                            .BuildValidators()
-                            .Select(validator => validator.Validate(recommendation, _session, _optionSettingHandler))
+                _validatorFactory.BuildValidators(recommendation.Recipe)
+                            .Select(validator => validator.Validate(recommendation, _session))
                             .Where(x => !x.IsValid)
                             .ToList();
 
@@ -768,9 +770,8 @@ namespace AWS.Deploy.CLI.Commands
                 if (string.IsNullOrEmpty(input))
                 {
                     var validatorFailedResults =
-                        recommendation.Recipe
-                            .BuildValidators()
-                            .Select(validator => validator.Validate(recommendation, _session, _optionSettingHandler))
+                        _validatorFactory.BuildValidators(recommendation.Recipe)
+                            .Select(validator => validator.Validate(recommendation, _session))
                             .Where(x => !x.IsValid)
                             .ToList();
 
