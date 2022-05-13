@@ -9,10 +9,12 @@ namespace AWS.Deploy.Common
     public abstract class DeployToolException : Exception
     {
         public DeployToolErrorCode ErrorCode { get; set; }
+        public int? ProcessExitCode { get; set; }
 
-        public DeployToolException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(message, innerException)
+        public DeployToolException(DeployToolErrorCode errorCode, string message, Exception? innerException = null, int? processExitCode = null) : base(message, innerException)
         {
             ErrorCode = errorCode;
+            ProcessExitCode = processExitCode;
         }
     }
 
@@ -110,7 +112,8 @@ namespace AWS.Deploy.Common
         FailedToRunCDKDiff = 10009000,
         FailedToCreateCDKProject = 10009100,
         ResourceQuery = 10009200,
-        FailedToRetrieveStackId = 10009300
+        FailedToRetrieveStackId = 10009300,
+        FailedToGetECRAuthorizationToken = 10009400
     }
 
     public class ProjectFileNotFoundException : DeployToolException
@@ -183,7 +186,7 @@ namespace AWS.Deploy.Common
     /// </summary>
     public class FailedToCreateDeploymentBundleException : DeployToolException
     {
-        public FailedToCreateDeploymentBundleException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+        public FailedToCreateDeploymentBundleException(DeployToolErrorCode errorCode, string message, int? processExitCode, Exception? innerException = null) : base(errorCode, message, innerException, processExitCode) { }
     }
 
     /// <summary>

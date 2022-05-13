@@ -7,11 +7,13 @@ namespace AWS.Deploy.CLI.ServerMode.Models
     {
         public string ErrorCode { get; set; }
         public string Message { get; set; }
+        public int? ProcessExitCode { get; set; }
 
-        public DeployToolExceptionSummary(string errorCode, string message)
+        public DeployToolExceptionSummary(string errorCode, string message, int? processExitCode = null)
         {
             ErrorCode = errorCode;
             Message = message;
+            ProcessExitCode = processExitCode;
         }
     }
 }

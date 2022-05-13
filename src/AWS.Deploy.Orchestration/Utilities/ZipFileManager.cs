@@ -49,7 +49,7 @@ namespace AWS.Deploy.Orchestration.Utilities
             var zipCLI = FindExecutableInPath("zip");
 
             if (string.IsNullOrEmpty(zipCLI))
-                throw new FailedToCreateZipFileException(DeployToolErrorCode.FailedToFindZipUtility, "Failed to find the \"zip\" utility program in path. This program is required to maintain Linux file permissions in the zip archive.");
+                throw new FailedToCreateZipFileException(DeployToolErrorCode.FailedToFindZipUtility, "Failed to find the \"zip\" utility program in path. This program is required to maintain Linux file permissions in the zip archive.", null);
 
             var args = new StringBuilder($"\"{destinationArchiveFileName}\"");
 
@@ -68,7 +68,7 @@ namespace AWS.Deploy.Orchestration.Utilities
                     errorMessage = $"We were unable to create a zip archive of the packaged application due to the following reason:{Environment.NewLine}{result.StandardError}";
 
                 errorMessage += $"{Environment.NewLine}Normally this indicates a problem running the \"zip\" utility. Make sure that application is installed and available in your PATH.";
-                throw new FailedToCreateZipFileException(DeployToolErrorCode.ZipUtilityFailedToZip, errorMessage);
+                throw new FailedToCreateZipFileException(DeployToolErrorCode.ZipUtilityFailedToZip, errorMessage, result.ExitCode);
             }
         }
 

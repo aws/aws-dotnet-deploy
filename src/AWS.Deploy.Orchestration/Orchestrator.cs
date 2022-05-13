@@ -210,7 +210,7 @@ namespace AWS.Deploy.Orchestration
                 }
                 catch (DeployToolException ex)
                 {
-                    throw new FailedToCreateDeploymentBundleException(ex.ErrorCode, ex.Message, ex);
+                    throw new FailedToCreateDeploymentBundleException(ex.ErrorCode, ex.Message, ex.ProcessExitCode, ex);
                 }
             }
             else if (recommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.DotnetPublishZipFile)
@@ -223,7 +223,7 @@ namespace AWS.Deploy.Orchestration
                 }
                 catch (DeployToolException ex)
                 {
-                    throw new FailedToCreateDeploymentBundleException(ex.ErrorCode, ex.Message, ex);
+                    throw new FailedToCreateDeploymentBundleException(ex.ErrorCode, ex.Message, ex.ProcessExitCode, ex);
                 }
             }
         }

@@ -583,7 +583,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                     var innerException = state.DeploymentTask.Exception.InnerException;
                     if (innerException is DeployToolException deployToolException)
                     {
-                        output.Exception = new DeployToolExceptionSummary(deployToolException.ErrorCode.ToString(), deployToolException.Message);
+                        output.Exception = new DeployToolExceptionSummary(deployToolException.ErrorCode.ToString(), deployToolException.Message, deployToolException.ProcessExitCode);
                     }
                     else
                     {

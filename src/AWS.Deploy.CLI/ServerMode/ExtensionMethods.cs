@@ -59,7 +59,8 @@ namespace AWS.Deploy.CLI.ServerMode
                             exceptionString = JsonSerializer.Serialize(
                                 new DeployToolExceptionSummary(
                                     deployToolException.ErrorCode.ToString(),
-                                    deployToolException.Message));
+                                    deployToolException.Message,
+                                    deployToolException.ProcessExitCode));
                         }
                         else
                         {
