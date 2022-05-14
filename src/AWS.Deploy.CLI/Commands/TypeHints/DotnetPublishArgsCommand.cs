@@ -1,11 +1,11 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.Recipes.Validation;
 using AWS.Deploy.Common.TypeHintData;
 
 namespace AWS.Deploy.CLI.Commands.TypeHints
@@ -56,18 +56,16 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
         private string ValidateDotnetPublishArgs(string publishArgs)
         {
-            var resultString = string.Empty;
+            var validationResult = new DotnetPublishArgsValidator().Validate(publishArgs);
 
-            if (publishArgs.Contains("-o ") || publishArgs.Contains("--output "))
-                resultString += "You must not include -o/--output as an additional argument as it is used internally." + Environment.NewLine;
-            if (publishArgs.Contains("-c ") || publishArgs.Contains("--configuration "))
-                resultString += "You must not include -c/--configuration as an additional argument. You can set the build configuration in the advanced settings." + Environment.NewLine;
-            if (publishArgs.Contains("--self-contained") || publishArgs.Contains("--no-self-contained"))
-                resultString += "You must not include --self-contained/--no-self-contained as an additional argument. You can set the self-contained property in the advanced settings." + Environment.NewLine;
-
-            if (!string.IsNullOrEmpty(resultString))
-                return "Invalid valid value for Dotnet Publish Arguments." + Environment.NewLine + resultString.Trim();
-            return "";
+            if (validationResult.IsValid)
+            {
+                return string.Empty;
+            }
+            else
+            {
+                return validationResult.ValidationFailedMessage ?? "Invalid value for Dotnet Publish Arguments.";
+            }
         }
     }
 }

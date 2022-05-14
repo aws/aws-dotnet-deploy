@@ -602,7 +602,10 @@
                                 "enum": [
                                     "Range",
                                     "Regex",
-                                    "Required"
+                                    "Required",
+                                    "DirectoryExists",
+                                    "DockerBuildArgs",
+                                    "DotnetPublishArgs"
                                 ]
                             }
                         },

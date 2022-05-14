@@ -89,7 +89,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
 
             var managedActionsEnabled = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, $"{optionSetting}.{childSetting}");
-            _optionSettingHandler.SetOptionSettingValue(managedActionsEnabled, childValue);
+            _optionSettingHandler.SetOptionSettingValue(beanstalkRecommendation, managedActionsEnabled, childValue);
 
             var elasticBeanstalkManagedPlatformUpdates = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, optionSetting);
             var elasticBeanstalkManagedPlatformUpdatesValue = _optionSettingHandler.GetOptionSettingValue<Dictionary<string, object>>(beanstalkRecommendation, elasticBeanstalkManagedPlatformUpdates);
@@ -109,8 +109,8 @@ namespace AWS.Deploy.CLI.UnitTests
             var subnets = _optionSettingHandler.GetOptionSetting(appRunnerRecommendation, "VPCConnector.Subnets");
             var securityGroups = _optionSettingHandler.GetOptionSetting(appRunnerRecommendation, "VPCConnector.SecurityGroups");
 
-            Assert.Throws<ValidationFailedException>(() => _optionSettingHandler.SetOptionSettingValue(subnets, new SortedSet<string>(){ "subnet1" }));
-            Assert.Throws<ValidationFailedException>(() => _optionSettingHandler.SetOptionSettingValue(securityGroups, new SortedSet<string>(){ "securityGroup1" }));
+            Assert.Throws<ValidationFailedException>(() => _optionSettingHandler.SetOptionSettingValue(appRunnerRecommendation, subnets, new SortedSet<string>(){ "subnet1" }));
+            Assert.Throws<ValidationFailedException>(() => _optionSettingHandler.SetOptionSettingValue(appRunnerRecommendation, securityGroups, new SortedSet<string>(){ "securityGroup1" }));
         }
 
         [Fact]
@@ -125,7 +125,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var subnets = _optionSettingHandler.GetOptionSetting(appRunnerRecommendation, "VPCConnector.Subnets");
             var emptySubnetsValue = _optionSettingHandler.GetOptionSettingValue(appRunnerRecommendation, subnets);
 
-            _optionSettingHandler.SetOptionSettingValue(subnets, new SortedSet<string>(){ "subnet-1234abcd" });
+            _optionSettingHandler.SetOptionSettingValue(appRunnerRecommendation, subnets, new SortedSet<string>(){ "subnet-1234abcd" });
             var subnetsValue = _optionSettingHandler.GetOptionSettingValue(appRunnerRecommendation, subnets);
 
             var emptySubnetsString = Assert.IsType<string>(emptySubnetsValue);

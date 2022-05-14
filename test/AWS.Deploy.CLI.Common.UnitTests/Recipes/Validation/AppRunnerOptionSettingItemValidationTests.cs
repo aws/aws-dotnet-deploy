@@ -71,7 +71,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             ValidationFailedException exception = null;
             try
             {
-                _optionSettingHandler.SetOptionSettingValue(optionSettingItem, value);
+                _optionSettingHandler.SetOptionSettingValue(null, optionSettingItem, value);
             }
             catch (ValidationFailedException e)
             {

@@ -47,7 +47,10 @@ namespace AWS.Deploy.Common.Recipes.Validation
         {
             { OptionSettingItemValidatorList.Range, typeof(RangeValidator) },
             { OptionSettingItemValidatorList.Regex, typeof(RegexValidator) },
-            { OptionSettingItemValidatorList.Required, typeof(RequiredValidator) }
+            { OptionSettingItemValidatorList.Required, typeof(RequiredValidator) },
+            { OptionSettingItemValidatorList.DirectoryExists, typeof(DirectoryExistsValidator) },
+            { OptionSettingItemValidatorList.DockerBuildArgs, typeof(DockerBuildArgsValidator) },
+            { OptionSettingItemValidatorList.DotnetPublishArgs, typeof(DotnetPublishArgsValidator) },
         };
 
         private static readonly Dictionary<RecipeValidatorList, Type> _recipeValidatorTypeMapping = new()

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.Recipes.Validation;
 using AWS.Deploy.Common.TypeHintData;
 
 namespace AWS.Deploy.CLI.Commands.TypeHints
@@ -56,10 +57,16 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
         private string ValidateExecutionDirectory(string executionDirectory)
         {
-            if (!string.IsNullOrEmpty(executionDirectory) && !_directoryManager.Exists(executionDirectory))
-                return "The directory specified for Docker execution does not exist.";
+            var validationResult = new DirectoryExistsValidator(_directoryManager).Validate(executionDirectory);
+
+            if (validationResult.IsValid)
+            {
+                return string.Empty;
+            }
             else
-                return "";
+            {   // Override the generic ValidationResultMessage with one about the the Docker execution directory
+                return "The directory specified for Docker execution does not exist.";
+            }
         }
     }
 }

@@ -9,7 +9,12 @@
             "TypeHint": "DockerBuildArgs",
             "DefaultValue": "",
             "AdvancedSetting": true,
-            "Updatable": true
+            "Updatable": true,
+            "Validators": [
+                {
+                    "ValidatorType": "DockerBuildArgs"
+                }
+            ]
         },
         {
             "Id": "DockerExecutionDirectory",
@@ -19,7 +24,12 @@
             "TypeHint": "DockerExecutionDirectory",
             "DefaultValue": "",
             "AdvancedSetting": true,
-            "Updatable": true
+            "Updatable": true,
+            "Validators": [
+                {
+                    "ValidatorType": "DirectoryExists"
+                }
+            ]
         },
         {
             "Id": "ECRRepositoryName",

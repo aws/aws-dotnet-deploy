@@ -34,6 +34,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
 
             var mockServiceProvider = new Mock<IServiceProvider>();
             mockServiceProvider.Setup(x => x.GetService(typeof(IOptionSettingHandler))).Returns(_optionSettingHandler);
+            mockServiceProvider.Setup(x => x.GetService(typeof(IDirectoryManager))).Returns(new TestDirectoryManager());
             _serviceProvider = mockServiceProvider.Object;
             _validatorFactory = new ValidatorFactory(_serviceProvider);
         }

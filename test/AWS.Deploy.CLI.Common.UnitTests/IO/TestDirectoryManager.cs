@@ -37,6 +37,9 @@ namespace AWS.Deploy.CLI.Common.UnitTests.IO
             return CreatedDirectories.Contains(path);
         }
 
+        public bool Exists(string path, string relativeTo) =>
+            throw new NotImplementedException("If your test needs this method, you'll need to implement this.");
+
         public string[] GetDirectories(string path, string searchPattern = null, SearchOption searchOption = SearchOption.TopDirectoryOnly) =>
             throw new NotImplementedException("If your test needs this method, you'll need to implement this.");
 
