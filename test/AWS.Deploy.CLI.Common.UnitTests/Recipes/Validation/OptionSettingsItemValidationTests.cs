@@ -64,7 +64,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             // ACT
             try
             {
-                _optionSettingHandler.SetOptionSettingValue(optionSettingItem, invalidValue);
+                _optionSettingHandler.SetOptionSettingValue(null, optionSettingItem, invalidValue);
             }
             catch (ValidationFailedException e)
             {
@@ -100,7 +100,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             // ACT
             try
             {
-                _optionSettingHandler.SetOptionSettingValue(optionSettingItem, invalidValue);
+                _optionSettingHandler.SetOptionSettingValue(null, optionSettingItem, invalidValue);
             }
             catch (ValidationFailedException e)
             {
@@ -142,7 +142,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             // ACT
             try
             {
-                _optionSettingHandler.SetOptionSettingValue(optionSettingItem, validValue);
+                _optionSettingHandler.SetOptionSettingValue(null, optionSettingItem, validValue);
             }
             catch (ValidationFailedException e)
             {
@@ -186,7 +186,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             // ACT
             try
             {
-                _optionSettingHandler.SetOptionSettingValue(optionSettingItem, invalidValue);
+                _optionSettingHandler.SetOptionSettingValue(null, optionSettingItem, invalidValue);
             }
             catch (ValidationFailedException e)
             {

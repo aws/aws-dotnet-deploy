@@ -13,7 +13,30 @@ namespace AWS.Deploy.Common.IO
     {
         DirectoryInfo CreateDirectory(string path);
         DirectoryInfo GetDirectoryInfo(string path);
+
+        /// <summary>
+        /// Determines whether the given path refers to an existing directory on disk.
+        /// This can either be an absolute path or relative to the current working directory.
+        /// </summary>
+        /// <param name="path">The path to test</param>
+        /// <returns>
+        /// true if path refers to an existing directory;
+        /// false if the directory does not exist or an error occurs when trying to determine if the specified directory exists
+        /// </returns>
         bool Exists(string path);
+
+        /// <summary>
+        /// Determines whether the given path refers to an existing directory on disk.
+        /// This can either be an absolute path or relative to the given directory.
+        /// </summary>
+        /// <param name="path">The path to test</param>
+        /// <param name="relativeTo">Directory to consider the path as relative to</param>
+        /// <returns>
+        /// true if path refers to an existing directory;
+        /// false if the directory does not exist or an error occurs when trying to determine if the specified directory exists
+        /// </returns>
+        bool Exists(string path, string relativeTo);
+
         string[] GetFiles(string path, string? searchPattern = null, SearchOption searchOption = SearchOption.TopDirectoryOnly);
         string[] GetDirectories(string path, string? searchPattern = null, SearchOption searchOption = SearchOption.TopDirectoryOnly);
         bool IsEmpty(string path);
@@ -37,6 +60,18 @@ namespace AWS.Deploy.Common.IO
         public DirectoryInfo GetDirectoryInfo(string path) => new DirectoryInfo(path);
 
         public bool Exists(string path) => IsDirectoryValid(path);
+
+        public bool Exists(string path, string relativeTo)
+        {
+            if (Path.IsPathRooted(path))
+            {
+                return Exists(path);
+            }
+            else
+            {
+                return Exists(Path.Combine(relativeTo, path));
+            }
+        }
 
         public string[] GetFiles(string path, string? searchPattern = null, SearchOption searchOption = SearchOption.TopDirectoryOnly)
             => Directory.GetFiles(path, searchPattern ?? "*", searchOption);

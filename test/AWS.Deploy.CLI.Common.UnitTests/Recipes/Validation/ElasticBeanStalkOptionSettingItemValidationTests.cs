@@ -104,6 +104,26 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             Validate(optionSettingItem, value, isValid);
         }
 
+        [Theory]
+        [InlineData("", true)]
+        [InlineData("--no-restore --nologo --framework net5.0", true)]
+        [InlineData("-o dir", false)]                   // -o or --output is reserved by the deploy tool
+        [InlineData("--output dir", false)]
+        [InlineData("-c Release", false)]               // -c or --configuration is controlled by DotnetPublishBuildConfiguration instead
+        [InlineData("--configuration Release", false)]
+        [InlineData("--self-contained true", false)]    // --self-contained is controlled by SelfContainedBuild instead
+        [InlineData("--no-self-contained", false)]
+        public void DotnetPublishArgsValidationTest(string value, bool isValid)
+        {
+            var optionSettingItem = new OptionSettingItem("id", "name", "description");
+            optionSettingItem.Validators.Add(new OptionSettingItemValidatorConfig
+            {
+                ValidatorType = OptionSettingItemValidatorList.DotnetPublishArgs
+            });
+
+            Validate(optionSettingItem, value, isValid);
+        }
+
         private OptionSettingItemValidatorConfig GetRegexValidatorConfig(string regex)
         {
             var regexValidatorConfig = new OptionSettingItemValidatorConfig
@@ -137,7 +157,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
 
             try
             {
-                _optionSettingHandler.SetOptionSettingValue(optionSettingItem, value);
+                _optionSettingHandler.SetOptionSettingValue(null, optionSettingItem, value);
             }
             catch (ValidationFailedException e)
             {

@@ -460,9 +460,7 @@ namespace AWS.Deploy.CLI.Commands
                         throw new InvalidOverrideValueException(DeployToolErrorCode.InvalidValueForOptionSettingItem, $"Invalid value {optionSettingValue} for option setting item {optionSettingJsonPath}");
                     }
 
-                    _optionSettingHandler.SetOptionSettingValue(optionSetting, settingValue);
-
-                    SetDeploymentBundleOptionSetting(recommendation, optionSetting.Id, settingValue);
+                    _optionSettingHandler.SetOptionSettingValue(recommendation, optionSetting, settingValue);
                 }
             }
 
@@ -485,30 +483,6 @@ namespace AWS.Deploy.CLI.Commands
                 errorMessage += result.ValidationFailedMessage + Environment.NewLine;
             }
             throw new InvalidUserDeploymentSettingsException(DeployToolErrorCode.DeploymentConfigurationNeedsAdjusting, errorMessage.Trim());
-        }
-
-        private void SetDeploymentBundleOptionSetting(Recommendation recommendation, string optionSettingId, object settingValue)
-        {
-            switch (optionSettingId)
-            {
-                case "DockerExecutionDirectory":
-                    ActivatorUtilities.CreateInstance<DockerExecutionDirectoryCommand>(_serviceProvider).OverrideValue(recommendation, settingValue.ToString() ?? "");
-                    break;
-                case "DockerBuildArgs":
-                    ActivatorUtilities.CreateInstance<DockerBuildArgsCommand>(_serviceProvider).OverrideValue(recommendation, settingValue.ToString() ?? "");
-                    break;
-                case "DotnetBuildConfiguration":
-                    ActivatorUtilities.CreateInstance<DotnetPublishBuildConfigurationCommand>(_serviceProvider).Overridevalue(recommendation, settingValue.ToString() ?? "");
-                    break;
-                case "DotnetPublishArgs":
-                    ActivatorUtilities.CreateInstance<DotnetPublishArgsCommand>(_serviceProvider).OverrideValue(recommendation, settingValue.ToString() ?? "");
-                    break;
-                case "SelfContainedBuild":
-                    ActivatorUtilities.CreateInstance<DotnetPublishSelfContainedBuildCommand>(_serviceProvider).OverrideValue(recommendation, (bool)settingValue);
-                    break;
-                default:
-                    return;
-            }
         }
 
         // This method prompts the user to select a CloudApplication name for existing deployments or create a new one.
@@ -855,7 +829,7 @@ namespace AWS.Deploy.CLI.Commands
             {
                 try
                 {
-                    _optionSettingHandler.SetOptionSettingValue(setting, settingValue);
+                    _optionSettingHandler.SetOptionSettingValue(recommendation, setting, settingValue);
                 }
                 catch (ValidationFailedException ex)
                 {

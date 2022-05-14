@@ -19,7 +19,12 @@
             "TypeHint": "DotnetPublishAdditionalBuildArguments",
             "DefaultValue": "",
             "AdvancedSetting": true,
-            "Updatable": true
+            "Updatable": true,
+            "Validators": [
+                {
+                    "ValidatorType": "DotnetPublishArgs"
+                }
+            ]
         },
         {
             "Id": "SelfContainedBuild",

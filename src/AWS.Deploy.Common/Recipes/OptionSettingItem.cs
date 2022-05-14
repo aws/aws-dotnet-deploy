@@ -40,8 +40,9 @@ namespace AWS.Deploy.Common.Recipes
         /// </summary>
         /// <param name="optionSettingHandler">Handler use to set any child option settings</param>
         /// <param name="value">Value to set</param>
-        /// /// <param name="validators">Validators for this item</param>
-        void SetValue(IOptionSettingHandler optionSettingHandler, object value, IOptionSettingItemValidator[] validators);
+        /// <param name="validators">Validators for this item</param>
+        /// <param name="recommendation">Selected recommendation</param>
+        void SetValue(IOptionSettingHandler optionSettingHandler, object value, IOptionSettingItemValidator[] validators, Recommendation recommendation);
     }
 
     /// <summary>

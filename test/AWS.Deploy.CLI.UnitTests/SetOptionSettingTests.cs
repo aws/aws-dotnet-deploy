@@ -29,8 +29,9 @@ namespace AWS.Deploy.CLI.UnitTests
         public SetOptionSettingTests()
         {
             var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
+            var directoryManager = new DirectoryManager();
 
-            var parser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
+            var parser = new ProjectDefinitionParser(new FileManager(), directoryManager);
             var awsCredentials = new Mock<AWSCredentials>();
             var session =  new OrchestratorSession(
                 parser.Parse(projectPath).Result,
@@ -43,7 +44,11 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, session);
             _recommendations = engine.ComputeRecommendations().GetAwaiter().GetResult();
-            _serviceProvider = new Mock<IServiceProvider>().Object;
+
+            var mockServiceProvider = new Mock<IServiceProvider>();
+            mockServiceProvider.Setup(x => x.GetService(typeof(IDirectoryManager))).Returns(directoryManager);
+            _serviceProvider = mockServiceProvider.Object;
+
             _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider));
         }
 
@@ -57,7 +62,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var recommendation = _recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
 
             var optionSetting = recommendation.Recipe.OptionSettings.First(x => x.Id.Equals("EnvironmentType"));
-            _optionSettingHandler.SetOptionSettingValue(optionSetting, optionSetting.AllowedValues.First());
+            _optionSettingHandler.SetOptionSettingValue(recommendation, optionSetting, optionSetting.AllowedValues.First());
 
             Assert.Equal(optionSetting.AllowedValues.First(), _optionSettingHandler.GetOptionSettingValue<string>(recommendation, optionSetting));
         }
@@ -74,7 +79,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var recommendation = _recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
 
             var optionSetting = recommendation.Recipe.OptionSettings.First(x => x.Id.Equals("EnvironmentType"));
-            Assert.Throws<InvalidOverrideValueException>(() => _optionSettingHandler.SetOptionSettingValue(optionSetting, optionSetting.ValueMapping.Values.First()));
+            Assert.Throws<InvalidOverrideValueException>(() => _optionSettingHandler.SetOptionSettingValue(recommendation, optionSetting, optionSetting.ValueMapping.Values.First()));
         }
 
         [Fact]
@@ -84,7 +89,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var optionSetting = recommendation.Recipe.OptionSettings.First(x => x.Id.Equals("ElasticBeanstalkEnvironmentVariables"));
             var values = new Dictionary<string, string>() { { "key", "value" } };
-            _optionSettingHandler.SetOptionSettingValue(optionSetting, values);
+            _optionSettingHandler.SetOptionSettingValue(recommendation, optionSetting, values);
 
             Assert.Equal(values, _optionSettingHandler.GetOptionSettingValue<Dictionary<string, string>>(recommendation, optionSetting));
         }
@@ -97,7 +102,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var optionSetting = recommendation.Recipe.OptionSettings.First(x => x.Id.Equals("ElasticBeanstalkEnvironmentVariables"));
             var dictionary = new Dictionary<string, string>() { { "key", "value" } };
             var dictionaryString = JsonConvert.SerializeObject(dictionary);
-            _optionSettingHandler.SetOptionSettingValue(optionSetting, dictionaryString);
+            _optionSettingHandler.SetOptionSettingValue(recommendation, optionSetting, dictionaryString);
 
             Assert.Equal(dictionary, _optionSettingHandler.GetOptionSettingValue<Dictionary<string, string>>(recommendation, optionSetting));
         }
@@ -108,7 +113,46 @@ namespace AWS.Deploy.CLI.UnitTests
             var recommendation = _recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
 
             var optionSetting = recommendation.Recipe.OptionSettings.First(x => x.Id.Equals("ElasticBeanstalkEnvironmentVariables"));
-            Assert.Throws<JsonReaderException>(() => _optionSettingHandler.SetOptionSettingValue(optionSetting, "string"));
+            Assert.Throws<JsonReaderException>(() => _optionSettingHandler.SetOptionSettingValue(recommendation, optionSetting, "string"));
+        }
+
+        /// <summary>
+        /// Verifies that calling SetOptionSettingValue for Docker-related settings
+        /// also sets the corresponding value in recommendation.DeploymentBundle
+        /// </summary>
+        [Fact]
+        public void DeploymentBundleWriteThrough_Docker()
+        {
+            var recommendation = _recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_APPRUNNER_ID);
+
+            var dockerExecutionDirectory = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
+            var dockerBuildArgs = "arg1=val1, arg2=val2";
+            _optionSettingHandler.SetOptionSettingValue(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, "DockerExecutionDirectory"), dockerExecutionDirectory);
+            _optionSettingHandler.SetOptionSettingValue(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, "DockerBuildArgs"), dockerBuildArgs);
+
+            Assert.Equal(dockerExecutionDirectory, recommendation.DeploymentBundle.DockerExecutionDirectory);
+            Assert.Equal(dockerBuildArgs, recommendation.DeploymentBundle.DockerBuildArgs);
+        }
+
+        /// <summary>
+        /// Verifies that calling SetOptionSettingValue for dotnet publish settings
+        /// also sets the corresponding value in recommendation.DeploymentBundle
+        /// </summary>
+        [Fact]
+        public void DeploymentBundleWriteThrough_Dotnet()
+        {
+            var recommendation = _recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+
+            var dotnetBuildConfiguration = "Debug";
+            var dotnetPublishArgs = "--force --nologo";
+            var selfContainedBuild = true;
+            _optionSettingHandler.SetOptionSettingValue(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, "DotnetBuildConfiguration"), dotnetBuildConfiguration);
+            _optionSettingHandler.SetOptionSettingValue(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, "DotnetPublishArgs"), dotnetPublishArgs);
+            _optionSettingHandler.SetOptionSettingValue(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, "SelfContainedBuild"), selfContainedBuild);
+
+            Assert.Equal(dotnetBuildConfiguration, recommendation.DeploymentBundle.DotnetPublishBuildConfiguration);
+            Assert.Equal(dotnetPublishArgs, recommendation.DeploymentBundle.DotnetPublishAdditionalBuildArguments);
+            Assert.True(recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild);
         }
     }
 }

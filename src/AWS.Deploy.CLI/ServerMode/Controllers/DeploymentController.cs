@@ -251,7 +251,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 try
                 {
                     var setting = optionSettingHandler.GetOptionSetting(state.SelectedRecommendation, updatedSetting.Key);
-                    optionSettingHandler.SetOptionSettingValue(setting, updatedSetting.Value);
+                    optionSettingHandler.SetOptionSettingValue(state.SelectedRecommendation, setting, updatedSetting.Value);
                 }
                 catch (Exception ex)
                 {
