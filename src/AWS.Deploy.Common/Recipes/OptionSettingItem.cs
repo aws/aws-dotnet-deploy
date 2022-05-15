@@ -65,6 +65,11 @@ namespace AWS.Deploy.Common.Recipes
         public string Name { get; set; }
 
         /// <summary>
+        /// The category for the setting. This value must match an id field in the list of categories.
+        /// </summary>
+        public string? Category { get; set; }
+
+        /// <summary>
         /// The description of what the setting is used for.
         /// </summary>
         public string Description { get; set; }

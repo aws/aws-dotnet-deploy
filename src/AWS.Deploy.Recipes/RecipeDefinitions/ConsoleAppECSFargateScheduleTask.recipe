@@ -93,12 +93,40 @@
     "Validators": [
         {
             "ValidatorType": "FargateTaskSizeCpuMemoryLimits"
-        }],
-
+        }
+    ],
+    "Categories": [
+        {
+            "Id": "General",
+            "DisplayName": "General",
+            "Order": 10
+        },
+        {
+            "Id": "Compute",
+            "DisplayName": "Compute",
+            "Order": 20
+        },
+        {
+            "Id": "Permissions",
+            "DisplayName": "Permissions",
+            "Order": 30
+        },
+        {
+            "Id": "VPC",
+            "DisplayName": "VPC",
+            "Order": 40
+        },
+        {
+            "Id": "EnvVariables",
+            "DisplayName": "Environment Variables",
+            "Order": 50
+        }
+    ],
     "OptionSettings": [
         {
             "Id": "ECSCluster",
             "Name": "ECS Cluster",
+            "Category": "General",
             "Description": "The ECS cluster used for the deployment.",
             "Type": "Object",
             "TypeHint": "ECSCluster",
@@ -125,7 +153,7 @@
                     "Validators": [
                         {
                             "ValidatorType": "Regex",
-                            "Configuration" : {
+                            "Configuration": {
                                 "Regex": "arn:[^:]+:ecs:[^:]*:[0-9]{12}:cluster/.+",
                                 "AllowEmptyString": true,
                                 "ValidationFailedMessage": "Invalid cluster Arn. The ARN should contain the arn:[PARTITION]:ecs namespace, followed by the Region of the cluster, the AWS account ID of the cluster owner, the cluster namespace, and then the cluster name. For example, arn:aws:ecs:region:012345678910:cluster/test. For more information visit https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_Cluster.html"
@@ -150,7 +178,7 @@
                     "Validators": [
                         {
                             "ValidatorType": "Regex",
-                            "Configuration" : {
+                            "Configuration": {
                                 "Regex": "^([A-Za-z0-9_-]{1,255})$",
                                 "AllowEmptyString": true,
                                 "ValidationFailedMessage": "Invalid cluster name. The cluster name can only contain letters (case-sensitive), numbers, hyphens, underscores and can't be longer than 255 character in length."
@@ -169,6 +197,7 @@
         {
             "Id": "ApplicationIAMRole",
             "Name": "Application IAM Role",
+            "Category": "Permissions",
             "Description": "The Identity and Access Management (IAM) role that provides AWS credentials to the application to access AWS services.",
             "Type": "Object",
             "TypeHint": "IAMRole",
@@ -220,6 +249,7 @@
         {
             "Id": "Schedule",
             "Name": "Task Schedule",
+            "Category": "General",
             "Description": "The schedule or rate (frequency) that determines when Amazon CloudWatch Events runs the rule. For details about the format for this value, see the CloudWatch Events guide: https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html",
             "Type": "String",
             "TypeHint": "ECSTaskSchedule",
@@ -230,6 +260,7 @@
         {
             "Id": "Vpc",
             "Name": "Virtual Private Cloud (VPC)",
+            "Category": "VPC",
             "Description": "A VPC enables you to launch the application into a virtual network that you've defined.",
             "Type": "Object",
             "TypeHint": "Vpc",
@@ -272,7 +303,7 @@
                     "Validators": [
                         {
                             "ValidatorType": "Regex",
-                            "Configuration" : {
+                            "Configuration": {
                                 "Regex": "^vpc-([0-9a-f]{8}|[0-9a-f]{17})$",
                                 "AllowEmptyString": true,
                                 "ValidationFailedMessage": "Invalid VPC ID. The VPC ID must start with the \"vpc-\" prefix, followed by either 8 or 17 characters consisting of digits and letters(lower-case) from a to f. For example vpc-abc88de9 is a valid VPC ID."
@@ -295,6 +326,7 @@
         {
             "Id": "TaskCpu",
             "Name": "Task CPU",
+            "Category": "Compute",
             "Description": "The number of CPU units used by the task. See the following for details on CPU values: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/AWS_Fargate.html#fargate-task-defs",
             "Type": "Int",
             "DefaultValue": 256,
@@ -312,6 +344,7 @@
         {
             "Id": "TaskMemory",
             "Name": "Task Memory",
+            "Category": "Compute",
             "Description": "The amount of memory (in MB) used by the task. See the following for details on memory values: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/AWS_Fargate.html#fargate-task-defs",
             "Type": "Int",
             "DefaultValue": 512,
@@ -387,6 +420,7 @@
         {
             "Id": "ECSEnvironmentVariables",
             "Name": "Environment Variables",
+            "Category": "EnvVariables",
             "Description": "Configure environment properties for your application.",
             "Type": "KeyValue",
             "AdvancedSetting": false,

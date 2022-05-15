@@ -146,6 +146,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                     baseRecipeId: recommendation.Recipe.BaseRecipeId,
                     recipeId: recommendation.Recipe.Id,
                     name: recommendation.Name,
+                    settingsCategories: CategorySummary.FromCategories(recommendation.GetConfigurableOptionSettingCategories()),
                     isPersistedDeploymentProject: recommendation.Recipe.PersistedDeploymentProject,
                     shortDescription: recommendation.ShortDescription,
                     description: recommendation.Description,
@@ -198,6 +199,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             {
                 var settingSummary = new OptionSettingItemSummary(setting.Id, setting.Name, setting.Description, setting.Type.ToString())
                 {
+                    Category = setting.Category,
                     TypeHint = setting.TypeHint?.ToString(),
                     TypeHintData = setting.TypeHintData,
                     Value = optionSettingHandler.GetOptionSettingValue(recommendation, setting),
@@ -340,6 +342,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                     baseRecipeId: recommendation.Recipe.BaseRecipeId,
                     recipeId: deployment.RecipeId,
                     recipeName: recommendation.Name,
+                    settingsCategories: CategorySummary.FromCategories(recommendation.GetConfigurableOptionSettingCategories()),
                     isPersistedDeploymentProject: recommendation.Recipe.PersistedDeploymentProject,
                     shortDescription: recommendation.ShortDescription,
                     description: recommendation.Description,
