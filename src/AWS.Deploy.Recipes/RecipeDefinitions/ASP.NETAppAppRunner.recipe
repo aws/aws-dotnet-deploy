@@ -53,11 +53,43 @@
         }
 
     ],
-
+    "Categories": [
+        {
+            "Id": "General",
+            "DisplayName": "General",
+            "Order": 10
+        },
+        {
+            "Id": "Compute",
+            "DisplayName": "Compute",
+            "Order": 20
+        },
+        {
+            "Id": "Health",
+            "DisplayName": "Health",
+            "Order": 30
+        },
+        {
+            "Id": "Permissions",
+            "DisplayName": "Permissions",
+            "Order": 40
+        },
+        {
+            "Id": "VPC",
+            "DisplayName": "VPC",
+            "Order": 50
+        },
+        {
+            "Id": "EnvVariables",
+            "DisplayName": "Environment Variables",
+            "Order": 60
+        }
+    ],
     "OptionSettings": [
         {
             "Id": "ServiceName",
             "Name": "Service Name",
+            "Category": "General",
             "Description": "The name of the AWS App Runner service.",
             "Type": "String",
             "TypeHint": "AppRunnerService",
@@ -67,8 +99,7 @@
             "Validators": [
                 {
                     "ValidatorType": "Regex",
-                    "Configuration": 
-                    {
+                    "Configuration": {
                         "Regex": "^([A-Za-z0-9][A-Za-z0-9_-]{3,39})$",
                         "ValidationFailedMessage": "Invalid service name. The service name must be between 4 and 40 characters in length and can contain uppercase and lowercase letters, numbers, hyphen(-) and underscore(_). It must start with a letter or a number."
                     }
@@ -78,6 +109,7 @@
         {
             "Id": "Port",
             "Name": "Port",
+            "Category": "General",
             "Description": "The port the container is listening for requests on.",
             "Type": "Int",
             "DefaultValue": 80,
@@ -86,8 +118,7 @@
             "Validators": [
                 {
                     "ValidatorType": "Range",
-                    "Configuration": 
-                    {
+                    "Configuration": {
                         "Min": 0,
                         "Max": 51200
                     }
@@ -97,6 +128,7 @@
         {
             "Id": "StartCommand",
             "Name": "Start Command",
+            "Category": "General",
             "Description": "Override the start command from the image's default start command.",
             "Type": "String",
             "AdvancedSetting": true,
@@ -105,6 +137,7 @@
         {
             "Id": "ApplicationIAMRole",
             "Name": "Application IAM Role",
+            "Category": "Permissions",
             "Description": "The Identity and Access Management (IAM) role that provides AWS credentials to the application to access AWS services.",
             "Type": "Object",
             "TypeHint": "IAMRole",
@@ -137,8 +170,7 @@
                     "Validators": [
                         {
                             "ValidatorType": "Regex",
-                            "Configuration": 
-                            {
+                            "Configuration": {
                                 "Regex": "arn:(aws|aws-us-gov|aws-cn|aws-iso|aws-iso-b):iam::[0-9]{12}:(role|role/service-role)/[\\w+=,.@\\-/]{1,1000}",
                                 "AllowEmptyString": true,
                                 "ValidationFailedMessage": "Invalid IAM Role ARN. The ARN should contain the arn:[PARTITION]:iam namespace, followed by the account ID, and then the resource path. For example - arn:aws:iam::123456789012:role/S3Access is a valid IAM Role ARN. For more information visit https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-apprunner-service-authenticationconfiguration.html"
@@ -157,6 +189,7 @@
         {
             "Id": "ServiceAccessIAMRole",
             "Name": "Service Access IAM Role",
+            "Category": "Permissions",
             "Description": "The Identity and Access Management (IAM) role that provides gives the AWS App Runner service access to pull the container image from ECR.",
             "Type": "Object",
             "TypeHint": "IAMRole",
@@ -189,8 +222,7 @@
                     "Validators": [
                         {
                             "ValidatorType": "Regex",
-                            "Configuration": 
-                            {
+                            "Configuration": {
                                 "Regex": "arn:(aws|aws-us-gov|aws-cn|aws-iso|aws-iso-b):iam::[0-9]{12}:(role|role/service-role)/[\\w+=,.@\\-/]{1,1000}",
                                 "AllowEmptyString": true,
                                 "ValidationFailedMessage": "Invalid IAM Role ARN. The ARN should contain the arn:[PARTITION]:iam namespace, followed by the account ID, and then the resource path. For example - arn:aws:iam::123456789012:role/S3Access is a valid IAM Role ARN. For more information visit https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-apprunner-service-authenticationconfiguration.html"
@@ -209,6 +241,7 @@
         {
             "Id": "Cpu",
             "Name": "CPU",
+            "Category": "Compute",
             "Description": "The number of CPU units reserved for each instance of your App Runner service.",
             "Type": "String",
             "AdvancedSetting": false,
@@ -226,6 +259,7 @@
         {
             "Id": "Memory",
             "Name": "Memory",
+            "Category": "Compute",
             "Description": "The amount of memory reserved for each instance of your App Runner service.",
             "Type": "String",
             "AdvancedSetting": false,
@@ -245,6 +279,7 @@
         {
             "Id": "EncryptionKmsKey",
             "Name": "Encryption KMS Key",
+            "Category": "Permissions",
             "Description": "The ARN of the KMS key that's used for encryption of application logs.",
             "Type": "String",
             "AdvancedSetting": true,
@@ -252,8 +287,7 @@
             "Validators": [
                 {
                     "ValidatorType": "Regex",
-                    "Configuration": 
-                    {
+                    "Configuration": {
                         "Regex": "arn:aws(-[\\w]+)*:kms:[a-z\\-]+-[0-9]{1}:[0-9]{12}:key/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
                         "AllowEmptyString": true,
                         "ValidationFailedMessage": "Invalid KMS key ARN. The ARN should contain the arn:[PARTITION]:kms namespace, followed by the region, account ID, and then the key-id. For example - arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab is a valid KMS key ARN. For more information visit https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-apprunner-service-encryptionconfiguration.html"
@@ -264,6 +298,7 @@
         {
             "Id": "HealthCheckProtocol",
             "Name": "Health Check Protocol",
+            "Category": "Health",
             "Description": "The IP protocol that App Runner uses to perform health checks for your service.",
             "Type": "String",
             "DefaultValue": "TCP",
@@ -277,6 +312,7 @@
         {
             "Id": "HealthCheckPath",
             "Name": "Health Check Path",
+            "Category": "Health",
             "Description": "The URL that health check requests are sent to.",
             "Type": "String",
             "AdvancedSetting": true,
@@ -291,6 +327,7 @@
         {
             "Id": "HealthCheckInterval",
             "Name": "Health Check Interval",
+            "Category": "Health",
             "Description": "The time interval, in seconds, between health checks.",
             "Type": "Int",
             "DefaultValue": 5,
@@ -298,9 +335,8 @@
             "Updatable": true,
             "Validators": [
                 {
-                    "ValidatorType":"Range",
-                    "Configuration": 
-                    {
+                    "ValidatorType": "Range",
+                    "Configuration": {
                         "Min": 1,
                         "Max": 20
                     }
@@ -310,6 +346,7 @@
         {
             "Id": "HealthCheckTimeout",
             "Name": "Health Check Timeout",
+            "Category": "Health",
             "Description": "The time, in seconds, to wait for a health check response before deciding it failed.",
             "Type": "Int",
             "DefaultValue": 2,
@@ -317,9 +354,8 @@
             "Updatable": true,
             "Validators": [
                 {
-                    "ValidatorType":"Range",
-                    "Configuration": 
-                    {
+                    "ValidatorType": "Range",
+                    "Configuration": {
                         "Min": 1,
                         "Max": 20
                     }
@@ -329,6 +365,7 @@
         {
             "Id": "HealthCheckHealthyThreshold",
             "Name": "Health Check Healthy Threshold",
+            "Category": "Health",
             "Description": "The number of consecutive checks that must succeed before App Runner decides that the service is healthy.",
             "Type": "Int",
             "DefaultValue": 3,
@@ -336,9 +373,8 @@
             "Updatable": true,
             "Validators": [
                 {
-                    "ValidatorType":"Range",
-                    "Configuration": 
-                    {
+                    "ValidatorType": "Range",
+                    "Configuration": {
                         "Min": 1,
                         "Max": 20
                     }
@@ -348,6 +384,7 @@
         {
             "Id": "HealthCheckUnhealthyThreshold",
             "Name": "Health Check Unhealthy Threshold",
+            "Category": "Health",
             "Description": "The number of consecutive checks that must fail before App Runner decides that the service is unhealthy.",
             "Type": "Int",
             "DefaultValue": 3,
@@ -355,9 +392,8 @@
             "Updatable": true,
             "Validators": [
                 {
-                    "ValidatorType":"Range",
-                    "Configuration": 
-                    {
+                    "ValidatorType": "Range",
+                    "Configuration": {
                         "Min": 1,
                         "Max": 20
                     }
@@ -367,6 +403,7 @@
         {
             "Id": "VPCConnector",
             "Name": "VPC Connector",
+            "Category": "VPC",
             "Description": "App Runner requires this resource when you want to associate your App Runner service to a custom Amazon Virtual Private Cloud (Amazon VPC).",
             "Type": "Object",
             "TypeHint": "VPCConnector",
@@ -481,6 +518,7 @@
         {
             "Id": "AppRunnerEnvironmentVariables",
             "Name": "Environment Variables",
+            "Category": "EnvVariables",
             "Description": "Configure environment properties for your application.",
             "Type": "KeyValue",
             "AdvancedSetting": false,

@@ -89,13 +89,33 @@
             }
         }
     ],
-
-
-
+    "Categories": [
+        {
+            "Id": "General",
+            "DisplayName": "General",
+            "Order": 10
+        },
+        {
+            "Id": "BackendAPI",
+            "DisplayName": "Backend API",
+            "Order": 20
+        },
+        {
+            "Id": "Logging",
+            "DisplayName": "Logging",
+            "Order": 30
+        },
+        {
+            "Id": "Networking",
+            "DisplayName": "Networking",
+            "Order": 40
+        }
+    ],
     "OptionSettings": [
         {
             "Id": "IndexDocument",
             "Name": "Index Document",
+            "Category": "General",
             "Description": "The default page to use when the endpoint is accessed with no resource path.",
             "Type": "String",
             "DefaultValue": "index.html",
@@ -105,6 +125,7 @@
         {
             "Id": "ErrorDocument",
             "Name": "Error Document",
+            "Category": "General",
             "Description": "The error page to use when an error occurs while accessing the resource path.",
             "Type": "String",
             "DefaultValue": "",
@@ -114,6 +135,7 @@
         {
             "Id": "Redirect404ToRoot",
             "Name": "Redirect 404 and 403 Errors",
+            "Category": "General",
             "Description": "Redirect any 404 and 403 requests to the index document. This is useful in Blazor applications that modify the resource path in the browser. If the modified resource path is reused in a new browser it will result in a 403 from Amazon CloudFront since no S3 object exists at that resource path.",
             "Type": "Bool",
             "DefaultValue": true,
@@ -123,6 +145,7 @@
         {
             "Id": "BackendApi",
             "Name": "Backend REST API",
+            "Category": "BackendAPI",
             "Description": "URI to a backend rest api that will be added as an origin to the CloudFront distribution. For example an API Gateway endpoint.",
             "Type": "Object",
             "DefaultValue": "",
@@ -173,6 +196,7 @@
         {
             "Id": "AccessLogging",
             "Name": "CloudFront Access Logging",
+            "Category": "Logging",
             "Description": "Configure if and how access logs are written for the CloudFront distribution",
             "Type": "Object",
             "AdvancedSetting": false,
@@ -260,6 +284,7 @@
         {
             "Id": "PriceClass",
             "Name": "CloudFront Price Class",
+            "Category": "General",
             "Description": "Configure the edge locations that will respond to request for the CloudFront distribution",
             "Type": "String",
             "DefaultValue": "PRICE_CLASS_ALL",
@@ -275,6 +300,7 @@
         {
             "Id": "EnableIpv6",
             "Name": "Enable IPv6",
+            "Category": "Networking",
             "Description": "Control if IPv6 should be enabled for the CloudFront distribution",
             "Type": "Bool",
             "DefaultValue": true,
@@ -284,6 +310,7 @@
         {
             "Id": "MaxHttpVersion",
             "Name": "Maximum HTTP Version",
+            "Category": "Networking",
             "Description": "The maximum http version that users can use to communicate with the CloudFront distribution",
             "Type": "String",
             "DefaultValue": "HTTP2",
@@ -298,6 +325,7 @@
         {
             "Id": "WebAclId",
             "Name": "Web ACL Arn",
+            "Category": "Networking",
             "Description": "The AWS WAF (web application firewall) ACL arn",
             "Type": "String",
             "DefaultValue": null,

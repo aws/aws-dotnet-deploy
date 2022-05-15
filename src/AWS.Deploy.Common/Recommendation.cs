@@ -53,8 +53,37 @@ namespace AWS.Deploy.Common
             }
         }
 
+        public List<Category> GetConfigurableOptionSettingCategories()
+        {
+            var categories = Recipe.Categories;
+
+            // If any top level settings has a category of General make sure the General category is added to the list.
+            if(!categories.Any(x => string.Equals(x.Id, Category.General.Id)) &&
+                Recipe.OptionSettings.Any(x => string.IsNullOrEmpty(x.Category) || string.Equals(x.Category, Category.General.Id)))
+            {
+                categories.Insert(0, Category.General);
+            }
+
+            // Add the build settings category if it is not already in the list of categories.
+            if(!categories.Any(x => string.Equals(x.Id, Category.DeploymentBundle.Id)))
+            {
+                categories.Add(Category.DeploymentBundle);
+            }
+
+            return categories;
+        }
+
         public IEnumerable<OptionSettingItem> GetConfigurableOptionSettingItems()
         {
+            // For any top level settings that don't have a category assigned to them assign the General category.
+            foreach(var setting in Recipe.OptionSettings)
+            {
+                if(string.IsNullOrEmpty(setting.Category))
+                {
+                    setting.Category = Category.General.Id;
+                }
+            }
+
             if (DeploymentBundleSettings == null)
                 return Recipe.OptionSettings;
 

@@ -39,6 +39,7 @@ namespace AWS.Deploy.CLI.ServerMode.Models
         public bool UpdatedByCurrentUser { get; set; }
 
         public DeploymentTypes DeploymentType { get; set; }
+        public List<CategorySummary> SettingsCategories { get; set; }
 
         public string ExistingDeploymentId { get; set; }
 
@@ -47,6 +48,7 @@ namespace AWS.Deploy.CLI.ServerMode.Models
             string? baseRecipeId,
             string recipeId,
             string recipeName,
+            List<CategorySummary> settingsCategories,
             bool isPersistedDeploymentProject,
             string shortDescription,
             string description,
@@ -61,6 +63,7 @@ namespace AWS.Deploy.CLI.ServerMode.Models
             BaseRecipeId = baseRecipeId;
             RecipeId = recipeId;
             RecipeName = recipeName;
+            SettingsCategories = settingsCategories;
             IsPersistedDeploymentProject = isPersistedDeploymentProject;
             ShortDescription = shortDescription;
             Description = description;

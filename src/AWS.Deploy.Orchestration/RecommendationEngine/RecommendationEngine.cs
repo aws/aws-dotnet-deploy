@@ -95,7 +95,15 @@ namespace AWS.Deploy.Orchestration.RecommendationEngine
                         if (definition == null)
                             throw new FailedToDeserializeException(DeployToolErrorCode.FailedToDeserializeDeploymentBundle, $"Failed to Deserialize Deployment Bundle [{deploymentBundleFile}]");
                         if (definition.Type.Equals(deploymentBundleTypes))
+                        {
+                            // Assign Build category to all of the deployment bundle settings.
+                            foreach(var setting in definition.Parameters)
+                            {
+                                setting.Category = Category.DeploymentBundle.Id;
+                            }
+
                             return definition.Parameters;
+                        }
                     }
                     catch (Exception e)
                     {
