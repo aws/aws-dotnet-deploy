@@ -386,14 +386,13 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                     return NotFound($"Recommendation {input.NewDeploymentRecipeId} not found.");
                 }
 
+                // We only validate the name when the recipe deployment type is not ElasticContainerRegistryImage.
+                // This is because pushing images to ECR does not need a cloud application name.
                 if (state.SelectedRecommendation.Recipe.DeploymentType != Common.Recipes.DeploymentTypes.ElasticContainerRegistryImage)
                 {
-                    // We only validate the name when the recipe deployment type is not ElasticContainerRegistryImage.
-                    // This is because pushing images to ECR does not need a cloud application name.
-                    if (!cloudApplicationNameGenerator.IsValidName(newDeploymentName))
-                    {
-                        return ValidationProblem(cloudApplicationNameGenerator.InvalidNameMessage(newDeploymentName));
-                    }
+                    var validationResult = cloudApplicationNameGenerator.IsValidName(newDeploymentName, state.ExistingDeployments ?? new List<CloudApplication>(), state.SelectedRecommendation.Recipe.DeploymentType);
+                    if (!validationResult.IsValid)
+                        return ValidationProblem(validationResult.ErrorMessage);
                 }
 
                 state.ApplicationDetails.Name = newDeploymentName;

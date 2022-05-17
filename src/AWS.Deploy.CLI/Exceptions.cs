@@ -84,4 +84,12 @@ namespace AWS.Deploy.CLI
     {
         public FailedToGetCredentialsForProfile(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
+
+    /// <summary>
+    /// Throw if cloud application name is invalid.
+    /// </summary>
+    public class InvalidCloudApplicationNameException : DeployToolException
+    {
+        public InvalidCloudApplicationNameException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+    }
 }

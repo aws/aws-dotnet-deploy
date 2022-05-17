@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using AWS.Deploy.Common.Recipes;
 
 namespace AWS.Deploy.Common
 {
@@ -17,6 +18,14 @@ namespace AWS.Deploy.Common
                 { CloudApplicationResourceType.CloudFormationStack, "CloudFormation Stack" },
                 { CloudApplicationResourceType.BeanstalkEnvironment, "Elastic Beanstalk Environment" },
                 { CloudApplicationResourceType.ElasticContainerRegistryImage, "ECR Repository" }
+            };
+
+        private readonly Dictionary<CloudApplicationResourceType, DeploymentTypes> _deploymentTypeMapping =
+            new()
+            {
+                { CloudApplicationResourceType.CloudFormationStack, DeploymentTypes.CdkProject},
+                { CloudApplicationResourceType.BeanstalkEnvironment, DeploymentTypes.BeanstalkEnvironment },
+                { CloudApplicationResourceType.ElasticContainerRegistryImage, DeploymentTypes.ElasticContainerRegistryImage }
             };
 
         /// <summary>
@@ -38,8 +47,7 @@ namespace AWS.Deploy.Common
         public string RecipeId { get; set; }
 
         /// <summary>
-        /// indicates the type of the AWS resource which serves as the deployment target.
-        /// Current supported values are None, CloudFormationStack and BeanstalkEnvironment.
+        /// Indicates the type of the AWS resource which serves as the deployment target.
         /// </summary>
         public CloudApplicationResourceType ResourceType { get; set; }
 
@@ -62,6 +70,11 @@ namespace AWS.Deploy.Common
         /// Display the name of the Cloud Application
         /// </summary>
         public override string ToString() => Name;
+
+        /// <summary>
+        /// Gets the deployment type of the recommendation that was used to deploy the cloud application.
+        /// </summary>
+        public DeploymentTypes DeploymentType => _deploymentTypeMapping[ResourceType];
 
         public CloudApplication(string name, string uniqueIdentifier, CloudApplicationResourceType resourceType, string recipeId, DateTime? lastUpdatedTime = null)
         {

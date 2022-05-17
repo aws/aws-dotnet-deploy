@@ -113,7 +113,8 @@ namespace AWS.Deploy.Common
         FailedToCreateCDKProject = 10009100,
         ResourceQuery = 10009200,
         FailedToRetrieveStackId = 10009300,
-        FailedToGetECRAuthorizationToken = 10009400
+        FailedToGetECRAuthorizationToken = 10009400,
+        InvalidCloudApplicationName = 10009500
     }
 
     public class ProjectFileNotFoundException : DeployToolException
