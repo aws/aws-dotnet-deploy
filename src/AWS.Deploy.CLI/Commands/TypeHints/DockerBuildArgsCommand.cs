@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.Recipes.Validation;
 using AWS.Deploy.Common.TypeHintData;
 
 namespace AWS.Deploy.CLI.Commands.TypeHints
@@ -55,20 +55,16 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
         private string ValidateBuildArgs(string buildArgs)
         {
-            var argsList = buildArgs.Split(",");
-            if (argsList.Length == 0)
-                return "";
+            var validationResult = new DockerBuildArgsValidator().Validate(buildArgs);
 
-            foreach (var arg in argsList)
+            if (validationResult.IsValid)
             {
-                var keyValue = arg.Split("=");
-                if (keyValue.Length == 2)
-                    return "";
-                else
-                    return "The Docker Build Args must have the following pattern 'arg1=val1,arg2=val2'.";
+                return string.Empty;
             }
-
-            return "";
+            else
+            {
+                return validationResult.ValidationFailedMessage ?? "Invalid value for additional Docker build options.";
+            }
         }
     }
 }

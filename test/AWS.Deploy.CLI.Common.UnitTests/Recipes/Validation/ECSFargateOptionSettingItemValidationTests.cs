@@ -2,14 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using System.IO;
+using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Recipes.Validation;
 using AWS.Deploy.Orchestration;
 using Moq;
 using Should;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
 {
@@ -17,10 +19,14 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
     {
         private readonly IOptionSettingHandler _optionSettingHandler;
         private readonly IServiceProvider _serviceProvider;
+        private readonly IDirectoryManager _directoryManager;
 
         public ECSFargateOptionSettingItemValidationTests()
         {
-            _serviceProvider = new Mock<IServiceProvider>().Object;
+            _directoryManager = new TestDirectoryManager();
+            var mockServiceProvider = new Mock<IServiceProvider>();
+            mockServiceProvider.Setup(x => x.GetService(typeof(IDirectoryManager))).Returns(_directoryManager);
+            _serviceProvider = mockServiceProvider.Object;
             _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider));
         }
 
@@ -149,6 +155,50 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             Validate(optionSettingItem, value, isValid);
         }
 
+        [Theory]
+        [InlineData("", true)]
+        [InlineData("--build-arg arg=val --no-cache", true)]
+        [InlineData("-t name:tag", false)]
+        [InlineData("--tag name:tag", false)]
+        [InlineData("-f file", false)]
+        [InlineData("--file file", false)]
+        public void DockerBuildArgsValidationTest(string value, bool isValid)
+        {
+            var optionSettingItem = new OptionSettingItem("id", "name", "description");
+            optionSettingItem.Validators.Add(new OptionSettingItemValidatorConfig
+            {
+                ValidatorType = OptionSettingItemValidatorList.DockerBuildArgs
+            });
+
+            Validate(optionSettingItem, value, isValid);
+        }
+
+        [Fact]
+        public void DockerExecutionDirectory_AbsoluteExists()
+        {
+            var optionSettingItem = new OptionSettingItem("id", "name", "description");
+            optionSettingItem.Validators.Add(new OptionSettingItemValidatorConfig
+            {
+                ValidatorType = OptionSettingItemValidatorList.DirectoryExists,
+            });
+
+            _directoryManager.CreateDirectory(Path.Join("C:", "project"));
+
+            Validate(optionSettingItem, Path.Join("C:", "project"), true);
+        }
+
+        [Fact]
+        public void DockerExecutionDirectory_AbsoluteDoesNotExist()
+        {
+            var optionSettingItem = new OptionSettingItem("id", "name", "description");
+            optionSettingItem.Validators.Add(new OptionSettingItemValidatorConfig
+            {
+                ValidatorType = OptionSettingItemValidatorList.DirectoryExists,
+            });
+
+            Validate(optionSettingItem, Path.Join("C:", "other_project"), false);
+        }
+
         private OptionSettingItemValidatorConfig GetRegexValidatorConfig(string regex)
         {
             var regexValidatorConfig = new OptionSettingItemValidatorConfig
@@ -181,7 +231,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             ValidationFailedException exception = null;
             try
             {
-                _optionSettingHandler.SetOptionSettingValue(optionSettingItem, value);
+                _optionSettingHandler.SetOptionSettingValue(null, optionSettingItem, value);
             }
             catch (ValidationFailedException e)
             {
