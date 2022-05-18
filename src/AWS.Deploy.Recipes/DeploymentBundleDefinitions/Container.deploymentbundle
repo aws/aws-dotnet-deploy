@@ -4,7 +4,7 @@
         {
             "Id": "DockerBuildArgs",
             "Name": "Docker Build Args",
-            "Description": "The list of additional docker build args.",
+            "Description": "The list of additional options to append to the `docker build` command.",
             "Type": "String",
             "TypeHint": "DockerBuildArgs",
             "DefaultValue": "",

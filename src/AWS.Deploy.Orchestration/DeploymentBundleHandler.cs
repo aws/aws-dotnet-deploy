@@ -178,21 +178,16 @@ namespace AWS.Deploy.Orchestration
 
         private string GetDockerBuildArgs(Recommendation recommendation)
         {
-            var buildArgs = string.Empty;
-            var argsDictionary = recommendation.DeploymentBundle.DockerBuildArgs
-                .Split(',')
-                .Where(x => x.Contains("="))
-                .ToDictionary(
-                    k => k.Split('=')[0],
-                    v => v.Split('=')[1]
-                );
+            var buildArgs = recommendation.DeploymentBundle.DockerBuildArgs;
 
-            foreach (var arg in argsDictionary.Keys)
-            {
-                buildArgs += $" --build-arg {arg}={argsDictionary[arg]}";
-            }
+            if (string.IsNullOrEmpty(buildArgs))
+                return buildArgs;
 
-            return buildArgs;
+            // Ensure it starts with a space so it doesn't collide with the previous option
+            if (!char.IsWhiteSpace(buildArgs[0]))
+                return $" {buildArgs}";
+            else
+                return buildArgs;
         }
 
         private async Task InitiateDockerLogin()
