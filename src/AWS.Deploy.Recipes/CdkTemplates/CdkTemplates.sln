@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30413.136
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32505.173
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetAppElasticBeanstalkLinux", "AspNetAppElasticBeanstalkLinux\AspNetAppElasticBeanstalkLinux.csproj", "{030E87A0-6413-40DC-AAFF-AB05A2D02A88}"
 EndProject
@@ -16,10 +16,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorWasm", "BlazorWasm\Bl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetAppAppRunner", "AspNetAppAppRunner\AspNetAppAppRunner.csproj", "{6625E9EB-607F-4390-9A90-8B75EC024FF2}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetAppElasticBeanstalkWindows", "AspNetAppElasticBeanstalkWindows\AspNetAppElasticBeanstalkWindows.csproj", "{1157F2CE-813C-4D95-81B9-30C94AEB5AB7}"
+EndProject
 Global
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		..\..\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems*{a4b77e71-3f69-492b-82ab-71632a20a424}*SharedItemsImports = 5
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -53,11 +52,18 @@ Global
 		{6625E9EB-607F-4390-9A90-8B75EC024FF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6625E9EB-607F-4390-9A90-8B75EC024FF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6625E9EB-607F-4390-9A90-8B75EC024FF2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1157F2CE-813C-4D95-81B9-30C94AEB5AB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1157F2CE-813C-4D95-81B9-30C94AEB5AB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1157F2CE-813C-4D95-81B9-30C94AEB5AB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1157F2CE-813C-4D95-81B9-30C94AEB5AB7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {539AEAE5-6E50-46B7-8058-B883E4881661}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\..\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems*{a4b77e71-3f69-492b-82ab-71632a20a424}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal

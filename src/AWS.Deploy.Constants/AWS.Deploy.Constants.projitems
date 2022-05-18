@@ -13,6 +13,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)CLI.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CloudFormationIdentifier.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Docker.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EC2.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ElasticBeanstalk.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RecipeIdentifier.cs" />
   </ItemGroup>

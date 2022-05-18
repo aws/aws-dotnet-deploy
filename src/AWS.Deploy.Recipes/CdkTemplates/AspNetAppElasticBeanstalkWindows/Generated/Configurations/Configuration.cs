@@ -9,7 +9,7 @@
 
 using System.Collections.Generic;
 
-namespace AspNetAppElasticBeanstalkLinux.Configurations
+namespace AspNetAppElasticBeanstalkWindows.Configurations
 {
     public partial class Configuration
     {
@@ -36,7 +36,7 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
         /// <summary>
         /// The Elastic Beanstalk environment.
         /// </summary>
-        public BeanstalkEnvironmentConfiguration BeanstalkEnvironment { get; set; }
+        public string EnvironmentName { get; set; }
 
         /// <summary>
         /// The Elastic Beanstalk application.
@@ -69,10 +69,15 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
         public bool XRayTracingSupportEnabled { get; set; } = false;
 
         /// <summary>
-        /// The reverse proxy to use. 
+        /// Specifies the IIS WebSite.
         /// </summary>
-        public string ReverseProxy { get; set; } = Recipe.REVERSEPROXY_NGINX;
-        
+        public string IISWebSite { get; set; } = "Default Web Site";
+
+        /// <summary>
+        /// Specifies the IIS application path.
+        /// </summary>
+        public string IISAppPath { get; set; } = "/";
+
         /// <summary>
         /// Specifies whether to enable or disable enhanced health reporting.
         /// </summary>
@@ -117,7 +122,7 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
             IAMRoleConfiguration applicationIAMRole,
             IAMRoleConfiguration serviceIAMRole,
             string instanceType,
-            BeanstalkEnvironmentConfiguration beanstalkEnvironment,
+            string environmentName,
             BeanstalkApplicationConfiguration beanstalkApplication,
             string elasticBeanstalkPlatformArn,
             string ec2KeyPair,
@@ -129,14 +134,13 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
             VPCConfiguration vpc,
             string environmentType = Recipe.ENVIRONMENTTYPE_SINGLEINSTANCE,
             string loadBalancerType = Recipe.LOADBALANCERTYPE_APPLICATION,
-            string reverseProxy = Recipe.REVERSEPROXY_NGINX,
             bool xrayTracingSupportEnabled = false,
             string enhancedHealthReporting = Recipe.ENHANCED_HEALTH_REPORTING)
         {
             ApplicationIAMRole = applicationIAMRole;
             ServiceIAMRole = serviceIAMRole;
             InstanceType = instanceType;
-            BeanstalkEnvironment = beanstalkEnvironment;
+            EnvironmentName = environmentName;
             BeanstalkApplication = beanstalkApplication;
             ElasticBeanstalkPlatformArn = elasticBeanstalkPlatformArn;
             EC2KeyPair = ec2KeyPair;
@@ -147,7 +151,6 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
             EnvironmentType = environmentType;
             LoadBalancerType = loadBalancerType;
             XRayTracingSupportEnabled = xrayTracingSupportEnabled;
-            ReverseProxy = reverseProxy;
             EnhancedHealthReporting = enhancedHealthReporting;
             HealthCheckURL = healthCheckURL;
             CNamePrefix = cnamePrefix;

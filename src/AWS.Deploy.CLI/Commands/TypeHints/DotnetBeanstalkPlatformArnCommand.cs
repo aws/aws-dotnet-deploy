@@ -30,7 +30,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
         private async Task<List<PlatformSummary>> GetData()
         {
-            return await _awsResourceQueryer.GetElasticBeanstalkPlatformArns();
+            return await _awsResourceQueryer.GetElasticBeanstalkPlatformArns(BeanstalkPlatformType.Linux);
         }
 
         public async Task<TypeHintResourceTable> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)

@@ -173,8 +173,16 @@ namespace AWS.Deploy.Orchestration
                 if (_awsResourceQueryer == null)
                     throw new InvalidOperationException($"{nameof(_awsResourceQueryer)} is null as part of the Orchestrator object");
 
-                var latestPlatform = await _awsResourceQueryer.GetLatestElasticBeanstalkPlatformArn();
+                var latestPlatform = await _awsResourceQueryer.GetLatestElasticBeanstalkPlatformArn(BeanstalkPlatformType.Linux);
                 recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_LATEST_DOTNET_BEANSTALK_PLATFORM_ARN, latestPlatform.PlatformArn);
+            }
+            if (recommendation.ReplacementTokens.ContainsKey(Constants.RecipeIdentifier.REPLACE_TOKEN_LATEST_DOTNET_WINDOWS_BEANSTALK_PLATFORM_ARN))
+            {
+                if (_awsResourceQueryer == null)
+                    throw new InvalidOperationException($"{nameof(_awsResourceQueryer)} is null as part of the Orchestrator object");
+
+                var latestPlatform = await _awsResourceQueryer.GetLatestElasticBeanstalkPlatformArn(BeanstalkPlatformType.Windows);
+                recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_LATEST_DOTNET_WINDOWS_BEANSTALK_PLATFORM_ARN, latestPlatform.PlatformArn);
             }
             if (recommendation.ReplacementTokens.ContainsKey(Constants.RecipeIdentifier.REPLACE_TOKEN_STACK_NAME))
             {

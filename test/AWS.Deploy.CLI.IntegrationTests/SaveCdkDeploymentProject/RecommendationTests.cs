@@ -74,12 +74,13 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             var recommendations = await orchestrator.GenerateDeploymentRecommendations();
 
             // ASSERT
-            recommendations.Count.ShouldEqual(5);
+            recommendations.Count.ShouldEqual(6);
             recommendations[0].Name.ShouldEqual("ASP.NET Core App to Amazon ECS using AWS Fargate"); // default recipe
             recommendations[1].Name.ShouldEqual("ASP.NET Core App to AWS App Runner"); // default recipe
             recommendations[2].Name.ShouldEqual("ASP.NET Core App to AWS Elastic Beanstalk on Linux"); // default recipe
-            recommendations[3].Name.ShouldEqual("ASP.NET Core App to Existing AWS Elastic Beanstalk Environment"); // default recipe
-            recommendations[4].Name.ShouldEqual("Container Image to Amazon Elastic Container Registry (ECR)"); // default recipe
+            recommendations[3].Name.ShouldEqual("ASP.NET Core App to AWS Elastic Beanstalk on Windows"); // default recipe
+            recommendations[4].Name.ShouldEqual("ASP.NET Core App to Existing AWS Elastic Beanstalk Environment"); // default recipe
+            recommendations[5].Name.ShouldEqual("Container Image to Amazon Elastic Container Registry (ECR)"); // default recipe
         }
 
         [Fact]
@@ -111,14 +112,15 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             var recommendations = await orchestrator.GenerateDeploymentRecommendations();
 
             // ASSERT - Recipes are ordered by priority
-            recommendations.Count.ShouldEqual(7);
+            recommendations.Count.ShouldEqual(8);
             recommendations[0].Name.ShouldEqual(customEcsRecipeName); // custom recipe
             recommendations[1].Name.ShouldEqual(customEbsRecipeName); // custom recipe
             recommendations[2].Name.ShouldEqual("ASP.NET Core App to Amazon ECS using AWS Fargate"); // default recipe
             recommendations[3].Name.ShouldEqual("ASP.NET Core App to AWS App Runner"); // default recipe
             recommendations[4].Name.ShouldEqual("ASP.NET Core App to AWS Elastic Beanstalk on Linux"); // default recipe
-            recommendations[5].Name.ShouldEqual("ASP.NET Core App to Existing AWS Elastic Beanstalk Environment"); // default recipe
-            recommendations[6].Name.ShouldEqual("Container Image to Amazon Elastic Container Registry (ECR)"); // default recipe
+            recommendations[5].Name.ShouldEqual("ASP.NET Core App to AWS Elastic Beanstalk on Windows"); // default recipe
+            recommendations[6].Name.ShouldEqual("ASP.NET Core App to Existing AWS Elastic Beanstalk Environment"); // default recipe
+            recommendations[7].Name.ShouldEqual("Container Image to Amazon Elastic Container Registry (ECR)"); // default recipe
 
             // ASSERT - Recipe paths
             recommendations[0].Recipe.RecipePath.ShouldEqual(Path.Combine(saveDirectoryPathEcsProject, "ECS-CDK.recipe"));
@@ -161,13 +163,14 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             var recommendations = await orchestrator.GenerateDeploymentRecommendations();
 
             // ASSERT - Recipes are ordered by priority
-            recommendations.Count.ShouldEqual(6);
+            recommendations.Count.ShouldEqual(7);
             recommendations[0].Name.ShouldEqual(customEbsRecipeName);
             recommendations[1].Name.ShouldEqual(customEcsRecipeName);
             recommendations[2].Name.ShouldEqual("ASP.NET Core App to AWS Elastic Beanstalk on Linux");
-            recommendations[3].Name.ShouldEqual("ASP.NET Core App to Amazon ECS using AWS Fargate");
-            recommendations[4].Name.ShouldEqual("ASP.NET Core App to AWS App Runner");
-            recommendations[5].Name.ShouldEqual("ASP.NET Core App to Existing AWS Elastic Beanstalk Environment");
+            recommendations[3].Name.ShouldEqual("ASP.NET Core App to AWS Elastic Beanstalk on Windows");
+            recommendations[4].Name.ShouldEqual("ASP.NET Core App to Amazon ECS using AWS Fargate");
+            recommendations[5].Name.ShouldEqual("ASP.NET Core App to AWS App Runner");
+            recommendations[6].Name.ShouldEqual("ASP.NET Core App to Existing AWS Elastic Beanstalk Environment");
 
             // ASSERT - Recipe paths
             recommendations[0].Recipe.RecipePath.ShouldEqual(Path.Combine(saveDirectoryPathEbsProject, "EBS-CDK.recipe"));

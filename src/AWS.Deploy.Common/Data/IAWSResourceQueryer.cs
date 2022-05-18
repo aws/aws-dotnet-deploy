@@ -22,6 +22,12 @@ using Amazon.CloudControlApi.Model;
 namespace AWS.Deploy.Common.Data
 {
     /// <summary>
+    /// Enum for filtering the type of Elastic Beanstalk platform to deploy to.
+    /// </summary>
+    public enum BeanstalkPlatformType { Linux, Windows }
+
+
+    /// <summary>
     /// Retrieves AWS resources
     /// </summary>
     /// <remarks>
@@ -63,8 +69,8 @@ namespace AWS.Deploy.Common.Data
         Task<string> CreateEC2KeyPair(string keyName, string saveLocation);
         Task<List<Role>> ListOfIAMRoles(string? servicePrincipal);
         Task<List<Vpc>> GetListOfVpcs();
-        Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns();
-        Task<PlatformSummary> GetLatestElasticBeanstalkPlatformArn();
+        Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns(params BeanstalkPlatformType[]? platformTypes);
+        Task<PlatformSummary> GetLatestElasticBeanstalkPlatformArn(BeanstalkPlatformType platformType);
         Task<List<AuthorizationData>> GetECRAuthorizationToken();
         Task<List<Repository>> GetECRRepositories(List<string>? repositoryNames = null);
         Task<Repository> CreateECRRepository(string repositoryName);

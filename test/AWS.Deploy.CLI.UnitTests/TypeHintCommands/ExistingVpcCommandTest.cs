@@ -52,7 +52,7 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
 
             var recommendations = await engine.ComputeRecommendations();
 
-            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
 
             var vpcOptionSetting = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, "VPC.VpcId");
 
@@ -91,7 +91,7 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
 
             var recommendations = await engine.ComputeRecommendations();
 
-            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
 
             var vpcOptionSetting = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, "VPC.VpcId");
 

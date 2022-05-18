@@ -490,10 +490,16 @@ namespace AWS.Deploy.Orchestration.Data
                 .Vpcs.FirstAsync());
         }
 
-        public async Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns()
+        public async Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns(params BeanstalkPlatformType[]? platformTypes)
         {
+            if(platformTypes == null || platformTypes.Length == 0)
+            {
+                platformTypes = new BeanstalkPlatformType[] { BeanstalkPlatformType.Linux, BeanstalkPlatformType.Windows };
+            }
             var beanstalkClient = _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>();
 
+            Func<string, Task<List<PlatformSummary>>> fetchPlatforms = async (platformName) =>
+            {
             var request = new ListPlatformVersionsRequest
             {
                 Filters = new List<PlatformFilter>
@@ -503,21 +509,43 @@ namespace AWS.Deploy.Orchestration.Data
                         Operator = "=",
                         Type = "PlatformStatus",
                         Values = { "Ready" }
+                        },
+                        new PlatformFilter
+                        {
+                            Operator = "contains",
+                            Type = "PlatformName",
+                            Values = { platformName }
                     }
                 }
             };
-            var response = await HandleException(async () => await beanstalkClient.ListPlatformVersionsAsync(request));
+
+                var platforms = await HandleException(async () => (await beanstalkClient.Paginators.ListPlatformVersions(request).PlatformSummaryList.ToListAsync()));
+
+                // Filter out old test platforms that only internal accounts would be able to see.
+                platforms = platforms.Where(x => !string.IsNullOrEmpty(x.PlatformBranchName)).ToList();
+
+                return platforms;
+            };
+
+            var allPlatformSummaries = new List<PlatformSummary>();
+            if (platformTypes.Contains(BeanstalkPlatformType.Linux))
+            {
+                allPlatformSummaries.AddRange(await fetchPlatforms(".NET Core"));
+            }
+            else if (platformTypes.Contains(BeanstalkPlatformType.Windows))
+            {
+                var windowsPlatforms = await fetchPlatforms("Windows Server");
+                SortElasticBeanstalkWindowsPlatforms(windowsPlatforms);
+                allPlatformSummaries.AddRange(windowsPlatforms);
+            }
 
             var platformVersions = new List<PlatformSummary>();
-            foreach (var version in response.PlatformSummaryList)
+            foreach (var version in allPlatformSummaries)
             {
                 if (string.IsNullOrEmpty(version.PlatformCategory) || string.IsNullOrEmpty(version.PlatformBranchLifecycleState))
                     continue;
 
                 if (!version.PlatformBranchLifecycleState.Equals("Supported"))
-                    continue;
-
-                if (!version.PlatformCategory.Equals(".NET Core"))
                     continue;
 
                 platformVersions.Add(version);
@@ -526,9 +554,9 @@ namespace AWS.Deploy.Orchestration.Data
             return platformVersions;
         }
 
-        public async Task<PlatformSummary> GetLatestElasticBeanstalkPlatformArn()
+        public async Task<PlatformSummary> GetLatestElasticBeanstalkPlatformArn(BeanstalkPlatformType platformType)
         {
-            var platforms = await GetElasticBeanstalkPlatformArns();
+            var platforms = await GetElasticBeanstalkPlatformArns(platformType);
 
             if (!platforms.Any())
             {
@@ -536,6 +564,89 @@ namespace AWS.Deploy.Orchestration.Data
             }
 
             return platforms.First();
+        }
+
+
+
+        /// <summary>
+        /// For Windows beanstalk platforms the describe calls return a collection of Windows Server Code and Windows Server based platforms.
+        /// The order return will be sorted by platform versions but not OS. So for example we could get a result like the following
+        /// 
+        /// IIS 10.0 running on 64bit Windows Server 2016 (1.1.0)
+        /// IIS 10.0 running on 64bit Windows Server 2016 (1.0.0)
+        /// IIS 10.0 running on 64bit Windows Server Core 2016 (1.1.0)
+        /// IIS 10.0 running on 64bit Windows Server Core 2016 (1.0.0)
+        /// IIS 10.0 running on 64bit Windows Server 2019 (1.1.0)
+        /// IIS 10.0 running on 64bit Windows Server 2019 (1.0.0)
+        /// IIS 10.0 running on 64bit Windows Server Core 2019 (1.1.0)
+        /// IIS 10.0 running on 64bit Windows Server Core 2019 (1.0.0)
+        ///
+        /// We want the user to use the latest version of each OS first as well as the latest version of Windows first. Also Windows Server should come before Windows Server Core.
+        /// This matches the behavior of the existing VS toolkit picker. The above example will be sorted into the following.
+        /// 
+        /// IIS 10.0 running on 64bit Windows Server 2019 (1.1.0)
+        /// IIS 10.0 running on 64bit Windows Server Core 2019 (1.1.0)
+        /// IIS 10.0 running on 64bit Windows Server 2016 (1.1.0)
+        /// IIS 10.0 running on 64bit Windows Server Core 2016 (1.1.0)
+        /// IIS 10.0 running on 64bit Windows Server 2019 (1.0.0)
+        /// IIS 10.0 running on 64bit Windows Server Core 2019 (1.0.0)
+        /// IIS 10.0 running on 64bit Windows Server 2016 (1.0.0)
+        /// IIS 10.0 running on 64bit Windows Server Core 2016 (1.0.0)
+        /// </summary>
+        /// <param name="windowsPlatforms"></param>
+        public static void SortElasticBeanstalkWindowsPlatforms(List<PlatformSummary> windowsPlatforms)
+        {
+            var parseYear = (string name) =>
+            {
+                var tokens = name.Split(' ');
+                int year;
+                if (int.TryParse(tokens[tokens.Length - 1], out year))
+                    return year;
+                if (int.TryParse(tokens[tokens.Length - 2], out year))
+                    return year;
+
+                return 0;
+            };
+            var parseOSLevel = (string name) =>
+            {
+                if (name.Contains("Windows Server Core"))
+                    return 1;
+                if (name.Contains("Windows Server"))
+                    return 2;
+
+                return 10;
+            };
+
+            windowsPlatforms.Sort((x, y) =>
+            {
+                if (!Version.TryParse(x.PlatformVersion, out var xVersion))
+                    xVersion = Version.Parse("0.0.0");
+
+                if (!Version.TryParse(y.PlatformVersion, out var yVersion))
+                    yVersion = Version.Parse("0.0.0");
+
+                if (yVersion != xVersion)
+                {
+                    return yVersion.CompareTo(xVersion);
+                }
+
+                var xYear = parseYear(x.PlatformBranchName);
+                var yYear = parseYear(y.PlatformBranchName);
+                var xOSLevel = parseOSLevel(x.PlatformBranchName);
+                var yOSLevel = parseOSLevel(y.PlatformBranchName);
+
+                if (yYear == xYear)
+                {
+                    if (yOSLevel == xOSLevel)
+                    {
+                        return 0;
+                    }
+
+                    return yOSLevel < xOSLevel ? -1 : 1;
+                }
+
+                return yYear < xYear ? -1 : 1;
+            });
         }
 
         public async Task<List<AuthorizationData>> GetECRAuthorizationToken()

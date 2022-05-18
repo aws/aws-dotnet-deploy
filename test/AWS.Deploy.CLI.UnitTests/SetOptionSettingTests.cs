@@ -75,7 +75,7 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var beanstalkApplication = new List<Amazon.ElasticBeanstalk.Model.ApplicationDescription> { new Amazon.ElasticBeanstalk.Model.ApplicationDescription { ApplicationName = "WebApp1"} };
             _awsResourceQueryer.Setup(x => x.ListOfElasticBeanstalkApplications(It.IsAny<string>())).ReturnsAsync(beanstalkApplication);
-            var recommendation = _recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var recommendation = _recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
 
             var optionSetting = _optionSettingHandler.GetOptionSetting(recommendation, "BeanstalkApplication.ApplicationName");
             await Assert.ThrowsAsync<ValidationFailedException>(() => _optionSettingHandler.SetOptionSettingValue(recommendation, optionSetting, "WebApp1"));
@@ -88,7 +88,7 @@ namespace AWS.Deploy.CLI.UnitTests
         [Fact]
         public async Task SetOptionSettingTests_AllowedValues()
         {
-            var recommendation = _recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var recommendation = _recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
 
             var optionSetting = recommendation.Recipe.OptionSettings.First(x => x.Id.Equals("EnvironmentType"));
             await _optionSettingHandler.SetOptionSettingValue(recommendation, optionSetting, optionSetting.AllowedValues.First());
@@ -105,7 +105,7 @@ namespace AWS.Deploy.CLI.UnitTests
         [Fact]
         public async Task SetOptionSettingTests_MappedValues()
         {
-            var recommendation = _recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var recommendation = _recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
 
             var optionSetting = recommendation.Recipe.OptionSettings.First(x => x.Id.Equals("EnvironmentType"));
             await Assert.ThrowsAsync<InvalidOverrideValueException>(async () => await _optionSettingHandler.SetOptionSettingValue(recommendation, optionSetting, optionSetting.ValueMapping.Values.First()));
@@ -114,7 +114,7 @@ namespace AWS.Deploy.CLI.UnitTests
         [Fact]
         public async Task SetOptionSettingTests_KeyValueType()
         {
-            var recommendation = _recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var recommendation = _recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
 
             var optionSetting = recommendation.Recipe.OptionSettings.First(x => x.Id.Equals("ElasticBeanstalkEnvironmentVariables"));
             var values = new Dictionary<string, string>() { { "key", "value" } };
@@ -126,7 +126,7 @@ namespace AWS.Deploy.CLI.UnitTests
         [Fact]
         public async Task SetOptionSettingTests_KeyValueType_String()
         {
-            var recommendation = _recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var recommendation = _recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
 
             var optionSetting = recommendation.Recipe.OptionSettings.First(x => x.Id.Equals("ElasticBeanstalkEnvironmentVariables"));
             var dictionary = new Dictionary<string, string>() { { "key", "value" } };
@@ -139,7 +139,7 @@ namespace AWS.Deploy.CLI.UnitTests
         [Fact]
         public async Task SetOptionSettingTests_KeyValueType_Error()
         {
-            var recommendation = _recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var recommendation = _recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
 
             var optionSetting = recommendation.Recipe.OptionSettings.First(x => x.Id.Equals("ElasticBeanstalkEnvironmentVariables"));
             await Assert.ThrowsAsync<JsonReaderException>(async () => await _optionSettingHandler.SetOptionSettingValue(recommendation, optionSetting, "string"));
@@ -170,7 +170,7 @@ namespace AWS.Deploy.CLI.UnitTests
         [Fact]
         public async Task DeploymentBundleWriteThrough_Dotnet()
         {
-            var recommendation = _recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var recommendation = _recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
 
             var dotnetBuildConfiguration = "Debug";
             var dotnetPublishArgs = "--force --nologo";
