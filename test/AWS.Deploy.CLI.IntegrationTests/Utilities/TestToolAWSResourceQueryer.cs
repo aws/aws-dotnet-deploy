@@ -25,7 +25,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.Utilities
 {
     public class TestToolAWSResourceQueryer : IAWSResourceQueryer
     {
-        public Task<PlatformSummary> GetLatestElasticBeanstalkPlatformArn()
+        public Task<PlatformSummary> GetLatestElasticBeanstalkPlatformArn(BeanstalkPlatformType platformType)
         {
             return System.Threading.Tasks.Task.FromResult(new PlatformSummary() { PlatformArn = string.Empty });
         }
@@ -41,7 +41,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.Utilities
         public Task<Stack> GetCloudFormationStack(string stackName) => throw new NotImplementedException();
         public Task<List<AuthorizationData>> GetECRAuthorizationToken() => throw new NotImplementedException();
         public Task<List<Repository>> GetECRRepositories(List<string> repositoryNames) => throw new NotImplementedException();
-        public Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns() => throw new NotImplementedException();
+        public Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns(params BeanstalkPlatformType[] platformTypes) => throw new NotImplementedException();
         public Task<List<Vpc>> GetListOfVpcs() => throw new NotImplementedException();
         public Task<string> GetS3BucketLocation(string bucketName) => throw new NotImplementedException();
         public Task<Amazon.S3.Model.WebsiteConfiguration> GetS3BucketWebSiteConfiguration(string bucketName) => throw new NotImplementedException();

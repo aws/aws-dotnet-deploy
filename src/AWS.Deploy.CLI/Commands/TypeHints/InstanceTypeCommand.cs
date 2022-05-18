@@ -9,26 +9,52 @@ using AWS.Deploy.Common;
 using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.TypeHintData;
+using AWS.Deploy.Constants;
 using AWS.Deploy.Orchestration.Data;
 
 namespace AWS.Deploy.CLI.Commands.TypeHints
 {
-    public class InstanceTypeCommand : ITypeHintCommand
+    public class WindowsInstanceTypeCommand : InstanceTypeCommand
     {
+        public WindowsInstanceTypeCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities, IOptionSettingHandler optionSettingHandler)
+            : base(awsResourceQueryer, consoleUtilities, optionSettingHandler, EC2.FILTER_PLATFORM_WINDOWS)
+        {
+        }
+    }
+
+    public class LinuxInstanceTypeCommand : InstanceTypeCommand
+    {
+        public LinuxInstanceTypeCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities, IOptionSettingHandler optionSettingHandler)
+            : base(awsResourceQueryer, consoleUtilities, optionSettingHandler, EC2.FILTER_PLATFORM_LINUX)
+        {
+        }
+    }
+
+    public abstract class InstanceTypeCommand : ITypeHintCommand
+    {
+
         private readonly IAWSResourceQueryer _awsResourceQueryer;
         private readonly IConsoleUtilities _consoleUtilities;
         private readonly IOptionSettingHandler _optionSettingHandler;
+        private readonly string _platform;
 
-        public InstanceTypeCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities, IOptionSettingHandler optionSettingHandler)
+        public InstanceTypeCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities, IOptionSettingHandler optionSettingHandler, string platform)
         {
             _awsResourceQueryer = awsResourceQueryer;
             _consoleUtilities = consoleUtilities;
             _optionSettingHandler = optionSettingHandler;
+            _platform = platform;
         }
 
         private async Task<List<InstanceTypeInfo>?> GetData()
         {
-            return await _awsResourceQueryer.ListOfAvailableInstanceTypes();
+            var instanceTypes = await _awsResourceQueryer.ListOfAvailableInstanceTypes();
+            if (string.Equals(_platform, EC2.FILTER_PLATFORM_WINDOWS, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return instanceTypes.Where(x => x.ProcessorInfo.SupportedArchitectures.Contains(EC2.FILTER_ARCHITECTURE_X86_64)).ToList();
+            }
+
+            return instanceTypes;
         }
 
         public async Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
@@ -53,9 +79,16 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             var freeTierEligibleAnswer = _consoleUtilities.AskYesNoQuestion("Do you want the EC2 instance to be free tier eligible?", "true");
             var freeTierEligible = freeTierEligibleAnswer == YesNo.Yes;
 
-            var architectureAllowedValues = new List<string> { "x86_64", "arm64"};
-
-            var architecture = _consoleUtilities.AskUserToChoose(architectureAllowedValues, "The architecture of the EC2 instances created for the environment.", "x86_64");
+            string architecture;
+            if (string.Equals(_platform, EC2.FILTER_PLATFORM_WINDOWS, System.StringComparison.OrdinalIgnoreCase))
+            {
+                architecture = EC2.FILTER_ARCHITECTURE_X86_64;
+            }
+            else
+            {
+                var architectureAllowedValues = new List<string> { EC2.FILTER_ARCHITECTURE_X86_64, EC2.FILTER_ARCHITECTURE_ARM64 };
+                architecture = _consoleUtilities.AskUserToChoose(architectureAllowedValues, "The architecture of the EC2 instances created for the environment.", EC2.FILTER_ARCHITECTURE_X86_64);
+            }
 
             var cpuCores = instanceTypes
                 .Where(x => x.FreeTierEligible.Equals(freeTierEligible))

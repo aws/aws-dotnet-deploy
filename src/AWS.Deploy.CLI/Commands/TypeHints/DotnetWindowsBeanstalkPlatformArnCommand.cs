@@ -15,13 +15,13 @@ using Newtonsoft.Json;
 
 namespace AWS.Deploy.CLI.Commands.TypeHints
 {
-    public class DotnetBeanstalkPlatformArnCommand : ITypeHintCommand
+    public class DotnetWindowsBeanstalkPlatformArnCommand : ITypeHintCommand
     {
         private readonly IAWSResourceQueryer _awsResourceQueryer;
         private readonly IConsoleUtilities _consoleUtilities;
         private readonly IOptionSettingHandler _optionSettingHandler;
 
-        public DotnetBeanstalkPlatformArnCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities, IOptionSettingHandler optionSettingHandler)
+        public DotnetWindowsBeanstalkPlatformArnCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities, IOptionSettingHandler optionSettingHandler)
         {
             _awsResourceQueryer = awsResourceQueryer;
             _consoleUtilities = consoleUtilities;
@@ -30,7 +30,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
         private async Task<List<PlatformSummary>> GetData()
         {
-            return await _awsResourceQueryer.GetElasticBeanstalkPlatformArns(BeanstalkPlatformType.Linux);
+            return await _awsResourceQueryer.GetElasticBeanstalkPlatformArns(BeanstalkPlatformType.Windows);
         }
 
         public async Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)

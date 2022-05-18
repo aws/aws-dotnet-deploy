@@ -85,7 +85,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var recommendations = await engine.ComputeRecommendations();
 
-            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
 
             var roleArnValue = roleArn == null ? "null" : $"\"{roleArn}\"";
 
@@ -178,7 +178,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var recommendations = await engine.ComputeRecommendations();
 
-            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
 
             var serializedSettings = @$"
             {{
@@ -206,7 +206,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var recommendations = await engine.ComputeRecommendations();
 
-            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
 
             var serializedSettings = @$"
             {{

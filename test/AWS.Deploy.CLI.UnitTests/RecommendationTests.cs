@@ -90,8 +90,8 @@ namespace AWS.Deploy.CLI.UnitTests
             var recommendations = await engine.ComputeRecommendations();
 
             recommendations
-                .Any(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID)
-                .ShouldBeTrue("Failed to receive Recommendation: " + Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+                .Any(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID)
+                .ShouldBeTrue("Failed to receive Recommendation: " + Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
 
             recommendations
                 .Any(r => r.Recipe.Id == Constants.ASPNET_CORE_ASPNET_CORE_FARGATE_RECIPE_ID)
@@ -106,8 +106,8 @@ namespace AWS.Deploy.CLI.UnitTests
             var recommendations = await engine.ComputeRecommendations();
 
             recommendations
-                .Any(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID)
-                .ShouldBeTrue("Failed to receive Recommendation: " + Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+                .Any(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID)
+                .ShouldBeTrue("Failed to receive Recommendation: " + Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
 
             recommendations
                 .Any(r => r.Recipe.Id == Constants.ASPNET_CORE_ASPNET_CORE_FARGATE_RECIPE_ID)
@@ -131,8 +131,8 @@ namespace AWS.Deploy.CLI.UnitTests
                 .ShouldBeTrue("Failed to receive Recommendation: " + Constants.ASPNET_CORE_ASPNET_CORE_FARGATE_RECIPE_ID);
 
             recommendations
-                .Any(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID)
-                .ShouldBeTrue("Failed to receive Recommendation: " + Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+                .Any(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID)
+                .ShouldBeTrue("Failed to receive Recommendation: " + Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
         }
 
         [Fact]
@@ -177,7 +177,7 @@ namespace AWS.Deploy.CLI.UnitTests
             Assert.Single(recommendations);
             recommendations
                 .Any(r => r.Recipe.Id == Constants.CONSOLE_APP_FARGATE_SERVICE_RECIPE_ID)
-                .ShouldBeTrue("Failed to receive Recommendation: " + Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+                .ShouldBeTrue("Failed to receive Recommendation: " + Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
         }
 
 
@@ -188,7 +188,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var recommendations = await engine.ComputeRecommendations();
 
-            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
             var environmentTypeOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("EnvironmentType"));
 
             Assert.Equal("SingleInstance", _optionSettingHandler.GetOptionSettingValue(beanstalkRecommendation, environmentTypeOptionSetting));
@@ -258,7 +258,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var recommendations = await engine.ComputeRecommendations();
 
-            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
             var applicationIAMRoleOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("ApplicationIAMRole"));
 
             var iamRoleTypeHintResponse = _optionSettingHandler.GetOptionSettingValue<IAMRoleTypeHintResponse>(beanstalkRecommendation, applicationIAMRoleOptionSetting);
@@ -274,7 +274,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var recommendations = await engine.ComputeRecommendations();
 
-            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
             var applicationIAMRoleOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("ApplicationIAMRole"));
 
             Assert.Null(_optionSettingHandler.GetOptionSettingDefaultValue(beanstalkRecommendation, applicationIAMRoleOptionSetting));
@@ -287,7 +287,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var recommendations = await engine.ComputeRecommendations();
 
-            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
             var environmentTypeOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("EnvironmentType"));
 
             await _optionSettingHandler.SetOptionSettingValue(beanstalkRecommendation, environmentTypeOptionSetting, "LoadBalanced");
@@ -301,7 +301,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var recommendations = await engine.ComputeRecommendations();
 
-            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
             var applicationIAMRoleOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("ApplicationIAMRole"));
 
             await _optionSettingHandler.SetOptionSettingValue(beanstalkRecommendation, applicationIAMRoleOptionSetting, new IAMRoleTypeHintResponse {CreateNew = false,
@@ -320,7 +320,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var recommendations = await engine.ComputeRecommendations();
 
-            var beanstalkRecommendation = recommendations.FirstOrDefault(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var beanstalkRecommendation = recommendations.FirstOrDefault(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
 
             var beanstalEnvNameSetting = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, "BeanstalkEnvironment.EnvironmentName");
 
@@ -338,7 +338,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var recommendations = await engine.ComputeRecommendations();
 
-            var beanstalkRecommendation = recommendations.FirstOrDefault(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var beanstalkRecommendation = recommendations.FirstOrDefault(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
 
             var envVarsSetting = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, "ElasticBeanstalkEnvironmentVariables");
 
@@ -352,7 +352,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var recommendations = await engine.ComputeRecommendations();
 
-            var beanstalkRecommendation = recommendations.FirstOrDefault(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var beanstalkRecommendation = recommendations.FirstOrDefault(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
 
             var envVarsSetting = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, "ElasticBeanstalkEnvironmentVariables.Key");
 
@@ -408,7 +408,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var recommendations = await engine.ComputeRecommendations();
 
-            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
             var environmentTypeOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("EnvironmentType"));
 
             var loadBalancerTypeOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("LoadBalancerType"));
@@ -460,7 +460,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var recommendations = await engine.ComputeRecommendations();
 
-            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
             var useVpcOptionSetting = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, "VPC.UseVPC");
             var vpcIdOptionSetting = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, "VPC.VpcId");
             var subnetsSetting = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, "VPC.Subnets");
