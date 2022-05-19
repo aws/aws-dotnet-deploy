@@ -464,11 +464,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
             var capabilities = await systemCapabilityEvaluator.EvaluateSystemCapabilities(state.SelectedRecommendation);
 
-            output.Capabilities = capabilities.Select(x => new SystemCapabilitySummary(x.Name, x.Installed, x.Available)
-            {
-                InstallationUrl = x.InstallationUrl,
-                Message = x.Message
-            }).ToList();
+            output.Capabilities = capabilities.Select(x => new SystemCapabilitySummary(x.Name, x.Message, x.InstallationUrl));
 
             return Ok(output);
         }

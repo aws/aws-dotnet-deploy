@@ -6,16 +6,14 @@ namespace AWS.Deploy.CLI.ServerMode.Models
     public class SystemCapabilitySummary
     {
         public string Name { get; set; }
-        public bool Installed { get; set; }
-        public bool Available { get; set; }
-        public string? Message { get; set; }
+        public string Message { get; set; }
         public string? InstallationUrl { get; set; }
 
-        public SystemCapabilitySummary(string name, bool installed, bool available)
+        public SystemCapabilitySummary(string name, string message, string? installationUrl = null)
         {
             Name = name;
-            Installed = installed;
-            Available = available;
+            Message = message;
+            InstallationUrl = installationUrl;
         }
     }
 }
