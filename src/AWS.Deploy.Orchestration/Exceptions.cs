@@ -42,7 +42,7 @@ namespace AWS.Deploy.Orchestration
     /// </summary>
     public class DockerBuildFailedException : DeployToolException
     {
-        public DockerBuildFailedException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+        public DockerBuildFailedException(DeployToolErrorCode errorCode, string message, int processExitCode, Exception? innerException = null) : base(errorCode, message, innerException, processExitCode) { }
     }
 
     /// <summary>
@@ -58,7 +58,7 @@ namespace AWS.Deploy.Orchestration
     /// </summary>
     public class DockerLoginFailedException : DeployToolException
     {
-        public DockerLoginFailedException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+        public DockerLoginFailedException(DeployToolErrorCode errorCode, string message, int? processExitCode, Exception? innerException = null) : base(errorCode, message, innerException, processExitCode) { }
     }
 
     /// <summary>
@@ -66,7 +66,7 @@ namespace AWS.Deploy.Orchestration
     /// </summary>
     public class DockerTagFailedException : DeployToolException
     {
-        public DockerTagFailedException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+        public DockerTagFailedException(DeployToolErrorCode errorCode, string message, int processExitCode, Exception? innerException = null) : base(errorCode, message, innerException, processExitCode) { }
     }
 
     /// <summary>
@@ -74,7 +74,7 @@ namespace AWS.Deploy.Orchestration
     /// </summary>
     public class DockerPushFailedException : DeployToolException
     {
-        public DockerPushFailedException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+        public DockerPushFailedException(DeployToolErrorCode errorCode, string message, int processExitCode, Exception? innerException = null) : base(errorCode, message, innerException, processExitCode) { }
     }
 
     /// <summary>
@@ -90,7 +90,7 @@ namespace AWS.Deploy.Orchestration
     /// </summary>
     public class DotnetPublishFailedException : DeployToolException
     {
-        public DotnetPublishFailedException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+        public DotnetPublishFailedException(DeployToolErrorCode errorCode, string message, int processExitCode, Exception? innerException = null) : base(errorCode, message, innerException, processExitCode) { }
     }
 
     /// <summary>
@@ -98,7 +98,7 @@ namespace AWS.Deploy.Orchestration
     /// </summary>
     public class FailedToCreateZipFileException : DeployToolException
     {
-        public FailedToCreateZipFileException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+        public FailedToCreateZipFileException(DeployToolErrorCode errorCode, string message, int? processExitCode, Exception? innerException = null) : base(errorCode, message, innerException, processExitCode) { }
     }
 
     /// <summary>
@@ -138,7 +138,7 @@ namespace AWS.Deploy.Orchestration
     /// </summary>
     public class FailedToDeployCDKAppException : DeployToolException
     {
-        public FailedToDeployCDKAppException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+        public FailedToDeployCDKAppException(DeployToolErrorCode errorCode, string message, int processExitCode, Exception? innerException = null) : base(errorCode, message, innerException, processExitCode) { }
     }
 
     /// <summary>
@@ -146,7 +146,7 @@ namespace AWS.Deploy.Orchestration
     /// </summary>
     public class FailedToRunCDKDiffException : DeployToolException
     {
-        public FailedToRunCDKDiffException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+        public FailedToRunCDKDiffException(DeployToolErrorCode errorCode, string message, int processExitCode, Exception? innerException = null) : base(errorCode, message, innerException, processExitCode) { }
     }
 
     /// <summary>

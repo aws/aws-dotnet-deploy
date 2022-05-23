@@ -1,6 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.\r
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.CLI.UnitTests.Utilities;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.Recipes.Validation;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.Data;
 using Moq;
@@ -22,12 +24,14 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
         private readonly Mock<IAWSResourceQueryer> _mockAWSResourceQueryer;
         private readonly IDirectoryManager _directoryManager;
         private readonly IOptionSettingHandler _optionSettingHandler;
+        private readonly IServiceProvider _serviceProvider;
 
         public ExistingSecurityGroubsCommandTest()
         {
             _mockAWSResourceQueryer = new Mock<IAWSResourceQueryer>();
             _directoryManager = new TestDirectoryManager();
-            _optionSettingHandler = new OptionSettingHandler();
+            _serviceProvider = new Mock<IServiceProvider>().Object;
+            _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider));
         }
 
         [Fact]

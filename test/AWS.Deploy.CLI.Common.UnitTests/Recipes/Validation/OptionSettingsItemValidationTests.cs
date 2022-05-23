@@ -1,10 +1,12 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.\r
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Recipes.Validation;
 using AWS.Deploy.Orchestration;
+using Moq;
 using Should;
 using Xunit;
 using Xunit.Abstractions;
@@ -22,11 +24,13 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
     {
         private readonly ITestOutputHelper _output;
         private readonly IOptionSettingHandler _optionSettingHandler;
+        private readonly IServiceProvider _serviceProvider;
 
         public OptionSettingsItemValidationTests(ITestOutputHelper output)
         {
             _output = output;
-            _optionSettingHandler = new OptionSettingHandler();
+            _serviceProvider = new Mock<IServiceProvider>().Object;
+            _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider));
         }
 
         [Theory]
@@ -60,7 +64,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             // ACT
             try
             {
-                _optionSettingHandler.SetOptionSettingValue(optionSettingItem, invalidValue);
+                _optionSettingHandler.SetOptionSettingValue(null, optionSettingItem, invalidValue);
             }
             catch (ValidationFailedException e)
             {
@@ -96,7 +100,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             // ACT
             try
             {
-                _optionSettingHandler.SetOptionSettingValue(optionSettingItem, invalidValue);
+                _optionSettingHandler.SetOptionSettingValue(null, optionSettingItem, invalidValue);
             }
             catch (ValidationFailedException e)
             {
@@ -138,7 +142,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             // ACT
             try
             {
-                _optionSettingHandler.SetOptionSettingValue(optionSettingItem, validValue);
+                _optionSettingHandler.SetOptionSettingValue(null, optionSettingItem, validValue);
             }
             catch (ValidationFailedException e)
             {
@@ -182,7 +186,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             // ACT
             try
             {
-                _optionSettingHandler.SetOptionSettingValue(optionSettingItem, invalidValue);
+                _optionSettingHandler.SetOptionSettingValue(null, optionSettingItem, invalidValue);
             }
             catch (ValidationFailedException e)
             {

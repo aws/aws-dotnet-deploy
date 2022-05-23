@@ -141,18 +141,24 @@ In the `RangeValidator` example above, a recipe author can customize `Validation
 
 ### Dependencies
 
-Because Validators will be deserialized as part of a `RecipeDefinition` they need to have parameterless constructors and therefore can't use Constructor Injection.
+Validators may require other services during validation. For example, an option that selects a file path may need an `IFileManager` to validate that it exists.
 
-Validators are currently envisoned to be relatively simple to the point where they shouldn't need any dependencies.  If dependencies in are needed in the future, we can explore adding an `Initialize` method that uses the ServiceLocation (anti-)pattern:
+When deserializing and initializing validators from the `RecipeDefinition` we shall inject any required services into their constructor via an `IServiceProvider` created from the collection of the Deploy Tool's custom services.
 
 ```csharp
-public interface IOptionSettingItemValidator
+public class FileExistsValidator : IOptionSettingItemValidator
 {
-    /// <summary>
-    /// One possibile solution if we need to create a Validator that needs 
-    /// dependencies.
-    /// </summary>
-    void Initialize(IServiceLocator serviceLocator);
+    private readonly IFileManager _fileManager;
+
+    public FileExistsValidator(IFileManager fileManager)
+    {
+        _fileManager = fileManager;
+    }
+
+    public ValidationResult Validate(object input)
+    {
+        // Validate that the provided file path is valid
+    }
 }
 ```
 

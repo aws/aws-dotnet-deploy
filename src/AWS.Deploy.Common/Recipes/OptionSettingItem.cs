@@ -38,9 +38,11 @@ namespace AWS.Deploy.Common.Recipes
         /// <summary>
         /// Set the value of an <see cref="OptionSettingItem"/> while validating the provided input.
         /// </summary>
-        /// <param name="optionSettingHandler"></param>
-        /// <param name="value"></param>
-        void SetValue(IOptionSettingHandler optionSettingHandler, object value);
+        /// <param name="optionSettingHandler">Handler use to set any child option settings</param>
+        /// <param name="value">Value to set</param>
+        /// <param name="validators">Validators for this item</param>
+        /// <param name="recommendation">Selected recommendation</param>
+        void SetValue(IOptionSettingHandler optionSettingHandler, object value, IOptionSettingItemValidator[] validators, Recommendation recommendation);
     }
 
     /// <summary>
@@ -63,6 +65,11 @@ namespace AWS.Deploy.Common.Recipes
         /// The display friendly name of the setting.
         /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// The category for the setting. This value must match an id field in the list of categories.
+        /// </summary>
+        public string? Category { get; set; }
 
         /// <summary>
         /// The description of what the setting is used for.

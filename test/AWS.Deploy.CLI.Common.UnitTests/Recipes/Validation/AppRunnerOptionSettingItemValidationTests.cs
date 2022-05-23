@@ -2,12 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Recipes.Validation;
 using AWS.Deploy.Orchestration;
+using Moq;
 using Should;
 using Xunit;
 
@@ -16,10 +15,12 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
     public class AppRunnerOptionSettingItemValidationTests
     {
         private readonly IOptionSettingHandler _optionSettingHandler;
+        private readonly IServiceProvider _serviceProvider;
 
         public AppRunnerOptionSettingItemValidationTests()
         {
-            _optionSettingHandler = new OptionSettingHandler();
+            _serviceProvider = new Mock<IServiceProvider>().Object;
+            _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider));
         }
 
         [Theory]
@@ -70,7 +71,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             ValidationFailedException exception = null;
             try
             {
-                _optionSettingHandler.SetOptionSettingValue(optionSettingItem, value);
+                _optionSettingHandler.SetOptionSettingValue(null, optionSettingItem, value);
             }
             catch (ValidationFailedException e)
             {

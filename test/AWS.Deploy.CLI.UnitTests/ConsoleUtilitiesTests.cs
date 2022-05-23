@@ -1,22 +1,22 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-using System.Collections.Generic;
-using System.Net.Http;
-using Should;
-using AWS.Deploy.Common;
-using Xunit;
-using Amazon.Runtime;
-using AWS.Deploy.CLI.Utilities;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Amazon.EC2.Model;
-using AWS.Deploy.Common.IO;
+using Amazon.Runtime;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.CLI.UnitTests.Utilities;
+using AWS.Deploy.CLI.Utilities;
+using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.Recipes.Validation;
 using AWS.Deploy.Orchestration;
+using Moq;
+using Should;
+using Xunit;
 
 namespace AWS.Deploy.CLI.UnitTests
 {
@@ -24,11 +24,13 @@ namespace AWS.Deploy.CLI.UnitTests
     {
         private readonly IDirectoryManager _directoryManager;
         private readonly IOptionSettingHandler _optionSettingHandler;
+        private readonly IServiceProvider _serviceProvider;
 
         public ConsoleUtilitiesTests()
         {
+            _serviceProvider = new Mock<IServiceProvider>().Object;
             _directoryManager = new TestDirectoryManager();
-            _optionSettingHandler = new OptionSettingHandler();
+            _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider));
         }
 
         private readonly List<OptionItem> _options = new List<OptionItem>

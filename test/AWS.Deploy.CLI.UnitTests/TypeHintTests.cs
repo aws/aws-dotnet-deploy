@@ -3,14 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
-using Moq;
-using Xunit;
-
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 using Amazon.S3;
@@ -20,21 +14,26 @@ using Amazon.SimpleNotificationService.Model;
 using Amazon.SQS;
 using Amazon.SQS.Model;
 using AWS.Deploy.CLI.Commands.TypeHints;
-using AWS.Deploy.Common;
-using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.CLI.UnitTests.Utilities;
+using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.Recipes.Validation;
 using AWS.Deploy.Orchestration;
+using AWS.Deploy.Orchestration.Data;
+using Moq;
+using Xunit;
 
 namespace AWS.Deploy.CLI.UnitTests
 {
     public class TypeHintTests
     {
         private readonly IOptionSettingHandler _optionSettingHandler;
+        private readonly IServiceProvider _serviceProvider;
 
         public TypeHintTests()
         {
-            _optionSettingHandler = new OptionSettingHandler();
+            _serviceProvider = new Mock<IServiceProvider>().Object;
+            _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider));
         }
 
         [Fact]

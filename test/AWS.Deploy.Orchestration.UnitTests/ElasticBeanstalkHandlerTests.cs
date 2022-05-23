@@ -11,6 +11,7 @@ using Amazon.Runtime;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.Recipes.Validation;
 using AWS.Deploy.Orchestration.ServiceHandlers;
 using AWS.Deploy.Orchestration.UnitTests.Utilities;
 using AWS.Deploy.Recipes;
@@ -22,10 +23,12 @@ namespace AWS.Deploy.Orchestration.UnitTests
     public class ElasticBeanstalkHandlerTests
     {
         private readonly IOptionSettingHandler _optionSettingHandler;
+        private readonly IServiceProvider _serviceProvider;
 
         public ElasticBeanstalkHandlerTests()
         {
-            _optionSettingHandler = new OptionSettingHandler();
+            _serviceProvider = new Mock<IServiceProvider>().Object;
+            _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider));
         }
 
         [Fact]
@@ -87,10 +90,10 @@ namespace AWS.Deploy.Orchestration.UnitTests
                 new Mock<IFileManager>().Object,
                 _optionSettingHandler);
 
-            _optionSettingHandler.SetOptionSettingValue(_optionSettingHandler.GetOptionSetting(recommendation, Constants.ElasticBeanstalk.EnhancedHealthReportingOptionId), "basic");
-            _optionSettingHandler.SetOptionSettingValue(_optionSettingHandler.GetOptionSetting(recommendation, Constants.ElasticBeanstalk.HealthCheckURLOptionId), "/url");
-            _optionSettingHandler.SetOptionSettingValue(_optionSettingHandler.GetOptionSetting(recommendation, Constants.ElasticBeanstalk.ProxyOptionId), "none");
-            _optionSettingHandler.SetOptionSettingValue(_optionSettingHandler.GetOptionSetting(recommendation, Constants.ElasticBeanstalk.XRayTracingOptionId), "true");
+            _optionSettingHandler.SetOptionSettingValue(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, Constants.ElasticBeanstalk.EnhancedHealthReportingOptionId), "basic");
+            _optionSettingHandler.SetOptionSettingValue(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, Constants.ElasticBeanstalk.HealthCheckURLOptionId), "/url");
+            _optionSettingHandler.SetOptionSettingValue(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, Constants.ElasticBeanstalk.ProxyOptionId), "none");
+            _optionSettingHandler.SetOptionSettingValue(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, Constants.ElasticBeanstalk.XRayTracingOptionId), "true");
 
             // ACT
             var optionSettings = elasticBeanstalkHandler.GetEnvironmentConfigurationSettings(recommendation);

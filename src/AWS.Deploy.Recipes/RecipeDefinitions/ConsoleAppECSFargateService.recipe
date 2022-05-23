@@ -131,18 +131,49 @@
         },
         {
             "ValidatorType": "MinMaxConstraint",
-            "Configuration":
-            {
+            "Configuration": {
                 "MinValueOptionSettingsId": "AutoScaling.MinCapacity",
                 "MaxValueOptionSettingsId": "AutoScaling.MaxCapacity"
             }
         }
     ],
-
+    "Categories": [
+        {
+            "Id": "General",
+            "DisplayName": "General",
+            "Order": 10
+        },
+        {
+            "Id": "Compute",
+            "DisplayName": "Compute",
+            "Order": 20
+        },
+        {
+            "Id": "Permissions",
+            "DisplayName": "Permissions",
+            "Order": 30
+        },
+        {
+            "Id": "AutoScaling",
+            "DisplayName": "Auto Scaling",
+            "Order": 40
+        },
+        {
+            "Id": "VPC",
+            "DisplayName": "VPC",
+            "Order": 50
+        },
+        {
+            "Id": "EnvVariables",
+            "DisplayName": "Environment Variables",
+            "Order": 60
+        }
+    ],
     "OptionSettings": [
         {
             "Id": "ECSCluster",
             "Name": "ECS Cluster",
+            "Category": "General",
             "Description": "The ECS cluster used for the deployment.",
             "Type": "Object",
             "TypeHint": "ECSCluster",
@@ -213,6 +244,7 @@
         {
             "Id": "ECSServiceName",
             "ParentSettingId": "ClusterName",
+            "Category": "General",
             "Name": "ECS Service Name",
             "Description": "The name of the ECS service running in the cluster.",
             "Type": "String",
@@ -233,6 +265,7 @@
         {
             "Id": "DesiredCount",
             "Name": "Desired Task Count",
+            "Category": "Compute",
             "Description": "The desired number of ECS tasks to run for the service.",
             "Type": "Int",
             "DefaultValue": 1,
@@ -251,6 +284,7 @@
         {
             "Id": "ApplicationIAMRole",
             "Name": "Application IAM Role",
+            "Category": "Permissions",
             "Description": "The Identity and Access Management (IAM) role that provides AWS credentials to the application to access AWS services.",
             "Type": "Object",
             "TypeHint": "IAMRole",
@@ -302,6 +336,7 @@
         {
             "Id": "Vpc",
             "Name": "Virtual Private Cloud (VPC)",
+            "Category": "VPC",
             "Description": "A VPC enables you to launch the application into a virtual network that you've defined.",
             "Type": "Object",
             "TypeHint": "Vpc",
@@ -367,6 +402,7 @@
         {
             "Id": "ECSServiceSecurityGroups",
             "Name": "ECS Service Security Groups",
+            "Category": "Permissions",
             "Description": "A comma-delimited list of EC2 security groups to assign to the ECS service. This is commonly used to provide access to Amazon RDS databases running in their own security groups.",
             "Type": "String",
             "DefaultValue": "",
@@ -376,6 +412,7 @@
         {
             "Id": "TaskCpu",
             "Name": "Task CPU",
+            "Category": "Compute",
             "Description": "The number of CPU units used by the task. See the following for details on CPU values: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/AWS_Fargate.html#fargate-task-defs",
             "Type": "Int",
             "DefaultValue": 256,
@@ -393,6 +430,7 @@
         {
             "Id": "TaskMemory",
             "Name": "Task Memory",
+            "Category": "Compute",
             "Description": "The amount of memory (in MB) used by the task. See the following for details on memory values: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/AWS_Fargate.html#fargate-task-defs",
             "Type": "Int",
             "DefaultValue": 512,
@@ -468,6 +506,7 @@
         {
             "Id": "AutoScaling",
             "Name": "AutoScaling",
+            "Category": "AutoScaling",
             "Description": "The AutoScaling configuration for the ECS service.",
             "Type": "Object",
             "AdvancedSetting": true,
@@ -493,8 +532,7 @@
                     "Validators": [
                         {
                             "ValidatorType": "Range",
-                            "Configuration":
-                            {
+                            "Configuration": {
                                 "Min": 1,
                                 "Max": 5000
                             }
@@ -518,8 +556,7 @@
                     "Validators": [
                         {
                             "ValidatorType": "Range",
-                            "Configuration":
-                            {
+                            "Configuration": {
                                 "Min": 1,
                                 "Max": 5000
                             }
@@ -562,8 +599,7 @@
                     "Validators": [
                         {
                             "ValidatorType": "Range",
-                            "Configuration":
-                            {
+                            "Configuration": {
                                 "Min": 1,
                                 "Max": 100
                             }
@@ -591,8 +627,7 @@
                     "Validators": [
                         {
                             "ValidatorType": "Range",
-                            "Configuration":
-                            {
+                            "Configuration": {
                                 "Min": 0,
                                 "Max": 3600
                             }
@@ -620,8 +655,7 @@
                     "Validators": [
                         {
                             "ValidatorType": "Range",
-                            "Configuration":
-                            {
+                            "Configuration": {
                                 "Min": 0,
                                 "Max": 3600
                             }
@@ -649,8 +683,7 @@
                     "Validators": [
                         {
                             "ValidatorType": "Range",
-                            "Configuration":
-                            {
+                            "Configuration": {
                                 "Min": 1,
                                 "Max": 100
                             }
@@ -678,8 +711,7 @@
                     "Validators": [
                         {
                             "ValidatorType": "Range",
-                            "Configuration":
-                            {
+                            "Configuration": {
                                 "Min": 0,
                                 "Max": 3600
                             }
@@ -707,8 +739,7 @@
                     "Validators": [
                         {
                             "ValidatorType": "Range",
-                            "Configuration":
-                            {
+                            "Configuration": {
                                 "Min": 0,
                                 "Max": 3600
                             }
@@ -730,6 +761,7 @@
         {
             "Id": "ECSEnvironmentVariables",
             "Name": "Environment Variables",
+            "Category": "EnvVariables",
             "Description": "Configure environment properties for your application.",
             "Type": "KeyValue",
             "AdvancedSetting": false,

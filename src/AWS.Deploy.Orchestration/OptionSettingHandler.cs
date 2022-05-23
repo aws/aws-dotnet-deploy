@@ -1,16 +1,25 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Extensions;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.Recipes.Validation;
 
 namespace AWS.Deploy.Orchestration
 {
     public class OptionSettingHandler : IOptionSettingHandler
     {
+        private readonly IValidatorFactory _validatorFactory;
+
+        public OptionSettingHandler(IValidatorFactory validatorFactory)
+        {
+            _validatorFactory = validatorFactory;
+        }
+
         /// <summary>
         /// Assigns a value to the OptionSettingItem.
         /// </summary>
@@ -18,9 +27,47 @@ namespace AWS.Deploy.Orchestration
         /// Thrown if one or more <see cref="Validators"/> determine
         /// <paramref name="value"/> is not valid.
         /// </exception>
-        public void SetOptionSettingValue(OptionSettingItem optionSettingItem, object value)
+        public void SetOptionSettingValue(Recommendation recommendation, OptionSettingItem optionSettingItem, object value)
         {
-            optionSettingItem.SetValue(this, value);
+            optionSettingItem.SetValue(this, value, _validatorFactory.BuildValidators(optionSettingItem), recommendation);
+
+            // If the optionSettingItem came from the selected recommendation's deployment bundle,
+            // set the corresponding property on recommendation.DeploymentBundle
+            SetDeploymentBundleProperty(recommendation, optionSettingItem, value);
+        }
+
+        /// <summary>
+        /// Sets the corresponding value in <see cref="DeploymentBundle"/> when the
+        /// corresponding <see cref="OptionSettingItem"> was just set
+        /// </summary>
+        /// <param name="recommendation">Selected recommendation</param>
+        /// <param name="optionSettingItem">Option setting that was just set</param>
+        /// <param name="value">Value that was just set, assumed to be valid</param>
+        private void SetDeploymentBundleProperty(Recommendation recommendation, OptionSettingItem optionSettingItem, object value)
+        {
+            switch (optionSettingItem.Id)
+            {
+                case "DockerExecutionDirectory":
+                    recommendation.DeploymentBundle.DockerExecutionDirectory = value.ToString() ?? string.Empty;
+                    break;
+                case "DockerBuildArgs":
+                    recommendation.DeploymentBundle.DockerBuildArgs = value.ToString() ?? string.Empty;
+                    break;
+                case "ECRRepositoryName":
+                    recommendation.DeploymentBundle.ECRRepositoryName = value.ToString() ?? string.Empty;
+                    break;
+                case "DotnetBuildConfiguration":
+                    recommendation.DeploymentBundle.DotnetPublishBuildConfiguration = value.ToString() ?? string.Empty;
+                    break;
+                case "DotnetPublishArgs":
+                    recommendation.DeploymentBundle.DotnetPublishAdditionalBuildArguments = value.ToString() ?? string.Empty;
+                    break;
+                case "SelfContainedBuild":
+                    recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild = Convert.ToBoolean(value);
+                    break;
+                default:
+                    return;
+            }
         }
 
         /// <summary>

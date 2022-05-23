@@ -157,7 +157,7 @@ namespace AWS.Deploy.Orchestration
             {
                 if (previousSettings.TryGetValue(optionSetting.Id, out var value))
                 {
-                    _optionSettingHandler.SetOptionSettingValue(optionSetting, value);
+                    _optionSettingHandler.SetOptionSettingValue(recommendationCopy, optionSetting, value);
                 }
             }
 
@@ -210,7 +210,7 @@ namespace AWS.Deploy.Orchestration
                 }
                 catch (DeployToolException ex)
                 {
-                    throw new FailedToCreateDeploymentBundleException(ex.ErrorCode, ex.Message, ex);
+                    throw new FailedToCreateDeploymentBundleException(ex.ErrorCode, ex.Message, ex.ProcessExitCode, ex);
                 }
             }
             else if (recommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.DotnetPublishZipFile)
@@ -223,7 +223,7 @@ namespace AWS.Deploy.Orchestration
                 }
                 catch (DeployToolException ex)
                 {
-                    throw new FailedToCreateDeploymentBundleException(ex.ErrorCode, ex.Message, ex);
+                    throw new FailedToCreateDeploymentBundleException(ex.ErrorCode, ex.Message, ex.ProcessExitCode, ex);
                 }
             }
         }
@@ -255,6 +255,8 @@ namespace AWS.Deploy.Orchestration
 
             _dockerEngine.DetermineDockerExecutionDirectory(recommendation);
 
+            // Read this from the OptionSetting instead of recommendation.DeploymentBundle.
+            // When its value comes from a replacement token, it wouldn't have been set back to the DeploymentBundle 
             var respositoryName = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, "ECRRepositoryName"));
 
             string imageTag;

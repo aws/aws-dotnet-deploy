@@ -68,7 +68,7 @@ namespace AWS.Deploy.Orchestration
 
                 errorMessage += $"{Environment.NewLine}Docker builds usually fail due to executing them from a working directory that is incompatible with the Dockerfile.";
                 errorMessage += $"{Environment.NewLine}You can try setting the 'Docker Execution Directory' in the option settings.";
-                throw new DockerBuildFailedException(DeployToolErrorCode.DockerBuildFailed, errorMessage);
+                throw new DockerBuildFailedException(DeployToolErrorCode.DockerBuildFailed, errorMessage, result.ExitCode);
             }
         }
 
@@ -125,7 +125,7 @@ namespace AWS.Deploy.Orchestration
                 if (!string.IsNullOrEmpty(result.StandardError))
                     errorMessage = $"We were unable to package the application using 'dotnet publish' due to the following error:{Environment.NewLine}{result.StandardError}";
 
-                throw new DotnetPublishFailedException(DeployToolErrorCode.DotnetPublishFailed, errorMessage);
+                throw new DotnetPublishFailedException(DeployToolErrorCode.DotnetPublishFailed, errorMessage, result.ExitCode);
             }
 
             var zipFilePath = $"{publishDirectoryInfo.FullName}.zip";
@@ -178,21 +178,16 @@ namespace AWS.Deploy.Orchestration
 
         private string GetDockerBuildArgs(Recommendation recommendation)
         {
-            var buildArgs = string.Empty;
-            var argsDictionary = recommendation.DeploymentBundle.DockerBuildArgs
-                .Split(',')
-                .Where(x => x.Contains("="))
-                .ToDictionary(
-                    k => k.Split('=')[0],
-                    v => v.Split('=')[1]
-                );
+            var buildArgs = recommendation.DeploymentBundle.DockerBuildArgs;
 
-            foreach (var arg in argsDictionary.Keys)
-            {
-                buildArgs += $" --build-arg {arg}={argsDictionary[arg]}";
-            }
+            if (string.IsNullOrEmpty(buildArgs))
+                return buildArgs;
 
-            return buildArgs;
+            // Ensure it starts with a space so it doesn't collide with the previous option
+            if (!char.IsWhiteSpace(buildArgs[0]))
+                return $" {buildArgs}";
+            else
+                return buildArgs;
         }
 
         private async Task InitiateDockerLogin()
@@ -200,7 +195,7 @@ namespace AWS.Deploy.Orchestration
             var authorizationTokens = await _awsResourceQueryer.GetECRAuthorizationToken();
 
             if (authorizationTokens.Count == 0)
-                throw new DockerLoginFailedException(DeployToolErrorCode.DockerLoginFailed, "Failed to login to Docker");
+                throw new DockerLoginFailedException(DeployToolErrorCode.FailedToGetECRAuthorizationToken, "Failed to login to Docker", null);
 
             var authTokenBytes = Convert.FromBase64String(authorizationTokens[0].AuthorizationToken);
             var authToken = Encoding.UTF8.GetString(authTokenBytes);
@@ -214,7 +209,7 @@ namespace AWS.Deploy.Orchestration
                 var errorMessage = "Failed to login to Docker";
                 if (!string.IsNullOrEmpty(result.StandardError))
                     errorMessage = $"Failed to login to Docker due to the following reason:{Environment.NewLine}{result.StandardError}";
-                throw new DockerLoginFailedException(DeployToolErrorCode.DockerLoginFailed, errorMessage);
+                throw new DockerLoginFailedException(DeployToolErrorCode.DockerLoginFailed, errorMessage, result.ExitCode);
             }
         }
 
@@ -242,7 +237,7 @@ namespace AWS.Deploy.Orchestration
                 var errorMessage = "Failed to tag Docker image";
                 if (!string.IsNullOrEmpty(result.StandardError))
                     errorMessage = $"Failed to tag Docker Image due to the following reason:{Environment.NewLine}{result.StandardError}";
-                throw new DockerTagFailedException(DeployToolErrorCode.DockerTagFailed, errorMessage);
+                throw new DockerTagFailedException(DeployToolErrorCode.DockerTagFailed, errorMessage, result.ExitCode);
             }
         }
 
@@ -256,7 +251,7 @@ namespace AWS.Deploy.Orchestration
                 var errorMessage = "Failed to push Docker Image";
                 if (!string.IsNullOrEmpty(result.StandardError))
                     errorMessage = $"Failed to push Docker Image due to the following reason:{Environment.NewLine}{result.StandardError}";
-                throw new DockerPushFailedException(DeployToolErrorCode.DockerPushFailed, errorMessage);
+                throw new DockerPushFailedException(DeployToolErrorCode.DockerPushFailed, errorMessage, result.ExitCode);
             }
         }
     }

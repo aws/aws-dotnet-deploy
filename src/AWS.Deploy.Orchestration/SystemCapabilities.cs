@@ -32,32 +32,22 @@ namespace AWS.Deploy.Orchestration
 
     public class SystemCapability
     {
-        public string Name {  get; set; }
-        public bool Installed { get; set; }
-        public bool Available { get; set; }
-        public string? Message { get; set; }
-        public string? InstallationUrl { get; set; }
+        public readonly string Name;
+        public readonly string Message;
+        public readonly string? InstallationUrl;
 
-        public SystemCapability(string name, bool installed, bool available)
+        public SystemCapability(string name, string message, string? installationUrl = null)
         {
             Name = name;
-            Installed = installed;
-            Available = available;
+            Message = message;
+            InstallationUrl = installationUrl;
         }
 
         public string GetMessage()
         {
-            if (!string.IsNullOrEmpty(Message))
-            {
-                if (!string.IsNullOrEmpty(InstallationUrl))
-                    return $"{Message} {InstallationUrl}";
-                else
-                    return Message;
-            }
-
-            var availabilityMessage = Available ? "and available" : "but not available";
-            var installationMessage = Installed ? $"installed {availabilityMessage}" : "not installed";
-            return $"The system capability '{Name}' is {installationMessage}";
+            return string.IsNullOrEmpty(InstallationUrl)
+                ? Message
+                : $"{Message}{Environment.NewLine}You can install the missing {Name} dependency from: {InstallationUrl}";
         }
     }
 }

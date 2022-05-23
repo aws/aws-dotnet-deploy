@@ -146,6 +146,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                     baseRecipeId: recommendation.Recipe.BaseRecipeId,
                     recipeId: recommendation.Recipe.Id,
                     name: recommendation.Name,
+                    settingsCategories: CategorySummary.FromCategories(recommendation.GetConfigurableOptionSettingCategories()),
                     isPersistedDeploymentProject: recommendation.Recipe.PersistedDeploymentProject,
                     shortDescription: recommendation.ShortDescription,
                     description: recommendation.Description,
@@ -198,6 +199,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             {
                 var settingSummary = new OptionSettingItemSummary(setting.Id, setting.Name, setting.Description, setting.Type.ToString())
                 {
+                    Category = setting.Category,
                     TypeHint = setting.TypeHint?.ToString(),
                     TypeHintData = setting.TypeHintData,
                     Value = optionSettingHandler.GetOptionSettingValue(recommendation, setting),
@@ -249,7 +251,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 try
                 {
                     var setting = optionSettingHandler.GetOptionSetting(state.SelectedRecommendation, updatedSetting.Key);
-                    optionSettingHandler.SetOptionSettingValue(setting, updatedSetting.Value);
+                    optionSettingHandler.SetOptionSettingValue(state.SelectedRecommendation, setting, updatedSetting.Value);
                 }
                 catch (Exception ex)
                 {
@@ -340,6 +342,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                     baseRecipeId: recommendation.Recipe.BaseRecipeId,
                     recipeId: deployment.RecipeId,
                     recipeName: recommendation.Name,
+                    settingsCategories: CategorySummary.FromCategories(recommendation.GetConfigurableOptionSettingCategories()),
                     isPersistedDeploymentProject: recommendation.Recipe.PersistedDeploymentProject,
                     shortDescription: recommendation.ShortDescription,
                     description: recommendation.Description,
@@ -383,14 +386,13 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                     return NotFound($"Recommendation {input.NewDeploymentRecipeId} not found.");
                 }
 
+                // We only validate the name when the recipe deployment type is not ElasticContainerRegistryImage.
+                // This is because pushing images to ECR does not need a cloud application name.
                 if (state.SelectedRecommendation.Recipe.DeploymentType != Common.Recipes.DeploymentTypes.ElasticContainerRegistryImage)
                 {
-                    // We only validate the name when the recipe deployment type is not ElasticContainerRegistryImage.
-                    // This is because pushing images to ECR does not need a cloud application name.
-                    if (!cloudApplicationNameGenerator.IsValidName(newDeploymentName))
-                    {
-                        return ValidationProblem(cloudApplicationNameGenerator.InvalidNameMessage(newDeploymentName));
-                    }
+                    var validationResult = cloudApplicationNameGenerator.IsValidName(newDeploymentName, state.ExistingDeployments ?? new List<CloudApplication>(), state.SelectedRecommendation.Recipe.DeploymentType);
+                    if (!validationResult.IsValid)
+                        return ValidationProblem(validationResult.ErrorMessage);
                 }
 
                 state.ApplicationDetails.Name = newDeploymentName;
@@ -462,11 +464,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
             var capabilities = await systemCapabilityEvaluator.EvaluateSystemCapabilities(state.SelectedRecommendation);
 
-            output.Capabilities = capabilities.Select(x => new SystemCapabilitySummary(x.Name, x.Installed, x.Available)
-            {
-                InstallationUrl = x.InstallationUrl,
-                Message = x.Message
-            }).ToList();
+            output.Capabilities = capabilities.Select(x => new SystemCapabilitySummary(x.Name, x.Message, x.InstallationUrl));
 
             return Ok(output);
         }
@@ -583,7 +581,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                     var innerException = state.DeploymentTask.Exception.InnerException;
                     if (innerException is DeployToolException deployToolException)
                     {
-                        output.Exception = new DeployToolExceptionSummary(deployToolException.ErrorCode.ToString(), deployToolException.Message);
+                        output.Exception = new DeployToolExceptionSummary(deployToolException.ErrorCode.ToString(), deployToolException.Message, deployToolException.ProcessExitCode);
                     }
                     else
                     {

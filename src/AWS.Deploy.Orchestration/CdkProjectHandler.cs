@@ -91,7 +91,7 @@ namespace AWS.Deploy.Orchestration
                 needAwsCredentials: true);
 
             if (cdkDiff.ExitCode != 0)
-                throw new FailedToRunCDKDiffException(DeployToolErrorCode.FailedToRunCDKDiff, "The CDK Diff command encountered an error and failed.");
+                throw new FailedToRunCDKDiffException(DeployToolErrorCode.FailedToRunCDKDiff, "The CDK Diff command encountered an error and failed.", cdkDiff.ExitCode);
 
             var templateFilePath = Path.Combine(cdkProjectPath, "cdk.out", $"{cloudApplication.Name}.template.json");
             return await _fileManager.ReadAllTextAsync(templateFilePath);
@@ -117,7 +117,7 @@ namespace AWS.Deploy.Orchestration
                     streamOutputToInteractiveService: true);
 
                 if (cdkBootstrap.ExitCode != 0)
-                    throw new FailedToDeployCDKAppException(DeployToolErrorCode.FailedToRunCDKBootstrap, "The AWS CDK Bootstrap, which is the process of provisioning initial resources for the deployment environment, has failed. Please review the output above for additional details [and check out our troubleshooting guide for the most common failure reasons]. You can learn more about CDK bootstrapping at https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html.");
+                    throw new FailedToDeployCDKAppException(DeployToolErrorCode.FailedToRunCDKBootstrap, "The AWS CDK Bootstrap, which is the process of provisioning initial resources for the deployment environment, has failed. Please review the output above for additional details [and check out our troubleshooting guide for the most common failure reasons]. You can learn more about CDK bootstrapping at https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html.", cdkBootstrap.ExitCode);
             }
             else
             {
@@ -156,7 +156,7 @@ namespace AWS.Deploy.Orchestration
                 cdkDeploy = await cdkDeployTask;
                 // We recapture the deployment end date at this point after the deployment task completes.
                 deploymentEndDate = DateTime.UtcNow;
-                await CheckCdkDeploymentFailure(stackId, deploymentStartDate, deploymentEndDate);
+                await CheckCdkDeploymentFailure(stackId, deploymentStartDate, deploymentEndDate, cdkDeploy);
             }
             else
             {
@@ -169,7 +169,7 @@ namespace AWS.Deploy.Orchestration
 
             var deploymentTotalTime = Math.Round((deploymentEndDate - deploymentStartDate).TotalSeconds, 2);
             if (cdkDeploy.ExitCode != 0)
-                throw new FailedToDeployCDKAppException(DeployToolErrorCode.FailedToDeployCdkApplication, $"We had an issue deploying your application to AWS. Check the deployment output for more details. Deployment took {deploymentTotalTime}s.");
+                throw new FailedToDeployCDKAppException(DeployToolErrorCode.FailedToDeployCdkApplication, $"We had an issue deploying your application to AWS. Check the deployment output for more details. Deployment took {deploymentTotalTime}s.", cdkDeploy.ExitCode);
         }
 
         public async Task<bool> DetermineIfCDKBootstrapShouldRun()
@@ -219,7 +219,7 @@ namespace AWS.Deploy.Orchestration
             return stack?.StackId ?? throw new ResourceQueryException(DeployToolErrorCode.FailedToRetrieveStackId, "We were unable to retrieve the CloudFormation stack identifier.");
         }
 
-        private async Task CheckCdkDeploymentFailure(string stackId, DateTime deploymentStartDate, DateTime deploymentEndDate)
+        private async Task CheckCdkDeploymentFailure(string stackId, DateTime deploymentStartDate, DateTime deploymentEndDate, TryRunResult cdkDeployResult)
         {
             try
             {
@@ -239,13 +239,13 @@ namespace AWS.Deploy.Orchestration
                 if (failedEvents.Any())
                 {
                     var errors = string.Join(". ", failedEvents.Reverse().Select(x => x.ResourceStatusReason));
-                    throw new FailedToDeployCDKAppException(DeployToolErrorCode.FailedToDeployCdkApplication, errors);
+                    throw new FailedToDeployCDKAppException(DeployToolErrorCode.FailedToDeployCdkApplication, errors, cdkDeployResult.ExitCode);
                 }
             }
             catch (ResourceQueryException exception) when (exception.InnerException != null && exception.InnerException.Message.Equals($"Stack [{stackId}] does not exist"))
             {
                 var deploymentTotalTime = Math.Round((deploymentEndDate - deploymentStartDate).TotalSeconds, 2);
-                throw new FailedToDeployCDKAppException(DeployToolErrorCode.FailedToCreateCdkStack, $"A CloudFormation stack was not created. Check the deployment output for more details. Deployment took {deploymentTotalTime}s.");
+                throw new FailedToDeployCDKAppException(DeployToolErrorCode.FailedToCreateCdkStack, $"A CloudFormation stack was not created. Check the deployment output for more details. Deployment took {deploymentTotalTime}s.", cdkDeployResult.ExitCode);
             }
         }
 

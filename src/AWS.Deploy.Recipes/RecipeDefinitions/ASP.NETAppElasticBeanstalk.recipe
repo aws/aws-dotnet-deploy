@@ -73,11 +73,63 @@
             }
         }
     ],
-
+    "Categories": [
+        {
+            "Id": "General",
+            "DisplayName": "General",
+            "Order": 10
+        },
+        {
+            "Id": "Hosting",
+            "DisplayName": "Hosting",
+            "Order": 20
+        },
+        {
+            "Id": "Platform",
+            "DisplayName": "Platform",
+            "Order": 30
+        },
+        {
+            "Id": "RollingUpdates",
+            "DisplayName": "Rolling updates & deployments",
+            "Order": 40
+        },
+        {
+            "Id": "Health",
+            "DisplayName": "Health & Monitoring",
+            "Order": 50
+        },
+        {
+            "Id": "Compute",
+            "DisplayName": "Compute",
+            "Order": 60
+        },
+        {
+            "Id": "LoadBalancer",
+            "DisplayName": "LoadBalancer",
+            "Order": 70
+        },
+        {
+            "Id": "Permissions",
+            "DisplayName": "Permissions",
+            "Order": 80
+        },
+        {
+            "Id": "VPC",
+            "DisplayName": "VPC",
+            "Order": 90
+        },
+        {
+            "Id": "EnvVariables",
+            "DisplayName": "Environment Variables",
+            "Order": 100
+        }
+    ],
     "OptionSettings": [
         {
             "Id": "BeanstalkApplication",
             "Name": "Application Name",
+            "Category": "General",
             "Description": "The Elastic Beanstalk application name.",
             "Type": "Object",
             "TypeHint": "BeanstalkApplication",
@@ -150,6 +202,7 @@
             "Id": "BeanstalkEnvironment",
             "ParentSettingId": "BeanstalkApplication.ApplicationName",
             "Name": "Environment Name",
+            "Category": "General",
             "Description": "The Elastic Beanstalk environment name.",
             "Type": "Object",
             "AdvancedSetting": false,
@@ -167,7 +220,7 @@
                     "Validators": [
                         {
                             "ValidatorType": "Regex",
-                            "Configuration" : {
+                            "Configuration": {
                                 "Regex": "^[a-zA-Z0-9][a-zA-Z0-9-]{2,38}[a-zA-Z0-9]$",
                                 "ValidationFailedMessage": "Invalid Environment Name. The Environment Name Must be from 4 to 40 characters in length. The name can contain only letters, numbers, and hyphens. It can't start or end with a hyphen."
                             }
@@ -179,6 +232,7 @@
         {
             "Id": "InstanceType",
             "Name": "EC2 Instance Type",
+            "Category": "Compute",
             "Description": "The EC2 instance type of the EC2 instances created for the environment.",
             "Type": "String",
             "TypeHint": "InstanceType",
@@ -188,6 +242,7 @@
         {
             "Id": "EnvironmentType",
             "Name": "Environment Type",
+            "Category": "General",
             "Description": "The type of environment to create; for example, a single instance for development work or load balanced for production.",
             "Type": "String",
             "DefaultValue": "SingleInstance",
@@ -205,6 +260,7 @@
         {
             "Id": "LoadBalancerType",
             "Name": "Load Balancer Type",
+            "Category": "LoadBalancer",
             "Description": "The type of load balancer for your environment.",
             "Type": "String",
             "DefaultValue": "application",
@@ -230,6 +286,7 @@
         {
             "Id": "ApplicationIAMRole",
             "Name": "Application IAM Role",
+            "Category": "Permissions",
             "Description": "The Identity and Access Management (IAM) role that provides AWS credentials to the application to access AWS services.",
             "Type": "Object",
             "TypeHint": "IAMRole",
@@ -268,7 +325,7 @@
                     "Validators": [
                         {
                             "ValidatorType": "Regex",
-                            "Configuration" : {
+                            "Configuration": {
                                 "Regex": "arn:.+:iam::[0-9]{12}:.+",
                                 "AllowEmptyString": true,
                                 "ValidationFailedMessage": "Invalid IAM Role ARN. The ARN should contain the arn:[PARTITION]:iam namespace, followed by the account ID, and then the resource path. For example - arn:aws:iam::123456789012:role/S3Access is a valid IAM Role ARN. For more information visit https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-arns"
@@ -281,6 +338,7 @@
         {
             "Id": "ServiceIAMRole",
             "Name": "Service IAM Role",
+            "Category": "Permissions",
             "Description": "A service role is the IAM role that Elastic Beanstalk assumes when calling other services on your behalf.",
             "Type": "Object",
             "TypeHint": "IAMRole",
@@ -319,7 +377,7 @@
                     "Validators": [
                         {
                             "ValidatorType": "Regex",
-                            "Configuration" : {
+                            "Configuration": {
                                 "Regex": "arn:.+:iam::[0-9]{12}:.+",
                                 "AllowEmptyString": true,
                                 "ValidationFailedMessage": "Invalid IAM Role ARN. The ARN should contain the arn:[PARTITION]:iam namespace, followed by the account ID, and then the resource path. For example - arn:aws:iam::123456789012:role/S3Access is a valid IAM Role ARN. For more information visit https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-arns"
@@ -332,6 +390,7 @@
         {
             "Id": "EC2KeyPair",
             "Name": "Key Pair",
+            "Category": "Permissions",
             "Description": "The EC2 key pair used to SSH into EC2 instances for the Elastic Beanstalk environment.",
             "Type": "String",
             "TypeHint": "EC2KeyPair",
@@ -341,7 +400,7 @@
             "Validators": [
                 {
                     "ValidatorType": "Regex",
-                    "Configuration" : {
+                    "Configuration": {
                         "Regex": "^(?! ).+(?<! )$",
                         "AllowEmptyString": true,
                         "ValidationFailedMessage": "Invalid EC2KeyPair. The EC2KeyPair can conatin all ASCII characters but without leading and trailing spaces"
@@ -352,6 +411,7 @@
         {
             "Id": "ElasticBeanstalkPlatformArn",
             "Name": "Beanstalk Platform",
+            "Category": "Platform",
             "Description": "The name of the Elastic Beanstalk platform to use with the environment.",
             "Type": "String",
             "TypeHint": "DotnetBeanstalkPlatformArn",
@@ -361,7 +421,7 @@
             "Validators": [
                 {
                     "ValidatorType": "Regex",
-                    "Configuration" : {
+                    "Configuration": {
                         "Regex": "arn:[^:]+:elasticbeanstalk:[^:]+:[^:]*:platform/.+",
                         "ValidationFailedMessage": "Invalid ElasticBeanstalkPlatform Arn. The ARN should contain the arn:[PARTITION]:elasticbeanstalk namespace, followed by the region, an optional account ID, and then the resource path. For example - arn:aws:elasticbeanstalk:us-east-2:123456789012:platform/MyPlatform/1.0 is a valid Arn. For more information visit https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/AWSHowTo.iam.policies.arn.html"
                     }
@@ -371,6 +431,7 @@
         {
             "Id": "ElasticBeanstalkManagedPlatformUpdates",
             "Name": "Managed Platform Updates",
+            "Category": "Platform",
             "Description": "Enable managed platform updates to apply platform updates automatically during a weekly maintenance window that you choose. Your application stays available during the update process.",
             "Type": "Object",
             "AdvancedSetting": true,
@@ -428,6 +489,7 @@
         {
             "Id": "XRayTracingSupportEnabled",
             "Name": "Enable AWS X-Ray Tracing Support",
+            "Category": "Health",
             "Description": "AWS X-Ray is a service that collects data about requests that your application serves, and provides tools you can use to view, filter, and gain insights into that data to identify issues and opportunities for optimization. Do you want to enable AWS X-Ray tracing support?",
             "Type": "Bool",
             "DefaultValue": false,
@@ -437,6 +499,7 @@
         {
             "Id": "ReverseProxy",
             "Name": "Reverse Proxy",
+            "Category": "Hosting",
             "Description": "By default Nginx is used as a reverse proxy in front of the .NET Core web server Kestrel. To use Kestrel as the front facing web server then select `none` as the reverse proxy.",
             "Type": "String",
             "DefaultValue": "nginx",
@@ -450,6 +513,7 @@
         {
             "Id": "EnhancedHealthReporting",
             "Name": "Enhanced Health Reporting",
+            "Category": "Health",
             "Description": "Enhanced health reporting provides free real-time application and operating system monitoring of the instances and other resources in your environment.",
             "Type": "String",
             "DefaultValue": "enhanced",
@@ -473,6 +537,7 @@
         {
             "Id": "HealthCheckURL",
             "Name": "Health Check URL",
+            "Category": "Health",
             "Description": "Customize the load balancer health check to ensure that your application, and not just the web server, is in a good state.",
             "Type": "String",
             "DefaultValue": "/",
@@ -488,6 +553,7 @@
         {
             "Id": "ElasticBeanstalkRollingUpdates",
             "Name": "Rolling Updates",
+            "Category": "RollingUpdates",
             "Description": "When a configuration change requires replacing instances, Elastic Beanstalk can perform the update in batches to avoid downtime while the change is propagated. During a rolling update, capacity is only reduced by the size of a single batch, which you can configure. Elastic Beanstalk takes one batch of instances out of service, terminates them, and then launches a batch with the new configuration. After the new batch starts serving requests, Elastic Beanstalk moves on to the next batch.",
             "Type": "Object",
             "TypeHint": "BeanstalkRollingUpdates",
@@ -631,6 +697,7 @@
         {
             "Id": "CNamePrefix",
             "Name": "CName Prefix",
+            "Category": "Hosting",
             "Description": "If specified, the environment attempts to use this value as the prefix for the CNAME in your Elastic Beanstalk environment URL. If not specified, the CNAME is generated automatically by appending a random alphanumeric string to the environment name.",
             "Type": "String",
             "DefaultValue": "",
@@ -640,6 +707,7 @@
         {
             "Id": "ElasticBeanstalkEnvironmentVariables",
             "Name": "Environment Variables",
+            "Category": "EnvVariables",
             "Description": "Configure environment properties for your application.",
             "Type": "KeyValue",
             "AdvancedSetting": false,
@@ -648,6 +716,7 @@
         {
             "Id": "VpcId",
             "Name": "Virtual Private Cloud (VPC)",
+            "Category": "VPC",
             "Description": "A VPC enables you to launch the application into a virtual network that you've defined.",
             "Type": "String",
             "TypeHint": "ExistingVpc",
@@ -668,6 +737,7 @@
         {
             "Id": "Subnets",
             "Name": "Subnets",
+            "Category": "VPC",
             "Description": "A list of IDs of subnets that Elastic Beanstalk should use when it associates your environment with a custom Amazon VPC. Specify IDs of subnets of a single Amazon VPC.",
             "Type": "List",
             "TypeHint": "ExistingSubnets",
@@ -694,6 +764,7 @@
         {
             "Id": "SecurityGroups",
             "Name": "Security Groups",
+            "Category": "VPC",
             "Description": "Lists the Amazon EC2 security groups to assign to the EC2 instances in the Auto Scaling group to define firewall rules for the instances.",
             "Type": "List",
             "TypeHint": "ExistingSecurityGroups",

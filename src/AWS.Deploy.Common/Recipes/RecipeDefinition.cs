@@ -94,6 +94,11 @@ namespace AWS.Deploy.Common.Recipes
         public List<RecommendationRuleItem> RecommendationRules { get; set; } = new ();
 
         /// <summary>
+        /// The list of categories for the recipes.
+        /// </summary>
+        public List<Category> Categories { get; set; } = new ();
+
+        /// <summary>
         /// The settings that can be configured by the user before deploying.
         /// </summary>
         public List<OptionSettingItem> OptionSettings { get; set; } = new ();

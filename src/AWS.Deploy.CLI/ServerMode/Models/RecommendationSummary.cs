@@ -24,11 +24,13 @@ namespace AWS.Deploy.CLI.ServerMode.Models
         public string Description { get; set; }
         public string TargetService { get; set; }
         public DeploymentTypes DeploymentType { get; set; }
+        public List<CategorySummary> SettingsCategories { get; set; }
 
         public RecommendationSummary(
             string? baseRecipeId,
             string recipeId,
             string name,
+            List<CategorySummary> settingsCategories,
             bool isPersistedDeploymentProject,
             string shortDescription,
             string description,
@@ -39,6 +41,7 @@ namespace AWS.Deploy.CLI.ServerMode.Models
             BaseRecipeId = baseRecipeId;
             RecipeId = recipeId;
             Name = name;
+            SettingsCategories = settingsCategories;
             IsPersistedDeploymentProject = isPersistedDeploymentProject;
             ShortDescription = shortDescription;
             Description = description;

@@ -92,11 +92,11 @@ namespace AWS.Deploy.Common.Recipes
         /// Thrown if one or more <see cref="Validators"/> determine
         /// <paramref name="valueOverride"/> is not valid.
         /// </exception>
-        public void SetValue(IOptionSettingHandler optionSettingHandler, object valueOverride)
+        public void SetValue(IOptionSettingHandler optionSettingHandler, object valueOverride, IOptionSettingItemValidator[] validators, Recommendation recommendation)
         {
             var isValid = true;
             var validationFailedMessage = string.Empty;
-            foreach (var validator in this.BuildValidators())
+            foreach (var validator in validators)
             {
                 var result = validator.Validate(valueOverride);
                 if (!result.IsValid)
@@ -148,7 +148,7 @@ namespace AWS.Deploy.Common.Recipes
                 {
                     if (deserialized.TryGetValue(childOptionSetting.Id, out var childValueOverride))
                     {
-                        optionSettingHandler.SetOptionSettingValue(childOptionSetting, childValueOverride);
+                        optionSettingHandler.SetOptionSettingValue(recommendation, childOptionSetting, childValueOverride);
                     }
                 }
             }

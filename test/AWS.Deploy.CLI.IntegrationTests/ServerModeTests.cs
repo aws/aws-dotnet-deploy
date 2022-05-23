@@ -158,49 +158,6 @@ namespace AWS.Deploy.CLI.IntegrationTests
         }
 
         [Fact]
-        public async Task SetInvalidCloudFormationStackName()
-        {
-            var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
-            var portNumber = 4080;
-            using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ResolveCredentials);
-
-            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
-            var cancelSource = new CancellationTokenSource();
-
-            var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
-            try
-            {
-                var restClient = new RestAPIClient($"http://localhost:{portNumber}/", httpClient);
-                await WaitTillServerModeReady(restClient);
-
-                var startSessionOutput = await restClient.StartDeploymentSessionAsync(new StartDeploymentSessionInput
-                {
-                    AwsRegion = _awsRegion,
-                    ProjectPath = projectPath
-                });
-
-                var sessionId = startSessionOutput.SessionId;
-                Assert.NotNull(sessionId);
-
-                var getRecommendationOutput = await restClient.GetRecommendationsAsync(sessionId);
-                Assert.NotEmpty(getRecommendationOutput.Recommendations);
-                var beanstalkRecommendation = getRecommendationOutput.Recommendations.FirstOrDefault();
-
-                var exception = await Assert.ThrowsAsync<ApiException<ProblemDetails>>(() => restClient.SetDeploymentTargetAsync(sessionId, new SetDeploymentTargetInput
-                {
-                    NewDeploymentRecipeId = beanstalkRecommendation.RecipeId,
-                    NewDeploymentName = "Hello$World"
-                }));
-
-                Assert.Contains("Invalid cloud application name Hello$World.", exception.Result.Detail);
-            }
-            finally
-            {
-                cancelSource.Cancel();
-            }
-        }
-
-        [Fact]
         public async Task WebFargateDeploymentNoConfigChanges()
         {
             _stackName = $"ServerModeWebFargate{Guid.NewGuid().ToString().Split('-').Last()}";
@@ -282,6 +239,11 @@ namespace AWS.Deploy.CLI.IntegrationTests
                 Assert.Equal(fargateRecommendation.Description, existingDeployment.Description);
                 Assert.Equal(fargateRecommendation.TargetService, existingDeployment.TargetService);
                 Assert.Equal(DeploymentTypes.CloudFormationStack, existingDeployment.DeploymentType);
+
+                Assert.NotEmpty(existingDeployment.SettingsCategories);
+                Assert.Contains(existingDeployment.SettingsCategories, x => string.Equals(x.Id, AWS.Deploy.Common.Recipes.Category.DeploymentBundle.Id));
+                Assert.DoesNotContain(existingDeployment.SettingsCategories, x => string.IsNullOrEmpty(x.Id));
+                Assert.DoesNotContain(existingDeployment.SettingsCategories, x => string.IsNullOrEmpty(x.DisplayName));
             }
             finally
             {
@@ -400,9 +362,66 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
                 Assert.Equal(400, exception.StatusCode);
 
-                var errorMessage = $"Invalid cloud application name {invalidStackName}. The application name can contain only alphanumeric characters (case-sensitive) and hyphens. " +
-                    "It must start with an alphabetic character and can't be longer than 128 characters";
+                var errorMessage = $"Invalid cloud application name: {invalidStackName}";
                 Assert.Contains(errorMessage, exception.Result.Detail);
+            }
+            finally
+            {
+                cancelSource.Cancel();
+            }
+        }
+
+        [Fact]
+        public async Task CheckCategories()
+        {
+            var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
+            var portNumber = 4200;
+            using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ResolveCredentials);
+
+            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
+            var cancelSource = new CancellationTokenSource();
+
+            var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
+            try
+            {
+                var restClient = new RestAPIClient($"http://localhost:{portNumber}/", httpClient);
+                await WaitTillServerModeReady(restClient);
+
+                var startSessionOutput = await restClient.StartDeploymentSessionAsync(new StartDeploymentSessionInput
+                {
+                    AwsRegion = _awsRegion,
+                    ProjectPath = projectPath
+                });
+
+                var sessionId = startSessionOutput.SessionId;
+                Assert.NotNull(sessionId);
+
+                var getRecommendationOutput = await restClient.GetRecommendationsAsync(sessionId);
+
+                foreach(var recommendation in getRecommendationOutput.Recommendations)
+                {
+                    Assert.NotEmpty(recommendation.SettingsCategories);
+                    Assert.Contains(recommendation.SettingsCategories, x => string.Equals(x.Id, AWS.Deploy.Common.Recipes.Category.DeploymentBundle.Id));
+                    Assert.DoesNotContain(recommendation.SettingsCategories, x => string.IsNullOrEmpty(x.Id));
+                    Assert.DoesNotContain(recommendation.SettingsCategories, x => string.IsNullOrEmpty(x.DisplayName));
+                }
+
+                var selectedRecommendation = getRecommendationOutput.Recommendations.First();
+                await restClient.SetDeploymentTargetAsync(sessionId, new SetDeploymentTargetInput
+                {
+                    NewDeploymentRecipeId = selectedRecommendation.RecipeId,
+                    NewDeploymentName = "TestStack-" + DateTime.UtcNow.Ticks
+                });
+
+                var getConfigSettingsResponse = await restClient.GetConfigSettingsAsync(sessionId);
+
+                // Make sure all top level settings have a category
+                Assert.DoesNotContain(getConfigSettingsResponse.OptionSettings, x => string.IsNullOrEmpty(x.Category));
+
+                // Make sure build settings have been applied a category.
+                var buildSetting = getConfigSettingsResponse.OptionSettings.FirstOrDefault(x => string.Equals(x.Id, "DotnetBuildConfiguration"));
+                Assert.NotNull(buildSetting);
+                Assert.Equal(AWS.Deploy.Common.Recipes.Category.DeploymentBundle.Id, buildSetting.Category);
             }
             finally
             {

@@ -10,19 +10,26 @@ namespace AWS.Deploy.Common.Recipes.Validation
     /// </summary>
     public class MinMaxConstraintValidator : IRecipeValidator
     {
+        private readonly IOptionSettingHandler _optionSettingHandler;
+
+        public MinMaxConstraintValidator(IOptionSettingHandler optionSettingHandler)
+        {
+            _optionSettingHandler = optionSettingHandler;
+        }
+
         public string MinValueOptionSettingsId { get; set; } = string.Empty;
         public string MaxValueOptionSettingsId { get; set; } = string.Empty;
         public string ValidationFailedMessage { get; set; } = "The value specified for {{MinValueOptionSettingsId}} must be less than or equal to the value specified for {{MaxValueOptionSettingsId}}";
 
-        public ValidationResult Validate(Recommendation recommendation, IDeployToolValidationContext deployValidationContext, IOptionSettingHandler optionSettingHandler)
+        public ValidationResult Validate(Recommendation recommendation, IDeployToolValidationContext deployValidationContext)
         {
             double minVal;
             double maxValue;
 
             try
             {
-                minVal = optionSettingHandler.GetOptionSettingValue<double>(recommendation, optionSettingHandler.GetOptionSetting(recommendation, MinValueOptionSettingsId));
-                maxValue = optionSettingHandler.GetOptionSettingValue<double>(recommendation, optionSettingHandler.GetOptionSetting(recommendation, MaxValueOptionSettingsId));
+                minVal = _optionSettingHandler.GetOptionSettingValue<double>(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, MinValueOptionSettingsId));
+                maxValue = _optionSettingHandler.GetOptionSettingValue<double>(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, MaxValueOptionSettingsId));
             }
             catch (OptionSettingItemDoesNotExistException)
             {

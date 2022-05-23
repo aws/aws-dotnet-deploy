@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
+using AWS.Deploy.Common.Recipes;
 
 namespace AWS.Deploy.Orchestration.Utilities
 {
@@ -20,23 +21,38 @@ namespace AWS.Deploy.Orchestration.Utilities
         /// <exception cref="ArgumentException">
         /// Thrown if can't generate a valid name from <paramref name="target"/>.
         /// </exception>
-        string GenerateValidName(ProjectDefinition target, List<CloudApplication> existingApplications);
+        string GenerateValidName(ProjectDefinition target, List<CloudApplication> existingApplications, DeploymentTypes? deploymentType = null);
 
         /// <summary>
-        /// https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-using-console-create-stack-parameters.html
+        /// Validates the cloud application name
         /// </summary>
-        bool IsValidName(string name);
+        /// <param name="name">User provided cloud application name</param>
+        /// <param name="deploymentType">The deployment type of the selected recommendation</param>
+        /// <param name="existingApplications">List of existing deployed applications</param>
+        /// <returns><see cref="CloudApplicationNameValidationResult"/></returns>
+        CloudApplicationNameValidationResult IsValidName(string name, IList<CloudApplication> existingApplications, DeploymentTypes? deploymentType = null);
+    }
 
-        /// <summary>
-        /// The message that should be displayed when an invalid name is passed
-        /// </summary>
-        string InvalidNameMessage(string name);
+    /// <summary>
+    /// Stores the result from validating the cloud application name.
+    /// </summary>
+    public class CloudApplicationNameValidationResult
+    {
+        public readonly bool IsValid;
+        public readonly string ErrorMessage;
+
+        public CloudApplicationNameValidationResult(bool isValid, string errorMessage)
+        {
+            IsValid = isValid;
+            ErrorMessage = errorMessage;
+        }
     }
 
     public class CloudApplicationNameGenerator : ICloudApplicationNameGenerator
     {
         private readonly IFileManager _fileManager;
         private readonly IDirectoryManager _directoryManager;
+
         /// <summary>
         /// https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-using-console-create-stack-parameters.html
         /// </summary>
@@ -48,7 +64,7 @@ namespace AWS.Deploy.Orchestration.Utilities
             _directoryManager = directoryManager;
         }
 
-        public string GenerateValidName(ProjectDefinition target, List<CloudApplication> existingApplications)
+        public string GenerateValidName(ProjectDefinition target, List<CloudApplication> existingApplications, DeploymentTypes? deploymentType = null)
         {
             // generate recommendation
             var recommendedPrefix = "deployment";
@@ -86,7 +102,9 @@ namespace AWS.Deploy.Orchestration.Utilities
             var suffix = !string.IsNullOrEmpty(suffixString) ? int.Parse(suffixString): 0;
             while (suffix < int.MaxValue)
             {
-                if (existingApplications.All(x => x.Name != recommendation) && IsValidName(recommendation))
+                var validationResult = IsValidName(recommendation, existingApplications, deploymentType);
+
+                if (validationResult.IsValid)
                     return recommendation;
 
                 recommendation = $"{prefix}{++suffix}";
@@ -95,15 +113,52 @@ namespace AWS.Deploy.Orchestration.Utilities
             throw new ArgumentException("Failed to generate a valid and unique name.");
         }
 
-        /// <remarks>
-        /// https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-using-console-create-stack-parameters.html
-        /// </remarks>>
-        public bool IsValidName(string name) => _validatorRegex.IsMatch(name);
 
-        public string InvalidNameMessage(string name)
+        public CloudApplicationNameValidationResult IsValidName(string name, IList<CloudApplication> existingApplications, DeploymentTypes? deploymentType = null)
         {
-            return $"Invalid cloud application name {name}. The application name can contain only alphanumeric characters (case-sensitive) and hyphens. " +
-                "It must start with an alphabetic character and can't be longer than 128 characters";
+            var errorMessage = string.Empty;
+
+            if (!SatisfiesRegex(name))
+            {
+                errorMessage += $"The application name can contain only alphanumeric characters (case-sensitive) and hyphens. " +
+                $"It must start with an alphabetic character and can't be longer than 128 characters.{Environment.NewLine}";
+            }
+            if (MatchesExistingDeployment(name, existingApplications, deploymentType))
+            {
+                errorMessage += "A cloud application already exists with this name.";
+            }
+
+            if (string.IsNullOrEmpty(errorMessage))
+                return new CloudApplicationNameValidationResult(true, string.Empty);
+
+            return new CloudApplicationNameValidationResult(false, $"Invalid cloud application name: {name}{Environment.NewLine}{errorMessage}");
+        }
+
+        /// <summary>
+        /// This method first filters the existing applications by the current deploymentType if the deploymentType is not null
+        /// It will then check if the current name matches the filtered list of existing applications
+        /// </summary>
+        /// <param name="name">User provided cloud application name</param>
+        /// <param name="deploymentType">The deployment type of the selected recommendation</param>
+        /// <param name="existingApplications">List of existing deployed applications</param>
+        /// <returns>true if found a match. false otherwise</returns>
+        private bool MatchesExistingDeployment(string name, IList<CloudApplication> existingApplications, DeploymentTypes? deploymentType = null)
+        {
+            if (!existingApplications.Any())
+                return false;
+
+            if (deploymentType != null)
+                existingApplications = existingApplications.Where(x => x.DeploymentType == deploymentType).ToList();
+
+            return existingApplications.Any(x => x.Name == name);
+        }
+
+        /// <summary>
+        /// https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-using-console-create-stack-parameters.html
+        /// </summary>
+        private bool SatisfiesRegex(string name)
+        {
+            return _validatorRegex.IsMatch(name);
         }
     }
 }

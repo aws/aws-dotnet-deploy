@@ -1,10 +1,12 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Recipes.Validation;
 using AWS.Deploy.Orchestration;
+using Moq;
 using Should;
 using Xunit;
 
@@ -13,10 +15,12 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
     public class ElasticBeanStalkOptionSettingItemValidationTests
     {
         private readonly IOptionSettingHandler _optionSettingHandler;
+        private readonly IServiceProvider _serviceProvider;
 
         public ElasticBeanStalkOptionSettingItemValidationTests()
         {
-            _optionSettingHandler = new OptionSettingHandler();
+            _serviceProvider = new Mock<IServiceProvider>().Object;
+            _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider));
         }
 
         [Theory]
@@ -100,6 +104,26 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             Validate(optionSettingItem, value, isValid);
         }
 
+        [Theory]
+        [InlineData("", true)]
+        [InlineData("--no-restore --nologo --framework net5.0", true)]
+        [InlineData("-o dir", false)]                   // -o or --output is reserved by the deploy tool
+        [InlineData("--output dir", false)]
+        [InlineData("-c Release", false)]               // -c or --configuration is controlled by DotnetPublishBuildConfiguration instead
+        [InlineData("--configuration Release", false)]
+        [InlineData("--self-contained true", false)]    // --self-contained is controlled by SelfContainedBuild instead
+        [InlineData("--no-self-contained", false)]
+        public void DotnetPublishArgsValidationTest(string value, bool isValid)
+        {
+            var optionSettingItem = new OptionSettingItem("id", "name", "description");
+            optionSettingItem.Validators.Add(new OptionSettingItemValidatorConfig
+            {
+                ValidatorType = OptionSettingItemValidatorList.DotnetPublishArgs
+            });
+
+            Validate(optionSettingItem, value, isValid);
+        }
+
         private OptionSettingItemValidatorConfig GetRegexValidatorConfig(string regex)
         {
             var regexValidatorConfig = new OptionSettingItemValidatorConfig
@@ -133,7 +157,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
 
             try
             {
-                _optionSettingHandler.SetOptionSettingValue(optionSettingItem, value);
+                _optionSettingHandler.SetOptionSettingValue(null, optionSettingItem, value);
             }
             catch (ValidationFailedException e)
             {

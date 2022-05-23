@@ -1777,6 +1777,25 @@ namespace AWS.Deploy.ServerMode.Client
     
     }
     
+    /// <summary>A category defined in the recipe that settings will be mapped to via the Id property.</summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.4.1.0 (Newtonsoft.Json v13.0.0.0)")]
+    public partial class CategorySummary 
+    {
+        /// <summary>The id of the category that will be specified on top level settings.</summary>
+        [Newtonsoft.Json.JsonProperty("id", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Id { get; set; }
+    
+        /// <summary>The display name of the category shown to users in UI screens.</summary>
+        [Newtonsoft.Json.JsonProperty("displayName", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string DisplayName { get; set; }
+    
+        /// <summary>The order used to sort categories in UI screens. Categories will be shown in sorted descending order.</summary>
+        [Newtonsoft.Json.JsonProperty("order", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int Order { get; set; }
+    
+    
+    }
+    
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.4.1.0 (Newtonsoft.Json v13.0.0.0)")]
     public enum DeploymentStatus
     {
@@ -1816,6 +1835,9 @@ namespace AWS.Deploy.ServerMode.Client
     
         [Newtonsoft.Json.JsonProperty("message", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Message { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("processExitCode", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int? ProcessExitCode { get; set; }
     
     
     }
@@ -1878,6 +1900,9 @@ namespace AWS.Deploy.ServerMode.Client
         [Newtonsoft.Json.JsonProperty("deploymentType", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public DeploymentTypes DeploymentType { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("settingsCategories", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.Generic.ICollection<CategorySummary> SettingsCategories { get; set; }
     
         [Newtonsoft.Json.JsonProperty("existingDeploymentId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string ExistingDeploymentId { get; set; }
@@ -1986,6 +2011,9 @@ namespace AWS.Deploy.ServerMode.Client
     
         [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Name { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("category", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Category { get; set; }
     
         [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Description { get; set; }
@@ -2114,6 +2142,9 @@ namespace AWS.Deploy.ServerMode.Client
         [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public DeploymentTypes DeploymentType { get; set; }
     
+        [Newtonsoft.Json.JsonProperty("settingsCategories", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.Generic.ICollection<CategorySummary> SettingsCategories { get; set; }
+    
     
     }
     
@@ -2161,12 +2192,6 @@ namespace AWS.Deploy.ServerMode.Client
     {
         [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Name { get; set; }
-    
-        [Newtonsoft.Json.JsonProperty("installed", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public bool Installed { get; set; }
-    
-        [Newtonsoft.Json.JsonProperty("available", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public bool Available { get; set; }
     
         [Newtonsoft.Json.JsonProperty("message", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Message { get; set; }
