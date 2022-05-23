@@ -28,6 +28,10 @@ namespace AWS.Deploy.Common.Recipes.Validation
         /// <summary>
         /// Must be paried with <see cref="DotnetPublishArgsValidator"/>
         /// </summary>
-        DotnetPublishArgs
+        DotnetPublishArgs,
+        /// <summary>
+        /// Must be paired with <see cref="ExistingResourceValidator"/>
+        /// </summary>
+        ExistingResource
     }
 }

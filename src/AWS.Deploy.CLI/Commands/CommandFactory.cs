@@ -26,6 +26,7 @@ using AWS.Deploy.Orchestration.LocalUserSettings;
 using AWS.Deploy.Orchestration.ServiceHandlers;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Recipes.Validation;
+using AWS.Deploy.Common.Data;
 
 namespace AWS.Deploy.CLI.Commands
 {

@@ -229,6 +229,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 
         private async Task<Orchestrator> GetOrchestrator(string targetApplicationProjectPath)
         {
+            var awsResourceQueryer = new TestToolAWSResourceQueryer();
             var directoryManager = new DirectoryManager();
             var fileManager = new FileManager();
             var deploymentManifestEngine = new DeploymentManifestEngine(directoryManager, fileManager);
@@ -237,13 +238,14 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 
             var projectDefinition = await new ProjectDefinitionParser(fileManager, directoryManager).Parse(targetApplicationProjectPath);
             var session = new OrchestratorSession(projectDefinition);
+            var serviceProvider = new Mock<IServiceProvider>();
 
             return new Orchestrator(session,
                 _inMemoryInteractiveService,
                 new Mock<ICdkProjectHandler>().Object,
                 new Mock<ICDKManager>().Object,
                 new Mock<ICDKVersionDetector>().Object,
-                new TestToolAWSResourceQueryer(),
+                awsResourceQueryer,
                 new Mock<IDeploymentBundleHandler>().Object,
                 localUserSettingsEngine,
                 new Mock<IDockerEngine>().Object,

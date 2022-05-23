@@ -13,18 +13,24 @@ using Amazon.CloudFormation.Model;
 using System.Collections.Generic;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Recipes.Validation;
+using AWS.Deploy.Common.Data;
 
 namespace AWS.Deploy.Orchestration.UnitTests.CDK
 {
     public class CDKProjectHandlerTests
     {
         private readonly IOptionSettingHandler _optionSettingHandler;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly Mock<IAWSResourceQueryer> _awsResourceQueryer;
+        private readonly Mock<IServiceProvider> _serviceProvider;
 
         public CDKProjectHandlerTests()
         {
-            _serviceProvider = new Mock<IServiceProvider>().Object;
-            _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider));
+            _awsResourceQueryer = new Mock<IAWSResourceQueryer>();
+            _serviceProvider = new Mock<IServiceProvider>();
+            _serviceProvider
+                .Setup(x => x.GetService(typeof(IAWSResourceQueryer)))
+                .Returns(_awsResourceQueryer.Object);
+            _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider.Object));
         }
 
         [Fact]

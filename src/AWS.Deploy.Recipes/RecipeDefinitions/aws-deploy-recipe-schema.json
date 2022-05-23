@@ -605,7 +605,8 @@
                                     "Required",
                                     "DirectoryExists",
                                     "DockerBuildArgs",
-                                    "DotnetPublishArgs"
+                                    "DotnetPublishArgs",
+                                    "ExistingResource"
                                 ]
                             }
                         },

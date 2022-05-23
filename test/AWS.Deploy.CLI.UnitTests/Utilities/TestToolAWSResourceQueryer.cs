@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Amazon.AppRunner.Model;
+using Amazon.CloudControlApi.Model;
 using Amazon.CloudFormation.Model;
 using Amazon.CloudFront.Model;
 using Amazon.CloudWatchEvents.Model;
@@ -16,6 +17,7 @@ using Amazon.IdentityManagement.Model;
 using Amazon.Runtime;
 using Amazon.S3;
 using Amazon.SecurityToken.Model;
+using AWS.Deploy.Common.Data;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.Data;
 
@@ -62,9 +64,9 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
         public Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns() => throw new NotImplementedException();
         public Task<List<Vpc>> GetListOfVpcs() => throw new NotImplementedException();
         public Task<List<KeyPairInfo>> ListOfEC2KeyPairs() => throw new NotImplementedException();
-        public Task<List<Amazon.ECS.Model.Cluster>> ListOfECSClusters() => throw new NotImplementedException();
-        public Task<List<ApplicationDescription>> ListOfElasticBeanstalkApplications() => throw new NotImplementedException();
-        public Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(string applicationName) => throw new NotImplementedException();
+        public Task<List<Amazon.ECS.Model.Cluster>> ListOfECSClusters(string ecsClusterName) => throw new NotImplementedException();
+        public Task<List<ApplicationDescription>> ListOfElasticBeanstalkApplications(string applicationName) => throw new NotImplementedException();
+        public Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(string applicationName, string environmentName) => throw new NotImplementedException();
         public Task<List<Role>> ListOfIAMRoles(string servicePrincipal) => throw new NotImplementedException();
         public Task<List<StackResource>> DescribeCloudFormationResources(string stackName) => throw new NotImplementedException();
         public Task<EnvironmentDescription> DescribeElasticBeanstalkEnvironment(string environmentId) => throw new NotImplementedException();
@@ -90,5 +92,6 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
         public Task<List<Subnet>> DescribeSubnets(string vpcID = null) => throw new NotImplementedException();
         public Task<List<SecurityGroup>> DescribeSecurityGroups(string vpcID = null) => throw new NotImplementedException();
         public Task<string> GetParameterStoreTextValue(string parameterName) => throw new NotImplementedException();
+        public Task<ResourceDescription> GetCloudControlApiResource(string type, string identifier) => throw new NotImplementedException();
     }
 }

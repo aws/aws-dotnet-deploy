@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using AWS.Deploy.Orchestration.Data;
 using System.Linq;
 using AWS.Deploy.Orchestration.DeploymentCommands;
+using AWS.Deploy.Common.Data;
 
 namespace AWS.Deploy.Orchestration.DisplayedResources
 {

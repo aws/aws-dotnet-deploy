@@ -19,20 +19,27 @@ using Xunit;
 using Assert = Should.Core.Assertions.Assert;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Recipes.Validation;
+using AWS.Deploy.Common.Data;
+using Amazon.CloudControlApi.Model;
+using Amazon.ElasticBeanstalk.Model;
 
 namespace AWS.Deploy.CLI.UnitTests
 {
     public class ApplyPreviousSettingsTests
     {
+        private readonly Mock<IAWSResourceQueryer> _awsResourceQueryer;
         private readonly IOptionSettingHandler _optionSettingHandler;
         private readonly Orchestrator _orchestrator;
-        private readonly IServiceProvider _serviceProvider;
-
+        private readonly Mock<IServiceProvider> _serviceProvider;
 
         public ApplyPreviousSettingsTests()
         {
-            _serviceProvider = new Mock<IServiceProvider>().Object;
-            _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider));
+            _awsResourceQueryer = new Mock<IAWSResourceQueryer>();
+            _serviceProvider = new Mock<IServiceProvider>();
+            _serviceProvider
+                .Setup(x => x.GetService(typeof(IAWSResourceQueryer)))
+                .Returns(_awsResourceQueryer.Object);
+            _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider.Object));
             _orchestrator = new Orchestrator(null, null, null, null, null, null, null, null, null, null, null, null, null, null, _optionSettingHandler);
         }
 
@@ -77,7 +84,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var settings = JsonConvert.DeserializeObject<Dictionary<string, object>>(serializedSettings);
 
-            beanstalkRecommendation = _orchestrator.ApplyRecommendationPreviousSettings(beanstalkRecommendation, settings);
+            beanstalkRecommendation = await _orchestrator.ApplyRecommendationPreviousSettings(beanstalkRecommendation, settings);
 
             var applicationIAMRoleOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("ApplicationIAMRole"));
             var typeHintResponse = _optionSettingHandler.GetOptionSettingValue<IAMRoleTypeHintResponse>(beanstalkRecommendation, applicationIAMRoleOptionSetting);
@@ -111,13 +118,95 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var settings = JsonConvert.DeserializeObject<Dictionary<string, object>>(serializedSettings);
 
-            fargateRecommendation = _orchestrator.ApplyRecommendationPreviousSettings(fargateRecommendation, settings);
+            fargateRecommendation = await _orchestrator.ApplyRecommendationPreviousSettings(fargateRecommendation, settings);
 
             var vpcOptionSetting = fargateRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("Vpc"));
 
             Assert.Equal(isDefault, _optionSettingHandler.GetOptionSettingValue(fargateRecommendation, vpcOptionSetting.ChildOptionSettings.First(optionSetting => optionSetting.Id.Equals("IsDefault"))));
             Assert.Equal(createNew, _optionSettingHandler.GetOptionSettingValue(fargateRecommendation, vpcOptionSetting.ChildOptionSettings.First(optionSetting => optionSetting.Id.Equals("CreateNew"))));
             Assert.Equal(vpcId, _optionSettingHandler.GetOptionSettingValue(fargateRecommendation, vpcOptionSetting.ChildOptionSettings.First(optionSetting => optionSetting.Id.Equals("VpcId"))));
+        }
+
+        [Fact]
+        public async Task ApplyECSClusterNamePreviousSettings()
+        {
+            _awsResourceQueryer.Setup(x => x.GetCloudControlApiResource(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(new ResourceDescription { Identifier = "WebApp" });
+            var engine = await BuildRecommendationEngine("WebAppWithDockerFile");
+
+            var recommendations = await engine.ComputeRecommendations();
+
+            var fargateRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_ASPNET_CORE_FARGATE_RECIPE_ID);
+
+            var serializedSettings = @$"
+            {{
+                ""ECSCluster"": {{
+                    ""CreateNew"": true,
+                    ""NewClusterName"": ""WebApp""
+                }}
+            }}";
+
+            var settings = JsonConvert.DeserializeObject<Dictionary<string, object>>(serializedSettings);
+
+            fargateRecommendation = await _orchestrator.ApplyRecommendationPreviousSettings(fargateRecommendation, settings);
+
+            var ecsClusterSetting = fargateRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("ECSCluster"));
+
+            Assert.Equal(true, _optionSettingHandler.GetOptionSettingValue(fargateRecommendation, ecsClusterSetting.ChildOptionSettings.First(optionSetting => optionSetting.Id.Equals("CreateNew"))));
+            Assert.Equal("WebApp", _optionSettingHandler.GetOptionSettingValue(fargateRecommendation, ecsClusterSetting.ChildOptionSettings.First(optionSetting => optionSetting.Id.Equals("NewClusterName"))));
+        }
+
+        [Fact]
+        public async Task ApplyBeanstalkApplicationNamePreviousSettings()
+        {
+            _awsResourceQueryer.Setup(x => x.ListOfElasticBeanstalkApplications(It.IsAny<string>())).ReturnsAsync(new List<ApplicationDescription> { new ApplicationDescription { ApplicationName = "WebApp" } });
+            var engine = await BuildRecommendationEngine("WebAppNoDockerFile");
+
+            var recommendations = await engine.ComputeRecommendations();
+
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+
+            var serializedSettings = @$"
+            {{
+                ""BeanstalkApplication"": {{
+                    ""CreateNew"": true,
+                    ""ApplicationName"": ""WebApp""
+                }}
+            }}";
+
+            var settings = JsonConvert.DeserializeObject<Dictionary<string, object>>(serializedSettings);
+
+            beanstalkRecommendation = await _orchestrator.ApplyRecommendationPreviousSettings(beanstalkRecommendation, settings);
+
+            var applicationSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("BeanstalkApplication"));
+
+            Assert.Equal(true, _optionSettingHandler.GetOptionSettingValue(beanstalkRecommendation, applicationSetting.ChildOptionSettings.First(optionSetting => optionSetting.Id.Equals("CreateNew"))));
+            Assert.Equal("WebApp", _optionSettingHandler.GetOptionSettingValue(beanstalkRecommendation, applicationSetting.ChildOptionSettings.First(optionSetting => optionSetting.Id.Equals("ApplicationName"))));
+        }
+
+        [Fact]
+        public async Task ApplyBeanstalkEnvironmentNamePreviousSettings()
+        {
+            _awsResourceQueryer.Setup(x => x.ListOfElasticBeanstalkEnvironments(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(new List<EnvironmentDescription> { new EnvironmentDescription { EnvironmentName = "WebApp" } });
+            var engine = await BuildRecommendationEngine("WebAppNoDockerFile");
+
+            var recommendations = await engine.ComputeRecommendations();
+
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+
+            var serializedSettings = @$"
+            {{
+                ""BeanstalkEnvironment"": {{
+                    ""EnvironmentName"": ""WebApp""
+                }}
+            }}";
+
+            var settings = JsonConvert.DeserializeObject<Dictionary<string, object>>(serializedSettings);
+
+            beanstalkRecommendation = await _orchestrator.ApplyRecommendationPreviousSettings(beanstalkRecommendation, settings);
+
+            var environmentSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("BeanstalkEnvironment"));
+
+            Assert.Equal("WebApp", _optionSettingHandler.GetOptionSettingValue(beanstalkRecommendation, environmentSetting.ChildOptionSettings.First(optionSetting => optionSetting.Id.Equals("EnvironmentName"))));
         }
     }
 }

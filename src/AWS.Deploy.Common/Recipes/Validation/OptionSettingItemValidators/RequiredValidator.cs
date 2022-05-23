@@ -1,6 +1,8 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.\r
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Threading.Tasks;
+
 namespace AWS.Deploy.Common.Recipes.Validation
 {
     /// <summary>
@@ -11,11 +13,11 @@ namespace AWS.Deploy.Common.Recipes.Validation
         private static readonly string defaultValidationFailedMessage = "Value can not be empty";
         public string ValidationFailedMessage { get; set; } = defaultValidationFailedMessage;
 
-        public ValidationResult Validate(object input) =>
-            new()
+        public Task<ValidationResult> Validate(object input) =>
+            Task.FromResult<ValidationResult>(new()
             {
                 IsValid = !string.IsNullOrEmpty(input?.ToString()),
                 ValidationFailedMessage = ValidationFailedMessage
-            };
+            });
     }
 }

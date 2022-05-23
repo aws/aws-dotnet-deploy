@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Extensions;
 using AWS.Deploy.Common.Recipes;
@@ -21,15 +22,45 @@ namespace AWS.Deploy.Orchestration
         }
 
         /// <summary>
+        /// This method runs all the option setting validators for the configurable settings.
+        /// In case of a first time deployment, all settings and validators are run.
+        /// In case of a redeployment, only the updatable settings are considered.
+        /// </summary>
+        public List<ValidationResult> RunOptionSettingValidators(Recommendation recommendation, IEnumerable<OptionSettingItem>? optionSettings = null)
+        {
+            if (optionSettings == null)
+                optionSettings = recommendation.GetConfigurableOptionSettingItems().Where(x => !recommendation.IsExistingCloudApplication || x.Updatable);
+
+            List<ValidationResult> settingValidatorFailedResults = new List<ValidationResult>();
+            foreach (var optionSetting in optionSettings)
+            {
+                var optionSettingValue = GetOptionSettingValue(recommendation, optionSetting);
+                settingValidatorFailedResults.AddRange(_validatorFactory.BuildValidators(optionSetting)
+                    .Select(async validator => await validator.Validate(optionSettingValue))
+                    .Select(x => x.Result)
+                    .Where(x => !x.IsValid)
+                    .ToList());
+
+                settingValidatorFailedResults.AddRange(RunOptionSettingValidators(recommendation, optionSetting.ChildOptionSettings));
+            }
+
+            return settingValidatorFailedResults;
+        }
+
+        /// <summary>
         /// Assigns a value to the OptionSettingItem.
         /// </summary>
         /// <exception cref="ValidationFailedException">
         /// Thrown if one or more <see cref="Validators"/> determine
         /// <paramref name="value"/> is not valid.
         /// </exception>
-        public void SetOptionSettingValue(Recommendation recommendation, OptionSettingItem optionSettingItem, object value)
+        public async Task SetOptionSettingValue(Recommendation recommendation, OptionSettingItem optionSettingItem, object value, bool skipValidation = false)
         {
-            optionSettingItem.SetValue(this, value, _validatorFactory.BuildValidators(optionSettingItem), recommendation);
+            IOptionSettingItemValidator[] validators = new IOptionSettingItemValidator[0];
+            if (!skipValidation)
+                validators = _validatorFactory.BuildValidators(optionSettingItem);
+
+            await optionSettingItem.SetValue(this, value, validators, recommendation, skipValidation);
 
             // If the optionSettingItem came from the selected recommendation's deployment bundle,
             // set the corresponding property on recommendation.DeploymentBundle

@@ -10,6 +10,7 @@ using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.CLI.TypeHintResponses;
 using AWS.Deploy.CLI.UnitTests.Utilities;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Recipes.Validation;
@@ -27,13 +28,18 @@ namespace AWS.Deploy.CLI.UnitTests
         private OrchestratorSession _session;
         private readonly IDirectoryManager _directoryManager;
         private readonly IOptionSettingHandler _optionSettingHandler;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly Mock<IAWSResourceQueryer> _awsResourceQueryer;
+        private readonly Mock<IServiceProvider> _serviceProvider;
 
         public RecommendationTests()
         {
             _directoryManager = new TestDirectoryManager();
-            _serviceProvider = new Mock<IServiceProvider>().Object;
-            _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider));
+            _awsResourceQueryer = new Mock<IAWSResourceQueryer>();
+            _serviceProvider = new Mock<IServiceProvider>();
+            _serviceProvider
+                .Setup(x => x.GetService(typeof(IAWSResourceQueryer)))
+                .Returns(_awsResourceQueryer.Object);
+            _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider.Object));
         }
 
         private async Task<RecommendationEngine> BuildRecommendationEngine(string testProjectName)
@@ -185,11 +191,11 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var originalDefaultValue = _optionSettingHandler.GetOptionSettingDefaultValue<int>(fargateRecommendation, desiredCountOptionSetting);
 
-            _optionSettingHandler.SetOptionSettingValue(fargateRecommendation, desiredCountOptionSetting, 2);
+            await _optionSettingHandler.SetOptionSettingValue(fargateRecommendation, desiredCountOptionSetting, 2);
 
             Assert.Equal(2, _optionSettingHandler.GetOptionSettingValue<int>(fargateRecommendation, desiredCountOptionSetting));
 
-            _optionSettingHandler.SetOptionSettingValue(fargateRecommendation, desiredCountOptionSetting, consoleUtilities.AskUserForValue("Title", "2", true, originalDefaultValue.ToString()));
+            await _optionSettingHandler.SetOptionSettingValue(fargateRecommendation, desiredCountOptionSetting, consoleUtilities.AskUserForValue("Title", "2", true, originalDefaultValue.ToString()));
 
             Assert.Equal(originalDefaultValue, _optionSettingHandler.GetOptionSettingValue<int>(fargateRecommendation, desiredCountOptionSetting));
         }
@@ -214,11 +220,11 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var originalDefaultValue = _optionSettingHandler.GetOptionSettingDefaultValue<string>(fargateRecommendation, ecsServiceNameOptionSetting);
 
-            _optionSettingHandler.SetOptionSettingValue(fargateRecommendation, ecsServiceNameOptionSetting, "TestService");
+            await _optionSettingHandler.SetOptionSettingValue(fargateRecommendation, ecsServiceNameOptionSetting, "TestService");
 
             Assert.Equal("TestService", _optionSettingHandler.GetOptionSettingValue<string>(fargateRecommendation, ecsServiceNameOptionSetting));
 
-            _optionSettingHandler.SetOptionSettingValue(fargateRecommendation, ecsServiceNameOptionSetting, consoleUtilities.AskUserForValue("Title", "TestService", true, originalDefaultValue));
+            await _optionSettingHandler.SetOptionSettingValue(fargateRecommendation, ecsServiceNameOptionSetting, consoleUtilities.AskUserForValue("Title", "TestService", true, originalDefaultValue));
 
             Assert.Equal(originalDefaultValue, _optionSettingHandler.GetOptionSettingValue<string>(fargateRecommendation, ecsServiceNameOptionSetting));
         }
@@ -262,7 +268,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
             var environmentTypeOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("EnvironmentType"));
 
-            _optionSettingHandler.SetOptionSettingValue(beanstalkRecommendation, environmentTypeOptionSetting, "LoadBalanced");
+            await _optionSettingHandler.SetOptionSettingValue(beanstalkRecommendation, environmentTypeOptionSetting, "LoadBalanced");
             Assert.Equal("LoadBalanced", _optionSettingHandler.GetOptionSettingValue(beanstalkRecommendation, environmentTypeOptionSetting));
         }
 
@@ -276,7 +282,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
             var applicationIAMRoleOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("ApplicationIAMRole"));
 
-            _optionSettingHandler.SetOptionSettingValue(beanstalkRecommendation, applicationIAMRoleOptionSetting, new IAMRoleTypeHintResponse {CreateNew = false,
+            await _optionSettingHandler.SetOptionSettingValue(beanstalkRecommendation, applicationIAMRoleOptionSetting, new IAMRoleTypeHintResponse {CreateNew = false,
                 RoleArn = "arn:aws:iam::123456789012:group/Developers" });
 
             var iamRoleTypeHintResponse = _optionSettingHandler.GetOptionSettingValue<IAMRoleTypeHintResponse>(beanstalkRecommendation, applicationIAMRoleOptionSetting);
@@ -391,7 +397,7 @@ namespace AWS.Deploy.CLI.UnitTests
             Assert.False(_optionSettingHandler.IsOptionSettingDisplayable(beanstalkRecommendation, loadBalancerTypeOptionSetting));
 
             // Satisfy dependency
-            _optionSettingHandler.SetOptionSettingValue(beanstalkRecommendation, environmentTypeOptionSetting, "LoadBalanced");
+            await _optionSettingHandler.SetOptionSettingValue(beanstalkRecommendation, environmentTypeOptionSetting, "LoadBalanced");
             Assert.Equal("LoadBalanced", _optionSettingHandler.GetOptionSettingValue(beanstalkRecommendation, environmentTypeOptionSetting));
 
             // Verify
@@ -414,11 +420,11 @@ namespace AWS.Deploy.CLI.UnitTests
             Assert.False(_optionSettingHandler.IsOptionSettingDisplayable(fargateRecommendation, vpcIdOptionSetting));
 
             // Satisfy dependencies
-            _optionSettingHandler.SetOptionSettingValue(fargateRecommendation, isDefaultOptionSetting, false);
+            await _optionSettingHandler.SetOptionSettingValue(fargateRecommendation, isDefaultOptionSetting, false);
             Assert.False(_optionSettingHandler.GetOptionSettingValue<bool>(fargateRecommendation, isDefaultOptionSetting));
 
             // Default value for Vpc.CreateNew already false, this is to show explicitly setting an override that satisfies Vpc Id option setting
-            _optionSettingHandler.SetOptionSettingValue(fargateRecommendation, createNewOptionSetting, false);
+            await _optionSettingHandler.SetOptionSettingValue(fargateRecommendation, createNewOptionSetting, false);
             Assert.False(_optionSettingHandler.GetOptionSettingValue<bool>(fargateRecommendation, createNewOptionSetting));
 
             // Verify
@@ -441,7 +447,7 @@ namespace AWS.Deploy.CLI.UnitTests
             Assert.False(_optionSettingHandler.IsOptionSettingDisplayable(beanstalkRecommendation, subnetsSetting));
 
             // Satisfy dependencies
-            _optionSettingHandler.SetOptionSettingValue(beanstalkRecommendation, vpcIdOptionSetting, "vpc-1234abcd");
+            await _optionSettingHandler.SetOptionSettingValue(beanstalkRecommendation, vpcIdOptionSetting, "vpc-1234abcd");
             Assert.True(_optionSettingHandler.IsOptionSettingDisplayable(beanstalkRecommendation, subnetsSetting));
         }
 
@@ -463,11 +469,11 @@ namespace AWS.Deploy.CLI.UnitTests
             Assert.False(_optionSettingHandler.IsOptionSettingDisplayable(beanstalkRecommendation, securityGroupsSetting));
 
             // Satisfy 1 dependency
-            _optionSettingHandler.SetOptionSettingValue(beanstalkRecommendation, vpcIdOptionSetting, "vpc-1234abcd");
+            await _optionSettingHandler.SetOptionSettingValue(beanstalkRecommendation, vpcIdOptionSetting, "vpc-1234abcd");
             Assert.False(_optionSettingHandler.IsOptionSettingDisplayable(beanstalkRecommendation, securityGroupsSetting));
 
             // Satisfy 2 dependencies
-            _optionSettingHandler.SetOptionSettingValue(beanstalkRecommendation, subnetsSetting, new SortedSet<string> { "subnet-1234abcd" });
+            await _optionSettingHandler.SetOptionSettingValue(beanstalkRecommendation, subnetsSetting, new SortedSet<string> { "subnet-1234abcd" });
             Assert.True(_optionSettingHandler.IsOptionSettingDisplayable(beanstalkRecommendation, securityGroupsSetting));
         }
 

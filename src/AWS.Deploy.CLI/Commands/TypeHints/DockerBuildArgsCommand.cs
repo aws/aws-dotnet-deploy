@@ -31,7 +31,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                     _optionSettingHandler.GetOptionSettingValue<string>(recommendation, optionSetting),
                     allowEmpty: true,
                     resetValue: _optionSettingHandler.GetOptionSettingDefaultValue<string>(recommendation, optionSetting) ?? "",
-                    validators: buildArgs => ValidateBuildArgs(buildArgs))
+                    validators: async buildArgs => await ValidateBuildArgs(buildArgs))
                 .ToString()
                 .Replace("\"", "\"\"");
 
@@ -45,17 +45,17 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         /// </summary>
         /// <param name="recommendation">The selected recommendation settings used for deployment <see cref="Recommendation"/></param>
         /// <param name="dockerBuildArgs">Arguments to be passed when performing a Docker build</param>
-        public void OverrideValue(Recommendation recommendation, string dockerBuildArgs)
+        public async Task OverrideValue(Recommendation recommendation, string dockerBuildArgs)
         {
-            var resultString = ValidateBuildArgs(dockerBuildArgs);
+            var resultString = await ValidateBuildArgs(dockerBuildArgs);
             if (!string.IsNullOrEmpty(resultString))
                 throw new InvalidOverrideValueException(DeployToolErrorCode.InvalidDockerBuildArgs, resultString);
             recommendation.DeploymentBundle.DockerBuildArgs = dockerBuildArgs;
         }
 
-        private string ValidateBuildArgs(string buildArgs)
+        private async Task<string> ValidateBuildArgs(string buildArgs)
         {
-            var validationResult = new DockerBuildArgsValidator().Validate(buildArgs);
+            var validationResult = await new DockerBuildArgsValidator().Validate(buildArgs);
 
             if (validationResult.IsValid)
             {

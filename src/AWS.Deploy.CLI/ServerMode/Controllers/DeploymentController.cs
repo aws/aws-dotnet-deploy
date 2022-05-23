@@ -33,6 +33,7 @@ using AWS.Deploy.CLI.Commands;
 using AWS.Deploy.CLI.Commands.TypeHints;
 using AWS.Deploy.Common.TypeHintData;
 using AWS.Deploy.Orchestration.ServiceHandlers;
+using AWS.Deploy.Common.Data;
 
 namespace AWS.Deploy.CLI.ServerMode.Controllers
 {
@@ -228,7 +229,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         [SwaggerResponse(200, type: typeof(ApplyConfigSettingsOutput))]
         [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound)]
         [Authorize]
-        public IActionResult ApplyConfigSettings(string sessionId, [FromBody] ApplyConfigSettingsInput input)
+        public async Task<IActionResult> ApplyConfigSettings(string sessionId, [FromBody] ApplyConfigSettingsInput input)
         {
             var state = _stateServer.Get(sessionId);
             if (state == null)
@@ -251,7 +252,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 try
                 {
                     var setting = optionSettingHandler.GetOptionSetting(state.SelectedRecommendation, updatedSetting.Key);
-                    optionSettingHandler.SetOptionSettingValue(state.SelectedRecommendation, setting, updatedSetting.Value);
+                    await optionSettingHandler.SetOptionSettingValue(state.SelectedRecommendation, setting, updatedSetting.Value);
                 }
                 catch (Exception ex)
                 {
@@ -425,7 +426,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 else
                     previousSettings = await deployedApplicationQueryer.GetPreviousSettings(existingDeployment);
 
-                state.SelectedRecommendation = orchestrator.ApplyRecommendationPreviousSettings(state.SelectedRecommendation, previousSettings);
+                state.SelectedRecommendation = await orchestrator.ApplyRecommendationPreviousSettings(state.SelectedRecommendation, previousSettings);
 
                 state.ApplicationDetails.Name = existingDeployment.Name;
                 state.ApplicationDetails.UniqueIdentifier = existingDeployment.UniqueIdentifier;
@@ -531,6 +532,17 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
             if (state.SelectedRecommendation == null)
                 throw new SelectedRecommendationIsNullException("The selected recommendation is null or invalid.");
+
+            var optionSettingHandler = serviceProvider.GetRequiredService<IOptionSettingHandler>();
+            var settingValidatorFailedResults = optionSettingHandler.RunOptionSettingValidators(state.SelectedRecommendation);
+            if (settingValidatorFailedResults.Any())
+            {
+                var settingValidationErrorMessage = $"The deployment configuration needs to be adjusted before it can be deployed:{Environment.NewLine}";
+                foreach (var result in settingValidatorFailedResults)
+                    settingValidationErrorMessage += $" - {result.ValidationFailedMessage}{Environment.NewLine}{Environment.NewLine}";
+                settingValidationErrorMessage += $"{Environment.NewLine}Please adjust your settings";
+                return Problem(settingValidationErrorMessage);
+            }
 
             var systemCapabilityEvaluator = serviceProvider.GetRequiredService<ISystemCapabilityEvaluator>();
 

@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.Extensions;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
@@ -145,7 +146,7 @@ namespace AWS.Deploy.Orchestration
         /// <summary>
         /// Creates a deep copy of the recommendation object and applies the previous settings to that recommendation.
         /// </summary>
-        public Recommendation ApplyRecommendationPreviousSettings(Recommendation recommendation, IDictionary<string, object> previousSettings)
+        public async Task<Recommendation> ApplyRecommendationPreviousSettings(Recommendation recommendation, IDictionary<string, object> previousSettings)
         {
             if (_optionSettingHandler == null)
                 throw new InvalidOperationException($"{nameof(_optionSettingHandler)} is null as part of the orchestartor object");
@@ -157,7 +158,7 @@ namespace AWS.Deploy.Orchestration
             {
                 if (previousSettings.TryGetValue(optionSetting.Id, out var value))
                 {
-                    _optionSettingHandler.SetOptionSettingValue(recommendationCopy, optionSetting, value);
+                    await  _optionSettingHandler.SetOptionSettingValue(recommendationCopy, optionSetting, value, skipValidation: true);
                 }
             }
 

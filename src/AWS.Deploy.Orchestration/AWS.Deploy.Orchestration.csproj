@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AWSSDK.CloudControlApi" Version="3.7.2" />
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.0.83" />
     <PackageReference Include="AWSSDK.SQS" Version="3.7.1.25" />
     <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.2.53" />
