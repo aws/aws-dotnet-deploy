@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using AWS.Deploy.Common.Data;
 using AWS.Deploy.Orchestration.Data;
 
 namespace AWS.Deploy.Orchestration.DisplayedResources

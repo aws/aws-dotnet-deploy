@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Amazon.AppRunner.Model;
+using Amazon.CloudControlApi.Model;
 using Amazon.CloudFormation.Model;
 using Amazon.CloudFront.Model;
 using Amazon.CloudWatchEvents.Model;
@@ -17,6 +18,7 @@ using Amazon.ElasticLoadBalancingV2;
 using Amazon.IdentityManagement.Model;
 using Amazon.Runtime;
 using Amazon.SecurityToken.Model;
+using AWS.Deploy.Common.Data;
 using AWS.Deploy.Orchestration.Data;
 
 namespace AWS.Deploy.CLI.IntegrationTests.Utilities
@@ -44,9 +46,9 @@ namespace AWS.Deploy.CLI.IntegrationTests.Utilities
         public Task<string> GetS3BucketLocation(string bucketName) => throw new NotImplementedException();
         public Task<Amazon.S3.Model.WebsiteConfiguration> GetS3BucketWebSiteConfiguration(string bucketName) => throw new NotImplementedException();
         public Task<List<KeyPairInfo>> ListOfEC2KeyPairs() => throw new NotImplementedException();
-        public Task<List<Cluster>> ListOfECSClusters() => throw new NotImplementedException();
-        public Task<List<ApplicationDescription>> ListOfElasticBeanstalkApplications() => throw new NotImplementedException();
-        public Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(string applicationName) => throw new NotImplementedException();
+        public Task<List<Cluster>> ListOfECSClusters(string ecsClusterName) => throw new NotImplementedException();
+        public Task<List<ApplicationDescription>> ListOfElasticBeanstalkApplications(string applicationName) => throw new NotImplementedException();
+        public Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(string applicationName, string environmentName) => throw new NotImplementedException();
         public Task<List<Role>> ListOfIAMRoles(string servicePrincipal) => throw new NotImplementedException();
         public Task<Amazon.AppRunner.Model.Service> DescribeAppRunnerService(string serviceArn) => throw new NotImplementedException();
         public Task<List<Amazon.ElasticLoadBalancingV2.Model.LoadBalancer>> ListOfLoadBalancers(LoadBalancerTypeEnum loadBalancerType) => throw new NotImplementedException();
@@ -65,5 +67,6 @@ namespace AWS.Deploy.CLI.IntegrationTests.Utilities
         public Task<List<Subnet>> DescribeSubnets(string vpcID = null) => throw new NotImplementedException();
         public Task<List<SecurityGroup>> DescribeSecurityGroups(string vpcID = null) => throw new NotImplementedException();
         public Task<string> GetParameterStoreTextValue(string parameterName) => throw new NotImplementedException();
+        public Task<ResourceDescription> GetCloudControlApiResource(string type, string identifier) => throw new NotImplementedException();
     }
 }

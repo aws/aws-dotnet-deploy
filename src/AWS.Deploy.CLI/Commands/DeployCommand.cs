@@ -24,6 +24,7 @@ using AWS.Deploy.Orchestration.LocalUserSettings;
 using Newtonsoft.Json;
 using AWS.Deploy.Orchestration.ServiceHandlers;
 using Microsoft.Extensions.DependencyInjection;
+using AWS.Deploy.Common.Data;
 
 namespace AWS.Deploy.CLI.Commands
 {
@@ -277,7 +278,7 @@ namespace AWS.Deploy.CLI.Commands
 
             if (userDeploymentSettings != null)
             {
-                ConfigureDeploymentFromConfigFile(selectedRecommendation, userDeploymentSettings);
+                await ConfigureDeploymentFromConfigFile(selectedRecommendation, userDeploymentSettings);
             }
 
             if (!_toolInteractiveService.DisableInteractive)
@@ -336,7 +337,7 @@ namespace AWS.Deploy.CLI.Commands
             else
                 previousSettings = await _deployedApplicationQueryer.GetPreviousSettings(deployedApplication);
 
-            selectedRecommendation = orchestrator.ApplyRecommendationPreviousSettings(selectedRecommendation, previousSettings);
+            selectedRecommendation = await orchestrator.ApplyRecommendationPreviousSettings(selectedRecommendation, previousSettings);
 
             var header = $"Loading {deployedApplication.DisplayName} settings:";
 
@@ -409,7 +410,7 @@ namespace AWS.Deploy.CLI.Commands
         /// </summary>
         /// <param name="recommendation">The selected recommendation settings used for deployment <see cref="Recommendation"/></param>
         /// <param name="userDeploymentSettings">The deserialized object from the user provided config file. <see cref="UserDeploymentSettings"/></param>
-        private void ConfigureDeploymentFromConfigFile(Recommendation recommendation, UserDeploymentSettings userDeploymentSettings)
+        private async Task ConfigureDeploymentFromConfigFile(Recommendation recommendation, UserDeploymentSettings userDeploymentSettings)
         {
             foreach (var entry in userDeploymentSettings.LeafOptionSettingItems)
             {
@@ -460,13 +461,14 @@ namespace AWS.Deploy.CLI.Commands
                         throw new InvalidOverrideValueException(DeployToolErrorCode.InvalidValueForOptionSettingItem, $"Invalid value {optionSettingValue} for option setting item {optionSettingJsonPath}");
                     }
 
-                    _optionSettingHandler.SetOptionSettingValue(recommendation, optionSetting, settingValue);
+                    await _optionSettingHandler.SetOptionSettingValue(recommendation, optionSetting, settingValue);
                 }
             }
 
             var validatorFailedResults =
                 _validatorFactory.BuildValidators(recommendation.Recipe)
-                            .Select(validator => validator.Validate(recommendation, _session))
+                            .Select(async validator => await validator.Validate(recommendation, _session))
+                            .Select(x => x.Result)
                             .Where(x => !x.IsValid)
                             .ToList();
 
@@ -710,13 +712,16 @@ namespace AWS.Deploy.CLI.Commands
                 // deploy case, nothing more to configure
                 if (string.IsNullOrEmpty(input))
                 {
-                    var validatorFailedResults =
+                    var settingValidatorFailedResults = _optionSettingHandler.RunOptionSettingValidators(recommendation);
+
+                    var recipeValidatorFailedResults =
                         _validatorFactory.BuildValidators(recommendation.Recipe)
-                            .Select(validator => validator.Validate(recommendation, _session))
+                            .Select(async validator => await validator.Validate(recommendation, _session))
+                            .Select(x => x.Result)
                             .Where(x => !x.IsValid)
                             .ToList();
 
-                    if (!validatorFailedResults.Any())
+                    if (!settingValidatorFailedResults.Any() && !recipeValidatorFailedResults.Any())
                     {
                         // validation successful
                         // deployment configured
@@ -725,7 +730,9 @@ namespace AWS.Deploy.CLI.Commands
 
                     _toolInteractiveService.WriteLine();
                     _toolInteractiveService.WriteErrorLine("The deployment configuration needs to be adjusted before it can be deployed:");
-                    foreach (var result in validatorFailedResults)
+                    foreach (var result in settingValidatorFailedResults)
+                        _toolInteractiveService.WriteErrorLine($" - {result.ValidationFailedMessage}");
+                    foreach (var result in recipeValidatorFailedResults)
                         _toolInteractiveService.WriteErrorLine($" - {result.ValidationFailedMessage}");
 
                     _toolInteractiveService.WriteLine();
@@ -829,7 +836,7 @@ namespace AWS.Deploy.CLI.Commands
             {
                 try
                 {
-                    _optionSettingHandler.SetOptionSettingValue(recommendation, setting, settingValue);
+                    await _optionSettingHandler.SetOptionSettingValue(recommendation, setting, settingValue);
                 }
                 catch (ValidationFailedException ex)
                 {

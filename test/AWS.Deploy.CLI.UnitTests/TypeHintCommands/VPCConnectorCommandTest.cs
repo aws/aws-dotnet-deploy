@@ -11,6 +11,7 @@ using AWS.Deploy.CLI.Commands.TypeHints;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.CLI.TypeHintResponses;
 using AWS.Deploy.CLI.UnitTests.Utilities;
+using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Recipes.Validation;
@@ -27,15 +28,18 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
         private readonly IDirectoryManager _directoryManager;
         private readonly IToolInteractiveService _toolInteractiveService;
         private readonly IOptionSettingHandler _optionSettingHandler;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly Mock<IServiceProvider> _serviceProvider;
 
         public VPCConnectorCommandTest()
         {
             _mockAWSResourceQueryer = new Mock<IAWSResourceQueryer>();
             _directoryManager = new TestDirectoryManager();
             _toolInteractiveService = new TestToolInteractiveServiceImpl();
-            _serviceProvider = new Mock<IServiceProvider>().Object;
-            _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider));
+            _serviceProvider = new Mock<IServiceProvider>();
+            _serviceProvider
+                .Setup(x => x.GetService(typeof(IAWSResourceQueryer)))
+                .Returns(_mockAWSResourceQueryer.Object);
+            _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider.Object));
         }
 
         [Fact]

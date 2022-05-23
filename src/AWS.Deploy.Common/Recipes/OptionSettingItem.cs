@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AWS.Deploy.Common.Recipes.Validation;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -42,7 +43,8 @@ namespace AWS.Deploy.Common.Recipes
         /// <param name="value">Value to set</param>
         /// <param name="validators">Validators for this item</param>
         /// <param name="recommendation">Selected recommendation</param>
-        void SetValue(IOptionSettingHandler optionSettingHandler, object value, IOptionSettingItemValidator[] validators, Recommendation recommendation);
+        /// <param name="skipValidation">Enables or disables running validators specified in <paramref name="validators"/></param>
+        Task SetValue(IOptionSettingHandler optionSettingHandler, object value, IOptionSettingItemValidator[] validators, Recommendation recommendation, bool skipValidation);
     }
 
     /// <summary>
@@ -120,7 +122,7 @@ namespace AWS.Deploy.Common.Recipes
         /// The allowed values for the setting.
         /// </summary>
         public IList<string> AllowedValues { get; set; } = new List<string>();
-
+        
         /// <summary>
         /// The value mapping for allowed values. The key of the dictionary is what is sent to services
         /// and the value is the display value shown to users.

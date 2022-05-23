@@ -17,6 +17,7 @@ using AWS.Deploy.Orchestration;
 using Moq;
 using Should;
 using Xunit;
+using AWS.Deploy.Common.Data;
 
 namespace AWS.Deploy.CLI.UnitTests
 {
@@ -24,13 +25,18 @@ namespace AWS.Deploy.CLI.UnitTests
     {
         private readonly IDirectoryManager _directoryManager;
         private readonly IOptionSettingHandler _optionSettingHandler;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly Mock<IAWSResourceQueryer> _awsResourceQueryer;
+        private readonly Mock<IServiceProvider> _serviceProvider;
 
         public ConsoleUtilitiesTests()
         {
-            _serviceProvider = new Mock<IServiceProvider>().Object;
             _directoryManager = new TestDirectoryManager();
-            _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider));
+            _awsResourceQueryer = new Mock<IAWSResourceQueryer>();
+            _serviceProvider = new Mock<IServiceProvider>();
+            _serviceProvider
+                .Setup(x => x.GetService(typeof(IAWSResourceQueryer)))
+                .Returns(_awsResourceQueryer.Object);
+            _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider.Object));
         }
 
         private readonly List<OptionItem> _options = new List<OptionItem>

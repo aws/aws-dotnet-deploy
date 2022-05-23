@@ -5,6 +5,7 @@ using AWS.Deploy.CLI.Commands;
 using AWS.Deploy.CLI.Commands.TypeHints;
 using AWS.Deploy.CLI.Utilities;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.DeploymentManifest;
 using AWS.Deploy.Common.Extensions;
 using AWS.Deploy.Common.IO;

@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Amazon.CloudFormation;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.Extensions;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;

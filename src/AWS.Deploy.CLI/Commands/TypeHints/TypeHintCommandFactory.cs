@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.TypeHintData;
@@ -67,7 +68,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 { OptionSettingTypeHint.ExistingVpcConnector,  ActivatorUtilities.CreateInstance<ExistingVpcConnectorCommand>(serviceProvider) },
                 { OptionSettingTypeHint.ExistingSubnets,  ActivatorUtilities.CreateInstance<ExistingSubnetsCommand>(serviceProvider) },
                 { OptionSettingTypeHint.ExistingSecurityGroups, ActivatorUtilities.CreateInstance<ExistingSecurityGroupsCommand>(serviceProvider) },
-                { OptionSettingTypeHint.VPCConnector, ActivatorUtilities.CreateInstance<VPCConnectorCommand>(serviceProvider) }
+                { OptionSettingTypeHint.VPCConnector, ActivatorUtilities.CreateInstance<VPCConnectorCommand>(serviceProvider) },
             };
         }
 

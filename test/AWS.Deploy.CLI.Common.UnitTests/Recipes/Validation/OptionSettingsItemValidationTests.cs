@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using System.Threading.Tasks;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Recipes.Validation;
 using AWS.Deploy.Orchestration;
@@ -24,20 +26,25 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
     {
         private readonly ITestOutputHelper _output;
         private readonly IOptionSettingHandler _optionSettingHandler;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly Mock<IAWSResourceQueryer> _awsResourceQueryer;
+        private readonly Mock<IServiceProvider> _serviceProvider;
 
         public OptionSettingsItemValidationTests(ITestOutputHelper output)
         {
             _output = output;
-            _serviceProvider = new Mock<IServiceProvider>().Object;
-            _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider));
+            _awsResourceQueryer = new Mock<IAWSResourceQueryer>();
+            _serviceProvider = new Mock<IServiceProvider>();
+            _serviceProvider
+                .Setup(x => x.GetService(typeof(IAWSResourceQueryer)))
+                .Returns(_awsResourceQueryer.Object);
+            _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider.Object));
         }
 
         [Theory]
         [InlineData("")]
         [InlineData("-10")]
         [InlineData("100")]
-        public void InvalidInputInMultipleValidatorsThrowsException(string invalidValue)
+        public async Task InvalidInputInMultipleValidatorsThrowsException(string invalidValue)
         {
             var optionSettingItem = new OptionSettingItem("id", "name", "description")
             {
@@ -64,7 +71,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             // ACT
             try
             {
-                _optionSettingHandler.SetOptionSettingValue(null, optionSettingItem, invalidValue);
+                await _optionSettingHandler.SetOptionSettingValue(null, optionSettingItem, invalidValue);
             }
             catch (ValidationFailedException e)
             {
@@ -77,7 +84,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         }
 
         [Fact]
-        public void InvalidInputInSingleValidatorThrowsException()
+        public async Task InvalidInputInSingleValidatorThrowsException()
         {
             var invalidValue = "lowercase_only";
             var optionSettingItem = new OptionSettingItem("id", "name", "description")
@@ -100,7 +107,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             // ACT
             try
             {
-                _optionSettingHandler.SetOptionSettingValue(null, optionSettingItem, invalidValue);
+                await _optionSettingHandler.SetOptionSettingValue(null, optionSettingItem, invalidValue);
             }
             catch (ValidationFailedException e)
             {
@@ -113,7 +120,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         }
 
         [Fact]
-        public void ValidInputDoesNotThrowException()
+        public async Task ValidInputDoesNotThrowException()
         {
             var validValue = 8;
 
@@ -142,7 +149,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             // ACT
             try
             {
-                _optionSettingHandler.SetOptionSettingValue(null, optionSettingItem, validValue);
+                await _optionSettingHandler.SetOptionSettingValue(null, optionSettingItem, validValue);
             }
             catch (ValidationFailedException e)
             {
@@ -158,7 +165,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         /// helps tests several important concepts.
         /// </remarks>
         [Fact]
-        public void CustomValidatorMessagePropagatesToValidationException()
+        public async Task CustomValidatorMessagePropagatesToValidationException()
         {
             // ARRANGE
             var customValidationMessage = "Custom Validation Message: Testing!";
@@ -186,7 +193,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             // ACT
             try
             {
-                _optionSettingHandler.SetOptionSettingValue(null, optionSettingItem, invalidValue);
+                await _optionSettingHandler.SetOptionSettingValue(null, optionSettingItem, invalidValue);
             }
             catch (ValidationFailedException e)
             {

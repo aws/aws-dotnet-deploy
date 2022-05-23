@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Amazon.ElasticLoadBalancingV2;
+using AWS.Deploy.Common.Data;
 using AWS.Deploy.Orchestration.Data;
 
 namespace AWS.Deploy.Orchestration.DisplayedResources

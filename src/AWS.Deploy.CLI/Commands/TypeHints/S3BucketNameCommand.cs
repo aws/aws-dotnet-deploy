@@ -10,6 +10,7 @@ using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.TypeHintData;
 using AWS.Deploy.Orchestration.Data;
 using Amazon.S3.Model;
+using AWS.Deploy.Common.Data;
 
 namespace AWS.Deploy.CLI.Commands.TypeHints
 {

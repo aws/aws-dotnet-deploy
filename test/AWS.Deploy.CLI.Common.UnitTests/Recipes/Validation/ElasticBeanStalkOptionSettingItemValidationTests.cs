@@ -2,7 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Amazon.ElasticBeanstalk.Model;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Recipes.Validation;
 using AWS.Deploy.Orchestration;
@@ -15,24 +19,29 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
     public class ElasticBeanStalkOptionSettingItemValidationTests
     {
         private readonly IOptionSettingHandler _optionSettingHandler;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly Mock<IAWSResourceQueryer> _awsResourceQueryer;
+        private readonly Mock<IServiceProvider> _serviceProvider;
 
         public ElasticBeanStalkOptionSettingItemValidationTests()
         {
-            _serviceProvider = new Mock<IServiceProvider>().Object;
-            _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider));
+            _awsResourceQueryer = new Mock<IAWSResourceQueryer>();
+            _serviceProvider = new Mock<IServiceProvider>();
+            _serviceProvider
+                .Setup(x => x.GetService(typeof(IAWSResourceQueryer)))
+                .Returns(_awsResourceQueryer.Object);
+            _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider.Object));
         }
 
         [Theory]
         [InlineData("12345sas", true)]
         [InlineData("435&*abc@3123", true)]
         [InlineData("abc/123/#", false)] // invalid character forward slash(/)
-        public void ApplicationNameValidationTest(string value, bool isValid)
+        public async Task ApplicationNameValidationTest(string value, bool isValid)
         {
             var optionSettingItem = new OptionSettingItem("id", "name", "description");
             //can contain up to 100 Unicode characters, not including forward slash (/).
             optionSettingItem.Validators.Add(GetRegexValidatorConfig("^[^/]{1,100}$"));
-            Validate(optionSettingItem, value, isValid);
+            await Validate(optionSettingItem, value, isValid);
         }
 
         [Theory]
@@ -40,13 +49,13 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         [InlineData("abc-ABC-123-xyz", true)]
         [InlineData("abc", false)] // invalid length less than 4 characters.
         [InlineData("-12-abc", false)] // invalid character leading hyphen (-)
-        public void EnvironmentNameValidationTest(string value, bool isValid)
+        public async Task EnvironmentNameValidationTest(string value, bool isValid)
         {
             var optionSettingItem = new OptionSettingItem("id", "name", "description");
             // Must be from 4 to 40 characters in length. The name can contain only letters, numbers, and hyphens.
             // It can't start or end with a hyphen.
             optionSettingItem.Validators.Add(GetRegexValidatorConfig("^[a-zA-Z0-9][a-zA-Z0-9-]{2,38}[a-zA-Z0-9]$"));
-            Validate(optionSettingItem, value, isValid);
+            await Validate(optionSettingItem, value, isValid);
         }
 
         [Theory]
@@ -56,11 +65,11 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         [InlineData("arn:aws:iam::123456789012:role/S3Access", true)]
         [InlineData("arn:aws:IAM::123456789012:role/S3Access", false)] //invalid uppercase IAM
         [InlineData("arn:aws:iam::1234567890124354:role/S3Access", false)] //invalid account ID
-        public void IAMRoleArnValidationTest(string value, bool isValid)
+        public async Task IAMRoleArnValidationTest(string value, bool isValid)
         {
             var optionSettingItem = new OptionSettingItem("id", "name", "description");
             optionSettingItem.Validators.Add(GetRegexValidatorConfig("arn:.+:iam::[0-9]{12}:.+"));
-            Validate(optionSettingItem, value, isValid);
+            await Validate(optionSettingItem, value, isValid);
         }
 
         [Theory]
@@ -68,12 +77,12 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         [InlineData("abc 1234 xyz", true)]
         [InlineData(" abc 123-xyz", false)] //leading space
         [InlineData(" 123 abc-456 ", false)] //leading and trailing space
-        public void EC2KeyPairValidationTest(string value, bool isValid)
+        public async Task EC2KeyPairValidationTest(string value, bool isValid)
         {
             var optionSettingItem = new OptionSettingItem("id", "name", "description");
             // It allows all ASCII characters but without leading and trailing spaces
             optionSettingItem.Validators.Add(GetRegexValidatorConfig("^(?! ).+(?<! )$"));
-            Validate(optionSettingItem, value, isValid);
+            await Validate(optionSettingItem, value, isValid);
         }
 
         [Theory]
@@ -83,11 +92,11 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         [InlineData("arn:aws:elasticbeanstalk:us-west-2::platform/MyPlatform/v1.0", true)]
         [InlineData("arn:aws:elasticbeanstalk:us-east-1:123456789012:platform/", false)] //no resource path
         [InlineData("arn:aws:elasticbeanstack:eu-west-1:123456789012:platform/MyPlatform", false)] //Typo elasticbeanstack instead of elasticbeanstalk
-        public void ElasticBeanstalkPlatformArnValidationTest(string value, bool isValid)
+        public async Task ElasticBeanstalkPlatformArnValidationTest(string value, bool isValid)
         {
             var optionSettingItem = new OptionSettingItem("id", "name", "description");
             optionSettingItem.Validators.Add(GetRegexValidatorConfig("arn:[^:]+:elasticbeanstalk:[^:]+:[^:]*:platform/.+"));
-            Validate(optionSettingItem, value, isValid);
+            await Validate(optionSettingItem, value, isValid);
         }
 
         [Theory]
@@ -97,11 +106,60 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         [InlineData("PT1H20M30S", true)]
         [InlineData("invalid", false)]
         [InlineData("PTB1H20M30S", false)]
-        public void ElasticBeanstalkRollingUpdatesPauseTime(string value, bool isValid)
+        public async Task ElasticBeanstalkRollingUpdatesPauseTime(string value, bool isValid)
         {
             var optionSettingItem = new OptionSettingItem("id", "name", "description");
             optionSettingItem.Validators.Add(GetRegexValidatorConfig("^P([0-9]+(?:[,\\.][0-9]+)?Y)?([0-9]+(?:[,\\.][0-9]+)?M)?([0-9]+(?:[,\\.][0-9]+)?D)?(?:T([0-9]+(?:[,\\.][0-9]+)?H)?([0-9]+(?:[,\\.][0-9]+)?M)?([0-9]+(?:[,\\.][0-9]+)?S)?)?$"));
-            Validate(optionSettingItem, value, isValid);
+            await Validate(optionSettingItem, value, isValid);
+        }
+
+        [Fact]
+        public async Task ExistingApplicationNameValidationTest_Valid()
+        {
+            _awsResourceQueryer.Setup(x => x.ListOfElasticBeanstalkApplications(It.IsAny<string>())).ReturnsAsync(new List<ApplicationDescription> { });
+            var optionSettingItem = new OptionSettingItem("id", "name", "description");
+            optionSettingItem.Validators.Add(GetExistingResourceValidatorConfig("AWS::ElasticBeanstalk::Application"));
+            await Validate(optionSettingItem, "WebApp1", true);
+        }
+
+        [Fact]
+        public async Task ExistingApplicationNameValidationTest_Invalid()
+        {
+            _awsResourceQueryer.Setup(x => x.ListOfElasticBeanstalkApplications(It.IsAny<string>())).ReturnsAsync(new List<ApplicationDescription> { new ApplicationDescription { ApplicationName = "WebApp1" } });
+            var optionSettingItem = new OptionSettingItem("id", "name", "description");
+            optionSettingItem.Validators.Add(GetExistingResourceValidatorConfig("AWS::ElasticBeanstalk::Application"));
+            await Validate(optionSettingItem, "WebApp1", false);
+        }
+
+        [Fact]
+        public async Task ExistingEnvironmentNameValidationTest_Valid()
+        {
+            _awsResourceQueryer.Setup(x => x.ListOfElasticBeanstalkEnvironments(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(new List<EnvironmentDescription> { });
+            var optionSettingItem = new OptionSettingItem("id", "name", "description");
+            optionSettingItem.Validators.Add(GetExistingResourceValidatorConfig("AWS::ElasticBeanstalk::Environment"));
+            await Validate(optionSettingItem, "WebApp1", true);
+        }
+
+        [Fact]
+        public async Task ExistingEnvironmentNameValidationTest_Invalid()
+        {
+            _awsResourceQueryer.Setup(x => x.ListOfElasticBeanstalkEnvironments(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(new List<EnvironmentDescription> { new EnvironmentDescription { EnvironmentName = "WebApp1" } });
+            var optionSettingItem = new OptionSettingItem("id", "name", "description");
+            optionSettingItem.Validators.Add(GetExistingResourceValidatorConfig("AWS::ElasticBeanstalk::Environment"));
+            await Validate(optionSettingItem, "WebApp1", false);
+        }
+
+        private OptionSettingItemValidatorConfig GetExistingResourceValidatorConfig(string type)
+        {
+            var existingResourceValidatorConfig = new OptionSettingItemValidatorConfig
+            {
+                ValidatorType = OptionSettingItemValidatorList.ExistingResource,
+                Configuration = new ExistingResourceValidator(_awsResourceQueryer.Object)
+                {
+                    ResourceType = type
+                }
+            };
+            return existingResourceValidatorConfig;
         }
 
         [Theory]
@@ -113,7 +171,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         [InlineData("--configuration Release", false)]
         [InlineData("--self-contained true", false)]    // --self-contained is controlled by SelfContainedBuild instead
         [InlineData("--no-self-contained", false)]
-        public void DotnetPublishArgsValidationTest(string value, bool isValid)
+        public async Task DotnetPublishArgsValidationTest(string value, bool isValid)
         {
             var optionSettingItem = new OptionSettingItem("id", "name", "description");
             optionSettingItem.Validators.Add(new OptionSettingItemValidatorConfig
@@ -121,7 +179,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
                 ValidatorType = OptionSettingItemValidatorList.DotnetPublishArgs
             });
 
-            Validate(optionSettingItem, value, isValid);
+            await Validate(optionSettingItem, value, isValid);
         }
 
         private OptionSettingItemValidatorConfig GetRegexValidatorConfig(string regex)
@@ -151,13 +209,13 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             return rangeValidatorConfig;
         }
 
-        private void Validate<T>(OptionSettingItem optionSettingItem, T value, bool isValid)
+        private async Task Validate<T>(OptionSettingItem optionSettingItem, T value, bool isValid)
         {
             ValidationFailedException exception = null;
 
             try
             {
-                _optionSettingHandler.SetOptionSettingValue(null, optionSettingItem, value);
+                await _optionSettingHandler.SetOptionSettingValue(null, optionSettingItem, value);
             }
             catch (ValidationFailedException e)
             {

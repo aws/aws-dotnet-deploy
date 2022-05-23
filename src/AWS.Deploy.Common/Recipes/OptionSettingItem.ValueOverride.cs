@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AWS.Deploy.Common.Recipes.Validation;
 using Newtonsoft.Json;
 
@@ -92,21 +93,24 @@ namespace AWS.Deploy.Common.Recipes
         /// Thrown if one or more <see cref="Validators"/> determine
         /// <paramref name="valueOverride"/> is not valid.
         /// </exception>
-        public void SetValue(IOptionSettingHandler optionSettingHandler, object valueOverride, IOptionSettingItemValidator[] validators, Recommendation recommendation)
+        public async Task SetValue(IOptionSettingHandler optionSettingHandler, object valueOverride, IOptionSettingItemValidator[] validators, Recommendation recommendation, bool skipValidation)
         {
-            var isValid = true;
-            var validationFailedMessage = string.Empty;
-            foreach (var validator in validators)
+            if (!skipValidation)
             {
-                var result = validator.Validate(valueOverride);
-                if (!result.IsValid)
+                var isValid = true;
+                var validationFailedMessage = string.Empty;
+                foreach (var validator in validators)
                 {
-                    isValid = false;
-                    validationFailedMessage += result.ValidationFailedMessage + Environment.NewLine;
+                    var result = await validator.Validate(valueOverride);
+                    if (!result.IsValid)
+                    {
+                        isValid = false;
+                        validationFailedMessage += result.ValidationFailedMessage + Environment.NewLine;
+                    }
                 }
+                if (!isValid)
+                    throw new ValidationFailedException(DeployToolErrorCode.OptionSettingItemValueValidationFailed, validationFailedMessage.Trim());
             }
-            if (!isValid)
-                throw new ValidationFailedException(DeployToolErrorCode.OptionSettingItemValueValidationFailed, validationFailedMessage.Trim());
 
             if (AllowedValues != null && AllowedValues.Count > 0 && valueOverride != null &&
                 !AllowedValues.Contains(valueOverride.ToString() ?? ""))
@@ -148,7 +152,7 @@ namespace AWS.Deploy.Common.Recipes
                 {
                     if (deserialized.TryGetValue(childOptionSetting.Id, out var childValueOverride))
                     {
-                        optionSettingHandler.SetOptionSettingValue(recommendation, childOptionSetting, childValueOverride);
+                        await optionSettingHandler.SetOptionSettingValue(recommendation, childOptionSetting, childValueOverride, skipValidation: skipValidation);
                     }
                 }
             }

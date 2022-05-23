@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Amazon.ECR.Model;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.Utilities;

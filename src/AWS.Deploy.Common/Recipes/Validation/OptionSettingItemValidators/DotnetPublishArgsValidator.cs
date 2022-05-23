@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using System.Threading.Tasks;
 
 namespace AWS.Deploy.Common.Recipes.Validation
 {
@@ -15,14 +16,14 @@ namespace AWS.Deploy.Common.Recipes.Validation
         /// </summary>
         /// <param name="input">Additional publish arguments</param>
         /// <returns>Valid if the arguments don't interfere with the deploy tool, invalid otherwise</returns>
-        public ValidationResult Validate(object input)
+        public Task<ValidationResult> Validate(object input)
         {
             var publishArgs = Convert.ToString(input);
             var errorMessage = string.Empty;
 
             if (string.IsNullOrEmpty(publishArgs))
             {
-                return ValidationResult.Valid();
+                return ValidationResult.ValidAsync();
             }
 
             if (publishArgs.Contains("-o ") || publishArgs.Contains("--output "))
@@ -35,9 +36,9 @@ namespace AWS.Deploy.Common.Recipes.Validation
                 errorMessage += "You must not include --self-contained/--no-self-contained as an additional argument. You can set the self-contained property in the advanced settings." + Environment.NewLine;
 
             if (!string.IsNullOrEmpty(errorMessage))
-                return ValidationResult.Failed("Invalid value for Dotnet Publish Arguments." + Environment.NewLine + errorMessage.Trim());
+                return ValidationResult.FailedAsync("Invalid value for Dotnet Publish Arguments." + Environment.NewLine + errorMessage.Trim());
 
-            return ValidationResult.Valid();
+            return ValidationResult.ValidAsync();
         }
     }
 }

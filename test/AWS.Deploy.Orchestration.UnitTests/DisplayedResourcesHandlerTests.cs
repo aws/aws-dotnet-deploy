@@ -8,6 +8,7 @@ using Amazon.CloudFormation.Model;
 using Amazon.ElasticBeanstalk.Model;
 using Amazon.Runtime;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.DisplayedResources;

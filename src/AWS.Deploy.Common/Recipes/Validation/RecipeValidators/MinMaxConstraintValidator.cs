@@ -1,6 +1,8 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Threading.Tasks;
+
 namespace AWS.Deploy.Common.Recipes.Validation
 {
     /// <summary>
@@ -21,7 +23,7 @@ namespace AWS.Deploy.Common.Recipes.Validation
         public string MaxValueOptionSettingsId { get; set; } = string.Empty;
         public string ValidationFailedMessage { get; set; } = "The value specified for {{MinValueOptionSettingsId}} must be less than or equal to the value specified for {{MaxValueOptionSettingsId}}";
 
-        public ValidationResult Validate(Recommendation recommendation, IDeployToolValidationContext deployValidationContext)
+        public Task<ValidationResult> Validate(Recommendation recommendation, IDeployToolValidationContext deployValidationContext)
         {
             double minVal;
             double maxValue;
@@ -33,18 +35,18 @@ namespace AWS.Deploy.Common.Recipes.Validation
             }
             catch (OptionSettingItemDoesNotExistException)
             {
-                return ValidationResult.Failed($"Could not find a valid value for {MinValueOptionSettingsId} or {MaxValueOptionSettingsId}. Please provide a valid value and try again.");
+                return Task.FromResult<ValidationResult>(ValidationResult.Failed($"Could not find a valid value for {MinValueOptionSettingsId} or {MaxValueOptionSettingsId}. Please provide a valid value and try again."));
             }
 
             if (minVal <= maxValue)
-                return ValidationResult.Valid();
+                return Task.FromResult<ValidationResult>(ValidationResult.Valid());
 
             var failureMessage =
                 ValidationFailedMessage
                     .Replace("{{MinValueOptionSettingsId}}", MinValueOptionSettingsId)
                     .Replace("{{MaxValueOptionSettingsId}}", MaxValueOptionSettingsId);
 
-            return ValidationResult.Failed(failureMessage);
+            return Task.FromResult<ValidationResult>(ValidationResult.Failed(failureMessage));
         }
     }
 }
