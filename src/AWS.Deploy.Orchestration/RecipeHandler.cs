@@ -21,12 +21,16 @@ namespace AWS.Deploy.Orchestration
         private readonly IOrchestratorInteractiveService _orchestratorInteractiveService;
         private readonly IDeploymentManifestEngine _deploymentManifestEngine;
         private readonly IDirectoryManager _directoryManager;
+        private readonly IFileManager _fileManager;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
-        public RecipeHandler(IDeploymentManifestEngine deploymentManifestEngine, IOrchestratorInteractiveService orchestratorInteractiveService, IDirectoryManager directoryManager)
+        public RecipeHandler(IDeploymentManifestEngine deploymentManifestEngine, IOrchestratorInteractiveService orchestratorInteractiveService, IDirectoryManager directoryManager, IFileManager fileManager, IOptionSettingHandler optionSettingHandler)
         {
             _orchestratorInteractiveService = orchestratorInteractiveService;
             _deploymentManifestEngine = deploymentManifestEngine;
             _directoryManager = directoryManager;
+            _fileManager = fileManager;
+            _optionSettingHandler = optionSettingHandler;
         }
 
         public async Task<List<RecipeDefinition>> GetRecipeDefinitions(ProjectDefinition? projectDefinition, List<string>? recipeDefinitionPaths = null)
@@ -50,17 +54,24 @@ namespace AWS.Deploy.Orchestration
             {
                 foreach(var recipeDefinitionsPath in recipeDefinitionPaths)
                 {
-                    foreach (var recipeDefinitionFile in Directory.GetFiles(recipeDefinitionsPath, "*.recipe", SearchOption.TopDirectoryOnly))
+                    foreach (var recipeDefinitionFile in _directoryManager.GetFiles(recipeDefinitionsPath, "*.recipe", SearchOption.TopDirectoryOnly))
                     {
                         try
                         {
-                            var content = File.ReadAllText(recipeDefinitionFile);
+                            var content = await _fileManager.ReadAllTextAsync(recipeDefinitionFile);
                             var definition = JsonConvert.DeserializeObject<RecipeDefinition>(content);
                             if (definition == null)
                                 throw new FailedToDeserializeException(DeployToolErrorCode.FailedToDeserializeRecipe, $"Failed to Deserialize Recipe Definition [{recipeDefinitionFile}]");
                             definition.RecipePath = recipeDefinitionFile;
                             if (!uniqueRecipeId.Contains(definition.Id))
                             {
+                                var dependencyTree = new Dictionary<string, List<string>>();
+                                BuildDependencyTree(definition, definition.OptionSettings, dependencyTree);
+                                foreach (var dependee in dependencyTree.Keys)
+                                {
+                                    var optionSetting = _optionSettingHandler.GetOptionSetting(definition, dependee);
+                                    optionSetting.Dependents = dependencyTree[dependee];
+                                }
                                 recipeDefinitions.Add(definition);
                                 uniqueRecipeId.Add(definition.Id);
                             }
@@ -224,6 +235,34 @@ namespace AWS.Deploy.Orchestration
             }
 
             return recipeFilePaths.All(filePath => Path.GetFileNameWithoutExtension(filePath).Equals(directoryName, StringComparison.Ordinal));
+        }
+
+        /// Creates an option setting item dependency tree that indicates
+        /// which option setting items need to be validated if a value update occurs.
+        /// The function recursively goes through all the settings and their children to build this tree.
+        /// This method also creates a Fully Qualified Id which will help reference <see cref="OptionSettingItem"/>.
+        /// </summary>
+        private void BuildDependencyTree(RecipeDefinition recipe, List<OptionSettingItem> optionSettingItems, Dictionary<string, List<string>> dependencyTree, string parentFullyQualifiedId = "")
+        {
+            foreach (var optionSettingItem in optionSettingItems)
+            {
+                optionSettingItem.FullyQualifiedId = string.IsNullOrEmpty(parentFullyQualifiedId)
+                    ? optionSettingItem.Id
+                    : $"{parentFullyQualifiedId}.{optionSettingItem.Id}";
+                optionSettingItem.ParentId = parentFullyQualifiedId;
+                foreach (var dependency in optionSettingItem.DependsOn)
+                {
+                    if (dependencyTree.ContainsKey(dependency.Id))
+                    {
+                        dependencyTree[dependency.Id].Add(optionSettingItem.FullyQualifiedId);
+                    }
+                    else
+                    {
+                        dependencyTree[dependency.Id] = new List<string> { optionSettingItem.FullyQualifiedId };
+                    }
+                }
+                BuildDependencyTree(recipe, optionSettingItem.ChildOptionSettings, dependencyTree, optionSettingItem.FullyQualifiedId);
+            }
         }
     }
 }
