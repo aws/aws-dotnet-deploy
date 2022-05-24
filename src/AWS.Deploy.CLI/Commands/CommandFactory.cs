@@ -71,12 +71,12 @@ namespace AWS.Deploy.CLI.Commands
         private readonly IDirectoryManager _directoryManager;
         private readonly IFileManager _fileManager;
         private readonly IDeploymentManifestEngine _deploymentManifestEngine;
-        private readonly ICustomRecipeLocator _customRecipeLocator;
         private readonly ILocalUserSettingsEngine _localUserSettingsEngine;
         private readonly ICDKVersionDetector _cdkVersionDetector;
         private readonly IAWSServiceHandler _awsServiceHandler;
         private readonly IOptionSettingHandler _optionSettingHandler;
         private readonly IValidatorFactory _validatorFactory;
+        private readonly IRecipeHandler _recipeHandler;
 
         public CommandFactory(
             IServiceProvider serviceProvider,
@@ -100,12 +100,12 @@ namespace AWS.Deploy.CLI.Commands
             IDirectoryManager directoryManager,
             IFileManager fileManager,
             IDeploymentManifestEngine deploymentManifestEngine,
-            ICustomRecipeLocator customRecipeLocator,
             ILocalUserSettingsEngine localUserSettingsEngine,
             ICDKVersionDetector cdkVersionDetector,
             IAWSServiceHandler awsServiceHandler,
             IOptionSettingHandler optionSettingHandler,
-            IValidatorFactory validatorFactory)
+            IValidatorFactory validatorFactory,
+            IRecipeHandler recipeHandler)
         {
             _serviceProvider = serviceProvider;
             _toolInteractiveService = toolInteractiveService;
@@ -128,12 +128,12 @@ namespace AWS.Deploy.CLI.Commands
             _directoryManager = directoryManager;
             _fileManager = fileManager;
             _deploymentManifestEngine = deploymentManifestEngine;
-            _customRecipeLocator = customRecipeLocator;
             _localUserSettingsEngine = localUserSettingsEngine;
             _cdkVersionDetector = cdkVersionDetector;
             _awsServiceHandler = awsServiceHandler;
             _optionSettingHandler = optionSettingHandler;
             _validatorFactory = validatorFactory;
+            _recipeHandler = recipeHandler;
         }
 
         public Command BuildRootCommand()
@@ -229,14 +229,14 @@ namespace AWS.Deploy.CLI.Commands
                         _cloudApplicationNameGenerator,
                         _localUserSettingsEngine,
                         _consoleUtilities,
-                        _customRecipeLocator,
                         _systemCapabilityEvaluator,
                         session,
                         _directoryManager,
                         _fileManager,
                         _awsServiceHandler,
                         _optionSettingHandler,
-                        _validatorFactory);
+                        _validatorFactory,
+                        _recipeHandler);
 
                     var deploymentProjectPath = input.DeploymentProject ?? string.Empty;
                     if (!string.IsNullOrEmpty(deploymentProjectPath))

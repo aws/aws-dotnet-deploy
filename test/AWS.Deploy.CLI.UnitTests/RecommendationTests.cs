@@ -11,6 +11,7 @@ using AWS.Deploy.CLI.TypeHintResponses;
 using AWS.Deploy.CLI.UnitTests.Utilities;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Data;
+using AWS.Deploy.Common.DeploymentManifest;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Recipes.Validation;
@@ -30,6 +31,10 @@ namespace AWS.Deploy.CLI.UnitTests
         private readonly IOptionSettingHandler _optionSettingHandler;
         private readonly Mock<IAWSResourceQueryer> _awsResourceQueryer;
         private readonly Mock<IServiceProvider> _serviceProvider;
+        private readonly IDeploymentManifestEngine _deploymentManifestEngine;
+        private readonly IOrchestratorInteractiveService _orchestratorInteractiveService;
+        private readonly IFileManager _fileManager;
+        private readonly IRecipeHandler _recipeHandler;
 
         public RecommendationTests()
         {
@@ -39,6 +44,12 @@ namespace AWS.Deploy.CLI.UnitTests
             _serviceProvider
                 .Setup(x => x.GetService(typeof(IAWSResourceQueryer)))
                 .Returns(_awsResourceQueryer.Object);
+            _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider.Object));
+            _directoryManager = new DirectoryManager();
+            _fileManager = new TestFileManager();
+            _deploymentManifestEngine = new DeploymentManifestEngine(_directoryManager, _fileManager);
+            _orchestratorInteractiveService = new TestToolOrchestratorInteractiveService();
+            _recipeHandler = new RecipeHandler(_deploymentManifestEngine, _orchestratorInteractiveService, _directoryManager);
             _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider.Object));
         }
 
@@ -57,7 +68,7 @@ namespace AWS.Deploy.CLI.UnitTests
                 AWSProfileName = "default"
             };
 
-            return new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, _session);
+            return new RecommendationEngine(_session, _recipeHandler);
         }
 
         [Fact]
@@ -350,7 +361,7 @@ namespace AWS.Deploy.CLI.UnitTests
             {
                 AWSProfileName = "default"
             };
-            var engine = new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, session);
+            var engine = new RecommendationEngine(session, _recipeHandler);
 
             Assert.Equal(expectedResult, engine.ShouldInclude(effect, testPass));
         }

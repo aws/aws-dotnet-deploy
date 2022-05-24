@@ -65,7 +65,7 @@ namespace AWS.Deploy.CLI.Commands
         /// <returns></returns>
         public async Task ExecuteAsync(string saveCdkDirectoryPath, string projectDisplayName)
         {
-            var orchestrator = new Orchestrator(_session, new[] { RecipeLocator.FindRecipeDefinitionsPath() });
+            var orchestrator = new Orchestrator(_session);
             var recommendations = await GenerateRecommendationsToSaveDeploymentProject(orchestrator);
             var selectedRecommendation = _consoleUtilities.AskToChooseRecommendation(recommendations);
 

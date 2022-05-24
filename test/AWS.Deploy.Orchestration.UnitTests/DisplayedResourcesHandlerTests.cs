@@ -9,7 +9,9 @@ using Amazon.ElasticBeanstalk.Model;
 using Amazon.Runtime;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Data;
+using AWS.Deploy.Common.DeploymentManifest;
 using AWS.Deploy.Common.IO;
+using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.DisplayedResources;
 using AWS.Deploy.Orchestration.UnitTests.Utilities;
@@ -30,9 +32,19 @@ namespace AWS.Deploy.Orchestration.UnitTests
         private readonly EnvironmentDescription _environmentDescription;
         private readonly LoadBalancer _loadBalancer;
         private OrchestratorSession _session;
+        private readonly IDeploymentManifestEngine _deploymentManifestEngine;
+        private readonly Mock<IOrchestratorInteractiveService> _orchestratorInteractiveService;
+        private readonly IDirectoryManager _directoryManager;
+        private readonly IFileManager _fileManager;
+        private readonly IRecipeHandler _recipeHandler;
 
         public DisplayedResourcesHandlerTests()
         {
+            _directoryManager = new DirectoryManager();
+            _fileManager = new FileManager();
+            _deploymentManifestEngine = new DeploymentManifestEngine(_directoryManager, _fileManager);
+            _orchestratorInteractiveService = new Mock<IOrchestratorInteractiveService>();
+            _recipeHandler = new RecipeHandler(_deploymentManifestEngine, _orchestratorInteractiveService.Object, _directoryManager);
             _mockAWSResourceQueryer = new Mock<IAWSResourceQueryer>();
             _cloudApplication = new CloudApplication("StackName", "UniqueId", CloudApplicationResourceType.CloudFormationStack, "RecipeId");
             _displayedResourcesFactory = new DisplayedResourceCommandFactory(_mockAWSResourceQueryer.Object);
@@ -57,7 +69,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
                 AWSProfileName = "default"
             };
 
-            return new RecommendationEngine.RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, _session);
+            return new RecommendationEngine.RecommendationEngine(_session, _recipeHandler);
         }
 
         [Fact]

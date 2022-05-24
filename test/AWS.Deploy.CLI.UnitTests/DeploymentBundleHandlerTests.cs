@@ -10,6 +10,7 @@ using Amazon.Runtime;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.CLI.UnitTests.Utilities;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.DeploymentManifest;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestration;
@@ -27,6 +28,10 @@ namespace AWS.Deploy.CLI.UnitTests
         private readonly TestDirectoryManager _directoryManager;
         private readonly ProjectDefinitionParser _projectDefinitionParser;
         private readonly RecipeDefinition _recipeDefinition;
+        private readonly IFileManager _fileManager;
+        private readonly IDeploymentManifestEngine _deploymentManifestEngine;
+        private readonly IOrchestratorInteractiveService _orchestratorInteractiveService;
+        private readonly IRecipeHandler _recipeHandler;
 
         public DeploymentBundleHandlerTests()
         {
@@ -35,7 +40,11 @@ namespace AWS.Deploy.CLI.UnitTests
             var zipFileManager = new TestZipFileManager();
 
             _commandLineWrapper = new TestToolCommandLineWrapper();
+            _fileManager = new TestFileManager();
             _directoryManager = new TestDirectoryManager();
+            _deploymentManifestEngine = new DeploymentManifestEngine(_directoryManager, _fileManager);
+            _orchestratorInteractiveService = new TestToolOrchestratorInteractiveService();
+            _recipeHandler = new RecipeHandler(_deploymentManifestEngine, _orchestratorInteractiveService, _directoryManager);
             _projectDefinitionParser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
 
             _deploymentBundleHandler = new DeploymentBundleHandler(_commandLineWrapper, awsResourceQueryer, interactiveService, _directoryManager, zipFileManager);
@@ -170,7 +179,7 @@ namespace AWS.Deploy.CLI.UnitTests
                 AWSProfileName = "default"
             };
 
-            return new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, session);
+            return new RecommendationEngine(session, _recipeHandler);
         }
 
         [Fact]

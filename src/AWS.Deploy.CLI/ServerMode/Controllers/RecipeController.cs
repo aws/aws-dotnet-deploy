@@ -8,6 +8,7 @@ using AWS.Deploy.CLI.ServerMode.Models;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.DeploymentManifest;
 using AWS.Deploy.Common.IO;
+using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.Utilities;
 using Microsoft.AspNetCore.Mvc;
@@ -20,12 +21,12 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
     [Route("api/v1/[controller]")]
     public class RecipeController : ControllerBase
     {
-        private readonly ICustomRecipeLocator _customRecipeLocator;
+        private readonly IRecipeHandler _recipeHandler;
         private readonly IProjectDefinitionParser _projectDefinitionParser;
 
-        public RecipeController(ICustomRecipeLocator customRecipeLocator, IProjectDefinitionParser projectDefinitionParser)
+        public RecipeController(IRecipeHandler recipeHandler, IProjectDefinitionParser projectDefinitionParser)
         {
-            _customRecipeLocator = customRecipeLocator;
+            _recipeHandler = recipeHandler;
             _projectDefinitionParser = projectDefinitionParser;
         }
 
@@ -48,7 +49,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             {
                 projectDefinition = await _projectDefinitionParser.Parse(projectPath);
             }
-            var recipeDefinitions = await RecipeHandler.GetRecipeDefinitions(_customRecipeLocator, projectDefinition);
+            var recipeDefinitions = await _recipeHandler.GetRecipeDefinitions(projectDefinition);
             var selectedRecipeDefinition = recipeDefinitions.FirstOrDefault(x => x.Id.Equals(recipeId));
 
             if (selectedRecipeDefinition == null)
