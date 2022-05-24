@@ -41,7 +41,10 @@ namespace AWS.Deploy.CLI.UnitTests
             _fileManager = new FileManager();
             _deploymentManifestEngine = new DeploymentManifestEngine(_directoryManager, _fileManager);
             _orchestratorInteractiveService = new TestToolOrchestratorInteractiveService();
-            _recipeHandler = new RecipeHandler(_deploymentManifestEngine, _orchestratorInteractiveService, _directoryManager);
+            var serviceProvider = new Mock<IServiceProvider>();
+            var validatorFactory = new ValidatorFactory(serviceProvider.Object);
+            var optionSettingHandler = new OptionSettingHandler(validatorFactory);
+            _recipeHandler = new RecipeHandler(_deploymentManifestEngine, _orchestratorInteractiveService, _directoryManager, optionSettingHandler);
 
             var parser = new ProjectDefinitionParser(new FileManager(), _directoryManager);
             var awsCredentials = new Mock<AWSCredentials>();

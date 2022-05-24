@@ -48,7 +48,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         [InlineData("arn:aws:ecs:us-east-1:012345678910:fluster/test", false)] //fluster instead of cluster
         public async Task ClusterArnValidationTests(string value, bool isValid)
         {
-            var optionSettingItem = new OptionSettingItem("id", "name", "description");
+            var optionSettingItem = new OptionSettingItem("id", "leafid", "name", "description");
             optionSettingItem.Validators.Add(GetRegexValidatorConfig("arn:[^:]+:ecs:[^:]*:[0-9]{12}:cluster/.+"));
             await Validate(optionSettingItem, value, isValid);
         }
@@ -61,7 +61,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         [InlineData("123*&$abc", false)] //invalid characters
         public async Task NewClusterNameValidationTests(string value, bool isValid)
         {
-            var optionSettingItem = new OptionSettingItem("id", "name", "description");
+            var optionSettingItem = new OptionSettingItem("id", "leafid", "name", "description");
             //up to 255 letters(uppercase and lowercase), numbers, underscores, and hyphens are allowed.
             optionSettingItem.Validators.Add(GetRegexValidatorConfig("^([A-Za-z0-9-]{1,255})$"));
             await Validate(optionSettingItem, value, isValid);
@@ -75,7 +75,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         [InlineData("123*&$_abc_", false)] //invalid characters
         public async Task ECSServiceNameValidationTests(string value, bool isValid)
         {
-            var optionSettingItem = new OptionSettingItem("id", "name", "description");
+            var optionSettingItem = new OptionSettingItem("id", "leafid", "name", "description");
             // Up to 255 letters (uppercase and lowercase), numbers, hyphens, and underscores are allowed.
             optionSettingItem.Validators.Add(GetRegexValidatorConfig("^([A-Za-z0-9_-]{1,255})$"));
             await Validate(optionSettingItem, value, isValid);
@@ -89,7 +89,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         [InlineData(1000, true)]
         public async Task DesiredCountValidationTests(int value, bool isValid)
         {
-            var optionSettingItem = new OptionSettingItem("id", "name", "description");
+            var optionSettingItem = new OptionSettingItem("id", "leafid", "name", "description");
             optionSettingItem.Validators.Add(GetRangeValidatorConfig(1, 5000));
             await Validate(optionSettingItem, value, isValid);
         }
@@ -103,7 +103,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         [InlineData("arn:aws:iam::1234567890124354:role/S3Access", false)] //invalid account ID
         public async Task RoleArnValidationTests(string value, bool isValid)
         {
-            var optionSettingItem = new OptionSettingItem("id", "name", "description");
+            var optionSettingItem = new OptionSettingItem("id", "leafid", "name", "description");
             optionSettingItem.Validators.Add(GetRegexValidatorConfig("arn:.+:iam::[0-9]{12}:.+"));
             await Validate(optionSettingItem, value, isValid);
         }
@@ -118,7 +118,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         [InlineData("vpc-ffffffffaaaabbbb12", false)] //suffix length greater than 17
         public async Task VpcIdValidationTests(string value, bool isValid)
         {
-            var optionSettingItem = new OptionSettingItem("id", "name", "description");
+            var optionSettingItem = new OptionSettingItem("id", "leafid", "name", "description");
             //must start with the \"vpc-\" prefix,
             //followed by either 8 or 17 characters consisting of digits and letters(lower-case) from a to f.
             optionSettingItem.Validators.Add(GetRegexValidatorConfig("^vpc-([0-9a-f]{8}|[0-9a-f]{17})$"));
@@ -133,7 +133,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         [InlineData("arn:aws:elasticloadbalancing:01234567891:elasticloadbalancing:loadbalancer", false)] //11 digit account ID
         public async Task LoadBalancerArnValidationTest(string value, bool isValid)
         {
-            var optionSettingItem = new OptionSettingItem("id", "name", "description");
+            var optionSettingItem = new OptionSettingItem("id", "leafid", "name", "description");
             optionSettingItem.Validators.Add(GetRegexValidatorConfig("arn:[^:]+:elasticloadbalancing:[^:]*:[0-9]{12}:loadbalancer/.+"));
             await Validate(optionSettingItem, value, isValid);
         }
@@ -146,7 +146,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         [InlineData("/Api/Path/<dsd<>", false)] // contains invalid character '<' and '>'
         public async Task ListenerConditionPathPatternValidationTest(string value, bool isValid)
         {
-            var optionSettingItem = new OptionSettingItem("id", "name", "description");
+            var optionSettingItem = new OptionSettingItem("id", "leafid", "name", "description");
             optionSettingItem.Validators.Add(GetRegexValidatorConfig("^/[a-zA-Z0-9*?&_\\-.$/~\"'@:+]{0,127}$"));
             await Validate(optionSettingItem, value, isValid);
         }
@@ -159,7 +159,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         [InlineData("myrepo123.a//b", false)] // cannot contain consecutive slashes.
         public async Task ECRRepositoryNameValidationTest(string value, bool isValid)
         {
-            var optionSettingItem = new OptionSettingItem("id", "name", "description");
+            var optionSettingItem = new OptionSettingItem("id", "leafid", "name", "description");
             optionSettingItem.Validators.Add(GetRegexValidatorConfig("^(?:[a-z0-9]+(?:[._-][a-z0-9]+)*/)*[a-z0-9]+(?:[._-][a-z0-9]+)*$"));
             await Validate(optionSettingItem, value, isValid);
         }

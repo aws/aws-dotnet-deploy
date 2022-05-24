@@ -45,7 +45,10 @@ namespace AWS.Deploy.Orchestration.UnitTests
             _fileManager = new FileManager();
             _deploymentManifestEngine = new DeploymentManifestEngine(_directoryManager, _fileManager);
             _orchestratorInteractiveService = new Mock<IOrchestratorInteractiveService>();
-            _recipeHandler = new RecipeHandler(_deploymentManifestEngine, _orchestratorInteractiveService.Object, _directoryManager);
+            var serviceProvider = new Mock<IServiceProvider>();
+            var validatorFactory = new ValidatorFactory(serviceProvider.Object);
+            var optionSettingHandler = new OptionSettingHandler(validatorFactory);
+            _recipeHandler = new RecipeHandler(_deploymentManifestEngine, _orchestratorInteractiveService.Object, _directoryManager, optionSettingHandler);
             _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider.Object));
         }
 

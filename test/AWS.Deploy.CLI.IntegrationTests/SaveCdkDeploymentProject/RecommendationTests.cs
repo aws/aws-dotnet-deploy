@@ -234,10 +234,12 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             var fileManager = new FileManager();
             var deploymentManifestEngine = new DeploymentManifestEngine(directoryManager, fileManager);
             var localUserSettingsEngine = new LocalUserSettingsEngine(fileManager, directoryManager);
-            var recipeHandler = new RecipeHandler(deploymentManifestEngine, _inMemoryInteractiveService, directoryManager);
+            var serviceProvider = new Mock<IServiceProvider>();
+            var validatorFactory = new ValidatorFactory(serviceProvider.Object);
+            var optionSettingHandler = new OptionSettingHandler(validatorFactory);
+            var recipeHandler = new RecipeHandler(deploymentManifestEngine, _inMemoryInteractiveService, directoryManager, optionSettingHandler);
             var projectDefinition = await new ProjectDefinitionParser(fileManager, directoryManager).Parse(targetApplicationProjectPath);
             var session = new OrchestratorSession(projectDefinition);
-            var serviceProvider = new Mock<IServiceProvider>();
 
             return new Orchestrator(session,
                 _inMemoryInteractiveService,

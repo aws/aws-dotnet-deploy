@@ -58,6 +58,17 @@ namespace AWS.Deploy.Common.Recipes
         public string Id { get; set; }
 
         /// <summary>
+        /// The Id of the option setting item in the Recipe Option Setting tree.
+        /// This helps easily reference the Option Setting without context of the parent setting.
+        /// </summary>
+        public string LeafId { get; set; }
+
+        /// <summary>
+        /// The parent Option Setting Item that allows an option setting item to reference it's parent.
+        /// </summary>
+        public string? ParentId { get; set; }
+
+        /// <summary>
         /// The id of the parent option setting. This is used for tooling that wants to look up the existing resources for a setting based on the TypeHint but needs
         /// to know the parent AWS resource. For example if listing the available Beanstalk environments the listing should be for the environments of the Beanstalk application.
         /// </summary>
@@ -145,9 +156,15 @@ namespace AWS.Deploy.Common.Recipes
         /// </summary>
         public Dictionary<string, object> TypeHintData { get; set; } = new ();
 
-        public OptionSettingItem(string id, string name, string description)
+        /// <summary>
+        /// Indicates which option setting items need to be validated if a value update occurs.
+        /// </summary>
+        public List<string> Dependents { get; set; } = new List<string> ();
+
+        public OptionSettingItem(string id, string leafId, string name, string description)
         {
             Id = id;
+            LeafId = leafId;
             Name = name;
             Description = description;
         }

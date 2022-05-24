@@ -140,6 +140,44 @@ namespace AWS.Deploy.Orchestration
         }
 
         /// <summary>
+        /// Interactively traverses given json path and returns target option setting.
+        /// Throws exception if there is no <see cref="OptionSettingItem" /> that matches <paramref name="jsonPath"/> />
+        /// In case an option setting of type <see cref="OptionSettingValueType.KeyValue"/> is encountered,
+        /// that <paramref name="jsonPath"/> can have the key value pair name as the leaf node with the option setting Id as the node before that.
+        /// </summary>
+        /// <param name="jsonPath">
+        /// Dot (.) separated key values string pointing to an option setting.
+        /// Read more <see href="https://tools.ietf.org/id/draft-goessner-dispatch-jsonpath-00.html"/>
+        /// </param>
+        /// <returns>Option setting at the json path. Throws <see cref="OptionSettingItemDoesNotExistException"/> if there doesn't exist an option setting.</returns>
+        public OptionSettingItem GetOptionSetting(RecipeDefinition recipe, string? jsonPath)
+        {
+            if (string.IsNullOrEmpty(jsonPath))
+                throw new OptionSettingItemDoesNotExistException(DeployToolErrorCode.OptionSettingItemDoesNotExistInRecipe, $"The Option Setting Item {jsonPath} does not exist as part of the" +
+                    $" {recipe.Name} recipe");
+
+            var ids = jsonPath.Split('.');
+            OptionSettingItem? optionSetting = null;
+
+            for (int i = 0; i < ids.Length; i++)
+            {
+                var optionSettings = optionSetting?.ChildOptionSettings ?? recipe.OptionSettings;
+                optionSetting = optionSettings.FirstOrDefault(os => os.Id.Equals(ids[i]));
+                if (optionSetting == null)
+                {
+                    throw new OptionSettingItemDoesNotExistException(DeployToolErrorCode.OptionSettingItemDoesNotExistInRecipe, $"The Option Setting Item {jsonPath} does not exist as part of the" +
+                    $" {recipe.Name} recipe");
+                }
+                if (optionSetting.Type.Equals(OptionSettingValueType.KeyValue))
+                {
+                    return optionSetting;
+                }
+            }
+
+            return optionSetting!;
+        }
+
+        /// <summary>
         /// Retrieves the value of the Option Setting Item in a given recommendation.
         /// </summary>
         public T GetOptionSettingValue<T>(Recommendation recommendation, OptionSettingItem optionSetting)

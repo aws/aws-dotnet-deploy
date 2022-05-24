@@ -40,7 +40,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         [InlineData("-abc123def45", false)] // does not start with a letter or a number
         public async Task AppRunnerServiceNameValidationTests(string value, bool isValid)
         {
-            var optionSettingItem = new OptionSettingItem("id", "name", "description");
+            var optionSettingItem = new OptionSettingItem("id", "leafid", "name", "description");
             // 4 to 40 letters (uppercase and lowercase), numbers, hyphens, and underscores are allowed.
             optionSettingItem.Validators.Add(GetRegexValidatorConfig("^([A-Za-z0-9][A-Za-z0-9_-]{3,39})$"));
             await Validate(optionSettingItem, value, isValid);
@@ -55,7 +55,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         [InlineData("arn:aws:iam::123456789012:role", false)] // missing resorce path
         public async Task RoleArnValidationTests(string value, bool isValid)
         {
-            var optionSettingItem = new OptionSettingItem("id", "name", "description");
+            var optionSettingItem = new OptionSettingItem("id", "leafid", "name", "description");
             optionSettingItem.Validators.Add(GetRegexValidatorConfig("arn:(aws|aws-us-gov|aws-cn|aws-iso|aws-iso-b):iam::[0-9]{12}:(role|role/service-role)/[\\w+=,.@\\-/]{1,1000}"));
             await Validate(optionSettingItem, value, isValid);
         }
@@ -69,7 +69,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         [InlineData("arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab", false)] // invalid key-id structure
         public async Task KmsKeyArnValidationTests(string value, bool isValid)
         {
-            var optionSettingItem = new OptionSettingItem("id", "name", "description");
+            var optionSettingItem = new OptionSettingItem("id", "leafid", "name", "description");
             optionSettingItem.Validators.Add(GetRegexValidatorConfig("arn:aws(-[\\w]+)*:kms:[a-z\\-]+-[0-9]{1}:[0-9]{12}:key/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"));
             await Validate(optionSettingItem, value, isValid);
         }

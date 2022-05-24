@@ -38,7 +38,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         [InlineData("abc/123/#", false)] // invalid character forward slash(/)
         public async Task ApplicationNameValidationTest(string value, bool isValid)
         {
-            var optionSettingItem = new OptionSettingItem("id", "name", "description");
+            var optionSettingItem = new OptionSettingItem("id", "leafid", "name", "description");
             //can contain up to 100 Unicode characters, not including forward slash (/).
             optionSettingItem.Validators.Add(GetRegexValidatorConfig("^[^/]{1,100}$"));
             await Validate(optionSettingItem, value, isValid);
@@ -51,7 +51,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         [InlineData("-12-abc", false)] // invalid character leading hyphen (-)
         public async Task EnvironmentNameValidationTest(string value, bool isValid)
         {
-            var optionSettingItem = new OptionSettingItem("id", "name", "description");
+            var optionSettingItem = new OptionSettingItem("id", "leafid", "name", "description");
             // Must be from 4 to 40 characters in length. The name can contain only letters, numbers, and hyphens.
             // It can't start or end with a hyphen.
             optionSettingItem.Validators.Add(GetRegexValidatorConfig("^[a-zA-Z0-9][a-zA-Z0-9-]{2,38}[a-zA-Z0-9]$"));
@@ -67,7 +67,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         [InlineData("arn:aws:iam::1234567890124354:role/S3Access", false)] //invalid account ID
         public async Task IAMRoleArnValidationTest(string value, bool isValid)
         {
-            var optionSettingItem = new OptionSettingItem("id", "name", "description");
+            var optionSettingItem = new OptionSettingItem("id", "leafid", "name", "description");
             optionSettingItem.Validators.Add(GetRegexValidatorConfig("arn:.+:iam::[0-9]{12}:.+"));
             await Validate(optionSettingItem, value, isValid);
         }
@@ -79,7 +79,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         [InlineData(" 123 abc-456 ", false)] //leading and trailing space
         public async Task EC2KeyPairValidationTest(string value, bool isValid)
         {
-            var optionSettingItem = new OptionSettingItem("id", "name", "description");
+            var optionSettingItem = new OptionSettingItem("id", "leafid", "name", "description");
             // It allows all ASCII characters but without leading and trailing spaces
             optionSettingItem.Validators.Add(GetRegexValidatorConfig("^(?! ).+(?<! )$"));
             await Validate(optionSettingItem, value, isValid);
@@ -94,7 +94,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         [InlineData("arn:aws:elasticbeanstack:eu-west-1:123456789012:platform/MyPlatform", false)] //Typo elasticbeanstack instead of elasticbeanstalk
         public async Task ElasticBeanstalkPlatformArnValidationTest(string value, bool isValid)
         {
-            var optionSettingItem = new OptionSettingItem("id", "name", "description");
+            var optionSettingItem = new OptionSettingItem("id", "leafid", "name", "description");
             optionSettingItem.Validators.Add(GetRegexValidatorConfig("arn:[^:]+:elasticbeanstalk:[^:]+:[^:]*:platform/.+"));
             await Validate(optionSettingItem, value, isValid);
         }
@@ -108,7 +108,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         [InlineData("PTB1H20M30S", false)]
         public async Task ElasticBeanstalkRollingUpdatesPauseTime(string value, bool isValid)
         {
-            var optionSettingItem = new OptionSettingItem("id", "name", "description");
+            var optionSettingItem = new OptionSettingItem("id", "leafid", "name", "description");
             optionSettingItem.Validators.Add(GetRegexValidatorConfig("^P([0-9]+(?:[,\\.][0-9]+)?Y)?([0-9]+(?:[,\\.][0-9]+)?M)?([0-9]+(?:[,\\.][0-9]+)?D)?(?:T([0-9]+(?:[,\\.][0-9]+)?H)?([0-9]+(?:[,\\.][0-9]+)?M)?([0-9]+(?:[,\\.][0-9]+)?S)?)?$"));
             await Validate(optionSettingItem, value, isValid);
         }

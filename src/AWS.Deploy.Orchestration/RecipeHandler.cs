@@ -21,12 +21,14 @@ namespace AWS.Deploy.Orchestration
         private readonly IOrchestratorInteractiveService _orchestratorInteractiveService;
         private readonly IDeploymentManifestEngine _deploymentManifestEngine;
         private readonly IDirectoryManager _directoryManager;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
-        public RecipeHandler(IDeploymentManifestEngine deploymentManifestEngine, IOrchestratorInteractiveService orchestratorInteractiveService, IDirectoryManager directoryManager)
+        public RecipeHandler(IDeploymentManifestEngine deploymentManifestEngine, IOrchestratorInteractiveService orchestratorInteractiveService, IDirectoryManager directoryManager, IOptionSettingHandler optionSettingHandler)
         {
             _orchestratorInteractiveService = orchestratorInteractiveService;
             _deploymentManifestEngine = deploymentManifestEngine;
             _directoryManager = directoryManager;
+            _optionSettingHandler = optionSettingHandler;
         }
 
         public async Task<List<RecipeDefinition>> GetRecipeDefinitions(ProjectDefinition? projectDefinition, List<string>? recipeDefinitionPaths = null)
@@ -61,6 +63,13 @@ namespace AWS.Deploy.Orchestration
                             definition.RecipePath = recipeDefinitionFile;
                             if (!uniqueRecipeId.Contains(definition.Id))
                             {
+                                var dependencyTree = new Dictionary<string, List<string>>();
+                                BuildDependencyTree(definition, definition.OptionSettings, dependencyTree);
+                                foreach (var dependent in dependencyTree.Keys)
+                                {
+                                    var optionSetting = _optionSettingHandler.GetOptionSetting(definition, dependent);
+                                    optionSetting.Dependents = dependencyTree[dependent];
+                                }
                                 recipeDefinitions.Add(definition);
                                 uniqueRecipeId.Add(definition.Id);
                             }
@@ -224,6 +233,32 @@ namespace AWS.Deploy.Orchestration
             }
 
             return recipeFilePaths.All(filePath => Path.GetFileNameWithoutExtension(filePath).Equals(directoryName, StringComparison.Ordinal));
+        }
+        
+        /// Creates an option setting item dependency tree that indicates
+        /// which option setting items need to be validated if a value update occurs.
+        /// The function recursively goes through all the settings and their children to build this tree.
+        /// This method also creates a Leaf Id which will help reference <see cref="OptionSettingItem"/>.
+        /// </summary>
+        private void BuildDependencyTree(RecipeDefinition recipe, List<OptionSettingItem> optionSettingItems, Dictionary<string, List<string>> dependencyTree, string parentLeafId = "")
+        {
+            foreach (var optionSettingItem in optionSettingItems)
+            {
+                optionSettingItem.LeafId = $"{parentLeafId}{optionSettingItem.Id}";
+                optionSettingItem.ParentId = parentLeafId.EndsWith(".") ? parentLeafId.Substring(0, parentLeafId.Length - 1) : parentLeafId;
+                foreach (var dependency in optionSettingItem.DependsOn)
+                {
+                    if (dependencyTree.ContainsKey(dependency.Id))
+                    {
+                        dependencyTree[dependency.Id].Add(optionSettingItem.LeafId);
+                    }
+                    else
+                    {
+                        dependencyTree[dependency.Id] = new List<string> { optionSettingItem.LeafId };
+                    }
+                }
+                BuildDependencyTree(recipe, optionSettingItem.ChildOptionSettings, dependencyTree, $"{optionSettingItem.LeafId}.");
+            }
         }
     }
 }
