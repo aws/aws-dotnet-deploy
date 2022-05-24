@@ -13,6 +13,7 @@ using AWS.Deploy.Common;
 using AWS.Deploy.Common.DeploymentManifest;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.Recipes.Validation;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.RecommendationEngine;
 using AWS.Deploy.Recipes;
@@ -28,7 +29,7 @@ namespace AWS.Deploy.CLI.UnitTests
         private readonly TestDirectoryManager _directoryManager;
         private readonly ProjectDefinitionParser _projectDefinitionParser;
         private readonly RecipeDefinition _recipeDefinition;
-        private readonly IFileManager _fileManager;
+        private readonly TestFileManager _fileManager;
         private readonly IDeploymentManifestEngine _deploymentManifestEngine;
         private readonly IOrchestratorInteractiveService _orchestratorInteractiveService;
         private readonly IRecipeHandler _recipeHandler;
@@ -42,9 +43,16 @@ namespace AWS.Deploy.CLI.UnitTests
             _commandLineWrapper = new TestToolCommandLineWrapper();
             _fileManager = new TestFileManager();
             _directoryManager = new TestDirectoryManager();
+            var recipeFiles = Directory.GetFiles(RecipeLocator.FindRecipeDefinitionsPath(), "*.recipe", SearchOption.TopDirectoryOnly);
+            _directoryManager.AddedFiles.Add(RecipeLocator.FindRecipeDefinitionsPath(), new HashSet<string> (recipeFiles));
+            foreach (var recipeFile in recipeFiles)
+                _fileManager.InMemoryStore.Add(recipeFile, File.ReadAllText(recipeFile));
             _deploymentManifestEngine = new DeploymentManifestEngine(_directoryManager, _fileManager);
             _orchestratorInteractiveService = new TestToolOrchestratorInteractiveService();
-            _recipeHandler = new RecipeHandler(_deploymentManifestEngine, _orchestratorInteractiveService, _directoryManager);
+            var serviceProvider = new Mock<IServiceProvider>();
+            var validatorFactory = new ValidatorFactory(serviceProvider.Object);
+            var optionSettingHandler = new OptionSettingHandler(validatorFactory);
+            _recipeHandler = new RecipeHandler(_deploymentManifestEngine, _orchestratorInteractiveService, _directoryManager, _fileManager, optionSettingHandler);
             _projectDefinitionParser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
 
             _deploymentBundleHandler = new DeploymentBundleHandler(_commandLineWrapper, awsResourceQueryer, interactiveService, _directoryManager, zipFileManager);

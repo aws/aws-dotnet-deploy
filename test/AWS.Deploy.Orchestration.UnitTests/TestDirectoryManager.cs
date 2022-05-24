@@ -5,12 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using AWS.Deploy.Common.IO;
+using System.Linq;
 
 namespace AWS.Deploy.Orchestration.UnitTests
 {
     public class TestDirectoryManager : IDirectoryManager
     {
         public readonly HashSet<string> CreatedDirectories = new();
+        public readonly Dictionary<string, HashSet<string>> AddedFiles = new();
 
         public DirectoryInfo CreateDirectory(string path)
         {
@@ -45,7 +47,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
             throw new NotImplementedException("If your test needs this method, you'll need to implement this.");
 
         public string[] GetFiles(string path, string searchPattern = null, SearchOption searchOption = SearchOption.TopDirectoryOnly) =>
-            throw new NotImplementedException("If your test needs this method, you'll need to implement this.");
+            AddedFiles.ContainsKey(path) ? AddedFiles[path].ToArray() : new string[0];
 
         public bool IsEmpty(string path) =>
             throw new NotImplementedException("If your test needs this method, you'll need to implement this.");

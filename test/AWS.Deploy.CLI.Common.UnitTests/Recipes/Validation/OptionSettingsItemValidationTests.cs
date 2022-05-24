@@ -46,7 +46,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         [InlineData("100")]
         public async Task InvalidInputInMultipleValidatorsThrowsException(string invalidValue)
         {
-            var optionSettingItem = new OptionSettingItem("id", "name", "description")
+            var optionSettingItem = new OptionSettingItem("id", "fullyQualifiedId", "name", "description")
             {
                 Validators = new()
                 {
@@ -87,7 +87,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         public async Task InvalidInputInSingleValidatorThrowsException()
         {
             var invalidValue = "lowercase_only";
-            var optionSettingItem = new OptionSettingItem("id", "name", "description")
+            var optionSettingItem = new OptionSettingItem("id", "fullyQualifiedId", "name", "description")
             {
                 Validators = new()
                 {
@@ -124,7 +124,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         {
             var validValue = 8;
 
-            var optionSettingItem = new OptionSettingItem("id", "name", "description")
+            var optionSettingItem = new OptionSettingItem("id", "fullyQualifiedId", "name", "description")
             {
                 Validators = new()
                 {
@@ -171,7 +171,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             var customValidationMessage = "Custom Validation Message: Testing!";
             var invalidValue = 100;
 
-            var optionSettingItem = new OptionSettingItem("id", "name", "description")
+            var optionSettingItem = new OptionSettingItem("id", "fullyQualifiedId", "name", "description")
             {
                 Validators = new()
                 {

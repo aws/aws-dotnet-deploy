@@ -1,0 +1,791 @@
+{
+    "$schema": "./aws-deploy-recipe-schema.json",
+    "Id": "AspNetAppEcsFargate",
+    "Version": "0.1.0",
+    "Name": "ASP.NET Core App to Amazon ECS using Fargate",
+    "OptionSettings": [
+        {
+            "Id": "ECSCluster",
+            "Name": "ECS Cluster",
+            "Category": "General",
+            "Description": "The ECS cluster used for the deployment.",
+            "Type": "Object",
+            "TypeHint": "ECSCluster",
+            "AdvancedSetting": false,
+            "Updatable": false,
+            "ChildOptionSettings": [
+                {
+                    "Id": "CreateNew",
+                    "Name": "Create New ECS Cluster",
+                    "Description": "Do you want to create a new ECS cluster?",
+                    "Type": "Bool",
+                    "DefaultValue": true,
+                    "AdvancedSetting": false,
+                    "Updatable": false
+                },
+                {
+                    "Id": "ClusterArn",
+                    "Name": "Existing Cluster ARN",
+                    "Description": "The ARN of the existing cluster to use.",
+                    "Type": "String",
+                    "TypeHint": "ExistingECSCluster",
+                    "AdvancedSetting": false,
+                    "Updatable": false,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": {
+                                "Regex": "arn:[^:]+:ecs:[^:]*:[0-9]{12}:cluster/.+",
+                                "AllowEmptyString": true,
+                                "ValidationFailedMessage": "Invalid cluster Arn. The ARN should contain the arn:[PARTITION]:ecs namespace, followed by the Region of the cluster, the AWS account ID of the cluster owner, the cluster namespace, and then the cluster name. For example, arn:aws:ecs:region:012345678910:cluster/test. For more information visit https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_Cluster.html"
+                            }
+                        }
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "ECSCluster.CreateNew",
+                            "Value": false
+                        }
+                    ]
+                },
+                {
+                    "Id": "NewClusterName",
+                    "Name": "New Cluster Name",
+                    "Description": "The name of the new cluster to create.",
+                    "Type": "String",
+                    "DefaultValue": "{StackName}",
+                    "AdvancedSetting": false,
+                    "Updatable": false,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": {
+                                "Regex": "^([A-Za-z0-9_-]{1,255})$",
+                                "AllowEmptyString": true,
+                                "ValidationFailedMessage": "Invalid cluster name. The cluster name can only contain letters (case-sensitive), numbers, hyphens, underscores and can't be longer than 255 character in length."
+                            }
+                        },
+                        {
+                            "ValidatorType": "ExistingResource",
+                            "Configuration": {
+                                "ResourceType": "AWS::ECS::Cluster"
+                            }
+                        }
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "ECSCluster.CreateNew",
+                            "Value": true
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Id": "ECSServiceName",
+            "ParentSettingId": "ClusterName",
+            "Name": "ECS Service Name",
+            "Category": "General",
+            "Description": "The name of the ECS service running in the cluster.",
+            "Type": "String",
+            "TypeHint": "ECSService",
+            "DefaultValue": "{StackName}-service",
+            "AdvancedSetting": false,
+            "Updatable": false,
+            "Validators": [
+                {
+                    "ValidatorType": "Regex",
+                    "Configuration": {
+                        "Regex": "^([A-Za-z0-9_-]{1,255})$",
+                        "ValidationFailedMessage": "Invalid service name. The service name can only contain letters (case-sensitive), numbers, hyphens, underscores and can't be longer than 255 character in length."
+                    }
+                }
+            ]
+        },
+        {
+            "Id": "DesiredCount",
+            "Name": "Desired Task Count",
+            "Category": "Compute",
+            "Description": "The desired number of ECS tasks to run for the service.",
+            "Type": "Int",
+            "DefaultValue": 3,
+            "AdvancedSetting": false,
+            "Updatable": true,
+            "Validators": [
+                {
+                    "ValidatorType": "Range",
+                    "Configuration": {
+                        "Min": 1,
+                        "Max": 5000
+                    }
+                }
+            ]
+        },
+        {
+            "Id": "ApplicationIAMRole",
+            "Name": "Application IAM Role",
+            "Category": "Permissions",
+            "Description": "The Identity and Access Management (IAM) role that provides AWS credentials to the application to access AWS services.",
+            "Type": "Object",
+            "TypeHint": "IAMRole",
+            "TypeHintData": {
+                "ServicePrincipal": "ecs-tasks.amazonaws.com"
+            },
+            "AdvancedSetting": false,
+            "Updatable": true,
+            "ChildOptionSettings": [
+                {
+                    "Id": "CreateNew",
+                    "Name": "Create New Role",
+                    "Description": "Do you want to create a new role?",
+                    "Type": "Bool",
+                    "DefaultValue": true,
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "ApplicationIAMRole.RoleArn",
+                            "Value": false
+                        }
+                    ]
+                },
+                {
+                    "Id": "RoleArn",
+                    "Name": "Existing Role ARN",
+                    "Description": "The ARN of the existing role to use.",
+                    "Type": "String",
+                    "TypeHint": "ExistingIAMRole",
+                    "TypeHintData": {
+                        "ServicePrincipal": "ecs-tasks.amazonaws.com"
+                    },
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": {
+                                "Regex": "arn:.+:iam::[0-9]{12}:.+",
+                                "AllowEmptyString": true,
+                                "ValidationFailedMessage": "Invalid IAM Role ARN. The ARN should contain the arn:[PARTITION]:iam namespace, followed by the account ID, and then the resource path. For example - arn:aws:iam::123456789012:role/S3Access is a valid IAM Role ARN. For more information visit https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-arns"
+                            }
+                        }
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "ApplicationIAMRole.CreateNew",
+                            "Value": false
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Id": "Vpc",
+            "Name": "Virtual Private Cloud (VPC)",
+            "Category": "VPC",
+            "Description": "A VPC enables you to launch the application into a virtual network that you've defined.",
+            "Type": "Object",
+            "TypeHint": "Vpc",
+            "AdvancedSetting": false,
+            "Updatable": false,
+            "ChildOptionSettings": [
+                {
+                    "Id": "IsDefault",
+                    "Name": "Use default VPC",
+                    "Description": "Do you want to use the default VPC for the deployment?",
+                    "Type": "Bool",
+                    "DefaultValue": true,
+                    "AdvancedSetting": false,
+                    "Updatable": false
+                },
+                {
+                    "Id": "CreateNew",
+                    "Name": "Create New VPC",
+                    "Description": "Do you want to create a new VPC?",
+                    "Type": "Bool",
+                    "DefaultValue": false,
+                    "AdvancedSetting": false,
+                    "Updatable": false,
+                    "DependsOn": [
+                        {
+                            "Id": "Vpc.IsDefault",
+                            "Value": false
+                        }
+                    ]
+                },
+                {
+                    "Id": "VpcId",
+                    "Name": "Existing VPC ID",
+                    "Description": "The ID of the existing VPC to use.",
+                    "Type": "String",
+                    "TypeHint": "ExistingVpc",
+                    "DefaultValue": null,
+                    "AdvancedSetting": false,
+                    "Updatable": false,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": {
+                                "Regex": "^vpc-([0-9a-f]{8}|[0-9a-f]{17})$",
+                                "AllowEmptyString": true,
+                                "ValidationFailedMessage": "Invalid VPC ID. The VPC ID must start with the \"vpc-\" prefix, followed by either 8 or 17 characters consisting of digits and letters(lower-case) from a to f. For example vpc-abc88de9 is a valid VPC ID."
+                            }
+                        }
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "Vpc.IsDefault",
+                            "Value": false
+                        },
+                        {
+                            "Id": "Vpc.CreateNew",
+                            "Value": false
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Id": "LoadBalancer",
+            "Name": "Elastic Load Balancer",
+            "Category": "LoadBalancer",
+            "Description": "Load Balancer the ECS Service will register tasks to.",
+            "Type": "Object",
+            "AdvancedSetting": true,
+            "Updatable": true,
+            "ChildOptionSettings": [
+                {
+                    "Id": "CreateNew",
+                    "Name": "Create New Load Balancer",
+                    "Description": "Do you want to create a new Load Balancer?",
+                    "Type": "Bool",
+                    "DefaultValue": true,
+                    "AdvancedSetting": false,
+                    "Updatable": false
+                },
+                {
+                    "Id": "ExistingLoadBalancerArn",
+                    "Name": "Existing Load Balancer ARN",
+                    "Description": "The ARN of an existing load balancer to use.",
+                    "Type": "String",
+                    "TypeHint": "ExistingApplicationLoadBalancer",
+                    "DefaultValue": null,
+                    "AdvancedSetting": false,
+                    "Updatable": false,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": {
+                                "Regex": "arn:[^:]+:elasticloadbalancing:[^:]*:[0-9]{12}:loadbalancer/.+",
+                                "AllowEmptyString": true,
+                                "ValidationFailedMessage": "Invalid load balancer ARN. The ARN should contain the arn:[PARTITION]:elasticloadbalancing namespace, followed by the Region of the load balancer, the AWS account ID of the load balancer owner, the loadbalancer namespace, and then the load balancer name. For example, arn:aws:elasticloadbalancing:us-west-2:123456789012:loadbalancer/app/my-load-balancer/50dc6c495c0c9188"
+                            }
+                        }
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "LoadBalancer.CreateNew",
+                            "Value": false
+                        }
+                    ]
+                },
+                {
+                    "Id": "DeregistrationDelayInSeconds",
+                    "Name": "Deregistration delay (seconds)",
+                    "Description": "The amount of time to allow requests to finish before deregistering ECS tasks.",
+                    "Type": "Int",
+                    "DefaultValue": 60,
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": {
+                                "Min": 0,
+                                "Max": 3600
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Id": "HealthCheckPath",
+                    "Name": "Health Check Path",
+                    "Description": "The ping path destination where Elastic Load Balancing sends health check requests.",
+                    "Type": "String",
+                    "DefaultValue": "/",
+                    "AdvancedSetting": true,
+                    "Updatable": true
+                },
+                {
+                    "Id": "HealthCheckInternval",
+                    "Name": "Health Check Interval",
+                    "Description": "The approximate interval, in seconds, between health checks of an individual instance.",
+                    "Type": "Int",
+                    "DefaultValue": 30,
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": {
+                                "Min": 5,
+                                "Max": 300
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Id": "HealthyThresholdCount",
+                    "Name": "Healthy Threshold Count",
+                    "Description": "The number of consecutive health check successes required before considering an unhealthy target healthy.",
+                    "Type": "Int",
+                    "DefaultValue": 5,
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": {
+                                "Min": 2,
+                                "Max": 10
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Id": "UnhealthyThresholdCount",
+                    "Name": "Unhealthy Threshold Count",
+                    "Description": "The number of consecutive health check successes required before considering an unhealthy target unhealthy.",
+                    "Type": "Int",
+                    "DefaultValue": 2,
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": {
+                                "Min": 2,
+                                "Max": 10
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Id": "ListenerConditionType",
+                    "Name": "Type of Listener Condition",
+                    "Description": "The type of listener rule to create to direct traffic to ECS service.",
+                    "Type": "String",
+                    "DefaultValue": "None",
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "AllowedValues": [
+                        "None",
+                        "Path"
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "LoadBalancer.CreateNew",
+                            "Value": false
+                        }
+                    ]
+                },
+                {
+                    "Id": "ListenerConditionPathPattern",
+                    "Name": "Listener Condition Path Pattern",
+                    "Description": "The resource path pattern to use for the listener rule. (i.e. \"/api/*\") ",
+                    "Type": "String",
+                    "DefaultValue": null,
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": {
+                                "Regex": "^/[a-zA-Z0-9*?&_\\-.$/~\"'@:+]{0,127}$",
+                                "AllowEmptyString": true,
+                                "ValidationFailedMessage": "Invalid listener condition path. The path is case-sensitive and can be up to 128. It starts with '/' and consists of alpha-numeric characters, wildcards (* and ?), & (using &amp;), and the following special characters: '_-.$/~\"'@:+'"
+                            }
+                        }
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "LoadBalancer.CreateNew",
+                            "Value": false
+                        },
+                        {
+                            "Id": "LoadBalancer.ListenerConditionType",
+                            "Value": "Path"
+                        }
+                    ]
+                },
+                {
+                    "Id": "ListenerConditionPriority",
+                    "Name": "Listener Condition Priority",
+                    "Description": "Priority of the condition rule. The value must be unique for the Load Balancer listener.",
+                    "Type": "Int",
+                    "DefaultValue": 100,
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": {
+                                "Min": 1,
+                                "Max": 50000
+                            }
+                        }
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "LoadBalancer.CreateNew",
+                            "Value": false
+                        },
+                        {
+                            "Id": "LoadBalancer.ListenerConditionType",
+                            "Value": "Path"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Id": "AutoScaling",
+            "Name": "AutoScaling",
+            "Category": "AutoScaling",
+            "Description": "The AutoScaling configuration for the ECS service.",
+            "Type": "Object",
+            "AdvancedSetting": true,
+            "Updatable": true,
+            "ChildOptionSettings": [
+                {
+                    "Id": "Enabled",
+                    "Name": "Enable",
+                    "Description": "Do you want to enable AutoScaling?",
+                    "Type": "Bool",
+                    "DefaultValue": false,
+                    "AdvancedSetting": false,
+                    "Updatable": true
+                },
+                {
+                    "Id": "MinCapacity",
+                    "Name": "Minimum Capacity",
+                    "Description": "The minimum number of ECS tasks handling the demand for the ECS service.",
+                    "Type": "Int",
+                    "DefaultValue": 3,
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": {
+                                "Min": 1,
+                                "Max": 5000
+                            }
+                        }
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "AutoScaling.Enabled",
+                            "Value": true
+                        }
+                    ]
+                },
+                {
+                    "Id": "MaxCapacity",
+                    "Name": "Maximum Capacity",
+                    "Description": "The maximum number of ECS tasks handling the demand for the ECS service.",
+                    "Type": "Int",
+                    "DefaultValue": 6,
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": {
+                                "Min": 1,
+                                "Max": 5000
+                            }
+                        }
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "AutoScaling.Enabled",
+                            "Value": true
+                        }
+                    ]
+                },
+                {
+                    "Id": "ScalingType",
+                    "Name": "AutoScaling Metric",
+                    "Description": "The metric to monitor for scaling changes.",
+                    "Type": "String",
+                    "DefaultValue": "Cpu",
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "AllowedValues": [
+                        "Cpu",
+                        "Memory",
+                        "Request"
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "AutoScaling.Enabled",
+                            "Value": true
+                        }
+                    ]
+                },
+                {
+                    "Id": "CpuTypeTargetUtilizationPercent",
+                    "Name": "CPU Target Utilization",
+                    "Description": "The target cpu utilization percentage that triggers a scaling change.",
+                    "Type": "Double",
+                    "DefaultValue": 70,
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": {
+                                "Min": 1,
+                                "Max": 100
+                            }
+                        }
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "AutoScaling.Enabled",
+                            "Value": true
+                        },
+                        {
+                            "Id": "AutoScaling.ScalingType",
+                            "Value": "Cpu"
+                        }
+                    ]
+                },
+                {
+                    "Id": "CpuTypeScaleInCooldownSeconds",
+                    "Name": "Scale in cooldown (seconds)",
+                    "Description": "The amount of time, in seconds, after a scale in activity completes before another scale in activity can start.",
+                    "Type": "Int",
+                    "DefaultValue": 300,
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": {
+                                "Min": 0,
+                                "Max": 3600
+                            }
+                        }
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "AutoScaling.Enabled",
+                            "Value": true
+                        },
+                        {
+                            "Id": "AutoScaling.ScalingType",
+                            "Value": "Cpu"
+                        }
+                    ]
+                },
+                {
+                    "Id": "CpuTypeScaleOutCooldownSeconds",
+                    "Name": "Scale out cooldown (seconds)",
+                    "Description": "The amount of time, in seconds, after a scale out activity completes before another scale out activity can start.",
+                    "Type": "Int",
+                    "DefaultValue": 300,
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": {
+                                "Min": 0,
+                                "Max": 3600
+                            }
+                        }
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "AutoScaling.Enabled",
+                            "Value": true
+                        },
+                        {
+                            "Id": "AutoScaling.ScalingType",
+                            "Value": "Cpu"
+                        }
+                    ]
+                },
+                {
+                    "Id": "MemoryTypeTargetUtilizationPercent",
+                    "Name": "Memory Target Utilization",
+                    "Description": "The target memory utilization percentage that triggers a scaling change.",
+                    "Type": "Double",
+                    "DefaultValue": 70,
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": {
+                                "Min": 1,
+                                "Max": 100
+                            }
+                        }
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "AutoScaling.Enabled",
+                            "Value": true
+                        },
+                        {
+                            "Id": "AutoScaling.ScalingType",
+                            "Value": "Memory"
+                        }
+                    ]
+                },
+                {
+                    "Id": "MemoryTypeScaleInCooldownSeconds",
+                    "Name": "Scale in cooldown (seconds)",
+                    "Description": "The amount of time, in seconds, after a scale in activity completes before another scale in activity can start.",
+                    "Type": "Int",
+                    "DefaultValue": 300,
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": {
+                                "Min": 0,
+                                "Max": 3600
+                            }
+                        }
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "AutoScaling.Enabled",
+                            "Value": true
+                        },
+                        {
+                            "Id": "AutoScaling.ScalingType",
+                            "Value": "Memory"
+                        }
+                    ]
+                },
+                {
+                    "Id": "MemoryTypeScaleOutCooldownSeconds",
+                    "Name": "Scale out cooldown (seconds)",
+                    "Description": "The amount of time, in seconds, after a scale out activity completes before another scale out activity can start.",
+                    "Type": "Int",
+                    "DefaultValue": 300,
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": {
+                                "Min": 0,
+                                "Max": 3600
+                            }
+                        }
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "AutoScaling.Enabled",
+                            "Value": true
+                        },
+                        {
+                            "Id": "AutoScaling.ScalingType",
+                            "Value": "Memory"
+                        }
+                    ]
+                },
+                {
+                    "Id": "RequestTypeRequestsPerTarget",
+                    "Name": "Request per task",
+                    "Description": "The number of request per ECS task that triggers a scaling change.",
+                    "Type": "Int",
+                    "DefaultValue": 1000,
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": {
+                                "Min": 1
+                            }
+                        }
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "AutoScaling.Enabled",
+                            "Value": true
+                        },
+                        {
+                            "Id": "AutoScaling.ScalingType",
+                            "Value": "Request"
+                        }
+                    ]
+                },
+                {
+                    "Id": "RequestTypeScaleInCooldownSeconds",
+                    "Name": "Scale in cooldown (seconds)",
+                    "Description": "The amount of time, in seconds, after a scale in activity completes before another scale in activity can start.",
+                    "Type": "Int",
+                    "DefaultValue": 300,
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": {
+                                "Min": 0,
+                                "Max": 3600
+                            }
+                        }
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "AutoScaling.Enabled",
+                            "Value": true
+                        },
+                        {
+                            "Id": "AutoScaling.ScalingType",
+                            "Value": "Request"
+                        }
+                    ]
+                },
+                {
+                    "Id": "RequestTypeScaleOutCooldownSeconds",
+                    "Name": "Scale out cooldown (seconds)",
+                    "Description": "The amount of time, in seconds, after a scale out activity completes before another scale out activity can start.",
+                    "Type": "Int",
+                    "DefaultValue": 300,
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": {
+                                "Min": 0,
+                                "Max": 3600
+                            }
+                        }
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "AutoScaling.Enabled",
+                            "Value": true
+                        },
+                        {
+                            "Id": "AutoScaling.ScalingType",
+                            "Value": "Request"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
