@@ -58,7 +58,6 @@ namespace AWS.Deploy.CLI.Extensions
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IDisplayedResourcesHandler), typeof(DisplayedResourcesHandler), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IZipFileManager), typeof(ZipFileManager), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IDeploymentManifestEngine), typeof(DeploymentManifestEngine), lifetime));
-            serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICustomRecipeLocator), typeof(CustomRecipeLocator), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(ILocalUserSettingsEngine), typeof(LocalUserSettingsEngine), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICommandFactory), typeof(CommandFactory), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICDKVersionDetector), typeof(CDKVersionDetector), lifetime));
@@ -67,6 +66,7 @@ namespace AWS.Deploy.CLI.Extensions
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IElasticBeanstalkHandler), typeof(AWSElasticBeanstalkHandler), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IOptionSettingHandler), typeof(OptionSettingHandler), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IValidatorFactory), typeof(ValidatorFactory), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(IRecipeHandler), typeof(RecipeHandler), lifetime));
 
             var packageJsonTemplate = typeof(PackageJsonGenerator).Assembly.ReadEmbeddedFile(PackageJsonGenerator.TemplateIdentifier);
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IPackageJsonGenerator), (serviceProvider) => new PackageJsonGenerator(packageJsonTemplate), lifetime));

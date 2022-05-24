@@ -10,6 +10,7 @@ using Amazon.ElasticBeanstalk.Model;
 using Amazon.Runtime;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Data;
+using AWS.Deploy.Common.DeploymentManifest;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Recipes.Validation;
@@ -26,6 +27,11 @@ namespace AWS.Deploy.Orchestration.UnitTests
         private readonly IOptionSettingHandler _optionSettingHandler;
         private readonly Mock<IAWSResourceQueryer> _awsResourceQueryer;
         private readonly Mock<IServiceProvider> _serviceProvider;
+        private readonly IDeploymentManifestEngine _deploymentManifestEngine;
+        private readonly Mock<IOrchestratorInteractiveService> _orchestratorInteractiveService;
+        private readonly IDirectoryManager _directoryManager;
+        private readonly IFileManager _fileManager;
+        private readonly IRecipeHandler _recipeHandler;
 
         public ElasticBeanstalkHandlerTests()
         {
@@ -34,6 +40,12 @@ namespace AWS.Deploy.Orchestration.UnitTests
             _serviceProvider
                 .Setup(x => x.GetService(typeof(IAWSResourceQueryer)))
                 .Returns(_awsResourceQueryer.Object);
+            _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider.Object));
+            _directoryManager = new DirectoryManager();
+            _fileManager = new FileManager();
+            _deploymentManifestEngine = new DeploymentManifestEngine(_directoryManager, _fileManager);
+            _orchestratorInteractiveService = new Mock<IOrchestratorInteractiveService>();
+            _recipeHandler = new RecipeHandler(_deploymentManifestEngine, _orchestratorInteractiveService.Object, _directoryManager);
             _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider.Object));
         }
 
@@ -149,7 +161,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
                 AWSProfileName = "default"
             };
 
-            return new RecommendationEngine.RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, session);
+            return new RecommendationEngine.RecommendationEngine(session, _recipeHandler);
         }
 
         private bool IsEqual(ConfigurationOptionSetting expected, ConfigurationOptionSetting actual)
