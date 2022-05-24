@@ -26,6 +26,16 @@
       </None>
     </ItemGroup>
 
-    <Import Project="..\..\src\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems" Label="Shared" />
+    <ItemGroup>
+      <None Remove="Recipes\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="Recipes\**">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
+  <Import Project="..\..\src\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems" Label="Shared" />
 
 </Project>

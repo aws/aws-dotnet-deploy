@@ -54,7 +54,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             // ARRANGE
             var allValidators = Enum.GetValues(typeof(OptionSettingItemValidatorList));
 
-            var optionSettingItem = new OptionSettingItem("id", "name", "description")
+            var optionSettingItem = new OptionSettingItem("id", "fullyQualifiedId", "name", "description")
             {
                 Validators =
                     allValidators
@@ -115,7 +115,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
                 ValidationFailedMessage = "Custom Test Message"
             };
 
-            var optionSettingItem = new OptionSettingItem("id", "name", "description")
+            var optionSettingItem = new OptionSettingItem("id", "fullyQualifiedId", "name", "description")
             {
                 Name = "Test Item",
                 Validators = new List<OptionSettingItemValidatorConfig>
@@ -155,7 +155,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         public void WhenValidatorTypeAndConfigurationHaveAMismatchThenValidatorTypeWins()
         {
             // ARRANGE
-            var optionSettingItem = new OptionSettingItem("id", "name", "description")
+            var optionSettingItem = new OptionSettingItem("id", "fullyQualifiedId", "name", "description")
             {
                 Name = "Test Item",
                 Validators = new List<OptionSettingItemValidatorConfig>

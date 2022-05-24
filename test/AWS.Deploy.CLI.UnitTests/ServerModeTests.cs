@@ -22,6 +22,8 @@ using System.Collections.Generic;
 using System.IO;
 using AWS.Deploy.Common.Recipes;
 using DeploymentTypes = AWS.Deploy.CLI.ServerMode.Models.DeploymentTypes;
+using System;
+using AWS.Deploy.Common.Recipes.Validation;
 
 namespace AWS.Deploy.CLI.UnitTests
 {
@@ -59,7 +61,10 @@ namespace AWS.Deploy.CLI.UnitTests
             var deploymentManifestEngine = new DeploymentManifestEngine(directoryManager, fileManager);
             var consoleInteractiveServiceImpl = new ConsoleInteractiveServiceImpl();
             var consoleOrchestratorLogger = new ConsoleOrchestratorLogger(consoleInteractiveServiceImpl);
-            var recipeHandler = new RecipeHandler(deploymentManifestEngine, consoleOrchestratorLogger, directoryManager);
+            var serviceProvider = new Mock<IServiceProvider>();
+            var validatorFactory = new ValidatorFactory(serviceProvider.Object);
+            var optionSettingHandler = new OptionSettingHandler(validatorFactory);
+            var recipeHandler = new RecipeHandler(deploymentManifestEngine, consoleOrchestratorLogger, directoryManager, fileManager, optionSettingHandler);
             var projectDefinitionParser = new ProjectDefinitionParser(fileManager, directoryManager);
 
             var recipeController = new RecipeController(recipeHandler, projectDefinitionParser);
@@ -76,8 +81,11 @@ namespace AWS.Deploy.CLI.UnitTests
             var deploymentManifestEngine = new DeploymentManifestEngine(directoryManager, fileManager);
             var consoleInteractiveServiceImpl = new ConsoleInteractiveServiceImpl();
             var consoleOrchestratorLogger = new ConsoleOrchestratorLogger(consoleInteractiveServiceImpl);
-            var recipeHandler = new RecipeHandler(deploymentManifestEngine, consoleOrchestratorLogger, directoryManager);
             var projectDefinitionParser = new ProjectDefinitionParser(fileManager, directoryManager);
+            var serviceProvider = new Mock<IServiceProvider>();
+            var validatorFactory = new ValidatorFactory(serviceProvider.Object);
+            var optionSettingHandler = new OptionSettingHandler(validatorFactory);
+            var recipeHandler = new RecipeHandler(deploymentManifestEngine, consoleOrchestratorLogger, directoryManager, fileManager, optionSettingHandler);
 
             var recipeController = new RecipeController(recipeHandler, projectDefinitionParser);
             var recipeDefinitions = await recipeHandler.GetRecipeDefinitions(null);
@@ -98,6 +106,10 @@ namespace AWS.Deploy.CLI.UnitTests
             var projectDefinitionParser = new ProjectDefinitionParser(fileManager, directoryManager);
 
             var deploymentManifestEngine = new Mock<IDeploymentManifestEngine>();
+            var serviceProvider = new Mock<IServiceProvider>();
+            var validatorFactory = new ValidatorFactory(serviceProvider.Object);
+            var optionSettingHandler = new OptionSettingHandler(validatorFactory);
+
             var customLocatorCalls = 0;
             var sourceProjectDirectory = SystemIOUtilities.ResolvePath("WebAppWithDockerFile");
             deploymentManifestEngine
@@ -109,7 +121,7 @@ namespace AWS.Deploy.CLI.UnitTests
                 })
                 .ReturnsAsync(new List<string>());
             var orchestratorInteractiveService = new TestToolOrchestratorInteractiveService();
-            var recipeHandler = new RecipeHandler(deploymentManifestEngine.Object, orchestratorInteractiveService, directoryManager);
+            var recipeHandler = new RecipeHandler(deploymentManifestEngine.Object, orchestratorInteractiveService, directoryManager, fileManager, optionSettingHandler);
 
 
             var projectDefinition = await projectDefinitionParser.Parse(sourceProjectDirectory);

@@ -32,6 +32,11 @@ namespace AWS.Deploy.Common.Recipes
         OptionSettingItem GetOptionSetting(Recommendation recommendation, string? jsonPath);
 
         /// <summary>
+        /// This method retrieves the <see cref="OptionSettingItem"/> related to a specific <see cref="Recipe"/>.
+        /// </summary>
+        OptionSettingItem GetOptionSetting(RecipeDefinition recipe, string? jsonPath);
+
+        /// <summary>
         /// Retrieve the <see cref="OptionSettingItem"/> value for a specific <see cref="Recommendation"/>
         /// This method retrieves the value in a specified type.
         /// </summary>
