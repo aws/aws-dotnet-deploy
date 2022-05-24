@@ -129,9 +129,9 @@
     "OptionSettings": [
         {
             "Id": "BeanstalkApplication",
-            "Name": "Application Name",
+            "Name": "Elastic Beanstalk Application",
             "Category": "General",
-            "Description": "The Elastic Beanstalk application name.",
+            "Description": "The Elastic Beanstalk application.",
             "Type": "Object",
             "TypeHint": "BeanstalkApplication",
             "AdvancedSetting": false,
