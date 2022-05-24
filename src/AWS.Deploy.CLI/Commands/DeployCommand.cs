@@ -45,7 +45,6 @@ namespace AWS.Deploy.CLI.Commands
         private readonly ICloudApplicationNameGenerator _cloudApplicationNameGenerator;
         private readonly ILocalUserSettingsEngine _localUserSettingsEngine;
         private readonly IConsoleUtilities _consoleUtilities;
-        private readonly ICustomRecipeLocator _customRecipeLocator;
         private readonly ISystemCapabilityEvaluator _systemCapabilityEvaluator;
         private readonly OrchestratorSession _session;
         private readonly IDirectoryManager _directoryManager;
@@ -54,6 +53,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly IAWSServiceHandler _awsServiceHandler;
         private readonly IOptionSettingHandler _optionSettingHandler;
         private readonly IValidatorFactory _validatorFactory;
+        private readonly IRecipeHandler _recipeHandler;
 
         public DeployCommand(
             IServiceProvider serviceProvider,
@@ -72,14 +72,14 @@ namespace AWS.Deploy.CLI.Commands
             ICloudApplicationNameGenerator cloudApplicationNameGenerator,
             ILocalUserSettingsEngine localUserSettingsEngine,
             IConsoleUtilities consoleUtilities,
-            ICustomRecipeLocator customRecipeLocator,
             ISystemCapabilityEvaluator systemCapabilityEvaluator,
             OrchestratorSession session,
             IDirectoryManager directoryManager,
             IFileManager fileManager,
             IAWSServiceHandler awsServiceHandler,
             IOptionSettingHandler optionSettingHandler,
-            IValidatorFactory validatorFactory)
+            IValidatorFactory validatorFactory,
+            IRecipeHandler recipeHandler)
         {
             _serviceProvider = serviceProvider;
             _toolInteractiveService = toolInteractiveService;
@@ -100,11 +100,11 @@ namespace AWS.Deploy.CLI.Commands
             _fileManager = fileManager;
             _cdkVersionDetector = cdkVersionDetector;
             _cdkManager = cdkManager;
-            _customRecipeLocator = customRecipeLocator;
             _systemCapabilityEvaluator = systemCapabilityEvaluator;
             _awsServiceHandler = awsServiceHandler;
             _optionSettingHandler = optionSettingHandler;
             _validatorFactory = validatorFactory;
+            _recipeHandler = recipeHandler;
         }
 
         public async Task ExecuteAsync(string applicationName, string deploymentProjectPath, UserDeploymentSettings? userDeploymentSettings = null)
@@ -166,8 +166,7 @@ namespace AWS.Deploy.CLI.Commands
                     _deploymentBundleHandler,
                     _localUserSettingsEngine,
                     _dockerEngine,
-                    _customRecipeLocator,
-                    new List<string> { RecipeLocator.FindRecipeDefinitionsPath() },
+                    _recipeHandler,
                     _fileManager,
                     _directoryManager,
                     _awsServiceHandler,

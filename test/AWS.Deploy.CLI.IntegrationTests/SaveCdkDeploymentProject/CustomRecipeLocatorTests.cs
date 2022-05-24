@@ -12,6 +12,7 @@ using Task = System.Threading.Tasks.Task;
 using Should;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.CLI.IntegrationTests.Services;
+using AWS.Deploy.Common.Recipes;
 
 namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 {
@@ -32,7 +33,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             var webAppWithDockerFilePath = Path.Combine(tempDirectoryPath, "testapps", "WebAppWithDockerFile");
             var webAppWithDockerCsproj = Path.Combine(webAppWithDockerFilePath, "WebAppWithDockerFile.csproj");
             var solutionDirectoryPath = tempDirectoryPath;
-            var customRecipeLocator = BuildCustomRecipeLocator();
+            var recipeHandler = BuildRecipeHandler();
             await _commandLineWrapper.Run("git init", tempDirectoryPath);
 
             // ARRANGE - Create 2 CDK deployment projects that contain the custom recipe snapshot
@@ -40,7 +41,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             await Utilities.CreateCDKDeploymentProject(webAppWithDockerFilePath, Path.Combine(tempDirectoryPath, "MyCdkApp2"));
 
             // ACT - Fetch custom recipes corresponding to the same target application that has a deployment-manifest file.
-            var customRecipePaths = await customRecipeLocator.LocateCustomRecipePaths(webAppWithDockerCsproj, solutionDirectoryPath);
+            var customRecipePaths = await recipeHandler.LocateCustomRecipePaths(webAppWithDockerCsproj, solutionDirectoryPath);
 
             // ASSERT
             File.Exists(Path.Combine(webAppWithDockerFilePath, "aws-deployments.json")).ShouldBeTrue();
@@ -58,7 +59,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             var webAppWithDockerCsproj = Path.Combine(webAppWithDockerFilePath, "WebAppWithDockerFile.csproj");
             var webAppNoDockerCsproj = Path.Combine(webAppNoDockerFilePath, "WebAppNoDockerFile.csproj");
             var solutionDirectoryPath = tempDirectoryPath;
-            var customRecipeLocator = BuildCustomRecipeLocator();
+            var recipeHandler = BuildRecipeHandler();
             await _commandLineWrapper.Run("git init", tempDirectoryPath);
 
             // ARRANGE - Create 2 CDK deployment projects that contain the custom recipe snapshot
@@ -66,7 +67,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             await Utilities.CreateCDKDeploymentProject(webAppWithDockerFilePath, Path.Combine(tempDirectoryPath, "MyCdkApp2"));
 
             // ACT - Fetch custom recipes corresponding to a different target application (under source control) without a deployment-manifest file.
-            var customRecipePaths = await customRecipeLocator.LocateCustomRecipePaths(webAppNoDockerCsproj, solutionDirectoryPath);
+            var customRecipePaths = await recipeHandler.LocateCustomRecipePaths(webAppNoDockerCsproj, solutionDirectoryPath);
 
             // ASSERT
             File.Exists(Path.Combine(webAppNoDockerFilePath, "aws-deployments.json")).ShouldBeFalse();
@@ -75,12 +76,12 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             customRecipePaths.ShouldContain(Path.Combine(tempDirectoryPath, "MyCdkApp1"));
         }
 
-        private ICustomRecipeLocator BuildCustomRecipeLocator()
+        private IRecipeHandler BuildRecipeHandler()
         {
             var directoryManager = new DirectoryManager();
             var fileManager = new FileManager();
             var deploymentManifestEngine = new DeploymentManifestEngine(directoryManager, fileManager);
-            return new CustomRecipeLocator(deploymentManifestEngine, _inMemoryInteractiveService, directoryManager);
+            return new RecipeHandler(deploymentManifestEngine, _inMemoryInteractiveService, directoryManager);
         }
 
         protected virtual void Dispose(bool disposing)
