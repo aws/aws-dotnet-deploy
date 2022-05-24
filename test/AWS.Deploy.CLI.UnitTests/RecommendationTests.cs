@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Amazon.Runtime;
@@ -27,13 +28,13 @@ namespace AWS.Deploy.CLI.UnitTests
     public class RecommendationTests
     {
         private OrchestratorSession _session;
-        private readonly IDirectoryManager _directoryManager;
+        private readonly TestDirectoryManager _directoryManager;
         private readonly IOptionSettingHandler _optionSettingHandler;
         private readonly Mock<IAWSResourceQueryer> _awsResourceQueryer;
         private readonly Mock<IServiceProvider> _serviceProvider;
         private readonly IDeploymentManifestEngine _deploymentManifestEngine;
         private readonly IOrchestratorInteractiveService _orchestratorInteractiveService;
-        private readonly IFileManager _fileManager;
+        private readonly TestFileManager _fileManager;
         private readonly IRecipeHandler _recipeHandler;
 
         public RecommendationTests()
@@ -45,11 +46,18 @@ namespace AWS.Deploy.CLI.UnitTests
                 .Setup(x => x.GetService(typeof(IAWSResourceQueryer)))
                 .Returns(_awsResourceQueryer.Object);
             _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider.Object));
-            _directoryManager = new DirectoryManager();
+            _directoryManager = new TestDirectoryManager();
             _fileManager = new TestFileManager();
+            var recipeFiles = Directory.GetFiles(RecipeLocator.FindRecipeDefinitionsPath(), "*.recipe", SearchOption.TopDirectoryOnly);
+            _directoryManager.AddedFiles.Add(RecipeLocator.FindRecipeDefinitionsPath(), new HashSet<string>(recipeFiles));
+            foreach (var recipeFile in recipeFiles)
+                _fileManager.InMemoryStore.Add(recipeFile, File.ReadAllText(recipeFile));
             _deploymentManifestEngine = new DeploymentManifestEngine(_directoryManager, _fileManager);
             _orchestratorInteractiveService = new TestToolOrchestratorInteractiveService();
-            _recipeHandler = new RecipeHandler(_deploymentManifestEngine, _orchestratorInteractiveService, _directoryManager);
+            var serviceProvider = new Mock<IServiceProvider>();
+            var validatorFactory = new ValidatorFactory(serviceProvider.Object);
+            var optionSettingHandler = new OptionSettingHandler(validatorFactory);
+            _recipeHandler = new RecipeHandler(_deploymentManifestEngine, _orchestratorInteractiveService, _directoryManager, _fileManager, optionSettingHandler);
             _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider.Object));
         }
 

@@ -448,6 +448,7 @@
             "properties": {
                 "Id": {
                     "type": "string",
+                    "pattern": "^[a-zA-Z0-9_-]+$",
                     "title": "Unique ID for the setting",
                     "description": "The unqiue id for the setting. This value should never been change once the recipe is released because it will be stored in user config files.",
                     "minLength": 1

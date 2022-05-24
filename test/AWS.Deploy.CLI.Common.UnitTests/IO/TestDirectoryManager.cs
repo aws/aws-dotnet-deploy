@@ -12,6 +12,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.IO
     public class TestDirectoryManager : IDirectoryManager
     {
         public readonly HashSet<string> CreatedDirectories = new();
+        public readonly Dictionary<string, HashSet<string>> AddedFiles = new();
 
         public DirectoryInfo CreateDirectory(string path)
         {
@@ -45,7 +46,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.IO
             CreatedDirectories.ToArray();
 
         public string[] GetFiles(string path, string searchPattern = null, SearchOption searchOption = SearchOption.TopDirectoryOnly) =>
-            throw new NotImplementedException("If your test needs this method, you'll need to implement this.");
+            AddedFiles.ContainsKey(path) ? AddedFiles[path].ToArray() : new string[0];
 
         public bool IsEmpty(string path) =>
             throw new NotImplementedException("If your test needs this method, you'll need to implement this.");
