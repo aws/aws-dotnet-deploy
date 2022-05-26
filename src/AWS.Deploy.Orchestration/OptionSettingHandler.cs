@@ -34,12 +34,30 @@ namespace AWS.Deploy.Orchestration
             List<ValidationResult> settingValidatorFailedResults = new List<ValidationResult>();
             foreach (var optionSetting in optionSettings)
             {
+                if (!IsOptionSettingDisplayable(recommendation, optionSetting))
+                {
+                    optionSetting.Validation.ValidationStatus = ValidationStatus.Valid;
+                    optionSetting.Validation.ValidationMessage = string.Empty;
+                    continue;
+                }
+
                 var optionSettingValue = GetOptionSettingValue(recommendation, optionSetting);
                 settingValidatorFailedResults.AddRange(_validatorFactory.BuildValidators(optionSetting)
                     .Select(async validator => await validator.Validate(optionSettingValue))
                     .Select(x => x.Result)
                     .Where(x => !x.IsValid)
                     .ToList());
+
+                if (settingValidatorFailedResults.Any())
+                {
+                    optionSetting.Validation.ValidationStatus = ValidationStatus.Invalid;
+                    optionSetting.Validation.ValidationMessage = string.Join(Environment.NewLine, settingValidatorFailedResults.Select(x => x.ValidationFailedMessage)).Trim();
+                }
+                else
+                {
+                    optionSetting.Validation.ValidationStatus = ValidationStatus.Valid;
+                    optionSetting.Validation.ValidationMessage = string.Empty;
+                }
 
                 settingValidatorFailedResults.AddRange(RunOptionSettingValidators(recommendation, optionSetting.ChildOptionSettings));
             }
@@ -59,9 +77,12 @@ namespace AWS.Deploy.Orchestration
             IOptionSettingItemValidator[] validators = new IOptionSettingItemValidator[0];
             if (!skipValidation)
                 validators = _validatorFactory.BuildValidators(optionSettingItem);
-
+            
             await optionSettingItem.SetValue(this, value, validators, recommendation, skipValidation);
 
+            if (!skipValidation)
+                RunOptionSettingValidators(recommendation, optionSettingItem.Dependents.Select(x => GetOptionSetting(recommendation, x)));
+            
             // If the optionSettingItem came from the selected recommendation's deployment bundle,
             // set the corresponding property on recommendation.DeploymentBundle
             SetDeploymentBundleProperty(recommendation, optionSettingItem, value);

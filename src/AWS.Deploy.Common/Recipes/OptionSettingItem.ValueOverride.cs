@@ -109,7 +109,14 @@ namespace AWS.Deploy.Common.Recipes
                     }
                 }
                 if (!isValid)
+                {
                     throw new ValidationFailedException(DeployToolErrorCode.OptionSettingItemValueValidationFailed, validationFailedMessage.Trim());
+                }
+                else
+                {
+                    Validation.ValidationStatus = ValidationStatus.Valid;
+                    Validation.ValidationMessage = string.Empty;
+                }
             }
 
             if (AllowedValues != null && AllowedValues.Count > 0 && valueOverride != null &&
