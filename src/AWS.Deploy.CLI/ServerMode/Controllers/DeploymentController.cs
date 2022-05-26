@@ -198,7 +198,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
             foreach (var setting in configurableOptionSettings)
             {
-                var settingSummary = new OptionSettingItemSummary(setting.Id, setting.Name, setting.Description, setting.Type.ToString())
+                var settingSummary = new OptionSettingItemSummary(setting.Id, setting.FullyQualifiedId, setting.Name, setting.Description, setting.Type.ToString())
                 {
                     Category = setting.Category,
                     TypeHint = setting.TypeHint?.ToString(),
@@ -210,6 +210,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                     SummaryDisplayable = optionSettingHandler.IsSummaryDisplayable(recommendation, setting),
                     AllowedValues = setting.AllowedValues,
                     ValueMapping = setting.ValueMapping,
+                    Validation = setting.Validation,
                     ChildOptionSettings = ListOptionSettingSummary(optionSettingHandler, recommendation, setting.ChildOptionSettings)
                 };
 

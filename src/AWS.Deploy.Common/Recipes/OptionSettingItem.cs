@@ -161,12 +161,18 @@ namespace AWS.Deploy.Common.Recipes
         /// </summary>
         public List<string> Dependents { get; set; } = new List<string> ();
 
+        /// <summary>
+        /// The validation state of the setting that contains the validation status and message.
+        /// </summary>
+        public OptionSettingValidation Validation { get; set; }
+
         public OptionSettingItem(string id, string fullyQualifiedId, string name, string description)
         {
             Id = id;
             FullyQualifiedId = fullyQualifiedId;
             Name = name;
             Description = description;
+            Validation = new OptionSettingValidation();
         }
 
         /// <summary>
