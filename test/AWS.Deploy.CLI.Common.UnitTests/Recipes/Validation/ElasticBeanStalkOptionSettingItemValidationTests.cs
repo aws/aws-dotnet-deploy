@@ -4,6 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Amazon.EC2;
+using Amazon.EC2.Model;
 using Amazon.ElasticBeanstalk.Model;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Data;
@@ -147,6 +149,48 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             var optionSettingItem = new OptionSettingItem("id", "fullyQualifiedId", "name", "description");
             optionSettingItem.Validators.Add(GetExistingResourceValidatorConfig("AWS::ElasticBeanstalk::Environment"));
             await Validate(optionSettingItem, "WebApp1", false);
+        }
+
+        /// <summary>
+        /// Validates that <see cref="InstanceTypeValidator"/> treats an instance type as
+        /// invalid when DescribeInstanceType is mocked to return an InstanceTypeInfo instance
+        /// </summary>
+        [Fact]
+        public async Task EC2InstanceType_Valid()
+        {
+            var validInstanceType = "m5.large";
+            _awsResourceQueryer.Setup(x => x.DescribeInstanceType(
+                It.Is<string>(rawInstanceType => rawInstanceType.Equals(validInstanceType))))
+                .ReturnsAsync(new InstanceTypeInfo());
+
+            var optionSettingItem = new OptionSettingItem("id", "fullyQualifiedId", "name", "description");
+            optionSettingItem.Validators.Add(new OptionSettingItemValidatorConfig
+            {
+                ValidatorType = OptionSettingItemValidatorList.InstanceType
+            });
+
+            await Validate(optionSettingItem, validInstanceType, true);
+        }
+
+        /// <summary>
+        /// Validates that <see cref="InstanceTypeValidator"/> treats an instance type as
+        /// invalid when DescribeInstanceType is mocked to return null
+        /// </summary>
+        [Fact]
+        public async Task EC2InstanceType_Invalid()
+        {
+            var invalidInstanceType = "m5.superlarge";
+            _awsResourceQueryer.Setup(x => x.DescribeInstanceType(
+                It.Is<string>(rawInstanceType => rawInstanceType.Equals(invalidInstanceType))))
+                .ReturnsAsync(() => null);
+
+            var optionSettingItem = new OptionSettingItem("id", "fullyQualifiedId", "name", "description");
+            optionSettingItem.Validators.Add(new OptionSettingItemValidatorConfig
+            {
+                ValidatorType = OptionSettingItemValidatorList.InstanceType
+            });
+
+            await Validate(optionSettingItem, invalidInstanceType, false);
         }
 
         private OptionSettingItemValidatorConfig GetExistingResourceValidatorConfig(string type)

@@ -40,6 +40,10 @@ namespace AWS.Deploy.Common.Recipes.Validation
         /// <summary>
         /// Must be paired with <see cref="StringLengthValidator"/>
         /// </summary>
-        StringLength
+        StringLength,
+        /// <summary>
+        /// Must be paired with <see cref="InstanceTypeValidator"/>
+        /// </summary>
+        InstanceType
     }
 }

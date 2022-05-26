@@ -250,7 +250,12 @@
             "Type": "String",
             "TypeHint": "InstanceType",
             "AdvancedSetting": true,
-            "Updatable": true
+            "Updatable": true,
+            "Validators": [
+                {
+                    "ValidatorType": "InstanceType"
+                }
+            ]
         },
         {
             "Id": "EnvironmentType",

@@ -610,7 +610,8 @@
                                     "DotnetPublishArgs",
                                     "ExistingResource",
                                     "FileExists",
-                                    "StringLength"
+                                    "StringLength",
+                                    "InstanceType"
                                 ]
                             }
                         },
