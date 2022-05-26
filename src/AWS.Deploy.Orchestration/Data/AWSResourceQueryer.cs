@@ -167,6 +167,22 @@ namespace AWS.Deploy.Orchestration.Data
             });
         }
 
+        public async Task<InstanceTypeInfo?> DescribeInstanceType(string instanceType)
+        {
+            var ec2Client = _awsClientFactory.GetAWSClient<IAmazonEC2>();
+
+            var request = new DescribeInstanceTypesRequest
+            {
+                InstanceTypes = new List<string> { instanceType }
+            };
+
+            return await HandleException(async () =>
+            {
+                var response = await ec2Client.DescribeInstanceTypesAsync(request);
+                return response.InstanceTypes.FirstOrDefault();
+            });
+        }
+
         public async Task<List<VpcConnector>> DescribeAppRunnerVpcConnectors()
         {
             var appRunnerClient = _awsClientFactory.GetAWSClient<Amazon.AppRunner.IAmazonAppRunner>();
