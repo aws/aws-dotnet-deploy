@@ -463,6 +463,7 @@ namespace AWS.Deploy.CLI.Commands
                         _fileManager,
                         session,
                         _deploymentManifestEngine,
+                        _recipeHandler,
                         targetApplicationFullPath);
 
                     await generateDeploymentProject.ExecuteAsync(saveDirectory, projectDisplayName);
