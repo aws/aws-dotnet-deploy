@@ -18,6 +18,7 @@ using AWS.Deploy.Orchestration.DeploymentCommands;
 using AWS.Deploy.Orchestration.LocalUserSettings;
 using AWS.Deploy.Orchestration.ServiceHandlers;
 using AWS.Deploy.Orchestration.Utilities;
+using AWS.Deploy.Recipes;
 
 namespace AWS.Deploy.Orchestration
 {
@@ -75,9 +76,10 @@ namespace AWS.Deploy.Orchestration
             _optionSettingHandler = optionSettingHandler;
         }
 
-        public Orchestrator(OrchestratorSession session)
+        public Orchestrator(OrchestratorSession session, IRecipeHandler recipeHandler)
         {
             _session = session;
+            _recipeHandler = recipeHandler;
         }
 
         /// <summary>
@@ -93,7 +95,9 @@ namespace AWS.Deploy.Orchestration
                 throw new InvalidOperationException($"{nameof(_recipeHandler)} is null as part of the orchestartor object");
             
             var engine = new RecommendationEngine.RecommendationEngine(_session, _recipeHandler);
-            return await engine.ComputeRecommendations();
+            var recipePaths = new HashSet<string> { RecipeLocator.FindRecipeDefinitionsPath() };
+            var customRecipePaths = await _recipeHandler.LocateCustomRecipePaths(_session.ProjectDefinition);
+            return await engine.ComputeRecommendations(recipeDefinitionPaths: recipePaths.Union(customRecipePaths).ToList());
         }
 
         /// <summary>
@@ -297,19 +301,6 @@ namespace AWS.Deploy.Orchestration
                     var errorMessage = $"Failed to find ${nameof(CloudApplicationResourceType)} from {nameof(DeploymentTypes)} {deploymentType}";
                     throw new FailedToFindCloudApplicationResourceType(DeployToolErrorCode.FailedToFindCloudApplicationResourceType, errorMessage);
             }
-        }
-
-        private async Task<List<string>> LocateCustomRecipePaths(string targetApplicationFullPath, string solutionDirectoryPath)
-        {
-            if (_recipeHandler == null)
-                throw new InvalidOperationException($"{nameof(_recipeHandler)} is null as part of the orchestartor object");
-
-            var customRecipePaths = new List<string>();
-            foreach (var customRecipePath in await _recipeHandler.LocateCustomRecipePaths(targetApplicationFullPath, solutionDirectoryPath))
-            {
-                customRecipePaths.Add(customRecipePath);
-            }
-            return customRecipePaths;
         }
     }
 }

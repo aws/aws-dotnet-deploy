@@ -24,6 +24,7 @@ using AWS.Deploy.Common.Recipes;
 using DeploymentTypes = AWS.Deploy.CLI.ServerMode.Models.DeploymentTypes;
 using System;
 using AWS.Deploy.Common.Recipes.Validation;
+using AWS.Deploy.Recipes;
 
 namespace AWS.Deploy.CLI.UnitTests
 {
@@ -125,8 +126,9 @@ namespace AWS.Deploy.CLI.UnitTests
 
 
             var projectDefinition = await projectDefinitionParser.Parse(sourceProjectDirectory);
-
-            var recipeDefinitions = await recipeHandler.GetRecipeDefinitions(projectDefinition);
+            var recipePaths = new HashSet<string> { RecipeLocator.FindRecipeDefinitionsPath() };
+            var customRecipePaths = await recipeHandler.LocateCustomRecipePaths(projectDefinition);
+            var recipeDefinitions = await recipeHandler.GetRecipeDefinitions(recipeDefinitionPaths: recipePaths.Union(customRecipePaths).ToList());
             var recipe = recipeDefinitions.First();
             Assert.NotEqual(0, customLocatorCalls);
 

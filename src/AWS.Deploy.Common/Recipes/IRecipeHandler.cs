@@ -11,7 +11,13 @@ namespace AWS.Deploy.Common.Recipes
         /// <summary>
         /// Retrieves all the <see cref="RecipeDefinition"/> that are defined by the system as well as any other recipes that are retrieved from an external source.
         /// </summary>
-        Task<List<RecipeDefinition>> GetRecipeDefinitions(ProjectDefinition? projectDefinition, List<string>? recipeDefinitionPaths = null);
+        Task<List<RecipeDefinition>> GetRecipeDefinitions(List<string>? recipeDefinitionPaths = null);
+
+        /// <summary>
+        /// Wrapper method to fetch custom recipe definition paths from a deployment-manifest file as well as
+        /// other locations that are monitored by the same source control root as the target application that needs to be deployed.
+        /// </summary>
+        Task<HashSet<string>> LocateCustomRecipePaths(ProjectDefinition projectDefinition);
 
         /// <summary>
         /// Wrapper method to fetch custom recipe definition paths from a deployment-manifest file as well as
