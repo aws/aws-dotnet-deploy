@@ -391,7 +391,6 @@
                             "ValidatorType": "Regex",
                             "Configuration": {
                                 "Regex": "arn:.+:iam::[0-9]{12}:.+",
-                                "AllowEmptyString": true,
                                 "ValidationFailedMessage": "Invalid IAM Role ARN. The ARN should contain the arn:[PARTITION]:iam namespace, followed by the account ID, and then the resource path. For example - arn:aws:iam::123456789012:role/S3Access is a valid IAM Role ARN. For more information visit https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-arns"
                             }
                         }
