@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AWS.Deploy.CLI.ServerMode.Models;
@@ -11,6 +12,7 @@ using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.Utilities;
+using AWS.Deploy.Recipes;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -45,11 +47,14 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             }
 
             ProjectDefinition? projectDefinition = null;
-            if(!string.IsNullOrEmpty(projectPath))
+            var recipePaths = new HashSet<string> { RecipeLocator.FindRecipeDefinitionsPath() };
+            HashSet<string> customRecipePaths = new HashSet<string>();
+            if (!string.IsNullOrEmpty(projectPath))
             {
                 projectDefinition = await _projectDefinitionParser.Parse(projectPath);
+                customRecipePaths = await _recipeHandler.LocateCustomRecipePaths(projectDefinition);
             }
-            var recipeDefinitions = await _recipeHandler.GetRecipeDefinitions(projectDefinition);
+            var recipeDefinitions = await _recipeHandler.GetRecipeDefinitions(recipeDefinitionPaths: recipePaths.Union(customRecipePaths).ToList());
             var selectedRecipeDefinition = recipeDefinitions.FirstOrDefault(x => x.Id.Equals(recipeId));
 
             if (selectedRecipeDefinition == null)

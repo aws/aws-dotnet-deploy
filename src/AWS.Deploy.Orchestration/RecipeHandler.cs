@@ -33,19 +33,9 @@ namespace AWS.Deploy.Orchestration
             _optionSettingHandler = optionSettingHandler;
         }
 
-        public async Task<List<RecipeDefinition>> GetRecipeDefinitions(ProjectDefinition? projectDefinition, List<string>? recipeDefinitionPaths = null)
+        public async Task<List<RecipeDefinition>> GetRecipeDefinitions(List<string>? recipeDefinitionPaths = null)
         {
-            recipeDefinitionPaths ??= new List<string>();
-            recipeDefinitionPaths.Add(RecipeLocator.FindRecipeDefinitionsPath());
-            if(projectDefinition != null)
-            {
-                var targetApplicationFullPath = new DirectoryInfo(projectDefinition.ProjectPath).FullName;
-                var solutionDirectoryPath = !string.IsNullOrEmpty(projectDefinition.ProjectSolutionPath) ?
-                    new DirectoryInfo(projectDefinition.ProjectSolutionPath).Parent.FullName : string.Empty;
-
-                var customPaths = await LocateCustomRecipePaths(targetApplicationFullPath, solutionDirectoryPath);
-                recipeDefinitionPaths = recipeDefinitionPaths.Union(customPaths).ToList();
-            }
+            recipeDefinitionPaths ??= new List<string> { RecipeLocator.FindRecipeDefinitionsPath() };
 
             var recipeDefinitions = new List<RecipeDefinition>();
             var uniqueRecipeId = new HashSet<string>();
@@ -89,6 +79,21 @@ namespace AWS.Deploy.Orchestration
             }
 
             return recipeDefinitions;
+        }
+
+        /// <summary>
+        /// Wrapper method to fetch custom recipe definition paths from a deployment-manifest file as well as
+        /// other locations that are monitored by the same source control root as the target application that needs to be deployed.
+        /// </summary>
+        /// <param name="projectDefinition">The <see cref="ProjectDefinition"/> of the application to be deployed.</param>
+        /// <returns>A <see cref="HashSet{String}"/> containing absolute paths of directories inside which the custom recipe snapshot is stored</returns>
+        public async Task<HashSet<string>> LocateCustomRecipePaths(ProjectDefinition projectDefinition)
+        {
+            var targetApplicationFullPath = new DirectoryInfo(projectDefinition.ProjectPath).FullName;
+            var solutionDirectoryPath = !string.IsNullOrEmpty(projectDefinition.ProjectSolutionPath) ?
+                new DirectoryInfo(projectDefinition.ProjectSolutionPath).Parent.FullName : string.Empty;
+
+            return await LocateCustomRecipePaths(targetApplicationFullPath, solutionDirectoryPath);
         }
 
         /// <summary>

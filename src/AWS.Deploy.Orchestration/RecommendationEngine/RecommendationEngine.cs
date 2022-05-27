@@ -29,7 +29,7 @@ namespace AWS.Deploy.Orchestration.RecommendationEngine
             additionalReplacements ??= new Dictionary<string, string>();
 
             var recommendations = new List<Recommendation>();
-            var availableRecommendations = await _recipeHandler.GetRecipeDefinitions(_orchestratorSession.ProjectDefinition, recipeDefinitionPaths);
+            var availableRecommendations = await _recipeHandler.GetRecipeDefinitions(recipeDefinitionPaths);
             foreach (var potentialRecipe in availableRecommendations)
             {
                 var results = await EvaluateRules(potentialRecipe.RecommendationRules);
