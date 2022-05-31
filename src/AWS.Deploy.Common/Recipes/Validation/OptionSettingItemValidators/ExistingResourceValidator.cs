@@ -26,22 +26,22 @@ namespace AWS.Deploy.Common.Recipes.Validation
         {
             if (string.IsNullOrEmpty(ResourceType))
                 throw new MissingValidatorConfigurationException(DeployToolErrorCode.MissingValidatorConfiguration, $"The validator of type '{typeof(ExistingResourceValidator)}' is missing the configuration property '{nameof(ResourceType)}'.");
-            var resourceName = input.ToString();
+            var resourceName = input?.ToString() ?? string.Empty;
             if (string.IsNullOrEmpty(resourceName))
-                return ValidationResult.Failed($"The resource name is empty and cannot be validated.");
+                return ValidationResult.Valid();
 
             switch (ResourceType)
             {
                 case "AWS::ElasticBeanstalk::Application":
-                    var beanstalkApplications = await _awsResourceQueryer.ListOfElasticBeanstalkApplications(input.ToString());
-                    if (beanstalkApplications.Any(x => x.ApplicationName.Equals(input.ToString())))
-                        return ValidationResult.Failed($"An Elastic Beanstalk application already exists with the name '{input.ToString()}'. Check the AWS Console for more information on the existing resource.");
+                    var beanstalkApplications = await _awsResourceQueryer.ListOfElasticBeanstalkApplications(resourceName);
+                    if (beanstalkApplications.Any(x => x.ApplicationName.Equals(resourceName)))
+                        return ValidationResult.Failed($"An Elastic Beanstalk application already exists with the name '{resourceName}'. Check the AWS Console for more information on the existing resource.");
                     break;
 
                 case "AWS::ElasticBeanstalk::Environment":
-                    var beanstalkEnvironments = await _awsResourceQueryer.ListOfElasticBeanstalkEnvironments(environmentName: input.ToString());
-                    if (beanstalkEnvironments.Any(x => x.EnvironmentName.Equals(input.ToString())))
-                        return ValidationResult.Failed($"An Elastic Beanstalk environment already exists with the name '{input.ToString()}'. Check the AWS Console for more information on the existing resource.");
+                    var beanstalkEnvironments = await _awsResourceQueryer.ListOfElasticBeanstalkEnvironments(environmentName: resourceName);
+                    if (beanstalkEnvironments.Any(x => x.EnvironmentName.Equals(resourceName)))
+                        return ValidationResult.Failed($"An Elastic Beanstalk environment already exists with the name '{resourceName}'. Check the AWS Console for more information on the existing resource.");
                     break;
 
                 default:
