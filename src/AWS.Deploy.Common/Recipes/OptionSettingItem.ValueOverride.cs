@@ -97,26 +97,18 @@ namespace AWS.Deploy.Common.Recipes
         {
             if (!skipValidation)
             {
-                var isValid = true;
-                var validationFailedMessage = string.Empty;
                 foreach (var validator in validators)
                 {
                     var result = await validator.Validate(valueOverride);
                     if (!result.IsValid)
                     {
-                        isValid = false;
-                        validationFailedMessage += result.ValidationFailedMessage + Environment.NewLine;
+                        throw new ValidationFailedException(DeployToolErrorCode.OptionSettingItemValueValidationFailed,
+                            result.ValidationFailedMessage?.Trim() ?? $"The value '{valueOverride}' is invalid for option setting '{Name}'.");
                     }
                 }
-                if (!isValid)
-                {
-                    throw new ValidationFailedException(DeployToolErrorCode.OptionSettingItemValueValidationFailed, validationFailedMessage.Trim());
-                }
-                else
-                {
-                    Validation.ValidationStatus = ValidationStatus.Valid;
-                    Validation.ValidationMessage = string.Empty;
-                }
+                
+                Validation.ValidationStatus = ValidationStatus.Valid;
+                Validation.ValidationMessage = string.Empty;
             }
 
             if (AllowedValues != null && AllowedValues.Count > 0 && valueOverride != null &&
