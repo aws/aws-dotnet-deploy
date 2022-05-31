@@ -87,6 +87,7 @@ Resources:
   CodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
+      ConcurrentBuildLimit: 1
       Name: !Sub ${CodeBuildProjectName}
       ServiceRole: !GetAtt CodeBuildProjectRole.Arn
       Environment:
