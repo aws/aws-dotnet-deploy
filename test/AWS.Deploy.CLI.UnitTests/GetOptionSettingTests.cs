@@ -127,9 +127,11 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var appRunnerRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_APPRUNNER_ID);
 
+            var createNew = _optionSettingHandler.GetOptionSetting(appRunnerRecommendation, "VPCConnector.CreateNew");
             var subnets = _optionSettingHandler.GetOptionSetting(appRunnerRecommendation, "VPCConnector.Subnets");
             var securityGroups = _optionSettingHandler.GetOptionSetting(appRunnerRecommendation, "VPCConnector.SecurityGroups");
 
+            await _optionSettingHandler.SetOptionSettingValue(appRunnerRecommendation, createNew, true);
             await Assert.ThrowsAsync<ValidationFailedException>(async () => await _optionSettingHandler.SetOptionSettingValue(appRunnerRecommendation, subnets, new SortedSet<string>(){ "subnet1" }));
             await Assert.ThrowsAsync<ValidationFailedException>(async () => await _optionSettingHandler.SetOptionSettingValue(appRunnerRecommendation, securityGroups, new SortedSet<string>(){ "securityGroup1" }));
         }

@@ -75,7 +75,7 @@ namespace AWS.Deploy.Orchestration
         public async Task SetOptionSettingValue(Recommendation recommendation, OptionSettingItem optionSettingItem, object value, bool skipValidation = false)
         {
             IOptionSettingItemValidator[] validators = new IOptionSettingItemValidator[0];
-            if (!skipValidation)
+            if (!skipValidation && IsOptionSettingDisplayable(recommendation, optionSettingItem))
                 validators = _validatorFactory.BuildValidators(optionSettingItem);
             
             await optionSettingItem.SetValue(this, value, validators, recommendation, skipValidation);
