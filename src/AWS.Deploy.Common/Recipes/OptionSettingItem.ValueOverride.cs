@@ -104,18 +104,26 @@ namespace AWS.Deploy.Common.Recipes
                     var result = await validator.Validate(valueOverride, recommendation);
                     if (!result.IsValid)
                     {
-                        throw new ValidationFailedException(DeployToolErrorCode.OptionSettingItemValueValidationFailed,
-                            result.ValidationFailedMessage?.Trim() ?? $"The value '{valueOverride}' is invalid for option setting '{Name}'.");
+                        Validation.ValidationStatus = ValidationStatus.Invalid;
+                        Validation.ValidationMessage = result.ValidationFailedMessage?.Trim() ?? $"The value '{valueOverride}' is invalid for option setting '{Name}'.";
+                        Validation.InvalidValue = valueOverride;
+                        throw new ValidationFailedException(DeployToolErrorCode.OptionSettingItemValueValidationFailed, Validation.ValidationMessage);
                     }
                 }
-                
-                Validation.ValidationStatus = ValidationStatus.Valid;
-                Validation.ValidationMessage = string.Empty;
             }
 
             if (AllowedValues != null && AllowedValues.Count > 0 && valueOverride != null &&
                 !AllowedValues.Contains(valueOverride.ToString() ?? ""))
-                throw new InvalidOverrideValueException(DeployToolErrorCode.InvalidValueForOptionSettingItem, $"Invalid value for option setting item '{Name}'");
+            {
+                Validation.ValidationStatus = ValidationStatus.Invalid;
+                Validation.ValidationMessage = $"Invalid value for option setting item '{Name}'";
+                Validation.InvalidValue = valueOverride;
+                throw new InvalidOverrideValueException(DeployToolErrorCode.InvalidValueForOptionSettingItem, Validation.ValidationMessage);
+            }
+
+            Validation.ValidationStatus = ValidationStatus.Valid;
+            Validation.ValidationMessage = string.Empty;
+            Validation.InvalidValue = null;
 
             if (valueOverride is bool || valueOverride is int || valueOverride is long || valueOverride is double || valueOverride is Dictionary<string, string> || valueOverride is SortedSet<string>)
             {
