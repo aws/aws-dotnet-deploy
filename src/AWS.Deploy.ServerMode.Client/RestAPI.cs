@@ -2006,50 +2006,95 @@ namespace AWS.Deploy.ServerMode.Client
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.4.1.0 (Newtonsoft.Json v13.0.0.0)")]
     public partial class OptionSettingItemSummary 
     {
+        /// <summary>The unique id of setting. This value will be persisted in other config files so its value should never change once a recipe is released.</summary>
         [Newtonsoft.Json.JsonProperty("id", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Id { get; set; }
     
+        /// <summary>The fully qualified id of the setting that includes the Id and all of the parent's Ids.
+        /// This helps easily reference the Option Setting without context of the parent setting.</summary>
+        [Newtonsoft.Json.JsonProperty("fullyQualifiedId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string FullyQualifiedId { get; set; }
+    
+        /// <summary>The display friendly name of the setting.</summary>
         [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Name { get; set; }
     
+        /// <summary>The category for the setting. This value must match an id field in the list of categories.</summary>
         [Newtonsoft.Json.JsonProperty("category", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Category { get; set; }
     
+        /// <summary>The description of what the setting is used for.</summary>
         [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Description { get; set; }
     
+        /// <summary>The value used for the recipe if it is set by the user.</summary>
         [Newtonsoft.Json.JsonProperty("value", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public object Value { get; set; }
     
+        /// <summary>The type of primitive value expected for this setting.
+        /// For example String, Int</summary>
         [Newtonsoft.Json.JsonProperty("type", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Type { get; set; }
     
+        /// <summary>Hint the the UI what type of setting this is optionally add additional UI features to select a value.
+        /// For example a value of BeanstalkApplication tells the UI it can display the list of available Beanstalk applications for the user to pick from.</summary>
         [Newtonsoft.Json.JsonProperty("typeHint", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string TypeHint { get; set; }
     
+        /// <summary>Type hint additional data required to facilitate handling of the option setting.</summary>
         [Newtonsoft.Json.JsonProperty("typeHintData", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.IDictionary<string, object> TypeHintData { get; set; }
     
+        /// <summary>UI can use this to reduce the amount of settings to show to the user when confirming the recommendation. This can make it so the user sees only the most important settings
+        /// they need to know about before deploying.</summary>
         [Newtonsoft.Json.JsonProperty("advanced", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool Advanced { get; set; }
     
+        /// <summary>Indicates whether the setting can be edited</summary>
         [Newtonsoft.Json.JsonProperty("readOnly", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool ReadOnly { get; set; }
     
+        /// <summary>Indicates whether the setting is visible/displayed on the UI</summary>
         [Newtonsoft.Json.JsonProperty("visible", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool Visible { get; set; }
     
+        /// <summary>Indicates whether the setting can be displayed as part of the settings summary of the previous deployment.</summary>
         [Newtonsoft.Json.JsonProperty("summaryDisplayable", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool SummaryDisplayable { get; set; }
     
+        /// <summary>The allowed values for the setting.</summary>
         [Newtonsoft.Json.JsonProperty("allowedValues", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<string> AllowedValues { get; set; }
     
+        /// <summary>The value mapping for allowed values. The key of the dictionary is what is sent to services
+        /// and the value is the display value shown to users.</summary>
         [Newtonsoft.Json.JsonProperty("valueMapping", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.IDictionary<string, string> ValueMapping { get; set; }
     
+        /// <summary>Child option settings for AWS.Deploy.Common.Recipes.OptionSettingValueType.Object value types
+        /// AWS.Deploy.CLI.ServerMode.Models.OptionSettingItemSummary.ChildOptionSettings value depends on the values of AWS.Deploy.CLI.ServerMode.Models.OptionSettingItemSummary.ChildOptionSettings</summary>
         [Newtonsoft.Json.JsonProperty("childOptionSettings", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<OptionSettingItemSummary> ChildOptionSettings { get; set; }
+    
+        /// <summary>The validation state of the setting that contains the validation status and message.</summary>
+        [Newtonsoft.Json.JsonProperty("validation", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public OptionSettingValidation Validation { get; set; }
+    
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.4.1.0 (Newtonsoft.Json v13.0.0.0)")]
+    public partial class OptionSettingValidation 
+    {
+        [Newtonsoft.Json.JsonProperty("validationStatus", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
+        public ValidationStatus ValidationStatus { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("validationMessage", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string ValidationMessage { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("invalidValue", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public object InvalidValue { get; set; }
     
     
     }
@@ -2222,6 +2267,17 @@ namespace AWS.Deploy.ServerMode.Client
         [Newtonsoft.Json.JsonProperty("displayName", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string DisplayName { get; set; }
     
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.4.1.0 (Newtonsoft.Json v13.0.0.0)")]
+    public enum ValidationStatus
+    {
+        [System.Runtime.Serialization.EnumMember(Value = @"Valid")]
+        Valid = 0,
+    
+        [System.Runtime.Serialization.EnumMember(Value = @"Invalid")]
+        Invalid = 1,
     
     }
 

@@ -8,6 +8,7 @@ using Amazon.ECS.Model;
 using Amazon.IdentityManagement.Model;
 using AWS.Deploy.CLI.TypeHintResponses;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.TypeHintData;
 using AWS.Deploy.Orchestration;

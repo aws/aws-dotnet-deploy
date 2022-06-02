@@ -1,6 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Threading.Tasks;
 using AWS.Deploy.Common.IO;
 
 namespace AWS.Deploy.Common.Recipes.Validation
@@ -23,14 +24,14 @@ namespace AWS.Deploy.Common.Recipes.Validation
         /// </summary>
         /// <param name="input">Path to validate</param>
         /// <returns>Valid if the directory exists, invalid otherwise</returns>
-        public ValidationResult Validate(object input)
+        public Task<ValidationResult> Validate(object input, Recommendation recommendation)
         {
             var executionDirectory = (string)input;
 
             if (!string.IsNullOrEmpty(executionDirectory) && !_directoryManager.Exists(executionDirectory))
-                return ValidationResult.Failed("The specified directory does not exist.");
+                return ValidationResult.FailedAsync("The specified directory does not exist.");
             else
-                return ValidationResult.Valid();
+                return ValidationResult.ValidAsync();
         }
     }
 }

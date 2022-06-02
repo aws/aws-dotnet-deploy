@@ -1,0 +1,169 @@
+Parameters:
+  GitHubOrg:
+    Type: String
+    Default: "aws"
+    Description: The GitHub organization to use for the repository.
+  GitHubRepositoryName:
+    Description: The name of the GitHub repository to create the role template in and to use for the CodeBuild.
+    Type: String
+    Default: "aws-dotnet-deploy"
+  OIDCProviderArn:
+    Description: Arn for the GitHub OIDC Provider.  Leave blank to create a new one or provide an existing Provider.  There can only be one GitHub OIDC Provider per GitHubOrg per AWS Account.  Example arn:aws:iam::665544332211:oidc-provider/token.actions.githubusercontent.com
+    Default: ""
+    Type: String
+  CodeBuildProjectName:
+    Description: Name of the CodeBuild project.
+    Default: "aws-dotnet-deploy-ci"
+    Type: String
+  CodeBuildArtifactsBucketName:
+    Description: Name of the buckets where the CodeBuild artifacts will be stored.
+    Default: "aws-dotnet-deploy-codebuild-artifacts"
+    Type: String
+  TestRunnerRoleArn:
+    Description: Role to assume when running tests.  This role must already exsit.  Role can be a different account.  Example arn:aws:iam:112233445566::role/awsdotnet-deploy-ci-test-runner
+    Default: ""
+    Type: String
+  OidcRoleRoleName:
+    Description: Name of the role to use for the OIDC provider.
+    Default: "aws-dotnet-deploy-ci-role"
+    Type: String
+
+
+Conditions:
+  CreateOIDCProvider: !Equals
+    - !Ref OIDCProviderArn
+    - ""
+
+Resources:
+  OidcRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref OidcRoleRoleName
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRoleWithWebIdentity
+            Principal:
+              Federated: !If
+                - CreateOIDCProvider
+                - !Ref GithubOidc
+                - !Ref OIDCProviderArn
+            Condition:
+              StringLike:
+                token.actions.githubusercontent.com:sub: !Sub repo:${GitHubOrg}/${GitHubRepositoryName}:*
+      Policies:
+        - PolicyName: !Sub "${AWS::StackName}-OIDC-Policy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - codebuild:StartBuild
+                  - codebuild:BatchGetBuilds
+                Resource:
+                  - !Sub arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${CodeBuildProjectName}
+              - Effect: Allow
+                Action:
+                  - logs:GetLogEvents
+                Resource:
+                  - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${CodeBuildProjectName}:*
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                Resource:
+                  - !Sub "${CodeBuildArtifactsBucket.Arn}/*"
+
+  GithubOidc:
+    Type: AWS::IAM::OIDCProvider
+    Condition: CreateOIDCProvider
+    Properties:
+      Url: https://token.actions.githubusercontent.com
+      ClientIdList:
+        - sts.amazonaws.com
+      ThumbprintList:
+        - 6938fd4d98bab03faadb97b34396831e3780aea1
+
+  CodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      ConcurrentBuildLimit: 1
+      Name: !Sub ${CodeBuildProjectName}
+      ServiceRole: !GetAtt CodeBuildProjectRole.Arn
+      Environment:
+        PrivilegedMode: true
+        ComputeType: BUILD_GENERAL1_LARGE
+        Type: LINUX_CONTAINER
+        ImagePullCredentialsType: CODEBUILD
+        Image: aws/codebuild/amazonlinux2-x86_64-standard:3.0
+        EnvironmentVariables:
+        - Name: TEST_RUNNER_ROLE_ARN
+          Type: PLAINTEXT
+          Value: !Ref TestRunnerRoleArn
+      Source:
+        Type: GITHUB
+        Location: !Sub https://github.com/${GitHubOrg}/${GitHubRepositoryName}
+        BuildSpec: buildtools/ci.buildspec.yml
+      Artifacts:
+        Type: S3
+        Packaging: ZIP
+        Location: !GetAtt CodeBuildArtifactsBucket.Arn
+        OverrideArtifactName: true
+
+
+  CodeBuildProjectRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${CodeBuildProjectName}-codebuild-service-role
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: ['sts:AssumeRole']
+          Effect: Allow
+          Principal:
+            Service: [codebuild.amazonaws.com]
+        Version: '2012-10-17'
+      Path: /
+      Policies:
+        - PolicyName: !Sub "${AWS::StackName}-codebuild-service-role-policy"
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                - 'logs:CreateLogGroup'
+                - 'logs:PutLogEvents'
+                - 'logs:CreateLogStream'
+                Effect: Allow
+                Resource:
+                  - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${CodeBuildProjectName}"
+                  - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${CodeBuildProjectName}:*"
+              - Action:
+                - 'sts:AssumeRole'
+                Effect: Allow
+                Resource:
+                  - !Ref TestRunnerRoleArn
+              - Action:
+                - codebuild:BatchPutTestCases
+                - codebuild:CreateReport
+                - codebuild:CreateReportGroup
+                - codebuild:UpdateReport
+                - codebuild:UpdateReportGroup
+                Effect: Allow
+                Resource:
+                  - !Sub arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:report-group/*
+              - Action:
+                - 's3:PutObject'
+                Effect: Allow
+                Resource:
+                  - !Sub "${CodeBuildArtifactsBucket.Arn}/*"
+
+  CodeBuildArtifactsBucket:
+    Type: 'AWS::S3::Bucket'
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Ref CodeBuildArtifactsBucketName
+
+Outputs:
+  OidcRole:
+    Value: !GetAtt OidcRole.Arn
+  CodeBuildProjectName:
+    Value: !Sub ${CodeBuildProjectName}

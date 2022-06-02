@@ -11,7 +11,29 @@ namespace AWS.Deploy.Common.IO
 {
     public interface IFileManager
     {
+        /// <summary>
+        /// Determines whether the specified file is at a valid path and exists.
+        /// This can either be an absolute path or relative to the current working directory.
+        /// </summary>
+        /// <param name="path">The file to check</param>
+        /// <returns>
+        /// True if the path is valid, the caller has the required permissions,
+        /// and path contains the name of an existing file
+        /// </returns>
         bool Exists(string path);
+
+        /// <summary>
+        /// Determines whether the specified file is at a valid path and exists.
+        /// This can either be an absolute path or relative to the given directory.
+        /// </summary>
+        /// <param name="path">The file to check</param>
+        /// <param name="directory">Directory to consider the path as relative to</param>
+        /// <returns>
+        /// True if the path is valid, the caller has the required permissions,
+        /// and path contains the name of an existing file
+        /// </returns>
+        bool Exists(string path, string directory);
+
         Task<string> ReadAllTextAsync(string path);
         Task<string[]> ReadAllLinesAsync(string path);
         Task WriteAllTextAsync(string filePath, string contents, CancellationToken cancellationToken = default);
@@ -26,6 +48,18 @@ namespace AWS.Deploy.Common.IO
     public class FileManager : IFileManager
     {
         public bool Exists(string path) => IsFileValid(path);
+
+        public bool Exists(string path, string directory)
+        {
+            if (Path.IsPathRooted(path))
+            {
+                return Exists(path);
+            }
+            else
+            {
+                return Exists(Path.Combine(directory, path));
+            }
+        }
 
         public Task<string> ReadAllTextAsync(string path) => File.ReadAllTextAsync(path);
 

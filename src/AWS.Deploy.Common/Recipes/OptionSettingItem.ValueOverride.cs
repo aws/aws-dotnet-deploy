@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AWS.Deploy.Common.Recipes.Validation;
 using Newtonsoft.Json;
 
@@ -88,29 +89,41 @@ namespace AWS.Deploy.Common.Recipes
         /// <summary>
         /// Assigns a value to the OptionSettingItem.
         /// </summary>
+        /// <param name="valueOverride">Value to assign</param>
+        /// <param name="recommendation">Current deployment recommendation, may be used if the validator needs to consider properties other than itself</param>
         /// <exception cref="ValidationFailedException">
         /// Thrown if one or more <see cref="Validators"/> determine
         /// <paramref name="valueOverride"/> is not valid.
         /// </exception>
-        public void SetValue(IOptionSettingHandler optionSettingHandler, object valueOverride, IOptionSettingItemValidator[] validators, Recommendation recommendation)
+        public async Task SetValue(IOptionSettingHandler optionSettingHandler, object valueOverride, IOptionSettingItemValidator[] validators, Recommendation recommendation, bool skipValidation)
         {
-            var isValid = true;
-            var validationFailedMessage = string.Empty;
-            foreach (var validator in validators)
+            if (!skipValidation)
             {
-                var result = validator.Validate(valueOverride);
-                if (!result.IsValid)
+                foreach (var validator in validators)
                 {
-                    isValid = false;
-                    validationFailedMessage += result.ValidationFailedMessage + Environment.NewLine;
+                    var result = await validator.Validate(valueOverride, recommendation);
+                    if (!result.IsValid)
+                    {
+                        Validation.ValidationStatus = ValidationStatus.Invalid;
+                        Validation.ValidationMessage = result.ValidationFailedMessage?.Trim() ?? $"The value '{valueOverride}' is invalid for option setting '{Name}'.";
+                        Validation.InvalidValue = valueOverride;
+                        throw new ValidationFailedException(DeployToolErrorCode.OptionSettingItemValueValidationFailed, Validation.ValidationMessage);
+                    }
                 }
             }
-            if (!isValid)
-                throw new ValidationFailedException(DeployToolErrorCode.OptionSettingItemValueValidationFailed, validationFailedMessage.Trim());
 
             if (AllowedValues != null && AllowedValues.Count > 0 && valueOverride != null &&
                 !AllowedValues.Contains(valueOverride.ToString() ?? ""))
-                throw new InvalidOverrideValueException(DeployToolErrorCode.InvalidValueForOptionSettingItem, $"Invalid value for option setting item '{Name}'");
+            {
+                Validation.ValidationStatus = ValidationStatus.Invalid;
+                Validation.ValidationMessage = $"Invalid value for option setting item '{Name}'";
+                Validation.InvalidValue = valueOverride;
+                throw new InvalidOverrideValueException(DeployToolErrorCode.InvalidValueForOptionSettingItem, Validation.ValidationMessage);
+            }
+
+            Validation.ValidationStatus = ValidationStatus.Valid;
+            Validation.ValidationMessage = string.Empty;
+            Validation.InvalidValue = null;
 
             if (valueOverride is bool || valueOverride is int || valueOverride is long || valueOverride is double || valueOverride is Dictionary<string, string> || valueOverride is SortedSet<string>)
             {
@@ -148,7 +161,7 @@ namespace AWS.Deploy.Common.Recipes
                 {
                     if (deserialized.TryGetValue(childOptionSetting.Id, out var childValueOverride))
                     {
-                        optionSettingHandler.SetOptionSettingValue(recommendation, childOptionSetting, childValueOverride);
+                        await optionSettingHandler.SetOptionSettingValue(recommendation, childOptionSetting, childValueOverride, skipValidation: skipValidation);
                     }
                 }
             }

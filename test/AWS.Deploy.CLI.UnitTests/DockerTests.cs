@@ -5,9 +5,13 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
+using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
+using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.DockerEngine;
+using AWS.Deploy.Orchestration;
+using Moq;
 using Should;
 using Xunit;
 
@@ -32,7 +36,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var project = await new ProjectDefinitionParser(fileManager, new DirectoryManager()).Parse(projectPath);
 
-            var engine = new DockerEngine.DockerEngine(project, fileManager);
+            var engine = new DockerEngine.DockerEngine(project, fileManager, new TestDirectoryManager());
 
             engine.GenerateDockerFile();
 

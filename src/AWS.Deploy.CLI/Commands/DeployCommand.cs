@@ -24,6 +24,7 @@ using AWS.Deploy.Orchestration.LocalUserSettings;
 using Newtonsoft.Json;
 using AWS.Deploy.Orchestration.ServiceHandlers;
 using Microsoft.Extensions.DependencyInjection;
+using AWS.Deploy.Common.Data;
 
 namespace AWS.Deploy.CLI.Commands
 {
@@ -44,7 +45,6 @@ namespace AWS.Deploy.CLI.Commands
         private readonly ICloudApplicationNameGenerator _cloudApplicationNameGenerator;
         private readonly ILocalUserSettingsEngine _localUserSettingsEngine;
         private readonly IConsoleUtilities _consoleUtilities;
-        private readonly ICustomRecipeLocator _customRecipeLocator;
         private readonly ISystemCapabilityEvaluator _systemCapabilityEvaluator;
         private readonly OrchestratorSession _session;
         private readonly IDirectoryManager _directoryManager;
@@ -53,6 +53,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly IAWSServiceHandler _awsServiceHandler;
         private readonly IOptionSettingHandler _optionSettingHandler;
         private readonly IValidatorFactory _validatorFactory;
+        private readonly IRecipeHandler _recipeHandler;
 
         public DeployCommand(
             IServiceProvider serviceProvider,
@@ -71,14 +72,14 @@ namespace AWS.Deploy.CLI.Commands
             ICloudApplicationNameGenerator cloudApplicationNameGenerator,
             ILocalUserSettingsEngine localUserSettingsEngine,
             IConsoleUtilities consoleUtilities,
-            ICustomRecipeLocator customRecipeLocator,
             ISystemCapabilityEvaluator systemCapabilityEvaluator,
             OrchestratorSession session,
             IDirectoryManager directoryManager,
             IFileManager fileManager,
             IAWSServiceHandler awsServiceHandler,
             IOptionSettingHandler optionSettingHandler,
-            IValidatorFactory validatorFactory)
+            IValidatorFactory validatorFactory,
+            IRecipeHandler recipeHandler)
         {
             _serviceProvider = serviceProvider;
             _toolInteractiveService = toolInteractiveService;
@@ -99,11 +100,11 @@ namespace AWS.Deploy.CLI.Commands
             _fileManager = fileManager;
             _cdkVersionDetector = cdkVersionDetector;
             _cdkManager = cdkManager;
-            _customRecipeLocator = customRecipeLocator;
             _systemCapabilityEvaluator = systemCapabilityEvaluator;
             _awsServiceHandler = awsServiceHandler;
             _optionSettingHandler = optionSettingHandler;
             _validatorFactory = validatorFactory;
+            _recipeHandler = recipeHandler;
         }
 
         public async Task ExecuteAsync(string applicationName, string deploymentProjectPath, UserDeploymentSettings? userDeploymentSettings = null)
@@ -165,8 +166,7 @@ namespace AWS.Deploy.CLI.Commands
                     _deploymentBundleHandler,
                     _localUserSettingsEngine,
                     _dockerEngine,
-                    _customRecipeLocator,
-                    new List<string> { RecipeLocator.FindRecipeDefinitionsPath() },
+                    _recipeHandler,
                     _fileManager,
                     _directoryManager,
                     _awsServiceHandler,
@@ -277,7 +277,7 @@ namespace AWS.Deploy.CLI.Commands
 
             if (userDeploymentSettings != null)
             {
-                ConfigureDeploymentFromConfigFile(selectedRecommendation, userDeploymentSettings);
+                await ConfigureDeploymentFromConfigFile(selectedRecommendation, userDeploymentSettings);
             }
 
             if (!_toolInteractiveService.DisableInteractive)
@@ -336,7 +336,7 @@ namespace AWS.Deploy.CLI.Commands
             else
                 previousSettings = await _deployedApplicationQueryer.GetPreviousSettings(deployedApplication);
 
-            selectedRecommendation = orchestrator.ApplyRecommendationPreviousSettings(selectedRecommendation, previousSettings);
+            selectedRecommendation = await orchestrator.ApplyRecommendationPreviousSettings(selectedRecommendation, previousSettings);
 
             var header = $"Loading {deployedApplication.DisplayName} settings:";
 
@@ -409,7 +409,7 @@ namespace AWS.Deploy.CLI.Commands
         /// </summary>
         /// <param name="recommendation">The selected recommendation settings used for deployment <see cref="Recommendation"/></param>
         /// <param name="userDeploymentSettings">The deserialized object from the user provided config file. <see cref="UserDeploymentSettings"/></param>
-        private void ConfigureDeploymentFromConfigFile(Recommendation recommendation, UserDeploymentSettings userDeploymentSettings)
+        private async Task ConfigureDeploymentFromConfigFile(Recommendation recommendation, UserDeploymentSettings userDeploymentSettings)
         {
             foreach (var entry in userDeploymentSettings.LeafOptionSettingItems)
             {
@@ -460,13 +460,14 @@ namespace AWS.Deploy.CLI.Commands
                         throw new InvalidOverrideValueException(DeployToolErrorCode.InvalidValueForOptionSettingItem, $"Invalid value {optionSettingValue} for option setting item {optionSettingJsonPath}");
                     }
 
-                    _optionSettingHandler.SetOptionSettingValue(recommendation, optionSetting, settingValue);
+                    await _optionSettingHandler.SetOptionSettingValue(recommendation, optionSetting, settingValue);
                 }
             }
 
             var validatorFailedResults =
                 _validatorFactory.BuildValidators(recommendation.Recipe)
-                            .Select(validator => validator.Validate(recommendation, _session))
+                            .Select(async validator => await validator.Validate(recommendation, _session))
+                            .Select(x => x.Result)
                             .Where(x => !x.IsValid)
                             .ToList();
 
@@ -710,13 +711,16 @@ namespace AWS.Deploy.CLI.Commands
                 // deploy case, nothing more to configure
                 if (string.IsNullOrEmpty(input))
                 {
-                    var validatorFailedResults =
+                    var settingValidatorFailedResults = _optionSettingHandler.RunOptionSettingValidators(recommendation);
+
+                    var recipeValidatorFailedResults =
                         _validatorFactory.BuildValidators(recommendation.Recipe)
-                            .Select(validator => validator.Validate(recommendation, _session))
+                            .Select(async validator => await validator.Validate(recommendation, _session))
+                            .Select(x => x.Result)
                             .Where(x => !x.IsValid)
                             .ToList();
 
-                    if (!validatorFailedResults.Any())
+                    if (!settingValidatorFailedResults.Any() && !recipeValidatorFailedResults.Any())
                     {
                         // validation successful
                         // deployment configured
@@ -725,7 +729,9 @@ namespace AWS.Deploy.CLI.Commands
 
                     _toolInteractiveService.WriteLine();
                     _toolInteractiveService.WriteErrorLine("The deployment configuration needs to be adjusted before it can be deployed:");
-                    foreach (var result in validatorFailedResults)
+                    foreach (var result in settingValidatorFailedResults)
+                        _toolInteractiveService.WriteErrorLine($" - {result.ValidationFailedMessage}");
+                    foreach (var result in recipeValidatorFailedResults)
                         _toolInteractiveService.WriteErrorLine($" - {result.ValidationFailedMessage}");
 
                     _toolInteractiveService.WriteLine();
@@ -829,7 +835,7 @@ namespace AWS.Deploy.CLI.Commands
             {
                 try
                 {
-                    _optionSettingHandler.SetOptionSettingValue(recommendation, setting, settingValue);
+                    await _optionSettingHandler.SetOptionSettingValue(recommendation, setting, settingValue);
                 }
                 catch (ValidationFailedException ex)
                 {

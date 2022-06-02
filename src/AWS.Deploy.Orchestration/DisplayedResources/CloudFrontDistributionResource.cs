@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using AWS.Deploy.Orchestration.Data;
 
 using Amazon.CloudFront.Model;
+using AWS.Deploy.Common.Data;
 
 namespace AWS.Deploy.Orchestration.DisplayedResources
 {

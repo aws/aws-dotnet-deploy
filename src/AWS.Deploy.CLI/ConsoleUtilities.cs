@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
@@ -28,7 +29,7 @@ namespace AWS.Deploy.CLI
         void DisplayRow((string, int)[] row);
         UserResponse<string> AskUserToChooseOrCreateNew(IEnumerable<string> options, string title, bool askNewName = true, string defaultNewName = "", bool canBeEmpty = false, string? defaultChoosePrompt = null, string? defaultCreateNewPrompt = null, string? defaultCreateNewLabel = null);
         UserResponse<T> AskUserToChooseOrCreateNew<T>(IEnumerable<T> options, string title, UserInputConfiguration<T> userInputConfiguration, string? defaultChoosePrompt = null, string? defaultCreateNewPrompt = null, string? defaultCreateNewLabel = null);
-        string AskUserForValue(string message, string defaultValue, bool allowEmpty, string resetValue = "", string? defaultAskValuePrompt = null, params Func<string, string>[] validators);
+        string AskUserForValue(string message, string defaultValue, bool allowEmpty, string resetValue = "", string? defaultAskValuePrompt = null, params Func<string, Task<string>>[] validators);
         string AskForEC2KeyPairSaveDirectory(string projectPath);
         YesNo AskYesNoQuestion(string question, string? defaultValue);
         YesNo AskYesNoQuestion(string question, YesNo? defaultValue = default);
@@ -328,7 +329,7 @@ namespace AWS.Deploy.CLI
             };
         }
 
-        public string AskUserForValue(string message, string defaultValue, bool allowEmpty, string resetValue = "", string? defaultAskValuePrompt = null, params Func<string, string>[] validators)
+        public string AskUserForValue(string message, string defaultValue, bool allowEmpty, string resetValue = "", string? defaultAskValuePrompt = null, params Func<string, Task<string>>[] validators)
         {
             const string RESET = "<reset>";
             var prompt = !string.IsNullOrEmpty(defaultAskValuePrompt) ? defaultAskValuePrompt : "Enter value";
@@ -367,7 +368,8 @@ namespace AWS.Deploy.CLI
 
                 var errorMessages =
                       validators
-                            .Select(v => v(userValue))
+                            .Select(async v => await v(userValue))
+                            .Select(v => v.Result)
                             .Where(e => !string.IsNullOrEmpty(e))
                             .ToList();
 

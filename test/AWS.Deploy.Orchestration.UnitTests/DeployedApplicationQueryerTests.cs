@@ -11,6 +11,7 @@ using Amazon.CloudFormation.Model;
 using Amazon.ElasticBeanstalk;
 using Amazon.ElasticBeanstalk.Model;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestration.Data;
@@ -55,7 +56,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
                 .Returns(Task.FromResult(new List<Stack>() { stack }));
 
             _mockAWSResourceQueryer
-                .Setup(x => x.ListOfElasticBeanstalkEnvironments(It.IsAny<string>()))
+                .Setup(x => x.ListOfElasticBeanstalkEnvironments(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(Task.FromResult(new List<EnvironmentDescription>()));
 
             var deployedApplicationQueryer = new DeployedApplicationQueryer(
@@ -100,7 +101,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
                 .Returns(Task.FromResult(stacks));
 
             _mockAWSResourceQueryer
-                .Setup(x => x.ListOfElasticBeanstalkEnvironments(It.IsAny<string>()))
+                .Setup(x => x.ListOfElasticBeanstalkEnvironments(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(Task.FromResult(new List<EnvironmentDescription>()));
 
             var deployedApplicationQueryer = new DeployedApplicationQueryer(
@@ -163,7 +164,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
                 .Returns(Task.FromResult(stacks));
 
             _mockAWSResourceQueryer
-                .Setup(x => x.ListOfElasticBeanstalkEnvironments(It.IsAny<string>()))
+                .Setup(x => x.ListOfElasticBeanstalkEnvironments(It.IsAny<string>(), It.IsAny<string>()))
                .Returns(Task.FromResult(new List<EnvironmentDescription>()));
 
             var deployedApplicationQueryer = new DeployedApplicationQueryer(
@@ -220,7 +221,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
                 .Returns(Task.FromResult(new List<Stack>() { stack }));
 
             _mockAWSResourceQueryer
-                .Setup(x => x.ListOfElasticBeanstalkEnvironments(It.IsAny<string>()))
+                .Setup(x => x.ListOfElasticBeanstalkEnvironments(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(Task.FromResult(new List<EnvironmentDescription>()));
 
             var deployedApplicationQueryer = new DeployedApplicationQueryer(
@@ -271,7 +272,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
                 .Returns(Task.FromResult(new List<Stack>()));
 
             _mockAWSResourceQueryer
-                .Setup(x => x.ListOfElasticBeanstalkEnvironments(It.IsAny<string>()))
+                .Setup(x => x.ListOfElasticBeanstalkEnvironments(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(Task.FromResult(environments));
 
             _mockAWSResourceQueryer
@@ -324,7 +325,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
                 .Returns(Task.FromResult(new List<Stack>()));
 
             _mockAWSResourceQueryer
-                .Setup(x => x.ListOfElasticBeanstalkEnvironments(It.IsAny<string>()))
+                .Setup(x => x.ListOfElasticBeanstalkEnvironments(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(Task.FromResult(environments));
 
             _mockAWSResourceQueryer
@@ -385,7 +386,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
                 .Returns(Task.FromResult(new List<Stack>()));
 
             _mockAWSResourceQueryer
-                .Setup(x => x.ListOfElasticBeanstalkEnvironments(It.IsAny<string>()))
+                .Setup(x => x.ListOfElasticBeanstalkEnvironments(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(Task.FromResult(environments));
 
             _mockAWSResourceQueryer

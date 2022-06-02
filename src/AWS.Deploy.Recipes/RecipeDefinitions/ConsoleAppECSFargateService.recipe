@@ -135,6 +135,9 @@
                 "MinValueOptionSettingsId": "AutoScaling.MinCapacity",
                 "MaxValueOptionSettingsId": "AutoScaling.MaxCapacity"
             }
+        },
+        {
+            "ValidatorType": "ValidDockerfilePath"
         }
     ],
     "Categories": [
@@ -202,7 +205,6 @@
                             "ValidatorType": "Regex",
                             "Configuration": {
                                 "Regex": "arn:[^:]+:ecs:[^:]*:[0-9]{12}:cluster/.+",
-                                "AllowEmptyString": true,
                                 "ValidationFailedMessage": "Invalid cluster Arn. The ARN should contain the arn:[PARTITION]:ecs namespace, followed by the Region of the cluster, the AWS account ID of the cluster owner, the cluster namespace, and then the cluster name. For example, arn:aws:ecs:region:012345678910:cluster/test. For more information visit https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_Cluster.html"
                             }
                         }
@@ -227,7 +229,6 @@
                             "ValidatorType": "Regex",
                             "Configuration": {
                                 "Regex": "^([A-Za-z0-9_-]{1,255})$",
-                                "AllowEmptyString": true,
                                 "ValidationFailedMessage": "Invalid cluster name. The cluster name can only contain letters (case-sensitive), numbers, hyphens, underscores and can't be longer than 255 character in length."
                             }
                         }
@@ -319,7 +320,6 @@
                             "ValidatorType": "Regex",
                             "Configuration": {
                                 "Regex": "arn:.+:iam::[0-9]{12}:.+",
-                                "AllowEmptyString": true,
                                 "ValidationFailedMessage": "Invalid IAM Role ARN. The ARN should contain the arn:[PARTITION]:iam namespace, followed by the account ID, and then the resource path. For example - arn:aws:iam::123456789012:role/S3Access is a valid IAM Role ARN. For more information visit https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-arns"
                             }
                         }

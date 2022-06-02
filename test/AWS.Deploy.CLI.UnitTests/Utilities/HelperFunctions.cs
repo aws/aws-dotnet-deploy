@@ -1,10 +1,13 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.\r
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using System.Threading.Tasks;
 using Amazon.Runtime;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.DeploymentManifest;
 using AWS.Deploy.Common.IO;
+using AWS.Deploy.Common.Recipes.Validation;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.RecommendationEngine;
 using AWS.Deploy.Recipes;
@@ -24,6 +27,13 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
         {
             var fullPath = SystemIOUtilities.ResolvePath(testProjectName);
 
+            var deploymentManifestEngine = new DeploymentManifestEngine(directoryManager, fileManager);
+            var orchestratorInteractiveService = new TestToolOrchestratorInteractiveService();
+            var serviceProvider = new Mock<IServiceProvider>();
+            var validatorFactory = new ValidatorFactory(serviceProvider.Object);
+            var optionSettingHandler = new OptionSettingHandler(validatorFactory);
+            var recipeHandler = new RecipeHandler(deploymentManifestEngine, orchestratorInteractiveService, directoryManager, fileManager, optionSettingHandler);
+
             var parser = new ProjectDefinitionParser(fileManager, directoryManager);
             var awsCredentials = new Mock<AWSCredentials>();
             var session =  new OrchestratorSession(
@@ -35,7 +45,7 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
                 AWSProfileName = awsProfile
             };
 
-            return new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, session);
+            return new RecommendationEngine(session, recipeHandler);
         }
     }
 }

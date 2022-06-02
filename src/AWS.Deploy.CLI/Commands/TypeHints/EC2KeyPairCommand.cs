@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Amazon.EC2.Model;
 using Amazon.ElasticBeanstalk.Model;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.TypeHintData;
 using AWS.Deploy.Orchestration.Data;

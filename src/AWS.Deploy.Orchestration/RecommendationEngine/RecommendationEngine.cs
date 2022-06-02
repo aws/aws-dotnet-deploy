@@ -15,49 +15,22 @@ namespace AWS.Deploy.Orchestration.RecommendationEngine
 {
     public class RecommendationEngine
     {
-        private readonly IList<RecipeDefinition> _availableRecommendations = new List<RecipeDefinition>();
         private readonly OrchestratorSession _orchestratorSession;
+        private readonly IRecipeHandler _recipeHandler;
 
-        public RecommendationEngine(IEnumerable<string> recipeDefinitionPaths, OrchestratorSession orchestratorSession)
+        public RecommendationEngine(OrchestratorSession orchestratorSession, IRecipeHandler recipeHandler)
         {
             _orchestratorSession = orchestratorSession;
-
-            recipeDefinitionPaths ??= new List<string>();
-
-            var uniqueRecipeId = new HashSet<string>();
-
-            foreach (var recommendationPath in recipeDefinitionPaths)
-            {
-                foreach (var recipeFile in Directory.GetFiles(recommendationPath, "*.recipe", SearchOption.TopDirectoryOnly))
-                {
-                    try
-                    {
-                        var content = File.ReadAllText(recipeFile);
-                        var definition = JsonConvert.DeserializeObject<RecipeDefinition>(content);
-                        if (definition == null)
-                            throw new FailedToDeserializeException(DeployToolErrorCode.FailedToDeserializeRecipe, $"Failed to Deserialize Recipe [{recipeFile}]");
-                        definition.RecipePath = recipeFile;
-                        if (!uniqueRecipeId.Contains(definition.Id))
-                        {
-                            _availableRecommendations.Add(definition);
-                            uniqueRecipeId.Add(definition.Id);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        throw new FailedToDeserializeException(DeployToolErrorCode.FailedToDeserializeRecipe, $"Failed to Deserialize Recipe [{recipeFile}]: {e.Message}", e);
-                    }
-                }
-            }
+            _recipeHandler = recipeHandler;
         }
 
-        public async Task<List<Recommendation>> ComputeRecommendations(Dictionary<string, string>? additionalReplacements = null)
+        public async Task<List<Recommendation>> ComputeRecommendations(List<string>? recipeDefinitionPaths = null, Dictionary<string, string>? additionalReplacements = null)
         {
             additionalReplacements ??= new Dictionary<string, string>();
 
             var recommendations = new List<Recommendation>();
-
-            foreach (var potentialRecipe in _availableRecommendations)
+            var availableRecommendations = await _recipeHandler.GetRecipeDefinitions(recipeDefinitionPaths);
+            foreach (var potentialRecipe in availableRecommendations)
             {
                 var results = await EvaluateRules(potentialRecipe.RecommendationRules);
                 if(!results.Include)

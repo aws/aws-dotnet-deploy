@@ -7,6 +7,8 @@ using System.IO;
 using System.Linq;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
+using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.Utilities;
 using Newtonsoft.Json;
 
 namespace AWS.Deploy.DockerEngine
@@ -33,9 +35,10 @@ namespace AWS.Deploy.DockerEngine
     {
         private readonly ProjectDefinition _project;
         private readonly IFileManager _fileManager;
+        private readonly IDirectoryManager _directoryManager;
         private readonly string _projectPath;
 
-        public DockerEngine(ProjectDefinition project, IFileManager fileManager)
+        public DockerEngine(ProjectDefinition project, IFileManager fileManager, IDirectoryManager directoryManager)
         {
             if (project == null)
             {
@@ -45,6 +48,7 @@ namespace AWS.Deploy.DockerEngine
             _project = project;
             _projectPath = project.ProjectPath;
             _fileManager = fileManager;
+            _directoryManager = directoryManager;
         }
 
         /// <summary>
@@ -158,8 +162,8 @@ namespace AWS.Deploy.DockerEngine
             if (string.IsNullOrEmpty(recommendation.DeploymentBundle.DockerExecutionDirectory))
             {
                 var projectFilename = Path.GetFileName(recommendation.ProjectPath);
-                var dockerFilePath = Path.Combine(Path.GetDirectoryName(recommendation.ProjectPath) ?? "", "Dockerfile");
-                if (_fileManager.Exists(dockerFilePath))
+                
+                if (DockerUtilities.TryGetAbsoluteDockerfile(recommendation, _fileManager, _directoryManager, out var dockerFilePath))
                 {
                     using (var stream = File.OpenRead(dockerFilePath))
                     using (var reader = new StreamReader(stream))

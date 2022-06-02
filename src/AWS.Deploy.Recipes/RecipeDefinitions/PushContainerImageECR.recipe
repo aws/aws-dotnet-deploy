@@ -26,6 +26,11 @@
             }
         }
     ],
+    "Validators": [
+        {
+            "ValidatorType": "ValidDockerfilePath"
+        }
+    ],
     "Categories": [
         {
             "Id": "General",

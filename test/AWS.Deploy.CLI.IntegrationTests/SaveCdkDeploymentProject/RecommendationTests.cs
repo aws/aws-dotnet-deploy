@@ -229,12 +229,15 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 
         private async Task<Orchestrator> GetOrchestrator(string targetApplicationProjectPath)
         {
+            var awsResourceQueryer = new TestToolAWSResourceQueryer();
             var directoryManager = new DirectoryManager();
             var fileManager = new FileManager();
             var deploymentManifestEngine = new DeploymentManifestEngine(directoryManager, fileManager);
             var localUserSettingsEngine = new LocalUserSettingsEngine(fileManager, directoryManager);
-            var customRecipeLocator = new CustomRecipeLocator(deploymentManifestEngine, _inMemoryInteractiveService, directoryManager);
-
+            var serviceProvider = new Mock<IServiceProvider>();
+            var validatorFactory = new ValidatorFactory(serviceProvider.Object);
+            var optionSettingHandler = new OptionSettingHandler(validatorFactory);
+            var recipeHandler = new RecipeHandler(deploymentManifestEngine, _inMemoryInteractiveService, directoryManager, fileManager, optionSettingHandler);
             var projectDefinition = await new ProjectDefinitionParser(fileManager, directoryManager).Parse(targetApplicationProjectPath);
             var session = new OrchestratorSession(projectDefinition);
 
@@ -243,12 +246,11 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
                 new Mock<ICdkProjectHandler>().Object,
                 new Mock<ICDKManager>().Object,
                 new Mock<ICDKVersionDetector>().Object,
-                new TestToolAWSResourceQueryer(),
+                awsResourceQueryer,
                 new Mock<IDeploymentBundleHandler>().Object,
                 localUserSettingsEngine,
                 new Mock<IDockerEngine>().Object,
-                customRecipeLocator,
-                new List<string> { RecipeLocator.FindRecipeDefinitionsPath() },
+                recipeHandler,
                 fileManager,
                 directoryManager,
                 new Mock<IAWSServiceHandler>().Object,

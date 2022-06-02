@@ -10,8 +10,10 @@ using Amazon.Runtime;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.CLI.UnitTests.Utilities;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.DeploymentManifest;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.Recipes.Validation;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.RecommendationEngine;
 using AWS.Deploy.Recipes;
@@ -27,18 +29,33 @@ namespace AWS.Deploy.CLI.UnitTests
         private readonly TestDirectoryManager _directoryManager;
         private readonly ProjectDefinitionParser _projectDefinitionParser;
         private readonly RecipeDefinition _recipeDefinition;
+        private readonly TestFileManager _fileManager;
+        private readonly IDeploymentManifestEngine _deploymentManifestEngine;
+        private readonly IOrchestratorInteractiveService _orchestratorInteractiveService;
+        private readonly IRecipeHandler _recipeHandler;
 
         public DeploymentBundleHandlerTests()
         {
             var awsResourceQueryer = new TestToolAWSResourceQueryer();
             var interactiveService = new TestToolOrchestratorInteractiveService();
             var zipFileManager = new TestZipFileManager();
+            var serviceProvider = new Mock<IServiceProvider>().Object;
 
             _commandLineWrapper = new TestToolCommandLineWrapper();
+            _fileManager = new TestFileManager();
             _directoryManager = new TestDirectoryManager();
+            var recipeFiles = Directory.GetFiles(RecipeLocator.FindRecipeDefinitionsPath(), "*.recipe", SearchOption.TopDirectoryOnly);
+            _directoryManager.AddedFiles.Add(RecipeLocator.FindRecipeDefinitionsPath(), new HashSet<string> (recipeFiles));
+            foreach (var recipeFile in recipeFiles)
+                _fileManager.InMemoryStore.Add(recipeFile, File.ReadAllText(recipeFile));
+            _deploymentManifestEngine = new DeploymentManifestEngine(_directoryManager, _fileManager);
+            _orchestratorInteractiveService = new TestToolOrchestratorInteractiveService();
+            var validatorFactory = new ValidatorFactory(serviceProvider);
+            var optionSettingHandler = new OptionSettingHandler(validatorFactory);
+            _recipeHandler = new RecipeHandler(_deploymentManifestEngine, _orchestratorInteractiveService, _directoryManager, _fileManager, optionSettingHandler);
             _projectDefinitionParser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
 
-            _deploymentBundleHandler = new DeploymentBundleHandler(_commandLineWrapper, awsResourceQueryer, interactiveService, _directoryManager, zipFileManager);
+            _deploymentBundleHandler = new DeploymentBundleHandler(_commandLineWrapper, awsResourceQueryer, interactiveService, _directoryManager, zipFileManager, new FileManager());
 
             _recipeDefinition = new Mock<RecipeDefinition>(
                 It.IsAny<string>(),
@@ -58,17 +75,20 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var projectPath = SystemIOUtilities.ResolvePath("ConsoleAppTask");
             var project = await _projectDefinitionParser.Parse(projectPath);
-
-            var recommendation = new Recommendation(_recipeDefinition, project, new List<OptionSettingItem>(), 100, new Dictionary<string, string>());
+            var options = new List<OptionSettingItem>()
+            {
+                new OptionSettingItem("DockerfilePath", "", "", "")
+            };
+            var recommendation = new Recommendation(_recipeDefinition, project, options, 100, new Dictionary<string, string>());
 
             var cloudApplication = new CloudApplication("ConsoleAppTask", String.Empty, CloudApplicationResourceType.CloudFormationStack, string.Empty);
             var imageTag = "imageTag";
             await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation, imageTag);
 
-            var dockerFile = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(recommendation.ProjectPath)), "Dockerfile");
+            var expectedDockerFile = Path.GetFullPath(Path.Combine(".", "Dockerfile"), recommendation.GetProjectDirectory());
             var dockerExecutionDirectory = Directory.GetParent(Path.GetFullPath(recommendation.ProjectPath)).Parent.Parent;
 
-            Assert.Equal($"docker build -t {imageTag} -f \"{dockerFile}\" .",
+            Assert.Equal($"docker build -t {imageTag} -f \"{expectedDockerFile}\" .",
                 _commandLineWrapper.CommandsToExecute.First().Command);
             Assert.Equal(dockerExecutionDirectory.FullName,
                 _commandLineWrapper.CommandsToExecute.First().WorkingDirectory);
@@ -79,7 +99,11 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var projectPath = SystemIOUtilities.ResolvePath("ConsoleAppTask");
             var project = await _projectDefinitionParser.Parse(projectPath);
-            var recommendation = new Recommendation(_recipeDefinition, project, new List<OptionSettingItem>(), 100, new Dictionary<string, string>());
+            var options = new List<OptionSettingItem>()
+            {
+                new OptionSettingItem("DockerfilePath", "", "", "")
+            };
+            var recommendation = new Recommendation(_recipeDefinition, project, options, 100, new Dictionary<string, string>());
 
             recommendation.DeploymentBundle.DockerExecutionDirectory = projectPath;
 
@@ -87,11 +111,40 @@ namespace AWS.Deploy.CLI.UnitTests
             var imageTag = "imageTag";
             await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation, imageTag);
 
-            var dockerFile = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(recommendation.ProjectPath)), "Dockerfile");
+            var expectedDockerFile = Path.GetFullPath(Path.Combine(".", "Dockerfile"), recommendation.GetProjectDirectory());
 
-            Assert.Equal($"docker build -t {imageTag} -f \"{dockerFile}\" .",
+            Assert.Equal($"docker build -t {imageTag} -f \"{expectedDockerFile}\" .",
                 _commandLineWrapper.CommandsToExecute.First().Command);
             Assert.Equal(projectPath,
+                _commandLineWrapper.CommandsToExecute.First().WorkingDirectory);
+        }
+
+        /// <summary>
+        /// Tests the Dockerfile being located in a subfolder instead of the project root
+        /// </summary>
+        [Fact]
+        public async Task BuildDockerImage_AlternativeDockerfilePathSet()
+        {
+            var projectPath = SystemIOUtilities.ResolvePath("ConsoleAppTask");
+            var project = await _projectDefinitionParser.Parse(projectPath);
+            var options = new List<OptionSettingItem>()
+            {
+                new OptionSettingItem("DockerfilePath", "", "", "")
+            };
+            var recommendation = new Recommendation(_recipeDefinition, project, options, 100, new Dictionary<string, string>());
+
+            var dockerfilePath = Path.Combine(projectPath, "Docker", "Dockerfile");
+            var expectedDockerExecutionDirectory = Directory.GetParent(Path.GetFullPath(recommendation.ProjectPath)).Parent.Parent;
+
+            recommendation.DeploymentBundle.DockerfilePath = dockerfilePath;
+
+            var cloudApplication = new CloudApplication("ConsoleAppTask", string.Empty, CloudApplicationResourceType.CloudFormationStack, recommendation.Recipe.Id);
+            var imageTag = "imageTag";
+            await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation, imageTag);
+
+            Assert.Equal($"docker build -t {imageTag} -f \"{dockerfilePath}\" .",
+                _commandLineWrapper.CommandsToExecute.First().Command);
+            Assert.Equal(expectedDockerExecutionDirectory.FullName,
                 _commandLineWrapper.CommandsToExecute.First().WorkingDirectory);
         }
 
@@ -170,7 +223,7 @@ namespace AWS.Deploy.CLI.UnitTests
                 AWSProfileName = "default"
             };
 
-            return new RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, session);
+            return new RecommendationEngine(session, _recipeHandler);
         }
 
         [Fact]

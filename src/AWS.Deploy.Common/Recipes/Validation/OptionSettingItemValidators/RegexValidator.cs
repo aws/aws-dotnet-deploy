@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using AWS.Deploy.Common.Extensions;
 
 namespace AWS.Deploy.Common.Recipes.Validation
@@ -21,7 +22,7 @@ namespace AWS.Deploy.Common.Recipes.Validation
         public string ValidationFailedMessage { get; set; } = defaultValidationFailedMessage;
         public bool AllowEmptyString { get; set; }
 
-        public ValidationResult Validate(object input)
+        public Task<ValidationResult> Validate(object input, Recommendation recommendation)
         {
             var regex = new Regex(Regex);
 
@@ -34,24 +35,24 @@ namespace AWS.Deploy.Common.Recipes.Validation
                 {
                     var valid = regex.IsMatch(item) || (AllowEmptyString && string.IsNullOrEmpty(item));
                     if (!valid)
-                        return new ValidationResult
+                        return Task.FromResult<ValidationResult>(new ValidationResult
                         {
                             IsValid = false,
                             ValidationFailedMessage = message
-                        };
+                        });
                 }
-                return new ValidationResult
+                return Task.FromResult<ValidationResult>(new ValidationResult
                 {
                     IsValid = true,
                     ValidationFailedMessage = message
-                };
+                });
             }
 
-            return new ValidationResult
+            return Task.FromResult<ValidationResult>(new ValidationResult
             {
                 IsValid = regex.IsMatch(input?.ToString() ?? "") || (AllowEmptyString && string.IsNullOrEmpty(input?.ToString())),
                 ValidationFailedMessage = message
-            };
+            });
         }
     }
 }

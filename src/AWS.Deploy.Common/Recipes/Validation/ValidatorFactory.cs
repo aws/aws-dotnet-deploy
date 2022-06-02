@@ -20,8 +20,9 @@ namespace AWS.Deploy.Common.Recipes.Validation
         /// Builds the validators that apply to the given option
         /// </summary>
         /// <param name="optionSettingItem">Option to validate</param>
+        /// <param name="filter">Applies a filter to the list of validators</param>
         /// <returns>Array of validators for the given option</returns>
-        IOptionSettingItemValidator[] BuildValidators(OptionSettingItem optionSettingItem);
+        IOptionSettingItemValidator[] BuildValidators(OptionSettingItem optionSettingItem, Func<OptionSettingItemValidatorConfig, bool>? filter = null);
 
         /// <summary>
         /// Builds the validators that apply to the given recipe
@@ -51,17 +52,21 @@ namespace AWS.Deploy.Common.Recipes.Validation
             { OptionSettingItemValidatorList.DirectoryExists, typeof(DirectoryExistsValidator) },
             { OptionSettingItemValidatorList.DockerBuildArgs, typeof(DockerBuildArgsValidator) },
             { OptionSettingItemValidatorList.DotnetPublishArgs, typeof(DotnetPublishArgsValidator) },
+            { OptionSettingItemValidatorList.ExistingResource, typeof(ExistingResourceValidator) },
+            { OptionSettingItemValidatorList.FileExists, typeof(FileExistsValidator) }
         };
 
         private static readonly Dictionary<RecipeValidatorList, Type> _recipeValidatorTypeMapping = new()
         {
             { RecipeValidatorList.FargateTaskSizeCpuMemoryLimits, typeof(FargateTaskCpuMemorySizeValidator) },
-            { RecipeValidatorList.MinMaxConstraint, typeof(MinMaxConstraintValidator) }
+            { RecipeValidatorList.MinMaxConstraint, typeof(MinMaxConstraintValidator) },
+            { RecipeValidatorList.ValidDockerfilePath, typeof(DockerfilePathValidator) }
         };
 
-        public IOptionSettingItemValidator[] BuildValidators(OptionSettingItem optionSettingItem)
+        public IOptionSettingItemValidator[] BuildValidators(OptionSettingItem optionSettingItem, Func<OptionSettingItemValidatorConfig, bool>? filter = null)
         {
             return optionSettingItem.Validators
+                .Where(validator => filter != null ? filter(validator) : true)
                 .Select(v => Activate(v.ValidatorType, v.Configuration, _optionSettingItemValidatorTypeMapping))
                 .OfType<IOptionSettingItemValidator>()
                 .ToArray();
@@ -70,7 +75,7 @@ namespace AWS.Deploy.Common.Recipes.Validation
         public IRecipeValidator[] BuildValidators(RecipeDefinition recipeDefinition)
         {
             return recipeDefinition.Validators
-                .Select(v => Activate(v.ValidatorType, v.Configuration,_recipeValidatorTypeMapping))
+                .Select(v => Activate(v.ValidatorType, v.Configuration, _recipeValidatorTypeMapping))
                 .OfType<IRecipeValidator>()
                 .ToArray();
         }

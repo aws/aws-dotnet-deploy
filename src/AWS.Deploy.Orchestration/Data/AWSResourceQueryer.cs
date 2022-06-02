@@ -9,6 +9,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Amazon;
 using Amazon.AppRunner.Model;
+using Amazon.CloudControlApi;
+using Amazon.CloudControlApi.Model;
 using Amazon.CloudFormation;
 using Amazon.CloudFormation.Model;
 using Amazon.CloudFront;
@@ -40,51 +42,10 @@ using Amazon.SimpleSystemsManagement.Model;
 using Amazon.SQS;
 using Amazon.SQS.Model;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.Data;
 
 namespace AWS.Deploy.Orchestration.Data
 {
-    public interface IAWSResourceQueryer
-    {
-        Task<List<StackEvent>> GetCloudFormationStackEvents(string stackName);
-        Task<List<InstanceTypeInfo>> ListOfAvailableInstanceTypes();
-        Task<Amazon.AppRunner.Model.Service> DescribeAppRunnerService(string serviceArn);
-        Task<List<StackResource>> DescribeCloudFormationResources(string stackName);
-        Task<EnvironmentDescription> DescribeElasticBeanstalkEnvironment(string environmentName);
-        Task<Amazon.ElasticLoadBalancingV2.Model.LoadBalancer> DescribeElasticLoadBalancer(string loadBalancerArn);
-        Task<List<Amazon.ElasticLoadBalancingV2.Model.Listener>> DescribeElasticLoadBalancerListeners(string loadBalancerArn);
-        Task<DescribeRuleResponse> DescribeCloudWatchRule(string ruleName);
-        Task<string> GetS3BucketLocation(string bucketName);
-        Task<Amazon.S3.Model.WebsiteConfiguration> GetS3BucketWebSiteConfiguration(string bucketName);
-        Task<List<Cluster>> ListOfECSClusters();
-        Task<List<ApplicationDescription>> ListOfElasticBeanstalkApplications();
-        Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(string? applicationName = null);
-        Task<List<Amazon.ElasticBeanstalk.Model.Tag>> ListElasticBeanstalkResourceTags(string resourceArn);
-        Task<List<KeyPairInfo>> ListOfEC2KeyPairs();
-        Task<string> CreateEC2KeyPair(string keyName, string saveLocation);
-        Task<List<Role>> ListOfIAMRoles(string? servicePrincipal);
-        Task<List<Vpc>> GetListOfVpcs();
-        Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns();
-        Task<PlatformSummary> GetLatestElasticBeanstalkPlatformArn();
-        Task<List<AuthorizationData>> GetECRAuthorizationToken();
-        Task<List<Repository>> GetECRRepositories(List<string>? repositoryNames = null);
-        Task<Repository> CreateECRRepository(string repositoryName);
-        Task<List<Stack>> GetCloudFormationStacks();
-        Task<Stack?> GetCloudFormationStack(string stackName);
-        Task<GetCallerIdentityResponse> GetCallerIdentity(string awsRegion);
-        Task<List<Amazon.ElasticLoadBalancingV2.Model.LoadBalancer>> ListOfLoadBalancers(LoadBalancerTypeEnum loadBalancerType);
-        Task<Distribution> GetCloudFrontDistribution(string distributionId);
-        Task<List<string>> ListOfDyanmoDBTables();
-        Task<List<string>> ListOfSQSQueuesUrls();
-        Task<List<string>> ListOfSNSTopicArns();
-        Task<List<Amazon.S3.Model.S3Bucket>> ListOfS3Buckets();
-        Task<List<ConfigurationOptionSetting>> GetBeanstalkEnvironmentConfigurationSettings(string environmentName);
-        Task<Repository> DescribeECRRepository(string respositoryName);
-        Task<List<VpcConnector>> DescribeAppRunnerVpcConnectors();
-        Task<List<Subnet>> DescribeSubnets(string? vpcID = null);
-        Task<List<SecurityGroup>> DescribeSecurityGroups(string? vpcID = null);
-        Task<string?> GetParameterStoreTextValue(string parameterName);
-    }
-
     public class AWSResourceQueryer : IAWSResourceQueryer
     {
         private readonly IAWSClientFactory _awsClientFactory;
@@ -92,6 +53,21 @@ namespace AWS.Deploy.Orchestration.Data
         public AWSResourceQueryer(IAWSClientFactory awsClientFactory)
         {
             _awsClientFactory = awsClientFactory;
+        }
+
+        public async Task<ResourceDescription> GetCloudControlApiResource(string type, string identifier)
+        {
+            var cloudControlApiClient = _awsClientFactory.GetAWSClient<IAmazonCloudControlApi>();
+            var request = new GetResourceRequest
+            {
+                TypeName = type,
+                Identifier = identifier
+            };
+
+            return await HandleException(async () => {
+                var resource = await cloudControlApiClient.GetResourceAsync(request);
+                return resource.ResourceDescription;
+            });
         }
 
         /// <summary>
@@ -342,34 +318,46 @@ namespace AWS.Deploy.Orchestration.Data
             return response.WebsiteConfiguration;
         }
 
-        public async Task<List<Cluster>> ListOfECSClusters()
+        public async Task<List<Cluster>> ListOfECSClusters(string? ecsClusterName = null)
         {
             var ecsClient = _awsClientFactory.GetAWSClient<IAmazonECS>();
 
             var clusters = await HandleException(async () =>
             {
-                var clusterArns = await ecsClient.Paginators
-                    .ListClusters(new ListClustersRequest())
-                    .ClusterArns
-                    .ToListAsync();
-
-                return await ecsClient.DescribeClustersAsync(new DescribeClustersRequest
+                var request = new DescribeClustersRequest();
+                if (string.IsNullOrEmpty(ecsClusterName))
                 {
-                    Clusters = clusterArns
-                });
+                    var clusterArns = await ecsClient.Paginators
+                        .ListClusters(new ListClustersRequest())
+                        .ClusterArns
+                        .ToListAsync();
+
+                    request.Clusters = clusterArns;
+                }
+                else
+                {
+                    request.Clusters = new List<string> { ecsClusterName };
+                }
+
+
+                return await ecsClient.DescribeClustersAsync(request);
             });
 
             return clusters.Clusters;
         }
 
-        public async Task<List<ApplicationDescription>> ListOfElasticBeanstalkApplications()
+        public async Task<List<ApplicationDescription>> ListOfElasticBeanstalkApplications(string? applicationName = null)
         {
             var beanstalkClient = _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>();
-            var applications = await HandleException(async () => await beanstalkClient.DescribeApplicationsAsync());
+            var request = new DescribeApplicationsRequest();
+            if (!string.IsNullOrEmpty(applicationName))
+                request.ApplicationNames = new List<string> { applicationName };
+
+            var applications = await HandleException(async () => await beanstalkClient.DescribeApplicationsAsync(request));
             return applications.Applications;
         }
 
-        public async Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(string? applicationName = null)
+        public async Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(string? applicationName = null, string? environmentName = null)
         {
             var beanstalkClient = _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>();
 
@@ -377,6 +365,9 @@ namespace AWS.Deploy.Orchestration.Data
             {
                 ApplicationName = applicationName
             };
+
+            if (!string.IsNullOrEmpty(environmentName))
+                request.EnvironmentNames = new List<string> { environmentName };
 
             return await HandleException(async () =>
             {
