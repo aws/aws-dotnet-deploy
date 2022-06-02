@@ -157,10 +157,15 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         [InlineData("MyRepo", false)] // cannot contain uppercase letters
         [InlineData("myrepo123@", false)] // cannot contain @
         [InlineData("myrepo123.a//b", false)] // cannot contain consecutive slashes.
+        [InlineData("aa", true)]
+        [InlineData("a", false)] //length cannot be less than 2
+        [InlineData("", false)] // length cannot be less than 2
+        [InlineData("reporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporepo", false)] // cannot be greater than 256 characters
         public async Task ECRRepositoryNameValidationTest(string value, bool isValid)
         {
             var optionSettingItem = new OptionSettingItem("id", "fullyQualifiedId", "name", "description");
             optionSettingItem.Validators.Add(GetRegexValidatorConfig("^(?:[a-z0-9]+(?:[._-][a-z0-9]+)*/)*[a-z0-9]+(?:[._-][a-z0-9]+)*$"));
+            optionSettingItem.Validators.Add(GetStringLengthValidatorConfig(2, 256));
             await Validate(optionSettingItem, value, isValid);
         }
 
@@ -265,6 +270,20 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
                 }
             };
             return rangeValidatorConfig;
+        }
+
+        private OptionSettingItemValidatorConfig GetStringLengthValidatorConfig(int minLength, int maxLength)
+        {
+            var stringLengthValidatorConfig = new OptionSettingItemValidatorConfig
+            {
+                ValidatorType = OptionSettingItemValidatorList.StringLength,
+                Configuration = new StringLengthValidator
+                {
+                    MinLength = minLength,
+                    MaxLength = maxLength
+                }
+            };
+            return stringLengthValidatorConfig;
         }
 
         private async Task Validate<T>(OptionSettingItem optionSettingItem, T value, bool isValid)

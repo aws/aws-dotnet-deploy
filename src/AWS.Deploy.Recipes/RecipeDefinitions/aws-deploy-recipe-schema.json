@@ -609,7 +609,8 @@
                                     "DockerBuildArgs",
                                     "DotnetPublishArgs",
                                     "ExistingResource",
-                                    "FileExists"
+                                    "FileExists",
+                                    "StringLength"
                                 ]
                             }
                         },
@@ -669,6 +670,28 @@
                                     "properties": {
                                         "Configuration": {
                                             "properties": {
+                                                "ValidationFailedMessage": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "if": {
+                                    "properties": { "ValidatorType": { "const": "StringLength" } }
+                                },
+                                "then": {
+                                    "properties": {
+                                        "Configuration": {
+                                            "properties": {
+                                                "MinLength": {
+                                                    "type": "integer"
+                                                },
+                                                "MaxLength": {
+                                                    "type": "integer"
+                                                },
                                                 "ValidationFailedMessage": {
                                                     "type": "string"
                                                 }
