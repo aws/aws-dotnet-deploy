@@ -53,7 +53,8 @@ namespace AWS.Deploy.Common.Recipes.Validation
             { OptionSettingItemValidatorList.DockerBuildArgs, typeof(DockerBuildArgsValidator) },
             { OptionSettingItemValidatorList.DotnetPublishArgs, typeof(DotnetPublishArgsValidator) },
             { OptionSettingItemValidatorList.ExistingResource, typeof(ExistingResourceValidator) },
-            { OptionSettingItemValidatorList.FileExists, typeof(FileExistsValidator) }
+            { OptionSettingItemValidatorList.FileExists, typeof(FileExistsValidator) },
+            { OptionSettingItemValidatorList.StringLength, typeof(StringLengthValidator) }
         };
 
         private static readonly Dictionary<RecipeValidatorList, Type> _recipeValidatorTypeMapping = new()
