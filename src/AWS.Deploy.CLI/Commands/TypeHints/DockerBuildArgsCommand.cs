@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.Recipes.Validation;
 using AWS.Deploy.Common.TypeHintData;
 
 namespace AWS.Deploy.CLI.Commands.TypeHints
@@ -13,10 +13,12 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
     public class DockerBuildArgsCommand : ITypeHintCommand
     {
         private readonly IConsoleUtilities _consoleUtilities;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
-        public DockerBuildArgsCommand(IConsoleUtilities consoleUtilities)
+        public DockerBuildArgsCommand(IConsoleUtilities consoleUtilities, IOptionSettingHandler optionSettingHandler)
         {
             _consoleUtilities = consoleUtilities;
+            _optionSettingHandler = optionSettingHandler;
         }
 
         public Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting) => Task.FromResult<List<TypeHintResource>?>(null);
@@ -26,10 +28,10 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             var settingValue = _consoleUtilities
                 .AskUserForValue(
                     string.Empty,
-                    recommendation.GetOptionSettingValue<string>(optionSetting),
+                    _optionSettingHandler.GetOptionSettingValue<string>(recommendation, optionSetting),
                     allowEmpty: true,
-                    resetValue: recommendation.GetOptionSettingDefaultValue<string>(optionSetting) ?? "",
-                    validators: buildArgs => ValidateBuildArgs(buildArgs))
+                    resetValue: _optionSettingHandler.GetOptionSettingDefaultValue<string>(recommendation, optionSetting) ?? "",
+                    validators: async buildArgs => await ValidateBuildArgs(buildArgs, recommendation))
                 .ToString()
                 .Replace("\"", "\"\"");
 
@@ -43,30 +45,26 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         /// </summary>
         /// <param name="recommendation">The selected recommendation settings used for deployment <see cref="Recommendation"/></param>
         /// <param name="dockerBuildArgs">Arguments to be passed when performing a Docker build</param>
-        public void OverrideValue(Recommendation recommendation, string dockerBuildArgs)
+        public async Task OverrideValue(Recommendation recommendation, string dockerBuildArgs)
         {
-            var resultString = ValidateBuildArgs(dockerBuildArgs);
+            var resultString = await ValidateBuildArgs(dockerBuildArgs, recommendation);
             if (!string.IsNullOrEmpty(resultString))
                 throw new InvalidOverrideValueException(DeployToolErrorCode.InvalidDockerBuildArgs, resultString);
             recommendation.DeploymentBundle.DockerBuildArgs = dockerBuildArgs;
         }
 
-        private string ValidateBuildArgs(string buildArgs)
+        private async Task<string> ValidateBuildArgs(string buildArgs, Recommendation recommendation)
         {
-            var argsList = buildArgs.Split(",");
-            if (argsList.Length == 0)
-                return "";
+            var validationResult = await new DockerBuildArgsValidator().Validate(buildArgs, recommendation);
 
-            foreach (var arg in argsList)
+            if (validationResult.IsValid)
             {
-                var keyValue = arg.Split("=");
-                if (keyValue.Length == 2)
-                    return "";
-                else
-                    return "The Docker Build Args must have the following pattern 'arg1=val1,arg2=val2'.";
+                return string.Empty;
             }
-
-            return "";
+            else
+            {
+                return validationResult.ValidationFailedMessage ?? "Invalid value for additional Docker build options.";
+            }
         }
     }
 }

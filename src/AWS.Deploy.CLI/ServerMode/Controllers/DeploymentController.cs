@@ -33,6 +33,7 @@ using AWS.Deploy.CLI.Commands;
 using AWS.Deploy.CLI.Commands.TypeHints;
 using AWS.Deploy.Common.TypeHintData;
 using AWS.Deploy.Orchestration.ServiceHandlers;
+using AWS.Deploy.Common.Data;
 
 namespace AWS.Deploy.CLI.ServerMode.Controllers
 {
@@ -121,6 +122,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         [HttpGet("session/<sessionId>/recommendations")]
         [SwaggerOperation(OperationId = "GetRecommendations")]
         [SwaggerResponse(200, type: typeof(GetRecommendationsOutput))]
+        [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound)]
         [Authorize]
         public async Task<IActionResult> GetRecommendations(string sessionId)
         {
@@ -142,8 +144,11 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                     continue;
 
                 output.Recommendations.Add(new RecommendationSummary(
+                    baseRecipeId: recommendation.Recipe.BaseRecipeId,
                     recipeId: recommendation.Recipe.Id,
                     name: recommendation.Name,
+                    settingsCategories: CategorySummary.FromCategories(recommendation.GetConfigurableOptionSettingCategories()),
+                    isPersistedDeploymentProject: recommendation.Recipe.PersistedDeploymentProject,
                     shortDescription: recommendation.ShortDescription,
                     description: recommendation.Description,
                     targetService: recommendation.Recipe.TargetService,
@@ -160,6 +165,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         [HttpGet("session/<sessionId>/settings")]
         [SwaggerOperation(OperationId = "GetConfigSettings")]
         [SwaggerResponse(200, type: typeof(GetOptionSettingsOutput))]
+        [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound)]
         [Authorize]
         public IActionResult GetConfigSettings(string sessionId)
         {
@@ -175,32 +181,37 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             }
 
             var orchestrator = CreateOrchestrator(state);
+            var serviceProvider = CreateSessionServiceProvider(state);
+            var optionSettingHandler = serviceProvider.GetRequiredService<IOptionSettingHandler>();
 
             var configurableOptionSettings = state.SelectedRecommendation.GetConfigurableOptionSettingItems();
 
             var output = new GetOptionSettingsOutput();
-            output.OptionSettings = ListOptionSettingSummary(state.SelectedRecommendation, configurableOptionSettings);
+            output.OptionSettings = ListOptionSettingSummary(optionSettingHandler, state.SelectedRecommendation, configurableOptionSettings);
 
             return Ok(output);
         }
 
-        private List<OptionSettingItemSummary> ListOptionSettingSummary(Recommendation recommendation, IEnumerable<OptionSettingItem> configurableOptionSettings)
+        private List<OptionSettingItemSummary> ListOptionSettingSummary(IOptionSettingHandler optionSettingHandler, Recommendation recommendation, IEnumerable<OptionSettingItem> configurableOptionSettings)
         {
             var optionSettingItems = new List<OptionSettingItemSummary>();
 
             foreach (var setting in configurableOptionSettings)
             {
-                var settingSummary = new OptionSettingItemSummary(setting.Id, setting.Name, setting.Description, setting.Type.ToString())
+                var settingSummary = new OptionSettingItemSummary(setting.Id, setting.FullyQualifiedId, setting.Name, setting.Description, setting.Type.ToString())
                 {
+                    Category = setting.Category,
                     TypeHint = setting.TypeHint?.ToString(),
-                    Value = recommendation.GetOptionSettingValue(setting),
+                    TypeHintData = setting.TypeHintData,
+                    Value = optionSettingHandler.GetOptionSettingValue(recommendation, setting),
                     Advanced = setting.AdvancedSetting,
                     ReadOnly = recommendation.IsExistingCloudApplication && !setting.Updatable,
-                    Visible = recommendation.IsOptionSettingDisplayable(setting),
-                    SummaryDisplayable = recommendation.IsSummaryDisplayable(setting),
+                    Visible = optionSettingHandler.IsOptionSettingDisplayable(recommendation, setting),
+                    SummaryDisplayable = optionSettingHandler.IsSummaryDisplayable(recommendation, setting),
                     AllowedValues = setting.AllowedValues,
                     ValueMapping = setting.ValueMapping,
-                    ChildOptionSettings = ListOptionSettingSummary(recommendation, setting.ChildOptionSettings)
+                    Validation = setting.Validation,
+                    ChildOptionSettings = ListOptionSettingSummary(optionSettingHandler, recommendation, setting.ChildOptionSettings)
                 };
 
                 optionSettingItems.Add(settingSummary);
@@ -217,8 +228,9 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         [HttpPut("session/<sessionId>/settings")]
         [SwaggerOperation(OperationId = "ApplyConfigSettings")]
         [SwaggerResponse(200, type: typeof(ApplyConfigSettingsOutput))]
+        [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound)]
         [Authorize]
-        public IActionResult ApplyConfigSettings(string sessionId, [FromBody] ApplyConfigSettingsInput input)
+        public async Task<IActionResult> ApplyConfigSettings(string sessionId, [FromBody] ApplyConfigSettingsInput input)
         {
             var state = _stateServer.Get(sessionId);
             if (state == null)
@@ -231,14 +243,17 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 return NotFound($"A deployment target is not set for Session ID {sessionId}.");
             }
 
+            var serviceProvider = CreateSessionServiceProvider(state);
+            var optionSettingHandler = serviceProvider.GetRequiredService<IOptionSettingHandler>();
+
             var output = new ApplyConfigSettingsOutput();
 
             foreach (var updatedSetting in input.UpdatedSettings)
             {
                 try
                 {
-                    var setting = state.SelectedRecommendation.GetOptionSetting(updatedSetting.Key);
-                    setting.SetValueOverride(updatedSetting.Value);
+                    var setting = optionSettingHandler.GetOptionSetting(state.SelectedRecommendation, updatedSetting.Key);
+                    await optionSettingHandler.SetOptionSettingValue(state.SelectedRecommendation, setting, updatedSetting.Value);
                 }
                 catch (Exception ex)
                 {
@@ -252,6 +267,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         [HttpGet("session/<sessionId>/settings/<configSettingId>/resources")]
         [SwaggerOperation(OperationId = "GetConfigSettingResources")]
         [SwaggerResponse(200, type: typeof(GetConfigSettingResourcesOutput))]
+        [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound)]
         [Authorize]
         public async Task<IActionResult> GetConfigSettingResources(string sessionId, string configSettingId)
         {
@@ -267,8 +283,9 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
             var serviceProvider = CreateSessionServiceProvider(state);
             var typeHintCommandFactory = serviceProvider.GetRequiredService<ITypeHintCommandFactory>();
+            var optionSettingHandler = serviceProvider.GetRequiredService<IOptionSettingHandler>();
 
-            var configSetting = state.SelectedRecommendation.GetOptionSetting(configSettingId);
+            var configSetting = optionSettingHandler.GetOptionSetting(state.SelectedRecommendation, configSettingId);
 
             if (configSetting.TypeHint.HasValue && typeHintCommandFactory.GetCommand(configSetting.TypeHint.Value) is var typeHintCommand && typeHintCommand != null)
             {
@@ -293,6 +310,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         [HttpGet("session/<sessionId>/deployments")]
         [SwaggerOperation(OperationId = "GetExistingDeployments")]
         [SwaggerResponse(200, type: typeof(GetExistingDeploymentsOutput))]
+        [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound)]
         [Authorize]
         public async Task<IActionResult> GetExistingDeployments(string sessionId)
         {
@@ -323,8 +341,11 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
                 output.ExistingDeployments.Add(new ExistingDeploymentSummary(
                     name: deployment.Name,
+                    baseRecipeId: recommendation.Recipe.BaseRecipeId,
                     recipeId: deployment.RecipeId,
                     recipeName: recommendation.Name,
+                    settingsCategories: CategorySummary.FromCategories(recommendation.GetConfigurableOptionSettingCategories()),
+                    isPersistedDeploymentProject: recommendation.Recipe.PersistedDeploymentProject,
                     shortDescription: recommendation.ShortDescription,
                     description: recommendation.Description,
                     targetService: recommendation.Recipe.TargetService,
@@ -342,6 +363,8 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         /// </summary>
         [HttpPost("session/<sessionId>")]
         [SwaggerOperation(OperationId = "SetDeploymentTarget")]
+        [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound)]
+        [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status400BadRequest)]
         [Authorize]
         public async Task<IActionResult> SetDeploymentTarget(string sessionId, [FromBody] SetDeploymentTargetInput input)
         {
@@ -353,26 +376,38 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
             var serviceProvider = CreateSessionServiceProvider(state);
             var orchestrator = CreateOrchestrator(state, serviceProvider);
+            var cloudApplicationNameGenerator = serviceProvider.GetRequiredService<ICloudApplicationNameGenerator>();
 
-            if(!string.IsNullOrEmpty(input.NewDeploymentRecipeId) &&
-               !string.IsNullOrEmpty(input.NewDeploymentName))
+            if (!string.IsNullOrEmpty(input.NewDeploymentRecipeId))
             {
+                var newDeploymentName = input.NewDeploymentName ?? string.Empty;
+
                 state.SelectedRecommendation = state.NewRecommendations?.FirstOrDefault(x => string.Equals(input.NewDeploymentRecipeId, x.Recipe.Id));
-                if(state.SelectedRecommendation == null)
+                if (state.SelectedRecommendation == null)
                 {
                     return NotFound($"Recommendation {input.NewDeploymentRecipeId} not found.");
                 }
 
-                state.ApplicationDetails.Name = input.NewDeploymentName;
+                // We only validate the name when the recipe deployment type is not ElasticContainerRegistryImage.
+                // This is because pushing images to ECR does not need a cloud application name.
+                if (state.SelectedRecommendation.Recipe.DeploymentType != Common.Recipes.DeploymentTypes.ElasticContainerRegistryImage)
+                {
+                    var validationResult = cloudApplicationNameGenerator.IsValidName(newDeploymentName, state.ExistingDeployments ?? new List<CloudApplication>(), state.SelectedRecommendation.Recipe.DeploymentType);
+                    if (!validationResult.IsValid)
+                        return ValidationProblem(validationResult.ErrorMessage);
+                }
+
+                state.ApplicationDetails.Name = newDeploymentName;
                 state.ApplicationDetails.UniqueIdentifier = string.Empty;
                 state.ApplicationDetails.ResourceType = orchestrator.GetCloudApplicationResourceType(state.SelectedRecommendation.Recipe.DeploymentType);
                 state.ApplicationDetails.RecipeId = input.NewDeploymentRecipeId;
-                await orchestrator.ApplyAllReplacementTokens(state.SelectedRecommendation, input.NewDeploymentName);
+                await orchestrator.ApplyAllReplacementTokens(state.SelectedRecommendation, newDeploymentName);
             }
             else if(!string.IsNullOrEmpty(input.ExistingDeploymentId))
             {
                 var templateMetadataReader = serviceProvider.GetRequiredService<ITemplateMetadataReader>();
                 var deployedApplicationQueryer = serviceProvider.GetRequiredService<IDeployedApplicationQueryer>();
+                var optionSettingHandler = serviceProvider.GetRequiredService<IOptionSettingHandler>();
 
                 var existingDeployment = state.ExistingDeployments?.FirstOrDefault(x => string.Equals(input.ExistingDeploymentId, x.UniqueIdentifier));
                 if (existingDeployment == null)
@@ -392,7 +427,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 else
                     previousSettings = await deployedApplicationQueryer.GetPreviousSettings(existingDeployment);
 
-                state.SelectedRecommendation = state.SelectedRecommendation.ApplyPreviousSettings(previousSettings);
+                state.SelectedRecommendation = await orchestrator.ApplyRecommendationPreviousSettings(state.SelectedRecommendation, previousSettings);
 
                 state.ApplicationDetails.Name = existingDeployment.Name;
                 state.ApplicationDetails.UniqueIdentifier = existingDeployment.UniqueIdentifier;
@@ -410,6 +445,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         [HttpPost("session/<sessionId>/compatiblity")]
         [SwaggerOperation(OperationId = "GetCompatibility")]
         [SwaggerResponse(200, type: typeof(GetCompatibilityOutput))]
+        [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound)]
         [Authorize]
         public async Task<IActionResult> GetCompatibility(string sessionId)
         {
@@ -430,11 +466,45 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
             var capabilities = await systemCapabilityEvaluator.EvaluateSystemCapabilities(state.SelectedRecommendation);
 
-            output.Capabilities = capabilities.Select(x => new SystemCapabilitySummary(x.Name, x.Installed, x.Available)
+            output.Capabilities = capabilities.Select(x => new SystemCapabilitySummary(x.Name, x.Message, x.InstallationUrl));
+
+            return Ok(output);
+        }
+
+        /// <summary>
+        /// Creates the CloudFormation template that will be used by CDK for the deployment.
+        /// This operation returns the CloudFormation template that is created for this deployment.
+        /// </summary>
+        [HttpGet("session/<sessionId>/cftemplate")]
+        [SwaggerOperation(OperationId = "GenerateCloudFormationTemplate")]
+        [SwaggerResponse(200, type: typeof(GenerateCloudFormationTemplateOutput))]
+        [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound)]
+        [Authorize]
+        public async Task<IActionResult> GenerateCloudFormationTemplate(string sessionId)
+        {
+            var state = _stateServer.Get(sessionId);
+            if (state == null)
             {
-                InstallationUrl = x.InstallationUrl,
-                Message = x.Message
-            }).ToList();
+                return NotFound($"Session ID {sessionId} not found.");
+            }
+
+            var serviceProvider = CreateSessionServiceProvider(state);
+
+            var orchestratorSession = CreateOrchestratorSession(state);
+
+            var orchestrator = CreateOrchestrator(state, serviceProvider);
+
+            var cdkProjectHandler = CreateCdkProjectHandler(state, serviceProvider);
+
+            if (state.SelectedRecommendation == null)
+                throw new SelectedRecommendationIsNullException("The selected recommendation is null or invalid.");
+
+            if (!state.SelectedRecommendation.Recipe.DeploymentType.Equals(Common.Recipes.DeploymentTypes.CdkProject))
+                throw new SelectedRecommendationIsIncompatibleException($"We cannot generate a CloudFormation template for the selected recommendation as it is not of type '{nameof(Models.DeploymentTypes.CloudFormationStack)}'.");
+
+            var task = new DeployRecommendationTask(orchestratorSession, orchestrator, state.ApplicationDetails, state.SelectedRecommendation);
+            var cloudFormationTemplate = await task.GenerateCloudFormationTemplate(cdkProjectHandler);
+            var output = new GenerateCloudFormationTemplateOutput(cloudFormationTemplate);
 
             return Ok(output);
         }
@@ -444,6 +514,8 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         /// </summary>
         [HttpPost("session/<sessionId>/execute")]
         [SwaggerOperation(OperationId = "StartDeployment")]
+        [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound)]
+        [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status424FailedDependency)]
         [Authorize]
         public async Task<IActionResult> StartDeployment(string sessionId)
         {
@@ -455,10 +527,23 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
             var serviceProvider = CreateSessionServiceProvider(state);
 
+            var orchestratorSession = CreateOrchestratorSession(state);
+
             var orchestrator = CreateOrchestrator(state, serviceProvider);
 
             if (state.SelectedRecommendation == null)
                 throw new SelectedRecommendationIsNullException("The selected recommendation is null or invalid.");
+
+            var optionSettingHandler = serviceProvider.GetRequiredService<IOptionSettingHandler>();
+            var settingValidatorFailedResults = optionSettingHandler.RunOptionSettingValidators(state.SelectedRecommendation);
+            if (settingValidatorFailedResults.Any())
+            {
+                var settingValidationErrorMessage = $"The deployment configuration needs to be adjusted before it can be deployed:{Environment.NewLine}";
+                foreach (var result in settingValidatorFailedResults)
+                    settingValidationErrorMessage += $" - {result.ValidationFailedMessage}{Environment.NewLine}{Environment.NewLine}";
+                settingValidationErrorMessage += $"{Environment.NewLine}Please adjust your settings";
+                return Problem(settingValidationErrorMessage);
+            }
 
             var systemCapabilityEvaluator = serviceProvider.GetRequiredService<ISystemCapabilityEvaluator>();
 
@@ -471,9 +556,9 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             }
 
             if (capabilities.Any())
-                return Problem($"Unable to start deployment due to missing system capabilities.{Environment.NewLine}{missingCapabilitiesMessage}");
+                return Problem($"Unable to start deployment due to missing system capabilities.{Environment.NewLine}{missingCapabilitiesMessage}", statusCode: Microsoft.AspNetCore.Http.StatusCodes.Status424FailedDependency);
 
-            var task = new DeployRecommendationTask(orchestrator, state.ApplicationDetails, state.SelectedRecommendation);
+            var task = new DeployRecommendationTask(orchestratorSession, orchestrator, state.ApplicationDetails, state.SelectedRecommendation);
             state.DeploymentTask = task.Execute();
 
             return Ok();
@@ -485,6 +570,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         [HttpGet("session/<sessionId>/execute")]
         [SwaggerOperation(OperationId = "GetDeploymentStatus")]
         [SwaggerResponse(200, type: typeof(GetDeploymentStatusOutput))]
+        [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound)]
         [Authorize]
         public IActionResult GetDeploymentStatus(string sessionId)
         {
@@ -508,7 +594,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                     var innerException = state.DeploymentTask.Exception.InnerException;
                     if (innerException is DeployToolException deployToolException)
                     {
-                        output.Exception = new DeployToolExceptionSummary(deployToolException.ErrorCode.ToString(), deployToolException.Message);
+                        output.Exception = new DeployToolExceptionSummary(deployToolException.ErrorCode.ToString(), deployToolException.Message, deployToolException.ProcessExitCode);
                     }
                     else
                     {
@@ -528,6 +614,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         [HttpGet("session/<sessionId>/details")]
         [SwaggerOperation(OperationId = "GetDeploymentDetails")]
         [SwaggerResponse(200, type: typeof(GetDeploymentDetailsOutput))]
+        [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound)]
         [Authorize]
         public async Task<IActionResult> GetDeploymentDetails(string sessionId)
         {
@@ -603,6 +690,22 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 state.AWSAccountId);
         }
 
+        private CdkProjectHandler CreateCdkProjectHandler(SessionState state, IServiceProvider? serviceProvider = null)
+        {
+            if (serviceProvider == null)
+            {
+                serviceProvider = CreateSessionServiceProvider(state);
+            }
+
+            return new CdkProjectHandler(
+                serviceProvider.GetRequiredService<IOrchestratorInteractiveService>(),
+                serviceProvider.GetRequiredService<ICommandLineWrapper>(),
+                serviceProvider.GetRequiredService<IAWSResourceQueryer>(),
+                serviceProvider.GetRequiredService<IFileManager>(),
+                serviceProvider.GetRequiredService<IOptionSettingHandler>()
+                );
+        }
+
         private Orchestrator CreateOrchestrator(SessionState state, IServiceProvider? serviceProvider = null, AWSCredentials? awsCredentials = null)
         {
             if(serviceProvider == null)
@@ -623,12 +726,13 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                                     serviceProvider.GetRequiredService<ILocalUserSettingsEngine>(),
                                     new DockerEngine.DockerEngine(
                                         session.ProjectDefinition,
-                                        serviceProvider.GetRequiredService<IFileManager>()),
-                                    serviceProvider.GetRequiredService<ICustomRecipeLocator>(),
-                                    new List<string> { RecipeLocator.FindRecipeDefinitionsPath() },
+                                        serviceProvider.GetRequiredService<IFileManager>(),
+                                        serviceProvider.GetRequiredService<IDirectoryManager>()),
+                                    serviceProvider.GetRequiredService<IRecipeHandler>(),
                                     serviceProvider.GetRequiredService<IFileManager>(),
                                     serviceProvider.GetRequiredService<IDirectoryManager>(),
-                                    serviceProvider.GetRequiredService<IAWSServiceHandler>()
+                                    serviceProvider.GetRequiredService<IAWSServiceHandler>(),
+                                    serviceProvider.GetRequiredService<IOptionSettingHandler>()
                                 );
         }
     }

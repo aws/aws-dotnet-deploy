@@ -9,7 +9,11 @@ using System.Threading.Tasks;
 using Amazon.ElasticBeanstalk.Model;
 using Amazon.Runtime;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.Data;
+using AWS.Deploy.Common.DeploymentManifest;
 using AWS.Deploy.Common.IO;
+using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.Recipes.Validation;
 using AWS.Deploy.Orchestration.ServiceHandlers;
 using AWS.Deploy.Orchestration.UnitTests.Utilities;
 using AWS.Deploy.Recipes;
@@ -20,6 +24,34 @@ namespace AWS.Deploy.Orchestration.UnitTests
 {
     public class ElasticBeanstalkHandlerTests
     {
+        private readonly IOptionSettingHandler _optionSettingHandler;
+        private readonly Mock<IAWSResourceQueryer> _awsResourceQueryer;
+        private readonly Mock<IServiceProvider> _serviceProvider;
+        private readonly IDeploymentManifestEngine _deploymentManifestEngine;
+        private readonly Mock<IOrchestratorInteractiveService> _orchestratorInteractiveService;
+        private readonly IDirectoryManager _directoryManager;
+        private readonly IFileManager _fileManager;
+        private readonly IRecipeHandler _recipeHandler;
+
+        public ElasticBeanstalkHandlerTests()
+        {
+            _awsResourceQueryer = new Mock<IAWSResourceQueryer>();
+            _serviceProvider = new Mock<IServiceProvider>();
+            _serviceProvider
+                .Setup(x => x.GetService(typeof(IAWSResourceQueryer)))
+                .Returns(_awsResourceQueryer.Object);
+            _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider.Object));
+            _directoryManager = new DirectoryManager();
+            _fileManager = new FileManager();
+            _deploymentManifestEngine = new DeploymentManifestEngine(_directoryManager, _fileManager);
+            _orchestratorInteractiveService = new Mock<IOrchestratorInteractiveService>();
+            var serviceProvider = new Mock<IServiceProvider>();
+            var validatorFactory = new ValidatorFactory(serviceProvider.Object);
+            var optionSettingHandler = new OptionSettingHandler(validatorFactory);
+            _recipeHandler = new RecipeHandler(_deploymentManifestEngine, _orchestratorInteractiveService.Object, _directoryManager, _fileManager, optionSettingHandler);
+            _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider.Object));
+        }
+
         [Fact]
         public async Task GetAdditionSettingsTest_DefaultValues()
         {
@@ -30,7 +62,8 @@ namespace AWS.Deploy.Orchestration.UnitTests
 
             var elasticBeanstalkHandler = new AWSElasticBeanstalkHandler(new Mock<IAWSClientFactory>().Object,
                 new Mock<IOrchestratorInteractiveService>().Object,
-                new Mock<IFileManager>().Object);
+                new Mock<IFileManager>().Object,
+                _optionSettingHandler);
 
             // ACT
             var optionSettings = elasticBeanstalkHandler.GetEnvironmentConfigurationSettings(recommendation);
@@ -75,12 +108,13 @@ namespace AWS.Deploy.Orchestration.UnitTests
 
             var elasticBeanstalkHandler = new AWSElasticBeanstalkHandler(new Mock<IAWSClientFactory>().Object,
                 new Mock<IOrchestratorInteractiveService>().Object,
-                new Mock<IFileManager>().Object);
+                new Mock<IFileManager>().Object,
+                _optionSettingHandler);
 
-            recommendation.GetOptionSetting(Constants.ElasticBeanstalk.EnhancedHealthReportingOptionId).SetValueOverride("basic");
-            recommendation.GetOptionSetting(Constants.ElasticBeanstalk.HealthCheckURLOptionId).SetValueOverride("/url");
-            recommendation.GetOptionSetting(Constants.ElasticBeanstalk.ProxyOptionId).SetValueOverride("none");
-            recommendation.GetOptionSetting(Constants.ElasticBeanstalk.XRayTracingOptionId).SetValueOverride("true");
+            await _optionSettingHandler.SetOptionSettingValue(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, Constants.ElasticBeanstalk.EnhancedHealthReportingOptionId), "basic");
+            await _optionSettingHandler.SetOptionSettingValue(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, Constants.ElasticBeanstalk.HealthCheckURLOptionId), "/url");
+            await _optionSettingHandler.SetOptionSettingValue(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, Constants.ElasticBeanstalk.ProxyOptionId), "none");
+            await _optionSettingHandler.SetOptionSettingValue(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, Constants.ElasticBeanstalk.XRayTracingOptionId), "true");
 
             // ACT
             var optionSettings = elasticBeanstalkHandler.GetEnvironmentConfigurationSettings(recommendation);
@@ -130,7 +164,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
                 AWSProfileName = "default"
             };
 
-            return new RecommendationEngine.RecommendationEngine(new[] { RecipeLocator.FindRecipeDefinitionsPath() }, session);
+            return new RecommendationEngine.RecommendationEngine(session, _recipeHandler);
         }
 
         private bool IsEqual(ConfigurationOptionSetting expected, ConfigurationOptionSetting actual)

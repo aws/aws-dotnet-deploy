@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AWS.Deploy.Common.Recipes.Validation;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -11,14 +12,61 @@ using Newtonsoft.Json.Converters;
 namespace AWS.Deploy.Common.Recipes
 {
     /// <summary>
+    /// Defines a contract for <see cref="OptionSettingItem"/> for getters and setters.
+    /// </summary>
+    public interface IOptionSettingItem
+    {
+        /// <summary>
+        /// Retrieve the value of an <see cref="OptionSettingItem"/> as a specified type.
+        /// </summary>
+        T GetValue<T>(IDictionary<string, string> replacementTokens, IDictionary<string, bool>? displayableOptionSettings = null);
+
+        /// <summary>
+        /// Retrieve the value of an <see cref="OptionSettingItem"/> as an object.
+        /// </summary>
+        object GetValue(IDictionary<string, string> replacementTokens, IDictionary<string, bool>? displayableOptionSettings = null);
+
+        /// <summary>
+        /// Retrieve the default value of an <see cref="OptionSettingItem"/> as a specified type.
+        /// </summary>
+        T? GetDefaultValue<T>(IDictionary<string, string> replacementTokens);
+
+        /// <summary>
+        /// Retrieve the default value of an <see cref="OptionSettingItem"/> as an object.
+        /// </summary>
+        object? GetDefaultValue(IDictionary<string, string> replacementTokens);
+
+        /// <summary>
+        /// Set the value of an <see cref="OptionSettingItem"/> while validating the provided input.
+        /// </summary>
+        /// <param name="optionSettingHandler">Handler use to set any child option settings</param>
+        /// <param name="value">Value to set</param>
+        /// <param name="validators">Validators for this item</param>
+        /// <param name="recommendation">Selected recommendation</param>
+        /// <param name="skipValidation">Enables or disables running validators specified in <paramref name="validators"/></param>
+        Task SetValue(IOptionSettingHandler optionSettingHandler, object value, IOptionSettingItemValidator[] validators, Recommendation recommendation, bool skipValidation);
+    }
+
+    /// <summary>
     /// Container for the setting values
     /// </summary>
-    public partial class OptionSettingItem
+    public partial class OptionSettingItem : IOptionSettingItem
     {
         /// <summary>
         /// The unique id of setting. This value will be persisted in other config files so its value should never change once a recipe is released.
         /// </summary>
         public string Id { get; set; }
+
+        /// <summary>
+        /// The fully qualified id of the setting that includes the Id and all of the parent's Ids.
+        /// This helps easily reference the Option Setting without context of the parent setting.
+        /// </summary>
+        public string FullyQualifiedId { get; set; }
+
+        /// <summary>
+        /// The parent Option Setting Item that allows an option setting item to reference it's parent.
+        /// </summary>
+        public string? ParentId { get; set; }
 
         /// <summary>
         /// The id of the parent option setting. This is used for tooling that wants to look up the existing resources for a setting based on the TypeHint but needs
@@ -30,6 +78,11 @@ namespace AWS.Deploy.Common.Recipes
         /// The display friendly name of the setting.
         /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// The category for the setting. This value must match an id field in the list of categories.
+        /// </summary>
+        public string? Category { get; set; }
 
         /// <summary>
         /// The description of what the setting is used for.
@@ -56,6 +109,11 @@ namespace AWS.Deploy.Common.Recipes
         public object? DefaultValue { get; set; }
 
         /// <summary>
+        /// The value used for the recipe if it is set by the user.
+        /// </summary>
+        private object? _value { get; set; }
+
+        /// <summary>
         /// UI can use this to reduce the amount of settings to show to the user when confirming the recommendation. This can make it so the user sees only the most important settings
         /// they need to know about before deploying.
         /// </summary>
@@ -75,7 +133,7 @@ namespace AWS.Deploy.Common.Recipes
         /// The allowed values for the setting.
         /// </summary>
         public IList<string> AllowedValues { get; set; } = new List<string>();
-
+        
         /// <summary>
         /// The value mapping for allowed values. The key of the dictionary is what is sent to services
         /// and the value is the display value shown to users.
@@ -98,11 +156,23 @@ namespace AWS.Deploy.Common.Recipes
         /// </summary>
         public Dictionary<string, object> TypeHintData { get; set; } = new ();
 
-        public OptionSettingItem(string id, string name, string description)
+        /// <summary>
+        /// Indicates which option setting items need to be validated if a value update occurs.
+        /// </summary>
+        public List<string> Dependents { get; set; } = new List<string> ();
+
+        /// <summary>
+        /// The validation state of the setting that contains the validation status and message.
+        /// </summary>
+        public OptionSettingValidation Validation { get; set; }
+
+        public OptionSettingItem(string id, string fullyQualifiedId, string name, string description)
         {
             Id = id;
+            FullyQualifiedId = fullyQualifiedId;
             Name = name;
             Description = description;
+            Validation = new OptionSettingValidation();
         }
 
         /// <summary>

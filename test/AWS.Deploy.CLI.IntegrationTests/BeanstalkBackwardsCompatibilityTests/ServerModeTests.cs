@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Amazon.Runtime;
 using AWS.Deploy.CLI.Commands;
-using AWS.Deploy.CLI.IntegrationTests.Helpers;
+using AWS.Deploy.Orchestration.Utilities;
 using AWS.Deploy.ServerMode.Client;
 using Xunit;
 
@@ -30,7 +30,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests
         public async Task DeployToExistingBeanstalkEnvironment()
         {
             var projectPath = _fixture.TestAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
-            var portNumber = 4001;
+            var portNumber = 4031;
             using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ResolveCredentials);
 
             var serverCommand = new ServerModeCommand(_fixture.ToolInteractiveService, portNumber, null, true);
@@ -58,6 +58,8 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests
 
                 Assert.Equal(_fixture.EnvironmentName, existingDeployment.Name);
                 Assert.Equal(BEANSTALK_ENVIRONMENT_RECIPE_ID, existingDeployment.RecipeId);
+                Assert.Null(existingDeployment.BaseRecipeId);
+                Assert.False(existingDeployment.IsPersistedDeploymentProject);
                 Assert.Equal(_fixture.EnvironmentId, existingDeployment.ExistingDeploymentId);
                 Assert.Equal(DeploymentTypes.BeanstalkEnvironment, existingDeployment.DeploymentType);
 
@@ -65,10 +67,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests
                 await signalRClient.JoinSession(sessionId);
 
                 var logOutput = new StringBuilder();
-                signalRClient.ReceiveLogAllLogAction = (line) =>
-                {
-                    logOutput.AppendLine(line);
-                };
+                AWS.Deploy.CLI.IntegrationTests.ServerModeTests.RegisterSignalRMessageCallbacks(signalRClient, logOutput);
 
                 await restClient.SetDeploymentTargetAsync(sessionId, new SetDeploymentTargetInput
                 {

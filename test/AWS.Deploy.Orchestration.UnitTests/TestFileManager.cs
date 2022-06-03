@@ -19,6 +19,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
         {
             return InMemoryStore.ContainsKey(path);
         }
+        public bool Exists(string path, string directory) => throw new NotImplementedException();
 
         public Task<string> ReadAllTextAsync(string path)
         {

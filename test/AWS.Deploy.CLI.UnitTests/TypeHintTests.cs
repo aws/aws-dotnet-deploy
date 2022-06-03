@@ -3,14 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
-using Moq;
-using Xunit;
-
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 using Amazon.S3;
@@ -20,14 +14,34 @@ using Amazon.SimpleNotificationService.Model;
 using Amazon.SQS;
 using Amazon.SQS.Model;
 using AWS.Deploy.CLI.Commands.TypeHints;
-using AWS.Deploy.Common;
-using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.CLI.UnitTests.Utilities;
+using AWS.Deploy.Common;
+using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.Recipes.Validation;
+using AWS.Deploy.Orchestration;
+using AWS.Deploy.Orchestration.Data;
+using Moq;
+using Xunit;
+using AWS.Deploy.Common.Data;
 
 namespace AWS.Deploy.CLI.UnitTests
 {
     public class TypeHintTests
     {
+        private readonly IOptionSettingHandler _optionSettingHandler;
+        private readonly Mock<IAWSResourceQueryer> _awsResourceQueryer;
+        private readonly Mock<IServiceProvider> _serviceProvider;
+
+        public TypeHintTests()
+        {
+            _awsResourceQueryer = new Mock<IAWSResourceQueryer>();
+            _serviceProvider = new Mock<IServiceProvider>();
+            _serviceProvider
+                .Setup(x => x.GetService(typeof(IAWSResourceQueryer)))
+                .Returns(_awsResourceQueryer.Object);
+            _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider.Object));
+        }
+
         [Fact]
         public async Task TestDynamoDBTableNameTypeHint()
         {
@@ -48,7 +62,7 @@ namespace AWS.Deploy.CLI.UnitTests
                     .Returns(ddbClient.Object);
 
             var awsResourceQueryer = new AWSResourceQueryer(awsClientFactory.Object);
-            var typeHintCommand = new DynamoDBTableCommand(awsResourceQueryer, null);
+            var typeHintCommand = new DynamoDBTableCommand(awsResourceQueryer, null, _optionSettingHandler);
 
             var resources = await typeHintCommand.GetResources(null, null);
             Assert.Equal(2, resources.Count);
@@ -78,7 +92,7 @@ namespace AWS.Deploy.CLI.UnitTests
                     .Returns(sqsClient.Object);
 
             var awsResourceQueryer = new AWSResourceQueryer(awsClientFactory.Object);
-            var typeHintCommand = new SQSQueueUrlCommand(awsResourceQueryer, null);
+            var typeHintCommand = new SQSQueueUrlCommand(awsResourceQueryer, null, _optionSettingHandler);
 
             var resources = await typeHintCommand.GetResources(null, null);
             Assert.Equal(2, resources.Count);
@@ -108,7 +122,7 @@ namespace AWS.Deploy.CLI.UnitTests
                     .Returns(snsClient.Object);
 
             var awsResourceQueryer = new AWSResourceQueryer(awsClientFactory.Object);
-            var typeHintCommand = new SNSTopicArnsCommand(awsResourceQueryer, null);
+            var typeHintCommand = new SNSTopicArnsCommand(awsResourceQueryer, null, _optionSettingHandler);
 
             var resources = await typeHintCommand.GetResources(null, null);
             Assert.Equal(2, resources.Count);
@@ -130,7 +144,7 @@ namespace AWS.Deploy.CLI.UnitTests
                     .Returns(s3Client.Object);
 
             var awsResourceQueryer = new AWSResourceQueryer(awsClientFactory.Object);
-            var typeHintCommand = new S3BucketNameCommand(awsResourceQueryer, null);
+            var typeHintCommand = new S3BucketNameCommand(awsResourceQueryer, null, _optionSettingHandler);
 
             var resources = await typeHintCommand.GetResources(null, null);
             Assert.Equal(2, resources.Count);

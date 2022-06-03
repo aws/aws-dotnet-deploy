@@ -14,17 +14,32 @@ namespace AWS.Deploy.CLI
             _interactiveService = interactiveService;
         }
 
-        public void LogErrorMessageLine(string? message)
+        public void LogSectionStart(string message, string? description)
+        {
+            var sectionBreak = new string('*', message.Length);
+            _interactiveService.WriteLine(string.Empty);
+            _interactiveService.WriteLine(sectionBreak);
+            _interactiveService.WriteLine(message);
+            if(description != null)
+            {
+                _interactiveService.WriteLine(new string('-', message.Length));
+                _interactiveService.WriteLine(description);
+            }
+            _interactiveService.WriteLine(sectionBreak);
+            _interactiveService.WriteLine(string.Empty);
+        }
+
+        public void LogErrorMessage(string? message)
         {
             _interactiveService.WriteErrorLine(message);
         }
 
-        public void LogMessageLine(string? message)
+        public void LogInfoMessage(string? message)
         {
             _interactiveService.WriteLine(message);
         }
 
-        public void LogDebugLine(string? message)
+        public void LogDebugMessage(string? message)
         {
             _interactiveService.WriteDebugLine(message);
         }

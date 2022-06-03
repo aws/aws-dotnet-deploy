@@ -12,6 +12,8 @@ using AWS.Deploy.CLI.Extensions;
 using AWS.Deploy.CLI.IntegrationTests.Extensions;
 using AWS.Deploy.CLI.IntegrationTests.Helpers;
 using AWS.Deploy.CLI.IntegrationTests.Services;
+using AWS.Deploy.Common;
+using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.Utilities;
@@ -48,6 +50,12 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
+            var awsClientFactory = serviceProvider.GetService<IAWSClientFactory>();
+            awsClientFactory.ConfigureAWSOptions((options) =>
+            {
+                options.Region = Amazon.RegionEndpoint.USWest2;
+            });
+
             App = serviceProvider.GetService<App>();
             Assert.NotNull(App);
 
@@ -76,7 +84,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests
             EnvironmentName = $"environment{suffix}";
             VersionLabel = $"v-{suffix}";
 
-            EBHelper = new ElasticBeanstalkHelper(new AmazonElasticBeanstalkClient(), AWSResourceQueryer, ToolInteractiveService);
+            EBHelper = new ElasticBeanstalkHelper(new AmazonElasticBeanstalkClient(Amazon.RegionEndpoint.USWest2), AWSResourceQueryer, ToolInteractiveService);
             IAMHelper = new IAMHelper(new AmazonIdentityManagementServiceClient(), AWSResourceQueryer, ToolInteractiveService);
         }
 

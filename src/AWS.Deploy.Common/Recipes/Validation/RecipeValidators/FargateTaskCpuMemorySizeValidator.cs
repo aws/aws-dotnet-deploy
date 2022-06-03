@@ -1,8 +1,10 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.\r
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace AWS.Deploy.Common.Recipes.Validation
 {
@@ -20,6 +22,13 @@ namespace AWS.Deploy.Common.Recipes.Validation
     /// </summary>
     public class FargateTaskCpuMemorySizeValidator : IRecipeValidator
     {
+        private readonly IOptionSettingHandler _optionSettingHandler;
+
+        public FargateTaskCpuMemorySizeValidator(IOptionSettingHandler optionSettingHandler)
+        {
+            _optionSettingHandler = optionSettingHandler;
+        }
+
         private readonly Dictionary<string, string[]> _cpuMemoryMap = new()
         {
             { "256", new[] { "512", "1024", "2048" } },
@@ -51,20 +60,20 @@ namespace AWS.Deploy.Common.Recipes.Validation
         public string? InvalidCpuValueValidationFailedMessage { get; set; }
 
         /// <inheritdoc cref="FargateTaskCpuMemorySizeValidator"/>
-        public ValidationResult Validate(Recommendation recommendation, IDeployToolValidationContext deployValidationContext)
+        public Task<ValidationResult> Validate(Recommendation recommendation, IDeployToolValidationContext deployValidationContext)
         {
             string cpu;
             string memory;
 
             try
             {
-                cpu = recommendation.GetOptionSettingValue<string>(recommendation.GetOptionSetting(CpuOptionSettingsId));
-                memory = recommendation.GetOptionSettingValue<string>(recommendation.GetOptionSetting(MemoryOptionSettingsId));
+                cpu = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, CpuOptionSettingsId));
+                memory = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, MemoryOptionSettingsId));
             }
             catch (OptionSettingItemDoesNotExistException)
             {
-                return ValidationResult.Failed("Could not find a valid value for Task CPU or Task Memory " +
-                    "as part of of the ECS Fargate deployment configuration. Please provide a valid value and try again.");
+                return Task.FromResult<ValidationResult>(ValidationResult.Failed("Could not find a valid value for Task CPU or Task Memory " +
+                    "as part of of the ECS Fargate deployment configuration. Please provide a valid value and try again."));
             }
 
             if (!_cpuMemoryMap.ContainsKey(cpu))
@@ -74,14 +83,14 @@ namespace AWS.Deploy.Common.Recipes.Validation
                 // or the UX flow calling in here doesn't enforce AllowedValues.
                 var message = InvalidCpuValueValidationFailedMessage?.Replace("{{cpu}}", cpu);
 
-                return ValidationResult.Failed(message?? "Cpu validation failed");
+                return Task.FromResult<ValidationResult>(ValidationResult.Failed(message?? "Cpu validation failed"));
             }
 
             var validMemoryValues = _cpuMemoryMap[cpu];
 
             if (validMemoryValues.Contains(memory))
             {
-                return ValidationResult.Valid();
+                return Task.FromResult<ValidationResult>(ValidationResult.Valid());
             }
 
             var failed =
@@ -90,7 +99,7 @@ namespace AWS.Deploy.Common.Recipes.Validation
                     .Replace("{{memory}}", memory)
                     .Replace("{{memoryList}}", string.Join(", ", validMemoryValues));
 
-            return ValidationResult.Failed(failed);
+            return Task.FromResult<ValidationResult>(ValidationResult.Failed(failed));
 
         }
     }

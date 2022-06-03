@@ -31,6 +31,11 @@ namespace AWS.Deploy.Common.Recipes
         ExistingECSCluster,
         ExistingVpc,
         ExistingBeanstalkApplication,
-        ECRRepository
+        ECRRepository,
+        ExistingVpcConnector,
+        ExistingSubnets,
+        ExistingSecurityGroups,
+        VPCConnector,
+        FilePath
     };
 }

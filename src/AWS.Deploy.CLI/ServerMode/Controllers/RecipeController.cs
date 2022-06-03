@@ -2,14 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AWS.Deploy.CLI.ServerMode.Models;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.DeploymentManifest;
 using AWS.Deploy.Common.IO;
+using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.Utilities;
+using AWS.Deploy.Recipes;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -20,12 +23,12 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
     [Route("api/v1/[controller]")]
     public class RecipeController : ControllerBase
     {
-        private readonly ICustomRecipeLocator _customRecipeLocator;
+        private readonly IRecipeHandler _recipeHandler;
         private readonly IProjectDefinitionParser _projectDefinitionParser;
 
-        public RecipeController(ICustomRecipeLocator customRecipeLocator, IProjectDefinitionParser projectDefinitionParser)
+        public RecipeController(IRecipeHandler recipeHandler, IProjectDefinitionParser projectDefinitionParser)
         {
-            _customRecipeLocator = customRecipeLocator;
+            _recipeHandler = recipeHandler;
             _projectDefinitionParser = projectDefinitionParser;
         }
 
@@ -35,6 +38,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         [HttpGet("{recipeId}")]
         [SwaggerOperation(OperationId = "GetRecipe")]
         [SwaggerResponse(200, type: typeof(RecipeSummary))]
+        [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetRecipe(string recipeId, [FromQuery] string? projectPath = null)
         {
             if (string.IsNullOrEmpty(recipeId))
@@ -43,11 +47,14 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             }
 
             ProjectDefinition? projectDefinition = null;
-            if(!string.IsNullOrEmpty(projectPath))
+            var recipePaths = new HashSet<string> { RecipeLocator.FindRecipeDefinitionsPath() };
+            HashSet<string> customRecipePaths = new HashSet<string>();
+            if (!string.IsNullOrEmpty(projectPath))
             {
                 projectDefinition = await _projectDefinitionParser.Parse(projectPath);
+                customRecipePaths = await _recipeHandler.LocateCustomRecipePaths(projectDefinition);
             }
-            var recipeDefinitions = await RecipeHandler.GetRecipeDefinitions(_customRecipeLocator, projectDefinition);
+            var recipeDefinitions = await _recipeHandler.GetRecipeDefinitions(recipeDefinitionPaths: recipePaths.Union(customRecipePaths).ToList());
             var selectedRecipeDefinition = recipeDefinitions.FirstOrDefault(x => x.Id.Equals(recipeId));
 
             if (selectedRecipeDefinition == null)

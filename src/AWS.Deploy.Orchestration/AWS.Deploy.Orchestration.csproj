@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AWSSDK.CloudControlApi" Version="3.7.2" />
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.0.83" />
     <PackageReference Include="AWSSDK.SQS" Version="3.7.1.25" />
     <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.2.53" />
@@ -21,7 +22,8 @@
     <PackageReference Include="AWSSDK.IdentityManagement" Version="3.7.2.25" />
     <PackageReference Include="AWSSDK.CloudFormation" Version="3.7.7.14" />
     <PackageReference Include="AWSSDK.S3" Version="3.7.1.17" />
-    <PackageReference Include="AWSSDK.AppRunner" Version="3.7.0.24" />
+    <PackageReference Include="AWSSDK.AppRunner" Version="3.7.3.11" />
+    <PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="3.7.16" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="5.0.0" />
     <PackageReference Include="Microsoft.TemplateEngine.IDE" Version="5.0.1" />
     <PackageReference Include="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="5.0.1" />
@@ -38,6 +40,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="CDK\package.json.template" />
+    <EmbeddedResource Include="CDK\CDKBootstrapTemplate.yaml" />
   </ItemGroup>
 
   <Import Project="..\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems" Label="Shared" />

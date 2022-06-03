@@ -1,7 +1,10 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.\r
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using AWS.Deploy.Common.Extensions;
 
 namespace AWS.Deploy.Common.Recipes.Validation
 {
@@ -19,17 +22,37 @@ namespace AWS.Deploy.Common.Recipes.Validation
         public string ValidationFailedMessage { get; set; } = defaultValidationFailedMessage;
         public bool AllowEmptyString { get; set; }
 
-        public ValidationResult Validate(object input)
+        public Task<ValidationResult> Validate(object input, Recommendation recommendation)
         {
             var regex = new Regex(Regex);
 
             var message = ValidationFailedMessage.Replace("{{Regex}}", Regex);
 
-            return new ValidationResult
+
+            if (input?.TryDeserialize<SortedSet<string>>(out var inputList) ?? false)
+            {
+                foreach (var item in inputList!)
+                {
+                    var valid = regex.IsMatch(item) || (AllowEmptyString && string.IsNullOrEmpty(item));
+                    if (!valid)
+                        return Task.FromResult<ValidationResult>(new ValidationResult
+                        {
+                            IsValid = false,
+                            ValidationFailedMessage = message
+                        });
+                }
+                return Task.FromResult<ValidationResult>(new ValidationResult
+                {
+                    IsValid = true,
+                    ValidationFailedMessage = message
+                });
+            }
+
+            return Task.FromResult<ValidationResult>(new ValidationResult
             {
                 IsValid = regex.IsMatch(input?.ToString() ?? "") || (AllowEmptyString && string.IsNullOrEmpty(input?.ToString())),
                 ValidationFailedMessage = message
-            };
+            });
         }
     }
 }

@@ -37,7 +37,7 @@ namespace AWS.Deploy.Orchestration.ServiceHandlers
         {
             using (var stream = _fileManager.OpenRead(filePath))
             {
-                _interactiveService.LogMessageLine($"Uploading to S3. (Bucket: {bucket} Key: {key} Size: {_fileManager.GetSizeInBytes(filePath)} bytes)");
+                _interactiveService.LogInfoMessage($"Uploading to S3. (Bucket: {bucket} Key: {key} Size: {_fileManager.GetSizeInBytes(filePath)} bytes)");
 
                 var request = new TransferUtilityUploadRequest()
                 {
@@ -71,7 +71,7 @@ namespace AWS.Deploy.Orchestration.ServiceHandlers
                 if (increment == 0)
                     increment = UPLOAD_PROGRESS_INCREMENT;
                 percentToUpdateOn = e.PercentDone + increment;
-                _interactiveService.LogMessageLine($"... Progress: {e.PercentDone}%");
+                _interactiveService.LogInfoMessage($"... Progress: {e.PercentDone}%");
             });
 
             return handler;

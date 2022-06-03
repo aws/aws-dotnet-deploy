@@ -24,21 +24,33 @@
                     "Type": "MSProperty",
                     "Condition": {
                         "PropertyName": "TargetFramework",
-                        "AllowedValues": [ "netcoreapp2.1", "netcoreapp3.1", "net5.0" ]
+                        "AllowedValues": [ "netcoreapp2.1", "netcoreapp3.1", "net5.0", "net6.0" ]
                     }
                 }
             ],
             "Effect": {
                 "Pass": { "Include": true },
-                "Fail": {"Include": false}
+                "Fail": { "Include": false }
             }
         }
     ],
-
+    "Categories": [
+        {
+            "Id": "Hosting",
+            "DisplayName": "Hosting",
+            "Order": 20
+        },
+        {
+            "Id": "Health",
+            "DisplayName": "Health & Monitoring",
+            "Order": 30
+        }
+    ],
     "OptionSettings": [
         {
             "Id": "EnhancedHealthReporting",
             "Name": "Enhanced Health Reporting",
+            "Category": "Health",
             "Description": "Enhanced health reporting provides free real-time application and operating system monitoring of the instances and other resources in your environment.",
             "Type": "String",
             "DefaultValue": "enhanced",
@@ -56,6 +68,7 @@
         {
             "Id": "XRayTracingSupportEnabled",
             "Name": "Enable AWS X-Ray Tracing Support",
+            "Category": "Health",
             "Description": "AWS X-Ray is a service that collects data about requests that your application serves, and provides tools you can use to view, filter, and gain insights into that data to identify issues and opportunities for optimization. Do you want to enable AWS X-Ray tracing support?",
             "Type": "Bool",
             "DefaultValue": false,
@@ -65,6 +78,7 @@
         {
             "Id": "ReverseProxy",
             "Name": "Reverse Proxy",
+            "Category": "Hosting",
             "Description": "By default Nginx is used as a reverse proxy in front of the .NET Core web server Kestrel. To use Kestrel as the front facing web server then select `none` as the reverse proxy.",
             "Type": "String",
             "DefaultValue": "nginx",
@@ -78,6 +92,7 @@
         {
             "Id": "HealthCheckURL",
             "Name": "Health Check URL",
+            "Category": "Health",
             "Description": "Customize the load balancer health check to ensure that your application, and not just the web server, is in a good state.",
             "Type": "String",
             "DefaultValue": "/",

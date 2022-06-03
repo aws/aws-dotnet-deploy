@@ -7,6 +7,8 @@
 // This class is marked as a partial class. If you add new settings to the recipe file, those settings should be
 // added to partial versions of this class outside of the Generated folder for example in the Configuration folder.
 
+using System.Collections.Generic;
+
 namespace AspNetAppEcsFargate.Configurations
 {
     public partial class Configuration
@@ -55,6 +57,11 @@ namespace AspNetAppEcsFargate.Configurations
 
         public AutoScalingConfiguration AutoScaling { get; set; }
 
+        /// <summary>
+        /// The environment variables that are set for the ECS environment.
+        /// </summary>
+        public Dictionary<string, string> ECSEnvironmentVariables { get; set; } = new Dictionary<string, string> { };
+
         /// A parameterless constructor is needed for <see cref="Microsoft.Extensions.Configuration.ConfigurationBuilder"/>
         /// or the classes will fail to initialize.
         /// The warnings are disabled since a parameterless constructor will allow non-nullable properties to be initialized with null values.
@@ -72,7 +79,8 @@ namespace AspNetAppEcsFargate.Configurations
             VpcConfiguration vpc,
             string additionalECSServiceSecurityGroups,
             LoadBalancerConfiguration loadBalancer,
-            AutoScalingConfiguration autoScaling
+            AutoScalingConfiguration autoScaling,
+            Dictionary<string, string> ecsEnvironmentVariables
             )
         {
             ApplicationIAMRole = applicationIAMRole;
@@ -82,6 +90,7 @@ namespace AspNetAppEcsFargate.Configurations
             AdditionalECSServiceSecurityGroups = additionalECSServiceSecurityGroups;
             LoadBalancer = loadBalancer;
             AutoScaling = autoScaling;
+            ECSEnvironmentVariables = ecsEnvironmentVariables;
         }
     }
 }

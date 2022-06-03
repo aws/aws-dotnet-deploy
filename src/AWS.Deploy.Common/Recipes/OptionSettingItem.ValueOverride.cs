@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AWS.Deploy.Common.Recipes.Validation;
 using Newtonsoft.Json;
 
@@ -12,8 +13,6 @@ namespace AWS.Deploy.Common.Recipes
     /// <see cref="GetValue{T}"/>, <see cref="GetValue"/> and <see cref="SetValueOverride"/> methods
     public partial class OptionSettingItem
     {
-        private object? _valueOverride = null;
-
         public T GetValue<T>(IDictionary<string, string> replacementTokens, IDictionary<string, bool>? displayableOptionSettings = null)
         {
             var value = GetValue(replacementTokens, displayableOptionSettings);
@@ -23,9 +22,9 @@ namespace AWS.Deploy.Common.Recipes
 
         public object GetValue(IDictionary<string, string> replacementTokens, IDictionary<string, bool>? displayableOptionSettings = null)
         {
-            if (_valueOverride != null)
+            if (_value != null)
             {
-                return _valueOverride;
+                return _value;
             }
 
             if (Type == OptionSettingValueType.Object)
@@ -90,52 +89,69 @@ namespace AWS.Deploy.Common.Recipes
         /// <summary>
         /// Assigns a value to the OptionSettingItem.
         /// </summary>
+        /// <param name="valueOverride">Value to assign</param>
+        /// <param name="recommendation">Current deployment recommendation, may be used if the validator needs to consider properties other than itself</param>
         /// <exception cref="ValidationFailedException">
         /// Thrown if one or more <see cref="Validators"/> determine
         /// <paramref name="valueOverride"/> is not valid.
         /// </exception>
-        public void SetValueOverride(object valueOverride)
+        public async Task SetValue(IOptionSettingHandler optionSettingHandler, object valueOverride, IOptionSettingItemValidator[] validators, Recommendation recommendation, bool skipValidation)
         {
-            var isValid = true;
-            var validationFailedMessage = string.Empty;
-            foreach (var validator in this.BuildValidators())
+            if (!skipValidation)
             {
-                var result = validator.Validate(valueOverride);
-                if (!result.IsValid)
+                foreach (var validator in validators)
                 {
-                    isValid = false;
-                    validationFailedMessage += result.ValidationFailedMessage + Environment.NewLine;
+                    var result = await validator.Validate(valueOverride, recommendation);
+                    if (!result.IsValid)
+                    {
+                        Validation.ValidationStatus = ValidationStatus.Invalid;
+                        Validation.ValidationMessage = result.ValidationFailedMessage?.Trim() ?? $"The value '{valueOverride}' is invalid for option setting '{Name}'.";
+                        Validation.InvalidValue = valueOverride;
+                        throw new ValidationFailedException(DeployToolErrorCode.OptionSettingItemValueValidationFailed, Validation.ValidationMessage);
+                    }
                 }
             }
-            if (!isValid)
-                throw new ValidationFailedException(DeployToolErrorCode.OptionSettingItemValueValidationFailed, validationFailedMessage.Trim());
 
             if (AllowedValues != null && AllowedValues.Count > 0 && valueOverride != null &&
                 !AllowedValues.Contains(valueOverride.ToString() ?? ""))
-                throw new InvalidOverrideValueException(DeployToolErrorCode.InvalidValueForOptionSettingItem, $"Invalid value for option setting item '{Name}'");
-
-            if (valueOverride is bool || valueOverride is int || valueOverride is long || valueOverride is double || valueOverride is Dictionary<string, string>)
             {
-                _valueOverride = valueOverride;
+                Validation.ValidationStatus = ValidationStatus.Invalid;
+                Validation.ValidationMessage = $"Invalid value for option setting item '{Name}'";
+                Validation.InvalidValue = valueOverride;
+                throw new InvalidOverrideValueException(DeployToolErrorCode.InvalidValueForOptionSettingItem, Validation.ValidationMessage);
+            }
+
+            Validation.ValidationStatus = ValidationStatus.Valid;
+            Validation.ValidationMessage = string.Empty;
+            Validation.InvalidValue = null;
+
+            if (valueOverride is bool || valueOverride is int || valueOverride is long || valueOverride is double || valueOverride is Dictionary<string, string> || valueOverride is SortedSet<string>)
+            {
+                _value = valueOverride;
             }
             else if (Type.Equals(OptionSettingValueType.KeyValue))
             {
                 var deserialized = JsonConvert.DeserializeObject<Dictionary<string, string>>(valueOverride?.ToString() ?? "");
-                _valueOverride = deserialized;
+                _value = deserialized;
+            }
+            else if (Type.Equals(OptionSettingValueType.List))
+            {
+                var deserialized = JsonConvert.DeserializeObject<SortedSet<string>>(valueOverride?.ToString() ?? "");
+                _value = deserialized;
             }
             else if (valueOverride is string valueOverrideString)
             {
                 if (bool.TryParse(valueOverrideString, out var valueOverrideBool))
                 {
-                    _valueOverride = valueOverrideBool;
+                    _value = valueOverrideBool;
                 }
                 else if (int.TryParse(valueOverrideString, out var valueOverrideInt))
                 {
-                    _valueOverride = valueOverrideInt;
+                    _value = valueOverrideInt;
                 }
                 else
                 {
-                    _valueOverride = valueOverrideString;
+                    _value = valueOverrideString;
                 }
             }
             else
@@ -145,7 +161,7 @@ namespace AWS.Deploy.Common.Recipes
                 {
                     if (deserialized.TryGetValue(childOptionSetting.Id, out var childValueOverride))
                     {
-                        childOptionSetting.SetValueOverride(childValueOverride);
+                        await optionSettingHandler.SetOptionSettingValue(recommendation, childOptionSetting, childValueOverride, skipValidation: skipValidation);
                     }
                 }
             }

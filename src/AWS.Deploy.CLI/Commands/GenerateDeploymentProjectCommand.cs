@@ -32,6 +32,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly IFileManager _fileManager;
         private readonly OrchestratorSession _session;
         private readonly IDeploymentManifestEngine _deploymentManifestEngine;
+        private readonly IRecipeHandler _recipeHandler;
         private readonly string _targetApplicationFullPath;
         
         public GenerateDeploymentProjectCommand(
@@ -43,6 +44,7 @@ namespace AWS.Deploy.CLI.Commands
             IFileManager fileManager,
             OrchestratorSession session,
             IDeploymentManifestEngine deploymentManifestEngine,
+            IRecipeHandler recipeHandler,
             string targetApplicationFullPath)
         {
             _toolInteractiveService = toolInteractiveService;
@@ -53,6 +55,7 @@ namespace AWS.Deploy.CLI.Commands
             _fileManager = fileManager;
             _session = session;
             _deploymentManifestEngine = deploymentManifestEngine;
+            _recipeHandler = recipeHandler;
             _targetApplicationFullPath = targetApplicationFullPath;
         }
 
@@ -65,7 +68,7 @@ namespace AWS.Deploy.CLI.Commands
         /// <returns></returns>
         public async Task ExecuteAsync(string saveCdkDirectoryPath, string projectDisplayName)
         {
-            var orchestrator = new Orchestrator(_session, new[] { RecipeLocator.FindRecipeDefinitionsPath() });
+            var orchestrator = new Orchestrator(_session, _recipeHandler);
             var recommendations = await GenerateRecommendationsToSaveDeploymentProject(orchestrator);
             var selectedRecommendation = _consoleUtilities.AskToChooseRecommendation(recommendations);
 

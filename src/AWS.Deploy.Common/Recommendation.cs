@@ -12,6 +12,9 @@ namespace AWS.Deploy.Common
 {
     public class Recommendation : IUserInputOption
     {
+        /// <summary>
+        /// Returns the full path to the project file
+        /// </summary>
         public string ProjectPath => ProjectDefinition.ProjectPath;
 
         public ProjectDefinition ProjectDefinition { get; }
@@ -22,7 +25,7 @@ namespace AWS.Deploy.Common
 
         public string Name => Recipe.Name;
 
-        public bool IsExistingCloudApplication { get; private set; }
+        public bool IsExistingCloudApplication { get; set; }
 
         public string Description => Recipe.Description;
 
@@ -53,6 +56,43 @@ namespace AWS.Deploy.Common
             }
         }
 
+        public List<Category> GetConfigurableOptionSettingCategories()
+        {
+            var categories = Recipe.Categories;
+
+            // If any top level settings has a category of General make sure the General category is added to the list.
+            if(!categories.Any(x => string.Equals(x.Id, Category.General.Id)) &&
+                Recipe.OptionSettings.Any(x => string.IsNullOrEmpty(x.Category) || string.Equals(x.Category, Category.General.Id)))
+            {
+                categories.Insert(0, Category.General);
+            }
+
+            // Add the build settings category if it is not already in the list of categories.
+            if(!categories.Any(x => string.Equals(x.Id, Category.DeploymentBundle.Id)))
+            {
+                categories.Add(Category.DeploymentBundle);
+            }
+
+            return categories;
+        }
+
+        public IEnumerable<OptionSettingItem> GetConfigurableOptionSettingItems()
+        {
+            // For any top level settings that don't have a category assigned to them assign the General category.
+            foreach(var setting in Recipe.OptionSettings)
+            {
+                if(string.IsNullOrEmpty(setting.Category))
+                {
+                    setting.Category = Category.General.Id;
+                }
+            }
+
+            if (DeploymentBundleSettings == null)
+                return Recipe.OptionSettings;
+
+            return Recipe.OptionSettings.Union(DeploymentBundleSettings);
+        }
+
         private void CollectRecommendationReplacementTokens(List<OptionSettingItem> optionSettings)
         {
             foreach (var optionSetting in optionSettings)
@@ -72,157 +112,23 @@ namespace AWS.Deploy.Common
             }
         }
 
-        public Recommendation ApplyPreviousSettings(IDictionary<string, object> previousSettings)
-        {
-            var recommendation = this.DeepCopy();
-
-            ApplyPreviousSettings(recommendation, previousSettings);
-
-            return recommendation;
-        }
-
         public void AddReplacementToken(string key, string value)
         {
             ReplacementTokens[key] = value;
         }
 
-        private void ApplyPreviousSettings(Recommendation recommendation, IDictionary<string, object> previousSettings)
-        {
-            recommendation.IsExistingCloudApplication = true;
-
-            foreach (var optionSetting in recommendation.Recipe.OptionSettings)
-            {
-                if (previousSettings.TryGetValue(optionSetting.Id, out var value))
-                {
-                    optionSetting.SetValueOverride(value);
-                }
-            }
-        }
-
-        public IEnumerable<OptionSettingItem> GetConfigurableOptionSettingItems()
-        {
-            if (DeploymentBundleSettings == null)
-                return Recipe.OptionSettings;
-
-            return Recipe.OptionSettings.Union(DeploymentBundleSettings);
-        }
-
         /// <summary>
-        /// Interactively traverses given json path and returns target option setting.
-        /// Throws exception if there is no <see cref="OptionSettingItem" /> that matches <paramref name="jsonPath"/> />
-        /// In case an option setting of type <see cref="OptionSettingValueType.KeyValue"/> is encountered,
-        /// that <paramref name="jsonPath"/> can have the key value pair name as the leaf node with the option setting Id as the node before that.
+        /// Helper to get the project's directory
         /// </summary>
-        /// <param name="jsonPath">
-        /// Dot (.) separated key values string pointing to an option setting.
-        /// Read more <see href="https://tools.ietf.org/id/draft-goessner-dispatch-jsonpath-00.html"/>
-        /// </param>
-        /// <returns>Option setting at the json path. Throws <see cref="OptionSettingItemDoesNotExistException"/> if there doesn't exist an option setting.</returns>
-        public OptionSettingItem GetOptionSetting(string? jsonPath)
+        /// <returns>Full name of directory containing this recommendation's project file</returns>
+        public string GetProjectDirectory()
         {
-            if (string.IsNullOrEmpty(jsonPath))
-                throw new OptionSettingItemDoesNotExistException(DeployToolErrorCode.OptionSettingItemDoesNotExistInRecipe, $"The Option Setting Item {jsonPath} does not exist as part of the" +
-                    $" {Recipe.Name} recipe");
+            var projectDirectory = new FileInfo(ProjectPath).Directory?.FullName;
 
-            var ids = jsonPath.Split('.');
-            OptionSettingItem? optionSetting = null;
+            if (string.IsNullOrEmpty(projectDirectory))
+                throw new InvalidProjectPathException(DeployToolErrorCode.ProjectPathNotFound, "The project path provided is invalid.");
 
-            for (int i = 0; i < ids.Length; i++)
-            {
-                var optionSettings = optionSetting?.ChildOptionSettings ?? GetConfigurableOptionSettingItems();
-                optionSetting = optionSettings.FirstOrDefault(os => os.Id.Equals(ids[i]));
-                if (optionSetting == null)
-                {
-                    throw new OptionSettingItemDoesNotExistException(DeployToolErrorCode.OptionSettingItemDoesNotExistInRecipe, $"The Option Setting Item {jsonPath} does not exist as part of the" +
-                    $" {Recipe.Name} recipe");
-                }
-                if (optionSetting.Type.Equals(OptionSettingValueType.KeyValue))
-                {
-                    return optionSetting;
-                }
-            }
-
-            return optionSetting!;
-        }
-
-        public T GetOptionSettingValue<T>(OptionSettingItem optionSetting)
-        {
-            var displayableOptionSettings = new Dictionary<string, bool>();
-            if (optionSetting.Type == OptionSettingValueType.Object)
-            {
-                foreach (var childOptionSetting in optionSetting.ChildOptionSettings)
-                {
-                    displayableOptionSettings.Add(childOptionSetting.Id, IsOptionSettingDisplayable(childOptionSetting));
-                }
-            }
-            return optionSetting.GetValue<T>(ReplacementTokens, displayableOptionSettings);
-        }
-
-        public object GetOptionSettingValue(OptionSettingItem optionSetting)
-        {
-            var displayableOptionSettings = new Dictionary<string, bool>();
-            if (optionSetting.Type == OptionSettingValueType.Object)
-            {
-                foreach (var childOptionSetting in optionSetting.ChildOptionSettings)
-                {
-                    displayableOptionSettings.Add(childOptionSetting.Id, IsOptionSettingDisplayable(childOptionSetting));
-                }
-            }
-            return optionSetting.GetValue(ReplacementTokens, displayableOptionSettings);
-        }
-
-        public T? GetOptionSettingDefaultValue<T>(OptionSettingItem optionSetting)
-        {
-            return optionSetting.GetDefaultValue<T>(ReplacementTokens);
-        }
-
-        public object? GetOptionSettingDefaultValue(OptionSettingItem optionSetting)
-        {
-            return optionSetting.GetDefaultValue(ReplacementTokens);
-        }
-
-        /// <summary>
-        /// Checks whether all the dependencies are satisfied or not, if there exists an unsatisfied dependency then returns false.
-        /// It allows caller to decide whether we want to display an <see cref="OptionSettingItem"/> to configure or not.
-        /// </summary>
-        /// <param name="optionSetting">Option setting to check whether it can be displayed for configuration or not.</param>
-        /// <returns>Returns true, if all the dependencies are satisfied, else false.</returns>
-        public bool IsOptionSettingDisplayable(OptionSettingItem optionSetting)
-        {
-            if (!optionSetting.DependsOn.Any())
-            {
-                return true;
-            }
-
-            foreach (var dependency in optionSetting.DependsOn)
-            {
-                var dependsOnOptionSetting = GetOptionSetting(dependency.Id);
-                var dependsOnOptionSettingValue = GetOptionSettingValue(dependsOnOptionSetting);
-                if (
-                    dependsOnOptionSetting != null &&
-                    dependsOnOptionSettingValue != null &&
-                    !dependsOnOptionSettingValue.Equals(dependency.Value))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// Checks whether the Option Setting Item can be displayed as part of the settings summary of the previous deployment.
-        /// </summary>
-        public bool IsSummaryDisplayable(OptionSettingItem optionSettingItem)
-        {
-            if (!IsOptionSettingDisplayable(optionSettingItem))
-                return false;
-
-            var value = GetOptionSettingValue(optionSettingItem);
-            if (string.IsNullOrEmpty(value?.ToString()))
-                return false;
-
-            return true;
+            return projectDirectory;
         }
     }
 }

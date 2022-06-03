@@ -10,6 +10,7 @@ using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.TypeHintData;
 using AWS.Deploy.Orchestration.Data;
 using Amazon.S3.Model;
+using AWS.Deploy.Common.Data;
 
 namespace AWS.Deploy.CLI.Commands.TypeHints
 {
@@ -17,11 +18,13 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
     {
         private readonly IAWSResourceQueryer _awsResourceQueryer;
         private readonly IConsoleUtilities _consoleUtilities;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
-        public S3BucketNameCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities)
+        public S3BucketNameCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities, IOptionSettingHandler optionSettingHandler)
         {
             _awsResourceQueryer = awsResourceQueryer;
             _consoleUtilities = consoleUtilities;
+            _optionSettingHandler = optionSettingHandler;
         }
 
         private async Task<List<S3Bucket>> GetData()
@@ -38,7 +41,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             const string NO_VALUE = "*** Do not select bucket ***";
-            var currentValue = recommendation.GetOptionSettingValue(optionSetting);
+            var currentValue = _optionSettingHandler.GetOptionSettingValue(recommendation, optionSetting);
             var typeHintData = optionSetting.GetTypeHintData<S3BucketNameTypeHintData>();
             var buckets = (await GetData()).Select(bucket => bucket.BucketName).ToList();
 

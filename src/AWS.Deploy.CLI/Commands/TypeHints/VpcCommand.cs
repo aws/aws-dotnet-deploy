@@ -8,6 +8,7 @@ using Amazon.EC2.Model;
 using Amazon.ECS.Model;
 using AWS.Deploy.CLI.TypeHintResponses;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.TypeHintData;
 using AWS.Deploy.Orchestration;
@@ -58,7 +59,8 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             var vpcs = await GetData();
 
             var userInputConfig = new UserInputConfiguration<Vpc>(
-                vpc =>
+                idSelector: vpc => vpc.VpcId,
+                displaySelector: vpc =>
                 {
                     var name = vpc.Tags?.FirstOrDefault(x => x.Key == "Name")?.Value ?? string.Empty;
                     var namePart =
@@ -73,7 +75,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
                     return $"{vpc.VpcId}{namePart}{isDefaultPart}";
                 },
-                vpc =>
+                defaultSelector: vpc =>
                     !string.IsNullOrEmpty(currentVpcTypeHintResponse?.VpcId)
                         ? vpc.VpcId == currentVpcTypeHintResponse.VpcId
                         : vpc.IsDefault);

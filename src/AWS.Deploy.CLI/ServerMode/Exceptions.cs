@@ -15,6 +15,14 @@ namespace AWS.Deploy.CLI.ServerMode
     }
 
     /// <summary>
+     /// Throw if the selected recommendation is incompatible with the operation performed.
+     /// </summary>
+    public class SelectedRecommendationIsIncompatibleException : Exception
+    {
+        public SelectedRecommendationIsIncompatibleException(string message, Exception? innerException = null) : base(message, innerException) { }
+    }
+
+    /// <summary>
     /// Throw if the tool was not able to retrieve the AWS Credentials.
     /// </summary>
     public class FailedToRetrieveAWSCredentialsException : Exception

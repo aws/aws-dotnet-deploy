@@ -4,12 +4,37 @@
         {
             "Id": "DockerBuildArgs",
             "Name": "Docker Build Args",
-            "Description": "The list of additional docker build args.",
+            "Description": "The list of additional options to append to the `docker build` command.",
             "Type": "String",
             "TypeHint": "DockerBuildArgs",
             "DefaultValue": "",
             "AdvancedSetting": true,
-            "Updatable": true
+            "Updatable": true,
+            "Validators": [
+                {
+                    "ValidatorType": "DockerBuildArgs"
+                }
+            ]
+        },
+        {
+            "Id": "DockerfilePath",
+            "Name": "Dockerfile Path",
+            "Description": "Specify a path to a Dockerfile as either an absolute path or a path relative to the project.",
+            "Type": "String",
+            "TypeHint": "FilePath",
+            "TypeHintData": {
+                "Filter": "All files (*.*)|*.*",
+                "CheckFileExists": true,
+                "Title": "Select a Dockerfile"
+            },
+            "DefaultValue": "{DockerfilePath}",
+            "AdvancedSetting": true,
+            "Updatable": true,
+            "Validators": [
+                {
+                    "ValidatorType": "FileExists"
+                }
+            ]
         },
         {
             "Id": "DockerExecutionDirectory",
@@ -19,12 +44,17 @@
             "TypeHint": "DockerExecutionDirectory",
             "DefaultValue": "",
             "AdvancedSetting": true,
-            "Updatable": true
+            "Updatable": true,
+            "Validators": [
+                {
+                    "ValidatorType": "DirectoryExists"
+                }
+            ]
         },
         {
             "Id": "ECRRepositoryName",
-            "Name": "ECS Repository Name",
-            "Description": "Specifies the ECR repository where the docker images will be stored",
+            "Name": "ECR Repository Name",
+            "Description": "Specifies the ECR repository where the Docker images will be stored",
             "Type": "String",
             "TypeHint": "ECRRepository",
             "DefaultValue": "{DefaultECRRepositoryName}",

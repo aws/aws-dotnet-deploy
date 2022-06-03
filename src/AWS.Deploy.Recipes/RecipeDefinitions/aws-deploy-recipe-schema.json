@@ -54,7 +54,7 @@
             "type": "string",
             "title": "Deployment type",
             "description": "The technology used to deploy the project.",
-            "enum": [ "CdkProject",  "BeanstalkEnvironment", "ElasticContainerRegistryImage"]
+            "enum": [ "CdkProject", "BeanstalkEnvironment", "ElasticContainerRegistryImage" ]
         },
         "DeploymentBundle": {
             "type": "string",
@@ -105,6 +105,9 @@
         },
         "RecommendationRules": {
             "$ref": "#/definitions/RecommendationRules"
+        },
+        "Categories": {
+            "$ref": "#/definitions/Categories"
         },
         "OptionSettings": {
             "$ref": "#/definitions/OptionSettings"
@@ -170,7 +173,7 @@
         "RecommendationRule": {
             "type": "object",
             "additionalProperties": false,
-            "required": [ "Tests", "Effect" ],
+            "required": [ "Tests" ],
             "properties": {
                 "Comment": {
                     "type": "string",
@@ -208,7 +211,8 @@
                         "MSProjectSdkAttribute",
                         "MSProperty",
                         "MSPropertyExists",
-                        "FileExists"
+                        "FileExists",
+                        "NuGetPackageReference"
                     ]
                 },
                 "Condition": {
@@ -233,7 +237,9 @@
                                         "description": "The expected value of the sdk attribute",
                                         "enum": [
                                             "Microsoft.NET.Sdk",
-                                            "Microsoft.NET.Sdk.Web"
+                                            "Microsoft.NET.Sdk.Web",
+                                            "Microsoft.NET.Sdk.BlazorWebAssembly",
+                                            "Microsoft.NET.Sdk.Worker"
                                         ]
                                     }
                                 }
@@ -346,7 +352,8 @@
                         "type": "string",
                         "enum": [
                             "FargateTaskSizeCpuMemoryLimits",
-                            "MinMaxConstraint"
+                            "MinMaxConstraint",
+                            "ValidDockerfilePath"
                         ]
                     }
                 },
@@ -362,10 +369,10 @@
                                         "InvalidCpuValueValidationFailedMessage": {
                                             "type": "string"
                                         },
-                                        "CpuOptionSettingsId":{
+                                        "CpuOptionSettingsId": {
                                             "type": "string"
                                         },
-                                        "MemoryOptionSettingsId":{
+                                        "MemoryOptionSettingsId": {
                                             "type": "string"
                                         }
                                     }
@@ -384,10 +391,10 @@
                                         "ValidationFailedMessage": {
                                             "type": "string"
                                         },
-                                        "MinValueOptionSettingsId":{
+                                        "MinValueOptionSettingsId": {
                                             "type": "string"
                                         },
-                                        "MaxValueOptionSettingsId":{
+                                        "MaxValueOptionSettingsId": {
                                             "type": "string"
                                         }
                                     }
@@ -396,6 +403,39 @@
                         }
                     }
                 ]
+            }
+        },
+        "Categories": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/Category" }
+        },
+        "Category": {
+            "type": "object",
+            "additionalItems": false,
+            "required": [
+                "Id",
+                "DisplayName",
+                "Order"
+            ],
+            "properties": {
+                "Id": {
+                    "type": "string",
+                    "title": "The unique id for the category.",
+                    "description": "The unique id for the category in the recipe. This value is applied to each top level setting to map settings to categories",
+                    "minLength": 1
+                },
+                "DisplayName": {
+                    "type": "string",
+                    "title": "Display Name",
+                    "description": "Display name show in UI screens.",
+                    "minLength": 1
+                },
+                "Order": {
+                    "type": "number",
+                    "title": "Order",
+                    "description": "Used to sort categories in ui. Categories are shown in sorted descending order.",
+                    "minLength": 1
+                }
             }
         },
         "OptionSettings": {
@@ -409,6 +449,7 @@
             "properties": {
                 "Id": {
                     "type": "string",
+                    "pattern": "^[a-zA-Z0-9_-]+$",
                     "title": "Unique ID for the setting",
                     "description": "The unqiue id for the setting. This value should never been change once the recipe is released because it will be stored in user config files.",
                     "minLength": 1
@@ -431,12 +472,17 @@
                     "description": "The description of the setting which will be shown to end users.",
                     "minLength": 1
                 },
+                "Category": {
+                    "type": "string",
+                    "title": "Category",
+                    "description": "The category for the setting used to organize ui screens. Category should only be set for top level settings. If a category is not set it will be included into the 'General' category."
+                },
                 "Type": {
                     "type": "string",
                     "title": "Type",
                     "description": "The data type of the setting.",
                     "minLength": 1,
-                    "enum": [ "String", "Int", "Bool", "Object" ]
+                    "enum": [ "String", "Int", "Bool", "Object", "KeyValue", "List", "Double" ]
                 },
                 "TypeHint": {
                     "type": "string",
@@ -446,6 +492,7 @@
                     "enum": [
                         "BeanstalkApplication",
                         "BeanstalkEnvironment",
+                        "BeanstalkRollingUpdates",
                         "InstanceType",
                         "IAMRole",
                         "ECSCluster",
@@ -458,7 +505,18 @@
                         "DotnetPublishBuildConfiguration",
                         "DotnetPublishAdditionalBuildArguments",
                         "DockerExecutionDirectory",
-                        "DockerBuildArgs"
+                        "DockerBuildArgs",
+                        "ExistingSubnets",
+                        "ExistingVpc",
+                        "ExistingSecurityGroups",
+                        "ExistingBeanstalkApplication",
+                        "ExistingIAMRole",
+                        "AppRunnerService",
+                        "VPCConnector",
+                        "ExistingVpcConnector",
+                        "ExistingECSCluster",
+                        "ExistingApplicationLoadBalancer",
+                        "S3BucketName"
                     ]
                 },
                 "DefaultValue": {
@@ -473,6 +531,11 @@
                     "items": {
                         "type": "string"
                     }
+                },
+                "ValueMapping": {
+                    "type": "object",
+                    "title": "Value Mapping",
+                    "description": "Maps the values in the allowed values collection to display values. The keys in this object are the strings in the AllowdValues collection and the values are the displaye values."
                 },
                 "AdvancedSetting": {
                     "type": "boolean",
@@ -500,6 +563,15 @@
                                 "title": "",
                                 "description": "",
                                 "minLength": 1
+                            },
+                            "Operation": {
+                                "type": "string",
+                                "title": "Operation",
+                                "description": "The operation to perform to compute the DependsOn relationship.",
+                                "enum": [
+                                    "NotEmpty",
+                                    "Equals"
+                                ]
                             },
                             "Value": {
                                 "type": [ "boolean", "string" ],
@@ -532,7 +604,12 @@
                                 "enum": [
                                     "Range",
                                     "Regex",
-                                    "Required"
+                                    "Required",
+                                    "DirectoryExists",
+                                    "DockerBuildArgs",
+                                    "DotnetPublishArgs",
+                                    "ExistingResource",
+                                    "FileExists"
                                 ]
                             }
                         },
@@ -576,7 +653,7 @@
                                                 "ValidationFailedMessage": {
                                                     "type": "string"
                                                 },
-                                                "AllowEmptyString" : {
+                                                "AllowEmptyString": {
                                                     "type": "boolean"
                                                 }
                                             }

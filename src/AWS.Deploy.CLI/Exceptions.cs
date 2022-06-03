@@ -76,4 +76,20 @@ namespace AWS.Deploy.CLI
     {
         public FailedToFindDeploymentProjectRecipeIdException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
+
+    /// <summary>
+    /// Throw if failed to retrieve credentials from the specified profile name.
+    /// </summary>
+    public class FailedToGetCredentialsForProfile : DeployToolException
+    {
+        public FailedToGetCredentialsForProfile(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+    }
+
+    /// <summary>
+    /// Throw if cloud application name is invalid.
+    /// </summary>
+    public class InvalidCloudApplicationNameException : DeployToolException
+    {
+        public InvalidCloudApplicationNameException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+    }
 }

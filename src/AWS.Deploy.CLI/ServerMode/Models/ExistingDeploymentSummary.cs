@@ -20,9 +20,13 @@ namespace AWS.Deploy.CLI.ServerMode.Models
 
         public string Name { get; set; }
 
+        public string? BaseRecipeId { get; set; }
+
         public string RecipeId { get; set; }
 
         public string RecipeName { get; set; }
+
+        public bool IsPersistedDeploymentProject { get; set; }
 
         public string ShortDescription { get; set; }
 
@@ -35,13 +39,17 @@ namespace AWS.Deploy.CLI.ServerMode.Models
         public bool UpdatedByCurrentUser { get; set; }
 
         public DeploymentTypes DeploymentType { get; set; }
+        public List<CategorySummary> SettingsCategories { get; set; }
 
         public string ExistingDeploymentId { get; set; }
 
         public ExistingDeploymentSummary(
             string name,
+            string? baseRecipeId,
             string recipeId,
             string recipeName,
+            List<CategorySummary> settingsCategories,
+            bool isPersistedDeploymentProject,
             string shortDescription,
             string description,
             string targetService,
@@ -52,8 +60,11 @@ namespace AWS.Deploy.CLI.ServerMode.Models
         )
         {
             Name = name;
+            BaseRecipeId = baseRecipeId;
             RecipeId = recipeId;
             RecipeName = recipeName;
+            SettingsCategories = settingsCategories;
+            IsPersistedDeploymentProject = isPersistedDeploymentProject;
             ShortDescription = shortDescription;
             Description = description;
             TargetService = targetService;

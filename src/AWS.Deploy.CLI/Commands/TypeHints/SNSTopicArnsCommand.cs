@@ -9,6 +9,7 @@ using AWS.Deploy.Common;
 using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.TypeHintData;
+using AWS.Deploy.Common.Data;
 
 namespace AWS.Deploy.CLI.Commands.TypeHints
 {
@@ -16,11 +17,13 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
     {
         private readonly IAWSResourceQueryer _awsResourceQueryer;
         private readonly IConsoleUtilities _consoleUtilities;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
-        public SNSTopicArnsCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities)
+        public SNSTopicArnsCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities, IOptionSettingHandler optionSettingHandler)
         {
             _awsResourceQueryer = awsResourceQueryer;
             _consoleUtilities = consoleUtilities;
+            _optionSettingHandler = optionSettingHandler;
         }
 
         public async Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
@@ -32,7 +35,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             const string NO_VALUE = "*** Do not select topic ***";
-            var currentValue = recommendation.GetOptionSettingValue(optionSetting);
+            var currentValue = _optionSettingHandler.GetOptionSettingValue(recommendation, optionSetting);
             var typeHintData = optionSetting.GetTypeHintData<SNSTopicArnsTypeHintData>();
             var currentValueStr = currentValue.ToString() ?? string.Empty;
             var topicArns = await GetResources(recommendation, optionSetting);

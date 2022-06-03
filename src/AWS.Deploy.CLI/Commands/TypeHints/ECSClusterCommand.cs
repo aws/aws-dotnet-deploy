@@ -8,6 +8,7 @@ using Amazon.ECS.Model;
 using Amazon.ElasticBeanstalk.Model;
 using AWS.Deploy.CLI.TypeHintResponses;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.TypeHintData;
 using AWS.Deploy.Orchestration.Data;
@@ -19,11 +20,13 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
     {
         private readonly IAWSResourceQueryer _awsResourceQueryer;
         private readonly IConsoleUtilities _consoleUtilities;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
-        public ECSClusterCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities)
+        public ECSClusterCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities, IOptionSettingHandler optionSettingHandler)
         {
             _awsResourceQueryer = awsResourceQueryer;
             _consoleUtilities = consoleUtilities;
+            _optionSettingHandler = optionSettingHandler;
         }
 
         private async Task<List<Cluster>> GetData()
@@ -40,12 +43,13 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var clusters = await GetData();
-            var currentTypeHintResponse = recommendation.GetOptionSettingValue<ECSClusterTypeHintResponse>(optionSetting);
+            var currentTypeHintResponse = _optionSettingHandler.GetOptionSettingValue<ECSClusterTypeHintResponse>(recommendation, optionSetting);
 
             var userInputConfiguration = new UserInputConfiguration<Cluster>(
-                cluster => cluster.ClusterName,
-                cluster => cluster.ClusterArn.Equals(currentTypeHintResponse?.ClusterArn),
-                currentTypeHintResponse.NewClusterName)
+                idSelector: cluster => cluster.ClusterArn,
+                displaySelector: cluster => cluster.ClusterName,
+                defaultSelector: cluster => cluster.ClusterArn.Equals(currentTypeHintResponse?.ClusterArn),
+                defaultNewName: currentTypeHintResponse.NewClusterName)
             {
                 AskNewName = true
             };

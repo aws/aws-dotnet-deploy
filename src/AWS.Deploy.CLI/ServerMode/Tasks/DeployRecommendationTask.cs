@@ -15,10 +15,12 @@ namespace AWS.Deploy.CLI.ServerMode.Tasks
     {
         private readonly CloudApplication _cloudApplication;
         private readonly Orchestrator _orchestrator;
+        private readonly OrchestratorSession _orchestratorSession;
         private readonly Recommendation _selectedRecommendation;
 
-        public DeployRecommendationTask(Orchestrator orchestrator, CloudApplication cloudApplication, Recommendation selectedRecommendation)
+        public DeployRecommendationTask(OrchestratorSession orchestratorSession, Orchestrator orchestrator, CloudApplication cloudApplication, Recommendation selectedRecommendation)
         {
+            _orchestratorSession = orchestratorSession;
             _orchestrator = orchestrator;
             _cloudApplication = cloudApplication;
             _selectedRecommendation = selectedRecommendation;
@@ -26,23 +28,30 @@ namespace AWS.Deploy.CLI.ServerMode.Tasks
 
         public async Task Execute()
         {
-            await CreateDeploymentBundle();
+            await _orchestrator.CreateDeploymentBundle(_cloudApplication, _selectedRecommendation);
             await _orchestrator.DeployRecommendation(_cloudApplication, _selectedRecommendation);
         }
 
-        private async Task CreateDeploymentBundle()
+        /// <summary>
+        /// Generates the CloudFormation template that will be used by CDK for the deployment.
+        /// This involves creating a deployment bundle, generating the CDK project and running 'cdk diff' to get the CF template.
+        /// This operation returns the CloudFormation template that is created for this deployment.
+        /// </summary>
+        public async Task<string> GenerateCloudFormationTemplate(CdkProjectHandler cdkProjectHandler)
         {
-            if (_selectedRecommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.Container)
+            if (cdkProjectHandler == null)
+                throw new FailedToCreateCDKProjectException(DeployToolErrorCode.FailedToCreateCDKProject, $"We could not create a CDK deployment project due to a missing dependency '{nameof(cdkProjectHandler)}'.");
+
+            await _orchestrator.CreateDeploymentBundle(_cloudApplication, _selectedRecommendation);
+
+            var cdkProject = await cdkProjectHandler.ConfigureCdkProject(_orchestratorSession, _cloudApplication, _selectedRecommendation);
+            try
             {
-                var dockerBuildDeploymentBundleResult = await _orchestrator.CreateContainerDeploymentBundle(_cloudApplication, _selectedRecommendation);
-                if (!dockerBuildDeploymentBundleResult)
-                    throw new FailedToCreateDeploymentBundleException(DeployToolErrorCode.FailedToCreateContainerDeploymentBundle, "Failed to create a deployment bundle");
+                return await cdkProjectHandler.PerformCdkDiff(cdkProject, _cloudApplication);
             }
-            else if (_selectedRecommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.DotnetPublishZipFile)
+            finally
             {
-                var dotnetPublishDeploymentBundleResult = await _orchestrator.CreateDotnetPublishDeploymentBundle(_selectedRecommendation);
-                if (!dotnetPublishDeploymentBundleResult)
-                    throw new FailedToCreateDeploymentBundleException(DeployToolErrorCode.FailedToCreateDotnetPublishDeploymentBundle, "Failed to create a deployment bundle");
+                cdkProjectHandler.DeleteTemporaryCdkProject(cdkProject);
             }
         }
     }

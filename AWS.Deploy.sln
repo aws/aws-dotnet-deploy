@@ -68,6 +68,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AWS.Deploy.ServerMode.Clien
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkerServiceExample", "testapps\WorkerServiceExample\WorkerServiceExample.csproj", "{7C330493-9BF7-4DB6-815B-807C08500AC6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApiNET6", "testapps\WebApiNET6\WebApiNET6.csproj", "{B2EA65BD-9FFE-4452-B2DC-574EB1A9FAF1}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		src\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems*{3f7a5ca6-7178-4dbf-8dad-6a63684c7a8e}*SharedItemsImports = 5
@@ -173,6 +175,10 @@ Global
 		{7C330493-9BF7-4DB6-815B-807C08500AC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C330493-9BF7-4DB6-815B-807C08500AC6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C330493-9BF7-4DB6-815B-807C08500AC6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2EA65BD-9FFE-4452-B2DC-574EB1A9FAF1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2EA65BD-9FFE-4452-B2DC-574EB1A9FAF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2EA65BD-9FFE-4452-B2DC-574EB1A9FAF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2EA65BD-9FFE-4452-B2DC-574EB1A9FAF1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -203,6 +209,7 @@ Global
 		{F2266C44-C8C5-45AD-AA9B-44F8825BDF63} = {11C7056E-93C1-408B-BD87-5270595BBE0E}
 		{74444ED0-9044-4DF7-A111-7D9F81ADF0FD} = {BD466B5C-D8B0-4069-98A9-6DC8F01FA757}
 		{7C330493-9BF7-4DB6-815B-807C08500AC6} = {C3A0C716-BDEA-4393-B223-AF8F8531522A}
+		{B2EA65BD-9FFE-4452-B2DC-574EB1A9FAF1} = {C3A0C716-BDEA-4393-B223-AF8F8531522A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5A4B2863-1763-4496-B122-651A38A4F5D7}

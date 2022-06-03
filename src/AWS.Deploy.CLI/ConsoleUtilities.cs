@@ -6,8 +6,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
+using AWS.Deploy.Common.Recipes;
 
 namespace AWS.Deploy.CLI
 {
@@ -19,6 +21,7 @@ namespace AWS.Deploy.CLI
 
     public interface IConsoleUtilities
     {
+        SortedSet<string> AskUserForList<T>(UserInputConfiguration<T> userInputConfiguration, List<T> availableData, OptionSettingItem optionSetting, Recommendation recommendation);
         Recommendation AskToChooseRecommendation(IList<Recommendation> recommendations);
         string AskUserToChoose(IList<string> values, string title, string? defaultValue, string? defaultChoosePrompt = null);
         T AskUserToChoose<T>(IList<T> options, string title, T defaultValue, string? defaultChoosePrompt = null)
@@ -26,23 +29,83 @@ namespace AWS.Deploy.CLI
         void DisplayRow((string, int)[] row);
         UserResponse<string> AskUserToChooseOrCreateNew(IEnumerable<string> options, string title, bool askNewName = true, string defaultNewName = "", bool canBeEmpty = false, string? defaultChoosePrompt = null, string? defaultCreateNewPrompt = null, string? defaultCreateNewLabel = null);
         UserResponse<T> AskUserToChooseOrCreateNew<T>(IEnumerable<T> options, string title, UserInputConfiguration<T> userInputConfiguration, string? defaultChoosePrompt = null, string? defaultCreateNewPrompt = null, string? defaultCreateNewLabel = null);
-        string AskUserForValue(string message, string defaultValue, bool allowEmpty, string resetValue = "", string? defaultAskValuePrompt = null, params Func<string, string>[] validators);
+        string AskUserForValue(string message, string defaultValue, bool allowEmpty, string resetValue = "", string? defaultAskValuePrompt = null, params Func<string, Task<string>>[] validators);
         string AskForEC2KeyPairSaveDirectory(string projectPath);
         YesNo AskYesNoQuestion(string question, string? defaultValue);
         YesNo AskYesNoQuestion(string question, YesNo? defaultValue = default);
         void DisplayValues(Dictionary<string, object> objectValues, string indent);
         Dictionary<string, string> AskUserForKeyValue(Dictionary<string, string> keyValue);
+        SortedSet<string> AskUserForList(SortedSet<string> listValue);
     }
 
     public class ConsoleUtilities : IConsoleUtilities
     {
         private readonly IToolInteractiveService _interactiveService;
         private readonly IDirectoryManager _directoryManager;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
-        public ConsoleUtilities(IToolInteractiveService interactiveService, IDirectoryManager directoryManager)
+        public ConsoleUtilities(IToolInteractiveService interactiveService, IDirectoryManager directoryManager, IOptionSettingHandler optionSettingHandler)
         {
             _interactiveService = interactiveService;
             _directoryManager = directoryManager;
+            _optionSettingHandler = optionSettingHandler;
+        }
+
+        /// <summary>
+        /// This method is used to display a list of values and allow the user to select multiple values.
+        /// The user will have the ability to add and delete values from the list.
+        /// </summary>
+        public SortedSet<string> AskUserForList<T>(
+            UserInputConfiguration<T> userInputConfiguration,
+            List<T> availableData,
+            OptionSettingItem optionSetting,
+            Recommendation recommendation)
+        {
+            const string ADD = "Add new";
+            const string DELETE = "Delete existing";
+            const string NOOP = "No action";
+            var operations = new List<string> { ADD, DELETE, NOOP };
+
+            var currentOptionSettingValue = _optionSettingHandler.GetOptionSettingValue<SortedSet<string>>(recommendation, optionSetting) ?? new SortedSet<string>();
+
+            while (true)
+            {
+                _interactiveService.WriteLine();
+                if (currentOptionSettingValue.Any())
+                {
+                    _interactiveService.WriteLine("Selected values:");
+                    var currentOptionSettingValueList = currentOptionSettingValue.ToList();
+                    for (int i = 1; i <= currentOptionSettingValueList.Count; i++)
+                    {
+                        var padLength = i.ToString().Length;
+                        _interactiveService.WriteLine($"{i.ToString().PadRight(padLength)}: {currentOptionSettingValueList[i-1]}");
+                    }
+                    _interactiveService.WriteLine();
+                }
+
+                var selectedOperation = AskUserToChoose(operations, "Select which operation you want to perform:", NOOP);
+                _interactiveService.WriteLine();
+
+                if (selectedOperation.Equals(ADD))
+                {
+                    var userResponse = AskUserToChooseOrCreateNew(availableData, "Select value:", userInputConfiguration);
+                    if (userResponse.SelectedOption != null)
+                        currentOptionSettingValue.Add(userInputConfiguration.IDSelector(userResponse.SelectedOption));
+                }
+                else if (selectedOperation.Equals(DELETE) && currentOptionSettingValue.Any())
+                {
+                    var selectedItem = AskUserToChoose(currentOptionSettingValue.ToList(), "Select the value you wish to delete:", null);
+                    currentOptionSettingValue.Remove(selectedItem);
+                }
+                else if (selectedOperation.Equals(NOOP))
+                {
+                    break;
+                }
+            }
+
+            _interactiveService.WriteLine();
+
+            return currentOptionSettingValue;
         }
 
         public Recommendation AskToChooseRecommendation(IList<Recommendation> recommendations)
@@ -178,9 +241,10 @@ namespace AWS.Deploy.CLI
         public UserResponse<string> AskUserToChooseOrCreateNew(IEnumerable<string> options, string title, bool askNewName = true, string defaultNewName = "", bool canBeEmpty = false, string? defaultChoosePrompt = null, string? defaultCreateNewPrompt = null, string? defaultCreateNewLabel = null)
         {
             var configuration = new UserInputConfiguration<string>(
-                option => option,
-                option => option.Contains(option),
-                defaultNewName)
+                idSelector: option => option,
+                displaySelector: option => option,
+                defaultSelector: option => option.Contains(option),
+                defaultNewName: defaultNewName)
             {
                 AskNewName = askNewName,
                 CanBeEmpty = canBeEmpty
@@ -207,14 +271,27 @@ namespace AWS.Deploy.CLI
                     defaultValue = userInputConfiguration.CreateNew || !options.Any() ? createNewLabel : userInputConfiguration.DisplaySelector(options.First());
             }
 
-            if (optionStrings.Any())
+            var displayOptionStrings = new List<string>();
+
+            // add empty option at the top if configured
+            if (userInputConfiguration.EmptyOption)
             {
-                var displayOptionStrings = new List<string>(optionStrings);
-                if (userInputConfiguration.EmptyOption)
-                    displayOptionStrings.Insert(0, Constants.CLI.EMPTY_LABEL);
-                if (userInputConfiguration.CreateNew)
-                    displayOptionStrings.Add(createNewLabel);
-                
+                displayOptionStrings.Add(Constants.CLI.EMPTY_LABEL);
+            }
+
+            // add all the options, this can be empty list if there are no options
+            // e.g. selecting a role for a service when there are no roles with a service principal
+            displayOptionStrings.AddRange(optionStrings);
+
+            // add create new option at the bottom if configured
+            if (userInputConfiguration.CreateNew)
+            {
+                displayOptionStrings.Add(createNewLabel);
+            }
+
+            // if list contains any options, ask user to choose one
+            if (displayOptionStrings.Any())
+            {
                 var selectedString = AskUserToChoose(displayOptionStrings, title, defaultValue, defaultChoosePrompt);
 
                 if (selectedString == Constants.CLI.EMPTY_LABEL)
@@ -252,7 +329,7 @@ namespace AWS.Deploy.CLI
             };
         }
 
-        public string AskUserForValue(string message, string defaultValue, bool allowEmpty, string resetValue = "", string? defaultAskValuePrompt = null, params Func<string, string>[] validators)
+        public string AskUserForValue(string message, string defaultValue, bool allowEmpty, string resetValue = "", string? defaultAskValuePrompt = null, params Func<string, Task<string>>[] validators)
         {
             const string RESET = "<reset>";
             var prompt = !string.IsNullOrEmpty(defaultAskValuePrompt) ? defaultAskValuePrompt : "Enter value";
@@ -291,7 +368,8 @@ namespace AWS.Deploy.CLI
 
                 var errorMessages =
                       validators
-                            .Select(v => v(userValue))
+                            .Select(async v => await v(userValue))
+                            .Select(v => v.Result)
                             .Where(e => !string.IsNullOrEmpty(e))
                             .ToList();
 
@@ -305,6 +383,59 @@ namespace AWS.Deploy.CLI
             }
 
             return userValue;
+        }
+
+        public SortedSet<string> AskUserForList(SortedSet<string> listValues)
+        {
+            listValues ??= new SortedSet<string>();
+
+            if (listValues.Count == 0)
+            {
+                AskToAddListItem(listValues);
+                return listValues;
+            }
+
+            const string ADD = "Add new";
+            const string UPDATE = "Update existing";
+            const string DELETE = "Delete existing";
+            const string NOOP = "No action";
+            var operations = new List<string> { ADD, UPDATE, DELETE, NOOP };
+
+            var selectedOperation = AskUserToChoose(operations, "Select which operation you want to perform:", NOOP);
+
+            if (selectedOperation.Equals(ADD))
+                AskToAddListItem(listValues);
+            else if (selectedOperation.Equals(UPDATE))
+                AskToUpdateListItem(listValues);
+            else if (selectedOperation.Equals(DELETE))
+                AskToDeleteListItem(listValues);
+
+            return listValues;
+        }
+
+        private void AskToAddListItem(SortedSet<string> listValues)
+        {
+            _interactiveService.WriteLine("Enter a value:");
+            var listValue = _interactiveService.ReadLine()?.Trim() ?? "";
+            if (!string.IsNullOrEmpty(listValue))
+                listValues.Add(listValue);
+        }
+
+        private void AskToUpdateListItem(SortedSet<string> listValues)
+        {
+            var selectedItem = AskUserToChoose(listValues.ToList(), "Select the value you wish to update:", null);
+            var selectedValue = AskUserForValue("Enter the updated value:", selectedItem, true);
+            if (!string.IsNullOrEmpty(selectedValue))
+            {
+                listValues.Remove(selectedItem);
+                listValues.Add(selectedValue);
+            }
+        }
+
+        private void AskToDeleteListItem(SortedSet<string> listValues)
+        {
+            var selectedItem = AskUserToChoose(listValues.ToList(), "Select the value you wish to delete:", null);
+            listValues.Remove(selectedItem);
         }
 
         public Dictionary<string, string> AskUserForKeyValue(Dictionary<string, string> keyValue)
@@ -468,6 +599,14 @@ namespace AWS.Deploy.CLI
                 {
                     _interactiveService.WriteLine($"{indent}{key}");
                     DisplayValues(childObjectValue, $"{indent}\t");
+                }
+                else if (value is SortedSet<string> listValues)
+                {
+                    _interactiveService.WriteLine($"{indent}{key}:");
+                    foreach (var listValue in listValues)
+                    {
+                        _interactiveService.WriteLine($"{indent}\t{listValue}");
+                    }
                 }
                 else if (value is string stringValue)
                 {

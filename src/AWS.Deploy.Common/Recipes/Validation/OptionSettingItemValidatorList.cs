@@ -16,6 +16,26 @@ namespace AWS.Deploy.Common.Recipes.Validation
         /// <summary>
         /// Must be paired with <see cref="RequiredValidator"/>
         /// </summary>
-        Required
+        Required,
+        /// <summary>
+        /// Must be paired with <see cref="DirectoryExistsValidator"/>
+        /// </summary>
+        DirectoryExists,
+        /// <summary>
+        /// Must be paired with <see cref="DockerBuildArgsValidator"/>
+        /// </summary>
+        DockerBuildArgs,
+        /// <summary>
+        /// Must be paried with <see cref="DotnetPublishArgsValidator"/>
+        /// </summary>
+        DotnetPublishArgs,
+        /// <summary>
+        /// Must be paired with <see cref="ExistingResourceValidator"/>
+        /// </summary>
+        ExistingResource,
+        /// <summary>
+        /// Must be paired with <see cref="FileExistsValidator"/>
+        /// </summary>
+        FileExists
     }
 }

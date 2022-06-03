@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.Recipes.Validation;
 using AWS.Deploy.Common.TypeHintData;
 
 namespace AWS.Deploy.CLI.Commands.TypeHints
@@ -15,11 +16,13 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
     {
         private readonly IConsoleUtilities _consoleUtilities;
         private readonly IDirectoryManager _directoryManager;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
-        public DockerExecutionDirectoryCommand(IConsoleUtilities consoleUtilities, IDirectoryManager directoryManager)
+        public DockerExecutionDirectoryCommand(IConsoleUtilities consoleUtilities, IDirectoryManager directoryManager, IOptionSettingHandler optionSettingHandler)
         {
             _consoleUtilities = consoleUtilities;
             _directoryManager = directoryManager;
+            _optionSettingHandler = optionSettingHandler;
         }
 
         public Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting) => Task.FromResult<List<TypeHintResource>?>(null);
@@ -29,10 +32,10 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             var settingValue = _consoleUtilities
                 .AskUserForValue(
                     string.Empty,
-                    recommendation.GetOptionSettingValue<string>(optionSetting),
+                    _optionSettingHandler.GetOptionSettingValue<string>(recommendation, optionSetting),
                     allowEmpty: true,
-                    resetValue: recommendation.GetOptionSettingDefaultValue<string>(optionSetting) ?? "",
-                    validators: executionDirectory => ValidateExecutionDirectory(executionDirectory));
+                    resetValue: _optionSettingHandler.GetOptionSettingDefaultValue<string>(recommendation, optionSetting) ?? "",
+                    validators: async executionDirectory => await ValidateExecutionDirectory(executionDirectory, recommendation));
 
             recommendation.DeploymentBundle.DockerExecutionDirectory = settingValue;
             return Task.FromResult<object>(settingValue);
@@ -42,22 +45,35 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         /// This method will be invoked to set the Docker execution directory in the deployment bundle
         /// when it is specified as part of the user provided configuration file.
         /// </summary>
-        /// <param name="recommendation">The selected recommendation settings used for deployment <see cref="Recommendation"/></param>
+        /// <param name="recommendation">The selected recommendation used for deployment <see cref="Recommendation"/></param>
         /// <param name="executionDirectory">The directory specified for Docker execution.</param>
-        public void OverrideValue(Recommendation recommendation, string executionDirectory)
+        public async Task OverrideValue(Recommendation recommendation, string executionDirectory)
         {
-            var resultString = ValidateExecutionDirectory(executionDirectory);
+            var resultString = await ValidateExecutionDirectory(executionDirectory, recommendation);
             if (!string.IsNullOrEmpty(resultString))
                 throw new InvalidOverrideValueException(DeployToolErrorCode.InvalidDockerExecutionDirectory, resultString);
             recommendation.DeploymentBundle.DockerExecutionDirectory = executionDirectory;
         }
 
-        private string ValidateExecutionDirectory(string executionDirectory)
+        /// <summary>
+        /// Validates that the Docker execution directory exists as either an
+        /// absolute path or a path relative to the project directory.
+        /// </summary>
+        /// <param name="executionDirectory">Proposed Docker execution directory</param>
+        /// <param name="recommendation">The selected recommendation settings used for deployment</param>
+        /// <returns>Empty string if the directory is valid, an error message if not</returns>
+        private async Task<string> ValidateExecutionDirectory(string executionDirectory, Recommendation recommendation)
         {
-            if (!string.IsNullOrEmpty(executionDirectory) && !_directoryManager.Exists(executionDirectory))
-                return "The directory specified for Docker execution does not exist.";
+            var validationResult = await new DirectoryExistsValidator(_directoryManager).Validate(executionDirectory, recommendation);
+
+            if (validationResult.IsValid)
+            {
+                return string.Empty;
+            }
             else
-                return "";
+            {   // Override the generic ValidationResultMessage with one about the the Docker execution directory
+                return "The directory specified for Docker execution does not exist.";
+            }
         }
     }
 }

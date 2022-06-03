@@ -94,7 +94,7 @@ WORKDIR /app
 COPY --from=publish /app/publish .
 
 #install aws deploy
-RUN dotnet tool install AWS.Deploy.CLI -g --add-source /app --version $AWS_CLI_VERSION
+RUN dotnet tool install AWS.Deploy.Tools -g --add-source /app --version $AWS_CLI_VERSION
 
 # verify it worked
 RUN dotnet aws --version

@@ -9,6 +9,7 @@ using Amazon.CloudFormation;
 using Amazon.ElasticBeanstalk;
 using Amazon.ElasticBeanstalk.Model;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestration.Data;
@@ -107,13 +108,13 @@ namespace AWS.Deploy.Orchestration.Utilities
                 }
                 catch (FailedToUpdateLocalUserSettingsFileException ex)
                 {
-                    _orchestratorInteractiveService.LogErrorMessageLine(ex.Message);
-                    _orchestratorInteractiveService.LogDebugLine(ex.PrettyPrint());
+                    _orchestratorInteractiveService.LogErrorMessage(ex.Message);
+                    _orchestratorInteractiveService.LogDebugMessage(ex.PrettyPrint());
                 }
                 catch (InvalidLocalUserSettingsFileException ex)
                 {
-                    _orchestratorInteractiveService.LogErrorMessageLine(ex.Message);
-                    _orchestratorInteractiveService.LogDebugLine(ex.PrettyPrint());
+                    _orchestratorInteractiveService.LogErrorMessage(ex.Message);
+                    _orchestratorInteractiveService.LogDebugMessage(ex.PrettyPrint());
                 }
             }
 

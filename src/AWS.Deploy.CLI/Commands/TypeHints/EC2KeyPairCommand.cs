@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Amazon.EC2.Model;
 using Amazon.ElasticBeanstalk.Model;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.TypeHintData;
 using AWS.Deploy.Orchestration.Data;
@@ -20,12 +21,14 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         private readonly IToolInteractiveService _toolInteractiveService;
         private readonly IAWSResourceQueryer _awsResourceQueryer;
         private readonly IConsoleUtilities _consoleUtilities;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
-        public EC2KeyPairCommand(IToolInteractiveService toolInteractiveService, IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities)
+        public EC2KeyPairCommand(IToolInteractiveService toolInteractiveService, IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities, IOptionSettingHandler optionSettingHandler)
         {
             _toolInteractiveService = toolInteractiveService;
             _awsResourceQueryer = awsResourceQueryer;
             _consoleUtilities = consoleUtilities;
+            _optionSettingHandler = optionSettingHandler;
         }
 
         private async Task<List<KeyPairInfo>> GetData()
@@ -41,12 +44,13 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
-            var currentValue = recommendation.GetOptionSettingValue(optionSetting);
+            var currentValue = _optionSettingHandler.GetOptionSettingValue(recommendation, optionSetting);
             var keyPairs = await GetData();
 
             var userInputConfiguration = new UserInputConfiguration<KeyPairInfo>(
-                kp => kp.KeyName,
-                kp => kp.KeyName.Equals(currentValue)
+                idSelector: kp => kp.KeyName,
+                displaySelector: kp => kp.KeyName,
+                defaultSelector: kp => kp.KeyName.Equals(currentValue)
                 )
             {
                 AskNewName = true,

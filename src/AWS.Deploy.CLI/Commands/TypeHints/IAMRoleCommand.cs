@@ -8,6 +8,7 @@ using Amazon.ECS.Model;
 using Amazon.IdentityManagement.Model;
 using AWS.Deploy.CLI.TypeHintResponses;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.TypeHintData;
 using AWS.Deploy.Orchestration;
@@ -20,11 +21,13 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
     {
         private readonly IAWSResourceQueryer _awsResourceQueryer;
         private readonly IConsoleUtilities _consoleUtilities;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
-        public IAMRoleCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities)
+        public IAMRoleCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities, IOptionSettingHandler optionSettingHandler)
         {
             _awsResourceQueryer = awsResourceQueryer;
             _consoleUtilities = consoleUtilities;
+            _optionSettingHandler = optionSettingHandler;
         }
 
         private async Task<List<Role>> GetData(OptionSettingItem optionSetting)
@@ -42,11 +45,12 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var existingRoles = await GetData(optionSetting);
-            var currentTypeHintResponse = recommendation.GetOptionSettingValue<IAMRoleTypeHintResponse>(optionSetting);
+            var currentTypeHintResponse = _optionSettingHandler.GetOptionSettingValue<IAMRoleTypeHintResponse>(recommendation, optionSetting);
 
             var userInputConfiguration = new UserInputConfiguration<Role>(
-                role => role.RoleName,
-                role => currentTypeHintResponse.RoleArn?.Equals(role.Arn) ?? false);
+                idSelector: role => role.Arn,
+                displaySelector: role => role.RoleName,
+                defaultSelector: role => currentTypeHintResponse.RoleArn?.Equals(role.Arn) ?? false);
 
             var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(existingRoles ,"Select an IAM role", userInputConfiguration);
 

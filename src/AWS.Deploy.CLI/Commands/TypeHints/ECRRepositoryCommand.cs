@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Amazon.ECR.Model;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.TypeHintData;
 using AWS.Deploy.Orchestration.Data;
@@ -17,23 +18,26 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         private readonly IAWSResourceQueryer _awsResourceQueryer;
         private readonly IConsoleUtilities _consoleUtilities;
         private readonly IToolInteractiveService _toolInteractiveService;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
-        public ECRRepositoryCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities, IToolInteractiveService toolInteractiveService)
+        public ECRRepositoryCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities, IToolInteractiveService toolInteractiveService, IOptionSettingHandler optionSettingHandler)
         {
             _awsResourceQueryer = awsResourceQueryer;
             _consoleUtilities = consoleUtilities;
             _toolInteractiveService = toolInteractiveService;
+            _optionSettingHandler = optionSettingHandler;
         }
 
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var repositories = await GetData();
-            var currentRepositoryName = recommendation.GetOptionSettingValue<string>(optionSetting);
+            var currentRepositoryName = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, optionSetting);
 
             var userInputConfiguration = new UserInputConfiguration<Repository>(
-                rep => rep.RepositoryName,
-                rep => rep.RepositoryName.Equals(currentRepositoryName),
-                currentRepositoryName)
+                idSelector: rep => rep.RepositoryName,
+                displaySelector: rep => rep.RepositoryName,
+                defaultSelector: rep => rep.RepositoryName.Equals(currentRepositoryName),
+                defaultNewName: currentRepositoryName)
             {
                 AskNewName = true,
             };

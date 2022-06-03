@@ -37,7 +37,7 @@ namespace AWS.Deploy.Orchestration.DeploymentCommands
                 throw new AWSResourceNotFoundException(DeployToolErrorCode.FailedToFindElasticBeanstalkApplication, message);
             }
 
-            orchestrator._interactiveService.LogMessageLine($"Initiating deployment to {cloudApplication.DisplayName}...");
+            orchestrator._interactiveService.LogSectionStart($"Creating application version", "Uploading deployment bundle to S3 and create an Elastic Beanstalk application version");
 
             var versionLabel = $"v-{DateTime.Now.Ticks}";
             var s3location = await elasticBeanstalkHandler.CreateApplicationStorageLocationAsync(applicationName, versionLabel, deploymentPackage);
@@ -45,11 +45,13 @@ namespace AWS.Deploy.Orchestration.DeploymentCommands
             await elasticBeanstalkHandler.CreateApplicationVersionAsync(applicationName, versionLabel, s3location);
             var environmentConfigurationSettings = elasticBeanstalkHandler.GetEnvironmentConfigurationSettings(recommendation);
 
+
+            orchestrator._interactiveService.LogSectionStart($"Deploying application version", $"Deploy new application version to Elastic Beanstalk environment {environmentName}.");
             var success = await elasticBeanstalkHandler.UpdateEnvironmentAsync(applicationName, environmentName, versionLabel, environmentConfigurationSettings);
 
             if (success)
             {
-                orchestrator._interactiveService.LogMessageLine($"The Elastic Beanstalk Environment {environmentName} has been successfully updated to the application version {versionLabel}" + Environment.NewLine);
+                orchestrator._interactiveService.LogInfoMessage($"The Elastic Beanstalk Environment {environmentName} has been successfully updated to the application version {versionLabel}" + Environment.NewLine);
             } 
             else
             {

@@ -22,15 +22,27 @@
             ],
             "Effect": {
                 "Pass": { "Include": true },
-                "Fail": {"Include": false}
+                "Fail": { "Include": false }
             }
         }
     ],
-
+    "Validators": [
+        {
+            "ValidatorType": "ValidDockerfilePath"
+        }
+    ],
+    "Categories": [
+        {
+            "Id": "General",
+            "DisplayName": "General",
+            "Order": 10
+        }
+    ],
     "OptionSettings": [
         {
             "Id": "ImageTag",
             "Name": "Image Tag",
+            "Category": "General",
             "Description": "This tag will be associated to the container images which are pushed to Amazon Elastic Container Registry.",
             "Type": "String",
             "DefaultValue": "{DefaultECRImageTag}",

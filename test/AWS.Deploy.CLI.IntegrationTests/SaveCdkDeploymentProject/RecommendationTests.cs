@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AWS.Deploy.CLI.Utilities;
@@ -25,6 +26,7 @@ using AWS.Deploy.CLI.IntegrationTests.Services;
 using AWS.Deploy.Orchestration.LocalUserSettings;
 using AWS.Deploy.Orchestration.Utilities;
 using AWS.Deploy.Orchestration.ServiceHandlers;
+using AWS.Deploy.Common.Recipes.Validation;
 
 namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 {
@@ -37,6 +39,26 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
         {
             _inMemoryInteractiveService  = new InMemoryInteractiveService();
             _commandLineWrapper = new CommandLineWrapper(_inMemoryInteractiveService);
+        }
+
+        [Fact]
+        public async Task GenerateRecommendationsForDeploymentProject()
+        {
+            // ARRANGE
+            var tempDirectoryPath = new TestAppManager().GetProjectPath(string.Empty);
+            var webAppWithDockerFilePath = Path.Combine(tempDirectoryPath, "testapps", "WebAppWithDockerFile");
+            var orchestrator = await GetOrchestrator(webAppWithDockerFilePath);
+            await _commandLineWrapper.Run("git init", tempDirectoryPath);
+
+            // ACT
+            var recommendations = await orchestrator.GenerateRecommendationsToSaveDeploymentProject();
+
+            // ASSERT
+            var anyNonCdkRecommendations = recommendations.Where(x => x.Recipe.DeploymentType != DeploymentTypes.CdkProject);
+            Assert.False(anyNonCdkRecommendations.Any());
+
+            Assert.NotNull(recommendations.FirstOrDefault(x => x.Recipe.Id == "AspNetAppEcsFargate"));
+            Assert.NotNull(recommendations.FirstOrDefault(x => x.Recipe.Id == "AspNetAppElasticBeanstalkLinux"));
         }
 
         [Fact]
@@ -207,13 +229,15 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 
         private async Task<Orchestrator> GetOrchestrator(string targetApplicationProjectPath)
         {
+            var awsResourceQueryer = new TestToolAWSResourceQueryer();
             var directoryManager = new DirectoryManager();
             var fileManager = new FileManager();
             var deploymentManifestEngine = new DeploymentManifestEngine(directoryManager, fileManager);
             var localUserSettingsEngine = new LocalUserSettingsEngine(fileManager, directoryManager);
-            var commandLineWrapper = new CommandLineWrapper(_inMemoryInteractiveService);
-            var customRecipeLocator = new CustomRecipeLocator(deploymentManifestEngine, _inMemoryInteractiveService, commandLineWrapper, directoryManager);
-
+            var serviceProvider = new Mock<IServiceProvider>();
+            var validatorFactory = new ValidatorFactory(serviceProvider.Object);
+            var optionSettingHandler = new OptionSettingHandler(validatorFactory);
+            var recipeHandler = new RecipeHandler(deploymentManifestEngine, _inMemoryInteractiveService, directoryManager, fileManager, optionSettingHandler);
             var projectDefinition = await new ProjectDefinitionParser(fileManager, directoryManager).Parse(targetApplicationProjectPath);
             var session = new OrchestratorSession(projectDefinition);
 
@@ -222,15 +246,15 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
                 new Mock<ICdkProjectHandler>().Object,
                 new Mock<ICDKManager>().Object,
                 new Mock<ICDKVersionDetector>().Object,
-                new TestToolAWSResourceQueryer(),
+                awsResourceQueryer,
                 new Mock<IDeploymentBundleHandler>().Object,
                 localUserSettingsEngine,
                 new Mock<IDockerEngine>().Object,
-                customRecipeLocator,
-                new List<string> { RecipeLocator.FindRecipeDefinitionsPath() },
+                recipeHandler,
                 fileManager,
                 directoryManager,
-                new Mock<IAWSServiceHandler>().Object);
+                new Mock<IAWSServiceHandler>().Object,
+                new OptionSettingHandler(new Mock<IValidatorFactory>().Object));
         }
 
         private async Task<string> GetCustomRecipeId(string recipeFilePath)

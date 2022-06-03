@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
+using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestration.Utilities;
 using Moq;
 using Should;
@@ -38,11 +39,11 @@ namespace AWS.Deploy.Orchestration.UnitTests.Utilities
         [InlineData("Valid")]
         [InlineData("A21")]
         [InlineData("Very-Long-With-Hyphens-And-Numbers")]
-        public void ValidNamesAreValid(string name)
+        public void ValidNamesAreValid_WithRespectTo_Regex(string name)
         {
-            _cloudApplicationNameGenerator
-                .IsValidName(name)
-                .ShouldBeTrue();
+            var existingApplications = new List<CloudApplication>();
+            var validationResult = _cloudApplicationNameGenerator.IsValidName(name, existingApplications);
+            validationResult.IsValid.ShouldBeTrue();
         }
 
         [Theory]
@@ -50,11 +51,11 @@ namespace AWS.Deploy.Orchestration.UnitTests.Utilities
         [InlineData("withSpecial!こんにちは世界Characters")]
         [InlineData("With.Periods")]
         [InlineData("With Spaces")]
-        public void InvalidNamesAreInvalid(string name)
+        public void InvalidNamesAreInvalid_WithRespectTo_Regex(string name)
         {
-            _cloudApplicationNameGenerator
-                .IsValidName(name)
-                .ShouldBeFalse();
+            var existingApplications = new List<CloudApplication>();
+            var validationResult = _cloudApplicationNameGenerator.IsValidName(name, existingApplications);
+            validationResult.IsValid.ShouldBeFalse();
         }
 
         [Theory]
@@ -77,10 +78,10 @@ namespace AWS.Deploy.Orchestration.UnitTests.Utilities
             var recommendation = _cloudApplicationNameGenerator.GenerateValidName(projectDefinition, existingApplication);
 
             // ACT
-            var recommendationIsValid = _cloudApplicationNameGenerator.IsValidName(recommendation);
+            var validationResult = _cloudApplicationNameGenerator.IsValidName(recommendation, existingApplication);
 
             // ASSERT
-            recommendationIsValid.ShouldBeTrue();
+            validationResult.IsValid.ShouldBeTrue();
         }
 
         [Fact]
@@ -104,6 +105,120 @@ namespace AWS.Deploy.Orchestration.UnitTests.Utilities
 
             // ASSERT
             recommendation.ShouldEqual(expectedRecommendation);
+        }
+
+        [Theory]
+        [InlineData("SuperTest", "SuperTest1")]
+        [InlineData("SuperTest1", "SuperTest2")]
+        [InlineData("SuperTest2022", "SuperTest2023")]
+        public async Task SuggestsValidNameAndRespectsExistingApplications_ProjectWithNumber(string projectFile, string expectedRecommendation)
+        {
+            var projectPath = _fakeFileManager.AddEmptyProjectFile($"c:\\{projectFile}.csproj");
+
+            var projectDefinition = await _projectDefinitionParser.Parse(projectPath);
+
+            var existingApplication = new List<CloudApplication>
+            {
+                new CloudApplication(projectFile, string.Empty, CloudApplicationResourceType.CloudFormationStack, string.Empty)
+            };
+
+            // ACT
+            var recommendation = _cloudApplicationNameGenerator.GenerateValidName(projectDefinition, existingApplication);
+
+            // ASSERT
+            recommendation.ShouldEqual(expectedRecommendation);
+        }
+
+        [Fact]
+        public async Task SuggestsValidNameAndRespectsExistingApplications_NoExistingCloudApplication()
+        {
+            // ARRANGE
+            var projectFile = "SuperTest";
+            var expectedRecommendation = $"{projectFile}";
+
+            var projectPath = _fakeFileManager.AddEmptyProjectFile($"c:\\{projectFile}.csproj");
+
+            var projectDefinition = await _projectDefinitionParser.Parse(projectPath);
+
+            var existingApplication = new List<CloudApplication> ();
+
+            // ACT
+            var recommendation = _cloudApplicationNameGenerator.GenerateValidName(projectDefinition, existingApplication);
+
+            // ASSERT
+            recommendation.ShouldEqual(expectedRecommendation);
+        }
+
+        [Fact]
+        public async Task SuggestsValidNameAndRespectsExistingApplications_MultipleProjectWithNumber()
+        {
+            // ARRANGE
+            var projectFile = "SuperTest1";
+            var projectFile2 = "SuperTest2";
+            var expectedRecommendation = $"SuperTest3";
+
+            var projectPath = _fakeFileManager.AddEmptyProjectFile($"c:\\{projectFile}.csproj");
+            var projectPath2 = _fakeFileManager.AddEmptyProjectFile($"c:\\{projectFile2}.csproj");
+
+            var projectDefinition = await _projectDefinitionParser.Parse(projectPath);
+
+            var existingApplication = new List<CloudApplication>
+            {
+                new CloudApplication(projectFile, string.Empty, CloudApplicationResourceType.CloudFormationStack, string.Empty),
+                new CloudApplication(projectFile2, string.Empty, CloudApplicationResourceType.CloudFormationStack, string.Empty)
+            };
+
+            // ACT
+            var recommendation = _cloudApplicationNameGenerator.GenerateValidName(projectDefinition, existingApplication);
+
+            // ASSERT
+            recommendation.ShouldEqual(expectedRecommendation);
+        }
+
+        [Theory]
+        [InlineData("application1", DeploymentTypes.CdkProject)]
+        [InlineData("application2", DeploymentTypes.CdkProject)]
+        [InlineData("application3", DeploymentTypes.BeanstalkEnvironment)]
+        public void InvalidNamesAreInvalid_WithRespectTo_ExistingApplications(string name, DeploymentTypes deploymentType)
+        {
+            // ARRANGE
+            var existingApplications = new List<CloudApplication>()
+            {
+                new CloudApplication("application1", "id1", CloudApplicationResourceType.CloudFormationStack, "recipe1"),
+                new CloudApplication("application2", "id2", CloudApplicationResourceType.CloudFormationStack, "recipe2"),
+                new CloudApplication("application3", "id3", CloudApplicationResourceType.BeanstalkEnvironment, "recipe3"),
+                new CloudApplication("application4", "id4", CloudApplicationResourceType.CloudFormationStack, "recipe1"),
+            };
+
+            // ACT
+            var validationResult = _cloudApplicationNameGenerator.IsValidName(name, existingApplications, deploymentType);
+
+            // ASSERT
+            validationResult.IsValid.ShouldBeFalse();
+        }
+
+        [Theory]
+        [InlineData("application", DeploymentTypes.CdkProject)]
+        [InlineData("application6", DeploymentTypes.CdkProject)]
+        [InlineData("application1", DeploymentTypes.BeanstalkEnvironment)]
+        [InlineData("application3", DeploymentTypes.CdkProject)]
+        public void ValidNamesAreValid_WithRespectTo_ExistingApplications(string name, DeploymentTypes deploymentType)
+        {
+            // ARRANGE
+            var existingApplications = new List<CloudApplication>()
+            {
+                new CloudApplication("application1", "id1", CloudApplicationResourceType.CloudFormationStack, "recipe1"),
+                new CloudApplication("application2", "id2", CloudApplicationResourceType.CloudFormationStack, "recipe2"),
+                new CloudApplication("application3", "id3", CloudApplicationResourceType.BeanstalkEnvironment, "recipe3"),
+                new CloudApplication("application4", "id4", CloudApplicationResourceType.CloudFormationStack, "recipe1"),
+                new CloudApplication("application5", "id4", CloudApplicationResourceType.BeanstalkEnvironment, "recipe3"),
+            };
+
+            // ACT
+            var validationResult = _cloudApplicationNameGenerator.IsValidName(name, existingApplications, deploymentType);
+
+            // ASSERT
+            validationResult.IsValid.ShouldBeTrue();
         }
     }
 }

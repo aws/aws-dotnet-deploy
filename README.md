@@ -34,18 +34,18 @@ The deployment tool is distributed as a .NET Tool from NuGet.org. The installati
 To install the deployment tool, use the dotnet tool install command:
 
 ```
-dotnet tool install -g aws.deploy.cli
+dotnet tool install -g aws.deploy.tools
 ```
 
 To update to the latest version of the deployment tool, use the dotnet tool update command.
 
 ```
-dotnet tool update -g aws.deploy.cli
+dotnet tool update -g aws.deploy.tools
 ```
 
 To uninstall it, simply type:
 ```
-dotnet tool uninstall -g aws.deploy.cli
+dotnet tool uninstall -g aws.deploy.tools
 ```
 
 Once you install the tool, you can view the list of available commands by typing:
@@ -139,6 +139,7 @@ We welcome community contributions and pull requests. See [CONTRIBUTING](https:/
 * [AWS Developer Guide](https://docs.aws.amazon.com/sdk-for-net/v3/developer-guide/deployment-tool.html) Find additional information about developing, deploying, and maintaining your applications using the AWS .Net deployment tool.
 * [AWS Developer Center - Explore .NET on AWS](https://aws.amazon.com/developer/language/net/) Find all the .NET code samples, step-by-step guides, videos, blog content, tools, and information about live events that you need in one place.
 * [AWS Developer Blog - .NET](https://aws.amazon.com/blogs/developer/category/programing-language/dot-net/) Come see what .NET developers at AWS are up to! Learn about new .NET software announcements, guides, and how-to's.
+* [AWS re:Invent 2021 - What’s new with .NET development and deployment on AWS](https://www.youtube.com/watch?v=UvTJ_Inb634) New deployment tooling incorporates best AWS practices right from the start, providing you with recommendations and the optimal deployment option for your .NET application.
 * [@dotnetonaws](https://twitter.com/dotnetonaws) Follow us on twitter!
 * Deployment tool blog posts
   * [Reimagining the AWS .NET deployment experience](http://aws.amazon.com/blogs/developer/reimagining-the-aws-net-deployment-experience/)

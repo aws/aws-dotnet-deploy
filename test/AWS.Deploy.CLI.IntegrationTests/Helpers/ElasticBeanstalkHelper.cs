@@ -11,6 +11,7 @@ using Amazon.ElasticBeanstalk;
 using Amazon.ElasticBeanstalk.Model;
 using Amazon.S3;
 using Amazon.S3.Transfer;
+using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Orchestration.Data;
 
@@ -192,7 +193,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.Helpers
                     InputStream = stream
                 };
 
-                var s3Client = new AmazonS3Client();
+                var s3Client = new AmazonS3Client(Amazon.RegionEndpoint.USWest2);
                 await new TransferUtility(s3Client).UploadAsync(request);
             }
         }

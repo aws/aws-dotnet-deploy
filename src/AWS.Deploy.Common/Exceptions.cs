@@ -2,19 +2,19 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
-using System.Reflection;
 using AWS.Deploy.Common.Recipes;
-using AWS.Deploy.Common.Recipes.Validation;
 
 namespace AWS.Deploy.Common
 {
     public abstract class DeployToolException : Exception
     {
         public DeployToolErrorCode ErrorCode { get; set; }
+        public int? ProcessExitCode { get; set; }
 
-        public DeployToolException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(message, innerException)
+        public DeployToolException(DeployToolErrorCode errorCode, string message, Exception? innerException = null, int? processExitCode = null) : base(message, innerException)
         {
             ErrorCode = errorCode;
+            ProcessExitCode = processExitCode;
         }
     }
 
@@ -106,7 +106,18 @@ namespace AWS.Deploy.Common
         ECRRepositoryDoesNotExist = 10008400,
         FailedToDeserializeRecipe = 10008500,
         FailedToDeserializeDeploymentBundle = 10008600,
-        FailedToDeserializeDeploymentProjectRecipe = 10008700
+        FailedToDeserializeDeploymentProjectRecipe = 10008700,
+        FailedToRunCDKBootstrap = 10008800,
+        FailedToGetCredentialsForProfile = 10008900,
+        FailedToRunCDKDiff = 10009000,
+        FailedToCreateCDKProject = 10009100,
+        ResourceQuery = 10009200,
+        FailedToRetrieveStackId = 10009300,
+        FailedToGetECRAuthorizationToken = 10009400,
+        InvalidCloudApplicationName = 10009500,
+        SelectedValueIsNotAllowed = 10009600,
+        MissingValidatorConfiguration = 10009700,
+        InvalidFilePath = 10009800
     }
 
     public class ProjectFileNotFoundException : DeployToolException
@@ -179,7 +190,7 @@ namespace AWS.Deploy.Common
     /// </summary>
     public class FailedToCreateDeploymentBundleException : DeployToolException
     {
-        public FailedToCreateDeploymentBundleException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+        public FailedToCreateDeploymentBundleException(DeployToolErrorCode errorCode, string message, int? processExitCode, Exception? innerException = null) : base(errorCode, message, innerException, processExitCode) { }
     }
 
     /// <summary>
@@ -201,6 +212,14 @@ namespace AWS.Deploy.Common
     public class ValidationFailedException : DeployToolException
     {
         public ValidationFailedException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+    }
+
+    /// <summary>
+    /// Thrown if Option Setting Item Validator has missing or invalid configuration.
+    /// </summary>
+    public class MissingValidatorConfigurationException : DeployToolException
+    {
+        public MissingValidatorConfigurationException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     /// <summary>
@@ -241,6 +260,22 @@ namespace AWS.Deploy.Common
     public class FailedToDeserializeException : DeployToolException
     {
         public FailedToDeserializeException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+    }
+
+    /// <summary>
+    /// Exception thrown if a failure occured while querying resources in AWS. It must be used in conjunction with <see cref="DeployToolErrorCode.ResourceQuery"/>.
+    /// </summary>
+    public class ResourceQueryException : DeployToolException
+    {
+        public ResourceQueryException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+    }
+
+    /// <summary>
+    /// Thrown when an invalid file path is specified as an <see cref="OptionSettingItem"/> value
+    /// </summary>
+    public class InvalidFilePath : DeployToolException
+    {
+        public InvalidFilePath(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     public static class ExceptionExtensions

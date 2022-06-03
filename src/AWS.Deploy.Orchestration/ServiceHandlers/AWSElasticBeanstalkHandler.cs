@@ -10,6 +10,7 @@ using Amazon.ElasticBeanstalk;
 using Amazon.ElasticBeanstalk.Model;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
+using AWS.Deploy.Common.Recipes;
 
 namespace AWS.Deploy.Orchestration.ServiceHandlers
 {
@@ -26,12 +27,14 @@ namespace AWS.Deploy.Orchestration.ServiceHandlers
         private readonly IAWSClientFactory _awsClientFactory;
         private readonly IOrchestratorInteractiveService _interactiveService;
         private readonly IFileManager _fileManager;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
-        public AWSElasticBeanstalkHandler(IAWSClientFactory awsClientFactory, IOrchestratorInteractiveService interactiveService, IFileManager fileManager)
+        public AWSElasticBeanstalkHandler(IAWSClientFactory awsClientFactory, IOrchestratorInteractiveService interactiveService, IFileManager fileManager, IOptionSettingHandler optionSettingHandler)
         {
             _awsClientFactory = awsClientFactory;
             _interactiveService = interactiveService;
             _fileManager = fileManager;
+            _optionSettingHandler = optionSettingHandler;
         }
 
         public async Task<S3Location> CreateApplicationStorageLocationAsync(string applicationName, string versionLabel, string deploymentPackage)
@@ -57,7 +60,7 @@ namespace AWS.Deploy.Orchestration.ServiceHandlers
 
         public async Task<CreateApplicationVersionResponse> CreateApplicationVersionAsync(string applicationName, string versionLabel, S3Location sourceBundle)
         {
-            _interactiveService.LogMessageLine("Creating new application version: " + versionLabel);
+            _interactiveService.LogInfoMessage("Creating new application version: " + versionLabel);
 
             try
             {
@@ -82,7 +85,7 @@ namespace AWS.Deploy.Orchestration.ServiceHandlers
 
             foreach (var tuple in Constants.ElasticBeanstalk.OptionSettingQueryList)
             {
-                var optionSetting = recommendation.GetOptionSetting(tuple.OptionSettingId);
+                var optionSetting = _optionSettingHandler.GetOptionSetting(recommendation, tuple.OptionSettingId);
 
                 if (!optionSetting.Updatable)
                     continue;
@@ -102,11 +105,11 @@ namespace AWS.Deploy.Orchestration.ServiceHandlers
 
         public async Task<bool> UpdateEnvironmentAsync(string applicationName, string environmentName, string versionLabel, List<ConfigurationOptionSetting> optionSettings)
         {
-            _interactiveService.LogMessageLine("Getting latest environment event date before update");
+            _interactiveService.LogInfoMessage("Getting latest environment event date before update");
 
             var startingEventDate = await GetLatestEventDateAsync(applicationName, environmentName);
 
-            _interactiveService.LogMessageLine($"Updating environment {environmentName} to new application version {versionLabel}");
+            _interactiveService.LogInfoMessage($"Updating environment {environmentName} to new application version {versionLabel}");
 
             var updateRequest = new UpdateEnvironmentRequest
             {
@@ -146,7 +149,7 @@ namespace AWS.Deploy.Orchestration.ServiceHandlers
 
         private async Task<bool> WaitForEnvironmentUpdateCompletion(string applicationName, string environmentName, DateTime startingEventDate)
         {
-            _interactiveService.LogMessageLine("Waiting for environment update to complete");
+            _interactiveService.LogInfoMessage("Waiting for environment update to complete");
 
             var success = true;
             var environment = new EnvironmentDescription();
@@ -183,7 +186,7 @@ namespace AWS.Deploy.Orchestration.ServiceHandlers
                         if (evnt.EventDate <= lastPrintedEventDate)
                             continue;
 
-                        _interactiveService.LogMessageLine(evnt.EventDate.ToLocalTime() + "    " + evnt.Severity + "    " + evnt.Message);
+                        _interactiveService.LogInfoMessage(evnt.EventDate.ToLocalTime() + "    " + evnt.Severity + "    " + evnt.Message);
                         if (evnt.Severity == EventSeverity.ERROR || evnt.Severity == EventSeverity.FATAL)
                         {
                             success = false;

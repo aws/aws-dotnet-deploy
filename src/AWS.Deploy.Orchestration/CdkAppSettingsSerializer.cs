@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.IO;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Recipes.CDK.Common;
 using Newtonsoft.Json;
 
@@ -11,6 +12,13 @@ namespace AWS.Deploy.Orchestration
 {
     public class CdkAppSettingsSerializer
     {
+        private readonly IOptionSettingHandler _optionSettingHandler;
+
+        public CdkAppSettingsSerializer(IOptionSettingHandler optionSettingHandler)
+        {
+            _optionSettingHandler = optionSettingHandler;
+        }
+
         public string Build(CloudApplication cloudApplication, Recommendation recommendation, OrchestratorSession session)
         {
             var projectPath = new FileInfo(recommendation.ProjectPath).Directory?.FullName;
@@ -37,7 +45,7 @@ namespace AWS.Deploy.Orchestration
             // Option Settings
             foreach (var optionSetting in recommendation.Recipe.OptionSettings)
             {
-                var optionSettingValue = recommendation.GetOptionSettingValue(optionSetting);
+                var optionSettingValue = _optionSettingHandler.GetOptionSettingValue(recommendation, optionSetting);
 
                 if (optionSettingValue != null)
                     appSettingsContainer.Settings[optionSetting.Id] = optionSettingValue;

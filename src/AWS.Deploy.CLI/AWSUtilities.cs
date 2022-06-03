@@ -7,18 +7,17 @@ using System.Linq;
 using System.Threading.Tasks;
 using Amazon.Runtime;
 using Amazon.Runtime.CredentialManagement;
-using Amazon.EC2.Model;
-using System.IO;
-using AWS.Deploy.CLI.Commands.CommandHandlerInput;
 using AWS.Deploy.CLI.Utilities;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
+using AWS.Deploy.Common.Recipes;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AWS.Deploy.CLI
 {
     public interface IAWSUtilities
     {
-        Task<AWSCredentials> ResolveAWSCredentials(string? profileName, string? lastUsedProfileName = null);
+        Task<AWSCredentials> ResolveAWSCredentials(string? profileName);
         string ResolveAWSRegion(string? region, string? lastRegionUsed = null);
     }
 
@@ -27,37 +26,43 @@ namespace AWS.Deploy.CLI
         private readonly IToolInteractiveService _toolInteractiveService;
         private readonly IConsoleUtilities _consoleUtilities;
         private readonly IDirectoryManager _directoryManager;
+        private readonly IOptionSettingHandler _optionSettingHandler;
+        private readonly IServiceProvider _serviceProvider;
 
         public AWSUtilities(
+            IServiceProvider serviceProvider,
             IToolInteractiveService toolInteractiveService,
             IConsoleUtilities consoleUtilities,
-            IDirectoryManager directoryManager)
+            IDirectoryManager directoryManager,
+            IOptionSettingHandler optionSettingHandler)
         {
+            _serviceProvider = serviceProvider;
             _toolInteractiveService = toolInteractiveService;
             _consoleUtilities = consoleUtilities;
             _directoryManager = directoryManager;
+            _optionSettingHandler = optionSettingHandler;
         }
 
-        public async Task<AWSCredentials> ResolveAWSCredentials(string? profileName, string? lastUsedProfileName = null)
+        public async Task<AWSCredentials> ResolveAWSCredentials(string? profileName)
         {
             async Task<AWSCredentials> Resolve()
             {
                 var chain = new CredentialProfileStoreChain();
 
-                if (!string.IsNullOrEmpty(profileName) && chain.TryGetAWSCredentials(profileName, out var profileCredentials) &&
+                if (!string.IsNullOrEmpty(profileName))
+                {
+                    if (chain.TryGetAWSCredentials(profileName, out var profileCredentials) &&
                     // Skip checking CanLoadCredentials for AssumeRoleAWSCredentials because it might require an MFA token and the callback hasn't been setup yet.
                     (profileCredentials is AssumeRoleAWSCredentials || await CanLoadCredentials(profileCredentials)))
-                {
-                    _toolInteractiveService.WriteLine($"Configuring AWS Credentials from Profile {profileName}.");
-                    return profileCredentials;
-                }
-
-                if (!string.IsNullOrEmpty(lastUsedProfileName) &&
-                    chain.TryGetAWSCredentials(lastUsedProfileName, out var lastUsedCredentials) &&
-                    await CanLoadCredentials(lastUsedCredentials))
-                {
-                    _toolInteractiveService.WriteLine($"Configuring AWS Credentials with previous configured profile value {lastUsedProfileName}.");
-                    return lastUsedCredentials;
+                    {
+                        _toolInteractiveService.WriteLine($"Configuring AWS Credentials from Profile {profileName}.");
+                        return profileCredentials;
+                    }
+                    else
+                    {
+                        var message = $"Failed to get credentials for profile \"{profileName}\". Please provide a valid profile name and try again.";
+                        throw new FailedToGetCredentialsForProfile(DeployToolErrorCode.FailedToGetCredentialsForProfile, message);
+                    }
                 }
 
                 try
@@ -99,7 +104,7 @@ namespace AWS.Deploy.CLI
             if (credentials is AssumeRoleAWSCredentials assumeRoleAWSCredentials)
             {
                 var assumeOptions = assumeRoleAWSCredentials.Options;
-                assumeOptions.MfaTokenCodeCallback = new AssumeRoleMfaTokenCodeCallback(_toolInteractiveService, _directoryManager, assumeOptions).Execute;
+                assumeOptions.MfaTokenCodeCallback = ActivatorUtilities.CreateInstance<AssumeRoleMfaTokenCodeCallback>(_serviceProvider, assumeOptions).Execute;
             }
 
             return credentials;
