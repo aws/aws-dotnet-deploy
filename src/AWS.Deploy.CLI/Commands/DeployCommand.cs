@@ -831,7 +831,7 @@ namespace AWS.Deploy.CLI.Commands
                 }
             }
 
-            if (!Equals(settingValue, currentValue) && settingValue != null)
+            if (settingValue != null)
             {
                 try
                 {

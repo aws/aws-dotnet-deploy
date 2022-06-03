@@ -613,7 +613,8 @@
                                     "StringLength",
                                     "InstanceType",
                                     "SubnetsInVpc",
-                                    "SecurityGroupsInVpc"
+                                    "SecurityGroupsInVpc",
+                                    "Uri"
                                 ]
                             }
                         },
@@ -695,6 +696,22 @@
                                                 "MaxLength": {
                                                     "type": "integer"
                                                 },
+                                                "ValidationFailedMessage": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "if": {
+                                    "properties": { "ValidatorType": { "const": "Uri" } }
+                                },
+                                "then": {
+                                    "properties": {
+                                        "Configuration": {
+                                            "properties": {
                                                 "ValidationFailedMessage": {
                                                     "type": "string"
                                                 }
