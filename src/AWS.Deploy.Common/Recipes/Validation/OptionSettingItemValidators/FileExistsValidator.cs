@@ -26,7 +26,7 @@ namespace AWS.Deploy.Common.Recipes.Validation
         /// </summary>
         public bool AllowEmptyString { get; set; } = true;
 
-        public Task<ValidationResult> Validate(object input, Recommendation recommendation)
+        public Task<ValidationResult> Validate(object input, Recommendation recommendation, OptionSettingItem optionSettingItem)
         {
             var inputFilePath = input?.ToString() ?? string.Empty;
 

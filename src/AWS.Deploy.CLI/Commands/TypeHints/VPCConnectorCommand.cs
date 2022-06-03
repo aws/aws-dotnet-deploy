@@ -44,10 +44,28 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             _toolInteractiveService.WriteLine();
-            var createNewOptionSetting = optionSetting.ChildOptionSettings.First(x => x.Id.Equals("CreateNew"));
-            var createNew = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, createNewOptionSetting) ?? "false";
-            var createNewVPCConnectorAnswer = _consoleUtilities.AskYesNoQuestion("Do you want to create a new VPC Connector?", createNew);
-            var createNewVPCConnector = createNewVPCConnectorAnswer == YesNo.Yes;
+            var useVpcConnectorOptionSetting = optionSetting.ChildOptionSettings.First(x => x.Id.Equals("UseVPCConnector"));
+            var useVpcConnectorValue = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, useVpcConnectorOptionSetting) ?? "false";
+            var useVpcConnectorAnswer = _consoleUtilities.AskYesNoQuestion(useVpcConnectorOptionSetting.Description, useVpcConnectorValue);
+            var useVpcConnector = useVpcConnectorAnswer == YesNo.Yes;
+
+            if (!useVpcConnector)
+                return new VPCConnectorTypeHintResponse()
+                {
+                    UseVPCConnector = false
+                };
+
+            var vpcConnectors = await GetData();
+            var createNewVPCConnector = true;
+
+            if (vpcConnectors.Any())
+            {
+                _toolInteractiveService.WriteLine();
+                var createNewOptionSetting = optionSetting.ChildOptionSettings.First(x => x.Id.Equals("CreateNew"));
+                var createNew = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, createNewOptionSetting) ?? "false";
+                var createNewVPCConnectorAnswer = _consoleUtilities.AskYesNoQuestion(createNewOptionSetting.Description, createNew);
+                createNewVPCConnector = createNewVPCConnectorAnswer == YesNo.Yes;
+            }
 
             _toolInteractiveService.WriteLine();
             if (createNewVPCConnector)
@@ -71,7 +89,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 if (vpc.SelectedOption == null)
                     return new VPCConnectorTypeHintResponse()
                     {
-                        CreateNew = false
+                        UseVPCConnector = false
                     };
 
                 var availableSubnets = (await _awsResourceQueryer.DescribeSubnets(vpc.SelectedOption.VpcId)).OrderBy(x => x.SubnetId).ToList();
@@ -80,7 +98,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                     displaySelector: subnet => $"{subnet.SubnetId.PadRight(24)} | {subnet.VpcId.PadRight(21)} | {subnet.AvailabilityZone}",
                     defaultSelector: subnet => false)
                 {
-                    CanBeEmpty = true,
+                    CanBeEmpty = false,
                     CreateNew = false
                 };
                 var subnetsOptionSetting = optionSetting.ChildOptionSettings.First(x => x.Id.Equals("Subnets"));
@@ -100,7 +118,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                     displaySelector: securityGroup => $"{securityGroup.GroupName.PadRight(groupNamePadding)} | {securityGroup.GroupId.PadRight(20)} | {securityGroup.VpcId}",
                     defaultSelector: securityGroup => false)
                 {
-                    CanBeEmpty = true,
+                    CanBeEmpty = false,
                     CreateNew = false
                 };
                 var securityGroupsOptionSetting = optionSetting.ChildOptionSettings.First(x => x.Id.Equals("SecurityGroups"));
@@ -110,6 +128,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
                 return new VPCConnectorTypeHintResponse()
                 {
+                    UseVPCConnector = true,
                     CreateNew = true,
                     VpcId = vpc.SelectedOption.VpcId,
                     Subnets = subnets,
@@ -118,15 +137,13 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             }
             else
             {
-                var vpcConnectors = await GetData();
-
                 var userInputConfiguration = new UserInputConfiguration<VpcConnector>(
                     idSelector: vpcConnector => vpcConnector.VpcConnectorArn,
                     displaySelector: vpcConnector => vpcConnector.VpcConnectorName,
                     defaultSelector: vpcConnector => false
                     )
                 {
-                    CanBeEmpty = true,
+                    CanBeEmpty = false,
                     CreateNew = false
                 };
 
@@ -136,6 +153,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
                 return new VPCConnectorTypeHintResponse()
                 {
+                    UseVPCConnector = true,
                     CreateNew = false,
                     VpcConnectorId = selectedVpcConnector
                 };

@@ -99,7 +99,12 @@ namespace AWS.Deploy.CLI
                 }
                 else if (selectedOperation.Equals(NOOP))
                 {
-                    break;
+                    if (userInputConfiguration.CanBeEmpty || currentOptionSettingValue.Any())
+                        break;
+                    else
+                    {
+                        _interactiveService.WriteErrorLine("The list cannot be empty. You must specify at least 1 value.");
+                    }
                 }
             }
 

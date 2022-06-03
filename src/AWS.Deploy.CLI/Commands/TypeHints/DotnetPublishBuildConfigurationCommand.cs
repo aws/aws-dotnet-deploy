@@ -33,16 +33,5 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             recommendation.DeploymentBundle.DotnetPublishBuildConfiguration = settingValue;
             return Task.FromResult<object>(settingValue);
         }
-
-        /// <summary>
-        /// This method will be invoked to set the Dotnet build configuration in the deployment bundle
-        /// when it is specified as part of the user provided configuration file.
-        /// </summary>
-        /// <param name="recommendation">The selected recommendation settings used for deployment <see cref="Recommendation"/></param>
-        /// <param name="configuration">The user specified Dotnet build configuration.</param>
-        public void Overridevalue(Recommendation recommendation, string configuration)
-        {
-            recommendation.DeploymentBundle.DotnetPublishBuildConfiguration = configuration;
-        }
     }
 }

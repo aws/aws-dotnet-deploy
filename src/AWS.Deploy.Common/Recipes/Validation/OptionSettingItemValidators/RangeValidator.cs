@@ -24,7 +24,7 @@ namespace AWS.Deploy.Common.Recipes.Validation
         public string ValidationFailedMessage { get; set; } = defaultValidationFailedMessage;
         public bool AllowEmptyString { get; set; }
 
-        public Task<ValidationResult> Validate(object input, Recommendation recommendation)
+        public Task<ValidationResult> Validate(object input, Recommendation recommendation, OptionSettingItem optionSettingItem)
         {
             if (AllowEmptyString && string.IsNullOrEmpty(input?.ToString()))
                 return ValidationResult.ValidAsync();

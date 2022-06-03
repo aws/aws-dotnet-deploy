@@ -17,7 +17,7 @@ namespace AWS.Deploy.Common.Recipes.Validation
         public int MaxLength { get; set; } = 1000;
         public string ValidationFailedMessage { get; set; } = "Invalid value. Number of characters must be between {{min}} and {{max}}";
 
-        public Task<ValidationResult> Validate(object input, Recommendation recommendation)
+        public Task<ValidationResult> Validate(object input, Recommendation recommendation, OptionSettingItem optionSettingItem)
         {
             var inputString = input?.ToString() ?? string.Empty;
             var stringLength = inputString.Length;

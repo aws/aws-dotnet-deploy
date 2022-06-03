@@ -102,6 +102,7 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
 
             var interactiveServices = new TestToolInteractiveServiceImpl(new List<string>
             {
+                "y",
                 "n",
                 "1"
             });
@@ -149,6 +150,7 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
             var interactiveServices = new TestToolInteractiveServiceImpl(new List<string>
             {
                 "y",
+                "y",
                 "1",
                 "1",
                 "1",
@@ -159,6 +161,16 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
             });
             var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager, _optionSettingHandler);
             var command = new VPCConnectorCommand(_mockAWSResourceQueryer.Object, consoleUtilities, _toolInteractiveService, _optionSettingHandler);
+
+            _mockAWSResourceQueryer
+                .Setup(x => x.DescribeAppRunnerVpcConnectors())
+                .ReturnsAsync(new List<VpcConnector>()
+                {
+                    new VpcConnector()
+                    {
+                        VpcConnectorArn = "arn:aws:apprunner:us-west-2:123456789010:vpcconnector/fakeVpcConnector"
+                    }
+                });
 
             _mockAWSResourceQueryer
                 .Setup(x => x.GetListOfVpcs())

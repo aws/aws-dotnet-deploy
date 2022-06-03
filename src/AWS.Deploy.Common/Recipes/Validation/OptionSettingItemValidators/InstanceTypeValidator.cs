@@ -21,7 +21,7 @@ namespace AWS.Deploy.Common.Recipes.Validation
             _awsResourceQueryer = awsResourceQueryer;
         }
 
-        public async Task<ValidationResult> Validate(object input, Recommendation recommendation)
+        public async Task<ValidationResult> Validate(object input, Recommendation recommendation, OptionSettingItem optionSettingItem)
         {
             var rawInstanceType = Convert.ToString(input);
             InstanceTypeInfo? instanceTypeInfo;

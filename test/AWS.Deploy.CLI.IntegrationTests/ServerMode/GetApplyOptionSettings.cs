@@ -85,14 +85,15 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
                 var subnetsResourcesEmpty = await restClient.GetConfigSettingResourcesAsync(sessionId, "VPCConnector.Subnets");
                 var securityGroupsResourcesEmpty = await restClient.GetConfigSettingResourcesAsync(sessionId, "VPCConnector.SecurityGroups");
                 Assert.NotEmpty(vpcResources.Resources);
-                Assert.Empty(subnetsResourcesEmpty.Resources);
-                Assert.Empty(securityGroupsResourcesEmpty.Resources);
+                Assert.NotEmpty(subnetsResourcesEmpty.Resources);
+                Assert.NotEmpty(securityGroupsResourcesEmpty.Resources);
 
                 var vpcId = vpcResources.Resources.First().SystemName;
                 await restClient.ApplyConfigSettingsAsync(sessionId, new ApplyConfigSettingsInput()
                 {
                     UpdatedSettings = new Dictionary<string, string>()
                     {
+                        {"VPCConnector.UseVPCConnector", "true"},
                         {"VPCConnector.CreateNew", "true"},
                         {"VPCConnector.VpcId", vpcId}
                     }
@@ -120,6 +121,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
 
                 Assert.True(metadata.Settings.ContainsKey("VPCConnector"));
                 var vpcConnector = JsonConvert.DeserializeObject<VPCConnectorTypeHintResponse>(metadata.Settings["VPCConnector"].ToString());
+                Assert.True(vpcConnector.UseVPCConnector);
                 Assert.True(vpcConnector.CreateNew);
                 Assert.Equal(vpcId, vpcConnector.VpcId);
                 Assert.Contains<string>(subnet, vpcConnector.Subnets);

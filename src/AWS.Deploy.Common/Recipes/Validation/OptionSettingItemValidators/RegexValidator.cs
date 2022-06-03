@@ -22,7 +22,7 @@ namespace AWS.Deploy.Common.Recipes.Validation
         public string ValidationFailedMessage { get; set; } = defaultValidationFailedMessage;
         public bool AllowEmptyString { get; set; }
 
-        public Task<ValidationResult> Validate(object input, Recommendation recommendation)
+        public Task<ValidationResult> Validate(object input, Recommendation recommendation, OptionSettingItem optionSettingItem)
         {
             var regex = new Regex(Regex);
 

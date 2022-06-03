@@ -15,8 +15,10 @@ namespace AWS.Deploy.Common.Recipes.Validation
         /// Validates that additional 'dotnet publish' arguments do not collide with those used by the deploy tool
         /// </summary>
         /// <param name="input">Additional publish arguments</param>
+        /// <param name="recommendation">Selected recommendation, which may be used if the validator needs to consider properties other than itself</param>
+        /// <param name="optionSettingItem">Selected option setting item, which may be used if the validator needs to consider properties other than itself</param>
         /// <returns>Valid if the arguments don't interfere with the deploy tool, invalid otherwise</returns>
-        public Task<ValidationResult> Validate(object input, Recommendation recommendation)
+        public Task<ValidationResult> Validate(object input, Recommendation recommendation, OptionSettingItem optionSettingItem)
         {
             var publishArgs = Convert.ToString(input);
             var errorMessage = string.Empty;

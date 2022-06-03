@@ -69,5 +69,6 @@ namespace AWS.Deploy.CLI.IntegrationTests.Utilities
         public Task<List<SecurityGroup>> DescribeSecurityGroups(string vpcID = null) => throw new NotImplementedException();
         public Task<string> GetParameterStoreTextValue(string parameterName) => throw new NotImplementedException();
         public Task<ResourceDescription> GetCloudControlApiResource(string type, string identifier) => throw new NotImplementedException();
+        public Task<Vpc> GetDefaultVpc() => throw new NotImplementedException();
     }
 }

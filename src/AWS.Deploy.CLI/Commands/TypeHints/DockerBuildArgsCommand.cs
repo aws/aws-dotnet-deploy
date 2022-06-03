@@ -31,7 +31,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                     _optionSettingHandler.GetOptionSettingValue<string>(recommendation, optionSetting),
                     allowEmpty: true,
                     resetValue: _optionSettingHandler.GetOptionSettingDefaultValue<string>(recommendation, optionSetting) ?? "",
-                    validators: async buildArgs => await ValidateBuildArgs(buildArgs, recommendation))
+                    validators: async buildArgs => await ValidateBuildArgs(buildArgs, recommendation, optionSetting))
                 .ToString()
                 .Replace("\"", "\"\"");
 
@@ -39,23 +39,9 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             return Task.FromResult<object>(settingValue);
         }
 
-        /// <summary>
-        /// This method will be invoked to set the Docker build arguments in the deployment bundle
-        /// when it is specified as part of the user provided configuration file.
-        /// </summary>
-        /// <param name="recommendation">The selected recommendation settings used for deployment <see cref="Recommendation"/></param>
-        /// <param name="dockerBuildArgs">Arguments to be passed when performing a Docker build</param>
-        public async Task OverrideValue(Recommendation recommendation, string dockerBuildArgs)
+        private async Task<string> ValidateBuildArgs(string buildArgs, Recommendation recommendation, OptionSettingItem optionSettingItem)
         {
-            var resultString = await ValidateBuildArgs(dockerBuildArgs, recommendation);
-            if (!string.IsNullOrEmpty(resultString))
-                throw new InvalidOverrideValueException(DeployToolErrorCode.InvalidDockerBuildArgs, resultString);
-            recommendation.DeploymentBundle.DockerBuildArgs = dockerBuildArgs;
-        }
-
-        private async Task<string> ValidateBuildArgs(string buildArgs, Recommendation recommendation)
-        {
-            var validationResult = await new DockerBuildArgsValidator().Validate(buildArgs, recommendation);
+            var validationResult = await new DockerBuildArgsValidator().Validate(buildArgs, recommendation, optionSettingItem);
 
             if (validationResult.IsValid)
             {

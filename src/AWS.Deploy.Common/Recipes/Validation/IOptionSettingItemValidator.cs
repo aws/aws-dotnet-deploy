@@ -17,7 +17,8 @@ namespace AWS.Deploy.Common.Recipes.Validation
         /// </summary>
         /// <param name="input">Raw input for an option</param>
         /// <param name="recommendation">Selected recommendation, which may be used if the validator needs to consider properties other than itself</param>
+        /// <param name="optionSettingItem">Selected option setting item, which may be used if the validator needs to consider properties other than itself</param>
         /// <returns>Whether or not the input is valid</returns>
-        Task<ValidationResult> Validate(object input, Recommendation recommendation);
+        Task<ValidationResult> Validate(object input, Recommendation recommendation, OptionSettingItem optionSettingItem);
     }
 }

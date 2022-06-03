@@ -35,24 +35,10 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                     _optionSettingHandler.GetOptionSettingValue<string>(recommendation, optionSetting),
                     allowEmpty: true,
                     resetValue: _optionSettingHandler.GetOptionSettingDefaultValue<string>(recommendation, optionSetting) ?? "",
-                    validators: async executionDirectory => await ValidateExecutionDirectory(executionDirectory, recommendation));
+                    validators: async executionDirectory => await ValidateExecutionDirectory(executionDirectory, recommendation, optionSetting));
 
             recommendation.DeploymentBundle.DockerExecutionDirectory = settingValue;
             return Task.FromResult<object>(settingValue);
-        }
-
-        /// <summary>
-        /// This method will be invoked to set the Docker execution directory in the deployment bundle
-        /// when it is specified as part of the user provided configuration file.
-        /// </summary>
-        /// <param name="recommendation">The selected recommendation used for deployment <see cref="Recommendation"/></param>
-        /// <param name="executionDirectory">The directory specified for Docker execution.</param>
-        public async Task OverrideValue(Recommendation recommendation, string executionDirectory)
-        {
-            var resultString = await ValidateExecutionDirectory(executionDirectory, recommendation);
-            if (!string.IsNullOrEmpty(resultString))
-                throw new InvalidOverrideValueException(DeployToolErrorCode.InvalidDockerExecutionDirectory, resultString);
-            recommendation.DeploymentBundle.DockerExecutionDirectory = executionDirectory;
         }
 
         /// <summary>
@@ -61,10 +47,11 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         /// </summary>
         /// <param name="executionDirectory">Proposed Docker execution directory</param>
         /// <param name="recommendation">The selected recommendation settings used for deployment</param>
+        /// <param name="optionSettingItem">The selected option setting item</param>
         /// <returns>Empty string if the directory is valid, an error message if not</returns>
-        private async Task<string> ValidateExecutionDirectory(string executionDirectory, Recommendation recommendation)
+        private async Task<string> ValidateExecutionDirectory(string executionDirectory, Recommendation recommendation, OptionSettingItem optionSettingItem)
         {
-            var validationResult = await new DirectoryExistsValidator(_directoryManager).Validate(executionDirectory, recommendation);
+            var validationResult = await new DirectoryExistsValidator(_directoryManager).Validate(executionDirectory, recommendation, optionSettingItem);
 
             if (validationResult.IsValid)
             {
