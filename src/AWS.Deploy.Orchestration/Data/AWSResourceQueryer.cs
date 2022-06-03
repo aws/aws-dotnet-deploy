@@ -472,6 +472,24 @@ namespace AWS.Deploy.Orchestration.Data
                 .ToListAsync());
         }
 
+        public async Task<Vpc> GetDefaultVpc()
+        {
+            var vpcClient = _awsClientFactory.GetAWSClient<IAmazonEC2>();
+
+            return await HandleException(async () => await vpcClient.Paginators
+                .DescribeVpcs(
+                    new DescribeVpcsRequest
+                    {
+                        Filters = new List<Filter> {
+                            new Filter {
+                                Name = "is-default",
+                                Values = new List<string> { "true" }
+                            }
+                        }
+                    })
+                .Vpcs.FirstAsync());
+        }
+
         public async Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns()
         {
             var beanstalkClient = _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>();

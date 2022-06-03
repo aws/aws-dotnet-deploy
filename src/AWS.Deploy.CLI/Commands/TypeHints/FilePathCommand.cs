@@ -50,20 +50,5 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
             return Task.FromResult<object>(userFilePath);
         }
-
-        /// <summary>
-        /// This method will be invoked to set a file path setting in the deployment bundle
-        /// when it is specified as part of the user provided configuration file.
-        /// </summary>
-        /// <param name="recommendation">The selected recommendation settings used for deployment <see cref="Recommendation"/></param>
-        /// <param name="filePath">File path entered by the user</param>
-        public async Task OverrideValue(Recommendation recommendation, string filePath)
-        {
-            var validator = new FileExistsValidator(_fileManager);
-            var validationResult = await (validator as IOptionSettingItemValidator).Validate(filePath, recommendation);
-
-            if (!validationResult.IsValid)
-                throw new InvalidOverrideValueException(DeployToolErrorCode.InvalidFilePath, validationResult.ValidationFailedMessage ?? validator.ValidationFailedMessage);
-        }
     }
 }

@@ -149,7 +149,7 @@ namespace AspNetAppAppRunner
                 }
             };
 
-            if ((settings.VPCConnector.CreateNew && VPCConnector != null) || !string.IsNullOrEmpty(settings.VPCConnector.VpcConnectorId))
+            if (settings.VPCConnector.UseVPCConnector)
             {
                 appRunnerServiceProp.NetworkConfiguration = new CfnService.NetworkConfigurationProperty
                 {

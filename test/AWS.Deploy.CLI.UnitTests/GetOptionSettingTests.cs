@@ -127,13 +127,71 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var appRunnerRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_APPRUNNER_ID);
 
+            var useVpcConnector = _optionSettingHandler.GetOptionSetting(appRunnerRecommendation, "VPCConnector.UseVPCConnector");
             var createNew = _optionSettingHandler.GetOptionSetting(appRunnerRecommendation, "VPCConnector.CreateNew");
+            var vpcId = _optionSettingHandler.GetOptionSetting(appRunnerRecommendation, "VPCConnector.VpcId");
             var subnets = _optionSettingHandler.GetOptionSetting(appRunnerRecommendation, "VPCConnector.Subnets");
             var securityGroups = _optionSettingHandler.GetOptionSetting(appRunnerRecommendation, "VPCConnector.SecurityGroups");
 
+            await _optionSettingHandler.SetOptionSettingValue(appRunnerRecommendation, useVpcConnector, true);
             await _optionSettingHandler.SetOptionSettingValue(appRunnerRecommendation, createNew, true);
+            await _optionSettingHandler.SetOptionSettingValue(appRunnerRecommendation, vpcId, "vpc-1234abcd");
             await Assert.ThrowsAsync<ValidationFailedException>(async () => await _optionSettingHandler.SetOptionSettingValue(appRunnerRecommendation, subnets, new SortedSet<string>(){ "subnet1" }));
             await Assert.ThrowsAsync<ValidationFailedException>(async () => await _optionSettingHandler.SetOptionSettingValue(appRunnerRecommendation, securityGroups, new SortedSet<string>(){ "securityGroup1" }));
+        }
+
+        [Fact]
+        public async Task GetOptionSettingTests_VPCConnector_DisplayableItems()
+        {
+            var SETTING_ID_VPCCONNECTOR = "VPCConnector";
+            var SETTING_ID_USEVPCCONNECTOR = "UseVPCConnector";
+            var SETTING_ID_CREATENEW = "CreateNew";
+            var SETTING_ID_VPCCONNECTORID = "VpcConnectorId";
+            var SETTING_ID_VPCID = "VpcId";
+            var SETTING_ID_SUBNETS = "Subnets";
+            var SETTING_ID_SECURITYGROUPS = "SecurityGroups";
+
+            var engine = await BuildRecommendationEngine("WebAppWithDockerFile");
+
+            var recommendations = await engine.ComputeRecommendations();
+
+            var appRunnerRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_APPRUNNER_ID);
+
+            var vpcConnector = _optionSettingHandler.GetOptionSetting(appRunnerRecommendation, SETTING_ID_VPCCONNECTOR);
+            var vpcConnectorChildren = vpcConnector.ChildOptionSettings.Where(x => _optionSettingHandler.IsOptionSettingDisplayable(appRunnerRecommendation, x)).ToList();
+            Assert.Single(vpcConnectorChildren);
+            Assert.NotNull(vpcConnectorChildren.First(x => x.Id.Equals(SETTING_ID_USEVPCCONNECTOR)));
+
+            var useVpcConnector = _optionSettingHandler.GetOptionSetting(appRunnerRecommendation, $"{SETTING_ID_VPCCONNECTOR}.{SETTING_ID_USEVPCCONNECTOR}");
+            await _optionSettingHandler.SetOptionSettingValue(appRunnerRecommendation, useVpcConnector, true);
+            vpcConnectorChildren = vpcConnector.ChildOptionSettings.Where(x => _optionSettingHandler.IsOptionSettingDisplayable(appRunnerRecommendation, x)).ToList();
+            Assert.Equal(3, vpcConnectorChildren.Count);
+            Assert.NotNull(vpcConnectorChildren.First(x => x.Id.Equals(SETTING_ID_USEVPCCONNECTOR)));
+            Assert.NotNull(vpcConnectorChildren.First(x => x.Id.Equals(SETTING_ID_CREATENEW)));
+            Assert.NotNull(vpcConnectorChildren.First(x => x.Id.Equals(SETTING_ID_VPCCONNECTORID)));
+
+            var createNew = _optionSettingHandler.GetOptionSetting(appRunnerRecommendation, $"{SETTING_ID_VPCCONNECTOR}.{SETTING_ID_CREATENEW}");
+            await _optionSettingHandler.SetOptionSettingValue(appRunnerRecommendation, createNew, true);
+            vpcConnectorChildren = vpcConnector.ChildOptionSettings.Where(x => _optionSettingHandler.IsOptionSettingDisplayable(appRunnerRecommendation, x)).ToList();
+            Assert.Equal(3, vpcConnectorChildren.Count);
+            Assert.NotNull(vpcConnectorChildren.First(x => x.Id.Equals(SETTING_ID_USEVPCCONNECTOR)));
+            Assert.NotNull(vpcConnectorChildren.First(x => x.Id.Equals(SETTING_ID_CREATENEW)));
+            Assert.NotNull(vpcConnectorChildren.First(x => x.Id.Equals(SETTING_ID_VPCID)));
+
+            var vpcId = _optionSettingHandler.GetOptionSetting(appRunnerRecommendation, $"{SETTING_ID_VPCCONNECTOR}.{SETTING_ID_VPCID}");
+            await _optionSettingHandler.SetOptionSettingValue(appRunnerRecommendation, vpcId, "vpc-abcd1234");
+            vpcConnectorChildren = vpcConnector.ChildOptionSettings.Where(x => _optionSettingHandler.IsOptionSettingDisplayable(appRunnerRecommendation, x)).ToList();
+            Assert.Equal(5, vpcConnectorChildren.Count);
+            Assert.NotNull(vpcConnectorChildren.First(x => x.Id.Equals(SETTING_ID_USEVPCCONNECTOR)));
+            Assert.NotNull(vpcConnectorChildren.First(x => x.Id.Equals(SETTING_ID_CREATENEW)));
+            Assert.NotNull(vpcConnectorChildren.First(x => x.Id.Equals(SETTING_ID_VPCID)));
+            Assert.NotNull(vpcConnectorChildren.First(x => x.Id.Equals(SETTING_ID_SUBNETS)));
+            Assert.NotNull(vpcConnectorChildren.First(x => x.Id.Equals(SETTING_ID_SECURITYGROUPS)));
+
+            await _optionSettingHandler.SetOptionSettingValue(appRunnerRecommendation, useVpcConnector, false);
+            vpcConnectorChildren = vpcConnector.ChildOptionSettings.Where(x => _optionSettingHandler.IsOptionSettingDisplayable(appRunnerRecommendation, x)).ToList();
+            Assert.Single(vpcConnectorChildren);
+            Assert.NotNull(vpcConnectorChildren.First(x => x.Id.Equals(SETTING_ID_USEVPCCONNECTOR)));
         }
 
         [Fact]

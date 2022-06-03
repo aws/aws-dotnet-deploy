@@ -30,6 +30,7 @@ namespace AWS.Deploy.Common.Data
     /// </remarks>
     public interface IAWSResourceQueryer
     {
+        Task<Vpc> GetDefaultVpc();
         Task<ResourceDescription> GetCloudControlApiResource(string type, string identifier);
         Task<List<StackEvent>> GetCloudFormationStackEvents(string stackName);
 

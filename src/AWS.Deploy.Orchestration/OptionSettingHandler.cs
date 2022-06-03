@@ -43,11 +43,11 @@ namespace AWS.Deploy.Orchestration
                 }
 
                 var optionSettingValue = GetOptionSettingValue(recommendation, optionSetting);
-                settingValidatorFailedResults.AddRange(_validatorFactory.BuildValidators(optionSetting)
-                    .Select(async validator => await validator.Validate(optionSettingValue, recommendation))
+                var failedValidators = _validatorFactory.BuildValidators(optionSetting)
+                    .Select(async validator => await validator.Validate(optionSettingValue, recommendation, optionSetting))
                     .Select(x => x.Result)
                     .Where(x => !x.IsValid)
-                    .ToList());
+                    .ToList();
 
                 // Only update the validation object if there is no InvalidValue set.
                 // In the case where a user tries to set an Invalid Value, this is the value that will be on the UI.
@@ -55,10 +55,10 @@ namespace AWS.Deploy.Orchestration
                 // since it won't be reflected on the UI.
                 if (optionSetting.Validation.InvalidValue == null)
                 {
-                    if (settingValidatorFailedResults.Any())
+                    if (failedValidators.Any())
                     {
                         optionSetting.Validation.ValidationStatus = ValidationStatus.Invalid;
-                        optionSetting.Validation.ValidationMessage = string.Join(Environment.NewLine, settingValidatorFailedResults.Select(x => x.ValidationFailedMessage)).Trim();
+                        optionSetting.Validation.ValidationMessage = string.Join(Environment.NewLine, failedValidators.Select(x => x.ValidationFailedMessage)).Trim();
                         optionSetting.Validation.InvalidValue = optionSettingValue;
                     }
                     else
@@ -67,7 +67,7 @@ namespace AWS.Deploy.Orchestration
                         optionSetting.Validation.ValidationMessage = string.Empty;
                     }
                 }
-
+                settingValidatorFailedResults.AddRange(failedValidators);
                 settingValidatorFailedResults.AddRange(RunOptionSettingValidators(recommendation, optionSetting.ChildOptionSettings));
             }
 

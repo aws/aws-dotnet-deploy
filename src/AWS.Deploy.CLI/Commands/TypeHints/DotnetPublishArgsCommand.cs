@@ -31,7 +31,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                     _optionSettingHandler.GetOptionSettingValue<string>(recommendation, optionSetting),
                     allowEmpty: true,
                     resetValue: _optionSettingHandler.GetOptionSettingDefaultValue<string>(recommendation, optionSetting) ?? "",
-                    validators: async publishArgs => await ValidateDotnetPublishArgs(publishArgs, recommendation))
+                    validators: async publishArgs => await ValidateDotnetPublishArgs(publishArgs, recommendation, optionSetting))
                 .ToString()
                 .Replace("\"", "\"\"");
 
@@ -40,23 +40,9 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             return Task.FromResult<object>(settingValue);
         }
 
-        /// <summary>
-        /// This method will be invoked to set any additional Dotnet build arguments in the deployment bundle
-        /// when it is specified as part of the user provided configuration file.
-        /// </summary>
-        /// <param name="recommendation">The selected recommendation settings used for deployment <see cref="Recommendation"/></param>
-        /// <param name="publishArgs">The user specified Dotnet build arguments.</param>
-        public async Task OverrideValue(Recommendation recommendation, string publishArgs)
+        private async Task<string> ValidateDotnetPublishArgs(string publishArgs, Recommendation recommendation, OptionSettingItem optionSettingItem)
         {
-            var resultString = await ValidateDotnetPublishArgs(publishArgs, recommendation);
-            if (!string.IsNullOrEmpty(resultString))
-                throw new InvalidOverrideValueException(DeployToolErrorCode.InvalidDotnetPublishArgs, resultString);
-            recommendation.DeploymentBundle.DotnetPublishAdditionalBuildArguments = publishArgs.Replace("\"", "\"\"");
-        }
-
-        private async Task<string> ValidateDotnetPublishArgs(string publishArgs, Recommendation recommendation)
-        {
-            var validationResult = await new DotnetPublishArgsValidator().Validate(publishArgs, recommendation);
+            var validationResult = await new DotnetPublishArgsValidator().Validate(publishArgs, recommendation, optionSettingItem);
 
             if (validationResult.IsValid)
             {

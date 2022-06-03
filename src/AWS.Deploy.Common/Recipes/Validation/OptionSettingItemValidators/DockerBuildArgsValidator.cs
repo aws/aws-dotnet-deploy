@@ -16,8 +16,10 @@ namespace AWS.Deploy.Common.Recipes.Validation
         /// with those set by the deploy tool
         /// </summary>
         /// <param name="input">Proposed Docker build args</param>
+        /// <param name="recommendation">Selected recommendation, which may be used if the validator needs to consider properties other than itself</param>
+        /// <param name="optionSettingItem">Selected option setting item, which may be used if the validator needs to consider properties other than itself</param>
         /// <returns>Valid if the options do not contain those set by the deploy tool, invalid otherwise</returns>
-        public Task<ValidationResult> Validate(object input, Recommendation recommendation)
+        public Task<ValidationResult> Validate(object input, Recommendation recommendation, OptionSettingItem optionSettingItem)
         {
             var buildArgs = Convert.ToString(input);
             var errorMessage = string.Empty;

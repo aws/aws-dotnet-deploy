@@ -193,6 +193,14 @@ namespace AWS.Deploy.Orchestration
                     recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_DOCKERFILE_PATH, defaultDockerfilePath);
                 }
             }
+            if (recommendation.ReplacementTokens.ContainsKey(Constants.RecipeIdentifier.REPLACE_TOKEN_DEFAULT_VPC_ID))
+            {
+                if (_awsResourceQueryer == null)
+                    throw new InvalidOperationException($"{nameof(_awsResourceQueryer)} is null as part of the Orchestrator object");
+
+                var defaultVPC = await _awsResourceQueryer.GetDefaultVpc();
+                recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_DEFAULT_VPC_ID, defaultVPC.VpcId);
+            }
         }
 
         public async Task DeployRecommendation(CloudApplication cloudApplication, Recommendation recommendation)
