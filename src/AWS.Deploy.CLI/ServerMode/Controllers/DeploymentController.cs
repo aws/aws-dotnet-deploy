@@ -337,6 +337,10 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             }
 
             var output = new GetExistingDeploymentsOutput();
+            if(state.NewRecommendations == null)
+            {
+                return Ok(output);
+            }
 
             var deployedApplicationQueryer = serviceProvider.GetRequiredService<IDeployedApplicationQueryer>();
             var session = CreateOrchestratorSession(state);
