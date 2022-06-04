@@ -140,7 +140,12 @@ namespace AWS.Deploy.CLI.Commands
         /// <returns>The default save directory path.</returns>
         private string GenerateDefaultSaveDirectoryPath()
         {
-            var applicatonDirectoryFullPath = _directoryManager.GetDirectoryInfo(_targetApplicationFullPath).Parent.FullName;
+            var targetApplicationDi = _directoryManager.GetDirectoryInfo(_targetApplicationFullPath);
+            if(targetApplicationDi.Parent == null)
+            {
+                throw new FailedToGenerateAnyRecommendations(DeployToolErrorCode.InvalidFilePath, $"Failed to find parent directory for directory {_targetApplicationFullPath}.");
+            }
+            var applicatonDirectoryFullPath = targetApplicationDi.Parent.FullName;
             var saveCdkDirectoryFullPath = applicatonDirectoryFullPath + ".Deployment";
 
             var suffixNumber = 0;
@@ -173,9 +178,15 @@ namespace AWS.Deploy.CLI.Commands
         /// <returns>A tuple containing a boolean that indicates if the directory is valid and a corresponding string error message.</returns>
         private Tuple<bool, string> ValidateSaveCdkDirectory(string saveCdkDirectoryPath)
         {
+            var targetApplicationDi = _directoryManager.GetDirectoryInfo(_targetApplicationFullPath);
+            if (targetApplicationDi.Parent == null)
+            {
+                throw new FailedToGenerateAnyRecommendations(DeployToolErrorCode.InvalidFilePath, $"Failed to find parent directory for directory {_targetApplicationFullPath}.");
+            }
+
             var errorMessage = string.Empty;
             var isValid = true;
-            var targetApplicationDirectoryFullPath = _directoryManager.GetDirectoryInfo(_targetApplicationFullPath).Parent.FullName;
+            var targetApplicationDirectoryFullPath = targetApplicationDi.Parent.FullName;
            
             if (!_directoryManager.IsEmpty(saveCdkDirectoryPath))
             {
@@ -215,7 +226,13 @@ namespace AWS.Deploy.CLI.Commands
         /// <param name="projectDisplayName">The name of the deployment project that will be displayed in the list of available deployment options.</param>
         private async Task GenerateDeploymentRecipeSnapShot(Recommendation recommendation, string saveCdkDirectoryPath, string projectDisplayName)
         {
-            var targetApplicationDirectoryName = _directoryManager.GetDirectoryInfo(_targetApplicationFullPath).Parent.Name;
+            var targetApplicationDi = _directoryManager.GetDirectoryInfo(_targetApplicationFullPath);
+            if (targetApplicationDi.Parent == null)
+            {
+                throw new FailedToGenerateAnyRecommendations(DeployToolErrorCode.InvalidFilePath, $"Failed to find parent directory for directory {_targetApplicationFullPath}.");
+            }
+
+            var targetApplicationDirectoryName = targetApplicationDi.Name;
             var recipeSnapshotFileName = _directoryManager.GetDirectoryInfo(saveCdkDirectoryPath).Name + ".recipe";
             var recipeSnapshotFilePath = Path.Combine(saveCdkDirectoryPath, recipeSnapshotFileName);
             var recipePath = recommendation.Recipe.RecipePath;

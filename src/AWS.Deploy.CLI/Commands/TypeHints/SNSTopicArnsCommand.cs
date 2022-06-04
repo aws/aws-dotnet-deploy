@@ -40,7 +40,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             var currentValueStr = currentValue.ToString() ?? string.Empty;
             var topicArns = await GetResources(recommendation, optionSetting);
 
-            var topicNames = topicArns.Select(queue => queue.DisplayName).ToList();
+            var topicNames = topicArns?.Select(topic => topic.DisplayName).ToList() ?? new List<string>();
             var currentName = string.Empty;
             if (currentValue.ToString()?.LastIndexOf(':') != -1)
             {
@@ -54,7 +54,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 title: "Select a SNS topic:",
                 defaultValue: currentName);
 
-            var selectedTopicArn = topicArns.FirstOrDefault(x => string.Equals(x.DisplayName, userResponse, StringComparison.OrdinalIgnoreCase));
+            var selectedTopicArn = topicArns?.FirstOrDefault(x => string.Equals(x.DisplayName, userResponse, StringComparison.OrdinalIgnoreCase));
             return selectedTopicArn?.SystemName ?? string.Empty;
         }
     }
