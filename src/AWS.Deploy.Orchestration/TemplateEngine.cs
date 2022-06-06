@@ -10,7 +10,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
-using AWS.Deploy.Recipes.CDK.Common;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Template;
