@@ -44,6 +44,14 @@ namespace AWS.Deploy.Common.Recipes.Validation
         /// <summary>
         /// Must be paired with <see cref="InstanceTypeValidator"/>
         /// </summary>
-        InstanceType
+        InstanceType,
+        /// <summary>
+        /// Must be paired with <see cref="SubnetsInVpcValidator"/>
+        /// </summary>
+        SubnetsInVpc,
+        /// <summary>
+        /// Must be paired with <see cref="SecurityGroupsInVpcValidator"/>
+        /// </summary>
+        SecurityGroupsInVpc
     }
 }

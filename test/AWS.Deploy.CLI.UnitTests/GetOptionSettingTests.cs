@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Amazon.EC2.Model;
 using Amazon.Runtime;
 using AWS.Deploy.CLI.UnitTests.Utilities;
 using AWS.Deploy.Common;
@@ -48,7 +49,9 @@ namespace AWS.Deploy.CLI.UnitTests
             var validatorFactory = new ValidatorFactory(serviceProvider.Object);
             var optionSettingHandler = new OptionSettingHandler(validatorFactory);
             _recipeHandler = new RecipeHandler(_deploymentManifestEngine, _orchestratorInteractiveService, _directoryManager, _fileManager, optionSettingHandler);
-            _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider.Object));
+            _serviceProvider
+                .Setup(x => x.GetService(typeof(IOptionSettingHandler)))
+                .Returns(_optionSettingHandler);
         }
 
         private async Task<RecommendationEngine> BuildRecommendationEngine(string testProjectName)
@@ -127,6 +130,9 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var appRunnerRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_APPRUNNER_ID);
 
+            _awsResourceQueryer.Setup(x => x.DescribeSubnets(It.IsAny<string>())).ReturnsAsync(new List<Subnet>());
+            _awsResourceQueryer.Setup(x => x.DescribeSecurityGroups(It.IsAny<string>())).ReturnsAsync(new List<SecurityGroup>());
+
             var useVpcConnector = _optionSettingHandler.GetOptionSetting(appRunnerRecommendation, "VPCConnector.UseVPCConnector");
             var createNew = _optionSettingHandler.GetOptionSetting(appRunnerRecommendation, "VPCConnector.CreateNew");
             var vpcId = _optionSettingHandler.GetOptionSetting(appRunnerRecommendation, "VPCConnector.VpcId");
@@ -156,6 +162,9 @@ namespace AWS.Deploy.CLI.UnitTests
             var recommendations = await engine.ComputeRecommendations();
 
             var appRunnerRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_APPRUNNER_ID);
+
+            _awsResourceQueryer.Setup(x => x.DescribeSubnets(It.IsAny<string>())).ReturnsAsync(new List<Subnet>());
+            _awsResourceQueryer.Setup(x => x.DescribeSecurityGroups(It.IsAny<string>())).ReturnsAsync(new List<SecurityGroup>());
 
             var vpcConnector = _optionSettingHandler.GetOptionSetting(appRunnerRecommendation, SETTING_ID_VPCCONNECTOR);
             var vpcConnectorChildren = vpcConnector.ChildOptionSettings.Where(x => _optionSettingHandler.IsOptionSettingDisplayable(appRunnerRecommendation, x)).ToList();

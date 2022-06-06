@@ -516,6 +516,12 @@
                                 "Regex": "^subnet-([0-9a-f]{8}|[0-9a-f]{17})$",
                                 "ValidationFailedMessage": "Invalid Subnet ID. The Subnet ID must start with the \"subnet-\" prefix, followed by either 8 or 17 characters consisting of digits and letters(lower-case) from a to f. For example subnet-abc88de9 is a valid Subnet ID."
                             }
+                        },
+                        {
+                            "ValidatorType": "SubnetsInVpc",
+                            "Configuration": {
+                                "VpcId": "VPCConnector.VpcId"
+                            }
                         }
                     ],
                     "DependsOn": [
@@ -551,6 +557,12 @@
                             "Configuration": {
                                 "Regex": "^sg-([0-9a-f]{8}|[0-9a-f]{17})$",
                                 "ValidationFailedMessage": "Invalid Security Group ID. The Security Group ID must start with the \"sg-\" prefix, followed by either 8 or 17 characters consisting of digits and letters(lower-case) from a to f. For example sg-abc88de9 is a valid Security Group ID."
+                            }
+                        },
+                        {
+                            "ValidatorType": "SecurityGroupsInVpc",
+                            "Configuration": {
+                                "VpcId": "VPCConnector.VpcId"
                             }
                         }
                     ],

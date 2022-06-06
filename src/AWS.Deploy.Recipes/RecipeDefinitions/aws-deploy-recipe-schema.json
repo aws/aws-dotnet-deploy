@@ -611,7 +611,9 @@
                                     "ExistingResource",
                                     "FileExists",
                                     "StringLength",
-                                    "InstanceType"
+                                    "InstanceType",
+                                    "SubnetsInVpc",
+                                    "SecurityGroupsInVpc"
                                 ]
                             }
                         },
