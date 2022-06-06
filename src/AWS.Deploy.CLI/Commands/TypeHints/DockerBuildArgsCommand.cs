@@ -21,7 +21,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             _optionSettingHandler = optionSettingHandler;
         }
 
-        public Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting) => Task.FromResult<List<TypeHintResource>?>(null);
+        public Task<TypeHintResourceTable> GetResources(Recommendation recommendation, OptionSettingItem optionSetting) => Task.FromResult(new TypeHintResourceTable());
 
         public Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {

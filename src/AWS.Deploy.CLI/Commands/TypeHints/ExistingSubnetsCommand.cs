@@ -9,7 +9,6 @@ using AWS.Deploy.Common;
 using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.TypeHintData;
-using AWS.Deploy.Orchestration.Data;
 
 namespace AWS.Deploy.CLI.Commands.TypeHints
 {
@@ -37,25 +36,48 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             return await _awsResourceQueryer.DescribeSubnets(vpcId);
         }
 
-        public async Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
+        public async Task<TypeHintResourceTable> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var subnets = await GetData(recommendation, optionSetting);
-            return subnets.Select(subnet => new TypeHintResource(subnet.SubnetId, subnet.SubnetId)).ToList();
+
+            var resourceTable = new TypeHintResourceTable
+            {
+                Columns = new List<TypeHintResourceColumn>()
+                {
+                    new TypeHintResourceColumn("Subnet Id"),
+                    new TypeHintResourceColumn("VPC Id"),
+                    new TypeHintResourceColumn("Availability Zone")
+                }
+            };
+
+            foreach (var subnet in subnets.OrderBy(subnet => subnet.VpcId))
+            {
+                var row = new TypeHintResource(subnet.SubnetId, subnet.SubnetId);
+                row.ColumnValues.Add(subnet.SubnetId);
+                row.ColumnValues.Add(subnet.VpcId);
+                row.ColumnValues.Add(subnet.AvailabilityZone);
+
+                resourceTable.Rows.Add(row);
+            }
+
+            return resourceTable;
         }
 
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var availableSubnets = (await GetData(recommendation, optionSetting)).OrderBy(x => x.VpcId).ToList();
-            var userInputConfigurationSubnets = new UserInputConfiguration<Subnet>(
-                idSelector: subnet => subnet.SubnetId,
-                displaySelector: subnet => $"{subnet.SubnetId.PadRight(24)} | {subnet.VpcId.PadRight(21)} | {subnet.AvailabilityZone}",
+            var resourceTable = await GetResources(recommendation, optionSetting);
+
+            var userInputConfigurationSubnets = new UserInputConfiguration<TypeHintResource>(
+                idSelector: subnet => subnet.SystemName,
+                displaySelector: subnet => $"{subnet.ColumnValues[0].PadRight(24)} | {subnet.ColumnValues[1].PadRight(21)} | {subnet.ColumnValues[2]}",
                 defaultSelector: subnet => false)
             {
                 CanBeEmpty = true,
                 CreateNew = false
             };
 
-            return _consoleUtilities.AskUserForList<Subnet>(userInputConfigurationSubnets, availableSubnets, optionSetting, recommendation);
+            return _consoleUtilities.AskUserForList(userInputConfigurationSubnets, resourceTable.Rows, optionSetting, recommendation);
         }
     }
 }

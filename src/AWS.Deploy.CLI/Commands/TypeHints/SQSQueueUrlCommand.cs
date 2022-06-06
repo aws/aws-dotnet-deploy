@@ -26,10 +26,16 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             _optionSettingHandler = optionSettingHandler;
         }
 
-        public async Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
+        public async Task<TypeHintResourceTable> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var queueUrls = await _awsResourceQueryer.ListOfSQSQueuesUrls();
-            return queueUrls.Select(queueUrl => new TypeHintResource(queueUrl, queueUrl.Substring(queueUrl.LastIndexOf('/') + 1))).ToList();
+
+            var resourceTable = new TypeHintResourceTable
+            {
+                Rows = queueUrls.Select(queueUrl => new TypeHintResource(queueUrl, queueUrl.Substring(queueUrl.LastIndexOf('/') + 1))).ToList()
+            };
+
+            return resourceTable;
         }
 
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
@@ -38,7 +44,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             var currentValue = _optionSettingHandler.GetOptionSettingValue(recommendation, optionSetting);
             var typeHintData = optionSetting.GetTypeHintData<SQSQueueUrlTypeHintData>();
             var currentValueStr = currentValue.ToString() ?? string.Empty;
-            var queueUrls = await GetResources(recommendation, optionSetting);
+            var queueUrls = (await GetResources(recommendation, optionSetting)).Rows;
 
             var queueNames = queueUrls?.Select(queue => queue.DisplayName).ToList() ?? new List<string>();
             var currentName = string.Empty;

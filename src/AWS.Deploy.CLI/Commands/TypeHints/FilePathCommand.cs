@@ -32,7 +32,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         /// Not implemented, specific files are not suggested to the user
         /// </summary>
         /// <returns>Empty list</returns>
-        public Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting) => Task.FromResult<List<TypeHintResource>?>(null);
+        public Task<TypeHintResourceTable> GetResources(Recommendation recommendation, OptionSettingItem optionSetting) => Task.FromResult(new TypeHintResourceTable());
 
         /// <summary>
         /// Prompts the user to enter a path to a file

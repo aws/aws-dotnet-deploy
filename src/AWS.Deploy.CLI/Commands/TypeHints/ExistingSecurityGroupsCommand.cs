@@ -9,7 +9,6 @@ using AWS.Deploy.Common;
 using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.TypeHintData;
-using AWS.Deploy.Orchestration.Data;
 
 namespace AWS.Deploy.CLI.Commands.TypeHints
 {
@@ -37,30 +36,54 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             return await _awsResourceQueryer.DescribeSecurityGroups(vpcId);
         }
 
-        public async Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
+        public async Task<TypeHintResourceTable> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var securityGroups = await GetData(recommendation, optionSetting);
-            return securityGroups.Select(securityGroup => new TypeHintResource(securityGroup.GroupId, securityGroup.GroupId)).ToList();
+
+            var resourceTable = new TypeHintResourceTable
+            {
+                Columns = new List<TypeHintResourceColumn>()
+                {
+                    new TypeHintResourceColumn("Group Name"),
+                    new TypeHintResourceColumn("Group Id"),
+                    new TypeHintResourceColumn("VPC Id")
+                }
+            };
+
+            foreach (var securityGroup in securityGroups.OrderBy(securityGroup => securityGroup.VpcId))
+            {
+                var row = new TypeHintResource(securityGroup.GroupId, securityGroup.GroupId);
+                row.ColumnValues.Add(securityGroup.GroupName);
+                row.ColumnValues.Add(securityGroup.GroupId);
+                row.ColumnValues.Add(securityGroup.VpcId);
+
+                resourceTable.Rows.Add(row);
+            }
+
+            return resourceTable;
         }
 
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
-            var availableSecurityGroups = (await GetData(recommendation, optionSetting)).OrderBy(x => x.VpcId).ToList();
+            var resourceTable = await GetResources(recommendation, optionSetting);
+
             var groupNamePadding = 0;
-            availableSecurityGroups.ForEach(x =>
+            resourceTable.Rows.ForEach(row =>
             {
-                if (x.GroupName.Length > groupNamePadding)
-                    groupNamePadding = x.GroupName.Length;
+                if (row.ColumnValues[0].Length > groupNamePadding)
+                    groupNamePadding = row.ColumnValues[0].Length;
             });
-            var userInputConfigurationSecurityGroups = new UserInputConfiguration<SecurityGroup>(
-                idSelector: securityGroup => securityGroup.GroupId,
-                displaySelector: securityGroup => $"{securityGroup.GroupName.PadRight(groupNamePadding)} | {securityGroup.GroupId.PadRight(20)} | {securityGroup.VpcId}",
+
+            var userInputConfigurationSecurityGroups = new UserInputConfiguration<TypeHintResource>(
+                idSelector: securityGroup => securityGroup.SystemName,
+                displaySelector: securityGroup => $"{securityGroup.ColumnValues[0].PadRight(groupNamePadding)} | {securityGroup.ColumnValues[1].PadRight(20)} | {securityGroup.ColumnValues[2]}",
                 defaultSelector: securityGroup => false)
             {
                 CanBeEmpty = true,
                 CreateNew = false
             };
-            return _consoleUtilities.AskUserForList<SecurityGroup>(userInputConfigurationSecurityGroups, availableSecurityGroups, optionSetting, recommendation);
+
+            return _consoleUtilities.AskUserForList(userInputConfigurationSecurityGroups, resourceTable.Rows, optionSetting, recommendation);
         }
     }
 }
