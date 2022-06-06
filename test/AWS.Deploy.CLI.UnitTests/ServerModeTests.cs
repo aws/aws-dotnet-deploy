@@ -30,6 +30,20 @@ namespace AWS.Deploy.CLI.UnitTests
 {
     public class ServerModeTests
     {
+        /// <summary>
+        /// This test is to make sure the CLI is using at least version 5.0.0 of System.Text.Json. If we use verisons less then
+        /// 5.0.0 types that do not have a parameterless constructor will fail to deserialize. This affects the server mode model types.
+        /// The unit and integ test project force a newer version of System.Text.Json then would be used by default in the CLI masking the issue.
+        /// </summary>
+        [Fact]
+        public void EnsureMinimumSystemTextJsonVersion()
+        {
+            var assembly = typeof(ServerModeCommand).Assembly;
+            var jsonAssemblyName = assembly.GetReferencedAssemblies().FirstOrDefault(x => string.Equals("System.Text.Json", x.Name, StringComparison.OrdinalIgnoreCase));
+            Assert.True(jsonAssemblyName.Version >= Version.Parse("5.0.0"));
+        }
+
+
         [Fact]
         public async Task TcpPortIsInUseTest()
         {
