@@ -36,10 +36,16 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             return await _awsResourceQueryer.ListOfEC2KeyPairs();
         }
 
-        public async Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
+        public async Task<TypeHintResourceTable> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var keyPairs = await GetData();
-            return keyPairs.Select(x => new TypeHintResource(x.KeyName, x.KeyName)).ToList();
+
+            var resourceTable = new TypeHintResourceTable
+            {
+                Rows = keyPairs.Select(x => new TypeHintResource(x.KeyName, x.KeyName)).ToList()
+            };
+
+            return resourceTable;
         }
 
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)

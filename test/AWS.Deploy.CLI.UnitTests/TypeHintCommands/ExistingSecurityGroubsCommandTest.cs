@@ -74,9 +74,9 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
 
             var resources = await command.GetResources(appRunnerRecommendation, securityGroupsOptionSetting);
 
-            Assert.Single(resources);
-            Assert.Equal("group1", resources[0].DisplayName);
-            Assert.Equal("group1", resources[0].SystemName);
+            Assert.Single(resources.Rows);
+            Assert.Equal("group1", resources.Rows[0].DisplayName);
+            Assert.Equal("group1", resources.Rows[0].SystemName);
         }
 
         [Fact]

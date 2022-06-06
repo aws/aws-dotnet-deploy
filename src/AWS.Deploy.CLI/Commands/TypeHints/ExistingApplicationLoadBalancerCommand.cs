@@ -35,10 +35,16 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             return await _awsResourceQueryer.ListOfLoadBalancers(LoadBalancerTypeEnum.Application);
         }
 
-        public async Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
+        public async Task<TypeHintResourceTable> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var loadBalancers = await GetData();
-            return loadBalancers.Select(x => new TypeHintResource(x.LoadBalancerArn, x.LoadBalancerName)).ToList();
+
+            var resourceTable = new TypeHintResourceTable()
+            {
+                Rows = loadBalancers.Select(x => new TypeHintResource(x.LoadBalancerArn, x.LoadBalancerName)).ToList()
+            };
+
+            return resourceTable;
         }
 
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)

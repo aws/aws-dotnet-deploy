@@ -77,9 +77,9 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
 
             var resources = await command.GetResources(appRunnerRecommendation, vpcConnectorOptionSetting);
 
-            Assert.Single(resources);
-            Assert.Equal("vpcConnectorName", resources[0].DisplayName);
-            Assert.Equal("arn:aws:apprunner:us-west-2:123456789010:vpcconnector/fakeVpcConnector", resources[0].SystemName);
+            Assert.Single(resources.Rows);
+            Assert.Equal("vpcConnectorName", resources.Rows[0].DisplayName);
+            Assert.Equal("arn:aws:apprunner:us-west-2:123456789010:vpcconnector/fakeVpcConnector", resources.Rows[0].SystemName);
         }
 
         [Fact]

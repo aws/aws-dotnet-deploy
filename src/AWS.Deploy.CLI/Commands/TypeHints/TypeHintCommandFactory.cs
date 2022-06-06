@@ -9,7 +9,6 @@ using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.TypeHintData;
-using AWS.Deploy.Orchestration.Data;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AWS.Deploy.CLI.Commands.TypeHints
@@ -19,7 +18,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
     /// </summary>
     public interface ITypeHintCommand
     {
-        Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting);
+        Task<TypeHintResourceTable> GetResources(Recommendation recommendation, OptionSettingItem optionSetting);
         Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting);
     }
 

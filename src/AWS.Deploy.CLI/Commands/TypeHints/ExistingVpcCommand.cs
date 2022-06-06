@@ -31,10 +31,13 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             return await _awsResourceQueryer.GetListOfVpcs();
         }
 
-        public async Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
+        public async Task<TypeHintResourceTable> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var vpcs = await GetData();
-            return vpcs.ToDictionary(x => x.VpcId, x =>
+
+            var resourceTable = new TypeHintResourceTable();
+
+            resourceTable.Rows = vpcs.ToDictionary(x => x.VpcId, x =>
             {
                 var name = x.Tags?.FirstOrDefault(x => x.Key == "Name")?.Value ?? string.Empty;
                 var namePart =
@@ -49,6 +52,8 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
                 return $"{x.VpcId}{namePart}{isDefaultPart}";
             }).Select(x => new TypeHintResource(x.Key, x.Value)).ToList();
+
+            return resourceTable;
         }
 
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)

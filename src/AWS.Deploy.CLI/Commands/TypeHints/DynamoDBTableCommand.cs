@@ -31,10 +31,16 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             return await _awsResourceQueryer.ListOfDyanmoDBTables();
         }
 
-        public async Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
+        public async Task<TypeHintResourceTable> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var tables = await GetData();
-            return tables.Select(tableName => new TypeHintResource(tableName, tableName)).ToList();
+
+            var resourceTable = new TypeHintResourceTable
+            {
+                Rows = tables.Select(tableName => new TypeHintResource(tableName, tableName)).ToList()
+            };
+
+            return resourceTable;
         }
 
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)

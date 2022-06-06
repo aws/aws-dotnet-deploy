@@ -34,10 +34,16 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             return await _awsResourceQueryer.ListOfECSClusters();
         }
 
-        public async Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
+        public async Task<TypeHintResourceTable> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var clusters = await GetData();
-            return clusters.Select(x => new TypeHintResource(x.ClusterArn, x.ClusterName)).ToList();
+
+            var resourceTable = new TypeHintResourceTable
+            {
+                Rows = clusters.Select(x => new TypeHintResource(x.ClusterArn, x.ClusterName)).ToList()
+            };
+
+            return resourceTable;
         }
 
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)

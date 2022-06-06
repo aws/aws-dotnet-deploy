@@ -264,6 +264,57 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
             }
         }
 
+        /// <summary>
+        /// Tests that GetConfigSettingResourcesAsync for App Runner's
+        /// VPC Connector child settings return TypeHintResourceColumns
+        /// </summary>
+        [Fact]
+        public async Task GetConfigSettingResources_VpcConnectorOptions()
+        {
+            _stackName = $"ServerModeWebAppRunner{Guid.NewGuid().ToString().Split('-').Last()}";
+
+            var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
+            var portNumber = 4023;
+            using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ServerModeExtensions.ResolveCredentials);
+
+            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
+            var cancelSource = new CancellationTokenSource();
+
+            var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
+            try
+            {
+                var baseUrl = $"http://localhost:{portNumber}/";
+                var restClient = new RestAPIClient(baseUrl, httpClient);
+
+                await restClient.WaitTillServerModeReady();
+
+                var sessionId = await restClient.StartDeploymentSession(projectPath, _awsRegion);
+
+                await restClient.GetRecommendationsAndSetDeploymentTarget(sessionId, "AspNetAppAppRunner", _stackName);
+
+                // Assert that the Subnets and SecurityGroups options are returning columns 
+                var subnets = await restClient.GetConfigSettingResourcesAsync(sessionId, "VPCConnector.Subnets");
+                Assert.Collection(subnets.Columns,
+                    column => Assert.NotNull(column),   // Subnet Id
+                    column => Assert.NotNull(column),   // VPC
+                    column => Assert.NotNull(column));  // Availability Zone
+
+                var securityGroups = await restClient.GetConfigSettingResourcesAsync(sessionId, "VPCConnector.SecurityGroups");
+                Assert.Collection(securityGroups.Columns,
+                    column => Assert.NotNull(column),   // Name
+                    column => Assert.NotNull(column),   // Id
+                    column => Assert.NotNull(column));  // VPC
+
+                // This is using a real AWSResourceQueryer,
+                // so not asserting on the rows for these two options
+            }
+            finally
+            {
+                cancelSource.Cancel();
+                _stackName = null;
+            }
+        }
+
         public void Dispose()
         {
             Dispose(true);

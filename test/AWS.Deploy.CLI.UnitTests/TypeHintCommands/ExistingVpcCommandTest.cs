@@ -72,9 +72,9 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
 
             var resources = await command.GetResources(beanstalkRecommendation, vpcOptionSetting);
 
-            Assert.Single(resources);
-            Assert.Equal("vpc1", resources[0].DisplayName);
-            Assert.Equal("vpc1", resources[0].SystemName);
+            Assert.Single(resources.Rows);
+            Assert.Equal("vpc1", resources.Rows[0].DisplayName);
+            Assert.Equal("vpc1", resources.Rows[0].SystemName);
         }
 
         [Fact]

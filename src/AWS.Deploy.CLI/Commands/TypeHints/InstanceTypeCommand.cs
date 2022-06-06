@@ -31,14 +31,19 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             return await _awsResourceQueryer.ListOfAvailableInstanceTypes();
         }
 
-        public async Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
+        public async Task<TypeHintResourceTable> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
         {
-            var instanceType = await GetData();
+            var instanceTypes = await GetData();
+            var resourceTable = new TypeHintResourceTable();
 
-            return instanceType?
-                .OrderBy(x => x.InstanceType.Value)
-                .Select(x => new TypeHintResource(x.InstanceType.Value, x.InstanceType.Value))
-                .ToList();
+            if (instanceTypes != null)
+            {
+                resourceTable.Rows = instanceTypes.OrderBy(x => x.InstanceType.Value)
+                                                  .Select(x => new TypeHintResource(x.InstanceType.Value, x.InstanceType.Value))
+                                                  .ToList();
+            }
+
+            return resourceTable;
         }
 
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)

@@ -32,10 +32,16 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             return await _awsResourceQueryer.ListOfS3Buckets();
         }
 
-        public async Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
+        public async Task<TypeHintResourceTable> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var buckets = await GetData();
-            return buckets.Select(bucket => new TypeHintResource(bucket.BucketName, bucket.BucketName)).ToList();
+
+            var resourceTable = new TypeHintResourceTable
+            {
+                Rows = buckets.Select(bucket => new TypeHintResource(bucket.BucketName, bucket.BucketName)).ToList()
+            };
+
+            return resourceTable;
         }
 
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
