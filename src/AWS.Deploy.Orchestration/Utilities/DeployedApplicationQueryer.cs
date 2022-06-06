@@ -14,7 +14,6 @@ using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.LocalUserSettings;
-using AWS.Deploy.Recipes.CDK.Common;
 
 namespace AWS.Deploy.Orchestration.Utilities
 {

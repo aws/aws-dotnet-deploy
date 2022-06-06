@@ -14,7 +14,6 @@ using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestration.CDK;
 using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.Utilities;
-using AWS.Deploy.Recipes.CDK.Common;
 using Stack = Amazon.CloudFormation.Model.Stack;
 
 namespace AWS.Deploy.Orchestration

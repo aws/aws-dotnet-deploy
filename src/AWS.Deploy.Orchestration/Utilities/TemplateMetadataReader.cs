@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Amazon.CloudFormation.Model;
 using AWS.Deploy.Common;
-using AWS.Deploy.Recipes.CDK.Common;
 using Newtonsoft.Json;
 using YamlDotNet.RepresentationModel;
 
