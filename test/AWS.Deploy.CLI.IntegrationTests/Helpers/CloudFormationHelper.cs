@@ -25,6 +25,12 @@ namespace AWS.Deploy.CLI.IntegrationTests.Helpers
             return stack.StackStatus;
         }
 
+        public async Task<StackStatus> GetStackArn(string stackName)
+        {
+            var stack = await GetStackAsync(stackName);
+            return stack.StackId;
+        }
+
         public async Task<bool> IsStackDeleted(string stackName)
         {
             try

@@ -229,6 +229,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         [SwaggerOperation(OperationId = "ApplyConfigSettings")]
         [SwaggerResponse(200, type: typeof(ApplyConfigSettingsOutput))]
         [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound)]
+        [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status400BadRequest)]
         [Authorize]
         public async Task<IActionResult> ApplyConfigSettings(string sessionId, [FromBody] ApplyConfigSettingsInput input)
         {
@@ -248,16 +249,23 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
             var output = new ApplyConfigSettingsOutput();
 
-            foreach (var updatedSetting in input.UpdatedSettings)
+            var optionSettingItems = input.UpdatedSettings
+                .Select(x => optionSettingHandler.GetOptionSetting(state.SelectedRecommendation, x.Key));
+
+            var readonlySettings = optionSettingItems
+                .Where(x => state.SelectedRecommendation.IsExistingCloudApplication && !x.Updatable);
+            if (readonlySettings.Any())
+                return BadRequest($"The following settings are read only and cannot be updated: {string.Join(", ", readonlySettings)}");
+
+            foreach (var updatedSetting in optionSettingItems)
             {
                 try
                 {
-                    var setting = optionSettingHandler.GetOptionSetting(state.SelectedRecommendation, updatedSetting.Key);
-                    await optionSettingHandler.SetOptionSettingValue(state.SelectedRecommendation, setting, updatedSetting.Value);
+                    await optionSettingHandler.SetOptionSettingValue(state.SelectedRecommendation, updatedSetting, input.UpdatedSettings[updatedSetting.FullyQualifiedId]);
                 }
                 catch (Exception ex)
                 {
-                    output.FailedConfigUpdates.Add(updatedSetting.Key, ex.Message);
+                    output.FailedConfigUpdates.Add(input.UpdatedSettings[updatedSetting.FullyQualifiedId], ex.Message);
                 }
             }
 
