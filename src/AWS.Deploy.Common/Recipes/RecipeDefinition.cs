@@ -123,6 +123,12 @@ namespace AWS.Deploy.Common.Recipes
         /// </summary>
         public string? BaseRecipeId { get; set; }
 
+        /// <summary>
+        /// The settings that are specific to the Deployment Bundle.
+        /// These settings are populated by the <see cref="IRecipeHandler"/>.
+        /// </summary>
+        public List<OptionSettingItem> DeploymentBundleSettings = new();
+
         public RecipeDefinition(
             string id,
             string version,

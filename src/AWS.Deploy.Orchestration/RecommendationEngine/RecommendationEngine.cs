@@ -45,51 +45,11 @@ namespace AWS.Deploy.Orchestration.RecommendationEngine
                     continue;
                 }
 
-                var deploymentBundleSettings = GetDeploymentBundleSettings(potentialRecipe.DeploymentBundle);
-                recommendations.Add(new Recommendation(potentialRecipe, _orchestratorSession.ProjectDefinition, deploymentBundleSettings, priority, additionalReplacements));
+                recommendations.Add(new Recommendation(potentialRecipe, _orchestratorSession.ProjectDefinition, priority, additionalReplacements));
             }
 
             recommendations = recommendations.OrderByDescending(recommendation => recommendation.ComputedPriority).ThenBy(recommendation => recommendation.Name).ToList();
             return recommendations;
-        }
-
-        public List<OptionSettingItem> GetDeploymentBundleSettings(DeploymentBundleTypes deploymentBundleTypes)
-        {
-            var deploymentBundleDefinitionsPath = DeploymentBundleDefinitionLocator.FindDeploymentBundleDefinitionPath();
-
-            try
-            {
-                foreach (var deploymentBundleFile in Directory.GetFiles(deploymentBundleDefinitionsPath, "*.deploymentbundle", SearchOption.TopDirectoryOnly))
-                {
-                    try
-                    {
-                        var content = File.ReadAllText(deploymentBundleFile);
-                        var definition = JsonConvert.DeserializeObject<DeploymentBundleDefinition>(content);
-                        if (definition == null)
-                            throw new FailedToDeserializeException(DeployToolErrorCode.FailedToDeserializeDeploymentBundle, $"Failed to Deserialize Deployment Bundle [{deploymentBundleFile}]");
-                        if (definition.Type.Equals(deploymentBundleTypes))
-                        {
-                            // Assign Build category to all of the deployment bundle settings.
-                            foreach(var setting in definition.Parameters)
-                            {
-                                setting.Category = Category.DeploymentBundle.Id;
-                            }
-
-                            return definition.Parameters;
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        throw new FailedToDeserializeException(DeployToolErrorCode.FailedToDeserializeDeploymentBundle, $"Failed to Deserialize Deployment Bundle [{deploymentBundleFile}]: {e.Message}", e);
-                    }
-                }
-            }
-            catch(IOException)
-            {
-                throw new NoDeploymentBundleDefinitionsFoundException(DeployToolErrorCode.DeploymentBundleDefinitionNotFound, "Failed to find a deployment bundle definition");
-            }
-
-            throw new NoDeploymentBundleDefinitionsFoundException(DeployToolErrorCode.DeploymentBundleDefinitionNotFound, "Failed to find a deployment bundle definition");
         }
 
         public async Task<RulesResult> EvaluateRules(IList<RecommendationRuleItem> rules)

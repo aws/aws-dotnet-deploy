@@ -86,7 +86,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
                 new OptionSettingItem("DockerfilePath", "", "", "")
             };
             var projectDefintion = new ProjectDefinition(null, projectPath, "", "");
-            var recommendation = new Recommendation(_recipeDefinition, projectDefintion, options, 100, new Dictionary<string, string>());
+            var recommendation = new Recommendation(_recipeDefinition, projectDefintion, 100, new Dictionary<string, string>());
             var validator = new DockerfilePathValidator(_directoryManager, _fileManager);
 
             recommendation.DeploymentBundle.DockerExecutionDirectory = dockerExecutionDirectory;
