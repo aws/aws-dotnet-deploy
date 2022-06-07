@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Amazon.CloudControlApi.Model;
 using AWS.Deploy.Common.Data;
+using Amazon.ElasticBeanstalk;
 
 namespace AWS.Deploy.Common.Recipes.Validation
 {
@@ -40,7 +41,7 @@ namespace AWS.Deploy.Common.Recipes.Validation
 
                 case "AWS::ElasticBeanstalk::Environment":
                     var beanstalkEnvironments = await _awsResourceQueryer.ListOfElasticBeanstalkEnvironments(environmentName: resourceName);
-                    if (beanstalkEnvironments.Any(x => x.EnvironmentName.Equals(resourceName)))
+                    if (beanstalkEnvironments.Any(x => x.EnvironmentName.Equals(resourceName) && x.Status != EnvironmentStatus.Terminated))
                         return ValidationResult.Failed($"An Elastic Beanstalk environment already exists with the name '{resourceName}'. Check the AWS Console for more information on the existing resource.");
                     break;
 
