@@ -33,11 +33,9 @@ namespace AWS.Deploy.Common
 
         public DeploymentBundle DeploymentBundle { get; }
 
-        public readonly List<OptionSettingItem> DeploymentBundleSettings = new ();
-
         public readonly Dictionary<string, string> ReplacementTokens = new();
 
-        public Recommendation(RecipeDefinition recipe, ProjectDefinition projectDefinition, List<OptionSettingItem> deploymentBundleSettings, int computedPriority, Dictionary<string, string> additionalReplacements)
+        public Recommendation(RecipeDefinition recipe, ProjectDefinition projectDefinition, int computedPriority, Dictionary<string, string> additionalReplacements)
         {
             additionalReplacements ??= new Dictionary<string, string>();
             Recipe = recipe;
@@ -46,7 +44,6 @@ namespace AWS.Deploy.Common
 
             ProjectDefinition = projectDefinition;
             DeploymentBundle = new DeploymentBundle();
-            DeploymentBundleSettings = deploymentBundleSettings;
 
             CollectRecommendationReplacementTokens(GetConfigurableOptionSettingItems().ToList());
 
@@ -87,10 +84,7 @@ namespace AWS.Deploy.Common
                 }
             }
 
-            if (DeploymentBundleSettings == null)
-                return Recipe.OptionSettings;
-
-            return Recipe.OptionSettings.Union(DeploymentBundleSettings);
+            return Recipe.OptionSettings;
         }
 
         private void CollectRecommendationReplacementTokens(List<OptionSettingItem> optionSettings)

@@ -55,6 +55,8 @@ namespace AWS.Deploy.Orchestration
                             definition.RecipePath = recipeDefinitionFile;
                             if (!uniqueRecipeId.Contains(definition.Id))
                             {
+                                definition.DeploymentBundleSettings = GetDeploymentBundleSettings(definition.DeploymentBundle);
+                                definition.OptionSettings.AddRange(definition.DeploymentBundleSettings);
                                 var dependencyTree = new Dictionary<string, List<string>>();
                                 BuildDependencyTree(definition, definition.OptionSettings, dependencyTree);
                                 foreach (var dependee in dependencyTree.Keys)
@@ -79,6 +81,45 @@ namespace AWS.Deploy.Orchestration
             }
 
             return recipeDefinitions;
+        }
+
+        private List<OptionSettingItem> GetDeploymentBundleSettings(DeploymentBundleTypes deploymentBundleTypes)
+        {
+            var deploymentBundleDefinitionsPath = DeploymentBundleDefinitionLocator.FindDeploymentBundleDefinitionPath();
+
+            try
+            {
+                foreach (var deploymentBundleFile in Directory.GetFiles(deploymentBundleDefinitionsPath, "*.deploymentbundle", SearchOption.TopDirectoryOnly))
+                {
+                    try
+                    {
+                        var content = File.ReadAllText(deploymentBundleFile);
+                        var definition = JsonConvert.DeserializeObject<DeploymentBundleDefinition>(content);
+                        if (definition == null)
+                            throw new FailedToDeserializeException(DeployToolErrorCode.FailedToDeserializeDeploymentBundle, $"Failed to Deserialize Deployment Bundle [{deploymentBundleFile}]");
+                        if (definition.Type.Equals(deploymentBundleTypes))
+                        {
+                            // Assign Build category to all of the deployment bundle settings.
+                            foreach (var setting in definition.Parameters)
+                            {
+                                setting.Category = Category.DeploymentBundle.Id;
+                            }
+
+                            return definition.Parameters;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        throw new FailedToDeserializeException(DeployToolErrorCode.FailedToDeserializeDeploymentBundle, $"Failed to Deserialize Deployment Bundle [{deploymentBundleFile}]: {e.Message}", e);
+                    }
+                }
+            }
+            catch (IOException)
+            {
+                throw new NoDeploymentBundleDefinitionsFoundException(DeployToolErrorCode.DeploymentBundleDefinitionNotFound, "Failed to find a deployment bundle definition");
+            }
+
+            throw new NoDeploymentBundleDefinitionsFoundException(DeployToolErrorCode.DeploymentBundleDefinitionNotFound, "Failed to find a deployment bundle definition");
         }
 
         /// <summary>
