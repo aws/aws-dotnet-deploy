@@ -821,7 +821,7 @@ namespace AWS.Deploy.CLI.Commands
                         case OptionSettingValueType.Object:
                             foreach (var childSetting in setting.ChildOptionSettings)
                             {
-                                if (_optionSettingHandler.IsOptionSettingDisplayable(recommendation, childSetting))
+                                if (_optionSettingHandler.IsOptionSettingDisplayable(recommendation, childSetting) && (!recommendation.IsExistingCloudApplication || childSetting.Updatable))
                                     await ConfigureDeploymentFromCli(recommendation, childSetting);
                             }
                             break;

@@ -29,8 +29,10 @@ namespace AWS.Deploy.CLI.UnitTests
     {
         private OrchestratorSession _session;
         private readonly TestDirectoryManager _directoryManager;
+        private readonly Mock<IValidatorFactory> _validatorFactory;
         private readonly IOptionSettingHandler _optionSettingHandler;
         private readonly Mock<IAWSResourceQueryer> _awsResourceQueryer;
+        private readonly SubnetsInVpcValidator _subnetsInVpcValidator;
         private readonly Mock<IServiceProvider> _serviceProvider;
         private readonly IDeploymentManifestEngine _deploymentManifestEngine;
         private readonly IOrchestratorInteractiveService _orchestratorInteractiveService;
@@ -45,7 +47,12 @@ namespace AWS.Deploy.CLI.UnitTests
             _serviceProvider
                 .Setup(x => x.GetService(typeof(IAWSResourceQueryer)))
                 .Returns(_awsResourceQueryer.Object);
-            _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider.Object));
+            _validatorFactory = new Mock<IValidatorFactory>();
+            _optionSettingHandler = new OptionSettingHandler(_validatorFactory.Object);
+            _subnetsInVpcValidator = new SubnetsInVpcValidator(_awsResourceQueryer.Object, _optionSettingHandler);
+            _serviceProvider
+                .Setup(x => x.GetService(typeof(IOptionSettingItemValidator)))
+                .Returns(_subnetsInVpcValidator);
             _directoryManager = new TestDirectoryManager();
             _fileManager = new TestFileManager();
             var recipeFiles = Directory.GetFiles(RecipeLocator.FindRecipeDefinitionsPath(), "*.recipe", SearchOption.TopDirectoryOnly);
@@ -54,11 +61,7 @@ namespace AWS.Deploy.CLI.UnitTests
                 _fileManager.InMemoryStore.Add(recipeFile, File.ReadAllText(recipeFile));
             _deploymentManifestEngine = new DeploymentManifestEngine(_directoryManager, _fileManager);
             _orchestratorInteractiveService = new TestToolOrchestratorInteractiveService();
-            var serviceProvider = new Mock<IServiceProvider>();
-            var validatorFactory = new ValidatorFactory(serviceProvider.Object);
-            var optionSettingHandler = new OptionSettingHandler(validatorFactory);
-            _recipeHandler = new RecipeHandler(_deploymentManifestEngine, _orchestratorInteractiveService, _directoryManager, _fileManager, optionSettingHandler);
-            _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider.Object));
+            _recipeHandler = new RecipeHandler(_deploymentManifestEngine, _orchestratorInteractiveService, _directoryManager, _fileManager, _optionSettingHandler);
         }
 
         private async Task<RecommendationEngine> BuildRecommendationEngine(string testProjectName)
@@ -458,42 +461,20 @@ namespace AWS.Deploy.CLI.UnitTests
             var recommendations = await engine.ComputeRecommendations();
 
             var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
-            var vpcIdOptionSetting = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, "VpcId");
-            var subnetsSetting = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, "Subnets");
+            var useVpcOptionSetting = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, "VPC.UseVPC");
+            var vpcIdOptionSetting = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, "VPC.VpcId");
+            var subnetsSetting = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, "VPC.Subnets");
 
             // Before dependency aren't satisfied
-            Assert.True(_optionSettingHandler.IsOptionSettingDisplayable(beanstalkRecommendation, vpcIdOptionSetting));
+            Assert.True(_optionSettingHandler.IsOptionSettingDisplayable(beanstalkRecommendation, useVpcOptionSetting));
+            Assert.False(_optionSettingHandler.IsOptionSettingDisplayable(beanstalkRecommendation, vpcIdOptionSetting));
             Assert.False(_optionSettingHandler.IsOptionSettingDisplayable(beanstalkRecommendation, subnetsSetting));
 
             // Satisfy dependencies
+            await _optionSettingHandler.SetOptionSettingValue(beanstalkRecommendation, useVpcOptionSetting, true);
             await _optionSettingHandler.SetOptionSettingValue(beanstalkRecommendation, vpcIdOptionSetting, "vpc-1234abcd");
-            Assert.True(_optionSettingHandler.IsOptionSettingDisplayable(beanstalkRecommendation, subnetsSetting));
-        }
-
-        [Fact]
-        public async Task IsDisplayable_NotEmptyOperation_ListType()
-        {
-            var engine = await BuildRecommendationEngine("WebAppNoDockerFile");
-
-            var recommendations = await engine.ComputeRecommendations();
-
-            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
-            var vpcIdOptionSetting = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, "VpcId");
-            var subnetsSetting = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, "Subnets");
-            var securityGroupsSetting = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, "SecurityGroups");
-
-            // Before dependency aren't satisfied
             Assert.True(_optionSettingHandler.IsOptionSettingDisplayable(beanstalkRecommendation, vpcIdOptionSetting));
-            Assert.False(_optionSettingHandler.IsOptionSettingDisplayable(beanstalkRecommendation, subnetsSetting));
-            Assert.False(_optionSettingHandler.IsOptionSettingDisplayable(beanstalkRecommendation, securityGroupsSetting));
-
-            // Satisfy 1 dependency
-            await _optionSettingHandler.SetOptionSettingValue(beanstalkRecommendation, vpcIdOptionSetting, "vpc-1234abcd");
-            Assert.False(_optionSettingHandler.IsOptionSettingDisplayable(beanstalkRecommendation, securityGroupsSetting));
-
-            // Satisfy 2 dependencies
-            await _optionSettingHandler.SetOptionSettingValue(beanstalkRecommendation, subnetsSetting, new SortedSet<string> { "subnet-1234abcd" });
-            Assert.True(_optionSettingHandler.IsOptionSettingDisplayable(beanstalkRecommendation, securityGroupsSetting));
+            Assert.True(_optionSettingHandler.IsOptionSettingDisplayable(beanstalkRecommendation, subnetsSetting));
         }
 
         [Fact]

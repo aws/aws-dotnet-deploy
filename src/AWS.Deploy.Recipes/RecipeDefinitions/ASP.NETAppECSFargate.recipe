@@ -321,7 +321,7 @@
                     "Description": "The ID of the existing VPC to use.",
                     "Type": "String",
                     "TypeHint": "ExistingVpc",
-                    "DefaultValue": null,
+                    "DefaultValue": "{DefaultVpcId}",
                     "AdvancedSetting": false,
                     "Updatable": false,
                     "Validators": [
