@@ -54,7 +54,7 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
 
             var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
 
-            var vpcOptionSetting = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, "VpcId");
+            var vpcOptionSetting = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, "VPC.VpcId");
 
             var interactiveServices = new TestToolInteractiveServiceImpl(new List<string>());
             var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager, _optionSettingHandler);
@@ -93,7 +93,7 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
 
             var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
 
-            var vpcOptionSetting = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, "VpcId");
+            var vpcOptionSetting = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, "VPC.VpcId");
 
             var interactiveServices = new TestToolInteractiveServiceImpl(new List<string>
             {

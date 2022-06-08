@@ -375,31 +375,31 @@ namespace AspNetAppElasticBeanstalkLinux
                 }
             }
 
-            if (!string.IsNullOrEmpty(settings.VpcId))
+            if (settings.VPC.UseVPC)
             {
                 optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
                 {
                     Namespace = "aws:ec2:vpc",
                     OptionName = "VPCId",
-                    Value = settings.VpcId
+                    Value = settings.VPC.VpcId
                 });
 
-                if (settings.Subnets.Any())
+                if (settings.VPC.Subnets.Any())
                 {
                     optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
                     {
                         Namespace = "aws:ec2:vpc",
                         OptionName = "Subnets",
-                        Value = string.Join(",", settings.Subnets)
+                        Value = string.Join(",", settings.VPC.Subnets)
                     });
 
-                    if (settings.SecurityGroups.Any())
+                    if (settings.VPC.SecurityGroups.Any())
                     {
                         optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
                         {
                             Namespace = "aws:autoscaling:launchconfiguration",
                             OptionName = "SecurityGroups",
-                            Value = string.Join(",", settings.SecurityGroups)
+                            Value = string.Join(",", settings.VPC.SecurityGroups)
                         });
                     }
                 }
