@@ -34,6 +34,7 @@ using AWS.Deploy.CLI.Commands.TypeHints;
 using AWS.Deploy.Common.TypeHintData;
 using AWS.Deploy.Orchestration.ServiceHandlers;
 using AWS.Deploy.Common.Data;
+using AWS.Deploy.Common.Recipes.Validation;
 
 namespace AWS.Deploy.CLI.ServerMode.Controllers
 {
@@ -543,11 +544,20 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 throw new SelectedRecommendationIsNullException("The selected recommendation is null or invalid.");
 
             var optionSettingHandler = serviceProvider.GetRequiredService<IOptionSettingHandler>();
+            var validatorFactory = serviceProvider.GetRequiredService<IValidatorFactory>();
             var settingValidatorFailedResults = optionSettingHandler.RunOptionSettingValidators(state.SelectedRecommendation);
-            if (settingValidatorFailedResults.Any())
+            var recipeValidatorFailedResults =
+                        validatorFactory.BuildValidators(state.SelectedRecommendation.Recipe)
+                            .Select(async validator => await validator.Validate(state.SelectedRecommendation, orchestratorSession))
+                            .Select(x => x.Result)
+                            .Where(x => !x.IsValid)
+                            .ToList();
+            if (settingValidatorFailedResults.Any() || recipeValidatorFailedResults.Any())
             {
                 var settingValidationErrorMessage = $"The deployment configuration needs to be adjusted before it can be deployed:{Environment.NewLine}";
                 foreach (var result in settingValidatorFailedResults)
+                    settingValidationErrorMessage += $" - {result.ValidationFailedMessage}{Environment.NewLine}{Environment.NewLine}";
+                foreach (var result in recipeValidatorFailedResults)
                     settingValidationErrorMessage += $" - {result.ValidationFailedMessage}{Environment.NewLine}{Environment.NewLine}";
                 settingValidationErrorMessage += $"{Environment.NewLine}Please adjust your settings";
                 return Problem(settingValidationErrorMessage);
