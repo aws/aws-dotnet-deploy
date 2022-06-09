@@ -1,6 +1,8 @@
-# Setting up credentials for the deployment tool<a name="deployment-tool-setup-creds"></a>
+# Setting up credentials
 
-****  
+****
+
+****
 
 The information shown below is about how to set up credentials for the deployment tool. If you're looking for information about setting up credentials for your .NET project, see [Configure AWS credentials](https://docs.aws.amazon.com/sdk-for-net/v3/developer-guide/net-dg-config-creds.html) in the [AWS SDK for .NET Developer Guide](https://docs.aws.amazon.com/sdk-for-net/v3/developer-guide/net-dg-config-creds.html) instead.
 
@@ -12,13 +14,13 @@ To run the deployment tool against your AWS account, you must have a credentials
 
 The credentials that you use to run the deployment tool must have permissions for certain services, depending on the tasks that you're trying to perform. The following are some examples of the typical permissions that are required to run the tool. Additional permissions might be required, depending on the type of application you're deploying and the services it uses.
 
-| Task | Permissions for services | 
+| Task | Permissions for services |
 | --- |--- |
-| Display a list of AWS CloudFormation stacks (list-deployments) | CloudFormation | 
-| Deploy and redeploy to Elastic Beanstalk (deploy) | CloudFormation, Elastic Beanstalk | 
-| Deploy and redeploy to Amazon ECS (deploy) | CloudFormation, Elastic Beanstalk, Elastic Container Registry | 
+| Display a list of AWS CloudFormation stacks (list-deployments) | CloudFormation |
+| Deploy and redeploy to Elastic Beanstalk (deploy) | CloudFormation, Elastic Beanstalk |
+| Deploy and redeploy to Amazon ECS (deploy) | CloudFormation, Elastic Beanstalk, Elastic Container Registry |
 
-For additional information about permissions, see the topics in the [Troubleshooting Guide](../../troubleshooting-guide.md).
+For additional information about permissions, see the topics in the [Troubleshooting Guide](../../troubleshooting-guide/missing-dependencies.md).
 
 In your shared AWS config and credentials files, if the `[default]` profile exists, the deployment tool uses that profile by default. You can change this behavior by specifying a profile for the tool to use, either system-wide or in a particular context.
 
@@ -36,5 +38,3 @@ To specify a profile for a particular context, do one of the following:
   > If you provide only the `--profile` argument, the AWS Region isn't read from the profile that you specify. Instead, the tool reads the Region from the `[default]` profile if one exists, or asks for the desired profile interactively.
 * Specify nothing and, assuming that you don't have a `[default]` profile, the tool will ask you to choose a profile and an AWS Region.
 
-## Next steps
-- See how to [run the tool](run-tool.md)

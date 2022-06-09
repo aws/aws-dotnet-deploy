@@ -9,33 +9,61 @@ docs_dir: 'site/content'
 site_dir: 'docs'
 
 nav:
-  - Overview: index.md
+  #- Overview: index.md
+  #  - Documentation: docs/getting-started/pre-requisites.md
+  #  - Troubleshooting Guide: troubleshooting-guide/missing-dependencies.md
+  #  - Contributing to the project: contributing.md
+  - Overview:
+    - About the tool: overview/about.md
+    - FAQs: overview/faq.md
+    - Resources: overview/resources.md
+    - Documentation: docs/getting-started/pre-requisites.md
+    - Troubleshooting Guide: troubleshooting-guide/missing-dependencies.md
+    - Contributing to the project: contributing.md
   - Documentation:
-    - Getting Started: 
-      - Setting up your environment: docs/getting-started/pre-requisites.md
-      - Installing the tool: docs/getting-started/installation.md
+    - Getting Started:
+      - Pre-requisites: docs/getting-started/pre-requisites.md
+      - How to install: docs/getting-started/installation.md
       - Setting up credentials: docs/getting-started/setup-creds.md
-      - Running the tool: docs/getting-started/run-tool.md
+      - Deploy "Hello World": docs/getting-started/run-tool.md
     - Supported AWS computes:
+      - Support Matrix: docs/aws-computes/matrix.md
       - Amazon ECS: docs/aws-computes/ecs.md
       - AWS Elastic Beanstalk: docs/aws-computes/beanstalk.md
       - AWS App Runner: docs/aws-computes/app-runner.md
       - Amazon S3: docs/aws-computes/s3.md
-    - Features:
-      - JSON configuration file: docs/features/config-file.md
-      - Recipe: docs/features/recipe.md
-      - Recommendation Engine: docs/features/recommendation-engine.md
-      - Deployment Project: docs/features/deployment-project.md
-      - Auto-generated Dockerfile: docs/features/autogen-dockerfile.md
-    - Tutorials:
-      - Deploying ASP.NET Core Application: docs/tutorials/deploy-webapp.md
-      - Deploying Blazor WebAssembly Application: docs/tutorials/deploy-blazorapp.md
-      - Deploying Console Service: docs/tutorials/deploy-console-service.md
-      - Deploying Console Task: docs/tutorials/deploy-console-task.md
-      - Pushing Image to ECS: docs/tutorials/push-image-ecr.md
-      - Automating Deployments: docs/tutorials/automate-deployments.md
-      - Listing Deployments: docs/tutorials/list-deployments.md
-      - Deleting Deployment: docs/tutorials/delete-deployment.md
+    - Commands:
+      - deploy: docs/commands/deploy.md
+      - list-deployments: docs/commands/list.md
+      - delete-deployment: docs/commands/delete.md
+      - deployment-project: docs/commands/project.md
+      - server-mode: docs/commands/server-mode.md
+    - Docker support:
+      - Dockerfile generation: docs/docker/docker-generation.md
+      - Publishing a Docker image: docs/docker/publish-image.md
+    - Deployment recipes: docs/recipe.md
+    - Deployment projects:
+      - Generating CDK project: docs/projects/overview.md
+      - Customizing CDK project: docs/projects/custom-project.md
+    - Integrating with CI/CD:
+      - Overview: docs/cicd/overview.md
+      - Deployment settings file: docs/cicd/settings.md
+      - Deploy with -silent: docs/cicd/silent.md
+    #- Features:
+    #  - JSON configuration file: docs/features/config-file.md
+    #  - Recipe: docs/features/recipe.md
+    #  - Recommendation Engine: docs/features/recommendation-engine.md
+    #  - Deployment Project: docs/features/deployment-project.md
+    #  - Auto-generated Dockerfile: docs/features/autogen-dockerfile.md
+    #- Tutorials:
+    #  - Deploying ASP.NET Core Application: docs/tutorials/deploy-webapp.md
+    #  - Deploying Blazor WebAssembly Application: docs/tutorials/deploy-blazorapp.md
+    #  - Deploying Console Service: docs/tutorials/deploy-console-service.md
+    #  - Deploying Console Task: docs/tutorials/deploy-console-task.md
+    #  - Pushing Image to ECS: docs/tutorials/push-image-ecr.md
+    #  - Automating Deployments: docs/tutorials/automate-deployments.md
+    #  - Listing Deployments: docs/tutorials/list-deployments.md
+    #  - Deleting Deployment: docs/tutorials/delete-deployment.md
   - Troubleshooting Guide:
     - Missing Dependencies: troubleshooting-guide/missing-dependencies.md
     - Docker Issues: troubleshooting-guide/docker-issues.md
