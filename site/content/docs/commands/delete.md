@@ -10,4 +10,5 @@
 Tears down the application stack.
 
 ####Examples
-TBD...
+
+    dotnet aws delete-deployment MY_APPLICATION -region us-west-2

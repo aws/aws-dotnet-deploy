@@ -9,14 +9,9 @@ docs_dir: 'site/content'
 site_dir: 'docs'
 
 nav:
-  #- Overview: index.md
-  #  - Documentation: docs/getting-started/pre-requisites.md
-  #  - Troubleshooting Guide: troubleshooting-guide/missing-dependencies.md
-  #  - Contributing to the project: contributing.md
   - Overview:
     - About the tool: overview/about.md
     - FAQs: overview/faq.md
-    - Resources: overview/resources.md
     - Documentation: docs/getting-started/pre-requisites.md
     - Troubleshooting Guide: troubleshooting-guide/missing-dependencies.md
     - Contributing to the project: contributing.md
@@ -24,10 +19,10 @@ nav:
     - Getting Started:
       - Pre-requisites: docs/getting-started/pre-requisites.md
       - How to install: docs/getting-started/installation.md
-      - Setting up credentials: docs/getting-started/setup-creds.md
+      - Set up Credentials: docs/getting-started/setup-creds.md
       - Deploy "Hello World": docs/getting-started/run-tool.md
     - Supported AWS computes:
-      - Support Matrix: docs/aws-computes/matrix.md
+      - Support matrix: docs/aws-computes/matrix.md
       - Amazon ECS: docs/aws-computes/ecs.md
       - AWS Elastic Beanstalk: docs/aws-computes/beanstalk.md
       - AWS App Runner: docs/aws-computes/app-runner.md
@@ -46,9 +41,10 @@ nav:
       - Generating CDK project: docs/projects/overview.md
       - Customizing CDK project: docs/projects/custom-project.md
     - Integrating with CI/CD:
-      - Overview: docs/cicd/overview.md
-      - Deployment settings file: docs/cicd/settings.md
+    #  - Overview: docs/cicd/overview.md
       - Deploy with -silent: docs/cicd/silent.md
+      - Deployment settings file: docs/cicd/settings.md
+
     #- Features:
     #  - JSON configuration file: docs/features/config-file.md
     #  - Recipe: docs/features/recipe.md

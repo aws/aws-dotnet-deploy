@@ -1,7 +1,5 @@
 # Installing the deployment tool<a name="deployment-tool-setup"></a>
 
-
-****
 The following instructions show you how to install, update, and uninstall the deployment tool.
 
 #### Install

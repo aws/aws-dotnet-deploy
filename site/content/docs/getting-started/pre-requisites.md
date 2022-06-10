@@ -1,19 +1,15 @@
-# Setting up your environment<a name="deployment-tool-setup-env"></a>
+# Setting up your environment
 
-****
+To run the AWS Deploy Tool, you need the following pre-requisites set up in your environment:
 
-To run the deployment tool, you need the following pre-requisites set up in your environment:
-
-####AWS Account
+#### AWS Account
 * *An AWS account* with a local credential profile configured in the shared AWS config and credentials files. For information on setting up a profile, see our [SDK Reference Guide](https://docs.aws.amazon.com/sdkref/latest/guide/access-users.html).
 
 * The local credential profile can be configured by a variety of tools. For example, the credential profile can be configured with the [AWS Toolkit for Visual Studio](https://docs.aws.amazon.com/toolkit-for-visual-studio/latest/user-guide/credentials.html) or the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html), among others.
 
-* Note: You need to make sure to add the appropriate AWS CloudFormation permissions to your credentials’ profile / assumed role.
+  > Note: You need to make sure to add the appropriate AWS permissions to your credentials’ profile / assumed role. See [Setting up Credentials](setup-creds.md)
 
-* For information on AWS Single Sign On (AWS SSO),  visit the [.NET SDK Reference Guide](https://docs.aws.amazon.com/sdkref/latest/guide/access-sso.html).
-
-####.NET Core 3.1 or later
+#### .NET Core 3.1 or later
 * .NET CLI - the deployment tool can be  used from the .NET command-line interface (CLI) - a cross-platform toolchain for developing, building, running, and publishing .NET applications.
 
 * The .NET CLI is included with the [.NET SDK](https://docs.microsoft.com/en-us/dotnet/core/sdk). For information about how to install or update .NET, see [https://dotnet.microsoft.com/](https://dotnet.microsoft.com/).
@@ -49,5 +45,5 @@ node --version
 
 * To install Docker, go to [https://docs.docker.com/engine/install/](https://docs.docker.com/engine/install/).
 
-#### ZIP CLI(Linux and macOS)
+#### ZIP CLI (Linux and macOS)
 * Mac / Linux only. Used when creating zip packages for deployment bundles. The zip cli is used to maintain Linux file permissions.

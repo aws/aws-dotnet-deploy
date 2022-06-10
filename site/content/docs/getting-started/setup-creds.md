@@ -1,40 +1,54 @@
 # Setting up credentials
 
-****
+#### Overview
 
-****
+AWS.Deploy.Tools, internally uses a variety of different tools and services to host your .NET application on AWS. To run it against your AWS account, you must have a credential profile that is set up with at least an access key ID and a secret access key for an AWS Identity and Access Management (IAM) user. Your credentials must have permissions for certain services, depending on the tasks that you're trying to perform.
 
-The information shown below is about how to set up credentials for the deployment tool. If you're looking for information about setting up credentials for your .NET project, see [Configure AWS credentials](https://docs.aws.amazon.com/sdk-for-net/v3/developer-guide/net-dg-config-creds.html) in the [AWS SDK for .NET Developer Guide](https://docs.aws.amazon.com/sdk-for-net/v3/developer-guide/net-dg-config-creds.html) instead.
+#### Recommended policies
 
-To run the deployment tool against your AWS account, you must have a credentials profile in your shared AWS config and credentials files. The profile must be set up with at least an access key ID and a secret access key for an AWS Identity and Access Management (IAM) user. There are various ways to do this. For information see the following references:
+The following are some examples of the typical permissions that are required. Additional permissions might be required, depending on the type of application you're deploying and the services it uses.
 
-- [Create users and roles](https://docs.aws.amazon.com/sdk-for-net/v3/developer-guide/net-dg-users-roles.html) and [Using the shared AWS credentials file](https://docs.aws.amazon.com/sdk-for-net/v3/developer-guide/creds-file.html) in the AWS SDK for .NET Developer Guide.
-- [Providing AWS credentials](https://docs.aws.amazon.com/toolkit-for-visual-studio/latest/user-guide/credentials.html) in the [AWS Toolkit for Visual Studio User Guide](https://docs.aws.amazon.com/toolkit-for-visual-studio/latest/user-guide/welcome.html).
-- [Configuration and credential file settings](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) in the [AWS Command Line Interface User Guide](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-welcome.html).
+|Command| Task | Recommended AWS Managed Policies |
+| --- | --- |--- |
+|deploy | Deploying to Amazon ECS | AWSCloudFormationFullAccess, AmazonECS_FullAccess, AmazonEC2ContainerRegistryFullAccess, IAMFullAccess |
+|deploy | Deploying to AWS App Runner| AWSCloudFormationFullAccess, AWSAppRunnerFullAccess, AmazonEC2ContainerRegistryFullAccess, IAMFullAccess|
+|deploy | Deploying to S3 | AWSCloudFormationFullAccess, AWSAppRunnerFullAccess, AmazonEC2ContainerRegistryFullAccess, IAMFullAccess|
+|deploy | Deploying to Elastic Beanstalk (deploy) | AWSCloudFormationFullAccess, AdministratorAccess-AWSElasticBeanstalk', AmazonS3FullAccess (To upload the application bundle), IAMFullAccess |
+| list-deployments | List CF stacks| AWSCloudFormationReadOnlyAccess  |
+| delete-deployment | Delete a CF stack | AWSCloudFormationFullAccess  |
 
-The credentials that you use to run the deployment tool must have permissions for certain services, depending on the tasks that you're trying to perform. The following are some examples of the typical permissions that are required to run the tool. Additional permissions might be required, depending on the type of application you're deploying and the services it uses.
+  > Note: If you are creating IAM roles, you need  IAMFullAccess otherwise  IAMReadOnlyAccess. Note that the first time the CDK bootstrap stack is created it will need IAMFullAccess.
 
-| Task | Permissions for services |
-| --- |--- |
-| Display a list of AWS CloudFormation stacks (list-deployments) | CloudFormation |
-| Deploy and redeploy to Elastic Beanstalk (deploy) | CloudFormation, Elastic Beanstalk |
-| Deploy and redeploy to Amazon ECS (deploy) | CloudFormation, Elastic Beanstalk, Elastic Container Registry |
 
-For additional information about permissions, see the topics in the [Troubleshooting Guide](../../troubleshooting-guide/missing-dependencies.md).
+
+  > Note: If you encounter an error saying **`user is not authorized to perform action because no identity based policies allow it`**, that means you need to add the corresponding permission to the IAM policy that is used by the current IAM role/user. The exact wording for an insufficient permissions related errors may differ.
+
+
+#### Specifying profile and region
 
 In your shared AWS config and credentials files, if the `[default]` profile exists, the deployment tool uses that profile by default. You can change this behavior by specifying a profile for the tool to use, either system-wide or in a particular context.
 
-To specify a system-wide profile, do the following:
+#####... locally
+* The simplest way to specify region and profile is to provide them as parameters to the tool.
+    `dotnet aws deploy --profile customProfile --region us-west-2`.
 
-* Define the `AWS_PROFILE` environment variable globally, as appropriate for your operating system. Be sure to reopen command prompts or terminals as necessary. If the profile you specify doesn't include an AWS Region, the tool might ask you to choose one.
+    For additional information about command parameters, see [Commands](docs/commands/deploy.md) section.
+
+  > **Note**
+  > If you provide only the `--profile` argument, the AWS Region isn't read from the profile that you specify. Instead, the tool reads the Region from the `[default]` profile if one exists, or asks for the desired profile interactively.
+
+#####... system-wide
+
+To specify a system-wide profile and region, define the `AWS_PROFILE` and `AWS_REGION` environment variables globally,  as appropriate for your operating system. Be sure to reopen command prompts or terminals as necessary.
+
   > **Warning**
   > If you set the `AWS_PROFILE` environment variable globally for your system, other SDKs, CLIs, and tools will also use that profile. If this behavior is unacceptable, specify a profile for a particular context instead.
 
-To specify a profile for a particular context, do one of the following:
+#### Additional Resources
 
-* Define the `AWS_PROFILE` environment variable in the command prompt or terminal session from which you're running the tool (as appropriate for your operating system).
-* Provide the `--profile` and `--region` command switches. For example: `dotnet-aws list-deployments --region us-west-2`. For additional information about the deployment tool's commands, see [Running the deployment tool](run-tool.md).
-  > **Note**
-  > If you provide only the `--profile` argument, the AWS Region isn't read from the profile that you specify. Instead, the tool reads the Region from the `[default]` profile if one exists, or asks for the desired profile interactively.
-* Specify nothing and, assuming that you don't have a `[default]` profile, the tool will ask you to choose a profile and an AWS Region.
-
+* For information on AWS credentials and access management, see [Credentials and Access](https://docs.aws.amazon.com/sdkref/latest/guide/access.html)
+* For information on configuration file settings, see [Config and Auth Settings Reference](https://docs.aws.amazon.com/sdkref/latest/guide/settings-reference.html)
+* For information on how to provide AWS credentials in AWS Toolkit for Visual Studio, see [AWS Toolkit for Visual Studio User Guide](https://docs.aws.amazon.com/toolkit-for-visual-studio/latest/user-guide/credentials.html).
+* For information on how to create customer managed IAM policies, see [Tutorial on Managed Policies](https://docs.aws.amazon.com/IAM/latest/UserGuide/tutorial_managed-policies.html)
+* For information on how to troubleshoot IAM policies, see [AWS IAM User Guide](https://docs.aws.amazon.com/IAM/latest/UserGuide/troubleshoot_policies.html)
+* For information on AWS Single Sign On (AWS SSO),  visit the [.NET SDK Reference Guide](https://docs.aws.amazon.com/sdkref/latest/guide/access-sso.html).

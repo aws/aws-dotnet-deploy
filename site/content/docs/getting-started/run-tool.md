@@ -18,7 +18,5 @@ The command for the deployment tool can be expressed in one of two forms. Either
 
 #### Step 3: Deploy to AWS
 
-    dotnet aws deploy
+    dotnet aws deploy --profile default --region us-east-1 -
 
-
-## TODO - a few screenshots
