@@ -38,6 +38,11 @@ namespace AspNetAppEcsFargate.Configurations
         public int? HealthCheckInternval { get; set; }
 
         /// <summary>
+        /// The amount of time, in seconds, during which no response from a target means a failed health check.
+        /// </summary>
+        public int? HealthCheckTimeout { get; set; }
+
+        /// <summary>
         /// The number of consecutive health check successes required before considering an unhealthy target healthy.
         /// </summary>
         public int? HealthyThresholdCount { get; set; }

@@ -67,13 +67,6 @@
             "ValidatorType": "FargateTaskSizeCpuMemoryLimits"
         },
         {
-            "ValidatorType": "MinMaxConstraint",
-            "Configuration": {
-                "MinValueOptionSettingsId": "AutoScaling.MinCapacity",
-                "MaxValueOptionSettingsId": "AutoScaling.MaxCapacity"
-            }
-        },
-        {
             "ValidatorType": "ValidDockerfilePath"
         }
     ],
@@ -521,6 +514,24 @@
                     "Updatable": true
                 },
                 {
+                    "Id": "HealthCheckTimeout",
+                    "Name": "Health Check Timeout",
+                    "Description": "The amount of time, in seconds, during which no response from a target means a failed health check.",
+                    "Type": "Int",
+                    "DefaultValue": 5,
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": {
+                                "Min": 2,
+                                "Max": 60
+                            }
+                        }
+                    ]
+                },
+                {
                     "Id": "HealthCheckInternval",
                     "Name": "Health Check Interval",
                     "Description": "The approximate interval, in seconds, between health checks of an individual instance.",
@@ -534,6 +545,13 @@
                             "Configuration": {
                                 "Min": 5,
                                 "Max": 300
+                            }
+                        },
+                        {
+                            "ValidatorType": "Comparison",
+                            "Configuration": {
+                                "Operation": "GreaterThan",
+                                "SettingId": "LoadBalancer.HealthCheckTimeout"
                             }
                         }
                     ]
@@ -708,6 +726,13 @@
                             "Configuration": {
                                 "Min": 1,
                                 "Max": 5000
+                            }
+                        },
+                        {
+                            "ValidatorType": "Comparison",
+                            "Configuration": {
+                                "Operation": "GreaterThan",
+                                "SettingId": "AutoScaling.MinCapacity"
                             }
                         }
                     ],
