@@ -352,7 +352,6 @@
                         "type": "string",
                         "enum": [
                             "FargateTaskSizeCpuMemoryLimits",
-                            "MinMaxConstraint",
                             "ValidDockerfilePath"
                         ]
                     }
@@ -373,28 +372,6 @@
                                             "type": "string"
                                         },
                                         "MemoryOptionSettingsId": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    {
-                        "if": {
-                            "properties": { "ValidatorType": { "const": "MinMaxConstraint" } }
-                        },
-                        "then": {
-                            "properties": {
-                                "Configuration": {
-                                    "properties": {
-                                        "ValidationFailedMessage": {
-                                            "type": "string"
-                                        },
-                                        "MinValueOptionSettingsId": {
-                                            "type": "string"
-                                        },
-                                        "MaxValueOptionSettingsId": {
                                             "type": "string"
                                         }
                                     }
@@ -614,7 +591,8 @@
                                     "InstanceType",
                                     "SubnetsInVpc",
                                     "SecurityGroupsInVpc",
-                                    "Uri"
+                                    "Uri",
+                                    "Comparison"
                                 ]
                             }
                         },
@@ -713,6 +691,25 @@
                                         "Configuration": {
                                             "properties": {
                                                 "ValidationFailedMessage": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "if": {
+                                    "properties": { "ValidatorType": { "const": "Comparison" } }
+                                },
+                                "then": {
+                                    "properties": {
+                                        "Configuration": {
+                                            "properties": {
+                                                "Operation": {
+                                                    "type": "string"
+                                                },
+                                                "SettingId": {
                                                     "type": "string"
                                                 }
                                             }

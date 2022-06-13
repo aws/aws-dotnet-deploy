@@ -288,6 +288,10 @@ namespace AspNetAppEcsFargate
             {
                 healthCheck.UnhealthyThresholdCount = settings.LoadBalancer.UnhealthyThresholdCount.Value;
             }
+            if (settings.LoadBalancer.HealthCheckTimeout.HasValue)
+            {
+                healthCheck.Timeout = Duration.Seconds(settings.LoadBalancer.HealthCheckTimeout.Value);
+            }
 
             ServiceTargetGroup.ConfigureHealthCheck(healthCheck);
 

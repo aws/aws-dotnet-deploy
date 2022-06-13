@@ -53,8 +53,13 @@ namespace AWS.Deploy.Common.Recipes.Validation
         /// Must be paired with <see cref="SecurityGroupsInVpcValidator"/>
         /// </summary>
         SecurityGroupsInVpc,
+        /// <summary>
         /// Must be paired with <see cref="UriValidator"/>
         /// </summary>
-        Uri
+        Uri,
+        /// <summary>
+        /// Must be paired with <see cref="ComparisonValidator"/>
+        /// </summary>
+        Comparison
     }
 }
