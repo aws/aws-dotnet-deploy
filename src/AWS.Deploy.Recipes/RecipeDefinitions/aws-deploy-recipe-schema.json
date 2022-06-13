@@ -352,7 +352,6 @@
                         "type": "string",
                         "enum": [
                             "FargateTaskSizeCpuMemoryLimits",
-                            "MinMaxConstraint",
                             "ValidDockerfilePath"
                         ]
                     }
@@ -614,7 +613,8 @@
                                     "InstanceType",
                                     "SubnetsInVpc",
                                     "SecurityGroupsInVpc",
-                                    "Uri"
+                                    "Uri",
+                                    "Comparison"
                                 ]
                             }
                         },

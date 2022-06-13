@@ -130,13 +130,6 @@
             "ValidatorType": "FargateTaskSizeCpuMemoryLimits"
         },
         {
-            "ValidatorType": "MinMaxConstraint",
-            "Configuration": {
-                "MinValueOptionSettingsId": "AutoScaling.MinCapacity",
-                "MaxValueOptionSettingsId": "AutoScaling.MaxCapacity"
-            }
-        },
-        {
             "ValidatorType": "ValidDockerfilePath"
         }
     ],
@@ -558,6 +551,13 @@
                             "Configuration": {
                                 "Min": 1,
                                 "Max": 5000
+                            }
+                        },
+                        {
+                            "ValidatorType": "Comparison",
+                            "Configuration": {
+                                "Operation": "GreaterThan",
+                                "SettingId": "AutoScaling.MinCapacity"
                             }
                         }
                     ],

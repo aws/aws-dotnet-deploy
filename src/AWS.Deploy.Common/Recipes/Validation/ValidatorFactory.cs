@@ -58,13 +58,13 @@ namespace AWS.Deploy.Common.Recipes.Validation
             { OptionSettingItemValidatorList.InstanceType, typeof(InstanceTypeValidator) },
             { OptionSettingItemValidatorList.SubnetsInVpc, typeof(SubnetsInVpcValidator) },
             { OptionSettingItemValidatorList.SecurityGroupsInVpc, typeof(SecurityGroupsInVpcValidator) },
-            { OptionSettingItemValidatorList.Uri, typeof(UriValidator) }
+            { OptionSettingItemValidatorList.Uri, typeof(UriValidator) },
+            { OptionSettingItemValidatorList.Comparison, typeof(ComparisonValidator) }
         };
 
         private static readonly Dictionary<RecipeValidatorList, Type> _recipeValidatorTypeMapping = new()
         {
             { RecipeValidatorList.FargateTaskSizeCpuMemoryLimits, typeof(FargateTaskCpuMemorySizeValidator) },
-            { RecipeValidatorList.MinMaxConstraint, typeof(MinMaxConstraintValidator) },
             { RecipeValidatorList.ValidDockerfilePath, typeof(DockerfilePathValidator) }
         };
 
