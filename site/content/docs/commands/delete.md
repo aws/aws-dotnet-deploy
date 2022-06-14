@@ -1,14 +1,14 @@
 # delete-deployment command
 
-####Usage
-    dotnet aws delete-deployment *-* ** Tears down the application stack.
+### Usage
+    dotnet aws delete-deployment *-* Tears down the application stack.
 
-####Synopsis
-    dotnet new delete-deployment <APPLICATION-NAME> [-d|—-diagnostics] [-s|--silent] [—-profile <PROFILE>] [—-region <REGION>] [-?|-h|--help]
+### Synopsis
+    dotnet aws delete-deployment <APPLICATION-NAME> [-d|--diagnostics] [-s|--silent] [--profile <PROFILE>] [--region <REGION>] [-?|-h|--help]
 
-####Description
+### Description
 Tears down the application stack.
 
-####Examples
+### Examples
 
-    dotnet aws delete-deployment MY_APPLICATION -region us-west-2
+    dotnet aws delete-deployment MY_APPLICATION --region us-west-2

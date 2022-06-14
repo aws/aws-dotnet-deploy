@@ -11,6 +11,6 @@ The recommendation rules are defined in the deployment recipes.  The deployment 
 There is a recipe for each project type. All recipes can be found on [GitHub](https://github.com/aws/aws-dotnet-deploy/tree/1344e9e8e5485d7d38af524657178facf27ec973/src/AWS.Deploy.Recipes/RecipeDefinitions). Each recipe contains the following:
 
 1. [**JSON metadata file**](https://github.com/aws/aws-dotnet-deploy/blob/main/src/AWS.Deploy.Recipes/RecipeDefinitions/aws-deploy-recipe-schema.json)- this file contains all of the metadata the deployment tool uses to drive the experience. This includes rules used in the recommendation engine to determine if the recipe is compatible with a project. It also has all of the settings that the deploy tool CLI, and eventually Visual Studio, uses to allow users to customize the experience.
-2. **.NET CDK project template** -a recipe also contains a .NET project template that will be used to generate an [AWS Cloud Development Kit (CDK)](https://aws.amazon.com/cdk/) deployment project.
+2. **.NET CDK project template** - a recipe also contains a .NET project template that will be used to generate an [AWS Cloud Development Kit (CDK)](https://aws.amazon.com/cdk/) deployment project.
 
     > Note: There are a couple special case recipes that don't have CDK project templates. (Push to ECR and Deploy to existing Beanstalk).

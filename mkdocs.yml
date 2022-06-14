@@ -42,7 +42,7 @@ nav:
       - Customizing CDK project: docs/projects/custom-project.md
     - Integrating with CI/CD:
     #  - Overview: docs/cicd/overview.md
-      - Deploy with -silent: docs/cicd/silent.md
+      - Suppress prompts with --silent: docs/cicd/silent.md
       - Deployment settings file: docs/cicd/settings.md
 
     #- Features:

@@ -4,10 +4,10 @@ The table below provides a matrix of supported .NET application types and AWS Co
 
 |                   | Console App   | 	ASP.NET Core    | Blazor    |
 | :---              |    :----:     |          :---:    |    :---:  |
-| Amazon ECS service| X             | X                 |           |
-| Amazon ECS task	| X             | X                 |           |
-| AWS App Runner    | X             | X                 |           |
-| AWS Beanstalk     |               | X                 |           |
+| Amazon Elastic Container Service (ECS) service| X             | X                 |           |
+| Amazon Elastic Container Service (ECS) task	| X             | X                 |           |
+| AWS App Runner    |              | X                 |           |
+| AWS Elastic Beanstalk     |               | X                 |           |
 | Amazon S3         |               |                   |   X       |
 
 

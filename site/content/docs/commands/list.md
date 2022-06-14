@@ -1,15 +1,15 @@
 # list-deployments command
 
-###Usage
+### Usage
     dotnet aws list-deployments *-* ** Lists available cloud applications that were deployed using AWS Deploy Tool
 
-####Synopsis
-    dotnet new list-deployments [-d|—-diagnostics] [-s|--silent] [—-profile <PROFILE>] [—-region <REGION>] [-?|-h|--help]
+### Synopsis
+    dotnet new list-deployments [-d|--diagnostics] [-s|--silent] [--profile <PROFILE>] [--region <REGION>] [-?|-h|--help]
 
-####Description
+### Description
 Lists available cloud applications that were deployed using AWS Deploy Tool.
 
-####Examples
+### Examples
 
-    dotnet aws list-deployments -region us-west-2
+    dotnet aws list-deployments --region us-west-2
 

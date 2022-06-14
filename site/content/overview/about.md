@@ -1,6 +1,6 @@
 # About the AWS Deploy Tool
 
-** AWS Deploy Tool** is an interractive tooling for the .NET CLI and the AWS Toolkit for Visual Studio that helps deploy .NET applications with minimum AWS knowledge, and with the fewest clicks or commands. It works by analyzing .NET codebases and guiding developers to the right AWS service. It then selects the right deployment service, builds and packages your application, generates the right IAM roles, and creates the deployment infrastructure. It allows for a quick and easy Proof of concept (POC), smooth graduation to CI/CD, and a gradual ramp up on AWS knowledge.
+** AWS Deploy Tool** is an interactive tooling for the .NET CLI and the AWS Toolkit for Visual Studio that helps deploy .NET applications with minimum AWS knowledge, and with the fewest clicks or commands. It works by analyzing .NET projects and guiding developers to the right AWS service. It then selects the right deployment service, builds and packages your application, and creates the deployment infrastructure. It allows for a quick and easy Proof of concept (POC), smooth graduation to CI/CD, and a gradual ramp up on AWS knowledge.
 
   > Note: AWS Deploy Tool is currently in Developer Preview.
 
@@ -9,11 +9,10 @@
 AWS Deploy Tool has the following capabilities:
 
 * **Compute recommendations for your application** – Get recommendations about the type of compute best suited for your application based on the application type.
-* **Dockerfile  generation** - The tool will generate the Dockerfile .... if needed, otherwise an existing Dockerfile will be used.
-* **Auto packaging and deployment** – Auto-generate IAM roles and permissions your application requires, build the deployment artifacts, generate a deployment CDK project, provision the infrastructure and  deploy your application to the chosen AWS compute.
-* **Repeatable and shareable deployments** – Persist configuration settings and AWS Cloud Development Kit (CDK) project used to deploy your application. You can also version control them and share with other team members for repeatable deployments.
+* **Dockerfile  generation** - The tool will generate a Dockerfile if needed, otherwise an existing Dockerfile will be used.
+* **Auto packaging and deployment** – The tool builds the deployment artifacts, generates a deployment CDK project, provisions the infrastructure and deploys your application to the chosen AWS compute.
+* **Repeatable and shareable deployments** –The tool persists configuration settings and AWS Cloud Development Kit (CDK) project used to deploy your application. You can also version control them and share with other team members for repeatable deployments.
 * **Help with learning AWS CDK for .NET!** - Once you are ready to start exploring, the deployment tool will help you gradually learn AWS tools like CDK that are used under the hood. It generates well documented/organized CDK projects that you can easily start modifying to fit your specific use-case.
-* **Extensibility (Build your own deployment recipes)** - Promote organizational best practices across the company. You can extend the recommendation engine by defining your own deployment recipe that fits your deployment ecosystem, but using our specs for deployment. Custom recipes are NuGet packages which can be added to any .NET codebase, and will be incorporated into the included recommendation engine to provide the opinionated deployment.
 
 ## Availability
 ### ... in .NET CLI

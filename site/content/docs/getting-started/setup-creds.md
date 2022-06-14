@@ -2,7 +2,7 @@
 
 #### Overview
 
-AWS.Deploy.Tools, internally uses a variety of different tools and services to host your .NET application on AWS. To run it against your AWS account, you must have a credential profile that is set up with at least an access key ID and a secret access key for an AWS Identity and Access Management (IAM) user. Your credentials must have permissions for certain services, depending on the tasks that you're trying to perform.
+AWS.Deploy.Tools, internally uses a variety of different tools and services to host your .NET application on AWS. To run the AWS Deploy Tool, you must configure a credential profile that provides access to the AWS account you wish to deploy to. Your credentials must have permissions for certain services, depending on the tasks that you're trying to perform.
 
 #### Recommended policies
 
@@ -15,7 +15,7 @@ The following are some examples of the typical permissions that are required. Ad
 |deploy | Deploying to S3 | AWSCloudFormationFullAccess, AWSAppRunnerFullAccess, AmazonEC2ContainerRegistryFullAccess, IAMFullAccess|
 |deploy | Deploying to Elastic Beanstalk (deploy) | AWSCloudFormationFullAccess, AdministratorAccess-AWSElasticBeanstalk', AmazonS3FullAccess (To upload the application bundle), IAMFullAccess |
 | list-deployments | List CF stacks| AWSCloudFormationReadOnlyAccess  |
-| delete-deployment | Delete a CF stack | AWSCloudFormationFullAccess  |
+| delete-deployment | Delete a CF stack | AWSCloudFormationFullAccess + permissions for resources being deleted |
 
   > Note: If you are creating IAM roles, you need  IAMFullAccess otherwise  IAMReadOnlyAccess. Note that the first time the CDK bootstrap stack is created it will need IAMFullAccess.
 

@@ -4,7 +4,7 @@ You can select deployment options interactively or specify them in a [JSON confi
 
 This section defines the JSON definitions and syntax that you construct and use a deployment settings file. Here is the [JSON file definition](https://github.com/aws/aws-dotnet-deploy/tree/main/src/AWS.Deploy.Recipes/RecipeDefinitions).
 
-The Deployment Settings file is a JSON file that contains all of the settings that the deployment tool uses to drive the experience. The deployment tool uses this file to determine which deployment services to use, and how to configure them. --apply option on deploy command allows you to specify a deployment settings file.
+The Deployment Settings file is a JSON file that contains all of the settings that the deployment tool uses to drive the experience. The deployment tool uses this file to determine which deployment services to use, and how to configure them. The `--apply` option on deploy command allows you to specify a deployment settings file.
 
 #### Creating a deployment settings file
 TODO
@@ -31,5 +31,5 @@ Deployment Settings file path is always relative to the `--project-path`. For a 
 
 You can run the deployment tool with the following command:
 
-    dotnet aws deploy --project-path MyWebApplication/MyWebApplication/MyWebApplication.csproj
+`dotnet aws deploy --project-path MyWebApplication/MyWebApplication/MyWebApplication.csproj --apply deploymentsettings.json`
 

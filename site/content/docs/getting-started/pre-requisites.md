@@ -20,10 +20,9 @@ To run the AWS Deploy Tool, you need the following pre-requisites set up in your
 dotnet --version
 ```
 
-
 #### Node.js
 
-* The deployment tool requires the [AWS Cloud Development Kit (CDK)](https://docs.aws.amazon.com/cdk/latest/guide/), and the AWS CDK requires [Node.js](https://nodejs.org/en/download/) version 10.13.0 or later (excluding versions 13.0.0 through 13.6.0).
+* The deployment tool requires the [AWS Cloud Development Kit (CDK)](https://docs.aws.amazon.com/cdk/latest/guide/), and the AWS CDK requires [Node.js](https://nodejs.org/en/download/). AWS CDK requires Node.js version 10.13.0 or later (excluding versions 13.0.0 through 13.6.0), however we recommend installing the latest LTS version.
 
 * To install Node.js, go to  [Node.js downloads](https://nodejs.org/en/download/)
 
