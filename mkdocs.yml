@@ -72,7 +72,6 @@ theme:
   features:
     - tabs
     - instant
-    - navigation.tabs
   icon:
     logo: aws-logo-light
   favicon: assets/images/aws-logo-light.svg
