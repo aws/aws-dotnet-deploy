@@ -9,12 +9,7 @@ docs_dir: 'site/content'
 site_dir: 'docs'
 
 nav:
-  - Overview:
-    - About the tool: overview/about.md
-    - FAQs: overview/faq.md
-    - Documentation: docs/getting-started/pre-requisites.md
-    - Troubleshooting Guide: troubleshooting-guide/missing-dependencies.md
-    - Contributing to the project: contributing.md
+  - Overview: index.md
   - Documentation:
     - Getting Started:
       - Pre-requisites: docs/getting-started/pre-requisites.md
@@ -65,6 +60,7 @@ nav:
     - Docker Issues: troubleshooting-guide/docker-issues.md
     - Other Issues: troubleshooting-guide/other-issues.md
   - Contributing to the project: contributing.md
+  - FAQs: faq.md
 
 theme:
   name: material
