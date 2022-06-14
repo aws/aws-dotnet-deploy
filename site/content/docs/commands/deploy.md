@@ -1,7 +1,7 @@
 #deploy command
 
 ### Usage
-    dotnet aws deploy *-* ** Inspect, build, and deploy the .NET project to AWS using the chosen AWS compute.
+    dotnet aws deploy - Inspect, build, and deploy the .NET project to AWS using the chosen AWS compute.
 
 ### Synopsis
     dotnet new deploy [-d|—-diagnostics] [-s|--silent] [--profile <PROFILE>] [--region <REGION>] [--project-path <PROJECT-PATH>] [--application-name <CLOUD-APPLICATION-NAME>] [--apply <PATH-TO-DEPLOYMENT-SETTINGS>] [--deployment-project <CDK-DEPLOYMENT-PROJECT-PATH>] [-?|-h|--help]

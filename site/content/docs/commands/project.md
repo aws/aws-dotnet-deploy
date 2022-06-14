@@ -1,7 +1,7 @@
 # deployment-project generate command
 
 ### Usage
-    dotnet aws deployment-project *-* ** Generates and saves the deployment CDK project in the user provided location.
+    dotnet aws deployment-project - Generates and saves the deployment CDK project in the user provided location.
 
 ### Synopsis
     dotnet aws deployment-project generate [-d|--diagnostics] [-s|--silent] [--profile <PROFILE>] [--region <REGION>] [--project-path <PROJECT-PATH>] [--project-display-name <DISPLAY-NAME>]
