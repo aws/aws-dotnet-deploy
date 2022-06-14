@@ -1,6 +1,6 @@
 # Deployment Settings File
 
-You can select deployment options interactively or specify them in a [JSON configuration file](docs/features/config-file.md). You can also keep the default values that the tool selects for you.
+You can select deployment options interactively or specify them in a JSON configuration file. You can also keep the default values that the tool selects for you.
 
 This section defines the JSON definitions and syntax that you construct and use a deployment settings file. Here is the [JSON file definition](https://github.com/aws/aws-dotnet-deploy/tree/main/src/AWS.Deploy.Recipes/RecipeDefinitions).
 

@@ -32,7 +32,7 @@ In your shared AWS config and credentials files, if the `[default]` profile exis
 * The simplest way to specify region and profile is to provide them as parameters to the tool.
     `dotnet aws deploy --profile customProfile --region us-west-2`.
 
-    For additional information about command parameters, see [Commands](docs/commands/deploy.md) section.
+    For additional information about command parameters, see [Commands](../../docs/commands/deploy.md) section.
 
   > **Note**
   > If you provide only the `--profile` argument, the AWS Region isn't read from the profile that you specify. Instead, the tool reads the Region from the `[default]` profile if one exists, or asks for the desired profile interactively.
