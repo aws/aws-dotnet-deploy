@@ -101,6 +101,50 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
         }
 
         [Fact]
+        public async Task GetAndApplyAppRunnerSettings_FailedUpdatesReturnSettingId()
+        {
+            _stackName = $"ServerModeWebAppRunner{Guid.NewGuid().ToString().Split('-').Last()}";
+
+            var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
+            var portNumber = 4027;
+            using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ServerModeExtensions.ResolveCredentials);
+
+            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
+            var cancelSource = new CancellationTokenSource();
+
+            var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
+            try
+            {
+                var baseUrl = $"http://localhost:{portNumber}/";
+                var restClient = new RestAPIClient(baseUrl, httpClient);
+
+                await restClient.WaitTillServerModeReady();
+
+                var sessionId = await restClient.StartDeploymentSession(projectPath, _awsRegion);
+
+                var logOutput = new StringBuilder();
+                await ServerModeExtensions.SetupSignalRConnection(baseUrl, sessionId, logOutput);
+
+                var fargateRecommendation = await restClient.GetRecommendationsAndSetDeploymentTarget(sessionId, "AspNetAppEcsFargate", _stackName);
+
+                var applyConfigSettingsResponse = await restClient.ApplyConfigSettingsAsync(sessionId, new ApplyConfigSettingsInput()
+                {
+                    UpdatedSettings = new Dictionary<string, string>()
+                    {
+                        {"DesiredCount", "test"}
+                    }
+                });
+                Assert.Single(applyConfigSettingsResponse.FailedConfigUpdates);
+                Assert.Equal("DesiredCount", applyConfigSettingsResponse.FailedConfigUpdates.Keys.First());
+            }
+            finally
+            {
+                cancelSource.Cancel();
+                _stackName = null;
+            }
+        }
+
+        [Fact]
         public async Task GetAndApplyAppRunnerSettings_VPCConnector()
         {
             _stackName = $"ServerModeWebAppRunner{Guid.NewGuid().ToString().Split('-').Last()}";
