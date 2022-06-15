@@ -4,11 +4,11 @@ You can use AWS Deploy Tool when developing your app using any Continuous Deploy
 
 ### Suppressing prompts with `--silent`
 
-To turn off the interactive features of the tooling, use the `-s (--silent)` switch. This will ensure the tooling never prompts for any questions that could block an automated process.
+To turn off the interactive features, use the `-s (--silent)` switch. This will ensure the tool never prompts for any questions that could block an automated process.
 
     dotnet aws deploy --silent
 
-### Deployment setting file
+### Creating a deployment setting file
 
 To specify the services to deploy and their configurations for your environment, you need to create deployment settings file. The deployment settings file is a JSON configuration file that contains all of the settings that the deployment tool uses to drive the experience. Here is the [JSON file definition](https://github.com/aws/aws-dotnet-deploy/tree/main/src/AWS.Deploy.Recipes/RecipeDefinitions).
 

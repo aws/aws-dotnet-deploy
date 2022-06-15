@@ -23,17 +23,19 @@ You can then customize the project and the deployment settings to fit your needs
 
 The `AppStack class` is the recommended place to add new AWS resources or customize the resources created in the generated code.
 
-### Customizing deployment resources
+### Customizing resources
 
 Now you can go ahead and add additional resources to the generated deployment project. Deployment projects enable you to change the deployment interface.
 
   > Note: Most of the code is located in the generated folder. We don’t recommend you edit the files in there directly, and instead use it for reference. If you want to take updates from the original recipe the deployment project was created from, you can just copy the code into the generated folder.
 
 In the example below, we’ll show you how to add a DynamoDB table....
-<TODO add example here for DynamoDB>
+
+TODO
 
 ### Customizing deployment settings
 You can also add new settings that will be presented to the user during deployment.
+
 TODO
 
 
