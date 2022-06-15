@@ -266,7 +266,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 }
                 catch (Exception ex)
                 {
-                    output.FailedConfigUpdates.Add(input.UpdatedSettings[updatedSetting.FullyQualifiedId], ex.Message);
+                    output.FailedConfigUpdates.Add(updatedSetting.FullyQualifiedId, ex.Message);
                 }
             }
 
