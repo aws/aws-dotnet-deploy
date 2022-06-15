@@ -60,6 +60,10 @@ namespace AWS.Deploy.Common.Recipes.Validation
         /// <summary>
         /// Must be paired with <see cref="ComparisonValidator"/>
         /// </summary>
-        Comparison
+        Comparison,
+        /// <summary>
+        /// Must be paired with <see cref="VPCSubnetsInDifferentAZsValidator"/>
+        /// </summary>
+        VPCSubnetsInDifferentAZs
     }
 }
