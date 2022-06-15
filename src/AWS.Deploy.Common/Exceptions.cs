@@ -117,7 +117,8 @@ namespace AWS.Deploy.Common
         InvalidCloudApplicationName = 10009500,
         SelectedValueIsNotAllowed = 10009600,
         MissingValidatorConfiguration = 10009700,
-        InvalidFilePath = 10009800
+        InvalidFilePath = 10009800,
+        InvalidDeployToolWorkspace = 10009900
     }
 
     public class ProjectFileNotFoundException : DeployToolException

@@ -30,6 +30,8 @@ namespace AWS.Deploy.Orchestration.DeploymentCommands
                 throw new InvalidOperationException($"{nameof(orchestrator._cdkVersionDetector)} must not be null.");
             if (orchestrator._directoryManager == null)
                 throw new InvalidOperationException($"{nameof(orchestrator._directoryManager)} must not be null.");
+            if (orchestrator._workspaceMetadata == null)
+                throw new InvalidOperationException($"{nameof(orchestrator._workspaceMetadata)} must not be null.");
 
             orchestrator._interactiveService.LogSectionStart("Configuring AWS Cloud Development Kit (CDK)",
                 "Ensure a compatible CDK version is installed and the CDK bootstrap CloudFormation stack has been created. A CDK project to perform the deployment is generated unless an existing deployment project was selected.");
@@ -38,7 +40,7 @@ namespace AWS.Deploy.Orchestration.DeploymentCommands
             var projFiles = orchestrator._directoryManager.GetProjFiles(cdkProject);
             var cdkVersion = orchestrator._cdkVersionDetector.Detect(projFiles);
 
-            await orchestrator._cdkManager.EnsureCompatibleCDKExists(recommendation.Recipe.PersistedDeploymentProject ? cdkProject : Constants.CDK.DeployToolWorkspaceDirectoryRoot, cdkVersion);
+            await orchestrator._cdkManager.EnsureCompatibleCDKExists(recommendation.Recipe.PersistedDeploymentProject ? cdkProject : orchestrator._workspaceMetadata.DeployToolWorkspaceDirectoryRoot, cdkVersion);
 
             try
             {

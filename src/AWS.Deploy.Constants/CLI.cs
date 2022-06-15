@@ -22,5 +22,6 @@ namespace AWS.Deploy.Constants
         public const string PROMPT_CHOOSE_DEPLOYMENT_TARGET = "Choose deployment target";
 
         public const string CLI_APP_NAME = "AWS .NET Deployment Tool";
+        public const string WORKSPACE_ENV_VARIABLE = "AWS_DOTNET_DEPLOYTOOL_WORKSPACE";
     }
 }

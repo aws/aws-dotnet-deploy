@@ -724,7 +724,8 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 serviceProvider.GetRequiredService<ICommandLineWrapper>(),
                 serviceProvider.GetRequiredService<IAWSResourceQueryer>(),
                 serviceProvider.GetRequiredService<IFileManager>(),
-                serviceProvider.GetRequiredService<IOptionSettingHandler>()
+                serviceProvider.GetRequiredService<IOptionSettingHandler>(),
+                serviceProvider.GetRequiredService<IDeployToolWorkspaceMetadata>()
                 );
         }
 
@@ -754,7 +755,8 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                                     serviceProvider.GetRequiredService<IFileManager>(),
                                     serviceProvider.GetRequiredService<IDirectoryManager>(),
                                     serviceProvider.GetRequiredService<IAWSServiceHandler>(),
-                                    serviceProvider.GetRequiredService<IOptionSettingHandler>()
+                                    serviceProvider.GetRequiredService<IOptionSettingHandler>(),
+                                    serviceProvider.GetRequiredService<IDeployToolWorkspaceMetadata>()
                                 );
         }
     }

@@ -21,7 +21,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.Utilities
     {
         public static async Task WaitTillServerModeReady(this RestAPIClient restApiClient)
         {
-            await WaitUntilHelper.WaitUntil(async () =>
+            await Orchestration.Utilities.Helpers.WaitUntil(async () =>
             {
                 SystemStatus status = SystemStatus.Error;
                 try

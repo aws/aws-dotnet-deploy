@@ -233,7 +233,9 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             var directoryManager = new DirectoryManager();
             var fileManager = new FileManager();
             var deploymentManifestEngine = new DeploymentManifestEngine(directoryManager, fileManager);
-            var localUserSettingsEngine = new LocalUserSettingsEngine(fileManager, directoryManager);
+            var environmentVariableManager = new Mock<IEnvironmentVariableManager>().Object;
+            var deployToolWorkspaceMetadata = new DeployToolWorkspaceMetadata(directoryManager, environmentVariableManager);
+            var localUserSettingsEngine = new LocalUserSettingsEngine(fileManager, directoryManager, deployToolWorkspaceMetadata);
             var serviceProvider = new Mock<IServiceProvider>();
             var validatorFactory = new ValidatorFactory(serviceProvider.Object);
             var optionSettingHandler = new OptionSettingHandler(validatorFactory);
@@ -254,7 +256,8 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
                 fileManager,
                 directoryManager,
                 new Mock<IAWSServiceHandler>().Object,
-                new OptionSettingHandler(new Mock<IValidatorFactory>().Object));
+                new OptionSettingHandler(new Mock<IValidatorFactory>().Object),
+                deployToolWorkspaceMetadata);
         }
 
         private async Task<string> GetCustomRecipeId(string recipeFilePath)

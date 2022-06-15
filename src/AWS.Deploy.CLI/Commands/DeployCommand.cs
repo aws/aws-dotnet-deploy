@@ -54,6 +54,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly IOptionSettingHandler _optionSettingHandler;
         private readonly IValidatorFactory _validatorFactory;
         private readonly IRecipeHandler _recipeHandler;
+        private readonly IDeployToolWorkspaceMetadata _deployToolWorkspaceMetadata;
 
         public DeployCommand(
             IServiceProvider serviceProvider,
@@ -79,7 +80,8 @@ namespace AWS.Deploy.CLI.Commands
             IAWSServiceHandler awsServiceHandler,
             IOptionSettingHandler optionSettingHandler,
             IValidatorFactory validatorFactory,
-            IRecipeHandler recipeHandler)
+            IRecipeHandler recipeHandler,
+            IDeployToolWorkspaceMetadata deployToolWorkspaceMetadata)
         {
             _serviceProvider = serviceProvider;
             _toolInteractiveService = toolInteractiveService;
@@ -105,6 +107,7 @@ namespace AWS.Deploy.CLI.Commands
             _optionSettingHandler = optionSettingHandler;
             _validatorFactory = validatorFactory;
             _recipeHandler = recipeHandler;
+            _deployToolWorkspaceMetadata = deployToolWorkspaceMetadata;
         }
 
         public async Task ExecuteAsync(string applicationName, string deploymentProjectPath, UserDeploymentSettings? userDeploymentSettings = null)
@@ -170,7 +173,8 @@ namespace AWS.Deploy.CLI.Commands
                     _fileManager,
                     _directoryManager,
                     _awsServiceHandler,
-                    _optionSettingHandler);
+                    _optionSettingHandler,
+                    _deployToolWorkspaceMetadata);
 
             // Determine what recommendations are possible for the project.
             var recommendations = await GenerateDeploymentRecommendations(orchestrator, deploymentProjectPath);

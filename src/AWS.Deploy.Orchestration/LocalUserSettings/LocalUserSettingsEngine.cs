@@ -24,13 +24,15 @@ namespace AWS.Deploy.Orchestration.LocalUserSettings
     {
         private readonly IFileManager _fileManager;
         private readonly IDirectoryManager _directoryManager;
+        private readonly IDeployToolWorkspaceMetadata _workspaceMetadata;
 
         private const string LOCAL_USER_SETTINGS_FILE_NAME = "local-user-settings.json";
 
-        public LocalUserSettingsEngine(IFileManager fileManager, IDirectoryManager directoryManager)
+        public LocalUserSettingsEngine(IFileManager fileManager, IDirectoryManager directoryManager, IDeployToolWorkspaceMetadata workspaceMetadata)
         {
             _fileManager = fileManager;
             _directoryManager = directoryManager;
+            _workspaceMetadata = workspaceMetadata;
         }
 
         /// <summary>
@@ -213,7 +215,7 @@ namespace AWS.Deploy.Orchestration.LocalUserSettings
         /// </summary>
         private string GetLocalUserSettingsFilePath()
         {
-            var deployToolWorkspace = _directoryManager.GetDirectoryInfo(Constants.CDK.DeployToolWorkspaceDirectoryRoot).FullName;
+            var deployToolWorkspace = _directoryManager.GetDirectoryInfo(_workspaceMetadata.DeployToolWorkspaceDirectoryRoot).FullName;
             var localUserSettingsFileFullPath = Path.Combine(deployToolWorkspace, LOCAL_USER_SETTINGS_FILE_NAME);
             return localUserSettingsFileFullPath;
         }
