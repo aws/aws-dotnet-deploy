@@ -38,7 +38,7 @@ namespace AWS.Deploy.Orchestration.DeploymentCommands
             var projFiles = orchestrator._directoryManager.GetProjFiles(cdkProject);
             var cdkVersion = orchestrator._cdkVersionDetector.Detect(projFiles);
 
-            await orchestrator._cdkManager.EnsureCompatibleCDKExists(Constants.CDK.DeployToolWorkspaceDirectoryRoot, cdkVersion);
+            await orchestrator._cdkManager.EnsureCompatibleCDKExists(recommendation.Recipe.PersistedDeploymentProject ? cdkProject : Constants.CDK.DeployToolWorkspaceDirectoryRoot, cdkVersion);
 
             try
             {
