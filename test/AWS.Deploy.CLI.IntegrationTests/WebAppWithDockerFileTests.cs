@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using Amazon.CloudFormation;
 using Amazon.ECS;
 using Amazon.ECS.Model;
@@ -124,14 +125,12 @@ namespace AWS.Deploy.CLI.IntegrationTests
         {
             _stackName = $"WebAppWithDockerFile{Guid.NewGuid().ToString().Split('-').Last()}";
 
-            // Arrange input for deploy
-            await _interactiveService.StdInWriter.WriteAsync("2" + Environment.NewLine); // Select App Runner recommendation
-            await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Select default option settings
-            await _interactiveService.StdInWriter.FlushAsync();
-
             // Deploy
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
-            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--application-name", _stackName, "--diagnostics" };
+            var configFilePath = Path.Combine(Directory.GetParent(projectPath).FullName, "AppRunnerConfigFile.json");
+            ConfigFileHelper.ReplacePlaceholders(configFilePath);
+
+            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--application-name", _stackName, "--diagnostics", "--apply", configFilePath, "--silent" };
             Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
 
             // Verify application is deployed and running
@@ -147,6 +146,12 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
             // URL could take few more minutes to come live, therefore, we want to wait and keep trying for a specified timeout
             await _httpHelper.WaitUntilSuccessStatusCode(applicationUrl, TimeSpan.FromSeconds(5), TimeSpan.FromMinutes(5));
+
+            // Ensure environemnt variables specified in AppRunnerConfigFile.json are set for the service. 
+            var checkEnvironmentVariableUrl = applicationUrl + "envvar/TEST_Key1";
+            using var httpClient = new HttpClient();
+            var envVarValue = await httpClient.GetStringAsync(checkEnvironmentVariableUrl);
+            Assert.Equal("Value1", envVarValue);
 
             // list
             var listArgs = new[] { "list-deployments", "--diagnostics" };

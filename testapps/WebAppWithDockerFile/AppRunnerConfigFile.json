@@ -1,0 +1,11 @@
+{
+    "ApplicationName": "AppAppRunner{Suffix}",
+    "RecipeId": "AspNetAppAppRunner",
+    "OptionSettingsConfig": {
+        "ServiceName": "MyNewService{Suffix}",
+        "AppRunnerEnvironmentVariables": {
+            "TEST_Key1": "Value1",
+            "TEST_Key2": "Value2"
+        }
+    }
+}
