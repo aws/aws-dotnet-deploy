@@ -143,7 +143,7 @@ namespace AspNetAppAppRunner
                         {
                             Port = settings.Port.ToString(),
                             StartCommand = !string.IsNullOrWhiteSpace(settings.StartCommand) ? settings.StartCommand : null,
-                            RuntimeEnvironmentVariables = runtimeEnvironmentVariables
+                            RuntimeEnvironmentVariables = runtimeEnvironmentVariables.ToArray()
                         }
                     }
                 }
