@@ -201,6 +201,44 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         }
 
         [Fact]
+        public async Task VpcIdHasSubnetsInDifferentAZs_DifferentZones_Valid()
+        {
+            _awsResourceQueryer.Setup(x => x.DescribeSubnets(It.IsAny<string>())).ReturnsAsync(
+                new List<Amazon.EC2.Model.Subnet> {
+                    new Amazon.EC2.Model.Subnet { AvailabilityZoneId = "AZ1"},
+                new Amazon.EC2.Model.Subnet { AvailabilityZoneId = "AZ2"}
+                });
+            var optionSettingItem = new OptionSettingItem("id", "fullyQualifiedId", "name", "description");
+            optionSettingItem.Validators.Add(GetVPCSubnetsInDifferentAZsValidatorConfig());
+            await Validate(optionSettingItem, "vpc-1234abcd", true);
+        }
+
+        [Fact]
+        public async Task VpcIdHasSubnetsInDifferentAZs_SingleSubnet_Invalid()
+        {
+            _awsResourceQueryer.Setup(x => x.DescribeSubnets(It.IsAny<string>())).ReturnsAsync(
+                new List<Amazon.EC2.Model.Subnet> {
+                    new Amazon.EC2.Model.Subnet { AvailabilityZoneId = "AZ1"}
+                });
+            var optionSettingItem = new OptionSettingItem("id", "fullyQualifiedId", "name", "description");
+            optionSettingItem.Validators.Add(GetVPCSubnetsInDifferentAZsValidatorConfig());
+            await Validate(optionSettingItem, "vpc-1234abcd", false);
+        }
+
+        [Fact]
+        public async Task VpcIdHasSubnetsInDifferentAZs_SingleZone_Invalid()
+        {
+            _awsResourceQueryer.Setup(x => x.DescribeSubnets(It.IsAny<string>())).ReturnsAsync(
+                new List<Amazon.EC2.Model.Subnet> {
+                    new Amazon.EC2.Model.Subnet { AvailabilityZoneId = "AZ1"},
+                    new Amazon.EC2.Model.Subnet { AvailabilityZoneId = "AZ1"}
+                });
+            var optionSettingItem = new OptionSettingItem("id", "fullyQualifiedId", "name", "description");
+            optionSettingItem.Validators.Add(GetVPCSubnetsInDifferentAZsValidatorConfig());
+            await Validate(optionSettingItem, "vpc-1234abcd", false);
+        }
+
+        [Fact]
         public async Task ECSClusterNameValidationTest_Invalid()
         {
             var resource = new ResourceDescription { Identifier = "WebApp1" };
@@ -278,6 +316,16 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
                 }
             };
             return existingResourceValidatorConfig;
+        }
+
+        private OptionSettingItemValidatorConfig GetVPCSubnetsInDifferentAZsValidatorConfig()
+        {
+            var vpcSubnetsInDifferentAZsValidatorConfig = new OptionSettingItemValidatorConfig
+            {
+                ValidatorType = OptionSettingItemValidatorList.VPCSubnetsInDifferentAZs,
+                Configuration = new VPCSubnetsInDifferentAZsValidator(_awsResourceQueryer.Object)
+            };
+            return vpcSubnetsInDifferentAZsValidatorConfig;
         }
 
         private OptionSettingItemValidatorConfig GetRangeValidatorConfig(int min, int max)

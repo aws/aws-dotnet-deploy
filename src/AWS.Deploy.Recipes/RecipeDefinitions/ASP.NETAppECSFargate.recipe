@@ -324,6 +324,9 @@
                                 "Regex": "^vpc-([0-9a-f]{8}|[0-9a-f]{17})$",
                                 "ValidationFailedMessage": "Invalid VPC ID. The VPC ID must start with the \"vpc-\" prefix, followed by either 8 or 17 characters consisting of digits and letters(lower-case) from a to f. For example vpc-abc88de9 is a valid VPC ID."
                             }
+                        },
+                        {
+                            "ValidatorType": "VPCSubnetsInDifferentAZs"
                         }
                     ],
                     "DependsOn": [
