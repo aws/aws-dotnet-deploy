@@ -19,7 +19,7 @@ To take advantage of this library you’ll need:
   * Note: You need to make sure to add the appropriate CloudFormation permissions to your credentials's profile / assumed role.
   * For SSO, please visit the [.NET SDK Reference Guide](https://docs.aws.amazon.com/sdkref/latest/guide/access-sso.html).
 * [.NET Core 3.1](https://dotnet.microsoft.com/download) or later
-* [Node.js 10.3](https://nodejs.org/en/download/) or later
+* [Node.js 14](https://nodejs.org/en/download/) or later
   * The [AWS Cloud Development Kit (CDK)](https://aws.amazon.com/cdk/) is used by this tool to create the AWS infrastructure to run applications. The CDK requires Node.js to function. This dependency is needed for deployments that are CDK based. If you will be using deployments that are not CDK based, you are not required to have this dependency.
 * (optional) [Docker](https://docs.docker.com/get-docker/)
   * Used when deploying to a container based service like Amazon Elastic Container Service (Amazon ECS)
