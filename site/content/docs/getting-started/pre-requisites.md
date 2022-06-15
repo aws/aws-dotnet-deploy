@@ -22,7 +22,7 @@ dotnet --version
 
 #### Node.js
 
-* The deployment tool requires the [AWS Cloud Development Kit (CDK)](https://docs.aws.amazon.com/cdk/latest/guide/), and the AWS CDK requires [Node.js](https://nodejs.org/en/download/). AWS CDK requires Node.js version (14.x, 16.x, or 18.x) or later - we recommend installing the latest LTS version.
+* The deployment tool requires the [AWS Cloud Development Kit (CDK)](https://docs.aws.amazon.com/cdk/latest/guide/), and the AWS CDK requires [Node.js](https://nodejs.org/en/download/). AWS CDK requires Node.js, versions 14.x, 16.x, 18.x (or later) - we recommend installing the latest LTS version.
 
 * To install Node.js, go to  [Node.js downloads](https://nodejs.org/en/download/)
 

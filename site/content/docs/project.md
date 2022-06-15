@@ -21,11 +21,11 @@ You can also generate the deployment project in the directory of your choice by 
 
 You can then customize the project and the deployment settings to fit your needs.
 
-The `AppStack class` is the recommended place to add new AWS resources or customize the resources created in the generated code.
-
 ### Customizing resources
 
 Now you can go ahead and add additional resources to the generated deployment project. Deployment projects enable you to change the deployment interface.
+
+The `AppStack class` is the recommended place to add new AWS resources or customize the resources created in the generated code.
 
   > Note: Most of the code is located in the generated folder. We don’t recommend you edit the files in there directly, and instead use it for reference. If you want to take updates from the original recipe the deployment project was created from, you can just copy the code into the generated folder.
 
@@ -51,4 +51,4 @@ Now that you created your custom deployment project, you can choose it over the 
 
 ### Sharing deployment projects
 
-It is important to save the generated deployment project in version control so that uou can reuse a project for multiple applications you want to deploy or share them with the rest of your team.
+It is important to save the generated deployment project in version control so that you can reuse a project for multiple applications you want to deploy or share them with the rest of your team.

@@ -25,7 +25,10 @@ For a sample web application which has following directory structure:
 
 Build stage consists of copying the files from the host machine to the container, restoring the dependencies, and building the application. Deployment Tool uses .sln directory as build context and generates file paths relative to the .sln directory.
 
-    FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+    FROM mcr.microsoft.com/dotnet/core/aspnet:6.0 AS base
+    WORKDIR /app
+    EXPOSE 80
+    EXPOSE 443
     WORKDIR /src
     COPY ["MyWebApplication/MyWebApplication.csproj", "MyWebApplication/"]
     COPY ["MyClassLibrary/MyClassLibrary.csproj", "MyClassLibrary/"]
