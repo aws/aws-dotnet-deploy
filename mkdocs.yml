@@ -11,17 +11,18 @@ site_dir: 'docs'
 nav:
   - Overview: index.md
   - Documentation:
-    - Getting Started:
+    - Getting started:
       - Pre-requisites: docs/getting-started/pre-requisites.md
       - How to install: docs/getting-started/installation.md
       - Set up Credentials: docs/getting-started/setup-creds.md
       - Deploy "Hello World": docs/getting-started/run-tool.md
-    - Supported AWS computes:
-      - Support matrix: docs/aws-computes/matrix.md
-      - Amazon ECS: docs/aws-computes/ecs.md
-      - AWS Elastic Beanstalk: docs/aws-computes/beanstalk.md
-      - AWS App Runner: docs/aws-computes/app-runner.md
-      - Amazon S3: docs/aws-computes/s3.md
+    -  Support matrix: docs/support.md
+  #  - Supported deployments:
+  #    - Support matrix: docs/aws-computes/matrix.md
+  #    - Amazon ECS: docs/aws-computes/ecs.md
+  #    - AWS Elastic Beanstalk: docs/aws-computes/beanstalk.md
+  #    - AWS App Runner: docs/aws-computes/app-runner.md
+  #    - Amazon S3 and Amazon CloudFront: docs/aws-computes/s3.md
     - Commands:
       - deploy: docs/commands/deploy.md
       - list-deployments: docs/commands/list.md
@@ -32,20 +33,14 @@ nav:
       - Dockerfile generation: docs/docker/docker-generation.md
       - Publishing a Docker image: docs/docker/publish-image.md
     - Deployment recipes: docs/recipe.md
-    - Deployment projects:
-      - Generating CDK project: docs/projects/overview.md
-      - Customizing CDK project: docs/projects/custom-project.md
-    - Integrating with CI/CD:
+    - Deployment projects: docs/project.md
+  #    - Generating CDK project: docs/projects/overview.md
+  #    - Customizing CDK project: docs/projects/custom-project.md
+    - Integrating with CI/CD: docs/cicd.md
     #  - Overview: docs/cicd/overview.md
-      - Suppress prompts with --silent: docs/cicd/silent.md
-      - Deployment settings file: docs/cicd/settings.md
+    #  - Suppress prompts with --silent: docs/cicd/silent.md
+    #  - Deployment settings file: docs/cicd/settings.md
 
-    #- Features:
-    #  - JSON configuration file: docs/features/config-file.md
-    #  - Recipe: docs/features/recipe.md
-    #  - Recommendation Engine: docs/features/recommendation-engine.md
-    #  - Deployment Project: docs/features/deployment-project.md
-    #  - Auto-generated Dockerfile: docs/features/autogen-dockerfile.md
     #- Tutorials:
     #  - Deploying ASP.NET Core Application: docs/tutorials/deploy-webapp.md
     #  - Deploying Blazor WebAssembly Application: docs/tutorials/deploy-blazorapp.md
