@@ -25,7 +25,7 @@ namespace AWS.Deploy.Orchestration
         private const string DOCKER_INSTALLATION_URL = "https://docs.docker.com/engine/install/";
 
         private readonly ICommandLineWrapper _commandLineWrapper;
-        private static readonly Version MinimumNodeJSVersion = new Version(10,13,0);
+        private static readonly Version MinimumNodeJSVersion = new Version(14,17,0);
 
         public SystemCapabilityEvaluator(ICommandLineWrapper commandLineWrapper)
         {
