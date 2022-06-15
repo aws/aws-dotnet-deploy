@@ -77,6 +77,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly IOptionSettingHandler _optionSettingHandler;
         private readonly IValidatorFactory _validatorFactory;
         private readonly IRecipeHandler _recipeHandler;
+        private readonly IDeployToolWorkspaceMetadata _deployToolWorkspaceMetadata;
 
         public CommandFactory(
             IServiceProvider serviceProvider,
@@ -105,7 +106,9 @@ namespace AWS.Deploy.CLI.Commands
             IAWSServiceHandler awsServiceHandler,
             IOptionSettingHandler optionSettingHandler,
             IValidatorFactory validatorFactory,
-            IRecipeHandler recipeHandler)
+            IRecipeHandler recipeHandler,
+            IDeployToolWorkspaceMetadata deployToolWorkspaceMetadata
+            )
         {
             _serviceProvider = serviceProvider;
             _toolInteractiveService = toolInteractiveService;
@@ -134,6 +137,7 @@ namespace AWS.Deploy.CLI.Commands
             _optionSettingHandler = optionSettingHandler;
             _validatorFactory = validatorFactory;
             _recipeHandler = recipeHandler;
+            _deployToolWorkspaceMetadata = deployToolWorkspaceMetadata;
         }
 
         public Command BuildRootCommand()
@@ -236,7 +240,8 @@ namespace AWS.Deploy.CLI.Commands
                         _awsServiceHandler,
                         _optionSettingHandler,
                         _validatorFactory,
-                        _recipeHandler);
+                        _recipeHandler,
+                        _deployToolWorkspaceMetadata);
 
                     var deploymentProjectPath = input.DeploymentProject ?? string.Empty;
                     if (!string.IsNullOrEmpty(deploymentProjectPath))

@@ -35,13 +35,15 @@ namespace AWS.Deploy.Orchestration
         private readonly IDirectoryManager _directoryManager;
         private readonly IAWSResourceQueryer _awsResourceQueryer;
         private readonly IFileManager _fileManager;
+        private readonly IDeployToolWorkspaceMetadata _workspaceMetadata;
 
         public CdkProjectHandler(
             IOrchestratorInteractiveService interactiveService,
             ICommandLineWrapper commandLineWrapper,
             IAWSResourceQueryer awsResourceQueryer,
             IFileManager fileManager,
-            IOptionSettingHandler optionSettingHandler)
+            IOptionSettingHandler optionSettingHandler,
+            IDeployToolWorkspaceMetadata workspaceMetadata)
         {
             _interactiveService = interactiveService;
             _commandLineWrapper = commandLineWrapper;
@@ -49,6 +51,7 @@ namespace AWS.Deploy.Orchestration
             _appSettingsBuilder = new CdkAppSettingsSerializer(optionSettingHandler);
             _directoryManager = new DirectoryManager();
             _fileManager = fileManager;
+            _workspaceMetadata = workspaceMetadata;
         }
 
         public async Task<string> ConfigureCdkProject(OrchestratorSession session, CloudApplication cloudApplication, Recommendation recommendation)
@@ -110,7 +113,7 @@ namespace AWS.Deploy.Orchestration
             if (await DetermineIfCDKBootstrapShouldRun())
             {
                 // Ensure region is bootstrapped
-                var cdkBootstrap = await _commandLineWrapper.TryRunWithResult($"npx cdk bootstrap aws://{session.AWSAccountId}/{session.AWSRegion} -c {Constants.CloudFormationIdentifier.SETTINGS_PATH_CDK_CONTEXT_PARAMETER}=\"{appSettingsFilePath}\" --template \"{Constants.CDK.CDKBootstrapTemplatePath}\"",
+                var cdkBootstrap = await _commandLineWrapper.TryRunWithResult($"npx cdk bootstrap aws://{session.AWSAccountId}/{session.AWSRegion} -c {Constants.CloudFormationIdentifier.SETTINGS_PATH_CDK_CONTEXT_PARAMETER}=\"{appSettingsFilePath}\" --template \"{_workspaceMetadata.CDKBootstrapTemplatePath}\"",
                     workingDirectory: cdkProjectPath,
                     needAwsCredentials: true,
                     redirectIO: true,
@@ -203,7 +206,7 @@ namespace AWS.Deploy.Orchestration
         private async Task<string> RetrieveStackId(CloudApplication cloudApplication, CancellationToken cancellationToken)
         {
             Stack? stack = null;
-            await WaitUntilHelper.WaitUntil(async () =>
+            await Helpers.WaitUntil(async () =>
             {
                 try
                 {
@@ -256,7 +259,7 @@ namespace AWS.Deploy.Orchestration
             {
                 saveCdkDirectoryPath =
                 Path.Combine(
-                    Constants.CDK.ProjectsDirectory,
+                    _workspaceMetadata.ProjectsDirectory,
                     Path.GetFileNameWithoutExtension(Path.GetRandomFileName()));
 
                 assemblyName = recommendation.ProjectDefinition.AssemblyName;
@@ -280,7 +283,7 @@ namespace AWS.Deploy.Orchestration
 
         public void DeleteTemporaryCdkProject(string cdkProjectPath)
         {
-            var parentPath = Path.GetFullPath(Constants.CDK.ProjectsDirectory);
+            var parentPath = Path.GetFullPath(_workspaceMetadata.ProjectsDirectory);
             cdkProjectPath = Path.GetFullPath(cdkProjectPath);
 
             if (!cdkProjectPath.StartsWith(parentPath))

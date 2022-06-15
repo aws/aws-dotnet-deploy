@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,7 +12,9 @@ using AWS.Deploy.CLI.Extensions;
 using AWS.Deploy.CLI.IntegrationTests.Extensions;
 using AWS.Deploy.CLI.IntegrationTests.Helpers;
 using AWS.Deploy.CLI.IntegrationTests.Services;
+using AWS.Deploy.Orchestration.Utilities;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Xunit;
 using Environment = System.Environment;
 
@@ -26,6 +29,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
         private bool _isDisposed;
         private string _stackName;
         private readonly TestAppManager _testAppManager;
+        private readonly string _customWorkspace;
 
         public WebAppNoDockerFileTests()
         {
@@ -34,7 +38,23 @@ namespace AWS.Deploy.CLI.IntegrationTests
             serviceCollection.AddCustomServices();
             serviceCollection.AddTestServices();
 
+            foreach (var item in serviceCollection)
+            {
+                if (item.ServiceType == typeof(IEnvironmentVariableManager))
+                {
+                    serviceCollection.Remove(item);
+                    break;
+                }
+            }
+
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(IEnvironmentVariableManager), typeof(TestEnvironmentVariableManager), ServiceLifetime.Singleton));
+
             var serviceProvider = serviceCollection.BuildServiceProvider();
+
+            _customWorkspace = Path.Combine(Path.GetTempPath(), $"deploy-tool-workspace{Guid.NewGuid().ToString().Split('-').Last()}");
+            var environmentVariableManager = serviceProvider.GetRequiredService<IEnvironmentVariableManager>();
+            environmentVariableManager.SetEnvironmentVariable("AWS_DOTNET_DEPLOYTOOL_WORKSPACE", _customWorkspace);
+            Directory.CreateDirectory(_customWorkspace);
 
             _app = serviceProvider.GetService<App>();
             Assert.NotNull(_app);
@@ -82,6 +102,11 @@ namespace AWS.Deploy.CLI.IntegrationTests
             // URL could take few more minutes to come live, therefore, we want to wait and keep trying for a specified timeout
             await _httpHelper.WaitUntilSuccessStatusCode(applicationUrl, TimeSpan.FromSeconds(5), TimeSpan.FromMinutes(5));
 
+            // Check the overridden workspace
+            Assert.True(File.Exists(Path.Combine(_customWorkspace, "CDKBootstrapTemplate.yaml")));
+            Assert.True(Directory.Exists(Path.Combine(_customWorkspace, "temp")));
+            Assert.True(Directory.Exists(Path.Combine(_customWorkspace, "Projects")));
+
             // list
             var listArgs = new[] { "list-deployments", "--diagnostics" };
             Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(listArgs));;
@@ -128,6 +153,24 @@ namespace AWS.Deploy.CLI.IntegrationTests
         ~WebAppNoDockerFileTests()
         {
             Dispose(false);
+        }
+    }
+
+    public class TestEnvironmentVariableManager : IEnvironmentVariableManager
+    {
+        public readonly Dictionary<string, string> store = new Dictionary<string, string>();
+
+        public string GetEnvironmentVariable(string variable)
+        {
+            return store.ContainsKey(variable) ? store[variable] : null;
+        }
+
+        public void SetEnvironmentVariable(string variable, string value)
+        {
+            if (string.Equals(variable, "AWS_DOTNET_DEPLOYTOOL_WORKSPACE"))
+                store[variable] = value;
+            else
+                Environment.SetEnvironmentVariable(variable, value);
         }
     }
 }

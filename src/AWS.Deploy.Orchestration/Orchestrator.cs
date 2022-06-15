@@ -44,6 +44,7 @@ namespace AWS.Deploy.Orchestration
         internal readonly OrchestratorSession? _session;
         internal readonly IAWSServiceHandler? _awsServiceHandler;
         private readonly IOptionSettingHandler? _optionSettingHandler;
+        internal readonly IDeployToolWorkspaceMetadata? _workspaceMetadata;
 
         public Orchestrator(
             OrchestratorSession session,
@@ -59,7 +60,8 @@ namespace AWS.Deploy.Orchestration
             IFileManager fileManager,
             IDirectoryManager directoryManager,
             IAWSServiceHandler awsServiceHandler,
-            IOptionSettingHandler optionSettingHandler)
+            IOptionSettingHandler optionSettingHandler,
+            IDeployToolWorkspaceMetadata deployToolWorkspaceMetadata)
         {
             _session = session;
             _interactiveService = interactiveService;
@@ -75,6 +77,7 @@ namespace AWS.Deploy.Orchestration
             _directoryManager = directoryManager;
             _awsServiceHandler = awsServiceHandler;
             _optionSettingHandler = optionSettingHandler;
+            _workspaceMetadata = deployToolWorkspaceMetadata;
         }
 
         public Orchestrator(OrchestratorSession session, IRecipeHandler recipeHandler)

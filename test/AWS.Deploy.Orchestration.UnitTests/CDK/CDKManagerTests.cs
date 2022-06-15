@@ -4,6 +4,7 @@
 using System;
 using System.Threading.Tasks;
 using AWS.Deploy.Orchestration.CDK;
+using AWS.Deploy.Orchestration.Utilities;
 using Moq;
 using Xunit;
 
@@ -15,6 +16,8 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
         private readonly Mock<INPMPackageInitializer> _mockNodeInitializer;
         private readonly Mock<IOrchestratorInteractiveService> _mockInteractiveService;
         private readonly CDKManager _cdkManager;
+        private readonly Mock<IEnvironmentVariableManager> _environmentVariableManager;
+        private readonly IDeployToolWorkspaceMetadata _deployToolWorkspaceMetadata;
         private const string _workingDirectory = @"c:\fake\path";
 
         public CDKManagerTests()
@@ -22,7 +25,14 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
             _mockCdkManager = new Mock<ICDKInstaller>();
             _mockNodeInitializer = new Mock<INPMPackageInitializer>();
             _mockInteractiveService = new Mock<IOrchestratorInteractiveService>();
-            _cdkManager = new CDKManager(_mockCdkManager.Object, _mockNodeInitializer.Object, _mockInteractiveService.Object);
+
+            _environmentVariableManager = new Mock<IEnvironmentVariableManager>();
+            _environmentVariableManager
+                .Setup(x => x.GetEnvironmentVariable(It.IsAny<string>()))
+                .Returns(() => null);
+
+            _deployToolWorkspaceMetadata = new DeployToolWorkspaceMetadata(new TestDirectoryManager(), _environmentVariableManager.Object);
+            _cdkManager = new CDKManager(_mockCdkManager.Object, _mockNodeInitializer.Object, _mockInteractiveService.Object, _deployToolWorkspaceMetadata);
         }
 
         [Theory]

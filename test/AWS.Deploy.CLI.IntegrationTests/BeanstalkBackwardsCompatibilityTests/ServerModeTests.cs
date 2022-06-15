@@ -98,7 +98,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests
             // Do an initial delay to avoid a race condition of the status being checked before the deployment has kicked off.
             await Task.Delay(TimeSpan.FromSeconds(3));
 
-            await WaitUntilHelper.WaitUntil(async () =>
+            await Orchestration.Utilities.Helpers.WaitUntil(async () =>
             {
                 DeploymentStatus status = (await restApiClient.GetDeploymentStatusAsync(sessionId)).Status; ;
                 return status != DeploymentStatus.Executing;
@@ -109,7 +109,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests
 
         private async Task WaitTillServerModeReady(RestAPIClient restApiClient)
         {
-            await WaitUntilHelper.WaitUntil(async () =>
+            await Orchestration.Utilities.Helpers.WaitUntil(async () =>
             {
                 SystemStatus status = SystemStatus.Error;
                 try

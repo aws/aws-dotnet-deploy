@@ -236,4 +236,12 @@ namespace AWS.Deploy.Orchestration
     {
         public FailedToCreateCDKProjectException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
+
+    /// <summary>
+    /// Throw if the deploy tool workspace is invalid
+    /// </summary>
+    public class InvalidDeployToolWorkspaceException : DeployToolException
+    {
+        public InvalidDeployToolWorkspaceException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+    }
 }
