@@ -7,8 +7,8 @@
     "DeploymentBundle": "Container",
     "CdkProjectTemplate": "../CdkTemplates/AspNetAppAppRunner",
     "CdkProjectTemplateId": "netdeploy.AspNetAppAppRunner",
-    "ShortDescription": ""Deploys as Linux container image to a fully managed service. Dockerfile will be automatically generated if needed.",
-    "Description": "This ASP.NET Core application will be built as a container image on Linux and deployed to AWS App Runner, a fully managed service for web applications and APIs. If your project does not contain a Dockerfile, it will be automatically generated, otherwise an existing Dockerfile will be used.\nRecommended if you want to deploy your web application as a Linux container image on a fully managed environment.",
+    "ShortDescription": "Deploys as Linux container image to a fully managed environment. Dockerfile will be automatically generated if needed.",
+    "Description": "This ASP.NET Core application will be built as a container image on Linux and deployed to AWS App Runner, a fully managed service for web applications and APIs. If your project does not contain a Dockerfile, it will be automatically generated, otherwise an existing Dockerfile will be used. Recommended if you want to deploy your web application as a Linux container image on a fully managed environment.",
     "TargetService": "AWS App Runner",
 
     "DisplayedResources": [

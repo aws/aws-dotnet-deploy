@@ -7,8 +7,8 @@
     "DeploymentBundle": "Container",
     "CdkProjectTemplate": "../CdkTemplates/ConsoleAppECSFargateService",
     "CdkProjectTemplateId": "netdeploy.ConsoleAppEcsFargateService",
-    "Description": "This .NET Console application will be built using a Dockerfile and deployed as a service to Amazon Elastic Container Service (Amazon ECS) with compute power managed by AWS Fargate compute engine. If your project does not contain a Dockerfile it will be automatically generated, otherwise an existing Dockerfile will be used.\nRecommended if you want to deploy a service as a container image on Linux.",
-    "ShortDescription": "Deploys a service as a linux container image to a fully managed container orchestration service. Dockerfile will be automatically generated if needed.",
+    "Description": "This .NET Console application will be built using a Dockerfile and deployed as a service to Amazon Elastic Container Service (Amazon ECS) with compute power managed by AWS Fargate compute engine. If your project does not contain a Dockerfile it will be automatically generated, otherwise an existing Dockerfile will be used. Recommended if you want to deploy a service as a container image on Linux.",
+    "ShortDescription": "Deploys a service as a Linux container image to a fully managed container orchestration service. Dockerfile will be automatically generated if needed.",
     "TargetService": "Amazon Elastic Container Service",
 
     "DisplayedResources": [
