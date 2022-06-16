@@ -11,7 +11,15 @@ namespace AWS.Deploy.Constants
         /// <summary>
         /// Deployment tool workspace directory to create CDK app during the deployment.
         /// </summary>
-        public static readonly string DeployToolWorkspaceDirectoryRoot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".aws-dotnet-deploy");
+        public static string DeployToolWorkspaceDirectoryRoot {
+            get
+            {
+                var deployToolWorkspace = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".aws-dotnet-deploy");
+                if (!Directory.Exists(deployToolWorkspace))
+                    Directory.CreateDirectory(deployToolWorkspace);
+                return deployToolWorkspace;
+            }
+        }
 
         /// <summary>
         /// Directory that contains CDK projects
