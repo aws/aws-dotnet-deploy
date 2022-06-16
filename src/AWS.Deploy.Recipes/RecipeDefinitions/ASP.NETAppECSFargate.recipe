@@ -8,7 +8,7 @@
     "CdkProjectTemplate": "../CdkTemplates/AspNetAppEcsFargate",
     "CdkProjectTemplateId": "netdeploy.AspNetAppEcsFargate",
     "ShortDescription": "Deploys as a Linux container image to a fully managed container orchestration service. Dockerfile will be automatically generated if needed.",
-    "Description": "This ASP.NET Core application will be deployed to Amazon Elastic Container Service (Amazon ECS) with compute power managed by AWS Fargate compute engine. If your project does not contain a Dockerfile, it will be automatically generated, otherwise an existing Dockerfile will be used.\nRecommended if you want to deploy your application as a container image on Linux.",
+    "Description": "This ASP.NET Core application will be deployed to Amazon Elastic Container Service (Amazon ECS) with compute power managed by AWS Fargate compute engine. If your project does not contain a Dockerfile, it will be automatically generated, otherwise an existing Dockerfile will be used. Recommended if you want to deploy your application as a container image on Linux.",
     "TargetService": "Amazon Elastic Container Service",
 
     "DisplayedResources": [

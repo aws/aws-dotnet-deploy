@@ -6,8 +6,8 @@
     "DisableNewDeployments": true,
     "DeploymentType": "BeanstalkEnvironment",
     "DeploymentBundle": "DotnetPublishZipFile",
-    "Description": "This ASP.NET Core application will be built and deployed to an existing AWS Elastic Beanstalk environment. Recommended if you want to deploy your application directly to EC2 hosts, not as a container image.",
     "ShortDescription": "Deploys your application directly to a Linux EC2 instance using AWS Elastic Beanstalk.",
+    "Description": "This ASP.NET Core application will be built and deployed to an existing AWS Elastic Beanstalk environment. Recommended if you want to deploy your application directly to EC2 hosts, not as a container image.",
     "TargetService": "AWS Elastic Beanstalk",
 
     "RecipePriority": 0,
