@@ -39,7 +39,7 @@ Build stage consists of copying the files from the host machine to the container
 
 ### Publish
 
-Publish stage takes the build output and publishes .NET application to /app/publish directory.
+Publish stage takes the build output and publishes the .NET application to /app/publish directory.
 
     FROM build AS publish
     RUN dotnet publish "MyWebApplication.csproj" -c Release -o /app/publish

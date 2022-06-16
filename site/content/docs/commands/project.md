@@ -8,7 +8,6 @@
 
 ### Description
 Generates and saves the deployment CDK project in a user provided directory path without proceeding with a deployment. Allows user to customize the CDK project before deploying the application.
-.
 
 ### Examples
 TBD...

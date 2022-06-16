@@ -51,4 +51,4 @@ Now that you created your custom deployment project, you can choose it over the 
 
 ### Sharing deployment projects
 
-It is important to save the generated deployment project in version control so that you can reuse a project for multiple applications you want to deploy or share them with the rest of your team.
+It is important to save the generated deployment project in version control so that you can reuse the project for multiple applications that you want to deploy or share with the rest of your team.
