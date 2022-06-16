@@ -11,37 +11,62 @@ site_dir: 'docs'
 nav:
   - Overview: index.md
   - Documentation:
-    - Getting Started: 
+    - Getting started:
       - Pre-requisites: docs/getting-started/pre-requisites.md
-      - Installing the tool: docs/getting-started/installation.md
-    - Supported AWS computes:
-      - Amazon ECS: docs/aws-computes/ecs.md
-      - AWS Elastic Beanstalk: docs/aws-computes/beanstalk.md
-      - AWS App Runner: docs/aws-computes/app-runner.md
-      - Amazon S3: docs/aws-computes/s3.md
-    - Features:
-      - Recipe: docs/features/recipe.md
-      - Recommendation Engine: docs/features/recommendation-engine.md
-      - Deployment Project: docs/features/deployment-project.md
-      - Auto-generated Dockerfile: docs/features/autogen-dockerfile.md
-    - Tutorials:
-      - Deploying ASP.NET Core Application: docs/tutorials/deploy-webapp.md
-      - Deploying Blazor WebAssembly Application: docs/tutorials/deploy-blazorapp.md
-      - Deploying Console Service: docs/tutorials/deploy-console-service.md
-      - Deploying Console Task: docs/tutorials/deploy-console-task.md
-      - Pushing Image to ECS: docs/tutorials/push-image-ecr.md
-      - Automating Deployments: docs/tutorials/automate-deployments.md
-      - Listing Deployments: docs/tutorials/list-deployments.md
-      - Deleting Deployment: docs/tutorials/delete-deployment.md
-  - Troubleshooting Guide: troubleshooting-guide.md
+      - How to install: docs/getting-started/installation.md
+      - Set up Credentials: docs/getting-started/setup-creds.md
+      - Deploy "Hello World": docs/getting-started/run-tool.md
+    -  Support matrix: docs/support.md
+  #  - Supported deployments:
+  #    - Support matrix: docs/aws-computes/matrix.md
+  #    - Amazon ECS: docs/aws-computes/ecs.md
+  #    - AWS Elastic Beanstalk: docs/aws-computes/beanstalk.md
+  #    - AWS App Runner: docs/aws-computes/app-runner.md
+  #    - Amazon S3 and Amazon CloudFront: docs/aws-computes/s3.md
+    - Commands:
+      - deploy: docs/commands/deploy.md
+      - list-deployments: docs/commands/list.md
+      - delete-deployment: docs/commands/delete.md
+      - deployment-project: docs/commands/project.md
+      - server-mode: docs/commands/server-mode.md
+    - Docker support:
+      - Dockerfile generation: docs/docker/docker-generation.md
+      - Publishing a Docker image: docs/docker/publish-image.md
+    - Deployment recipes: docs/recipe.md
+    - Deployment projects: docs/project.md
+  #    - Generating CDK project: docs/projects/overview.md
+  #    - Customizing CDK project: docs/projects/custom-project.md
+    - Integrating with CI/CD: docs/cicd.md
+    #  - Overview: docs/cicd/overview.md
+    #  - Suppress prompts with --silent: docs/cicd/silent.md
+    #  - Deployment settings file: docs/cicd/settings.md
+
+    #- Tutorials:
+    #  - Deploying ASP.NET Core Application: docs/tutorials/deploy-webapp.md
+    #  - Deploying Blazor WebAssembly Application: docs/tutorials/deploy-blazorapp.md
+    #  - Deploying Console Service: docs/tutorials/deploy-console-service.md
+    #  - Deploying Console Task: docs/tutorials/deploy-console-task.md
+    #  - Pushing Image to ECS: docs/tutorials/push-image-ecr.md
+    #  - Automating Deployments: docs/tutorials/automate-deployments.md
+    #  - Listing Deployments: docs/tutorials/list-deployments.md
+    #  - Deleting Deployment: docs/tutorials/delete-deployment.md
+  - Troubleshooting Guide:
+    - Missing Dependencies: troubleshooting-guide/missing-dependencies.md
+    - Docker Issues: troubleshooting-guide/docker-issues.md
+    - Other Issues: troubleshooting-guide/other-issues.md
   - Contributing to the project: contributing.md
+  - FAQs: faq.md
 
 theme:
   name: material
+  custom_dir: site/overrides
   palette:
-    primary: white
+    primary: indigo
   font: false
   language: en
   features:
     - tabs
     - instant
+  icon:
+    logo: aws-logo-light
+  favicon: assets/images/aws-logo-light.svg

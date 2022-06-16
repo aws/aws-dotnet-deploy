@@ -334,7 +334,7 @@ Copyright (c) 2016 .NET Foundation
 Copyright (c) 2016 .NET Foundation
 ** Microsoft.Extensions.Configuration.Json; version 3.1.7 -- https://www.nuget.org/packages/Microsoft.Bcl.AsyncInterhttps://www.nuget.org/packages/Microsoft.Extensions.Configuration.Jsonfaces
 Copyright (c) .NET Foundation and Contributors
-** System.Text.Json; version 5.0.0 -- https://www.nuget.org/packages/System.Text.Json
+** System.Text.Json; version 6.0.4 -- https://www.nuget.org/packages/System.Text.Json
 Copyright (c) .NET Foundation and Contributors
 ** Microsoft.Extensions.DependencyInjection; version 6.0.0 -- https://www.nuget.org/packages/Microsoft.Extensions.DependencyInjection
 Copyright (c) .NET Foundation and Contributors
@@ -344,7 +344,7 @@ Copyright (c) .NET Foundation and Contributors
 Copyright (c) .NET Foundation and Contributors
 ** Microsoft.OpenApi; version 1.2.3 -- https://www.nuget.org/packages/Microsoft.OpenApi/
 Copyright (c) Microsoft Corporation.
- 
+
 All rights reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

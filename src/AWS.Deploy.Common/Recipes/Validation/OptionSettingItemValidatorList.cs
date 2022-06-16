@@ -36,6 +36,30 @@ namespace AWS.Deploy.Common.Recipes.Validation
         /// <summary>
         /// Must be paired with <see cref="FileExistsValidator"/>
         /// </summary>
-        FileExists
+        FileExists,
+        /// <summary>
+        /// Must be paired with <see cref="StringLengthValidator"/>
+        /// </summary>
+        StringLength,
+        /// <summary>
+        /// Must be paired with <see cref="InstanceTypeValidator"/>
+        /// </summary>
+        InstanceType,
+        /// <summary>
+        /// Must be paired with <see cref="SubnetsInVpcValidator"/>
+        /// </summary>
+        SubnetsInVpc,
+        /// <summary>
+        /// Must be paired with <see cref="SecurityGroupsInVpcValidator"/>
+        /// </summary>
+        SecurityGroupsInVpc,
+        /// <summary>
+        /// Must be paired with <see cref="UriValidator"/>
+        /// </summary>
+        Uri,
+        /// <summary>
+        /// Must be paired with <see cref="ComparisonValidator"/>
+        /// </summary>
+        Comparison
     }
 }

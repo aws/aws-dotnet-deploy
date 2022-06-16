@@ -28,6 +28,7 @@ namespace AWS.Deploy.CLI.UnitTests
         [InlineData("WebAppDifferentTargetFramework", "")]
         [InlineData("ConsoleSdkType", "")]
         [InlineData("WorkerServiceExample", "")]
+        [InlineData("WebAppNet7", "")]
         public async Task DockerGenerate(string topLevelFolder, string projectName)
         {
             var projectPath = ResolvePath(Path.Combine(topLevelFolder, projectName));

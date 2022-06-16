@@ -34,6 +34,7 @@ using AWS.Deploy.CLI.Commands.TypeHints;
 using AWS.Deploy.Common.TypeHintData;
 using AWS.Deploy.Orchestration.ServiceHandlers;
 using AWS.Deploy.Common.Data;
+using AWS.Deploy.Common.Recipes.Validation;
 
 namespace AWS.Deploy.CLI.ServerMode.Controllers
 {
@@ -229,6 +230,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         [SwaggerOperation(OperationId = "ApplyConfigSettings")]
         [SwaggerResponse(200, type: typeof(ApplyConfigSettingsOutput))]
         [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound)]
+        [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status400BadRequest)]
         [Authorize]
         public async Task<IActionResult> ApplyConfigSettings(string sessionId, [FromBody] ApplyConfigSettingsInput input)
         {
@@ -248,16 +250,23 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
             var output = new ApplyConfigSettingsOutput();
 
-            foreach (var updatedSetting in input.UpdatedSettings)
+            var optionSettingItems = input.UpdatedSettings
+                .Select(x => optionSettingHandler.GetOptionSetting(state.SelectedRecommendation, x.Key));
+
+            var readonlySettings = optionSettingItems
+                .Where(x => state.SelectedRecommendation.IsExistingCloudApplication && !x.Updatable);
+            if (readonlySettings.Any())
+                return BadRequest($"The following settings are read only and cannot be updated: {string.Join(", ", readonlySettings)}");
+
+            foreach (var updatedSetting in optionSettingItems)
             {
                 try
                 {
-                    var setting = optionSettingHandler.GetOptionSetting(state.SelectedRecommendation, updatedSetting.Key);
-                    await optionSettingHandler.SetOptionSettingValue(state.SelectedRecommendation, setting, updatedSetting.Value);
+                    await optionSettingHandler.SetOptionSettingValue(state.SelectedRecommendation, updatedSetting, input.UpdatedSettings[updatedSetting.FullyQualifiedId]);
                 }
                 catch (Exception ex)
                 {
-                    output.FailedConfigUpdates.Add(updatedSetting.Key, ex.Message);
+                    output.FailedConfigUpdates.Add(updatedSetting.FullyQualifiedId, ex.Message);
                 }
             }
 
@@ -328,6 +337,10 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             }
 
             var output = new GetExistingDeploymentsOutput();
+            if(state.NewRecommendations == null)
+            {
+                return Ok(output);
+            }
 
             var deployedApplicationQueryer = serviceProvider.GetRequiredService<IDeployedApplicationQueryer>();
             var session = CreateOrchestratorSession(state);
@@ -535,11 +548,20 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 throw new SelectedRecommendationIsNullException("The selected recommendation is null or invalid.");
 
             var optionSettingHandler = serviceProvider.GetRequiredService<IOptionSettingHandler>();
+            var validatorFactory = serviceProvider.GetRequiredService<IValidatorFactory>();
             var settingValidatorFailedResults = optionSettingHandler.RunOptionSettingValidators(state.SelectedRecommendation);
-            if (settingValidatorFailedResults.Any())
+            var recipeValidatorFailedResults =
+                        validatorFactory.BuildValidators(state.SelectedRecommendation.Recipe)
+                            .Select(async validator => await validator.Validate(state.SelectedRecommendation, orchestratorSession))
+                            .Select(x => x.Result)
+                            .Where(x => !x.IsValid)
+                            .ToList();
+            if (settingValidatorFailedResults.Any() || recipeValidatorFailedResults.Any())
             {
                 var settingValidationErrorMessage = $"The deployment configuration needs to be adjusted before it can be deployed:{Environment.NewLine}";
                 foreach (var result in settingValidatorFailedResults)
+                    settingValidationErrorMessage += $" - {result.ValidationFailedMessage}{Environment.NewLine}{Environment.NewLine}";
+                foreach (var result in recipeValidatorFailedResults)
                     settingValidationErrorMessage += $" - {result.ValidationFailedMessage}{Environment.NewLine}{Environment.NewLine}";
                 settingValidationErrorMessage += $"{Environment.NewLine}Please adjust your settings";
                 return Problem(settingValidationErrorMessage);

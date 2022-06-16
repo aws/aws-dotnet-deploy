@@ -55,6 +55,96 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
         }
 
         [Fact]
+        public async Task GetAndApplyAppRunnerSettings_RecipeValidatorsAreRun()
+        {
+            _stackName = $"ServerModeWebAppRunner{Guid.NewGuid().ToString().Split('-').Last()}";
+
+            var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
+            var portNumber = 4026;
+            using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ServerModeExtensions.ResolveCredentials);
+
+            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
+            var cancelSource = new CancellationTokenSource();
+
+            var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
+            try
+            {
+                var baseUrl = $"http://localhost:{portNumber}/";
+                var restClient = new RestAPIClient(baseUrl, httpClient);
+
+                await restClient.WaitTillServerModeReady();
+
+                var sessionId = await restClient.StartDeploymentSession(projectPath, _awsRegion);
+
+                var logOutput = new StringBuilder();
+                await ServerModeExtensions.SetupSignalRConnection(baseUrl, sessionId, logOutput);
+
+                var fargateRecommendation = await restClient.GetRecommendationsAndSetDeploymentTarget(sessionId, "AspNetAppEcsFargate", _stackName);
+
+                var applyConfigSettingsResponse = await restClient.ApplyConfigSettingsAsync(sessionId, new ApplyConfigSettingsInput()
+                {
+                    UpdatedSettings = new Dictionary<string, string>()
+                    {
+                        {"TaskCpu", "4096"}
+                    }
+                });
+                Assert.Empty(applyConfigSettingsResponse.FailedConfigUpdates);
+
+                var exceptionThrown = await Assert.ThrowsAsync<ApiException>(async () => await restClient.StartDeploymentAsync(sessionId));
+                Assert.Contains("Cpu value 4096 is not compatible with memory value 512.", exceptionThrown.Response);
+            }
+            finally
+            {
+                cancelSource.Cancel();
+                _stackName = null;
+            }
+        }
+
+        [Fact]
+        public async Task GetAndApplyAppRunnerSettings_FailedUpdatesReturnSettingId()
+        {
+            _stackName = $"ServerModeWebAppRunner{Guid.NewGuid().ToString().Split('-').Last()}";
+
+            var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
+            var portNumber = 4027;
+            using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ServerModeExtensions.ResolveCredentials);
+
+            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
+            var cancelSource = new CancellationTokenSource();
+
+            var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
+            try
+            {
+                var baseUrl = $"http://localhost:{portNumber}/";
+                var restClient = new RestAPIClient(baseUrl, httpClient);
+
+                await restClient.WaitTillServerModeReady();
+
+                var sessionId = await restClient.StartDeploymentSession(projectPath, _awsRegion);
+
+                var logOutput = new StringBuilder();
+                await ServerModeExtensions.SetupSignalRConnection(baseUrl, sessionId, logOutput);
+
+                var fargateRecommendation = await restClient.GetRecommendationsAndSetDeploymentTarget(sessionId, "AspNetAppEcsFargate", _stackName);
+
+                var applyConfigSettingsResponse = await restClient.ApplyConfigSettingsAsync(sessionId, new ApplyConfigSettingsInput()
+                {
+                    UpdatedSettings = new Dictionary<string, string>()
+                    {
+                        {"DesiredCount", "test"}
+                    }
+                });
+                Assert.Single(applyConfigSettingsResponse.FailedConfigUpdates);
+                Assert.Equal("DesiredCount", applyConfigSettingsResponse.FailedConfigUpdates.Keys.First());
+            }
+            finally
+            {
+                cancelSource.Cancel();
+                _stackName = null;
+            }
+        }
+
+        [Fact]
         public async Task GetAndApplyAppRunnerSettings_VPCConnector()
         {
             _stackName = $"ServerModeWebAppRunner{Guid.NewGuid().ToString().Split('-').Last()}";
@@ -85,14 +175,15 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
                 var subnetsResourcesEmpty = await restClient.GetConfigSettingResourcesAsync(sessionId, "VPCConnector.Subnets");
                 var securityGroupsResourcesEmpty = await restClient.GetConfigSettingResourcesAsync(sessionId, "VPCConnector.SecurityGroups");
                 Assert.NotEmpty(vpcResources.Resources);
-                Assert.Empty(subnetsResourcesEmpty.Resources);
-                Assert.Empty(securityGroupsResourcesEmpty.Resources);
+                Assert.NotEmpty(subnetsResourcesEmpty.Resources);
+                Assert.NotEmpty(securityGroupsResourcesEmpty.Resources);
 
                 var vpcId = vpcResources.Resources.First().SystemName;
                 await restClient.ApplyConfigSettingsAsync(sessionId, new ApplyConfigSettingsInput()
                 {
                     UpdatedSettings = new Dictionary<string, string>()
                     {
+                        {"VPCConnector.UseVPCConnector", "true"},
                         {"VPCConnector.CreateNew", "true"},
                         {"VPCConnector.VpcId", vpcId}
                     }
@@ -120,6 +211,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
 
                 Assert.True(metadata.Settings.ContainsKey("VPCConnector"));
                 var vpcConnector = JsonConvert.DeserializeObject<VPCConnectorTypeHintResponse>(metadata.Settings["VPCConnector"].ToString());
+                Assert.True(vpcConnector.UseVPCConnector);
                 Assert.True(vpcConnector.CreateNew);
                 Assert.Equal(vpcId, vpcConnector.VpcId);
                 Assert.Contains<string>(subnet, vpcConnector.Subnets);

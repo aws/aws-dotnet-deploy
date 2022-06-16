@@ -68,16 +68,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AWS.Deploy.ServerMode.Clien
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkerServiceExample", "testapps\WorkerServiceExample\WorkerServiceExample.csproj", "{7C330493-9BF7-4DB6-815B-807C08500AC6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApiNET6", "testapps\WebApiNET6\WebApiNET6.csproj", "{B2EA65BD-9FFE-4452-B2DC-574EB1A9FAF1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApiNET6", "testapps\WebApiNET6\WebApiNET6.csproj", "{B2EA65BD-9FFE-4452-B2DC-574EB1A9FAF1}"
 EndProject
 Global
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		src\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems*{3f7a5ca6-7178-4dbf-8dad-6a63684c7a8e}*SharedItemsImports = 5
-		src\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems*{5f8ec972-781d-4a82-a73f-36a97281b0d5}*SharedItemsImports = 5
-		src\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems*{8a351cc0-70c0-4412-b45e-358606251512}*SharedItemsImports = 5
-		src\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems*{f2266c44-c8c5-45ad-aa9b-44f8825bdf63}*SharedItemsImports = 13
-		src\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems*{fae4d4c5-9107-4622-a050-e30cc70be754}*SharedItemsImports = 5
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -213,5 +206,13 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5A4B2863-1763-4496-B122-651A38A4F5D7}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		src\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems*{3aac19a6-02e8-45d0-bdd0-cad0fbe15f64}*SharedItemsImports = 5
+		src\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems*{3f7a5ca6-7178-4dbf-8dad-6a63684c7a8e}*SharedItemsImports = 5
+		src\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems*{5f8ec972-781d-4a82-a73f-36a97281b0d5}*SharedItemsImports = 5
+		src\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems*{8a351cc0-70c0-4412-b45e-358606251512}*SharedItemsImports = 5
+		src\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems*{f2266c44-c8c5-45ad-aa9b-44f8825bdf63}*SharedItemsImports = 13
+		src\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems*{fae4d4c5-9107-4622-a050-e30cc70be754}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal

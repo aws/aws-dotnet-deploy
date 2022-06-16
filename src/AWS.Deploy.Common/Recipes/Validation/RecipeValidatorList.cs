@@ -11,11 +11,6 @@ namespace AWS.Deploy.Common.Recipes.Validation
         FargateTaskSizeCpuMemoryLimits,
 
         /// <summary>
-        /// Must be paired with <see cref="MinMaxConstraintValidator"/>
-        /// </summary>
-        MinMaxConstraint,
-
-        /// <summary>
         /// Must be paired with <see cref="DockerfilePathValidator"/>
         /// </summary>
         ValidDockerfilePath

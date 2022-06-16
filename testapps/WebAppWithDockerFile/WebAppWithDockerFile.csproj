@@ -12,6 +12,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Update="AppRunnerConfigFile.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Update="ECSFargateConfigFile.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

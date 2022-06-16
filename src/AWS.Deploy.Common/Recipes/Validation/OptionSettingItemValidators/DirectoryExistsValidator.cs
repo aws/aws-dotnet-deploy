@@ -23,8 +23,10 @@ namespace AWS.Deploy.Common.Recipes.Validation
         /// This can be either an absolute path, or a path relative to the project directory.
         /// </summary>
         /// <param name="input">Path to validate</param>
+        /// <param name="recommendation">Selected recommendation, which may be used if the validator needs to consider properties other than itself</param>
+        /// <param name="optionSettingItem">Selected option setting item, which may be used if the validator needs to consider properties other than itself</param>
         /// <returns>Valid if the directory exists, invalid otherwise</returns>
-        public Task<ValidationResult> Validate(object input, Recommendation recommendation)
+        public Task<ValidationResult> Validate(object input, Recommendation recommendation, OptionSettingItem optionSettingItem)
         {
             var executionDirectory = (string)input;
 

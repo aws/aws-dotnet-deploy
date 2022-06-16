@@ -35,7 +35,7 @@
                     "Type": "MSProperty",
                     "Condition": {
                         "PropertyName": "TargetFramework",
-                        "AllowedValues": [ "netcoreapp2.1", "netcoreapp3.1", "net5.0", "net6.0" ]
+                        "AllowedValues": [ "netcoreapp3.1", "net5.0", "net6.0", "net7.0" ]
                     }
                 }
             ],
@@ -128,13 +128,6 @@
     "Validators": [
         {
             "ValidatorType": "FargateTaskSizeCpuMemoryLimits"
-        },
-        {
-            "ValidatorType": "MinMaxConstraint",
-            "Configuration": {
-                "MinValueOptionSettingsId": "AutoScaling.MinCapacity",
-                "MaxValueOptionSettingsId": "AutoScaling.MaxCapacity"
-            }
         },
         {
             "ValidatorType": "ValidDockerfilePath"
@@ -373,7 +366,7 @@
                     "Description": "The ID of the existing VPC to use.",
                     "Type": "String",
                     "TypeHint": "ExistingVpc",
-                    "DefaultValue": null,
+                    "DefaultValue": "{DefaultVpcId}",
                     "AdvancedSetting": false,
                     "Updatable": false,
                     "Validators": [
@@ -381,7 +374,6 @@
                             "ValidatorType": "Regex",
                             "Configuration": {
                                 "Regex": "^vpc-([0-9a-f]{8}|[0-9a-f]{17})$",
-                                "AllowEmptyString": true,
                                 "ValidationFailedMessage": "Invalid VPC ID. The VPC ID must start with the \"vpc-\" prefix, followed by either 8 or 17 characters consisting of digits and letters(lower-case) from a to f. For example vpc-abc88de9 is a valid VPC ID."
                             }
                         }
@@ -559,6 +551,13 @@
                             "Configuration": {
                                 "Min": 1,
                                 "Max": 5000
+                            }
+                        },
+                        {
+                            "ValidatorType": "Comparison",
+                            "Configuration": {
+                                "Operation": "GreaterThan",
+                                "SettingId": "AutoScaling.MinCapacity"
                             }
                         }
                     ],

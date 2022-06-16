@@ -143,13 +143,13 @@ namespace AspNetAppAppRunner
                         {
                             Port = settings.Port.ToString(),
                             StartCommand = !string.IsNullOrWhiteSpace(settings.StartCommand) ? settings.StartCommand : null,
-                            RuntimeEnvironmentVariables = runtimeEnvironmentVariables
+                            RuntimeEnvironmentVariables = runtimeEnvironmentVariables.ToArray()
                         }
                     }
                 }
             };
 
-            if ((settings.VPCConnector.CreateNew && VPCConnector != null) || !string.IsNullOrEmpty(settings.VPCConnector.VpcConnectorId))
+            if (settings.VPCConnector.UseVPCConnector)
             {
                 appRunnerServiceProp.NetworkConfiguration = new CfnService.NetworkConfigurationProperty
                 {

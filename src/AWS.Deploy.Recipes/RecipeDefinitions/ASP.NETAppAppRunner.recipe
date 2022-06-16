@@ -32,7 +32,7 @@
                     "Type": "MSProperty",
                     "Condition": {
                         "PropertyName": "TargetFramework",
-                        "AllowedValues": [ "netcoreapp2.1", "netcoreapp3.1", "net5.0", "net6.0" ]
+                        "AllowedValues": [ "netcoreapp3.1", "net5.0", "net6.0", "net7.0" ]
                     }
                 }
             ]
@@ -413,13 +413,28 @@
             "Updatable": true,
             "ChildOptionSettings": [
                 {
+                    "Id": "UseVPCConnector",
+                    "Name": "Use VPC Connector",
+                    "Description": "Do you want to use a VPC Connector to connect to a VPC?",
+                    "Type": "Bool",
+                    "DefaultValue": false,
+                    "AdvancedSetting": false,
+                    "Updatable": true
+                },
+                {
                     "Id": "CreateNew",
                     "Name": "Create New VPC Connector",
                     "Description": "Do you want to create a new VPC Connector?",
                     "Type": "Bool",
                     "DefaultValue": false,
                     "AdvancedSetting": false,
-                    "Updatable": true
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "VPCConnector.UseVPCConnector",
+                            "Value": true
+                        }
+                    ]
                 },
                 {
                     "Id": "VpcConnectorId",
@@ -430,7 +445,23 @@
                     "DefaultValue": null,
                     "AdvancedSetting": false,
                     "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Required"
+                        },
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": {
+                                "Regex": "arn:(aws|aws-us-gov|aws-cn|aws-iso|aws-iso-b):apprunner:\\w+(?:-\\w+)+:[0-9]{12}:vpcconnector/[\\w+=,.@\\-/]{1,1000}",
+                                "ValidationFailedMessage": "Invalid VPC Connector ARN. The ARN should contain the arn:[PARTITION]:apprunner namespace, followed by the AWS region and account ID, and then the resource path. For example - arn:aws:apprunner:us-west-2:123456789012:vpcconnector/RecipeVPCConnector is a valid VPC Connector ARN."
+                            }
+                        }
+                    ],
                     "DependsOn": [
+                        {
+                            "Id": "VPCConnector.UseVPCConnector",
+                            "Value": true
+                        },
                         {
                             "Id": "VPCConnector.CreateNew",
                             "Value": false
@@ -443,7 +474,7 @@
                     "Description": "A list of VPC IDs that App Runner should use when it associates your service with a custom Amazon VPC.",
                     "Type": "String",
                     "TypeHint": "ExistingVpc",
-                    "DefaultValue": null,
+                    "DefaultValue": "{DefaultVpcId}",
                     "AdvancedSetting": false,
                     "Updatable": true,
                     "Validators": [
@@ -451,12 +482,15 @@
                             "ValidatorType": "Regex",
                             "Configuration": {
                                 "Regex": "^vpc-([0-9a-f]{8}|[0-9a-f]{17})$",
-                                "AllowEmptyString": true,
                                 "ValidationFailedMessage": "Invalid VPC ID. The VPC ID must start with the \"vpc-\" prefix, followed by either 8 or 17 characters consisting of digits and letters(lower-case) from a to f. For example vpc-abc88de9 is a valid VPC ID."
                             }
                         }
                     ],
                     "DependsOn": [
+                        {
+                            "Id": "VPCConnector.UseVPCConnector",
+                            "Value": true
+                        },
                         {
                             "Id": "VPCConnector.CreateNew",
                             "Value": true
@@ -474,18 +508,34 @@
                     "Updatable": true,
                     "Validators": [
                         {
+                            "ValidatorType": "Required"
+                        },
+                        {
                             "ValidatorType": "Regex",
                             "Configuration": {
                                 "Regex": "^subnet-([0-9a-f]{8}|[0-9a-f]{17})$",
-                                "AllowEmptyString": true,
                                 "ValidationFailedMessage": "Invalid Subnet ID. The Subnet ID must start with the \"subnet-\" prefix, followed by either 8 or 17 characters consisting of digits and letters(lower-case) from a to f. For example subnet-abc88de9 is a valid Subnet ID."
+                            }
+                        },
+                        {
+                            "ValidatorType": "SubnetsInVpc",
+                            "Configuration": {
+                                "VpcId": "VPCConnector.VpcId"
                             }
                         }
                     ],
                     "DependsOn": [
                         {
+                            "Id": "VPCConnector.UseVPCConnector",
+                            "Value": true
+                        },
+                        {
                             "Id": "VPCConnector.CreateNew",
                             "Value": true
+                        },
+                        {
+                            "Id": "VPCConnector.VpcId",
+                            "Operation": "NotEmpty"
                         }
                     ]
                 },
@@ -500,18 +550,34 @@
                     "Updatable": true,
                     "Validators": [
                         {
+                            "ValidatorType": "Required"
+                        },
+                        {
                             "ValidatorType": "Regex",
                             "Configuration": {
                                 "Regex": "^sg-([0-9a-f]{8}|[0-9a-f]{17})$",
-                                "AllowEmptyString": true,
                                 "ValidationFailedMessage": "Invalid Security Group ID. The Security Group ID must start with the \"sg-\" prefix, followed by either 8 or 17 characters consisting of digits and letters(lower-case) from a to f. For example sg-abc88de9 is a valid Security Group ID."
+                            }
+                        },
+                        {
+                            "ValidatorType": "SecurityGroupsInVpc",
+                            "Configuration": {
+                                "VpcId": "VPCConnector.VpcId"
                             }
                         }
                     ],
                     "DependsOn": [
                         {
+                            "Id": "VPCConnector.UseVPCConnector",
+                            "Value": true
+                        },
+                        {
                             "Id": "VPCConnector.CreateNew",
                             "Value": true
+                        },
+                        {
+                            "Id": "VPCConnector.VpcId",
+                            "Operation": "NotEmpty"
                         }
                     ]
                 }

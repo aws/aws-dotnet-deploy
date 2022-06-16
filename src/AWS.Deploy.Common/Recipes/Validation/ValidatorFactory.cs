@@ -53,13 +53,18 @@ namespace AWS.Deploy.Common.Recipes.Validation
             { OptionSettingItemValidatorList.DockerBuildArgs, typeof(DockerBuildArgsValidator) },
             { OptionSettingItemValidatorList.DotnetPublishArgs, typeof(DotnetPublishArgsValidator) },
             { OptionSettingItemValidatorList.ExistingResource, typeof(ExistingResourceValidator) },
-            { OptionSettingItemValidatorList.FileExists, typeof(FileExistsValidator) }
+            { OptionSettingItemValidatorList.FileExists, typeof(FileExistsValidator) },
+            { OptionSettingItemValidatorList.StringLength, typeof(StringLengthValidator) },
+            { OptionSettingItemValidatorList.InstanceType, typeof(InstanceTypeValidator) },
+            { OptionSettingItemValidatorList.SubnetsInVpc, typeof(SubnetsInVpcValidator) },
+            { OptionSettingItemValidatorList.SecurityGroupsInVpc, typeof(SecurityGroupsInVpcValidator) },
+            { OptionSettingItemValidatorList.Uri, typeof(UriValidator) },
+            { OptionSettingItemValidatorList.Comparison, typeof(ComparisonValidator) }
         };
 
         private static readonly Dictionary<RecipeValidatorList, Type> _recipeValidatorTypeMapping = new()
         {
             { RecipeValidatorList.FargateTaskSizeCpuMemoryLimits, typeof(FargateTaskCpuMemorySizeValidator) },
-            { RecipeValidatorList.MinMaxConstraint, typeof(MinMaxConstraintValidator) },
             { RecipeValidatorList.ValidDockerfilePath, typeof(DockerfilePathValidator) }
         };
 

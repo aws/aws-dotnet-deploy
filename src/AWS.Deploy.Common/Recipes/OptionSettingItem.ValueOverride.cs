@@ -101,7 +101,7 @@ namespace AWS.Deploy.Common.Recipes
             {
                 foreach (var validator in validators)
                 {
-                    var result = await validator.Validate(valueOverride, recommendation);
+                    var result = await validator.Validate(valueOverride, recommendation, this);
                     if (!result.IsValid)
                     {
                         Validation.ValidationStatus = ValidationStatus.Invalid;

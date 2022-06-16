@@ -83,6 +83,7 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
         public Task<List<string>> ListOfSNSTopicArns() => throw new NotImplementedException();
         public Task<List<Amazon.S3.Model.S3Bucket>> ListOfS3Buckets() => throw new NotImplementedException();
         public Task<List<InstanceTypeInfo>> ListOfAvailableInstanceTypes() => throw new NotImplementedException();
+        public Task<InstanceTypeInfo> DescribeInstanceType(string instanceType) => throw new NotImplementedException();
         public Task<List<StackEvent>> GetCloudFormationStackEvents(string stackName) => throw new NotImplementedException();
         public Task<List<Amazon.ElasticBeanstalk.Model.Tag>> ListElasticBeanstalkResourceTags(string resourceArn) => throw new NotImplementedException();
         public Task<List<ConfigurationOptionSetting>> GetBeanstalkEnvironmentConfigurationSettings(string environmentId) => throw new NotImplementedException();
@@ -93,5 +94,6 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
         public Task<List<SecurityGroup>> DescribeSecurityGroups(string vpcID = null) => throw new NotImplementedException();
         public Task<string> GetParameterStoreTextValue(string parameterName) => throw new NotImplementedException();
         public Task<ResourceDescription> GetCloudControlApiResource(string type, string identifier) => throw new NotImplementedException();
+        public Task<Vpc> GetDefaultVpc() => throw new NotImplementedException();
     }
 }

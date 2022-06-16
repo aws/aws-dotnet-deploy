@@ -21,11 +21,32 @@ using Amazon.CloudControlApi.Model;
 
 namespace AWS.Deploy.Common.Data
 {
+    /// <summary>
+    /// Retrieves AWS resources
+    /// </summary>
+    /// <remarks>
+    /// This is meant to be a lightweight wrapper around the SDK,
+    /// business logic should generally be implemented in the caller.
+    /// </remarks>
     public interface IAWSResourceQueryer
     {
+        Task<Vpc> GetDefaultVpc();
         Task<ResourceDescription> GetCloudControlApiResource(string type, string identifier);
         Task<List<StackEvent>> GetCloudFormationStackEvents(string stackName);
+
+        /// <summary>
+        /// Lists all of the EC2 instance types available in the deployment region without any filtering
+        /// </summary>
+        /// <returns>List of <see cref="InstanceTypeInfo"/></returns>
         Task<List<InstanceTypeInfo>> ListOfAvailableInstanceTypes();
+
+        /// <summary>
+        /// Describes a single EC2 instance type
+        /// </summary>
+        /// <param name="instanceType">Instance type (for example, "t2.micro")</param>
+        /// <returns>The first <see cref="InstanceTypeInfo"/> if the specified type exists</returns>
+        Task<InstanceTypeInfo?> DescribeInstanceType(string instanceType);
+
         Task<Amazon.AppRunner.Model.Service> DescribeAppRunnerService(string serviceArn);
         Task<List<StackResource>> DescribeCloudFormationResources(string stackName);
         Task<EnvironmentDescription> DescribeElasticBeanstalkEnvironment(string environmentName);

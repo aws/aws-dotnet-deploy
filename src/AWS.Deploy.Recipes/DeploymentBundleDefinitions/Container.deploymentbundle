@@ -63,9 +63,16 @@
             "Validators": [
                 {
                     "ValidatorType": "Regex",
-                    "Configuration" : {
+                    "Configuration": {
                         "Regex": "^(?:[a-z0-9]+(?:[._-][a-z0-9]+)*/)*[a-z0-9]+(?:[._-][a-z0-9]+)*$",
                         "ValidationFailedMessage": "Invalid ECR repository Name. The ECR repository name can only contain lowercase letters, numbers, hyphens(-), dots(.), underscores(_) and forward slashes (/). For more information visit https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ecr-repository.html#cfn-ecr-repository-repositoryname"
+                    }
+                },
+                {
+                    "ValidatorType": "StringLength",
+                    "Configuration": {
+                        "MinLength": 2,
+                        "MaxLength": 256
                     }
                 }
             ]

@@ -352,7 +352,6 @@
                         "type": "string",
                         "enum": [
                             "FargateTaskSizeCpuMemoryLimits",
-                            "MinMaxConstraint",
                             "ValidDockerfilePath"
                         ]
                     }
@@ -609,7 +608,13 @@
                                     "DockerBuildArgs",
                                     "DotnetPublishArgs",
                                     "ExistingResource",
-                                    "FileExists"
+                                    "FileExists",
+                                    "StringLength",
+                                    "InstanceType",
+                                    "SubnetsInVpc",
+                                    "SecurityGroupsInVpc",
+                                    "Uri",
+                                    "Comparison"
                                 ]
                             }
                         },
@@ -664,6 +669,44 @@
                             {
                                 "if": {
                                     "properties": { "ValidatorType": { "const": "Required" } }
+                                },
+                                "then": {
+                                    "properties": {
+                                        "Configuration": {
+                                            "properties": {
+                                                "ValidationFailedMessage": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "if": {
+                                    "properties": { "ValidatorType": { "const": "StringLength" } }
+                                },
+                                "then": {
+                                    "properties": {
+                                        "Configuration": {
+                                            "properties": {
+                                                "MinLength": {
+                                                    "type": "integer"
+                                                },
+                                                "MaxLength": {
+                                                    "type": "integer"
+                                                },
+                                                "ValidationFailedMessage": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "if": {
+                                    "properties": { "ValidatorType": { "const": "Uri" } }
                                 },
                                 "then": {
                                     "properties": {

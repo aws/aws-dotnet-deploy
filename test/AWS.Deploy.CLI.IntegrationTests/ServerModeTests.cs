@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -244,6 +245,34 @@ namespace AWS.Deploy.CLI.IntegrationTests
                 Assert.Contains(existingDeployment.SettingsCategories, x => string.Equals(x.Id, AWS.Deploy.Common.Recipes.Category.DeploymentBundle.Id));
                 Assert.DoesNotContain(existingDeployment.SettingsCategories, x => string.IsNullOrEmpty(x.Id));
                 Assert.DoesNotContain(existingDeployment.SettingsCategories, x => string.IsNullOrEmpty(x.DisplayName));
+
+                // The below tests will check if updating readonly settings will properly get rejected.
+
+                // These tests need to be performed on a redeployment
+                await restClient.SetDeploymentTargetAsync(redeploymentSessionId, new SetDeploymentTargetInput
+                {
+                    ExistingDeploymentId = await _cloudFormationHelper.GetStackArn(_stackName)
+                });
+
+                var settings = await restClient.GetConfigSettingsAsync(sessionId);
+
+                // Try to update a list of settings containing readonly settings which we expect to fail
+                var updatedSettings = (IDictionary<string, string>)settings.OptionSettings.Where(x => !string.IsNullOrEmpty(x.FullyQualifiedId)).ToDictionary(k => k.FullyQualifiedId, v => "test");
+                var exceptionThrown = await Assert.ThrowsAsync<ApiException>(async () => await restClient.ApplyConfigSettingsAsync(redeploymentSessionId, new ApplyConfigSettingsInput()
+                {
+                    UpdatedSettings = updatedSettings
+                }));
+                Assert.Equal(400, exceptionThrown.StatusCode);
+
+                // Try to update an updatable setting which should be successful
+                var applyConfigResponse = await restClient.ApplyConfigSettingsAsync(redeploymentSessionId,
+                    new ApplyConfigSettingsInput
+                    {
+                        UpdatedSettings = new Dictionary<string, string> {
+                            { "DesiredCount", "4" }
+                        }
+                    });
+                Assert.Empty(applyConfigResponse.FailedConfigUpdates);
             }
             finally
             {

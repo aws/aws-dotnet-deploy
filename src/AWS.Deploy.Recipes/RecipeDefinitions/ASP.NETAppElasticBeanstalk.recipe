@@ -32,7 +32,7 @@
                     "Type": "MSProperty",
                     "Condition": {
                         "PropertyName": "TargetFramework",
-                        "AllowedValues": [ "netcoreapp2.1", "netcoreapp3.1", "net5.0", "net6.0" ]
+                        "AllowedValues": [ "netcoreapp3.1", "net5.0", "net6.0" ]
                     }
                 }
             ],
@@ -250,7 +250,12 @@
             "Type": "String",
             "TypeHint": "InstanceType",
             "AdvancedSetting": true,
-            "Updatable": true
+            "Updatable": true,
+            "Validators": [
+                {
+                    "ValidatorType": "InstanceType"
+                }
+            ]
         },
         {
             "Id": "EnvironmentType",
@@ -725,81 +730,123 @@
             "Updatable": true
         },
         {
-            "Id": "VpcId",
+            "Id": "VPC",
             "Name": "Virtual Private Cloud (VPC)",
             "Category": "VPC",
-            "Description": "A VPC enables you to launch the application into a virtual network that you've defined.",
-            "Type": "String",
-            "TypeHint": "ExistingVpc",
-            "DefaultValue": null,
-            "AdvancedSetting": true,
-            "Updatable": false,
-            "Validators": [
-                {
-                    "ValidatorType": "Regex",
-                    "Configuration": {
-                        "Regex": "^vpc-([0-9a-f]{8}|[0-9a-f]{17})$",
-                        "AllowEmptyString": true,
-                        "ValidationFailedMessage": "Invalid VPC ID. The VPC ID must start with the \"vpc-\" prefix, followed by either 8 or 17 characters consisting of digits and letters(lower-case) from a to f. For example vpc-abc88de9 is a valid VPC ID."
-                    }
-                }
-            ]
-        },
-        {
-            "Id": "Subnets",
-            "Name": "Subnets",
-            "Category": "VPC",
-            "Description": "A list of IDs of subnets that Elastic Beanstalk should use when it associates your environment with a custom Amazon VPC. Specify IDs of subnets of a single Amazon VPC.",
-            "Type": "List",
-            "TypeHint": "ExistingSubnets",
-            "ParentSettingId": "VpcId",
+            "Description": "A VPC enables you to launch the application into a virtual network that you've defined",
+            "Type": "Object",
             "AdvancedSetting": true,
             "Updatable": true,
-            "Validators": [
+            "ChildOptionSettings": [
                 {
-                    "ValidatorType": "Regex",
-                    "Configuration": {
-                        "Regex": "^subnet-([0-9a-f]{8}|[0-9a-f]{17})$",
-                        "AllowEmptyString": true,
-                        "ValidationFailedMessage": "Invalid Subnet ID. The Subnet ID must start with the \"subnet-\" prefix, followed by either 8 or 17 characters consisting of digits and letters(lower-case) from a to f. For example subnet-abc88de9 is a valid Subnet ID."
-                    }
-                }
-            ],
-            "DependsOn": [
-                {
-                    "Id": "VpcId",
-                    "Operation": "NotEmpty"
-                }
-            ]
-        },
-        {
-            "Id": "SecurityGroups",
-            "Name": "Security Groups",
-            "Category": "VPC",
-            "Description": "Lists the Amazon EC2 security groups to assign to the EC2 instances in the Auto Scaling group to define firewall rules for the instances.",
-            "Type": "List",
-            "TypeHint": "ExistingSecurityGroups",
-            "ParentSettingId": "VpcId",
-            "AdvancedSetting": true,
-            "Updatable": true,
-            "Validators": [
-                {
-                    "ValidatorType": "Regex",
-                    "Configuration": {
-                        "Regex": "^sg-([0-9a-f]{8}|[0-9a-f]{17})$",
-                        "AllowEmptyString": true,
-                        "ValidationFailedMessage": "Invalid Security Group ID. The Security Group ID must start with the \"sg-\" prefix, followed by either 8 or 17 characters consisting of digits and letters(lower-case) from a to f. For example sg-abc88de9 is a valid Security Group ID."
-                    }
-                }
-            ],
-            "DependsOn": [
+                    "Id": "UseVPC",
+                    "Name": "Use a VPC ",
+                    "Description": "Do you want to use a Virtual Private Cloud (VPC)?",
+                    "Type": "Bool",
+                    "DefaultValue": false,
+                    "AdvancedSetting": true,
+                    "Updatable": false
+                },
                 {
                     "Id": "VpcId",
-                    "Operation": "NotEmpty"
+                    "Name": "VPC ID",
+                    "Description": "A list of VPC IDs that App Runner should use when it associates your service with a custom Amazon VPC.",
+                    "Type": "String",
+                    "TypeHint": "ExistingVpc",
+                    "DefaultValue": "{DefaultVpcId}",
+                    "AdvancedSetting": true,
+                    "Updatable": false,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": {
+                                "Regex": "^vpc-([0-9a-f]{8}|[0-9a-f]{17})$",
+                                "ValidationFailedMessage": "Invalid VPC ID. The VPC ID must start with the \"vpc-\" prefix, followed by either 8 or 17 characters consisting of digits and letters(lower-case) from a to f. For example vpc-abc88de9 is a valid VPC ID."
+                            }
+                        }
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "VPC.UseVPC",
+                            "Value": true
+                        }
+                    ]
                 },
                 {
                     "Id": "Subnets",
-                    "Operation": "NotEmpty"
+                    "Name": "Subnets",
+                    "Description": "A list of IDs of subnets that Elastic Beanstalk should use when it associates your environment with a custom Amazon VPC. Specify IDs of subnets of a single Amazon VPC.",
+                    "Type": "List",
+                    "TypeHint": "ExistingSubnets",
+                    "ParentSettingId": "VPC.VpcId",
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Required"
+                        },
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": {
+                                "Regex": "^subnet-([0-9a-f]{8}|[0-9a-f]{17})$",
+                                "ValidationFailedMessage": "Invalid Subnet ID. The Subnet ID must start with the \"subnet-\" prefix, followed by either 8 or 17 characters consisting of digits and letters(lower-case) from a to f. For example subnet-abc88de9 is a valid Subnet ID."
+                            }
+                        },
+                        {
+                            "ValidatorType": "SubnetsInVpc",
+                            "Configuration": {
+                                "VpcId": "VPC.VpcId"
+                            }
+                        }
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "VPC.UseVPC",
+                            "Value": true
+                        },
+                        {
+                            "Id": "VPC.VpcId",
+                            "Operation": "NotEmpty"
+                        }
+                    ]
+                },
+                {
+                    "Id": "SecurityGroups",
+                    "Name": "Security Groups",
+                    "Description": "Lists the Amazon EC2 security groups to assign to the EC2 instances in the Auto Scaling group to define firewall rules for the instances.",
+                    "Type": "List",
+                    "TypeHint": "ExistingSecurityGroups",
+                    "ParentSettingId": "VPC.VpcId",
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Required"
+                        },
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": {
+                                "Regex": "^sg-([0-9a-f]{8}|[0-9a-f]{17})$",
+                                "ValidationFailedMessage": "Invalid Security Group ID. The Security Group ID must start with the \"sg-\" prefix, followed by either 8 or 17 characters consisting of digits and letters(lower-case) from a to f. For example sg-abc88de9 is a valid Security Group ID."
+                            }
+                        },
+                        {
+                            "ValidatorType": "SecurityGroupsInVpc",
+                            "Configuration": {
+                                "VpcId": "VPC.VpcId"
+                            }
+                        }
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "VPC.UseVPC",
+                            "Value": true
+                        },
+                        {
+                            "Id": "VPC.VpcId",
+                            "Operation": "NotEmpty"
+                        }
+                    ]
                 }
             ]
         }

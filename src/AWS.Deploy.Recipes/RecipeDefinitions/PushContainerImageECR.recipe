@@ -52,7 +52,7 @@
                 {
                     "ValidatorType": "Regex",
                     "Configuration": {
-                        "Regex": "^[a-zA-Z0-9][a-zA-Z0-9.-_]{0,127}$",
+                        "Regex": "^[a-zA-Z0-9][a-zA-Z0-9.\\-_]{0,127}$",
                         "ValidationFailedMessage": "Invalid image tag. The image tag can only contain uppercase and lowercase letters, digits, dashes, period and underscore. It may contain a maximum of 128 characters and cannot start with a special character."
                     }
                 }

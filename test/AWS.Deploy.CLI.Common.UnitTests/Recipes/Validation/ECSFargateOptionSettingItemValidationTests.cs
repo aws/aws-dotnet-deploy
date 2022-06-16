@@ -16,6 +16,7 @@ using Should;
 using Xunit;
 using ResourceNotFoundException = Amazon.CloudControlApi.Model.ResourceNotFoundException;
 using Task = System.Threading.Tasks.Task;
+using System.Collections.Generic;
 
 namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
 {
@@ -25,6 +26,8 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         private readonly IServiceProvider _serviceProvider;
         private readonly IDirectoryManager _directoryManager;
         private readonly Mock<IAWSResourceQueryer> _awsResourceQueryer;
+        private readonly RecipeDefinition _recipe;
+        private readonly Recommendation _recommendation;
 
         public ECSFargateOptionSettingItemValidationTests()
         {
@@ -37,6 +40,9 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
                 .Returns(_awsResourceQueryer.Object);
             _serviceProvider = mockServiceProvider.Object;
             _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider));
+
+            _recipe = new RecipeDefinition("Fargate", "0.1", "Fargate", DeploymentTypes.CdkProject, DeploymentBundleTypes.Container, "", "", "", "", "");
+            _recommendation = new Recommendation(_recipe, null, 100, new Dictionary<string, string>());
         }
 
         [Theory]
@@ -92,6 +98,22 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             var optionSettingItem = new OptionSettingItem("id", "fullyQualifiedId", "name", "description");
             optionSettingItem.Validators.Add(GetRangeValidatorConfig(1, 5000));
             await Validate(optionSettingItem, value, isValid);
+        }
+
+        [Theory]
+        [InlineData(5, false)]
+        [InlineData(6, true)]
+        public async Task HealthCheckInterval(int value, bool isValid)
+        {
+            var healthCheckInterval = new OptionSettingItem("healthCheckInterval", "fullyQualifiedId", "name", "description");
+            var healthCheckTimeout = new OptionSettingItem("healthCheckTimeout", "fullyQualifiedId", "name", "description");
+            _recipe.OptionSettings.Add(healthCheckInterval);
+            _recipe.OptionSettings.Add(healthCheckTimeout);
+
+            await _optionSettingHandler.SetOptionSettingValue(_recommendation, healthCheckTimeout, 5, true);
+            healthCheckInterval.Validators.Add(GetComparisonValidatorConfig(ComparisonValidatorOperation.GreaterThan, "healthCheckTimeout"));
+
+            await Validate(healthCheckInterval, value, isValid);
         }
 
         [Theory]
@@ -157,10 +179,15 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         [InlineData("MyRepo", false)] // cannot contain uppercase letters
         [InlineData("myrepo123@", false)] // cannot contain @
         [InlineData("myrepo123.a//b", false)] // cannot contain consecutive slashes.
+        [InlineData("aa", true)]
+        [InlineData("a", false)] //length cannot be less than 2
+        [InlineData("", false)] // length cannot be less than 2
+        [InlineData("reporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporeporepo", false)] // cannot be greater than 256 characters
         public async Task ECRRepositoryNameValidationTest(string value, bool isValid)
         {
             var optionSettingItem = new OptionSettingItem("id", "fullyQualifiedId", "name", "description");
             optionSettingItem.Validators.Add(GetRegexValidatorConfig("^(?:[a-z0-9]+(?:[._-][a-z0-9]+)*/)*[a-z0-9]+(?:[._-][a-z0-9]+)*$"));
+            optionSettingItem.Validators.Add(GetStringLengthValidatorConfig(2, 256));
             await Validate(optionSettingItem, value, isValid);
         }
 
@@ -267,12 +294,40 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             return rangeValidatorConfig;
         }
 
+        private OptionSettingItemValidatorConfig GetComparisonValidatorConfig(ComparisonValidatorOperation operation, string settingId)
+        {
+            var comparisonValidatorConfig = new OptionSettingItemValidatorConfig
+            {
+                ValidatorType = OptionSettingItemValidatorList.Comparison,
+                Configuration = new ComparisonValidator(_optionSettingHandler)
+                {
+                    Operation = operation,
+                    SettingId = settingId
+                }
+            };
+            return comparisonValidatorConfig;
+        }
+
+        private OptionSettingItemValidatorConfig GetStringLengthValidatorConfig(int minLength, int maxLength)
+        {
+            var stringLengthValidatorConfig = new OptionSettingItemValidatorConfig
+            {
+                ValidatorType = OptionSettingItemValidatorList.StringLength,
+                Configuration = new StringLengthValidator
+                {
+                    MinLength = minLength,
+                    MaxLength = maxLength
+                }
+            };
+            return stringLengthValidatorConfig;
+        }
+
         private async Task Validate<T>(OptionSettingItem optionSettingItem, T value, bool isValid)
         {
             ValidationFailedException exception = null;
             try
             {
-                await _optionSettingHandler.SetOptionSettingValue(null, optionSettingItem, value);
+                await _optionSettingHandler.SetOptionSettingValue(_recommendation, optionSettingItem, value);
             }
             catch (ValidationFailedException e)
             {

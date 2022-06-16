@@ -15,6 +15,7 @@ namespace AWS.Deploy.Constants
         public const string REPLACE_TOKEN_ECR_REPOSITORY_NAME = "{DefaultECRRepositoryName}";
         public const string REPLACE_TOKEN_ECR_IMAGE_TAG = "{DefaultECRImageTag}";
         public const string REPLACE_TOKEN_DOCKERFILE_PATH = "{DockerfilePath}";
+        public const string REPLACE_TOKEN_DEFAULT_VPC_ID = "{DefaultVpcId}";
 
         /// <summary>
         /// Id for the 'dotnet publish --configuration' recipe option

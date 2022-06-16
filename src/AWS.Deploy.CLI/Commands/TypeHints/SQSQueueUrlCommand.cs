@@ -40,7 +40,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             var currentValueStr = currentValue.ToString() ?? string.Empty;
             var queueUrls = await GetResources(recommendation, optionSetting);
 
-            var queueNames = queueUrls.Select(queue => queue.DisplayName).ToList();
+            var queueNames = queueUrls?.Select(queue => queue.DisplayName).ToList() ?? new List<string>();
             var currentName = string.Empty;
             if (currentValue.ToString()?.LastIndexOf('/') != -1)
             {
@@ -54,7 +54,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 title: "Select a SQS queue:",
                 defaultValue: currentName);
 
-            var selectedQueueUrl = queueUrls.FirstOrDefault(x => string.Equals(x.DisplayName, userResponse, StringComparison.OrdinalIgnoreCase));
+            var selectedQueueUrl = queueUrls?.FirstOrDefault(x => string.Equals(x.DisplayName, userResponse, StringComparison.OrdinalIgnoreCase));
             return selectedQueueUrl?.SystemName ?? string.Empty;
         }
     }

@@ -111,7 +111,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
 
             var recommendations = new List<Recommendation>
             {
-                new Recommendation(new RecipeDefinition("AspNetAppEcsFargate", "0.2.0",  "ASP.NET Core ECS", DeploymentTypes.CdkProject, DeploymentBundleTypes.Container, "", "", "", "", "" ), null, null, 100, new Dictionary<string, string>())
+                new Recommendation(new RecipeDefinition("AspNetAppEcsFargate", "0.2.0",  "ASP.NET Core ECS", DeploymentTypes.CdkProject, DeploymentBundleTypes.Container, "", "", "", "", "" ), null, 100, new Dictionary<string, string>())
                 {
 
                 }
@@ -180,7 +180,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
                                                                 PersistedDeploymentProject = true,
                                                                 BaseRecipeId = "AspNetAppEcsFargate"
                                                             },
-                                                            null, null, 100, new Dictionary<string, string>())
+                                                            null, 100, new Dictionary<string, string>())
                 {
 
                 }

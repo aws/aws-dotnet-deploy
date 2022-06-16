@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\AWS.Deploy.Recipes.CDK.Common\RecipeProps.cs" Link="RecipeProps.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AWSSDK.CloudControlApi" Version="3.7.2" />
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.0.83" />
     <PackageReference Include="AWSSDK.SQS" Version="3.7.1.25" />
@@ -33,7 +37,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AWS.Deploy.Recipes.CDK.Common\AWS.Deploy.Recipes.CDK.Common.csproj" />
     <ProjectReference Include="..\AWS.Deploy.Recipes\AWS.Deploy.Recipes.csproj" />
     <ProjectReference Include="..\AWS.Deploy.DockerEngine\AWS.Deploy.DockerEngine.csproj" />
   </ItemGroup>

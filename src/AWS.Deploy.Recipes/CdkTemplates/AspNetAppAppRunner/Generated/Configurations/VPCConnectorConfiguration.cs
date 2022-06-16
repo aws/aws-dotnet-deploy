@@ -14,6 +14,11 @@ namespace AspNetAppAppRunner.Configurations
     public partial class VPCConnectorConfiguration
     {
         /// <summary>
+        /// If set, the deployment will use a VPC Connector to connect to the AppRunner service.
+        /// </summary>
+        public bool UseVPCConnector { get; set; }
+
+        /// <summary>
         /// If set, creates a new VPC Connector to connect to the AppRunner service.
         /// </summary>
         public bool CreateNew { get; set; }

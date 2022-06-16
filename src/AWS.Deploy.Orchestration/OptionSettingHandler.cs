@@ -43,31 +43,25 @@ namespace AWS.Deploy.Orchestration
                 }
 
                 var optionSettingValue = GetOptionSettingValue(recommendation, optionSetting);
-                settingValidatorFailedResults.AddRange(_validatorFactory.BuildValidators(optionSetting)
-                    .Select(async validator => await validator.Validate(optionSettingValue, recommendation))
+                var failedValidators = _validatorFactory.BuildValidators(optionSetting)
+                    .Select(async validator => await validator.Validate(optionSettingValue, recommendation, optionSetting))
                     .Select(x => x.Result)
                     .Where(x => !x.IsValid)
-                    .ToList());
+                    .ToList();
 
-                // Only update the validation object if there is no InvalidValue set.
-                // In the case where a user tries to set an Invalid Value, this is the value that will be on the UI.
-                // We don't want to update that value in the background if it is triggered by a dependent setting validation
-                // since it won't be reflected on the UI.
-                if (optionSetting.Validation.InvalidValue == null)
+                if (failedValidators.Any())
                 {
-                    if (settingValidatorFailedResults.Any())
-                    {
-                        optionSetting.Validation.ValidationStatus = ValidationStatus.Invalid;
-                        optionSetting.Validation.ValidationMessage = string.Join(Environment.NewLine, settingValidatorFailedResults.Select(x => x.ValidationFailedMessage)).Trim();
-                        optionSetting.Validation.InvalidValue = optionSettingValue;
-                    }
-                    else
-                    {
-                        optionSetting.Validation.ValidationStatus = ValidationStatus.Valid;
-                        optionSetting.Validation.ValidationMessage = string.Empty;
-                    }
+                    optionSetting.Validation.ValidationStatus = ValidationStatus.Invalid;
+                    optionSetting.Validation.ValidationMessage = string.Join(Environment.NewLine, failedValidators.Select(x => x.ValidationFailedMessage)).Trim();
+                    optionSetting.Validation.InvalidValue = optionSettingValue;
                 }
-
+                else
+                {
+                    optionSetting.Validation.ValidationStatus = ValidationStatus.Valid;
+                    optionSetting.Validation.ValidationMessage = string.Empty;
+                    optionSetting.Validation.InvalidValue = null;
+                }
+                settingValidatorFailedResults.AddRange(failedValidators);
                 settingValidatorFailedResults.AddRange(RunOptionSettingValidators(recommendation, optionSetting.ChildOptionSettings));
             }
 
