@@ -76,7 +76,7 @@
 
 <Target Name="SetupNuGetCache" AfterTargets="Pack">
 
-  <SetupLocalCache NuGetPackage="$(OutputPath)..\$(PackageId).$(PackageVersion).nupkg" />
+  <SetupLocalCache NuGetPackage="$(PackageOutputAbsolutePath)\$(PackageId).$(PackageVersion).nupkg" />
 
 </Target>
 
