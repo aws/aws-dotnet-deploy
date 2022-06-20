@@ -1,4 +1,4 @@
-# Other Issues
+# General Issues
 This section of the troubleshooting guide explains how to determine, diagnose, and fix common issues you might encounter during the deployment process.
 
 ## Invalid project path provided

@@ -263,6 +263,10 @@ namespace AWS.Deploy.CLI.Commands
                         _toolInteractiveService.WriteErrorLine(e.Message);
                     }
 
+                    _toolInteractiveService.WriteErrorLine(string.Empty);
+                    _toolInteractiveService.WriteErrorLine("For more information, please visit our troubleshooting guide https://aws.github.io/aws-dotnet-deploy/troubleshooting-guide/.");
+                    _toolInteractiveService.WriteErrorLine("If you are still unable to solve this issue and believe this is an issue with the tooling, please cut a ticket https://github.com/aws/aws-dotnet-deploy/issues/new/choose.");
+
                     // bail out with an non-zero return code.
                     return CommandReturnCodes.USER_ERROR;
                 }
