@@ -52,9 +52,9 @@ nav:
     #  - Listing Deployments: docs/tutorials/list-deployments.md
     #  - Deleting Deployment: docs/tutorials/delete-deployment.md
   - Troubleshooting Guide:
+    - troubleshooting-guide/index.md
     - Missing Dependencies: troubleshooting-guide/missing-dependencies.md
     - Docker Issues: troubleshooting-guide/docker-issues.md
-    - Other Issues: troubleshooting-guide/other-issues.md
   - Contributing to the project: contributing.md
   - FAQs: faq.md
 
