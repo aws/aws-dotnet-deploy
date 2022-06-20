@@ -39,9 +39,9 @@ namespace AspNetAppEcsFargate.Configurations
         public VpcConfiguration Vpc { get; set; }
 
         /// <summary>
-        /// Comma-delimited list of security groups assigned to the ECS service.
+        /// List of security groups assigned to the ECS service.
         /// </summary>
-        public string AdditionalECSServiceSecurityGroups { get; set; }
+        public SortedSet<string> AdditionalECSServiceSecurityGroups { get; set; } = new SortedSet<string>();
 
         /// <summary>
         /// The amount of CPU to allocate to the Fargate task
@@ -77,7 +77,7 @@ namespace AspNetAppEcsFargate.Configurations
             string ecsServiceName,
             ECSClusterConfiguration ecsCluster,
             VpcConfiguration vpc,
-            string additionalECSServiceSecurityGroups,
+            SortedSet<string> additionalECSServiceSecurityGroups,
             LoadBalancerConfiguration loadBalancer,
             AutoScalingConfiguration autoScaling,
             Dictionary<string, string> ecsEnvironmentVariables

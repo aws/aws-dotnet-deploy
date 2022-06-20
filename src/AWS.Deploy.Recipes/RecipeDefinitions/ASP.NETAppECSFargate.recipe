@@ -346,11 +346,21 @@
             "Id": "AdditionalECSServiceSecurityGroups",
             "Name": "ECS Service Security Groups",
             "Category": "Permissions",
-            "Description": "A comma-delimited list of EC2 security groups to assign to the ECS service. This is commonly used to provide access to Amazon RDS databases running in their own security groups.",
-            "Type": "String",
-            "DefaultValue": "",
+            "Description": "A list of EC2 security groups to assign to the ECS service. This is commonly used to provide access to Amazon RDS databases running in their own security groups.",
+            "Type": "List",
+            "TypeHint": "ExistingSecurityGroups",
             "AdvancedSetting": true,
-            "Updatable": true
+            "Updatable": true,
+            "Validators": [
+                {
+                    "ValidatorType": "Regex",
+                    "Configuration": {
+                        "Regex": "^sg-([0-9a-f]{8}|[0-9a-f]{17})$",
+                        "AllowEmptyString": true,
+                        "ValidationFailedMessage": "Invalid Security Group ID. The Security Group ID must start with the \"sg-\" prefix, followed by either 8 or 17 characters consisting of digits and letters(lower-case) from a to f. For example sg-abc88de9 is a valid Security Group ID."
+                    }
+                }
+            ]
         },
         {
             "Id": "TaskCpu",
