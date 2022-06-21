@@ -236,11 +236,11 @@ namespace AWS.Deploy.Common
     }
 
     /// <summary>
-    /// Throw if an invalid <see cref="UserDeploymentSettings"/> is used.
+    /// Throw if an invalid <see cref="DeploymentSettings"/> is used.
     /// </summary>
-    public class InvalidUserDeploymentSettingsException : DeployToolException
+    public class InvalidDeploymentSettingsException : DeployToolException
     {
-        public InvalidUserDeploymentSettingsException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+        public InvalidDeploymentSettingsException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     /// <summary>

@@ -3,7 +3,7 @@
     "AWSRegion": "us-west-2",
     "ApplicationName": "MyAppStack",
     "RecipeId": "AspNetAppAppRunner",
-    "OptionSettingsConfig":{
+    "Settings":{
         "VPCConnector":
         {
             "CreateNew": true,

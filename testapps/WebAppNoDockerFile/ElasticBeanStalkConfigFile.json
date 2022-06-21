@@ -1,7 +1,7 @@
 {
     "ApplicationName": "ElasticBeanStalk{Suffix}",
     "RecipeId": "AspNetAppElasticBeanstalkLinux",
-    "OptionSettingsConfig": {
+    "Settings": {
         "BeanstalkApplication": {
             "CreateNew": true,
             "ApplicationName": "MyApplication{Suffix}"

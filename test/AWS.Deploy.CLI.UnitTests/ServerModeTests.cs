@@ -79,7 +79,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var serviceProvider = new Mock<IServiceProvider>();
             var validatorFactory = new ValidatorFactory(serviceProvider.Object);
             var optionSettingHandler = new OptionSettingHandler(validatorFactory);
-            var recipeHandler = new RecipeHandler(deploymentManifestEngine, consoleOrchestratorLogger, directoryManager, fileManager, optionSettingHandler);
+            var recipeHandler = new RecipeHandler(deploymentManifestEngine, consoleOrchestratorLogger, directoryManager, fileManager, optionSettingHandler, validatorFactory);
             var projectDefinitionParser = new ProjectDefinitionParser(fileManager, directoryManager);
 
             var recipeController = new RecipeController(recipeHandler, projectDefinitionParser);
@@ -100,7 +100,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var serviceProvider = new Mock<IServiceProvider>();
             var validatorFactory = new ValidatorFactory(serviceProvider.Object);
             var optionSettingHandler = new OptionSettingHandler(validatorFactory);
-            var recipeHandler = new RecipeHandler(deploymentManifestEngine, consoleOrchestratorLogger, directoryManager, fileManager, optionSettingHandler);
+            var recipeHandler = new RecipeHandler(deploymentManifestEngine, consoleOrchestratorLogger, directoryManager, fileManager, optionSettingHandler, validatorFactory);
 
             var recipeController = new RecipeController(recipeHandler, projectDefinitionParser);
             var recipeDefinitions = await recipeHandler.GetRecipeDefinitions(null);
@@ -136,7 +136,7 @@ namespace AWS.Deploy.CLI.UnitTests
                 })
                 .ReturnsAsync(new List<string>());
             var orchestratorInteractiveService = new TestToolOrchestratorInteractiveService();
-            var recipeHandler = new RecipeHandler(deploymentManifestEngine.Object, orchestratorInteractiveService, directoryManager, fileManager, optionSettingHandler);
+            var recipeHandler = new RecipeHandler(deploymentManifestEngine.Object, orchestratorInteractiveService, directoryManager, fileManager, optionSettingHandler, validatorFactory);
 
 
             var projectDefinition = await projectDefinitionParser.Parse(sourceProjectDirectory);
