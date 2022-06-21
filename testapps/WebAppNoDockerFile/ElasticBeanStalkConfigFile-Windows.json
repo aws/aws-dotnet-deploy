@@ -1,6 +1,6 @@
 {
     "RecipeId": "AspNetAppElasticBeanstalkWindows",
-    "OptionSettingsConfig": {
+    "Settings": {
         "IISAppPath": "/extra-path"
     }
 }

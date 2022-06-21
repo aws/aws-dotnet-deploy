@@ -1,6 +1,6 @@
 {
   "RecipeId": "BlazorWasm",
-  "OptionSettingsConfig": {
+  "Settings": {
     "PriceClass": "PRICE_CLASS_100"
   }
 }

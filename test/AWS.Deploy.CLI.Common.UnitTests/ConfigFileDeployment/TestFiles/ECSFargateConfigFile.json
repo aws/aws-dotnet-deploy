@@ -3,7 +3,7 @@
     "AWSRegion": "us-west-2",
     "ApplicationName": "MyAppStack",
     "RecipeId": "AspNetAppEcsFargate",
-    "OptionSettingsConfig":{
+    "Settings":{
         "ECSCluster": 
         {
             "CreateNew": true,
@@ -24,4 +24,4 @@
         "TaskMemory": 512,
         "DockerExecutionDirectory": "C:\\codebase"
     }
-  }
+}

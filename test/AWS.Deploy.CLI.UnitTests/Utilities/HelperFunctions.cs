@@ -32,7 +32,7 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
             var serviceProvider = new Mock<IServiceProvider>();
             var validatorFactory = new ValidatorFactory(serviceProvider.Object);
             var optionSettingHandler = new OptionSettingHandler(validatorFactory);
-            var recipeHandler = new RecipeHandler(deploymentManifestEngine, orchestratorInteractiveService, directoryManager, fileManager, optionSettingHandler);
+            var recipeHandler = new RecipeHandler(deploymentManifestEngine, orchestratorInteractiveService, directoryManager, fileManager, optionSettingHandler, validatorFactory);
 
             var parser = new ProjectDefinitionParser(fileManager, directoryManager);
             var awsCredentials = new Mock<AWSCredentials>();

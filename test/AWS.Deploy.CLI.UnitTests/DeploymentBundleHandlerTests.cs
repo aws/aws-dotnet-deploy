@@ -52,7 +52,7 @@ namespace AWS.Deploy.CLI.UnitTests
             _orchestratorInteractiveService = new TestToolOrchestratorInteractiveService();
             var validatorFactory = new ValidatorFactory(serviceProvider);
             var optionSettingHandler = new OptionSettingHandler(validatorFactory);
-            _recipeHandler = new RecipeHandler(_deploymentManifestEngine, _orchestratorInteractiveService, _directoryManager, _fileManager, optionSettingHandler);
+            _recipeHandler = new RecipeHandler(_deploymentManifestEngine, _orchestratorInteractiveService, _directoryManager, _fileManager, optionSettingHandler, validatorFactory);
             _projectDefinitionParser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
 
             _deploymentBundleHandler = new DeploymentBundleHandler(_commandLineWrapper, awsResourceQueryer, interactiveService, _directoryManager, zipFileManager, new FileManager());

@@ -1,7 +1,7 @@
 {
     "ApplicationName": "EcsFargate{Suffix}",
     "RecipeId": "AspNetAppEcsFargate",
-    "OptionSettingsConfig":{
+    "Settings":{
         "ECSCluster":
         {
             "CreateNew": true,

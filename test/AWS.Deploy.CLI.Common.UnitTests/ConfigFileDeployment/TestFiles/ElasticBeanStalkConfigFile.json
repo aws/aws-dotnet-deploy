@@ -3,7 +3,7 @@
     "AWSRegion": "us-west-2",
     "ApplicationName": "MyAppStack",
     "RecipeId": "AspNetAppElasticBeanstalkLinux",
-    "OptionSettingsConfig": {
+    "Settings": {
         "BeanstalkApplication": {
             "CreateNew": true,
             "ApplicationName": "MyApplication"
@@ -28,4 +28,4 @@
             "VarName": "VarValue"
         }
     }
-  }
+ }

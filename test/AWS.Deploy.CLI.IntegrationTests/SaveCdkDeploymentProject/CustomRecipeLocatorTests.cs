@@ -86,7 +86,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             var serviceProvider = new Mock<IServiceProvider>();
             var validatorFactory = new ValidatorFactory(serviceProvider.Object);
             var optionSettingHandler = new OptionSettingHandler(validatorFactory);
-            return new RecipeHandler(deploymentManifestEngine, _inMemoryInteractiveService, directoryManager, fileManager, optionSettingHandler);
+            return new RecipeHandler(deploymentManifestEngine, _inMemoryInteractiveService, directoryManager, fileManager, optionSettingHandler, validatorFactory);
         }
 
         protected virtual void Dispose(bool disposing)

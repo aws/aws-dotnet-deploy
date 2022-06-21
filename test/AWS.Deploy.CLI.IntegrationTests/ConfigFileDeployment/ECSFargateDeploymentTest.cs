@@ -12,7 +12,6 @@ using AWS.Deploy.CLI.Extensions;
 using AWS.Deploy.CLI.IntegrationTests.Extensions;
 using AWS.Deploy.CLI.IntegrationTests.Helpers;
 using AWS.Deploy.CLI.IntegrationTests.Services;
-using AWS.Deploy.Common;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using Task = System.Threading.Tasks.Task;
@@ -63,12 +62,10 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
             // Deploy
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
             var configFilePath = Path.Combine(Directory.GetParent(projectPath).FullName, "ECSFargateConfigFile.json");
-            ConfigFileHelper.ReplacePlaceholders(configFilePath);
+            var suffix = ConfigFileHelper.ReplacePlaceholders(configFilePath);
 
-            var userDeploymentSettings = UserDeploymentSettings.ReadSettings(configFilePath);
-
-            _stackName = userDeploymentSettings.ApplicationName;
-            _clusterName = userDeploymentSettings.LeafOptionSettingItems["ECSCluster.NewClusterName"];
+            _stackName = $"EcsFargate{suffix}";
+            _clusterName = $"MyNewCluster{suffix}";
 
             var deployArgs = new[] { "deploy", "--project-path", projectPath, "--apply", configFilePath, "--silent", "--diagnostics" };
             Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));

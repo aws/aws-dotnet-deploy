@@ -10,6 +10,7 @@ using AWS.Deploy.Common;
 using AWS.Deploy.Common.DeploymentManifest;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.Recipes.Validation;
 using AWS.Deploy.Recipes;
 using Newtonsoft.Json;
 
@@ -23,14 +24,16 @@ namespace AWS.Deploy.Orchestration
         private readonly IDirectoryManager _directoryManager;
         private readonly IFileManager _fileManager;
         private readonly IOptionSettingHandler _optionSettingHandler;
+        private readonly IValidatorFactory _validatorFactory;
 
-        public RecipeHandler(IDeploymentManifestEngine deploymentManifestEngine, IOrchestratorInteractiveService orchestratorInteractiveService, IDirectoryManager directoryManager, IFileManager fileManager, IOptionSettingHandler optionSettingHandler)
+        public RecipeHandler(IDeploymentManifestEngine deploymentManifestEngine, IOrchestratorInteractiveService orchestratorInteractiveService, IDirectoryManager directoryManager, IFileManager fileManager, IOptionSettingHandler optionSettingHandler, IValidatorFactory validatorFactory)
         {
             _orchestratorInteractiveService = orchestratorInteractiveService;
             _deploymentManifestEngine = deploymentManifestEngine;
             _directoryManager = directoryManager;
             _fileManager = fileManager;
             _optionSettingHandler = optionSettingHandler;
+            _validatorFactory = validatorFactory;
         }
 
         public async Task<List<RecipeDefinition>> GetRecipeDefinitions(List<string>? recipeDefinitionPaths = null)
@@ -167,6 +170,21 @@ namespace AWS.Deploy.Orchestration
             }
 
             return customRecipePaths;
+        }
+
+        /// <summary>
+        /// Runs the recipe level validators and returns a list of failed validations
+        /// </summary>
+        public List<ValidationResult> RunRecipeValidators(Recommendation recommendation, IDeployToolValidationContext deployToolValidationContext)
+        {
+            var validatorFailedResults =
+               _validatorFactory.BuildValidators(recommendation.Recipe)
+                           .Select(async validator => await validator.Validate(recommendation, deployToolValidationContext))
+                           .Select(x => x.Result)
+                           .Where(x => !x.IsValid)
+                           .ToList();
+
+            return validatorFailedResults;
         }
 
         /// <summary>
