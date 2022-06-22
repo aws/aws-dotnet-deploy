@@ -32,3 +32,9 @@ If you are missing the required AWS Identity and Access Management (IAM) permiss
 Failed to push Docker Image
 ```
 **Resolution**: See [here](https://docs.aws.amazon.com/AmazonECR/latest/userguide/repository-policy-examples.html) for guidance on how to set IAM policy statements to allow actions on Amazon ECR repositories.
+
+## Failed to generate a Dockerfile
+
+**Why is this happening** You may see this if your project has project references (.csproj, .vbproj) that are located in a higher folder than the solution file (.sln) that AWS.Deploy.Tools is using to generate a Dockerfile. In this case AWS.Deploy.Tools will not generate a Dockerfile to avoid a large build context that can result in long builds.
+
+**Resolution**: If you would still like to deploy to an [AWS service that requires Docker](../docs/support.md), you must create your own Dockerfile and set an appropriate "Docker Execution Directory" in the deployment options. Alternatively you may choose another deployment target that does not require Docker, such as AWS Elastic Beanstalk.
