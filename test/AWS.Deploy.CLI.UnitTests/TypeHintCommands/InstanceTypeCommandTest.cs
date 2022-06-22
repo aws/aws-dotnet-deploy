@@ -94,9 +94,9 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
 
             var resources = await command.GetResources(beanstalkRecommendation, instanceTypeSetting);
 
-            Assert.Contains(resources, x => string.Equals("t1.any", x.SystemName, StringComparison.OrdinalIgnoreCase));
-            Assert.Contains(resources, x => string.Equals("t1.x86_64", x.SystemName, StringComparison.OrdinalIgnoreCase));
-            Assert.DoesNotContain(resources, x => string.Equals("t1.arm64", x.SystemName, StringComparison.OrdinalIgnoreCase));
+            Assert.Contains(resources.Rows, x => string.Equals("t1.any", x.SystemName, StringComparison.OrdinalIgnoreCase));
+            Assert.Contains(resources.Rows, x => string.Equals("t1.x86_64", x.SystemName, StringComparison.OrdinalIgnoreCase));
+            Assert.DoesNotContain(resources.Rows, x => string.Equals("t1.arm64", x.SystemName, StringComparison.OrdinalIgnoreCase));
         }
 
         [Fact]
@@ -153,9 +153,9 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
 
             var resources = await command.GetResources(beanstalkRecommendation, instanceTypeSetting);
 
-            Assert.Contains(resources, x => string.Equals("t1.any", x.SystemName, StringComparison.OrdinalIgnoreCase));
-            Assert.Contains(resources, x => string.Equals("t1.x86_64", x.SystemName, StringComparison.OrdinalIgnoreCase));
-            Assert.Contains(resources, x => string.Equals("t1.arm64", x.SystemName, StringComparison.OrdinalIgnoreCase));
+            Assert.Contains(resources.Rows, x => string.Equals("t1.any", x.SystemName, StringComparison.OrdinalIgnoreCase));
+            Assert.Contains(resources.Rows, x => string.Equals("t1.x86_64", x.SystemName, StringComparison.OrdinalIgnoreCase));
+            Assert.Contains(resources.Rows, x => string.Equals("t1.arm64", x.SystemName, StringComparison.OrdinalIgnoreCase));
         }
 
         [Fact]

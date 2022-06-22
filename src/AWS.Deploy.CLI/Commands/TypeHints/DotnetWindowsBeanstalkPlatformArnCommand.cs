@@ -33,28 +33,47 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             return await _awsResourceQueryer.GetElasticBeanstalkPlatformArns(BeanstalkPlatformType.Windows);
         }
 
-        public async Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
+        public async Task<TypeHintResourceTable> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var platformArns = await GetData();
-            return platformArns.Select(x => new TypeHintResource(x.PlatformArn, $"{x.PlatformBranchName} v{x.PlatformVersion}")).ToList();
+
+            var resourceTable = new TypeHintResourceTable
+            {
+                Columns = new List<TypeHintResourceColumn>()
+                {
+                    new TypeHintResourceColumn("Platform Branch"),
+                    new TypeHintResourceColumn("Platform Version")
+                }
+            };
+
+            foreach (var platformArn in platformArns)
+            {
+                var row = new TypeHintResource(platformArn.PlatformArn, $"{platformArn.PlatformBranchName} v{platformArn.PlatformVersion}");
+                row.ColumnValues.Add(platformArn.PlatformBranchName);
+                row.ColumnValues.Add(platformArn.PlatformVersion);
+
+                resourceTable.Rows.Add(row);
+            }
+
+            return resourceTable;
         }
 
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var currentValue = _optionSettingHandler.GetOptionSettingValue(recommendation, optionSetting);
-            var platformArns = await GetData();
+            var resourceTable = await GetResources(recommendation, optionSetting);
 
-            var userInputConfiguration = new UserInputConfiguration<PlatformSummary>(
-                idSelector: platform => platform.PlatformArn,
-                displaySelector: platform => $"{platform.PlatformBranchName} v{platform.PlatformVersion}",
-                defaultSelector: platform => platform.PlatformArn.Equals(currentValue))
+            var userInputConfiguration = new UserInputConfiguration<TypeHintResource>(
+                idSelector: platform => platform.SystemName,
+                displaySelector: platform => platform.DisplayName,
+                defaultSelector: platform => platform.SystemName.Equals(currentValue))
             {
                 CreateNew = false
             };
 
-            var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(platformArns, "Select the Platform to use:", userInputConfiguration);
+            var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(resourceTable.Rows, "Select the Platform to use:", userInputConfiguration);
 
-            return userResponse.SelectedOption?.PlatformArn!;
+            return userResponse.SelectedOption?.SystemName!;
         }
     }
 }
