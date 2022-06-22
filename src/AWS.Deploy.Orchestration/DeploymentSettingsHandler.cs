@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,17 +26,25 @@ namespace AWS.Deploy.Orchestration
         /// Iterates over the option setting values found at <see cref="DeploymentSettings"/> and applies them to the selected recommendation
         /// </summary>
         Task ApplySettings(DeploymentSettings deploymentSettings, Recommendation recommendation, IDeployToolValidationContext deployToolValidationContext);
+
+        /// <summary>
+        /// Save the deployment settings at the specified file path.
+        /// </summary>
+        /// <exception cref="FailedToSaveDeploymentSettingsException">Thrown if this operation fails.</exception>
+        Task SaveSettings(SaveSettingsConfiguration saveSettingsConfig, Recommendation recommendation, CloudApplication cloudApplication, OrchestratorSession orchestratorSession);
     }
 
     public class DeploymentSettingsHandler : IDeploymentSettingsHandler
     {
-        private readonly IFileManager _filemanager;
+        private readonly IFileManager _fileManager;
+        private readonly IDirectoryManager _directoryManager;
         private readonly IOptionSettingHandler _optionSettingHandler;
         private readonly IRecipeHandler _recipeHandler;
 
-        public DeploymentSettingsHandler(IFileManager fileManager, IOptionSettingHandler optionSettingHandler, IRecipeHandler recipeHandler)
+        public DeploymentSettingsHandler(IFileManager fileManager, IDirectoryManager directoryManager, IOptionSettingHandler optionSettingHandler, IRecipeHandler recipeHandler)
         {
-            _filemanager = fileManager;
+            _fileManager = fileManager;
+            _directoryManager = directoryManager;
             _optionSettingHandler = optionSettingHandler;
             _recipeHandler = recipeHandler;
         }
@@ -44,7 +53,7 @@ namespace AWS.Deploy.Orchestration
         {
             try
             {
-                var contents = await _filemanager.ReadAllTextAsync(filePath);
+                var contents = await _fileManager.ReadAllTextAsync(filePath);
                 var userDeploymentSettings = JsonConvert.DeserializeObject<DeploymentSettings>(contents);
                 return userDeploymentSettings;
             }
@@ -90,6 +99,82 @@ namespace AWS.Deploy.Orchestration
             }
 
             throw new InvalidDeploymentSettingsException(DeployToolErrorCode.DeploymentConfigurationNeedsAdjusting, errorMessage.Trim());
+        }
+
+        public async Task SaveSettings(SaveSettingsConfiguration saveSettingsConfig, Recommendation recommendation, CloudApplication cloudApplication, OrchestratorSession orchestratorSession)
+        {
+            if (saveSettingsConfig.SettingsType == SaveSettingsType.None)
+            {
+                // We are not throwing an expected exception here as this issue is not caused by the user.
+                throw new InvalidOperationException($"Cannot persist settings with {SaveSettingsType.None}");
+            }
+
+            if (!_fileManager.IsFileValidPath(saveSettingsConfig.FilePath))
+            {
+                var message = $"Failed to save deployment settings because {saveSettingsConfig.FilePath} is invalid or its parent directory does not exist on disk.";
+                throw new FailedToSaveDeploymentSettingsException(DeployToolErrorCode.FailedToSaveDeploymentSettings, message);
+            }
+
+            var projectDirectory = Path.GetDirectoryName(orchestratorSession.ProjectDefinition.ProjectPath);
+            if (string.IsNullOrEmpty(projectDirectory))
+            {
+                var message = "Failed to save deployment settings because the current deployment session does not have a valid project path";
+                throw new FailedToSaveDeploymentSettingsException(DeployToolErrorCode.FailedToSaveDeploymentSettings, message);
+            }
+
+            var deploymentSettings = new DeploymentSettings
+            {
+                AWSProfile = orchestratorSession.AWSProfileName,
+                AWSRegion = orchestratorSession.AWSRegion,
+                ApplicationName = recommendation.Recipe.DeploymentType == DeploymentTypes.ElasticContainerRegistryImage ? null : cloudApplication.Name,
+                RecipeId = cloudApplication.RecipeId,
+                Settings = new Dictionary<string, object>()
+            };
+
+            var optionSettings = recommendation.GetConfigurableOptionSettingItems();
+            foreach (var optionSetting in optionSettings)
+            {
+                if (saveSettingsConfig.SettingsType == SaveSettingsType.Modified && !_optionSettingHandler.IsOptionSettingModified(recommendation, optionSetting))
+                {
+                    continue;
+                }
+
+                var id = optionSetting.FullyQualifiedId;
+                var value = _optionSettingHandler.GetOptionSettingValue(recommendation, optionSetting);
+                if (optionSetting.TypeHint.HasValue && (optionSetting.TypeHint == OptionSettingTypeHint.FilePath || optionSetting.TypeHint == OptionSettingTypeHint.DockerExecutionDirectory))
+                {
+                    var path = value?.ToString();
+                    if (string.IsNullOrEmpty(path))
+                    {
+                        continue;
+                    }
+
+                    // All file paths or directory paths must be persisted relative the the customers .NET project.
+                    // This is a done to ensure that the resolved paths work correctly across all cloned repos.
+                    // The relative path is also canonicalized to work across Unix and Windows OS.
+                    var absolutePath = _directoryManager.GetAbsolutePath(projectDirectory, path);
+                    value = _directoryManager.GetRelativePath(projectDirectory, absolutePath)
+                                .Replace(Path.DirectorySeparatorChar, '/');
+                }
+                deploymentSettings.Settings[id] = value;
+            }
+
+            try
+            {
+                var content = JsonConvert.SerializeObject(deploymentSettings, new JsonSerializerSettings
+                {
+                    Formatting = Formatting.Indented,
+                    NullValueHandling = NullValueHandling.Ignore,
+                    ContractResolver = new SerializeModelContractResolver()
+                });
+
+                await _fileManager.WriteAllTextAsync(saveSettingsConfig.FilePath, content);
+            }
+            catch (Exception ex)
+            {
+                var message = $"Failed to save the deployment settings at {saveSettingsConfig.FilePath} due to the following error: {Environment.NewLine}{ex.Message}";
+                throw new FailedToSaveDeploymentSettingsException(DeployToolErrorCode.FailedToSaveDeploymentSettings, message, ex);
+            }
         }
     }
 }

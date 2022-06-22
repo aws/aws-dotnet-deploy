@@ -1,0 +1,17 @@
+{
+  "AWSProfile": "default",
+  "AWSRegion": "us-west-2",
+  "ApplicationName": "MyAppStack",
+  "RecipeId": "AspNetAppElasticBeanstalkLinux",
+  "Settings": {
+    "BeanstalkEnvironment": {
+      "EnvironmentName": "MyBeanstalkEnvironment"
+    },
+    "EnvironmentType": "LoadBalanced",
+    "XRayTracingSupportEnabled": true,
+    "ElasticBeanstalkEnvironmentVariables": {
+      "key1": "value1",
+      "key2": "value2"
+    }
+  }
+}

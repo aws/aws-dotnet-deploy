@@ -41,6 +41,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
         public FileStream OpenRead(string filePath) => throw new NotImplementedException();
         public string GetExtension(string filePath) => throw new NotImplementedException();
         public long GetSizeInBytes(string filePath) => throw new NotImplementedException();
+        public bool IsFileValidPath(string filePath) => throw new NotImplementedException();
     }
 
     public static class TestFileManagerExtensions

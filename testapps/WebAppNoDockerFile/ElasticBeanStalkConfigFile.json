@@ -1,18 +1,15 @@
 {
-    "ApplicationName": "ElasticBeanStalk{Suffix}",
-    "RecipeId": "AspNetAppElasticBeanstalkLinux",
-    "Settings": {
-        "BeanstalkApplication": {
-            "CreateNew": true,
-            "ApplicationName": "MyApplication{Suffix}"
-        },
-        "BeanstalkEnvironment": {
-            "EnvironmentName": "MyEnvironment{Suffix}"
-        },
-        "EnvironmentType": "LoadBalanced",
-        "LoadBalancerType": "application",
-        "ApplicationIAMRole": {
-            "CreateNew": true
-        }
-    }
+  "ApplicationName": "{StackName}",
+  "RecipeId": "AspNetAppElasticBeanstalkLinux",
+  "Settings": {
+    "BeanstalkApplication": {
+      "CreateNew": true,
+      "ApplicationName": "{StackName}-app"
+    },
+    "BeanstalkEnvironment": {
+      "EnvironmentName": "{StackName}-dev"
+    },
+    "EnvironmentType": "LoadBalanced",
+    "XRayTracingSupportEnabled": true
   }
+}

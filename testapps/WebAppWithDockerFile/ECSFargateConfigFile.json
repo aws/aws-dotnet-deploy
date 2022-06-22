@@ -1,13 +1,13 @@
 {
-    "ApplicationName": "EcsFargate{Suffix}",
+    "ApplicationName": "{StackName}",
     "RecipeId": "AspNetAppEcsFargate",
     "Settings":{
         "ECSCluster":
         {
             "CreateNew": true,
-            "NewClusterName": "MyNewCluster{Suffix}"
+            "NewClusterName": "{StackName}-cluster"
         },
-        "ECSServiceName": "MyNewService{Suffix}",
+        "ECSServiceName": "{StackName}-service",
         "DesiredCount": 3,
         "ApplicationIAMRole":
         {
