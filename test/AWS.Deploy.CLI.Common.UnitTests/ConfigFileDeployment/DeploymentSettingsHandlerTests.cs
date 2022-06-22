@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using Amazon.Runtime;
 using AWS.Deploy.CLI.Common.UnitTests.Utilities;
@@ -21,6 +19,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.ConfigFileDeployment
 {
     public class DeploymentSettingsHandlerTests
     {
+        private readonly string _projectPath;
         private readonly IOptionSettingHandler _optionSettingHandler;
         private readonly IDeploymentManifestEngine _deploymentManifestEngine;
         private readonly IOrchestratorInteractiveService _orchestratorInteractiveService;
@@ -29,10 +28,15 @@ namespace AWS.Deploy.CLI.Common.UnitTests.ConfigFileDeployment
         private readonly IRecipeHandler _recipeHandler;
         private readonly IDeploymentSettingsHandler _deploymentSettingsHandler;
         private readonly RecommendationEngine _recommendationEngine;
+        private readonly OrchestratorSession _orchestratorSession;
+
+        private const string BEANSTALK_PLATFORM_ARN_TOKEN = "{LatestDotnetBeanstalkPlatformArn}";
+        private const string STACK_NAME_TOKEN = "{StackName}";
+        private const string DEFAULT_VPC_ID_TOKEN = "{DefaultVpcId}";
 
         public DeploymentSettingsHandlerTests()
         {
-            var projectPath = SystemIOUtilities.ResolvePath("WebAppNoDockerFile");
+            _projectPath = SystemIOUtilities.ResolvePath("WebAppWithDockerFile");
             _directoryManager = new DirectoryManager();
             _fileManager = new FileManager();
             _deploymentManifestEngine = new DeploymentManifestEngine(_directoryManager, _fileManager);
@@ -40,8 +44,8 @@ namespace AWS.Deploy.CLI.Common.UnitTests.ConfigFileDeployment
 
             var parser = new ProjectDefinitionParser(_fileManager, _directoryManager);
             var awsCredentials = new Mock<AWSCredentials>();
-            var session = new OrchestratorSession(
-                parser.Parse(projectPath).Result,
+            _orchestratorSession = new OrchestratorSession(
+                parser.Parse(_projectPath).Result,
                 awsCredentials.Object,
                 "us-west-2",
                 "123456789012")
@@ -52,15 +56,15 @@ namespace AWS.Deploy.CLI.Common.UnitTests.ConfigFileDeployment
             var validatorFactory = new TestValidatorFactory();
             _optionSettingHandler = new OptionSettingHandler(validatorFactory);
             _recipeHandler = new RecipeHandler(_deploymentManifestEngine, _orchestratorInteractiveService, _directoryManager, _fileManager, _optionSettingHandler, validatorFactory);
-            _deploymentSettingsHandler = new DeploymentSettingsHandler(_fileManager, _optionSettingHandler, _recipeHandler);
-            _recommendationEngine = new RecommendationEngine(session, _recipeHandler);
+            _deploymentSettingsHandler = new DeploymentSettingsHandler(_fileManager, _directoryManager, _optionSettingHandler, _recipeHandler);
+            _recommendationEngine = new RecommendationEngine(_orchestratorSession, _recipeHandler);
         }
 
         [Fact]
-        public async Task AppRunnerTests()
+        public async Task ApplySettings_AppRunner()
         {
             // ARRANGE
-            var recommendations = _recommendationEngine.ComputeRecommendations().GetAwaiter().GetResult();
+            var recommendations = await _recommendationEngine.ComputeRecommendations();
             var selectedRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, "AspNetAppAppRunner"));
             var filePath = Path.Combine("ConfigFileDeployment", "TestFiles", "AppRunnerConfigFile.json");
 
@@ -80,10 +84,10 @@ namespace AWS.Deploy.CLI.Common.UnitTests.ConfigFileDeployment
         }
 
         [Fact]
-        public async Task ECSFargateTests()
+        public async Task ApplySettings_ECSFargate()
         {
             // ARRANGE
-            var recommendations = _recommendationEngine.ComputeRecommendations().GetAwaiter().GetResult();
+            var recommendations = await _recommendationEngine.ComputeRecommendations();
             var selectedRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, "AspNetAppEcsFargate"));
             var filePath = Path.Combine("ConfigFileDeployment", "TestFiles", "ECSFargateConfigFile.json");
 
@@ -109,10 +113,10 @@ namespace AWS.Deploy.CLI.Common.UnitTests.ConfigFileDeployment
         }
 
         [Fact]
-        public async Task ElasticBeanStalkTests()
+        public async Task ApplySettings_ElasticBeanStalk()
         {
             // ARRANGE
-            var recommendations = _recommendationEngine.ComputeRecommendations().GetAwaiter().GetResult();
+            var recommendations = await _recommendationEngine.ComputeRecommendations();
             var selectedRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, "AspNetAppElasticBeanstalkLinux"));
             var filePath = Path.Combine("ConfigFileDeployment", "TestFiles", "ElasticBeanStalkConfigFile.json");
 
@@ -142,6 +146,106 @@ namespace AWS.Deploy.CLI.Common.UnitTests.ConfigFileDeployment
             Assert.Equal("VarValue", envVars["VarName"]);
         }
 
+        [Theory]
+        [InlineData(SaveSettingsType.All, "ConfigFileDeployment", "TestFiles", "SettingsSnapshot_NonContainer.json")]
+        [InlineData(SaveSettingsType.Modified, "ConfigFileDeployment", "TestFiles", "SettingsSnapshot_NonContainer_ModifiedOnly.json")]
+        public async Task SaveSettings_NonContainerBased(SaveSettingsType saveSettingsType, string path1, string path2, string path3)
+        {
+            // ARRANGE
+            var recommendations = await _recommendationEngine.ComputeRecommendations();
+            var selectedRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, "AspNetAppElasticBeanstalkLinux"));
+            var expectedSnapshotfilePath = Path.Combine(path1, path2, path3);
+            var actualSnapshotFilePath = Path.Combine(Path.GetTempPath(), $"DeploymentSettings-{Guid.NewGuid().ToString().Split('-').Last()}.json");
+            var cloudApplication = new CloudApplication("MyAppStack", "", CloudApplicationResourceType.CloudFormationStack, "AspNetAppElasticBeanstalkLinux");
+
+            // ARRANGE - add replacement tokens
+            selectedRecommendation.AddReplacementToken(BEANSTALK_PLATFORM_ARN_TOKEN, "Latest-ARN");
+            selectedRecommendation.AddReplacementToken(STACK_NAME_TOKEN, "MyAppStack");
+            selectedRecommendation.AddReplacementToken(DEFAULT_VPC_ID_TOKEN, "vpc-12345678");
+
+            // ARRANGE - Modify option setting items
+            await _optionSettingHandler.SetOptionSettingValue(selectedRecommendation, "BeanstalkApplication", "MyBeanstalkApplication");
+            await _optionSettingHandler.SetOptionSettingValue(selectedRecommendation, "BeanstalkEnvironment.EnvironmentName", "MyBeanstalkEnvironment");
+            await _optionSettingHandler.SetOptionSettingValue(selectedRecommendation, "EnvironmentType", "LoadBalanced");
+            await _optionSettingHandler.SetOptionSettingValue(selectedRecommendation, "XRayTracingSupportEnabled", true);
+            await _optionSettingHandler.SetOptionSettingValue(selectedRecommendation, "ElasticBeanstalkEnvironmentVariables", new Dictionary<string, string>
+            {
+                { "key1", "value1" },
+                { "key2", "value2" }
+            });
+
+            // ACT
+            await _deploymentSettingsHandler.SaveSettings(new SaveSettingsConfiguration(saveSettingsType, actualSnapshotFilePath), selectedRecommendation, cloudApplication, _orchestratorSession);
+
+            // ASSERT
+            var actualSnapshot = await _fileManager.ReadAllTextAsync(actualSnapshotFilePath);
+            var expectedSnapshot = await _fileManager.ReadAllTextAsync(expectedSnapshotfilePath);
+            actualSnapshot = SanitizeFileContents(actualSnapshot);
+            expectedSnapshot = SanitizeFileContents(expectedSnapshot);
+            Assert.Equal(expectedSnapshot, actualSnapshot);
+        }
+
+        [Theory]
+        [InlineData(SaveSettingsType.All, "ConfigFileDeployment", "TestFiles", "SettingsSnapshot_Container.json")]
+        [InlineData(SaveSettingsType.Modified, "ConfigFileDeployment", "TestFiles", "SettingsSnapshot_Container_ModifiedOnly.json")]
+        public async Task SaveSettings_ContainerBased(SaveSettingsType saveSettingsType, string path1, string path2, string path3)
+        {
+            // ARRANGE
+            var recommendations = await _recommendationEngine.ComputeRecommendations();
+            var selectedRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, "AspNetAppAppRunner"));
+            var expectedSnapshotfilePath = Path.Combine(path1, path2, path3);
+            var actualSnapshotFilePath = Path.Combine(Path.GetTempPath(), $"DeploymentSettings-{Guid.NewGuid().ToString().Split('-').Last()}.json");
+            var cloudApplication = new CloudApplication("MyAppStack", "", CloudApplicationResourceType.CloudFormationStack, "AspNetAppAppRunner");
+
+            // ARRANGE - add replacement tokens
+            selectedRecommendation.AddReplacementToken(STACK_NAME_TOKEN, "MyAppStack");
+            selectedRecommendation.AddReplacementToken(DEFAULT_VPC_ID_TOKEN, "vpc-12345678");
+
+            // ARRANGE - Modify option setting items
+            await _optionSettingHandler.SetOptionSettingValue(selectedRecommendation, "ServiceName", "MyAppRunnerService");
+            await _optionSettingHandler.SetOptionSettingValue(selectedRecommendation, "Port", "100");
+            await _optionSettingHandler.SetOptionSettingValue(selectedRecommendation, "ECRRepositoryName", "my-ecr-repository");
+            await _optionSettingHandler.SetOptionSettingValue(selectedRecommendation, "DockerfilePath", Path.Combine("DockerAssets", "Dockerfile")); // relative path
+            await _optionSettingHandler.SetOptionSettingValue(selectedRecommendation, "DockerExecutionDirectory", Path.Combine(_projectPath, "DockerAssets")); // absolute path
+
+            // ACT
+            await _deploymentSettingsHandler.SaveSettings(new SaveSettingsConfiguration(saveSettingsType, actualSnapshotFilePath), selectedRecommendation, cloudApplication, _orchestratorSession);
+
+            // ASSERT
+            var actualSnapshot = await _fileManager.ReadAllTextAsync(actualSnapshotFilePath);
+            var expectedSnapshot = await _fileManager.ReadAllTextAsync(expectedSnapshotfilePath);
+            actualSnapshot = SanitizeFileContents(actualSnapshot);
+            expectedSnapshot = SanitizeFileContents(expectedSnapshot);
+            Assert.Equal(expectedSnapshot, actualSnapshot);
+        }
+
+        [Fact]
+        public async Task SaveSettings_PushImageToECR()
+        {
+            // ARRANGE
+            var recommendations = await _recommendationEngine.ComputeRecommendations();
+            var selectedRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, "PushContainerImageEcr"));
+            var expectedSnapshotfilePath = Path.Combine("ConfigFileDeployment", "TestFiles", "SettingsSnapshot_PushImageECR.json");
+            var actualSnapshotFilePath = Path.Combine(Path.GetTempPath(), $"DeploymentSettings-{Guid.NewGuid().ToString().Split('-').Last()}.json");
+            var cloudApplication = new CloudApplication("my-ecr-repository", "", CloudApplicationResourceType.ElasticContainerRegistryImage, "PushContainerImageEcr");
+
+            // ARRANGE - Modify option setting items
+            await _optionSettingHandler.SetOptionSettingValue(selectedRecommendation, "ImageTag", "123456789");
+            await _optionSettingHandler.SetOptionSettingValue(selectedRecommendation, "ECRRepositoryName", "my-ecr-repository");
+            await _optionSettingHandler.SetOptionSettingValue(selectedRecommendation, "DockerfilePath", Path.Combine("DockerAssets", "Dockerfile")); // relative path
+            await _optionSettingHandler.SetOptionSettingValue(selectedRecommendation, "DockerExecutionDirectory", Path.Combine(_projectPath, "DockerAssets")); // absolute path
+
+            // ACT
+            await _deploymentSettingsHandler.SaveSettings(new SaveSettingsConfiguration(SaveSettingsType.All, actualSnapshotFilePath), selectedRecommendation, cloudApplication, _orchestratorSession);
+
+            // ASSERT
+            var actualSnapshot = await _fileManager.ReadAllTextAsync(actualSnapshotFilePath);
+            var expectedSnapshot = await _fileManager.ReadAllTextAsync(expectedSnapshotfilePath);
+            actualSnapshot = SanitizeFileContents(actualSnapshot);
+            expectedSnapshot = SanitizeFileContents(expectedSnapshot);
+            Assert.Equal(expectedSnapshot, actualSnapshot);
+        }
+
         private object GetOptionSettingValue(Recommendation recommendation, string fullyQualifiedId)
         {
             var optionSetting = _optionSettingHandler.GetOptionSetting(recommendation, fullyQualifiedId);
@@ -152,6 +256,14 @@ namespace AWS.Deploy.CLI.Common.UnitTests.ConfigFileDeployment
         {
             var optionSetting = _optionSettingHandler.GetOptionSetting(recommendation, fullyQualifiedId);
             return _optionSettingHandler.GetOptionSettingValue<T>(recommendation, optionSetting);
+        }
+
+        private string SanitizeFileContents(string content)
+        {
+            return content.Replace("\r\n", Environment.NewLine)
+                .Replace("\n", Environment.NewLine)
+                .Replace("\r\r\n", Environment.NewLine)
+                .Trim();
         }
     }
 

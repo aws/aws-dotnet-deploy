@@ -92,6 +92,22 @@ namespace AWS.Deploy.Orchestration
         }
 
         /// <summary>
+        /// Assigns a value to the OptionSettingItem based on the fullyQualifiedId
+        /// </summary>
+        /// <exception cref="ValidationFailedException">
+        /// Thrown if one or more <see cref="Validators"/> determine
+        /// <paramref name="value"/> is not valid.
+        /// </exception>
+        /// <exception cref="OptionSettingItemDoesNotExistException">
+        /// Thrown if there doesn't exist an option setting with the given fullyQualifiedId
+        /// </exception>
+        public async Task SetOptionSettingValue(Recommendation recommendation, string fullyQualifiedId, object value, bool skipValidation = false)
+        {
+            var optionSetting = GetOptionSetting(recommendation, fullyQualifiedId);
+            await SetOptionSettingValue(recommendation, optionSetting, value, skipValidation);
+        }
+
+        /// <summary>
         /// Sets the corresponding value in <see cref="DeploymentBundle"/> when the
         /// corresponding <see cref="OptionSettingItem"> was just set
         /// </summary>
@@ -332,6 +348,80 @@ namespace AWS.Deploy.Orchestration
                 return false;
 
             return true;
+        }
+
+        /// <summary>
+        /// Checks whether the option setting item has been modified by the user. If it has been modified, then it will hold a non-default value
+        /// </summary>
+        /// <returns>true if the option setting item has been modified or false otherwise</returns>
+        public bool IsOptionSettingModified(Recommendation recommendation, OptionSettingItem optionSetting)
+        {
+            // If the option setting is not displayable, that means its dependencies are not satisfied and it does not play any role in the deployment.
+            // We do not need to evaluate whether it has been modified or not.
+            if (!IsOptionSettingDisplayable(recommendation, optionSetting))
+            {
+                return false;
+            }
+
+            if (optionSetting.Type.Equals(OptionSettingValueType.List))
+            {
+                var currentSet = GetOptionSettingValue<SortedSet<string>>(recommendation, optionSetting) ?? new SortedSet<string>();
+                var defaultSet = GetOptionSettingDefaultValue<SortedSet<string>>(recommendation, optionSetting) ?? new SortedSet<string>();
+
+                // return true if both have different lengths or all elements in currentSet are not present in defaultSet
+                return defaultSet.Count != currentSet.Count || !currentSet.All(x => defaultSet.Contains(x));
+            }
+
+            if (optionSetting.Type.Equals(OptionSettingValueType.KeyValue))
+            {
+                var currentDict = GetOptionSettingValue<Dictionary<string, string>>(recommendation, optionSetting) ?? new Dictionary<string, string>();
+                var defaultDict = GetOptionSettingDefaultValue<Dictionary<string, string>>(recommendation, optionSetting) ?? new Dictionary<string, string>();
+
+                // return true if both have different lengths or all keyValue pairs are not equal between currentDict and defaultDict
+                return defaultDict.Count != currentDict.Count ||
+                    !currentDict.All(keyPair => defaultDict.ContainsKey(keyPair.Key) && string.Equals(defaultDict[keyPair.Key], currentDict[keyPair.Key]));
+            }
+
+            if (optionSetting.Type.Equals(OptionSettingValueType.Int))
+            {
+                var currentValue = GetOptionSettingValue<int>(recommendation, optionSetting);
+                var defaultValue = GetOptionSettingDefaultValue<int>(recommendation, optionSetting);
+                return defaultValue != currentValue;
+            }
+
+            if (optionSetting.Type.Equals(OptionSettingValueType.Double))
+            {
+                var currentValue = GetOptionSettingValue<double>(recommendation, optionSetting);
+                var defaultValue = GetOptionSettingDefaultValue<double>(recommendation, optionSetting);
+                return defaultValue != currentValue;
+            }
+
+            if (optionSetting.Type.Equals(OptionSettingValueType.Bool))
+            {
+                var currentValue = GetOptionSettingValue<bool>(recommendation, optionSetting);
+                var defaultValue = GetOptionSettingDefaultValue<bool>(recommendation, optionSetting);
+                return defaultValue != currentValue;
+            }
+
+            if (optionSetting.Type.Equals(OptionSettingValueType.String))
+            {
+                var currentValue = GetOptionSettingValue<string>(recommendation, optionSetting);
+                var defaultValue = GetOptionSettingDefaultValue<string>(recommendation, optionSetting);
+
+                if (string.IsNullOrEmpty(currentValue) && string.IsNullOrEmpty(defaultValue))
+                    return false;
+
+                return !string.Equals(currentValue, defaultValue);
+            }
+
+            // The option setting is of type Object and it has nested child settings.
+            // return true is any of the child settings are modified.
+            foreach (var childSetting in optionSetting.ChildOptionSettings)
+            {
+                if (IsOptionSettingModified(recommendation, childSetting))
+                    return true;
+            }
+            return false;
         }
     }
 }

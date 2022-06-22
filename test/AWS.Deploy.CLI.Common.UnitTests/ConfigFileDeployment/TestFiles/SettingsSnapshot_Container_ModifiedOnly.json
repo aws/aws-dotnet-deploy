@@ -1,0 +1,13 @@
+{
+  "AWSProfile": "default",
+  "AWSRegion": "us-west-2",
+  "ApplicationName": "MyAppStack",
+  "RecipeId": "AspNetAppAppRunner",
+  "Settings": {
+    "ServiceName": "MyAppRunnerService",
+    "Port": 100,
+    "DockerfilePath": "DockerAssets/Dockerfile",
+    "DockerExecutionDirectory": "DockerAssets",
+    "ECRRepositoryName": "my-ecr-repository"
+  }
+}

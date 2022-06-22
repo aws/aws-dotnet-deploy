@@ -124,7 +124,8 @@ namespace AWS.Deploy.Common
         FailedToGetOptionSettingValue = 10010200,
         ECRRepositoryNameIsNull = 10010300,
         FailedToReadCdkBootstrapVersion = 10010400,
-        UnsupportedOptionSettingType = 10010500
+        UnsupportedOptionSettingType = 10010500,
+        FailedToSaveDeploymentSettings = 10010600
     }
 
     public class ProjectFileNotFoundException : DeployToolException
@@ -291,6 +292,14 @@ namespace AWS.Deploy.Common
     public class InvalidFilePath : DeployToolException
     {
         public InvalidFilePath(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+    }
+
+    /// <summary>
+    /// Throw if an error occurred while saving the deployment settings to a config file
+    /// </summary>
+    public class FailedToSaveDeploymentSettingsException : DeployToolException
+    {
+        public FailedToSaveDeploymentSettingsException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     public static class ExceptionExtensions

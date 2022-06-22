@@ -51,6 +51,8 @@ namespace AWS.Deploy.CLI.Common.UnitTests.IO
                 return Exists(Path.Combine(directory, path));
             }
         }
+
+        public bool IsFileValidPath(string filePath) => throw new NotImplementedException();
     }
 
     public static class TestFileManagerExtensions
