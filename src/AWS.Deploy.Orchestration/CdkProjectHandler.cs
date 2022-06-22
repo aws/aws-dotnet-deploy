@@ -113,8 +113,8 @@ namespace AWS.Deploy.Orchestration
             if (await DetermineIfCDKBootstrapShouldRun())
             {
                 // Ensure region is bootstrapped
-                var cdkBootstrap = await _commandLineWrapper.TryRunWithResult($"npx cdk bootstrap aws://{session.AWSAccountId}/{session.AWSRegion} -c {Constants.CloudFormationIdentifier.SETTINGS_PATH_CDK_CONTEXT_PARAMETER}=\"{appSettingsFilePath}\" --template \"{_workspaceMetadata.CDKBootstrapTemplatePath}\"",
-                    workingDirectory: cdkProjectPath,
+                var cdkBootstrap = await _commandLineWrapper.TryRunWithResult($"npx cdk bootstrap aws://{session.AWSAccountId}/{session.AWSRegion} --template \"{_workspaceMetadata.CDKBootstrapTemplatePath}\"",
+                    workingDirectory: _workspaceMetadata.DeployToolWorkspaceDirectoryRoot,
                     needAwsCredentials: true,
                     redirectIO: true,
                     streamOutputToInteractiveService: true);
