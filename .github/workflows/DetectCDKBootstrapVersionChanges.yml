@@ -1,0 +1,32 @@
+name: Detect CDK Bootstrap Version Changes
+
+on: [pull_request]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: '0'
+    - name: Install AWS CDK
+      run: |
+        npm install -g aws-cdk
+    - name: Save New CDK Bootstrap Template
+      run: |
+        cdk bootstrap --show-template > newTemplate.yml
+    - name: Get Latest CDK Bootstrap Version
+      id: latestBootstrapVersion
+      run: |
+        echo "::set-output name=latest-version::$(yq '.Resources.CdkBootstrapVersion.Properties.Value' 'newTemplate.yml')"
+    - name: Get Current CDK Bootstrap Version
+      id: currentBootstrapVersion
+      run: |
+        echo "::set-output name=current-version::$(yq '.Resources.CdkBootstrapVersion.Properties.Value' 'src/AWS.Deploy.Orchestration/CDK/CDKBootstrapTemplate.yaml')"
+    - name: Fail If CDK Bootstrap Template Changes Detected
+      if: steps.currentBootstrapVersion.outputs.current-version != steps.latestBootstrapVersion.outputs.latest-version
+      run: |
+        echo "A new version of the AWS CDK Bootstrap Template is available. The current template that is being used by the Deploy tool needs to be updated."
+        exit 1
