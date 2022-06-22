@@ -87,5 +87,43 @@ namespace AWS.Deploy.Orchestration.Utilities
 
             return overridenWorkspace;
         }
+
+        /// <summary>
+        /// Creates a <see cref="SaveSettingsConfiguration"/>
+        /// </summary>
+        /// <param name="saveSettingsPath">The absolute or the relative JSON file path where the deployment settings will be saved. Only the settings modified by the user are persisted.</param>
+        /// <param name="saveAllSettingsPath">The absolute or the relative JSON file path where the deployment settings will be saved. All deployment settings are persisted.</param>
+        /// <param name="projectDirectoryPath">The absolute path to the user's .NET project directory</param>
+        /// <param name="deploymentSettingsHandler"><see cref="IDeploymentSettingsHandler"/></param>
+        /// <returns><see cref="SaveSettingsConfiguration"/></returns>
+        public static SaveSettingsConfiguration GetSaveSettingsConfiguration(string? saveSettingsPath, string? saveAllSettingsPath, string projectDirectoryPath, IDeploymentSettingsHandler deploymentSettingsHandler)
+        {
+            if (!string.IsNullOrEmpty(saveSettingsPath) && !string.IsNullOrEmpty(saveAllSettingsPath))
+            {
+                throw new FailedToSaveDeploymentSettingsException(DeployToolErrorCode.FailedToSaveDeploymentSettings, "Cannot save deployment settings because invalid arguments were provided. Cannot use --save-settings along with --save-all-settings");
+            }
+
+            var filePath = string.Empty;
+            var saveSettingsType = SaveSettingsType.None;
+
+            if (!string.IsNullOrEmpty(saveSettingsPath))
+            {
+                filePath = saveSettingsPath;
+                saveSettingsType = SaveSettingsType.Modified;
+            }
+            else if (!string.IsNullOrEmpty(saveAllSettingsPath))
+            {
+                filePath = saveAllSettingsPath;
+                saveSettingsType = SaveSettingsType.All;
+            }
+
+            if (!string.IsNullOrEmpty(filePath))
+            {
+                filePath = Path.GetFullPath(filePath, projectDirectoryPath);
+                deploymentSettingsHandler.ValidateSaveSettingsFile(filePath);
+            }
+
+            return new SaveSettingsConfiguration(saveSettingsType, filePath);
+        }
     }
 }

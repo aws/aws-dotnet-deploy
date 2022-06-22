@@ -1,0 +1,46 @@
+{
+  "AWSProfile": "default",
+  "AWSRegion": "us-west-2",
+  "ApplicationName": "MyAppStack",
+  "RecipeId": "AspNetAppElasticBeanstalkLinux",
+  "Settings": {
+    "BeanstalkApplication": "MyBeanstalkApplication",
+    "BeanstalkEnvironment": {
+      "EnvironmentName": "MyBeanstalkEnvironment"
+    },
+    "InstanceType": "",
+    "EnvironmentType": "LoadBalanced",
+    "LoadBalancerType": "application",
+    "ApplicationIAMRole": {
+      "CreateNew": true
+    },
+    "ServiceIAMRole": {
+      "CreateNew": true
+    },
+    "EC2KeyPair": "",
+    "ElasticBeanstalkPlatformArn": "Latest-ARN",
+    "ElasticBeanstalkManagedPlatformUpdates": {
+      "ManagedActionsEnabled": true,
+      "PreferredStartTime": "Sun:00:00",
+      "UpdateLevel": "minor"
+    },
+    "XRayTracingSupportEnabled": true,
+    "ReverseProxy": "nginx",
+    "EnhancedHealthReporting": "enhanced",
+    "HealthCheckURL": "/",
+    "ElasticBeanstalkRollingUpdates": {
+      "RollingUpdatesEnabled": false
+    },
+    "CNamePrefix": "",
+    "ElasticBeanstalkEnvironmentVariables": {
+      "key1": "value1",
+      "key2": "value2"
+    },
+    "VPC": {
+      "UseVPC": false
+    },
+    "DotnetBuildConfiguration": "Release",
+    "DotnetPublishArgs": "",
+    "SelfContainedBuild": false
+  }
+}

@@ -113,7 +113,7 @@ namespace AWS.Deploy.CLI.Commands
             _deploymentSettingsHandler = deploymentSettingsHandler;
         }
 
-        public async Task ExecuteAsync(string applicationName, string deploymentProjectPath, DeploymentSettings? deploymentSettings = null)
+        public async Task ExecuteAsync(string applicationName, string deploymentProjectPath, SaveSettingsConfiguration saveSettingsConfig, DeploymentSettings? deploymentSettings = null)
         {
             var (orchestrator, selectedRecommendation, cloudApplication) = await InitializeDeployment(applicationName, deploymentSettings, deploymentProjectPath);
 
@@ -129,6 +129,12 @@ namespace AWS.Deploy.CLI.Commands
             }
 
             await CreateDeploymentBundle(orchestrator, selectedRecommendation, cloudApplication);
+
+            if (saveSettingsConfig.SettingsType != SaveSettingsType.None)
+            {
+                await _deploymentSettingsHandler.SaveSettings(saveSettingsConfig, selectedRecommendation, cloudApplication, _session);
+                _toolInteractiveService.WriteLine($"{Environment.NewLine} Successfully saved the deployment settings at {saveSettingsConfig.FilePath}");
+            }
 
             await orchestrator.DeployRecommendation(cloudApplication, selectedRecommendation);
 
@@ -193,11 +199,25 @@ namespace AWS.Deploy.CLI.Commands
                 cloudApplicationName = deploymentSettings?.ApplicationName ?? string.Empty;
 
             // Prompt the user with a choice to re-deploy to existing targets or deploy to a new cloud application.
-            if (string.IsNullOrEmpty(cloudApplicationName))
+            // This prompt is NOT needed if the user is just pushing the docker image to ECR.
+            if (string.IsNullOrEmpty(cloudApplicationName) && !string.Equals(deploymentSettings?.RecipeId, Constants.RecipeIdentifier.PUSH_TO_ECR_RECIPE_ID))
                 cloudApplicationName = AskForCloudApplicationNameFromDeployedApplications(compatibleApplications);
 
             // Find existing application with the same CloudApplication name.
-            var deployedApplication = allDeployedApplications.FirstOrDefault(x => string.Equals(x.Name, cloudApplicationName));
+            CloudApplication? deployedApplication = null;
+            if (!string.IsNullOrEmpty(deploymentSettings?.RecipeId))
+            {
+                // if the recommendation is specified via a config file then find the deployed application by matching the deployment type along with the cloudApplicationName
+                var recommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, deploymentSettings.RecipeId));
+                if (recommendation != null)
+                {
+                    deployedApplication = allDeployedApplications.FirstOrDefault(x => string.Equals(x.Name, cloudApplicationName) && x.DeploymentType == recommendation.Recipe.DeploymentType);
+                }
+            }
+            else
+            {
+                deployedApplication = allDeployedApplications.FirstOrDefault(x => string.Equals(x.Name, cloudApplicationName));
+            }
 
             Recommendation? selectedRecommendation = null;
             if (deployedApplication != null)

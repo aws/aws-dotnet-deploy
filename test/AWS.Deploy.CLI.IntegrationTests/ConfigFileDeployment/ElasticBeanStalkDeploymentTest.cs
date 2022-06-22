@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ using AWS.Deploy.CLI.IntegrationTests.Extensions;
 using AWS.Deploy.CLI.IntegrationTests.Helpers;
 using AWS.Deploy.CLI.IntegrationTests.Services;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.Data;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using Environment = System.Environment;
@@ -27,6 +29,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
         private bool _isDisposed;
         private string _stackName;
         private readonly TestAppManager _testAppManager;
+        private readonly IServiceProvider _serviceProvider;
 
         public ElasticBeanStalkDeploymentTest()
         {
@@ -35,12 +38,12 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
             serviceCollection.AddCustomServices();
             serviceCollection.AddTestServices();
 
-            var serviceProvider = serviceCollection.BuildServiceProvider();
+            _serviceProvider = serviceCollection.BuildServiceProvider();
 
-            _app = serviceProvider.GetService<App>();
+            _app = _serviceProvider.GetService<App>();
             Assert.NotNull(_app);
 
-            _interactiveService = serviceProvider.GetService<InMemoryInteractiveService>();
+            _interactiveService = _serviceProvider.GetService<InMemoryInteractiveService>();
             Assert.NotNull(_interactiveService);
 
             _httpHelper = new HttpHelper(_interactiveService);
@@ -54,12 +57,27 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
         [Fact]
         public async Task PerformDeployment()
         {
-            // Deploy
+            // Create the config file
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
-            var configFilePath = Path.Combine(Directory.GetParent(projectPath).FullName, "ElasticBeanStalkConfigFile.json");
-            var suffix = ConfigFileHelper.ReplacePlaceholders(configFilePath);
+            var stackNamePlaceholder = "{StackName}";
+            var configFilePath = Path.Combine(Path.GetTempPath(), $"DeploymentSettings-{Guid.NewGuid().ToString().Split('-').Last()}.json");
+            var expectedConfigFilePath = Path.Combine(Directory.GetParent(projectPath).FullName, "ElasticBeanStalkConfigFile.json");
+            var optionSettings = new Dictionary<string, object>
+            {
+                {"BeanstalkApplication.CreateNew", true },
+                {"BeanstalkApplication.ApplicationName", $"{stackNamePlaceholder}-app" },
+                {"BeanstalkEnvironment.EnvironmentName", $"{stackNamePlaceholder}-dev" },
+                {"EnvironmentType", "LoadBalanced" },
+                {"LoadBalancerType", "application" },
+                {"ApplicationIAMRole.CreateNew", true },
+                {"XRayTracingSupportEnabled", true }
+            };
+            await ConfigFileHelper.CreateConfigFile(_serviceProvider, stackNamePlaceholder, "AspNetAppElasticBeanstalkLinux", optionSettings, projectPath, configFilePath, SaveSettingsType.Modified);
+            Assert.True(await ConfigFileHelper.VerifyConfigFileContents(expectedConfigFilePath, configFilePath));
 
-            _stackName = $"ElasticBeanStalk{suffix}";
+            // Deploy
+            _stackName = $"WebAppNoDockerFile{Guid.NewGuid().ToString().Split('-').Last()}";
+            ConfigFileHelper.ApplyReplacementTokens(new Dictionary<string, string> { {stackNamePlaceholder, _stackName } }, configFilePath);
 
             var deployArgs = new[] { "deploy", "--project-path", projectPath, "--apply", configFilePath, "--silent", "--diagnostics" };
             Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));

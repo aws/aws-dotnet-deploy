@@ -48,4 +48,6 @@
     <None Remove="..\..\testapps\**\docker\**\*" />
   </ItemGroup>
 
+  <Import Project="..\..\src\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems" Label="Shared" />
+
 </Project>

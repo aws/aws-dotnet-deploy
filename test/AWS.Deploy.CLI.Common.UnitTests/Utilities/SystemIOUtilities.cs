@@ -9,7 +9,7 @@ using System.Text;
 
 namespace AWS.Deploy.CLI.Common.UnitTests.Utilities
 {
-    internal static class SystemIOUtilities
+    public static class SystemIOUtilities
     {
         public static string ResolvePath(string projectName)
         {

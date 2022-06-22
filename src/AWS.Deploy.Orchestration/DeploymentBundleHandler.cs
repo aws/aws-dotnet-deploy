@@ -171,6 +171,8 @@ namespace AWS.Deploy.Orchestration
                 }
             }
 
+            // The docker build command will fail if a relative path is provided
+            dockerExecutionDirectory = _directoryManager.GetAbsolutePath(projectDirectory, dockerExecutionDirectory);
             return dockerExecutionDirectory;
         }
 

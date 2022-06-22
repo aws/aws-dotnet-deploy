@@ -1,0 +1,12 @@
+{
+  "AWSProfile": "default",
+  "AWSRegion": "us-west-2",
+  "RecipeId": "PushContainerImageEcr",
+  "Settings": {
+    "ImageTag": 123456789,
+    "DockerBuildArgs": "",
+    "DockerfilePath": "DockerAssets/Dockerfile",
+    "DockerExecutionDirectory": "DockerAssets",
+    "ECRRepositoryName": "my-ecr-repository"
+  }
+}

@@ -72,6 +72,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
         public async Task DefaultConfigurations()
         {
             _stackName = $"WebAppNoDockerFile{Guid.NewGuid().ToString().Split('-').Last()}";
+            var saveSettingsFilePath = Path.Combine(Path.GetTempPath(), $"DeploymentSettings-{Guid.NewGuid().ToString().Split('-').Last()}.json");
 
             // Arrange input for deploy
             await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Select default recommendation
@@ -80,7 +81,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
             // Deploy
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
-            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--application-name", _stackName, "--diagnostics" };
+            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--application-name", _stackName, "--diagnostics", "--save-settings", saveSettingsFilePath };
             Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
 
             // Verify application is deployed and running
@@ -104,6 +105,9 @@ namespace AWS.Deploy.CLI.IntegrationTests
             Assert.True(File.Exists(Path.Combine(_customWorkspace, "CDKBootstrapTemplate.yaml")));
             Assert.True(Directory.Exists(Path.Combine(_customWorkspace, "temp")));
             Assert.True(Directory.Exists(Path.Combine(_customWorkspace, "Projects")));
+
+            // Verify existence of the saved deployment settings file
+            Assert.True(File.Exists(saveSettingsFilePath));
 
             // list
             var listArgs = new[] { "list-deployments", "--diagnostics" };

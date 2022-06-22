@@ -97,7 +97,7 @@ namespace AWS.Deploy.CLI.UnitTests
         [Fact]
         public async Task BuildDockerImage_DockerExecutionDirectorySet()
         {
-            var projectPath = SystemIOUtilities.ResolvePath("ConsoleAppTask");
+            var projectPath = new DirectoryInfo(SystemIOUtilities.ResolvePath("ConsoleAppTask")).FullName;
             var project = await _projectDefinitionParser.Parse(projectPath);
             var options = new List<OptionSettingItem>()
             {

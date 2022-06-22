@@ -210,6 +210,7 @@ Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		src\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems*{3aac19a6-02e8-45d0-bdd0-cad0fbe15f64}*SharedItemsImports = 5
 		src\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems*{3f7a5ca6-7178-4dbf-8dad-6a63684c7a8e}*SharedItemsImports = 5
+		src\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems*{4ad9d400-3f3d-4076-b34c-0f88576c1889}*SharedItemsImports = 5
 		src\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems*{5f8ec972-781d-4a82-a73f-36a97281b0d5}*SharedItemsImports = 5
 		src\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems*{8a351cc0-70c0-4412-b45e-358606251512}*SharedItemsImports = 5
 		src\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems*{f2266c44-c8c5-45ad-aa9b-44f8825bdf63}*SharedItemsImports = 13

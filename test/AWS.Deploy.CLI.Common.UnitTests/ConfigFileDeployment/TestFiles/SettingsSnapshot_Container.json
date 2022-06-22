@@ -1,0 +1,34 @@
+{
+  "AWSProfile": "default",
+  "AWSRegion": "us-west-2",
+  "ApplicationName": "MyAppStack",
+  "RecipeId": "AspNetAppAppRunner",
+  "Settings": {
+    "ServiceName": "MyAppRunnerService",
+    "Port": 100,
+    "StartCommand": "",
+    "ApplicationIAMRole": {
+      "CreateNew": true
+    },
+    "ServiceAccessIAMRole": {
+      "CreateNew": true
+    },
+    "Cpu": "1024",
+    "Memory": "2048",
+    "EncryptionKmsKey": "",
+    "HealthCheckProtocol": "TCP",
+    "HealthCheckPath": "",
+    "HealthCheckInterval": 5,
+    "HealthCheckTimeout": 2,
+    "HealthCheckHealthyThreshold": 3,
+    "HealthCheckUnhealthyThreshold": 3,
+    "VPCConnector": {
+      "UseVPCConnector": false
+    },
+    "AppRunnerEnvironmentVariables": "",
+    "DockerBuildArgs": "",
+    "DockerfilePath": "DockerAssets/Dockerfile",
+    "DockerExecutionDirectory": "DockerAssets",
+    "ECRRepositoryName": "my-ecr-repository"
+  }
+}

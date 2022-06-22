@@ -311,6 +311,10 @@ namespace AWS.Deploy.Orchestration
 
             await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation, imageTag);
 
+            // These option settings need to be persisted back as they are not always provided by the user and we have custom logic to determine their values
+            await _optionSettingHandler.SetOptionSettingValue(recommendation, Constants.Docker.DockerExecutionDirectoryOptionId, recommendation.DeploymentBundle.DockerExecutionDirectory);
+            await _optionSettingHandler.SetOptionSettingValue(recommendation, Constants.Docker.DockerfileOptionId, recommendation.DeploymentBundle.DockerfilePath);
+
             _interactiveService.LogSectionStart("Pushing container image to Elastic Container Registry (ECR)", "Using the docker CLI to log on to ECR and push the local image to ECR.");
             await _deploymentBundleHandler.PushDockerImageToECR(recommendation, respositoryName, imageTag);
         }
