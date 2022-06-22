@@ -1,6 +1,6 @@
 # Dockerfile Generation
 
-**IF YOUR PROJECT DOES NOT CONTAIN A DOCKERFILE, THE DEPLOYMENT TOOL WILL AUTOMATICALLY GENERATE IT,** otherwise an existing Dockerfile will be used for deployment.
+**IF YOUR PROJECT DOES NOT CONTAIN A DOCKERFILE, THE DEPLOYMENT TOOL WILL ATTEMPT TO AUTOMATICALLY GENERATE IT,** otherwise an existing Dockerfile will be used for deployment.
 
 The Dockerfile that deployment tools generates uses Docker's multistage build process. This allows efficient and smaller container images that only contain the bits that are required to run your application.
 
