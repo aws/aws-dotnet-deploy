@@ -17,3 +17,6 @@ Yes. The AWS Deploy Tool saves your deployment settings, including the environme
 
 #### *FAQ: Can I choose a different AWS service to deploy my application?*
 The AWS Deploy Tool  will show you all compute service options available to deploy your application, and will recommend a default with information about why it was chosen. The other compute service options will be shown with an explanation of their differences. If the selected compute option does not match your need, you can select a different compute service.
+
+#### *FAQ: I have an application that has dependency on Windows technology, Can I use the AWS Deploy Tool to deploy it to AWS?*
+ASP.NET Core applications can be deployed to AWS Elastic Beanstalk picking the "ASP.NET Core App to AWS Elastic Beanstalk on Windows" recommendation. The deployment experience is very similar the "ASP.NET Core App to AWS Elastic Beanstalk on Linux" recommendation with additional settings for configuring the Internet Information Services (IIS) resource path and web site.
