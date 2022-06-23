@@ -1,7 +1,7 @@
 {
     "$schema": "./aws-deploy-recipe-schema.json",
     "Id": "AspNetAppElasticBeanstalkWindows",
-    "Version": "0.1.0",
+    "Version": "1.0.0",
     "Name": "ASP.NET Core App to AWS Elastic Beanstalk on Windows",
     "DeploymentType": "CdkProject",
     "DeploymentBundle": "DotnetPublishZipFile",

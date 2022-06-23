@@ -1,7 +1,7 @@
 {
     "$schema": "./aws-deploy-recipe-schema.json",
     "Id": "ConsoleAppEcsFargateService",
-    "Version": "0.2.0",
+    "Version": "1.0.0",
     "Name": "Service on Amazon Elastic Container Service (ECS) using AWS Fargate",
     "DeploymentType": "CdkProject",
     "DeploymentBundle": "Container",
