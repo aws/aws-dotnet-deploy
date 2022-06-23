@@ -1,7 +1,7 @@
 {
     "$schema": "./aws-deploy-recipe-schema.json",
     "Id": "AspNetAppEcsFargate",
-    "Version": "0.1.0",
+    "Version": "1.0.0",
     "Name": "ASP.NET Core App to Amazon ECS using AWS Fargate",
     "DeploymentType": "CdkProject",
     "DeploymentBundle": "Container",
