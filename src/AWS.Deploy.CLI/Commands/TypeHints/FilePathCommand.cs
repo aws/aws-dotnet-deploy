@@ -44,7 +44,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             var userFilePath = _consoleUtilities
                .AskUserForValue(
                    string.Empty,
-                   _optionSettingHandler.GetOptionSettingValue<string>(recommendation, optionSetting),
+                   _optionSettingHandler.GetOptionSettingValue<string>(recommendation, optionSetting) ?? string.Empty,
                    allowEmpty: typeHintData?.AllowEmpty ?? true,
                    resetValue: _optionSettingHandler.GetOptionSettingDefaultValue<string>(recommendation, optionSetting) ?? "") ;
 

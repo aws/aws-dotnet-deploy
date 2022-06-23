@@ -56,7 +56,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 idSelector: env => env.EnvironmentName,
                 displaySelector: env => env.EnvironmentName,
                 defaultSelector: app => app.EnvironmentName.Equals(currentTypeHintResponse?.EnvironmentName),
-                defaultNewName: currentTypeHintResponse.EnvironmentName)
+                defaultNewName: currentTypeHintResponse?.EnvironmentName ?? string.Empty)
             {
                 AskNewName = true,
             };

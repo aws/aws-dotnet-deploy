@@ -53,7 +53,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 idSelector: app => app.ApplicationName,
                 displaySelector: app => app.ApplicationName,
                 defaultSelector: app => app.ApplicationName.Equals(currentTypeHintResponse?.ApplicationName),
-                defaultNewName: currentTypeHintResponse.ApplicationName ?? String.Empty)
+                defaultNewName: currentTypeHintResponse?.ApplicationName ?? string.Empty)
             {
                 AskNewName = true,
             };

@@ -62,8 +62,8 @@ namespace AWS.Deploy.Common.Recipes.Validation
         /// <inheritdoc cref="FargateTaskCpuMemorySizeValidator"/>
         public Task<ValidationResult> Validate(Recommendation recommendation, IDeployToolValidationContext deployValidationContext)
         {
-            string cpu;
-            string memory;
+            string? cpu;
+            string? memory;
 
             try
             {
@@ -75,6 +75,11 @@ namespace AWS.Deploy.Common.Recipes.Validation
                 return Task.FromResult<ValidationResult>(ValidationResult.Failed("Could not find a valid value for Task CPU or Task Memory " +
                     "as part of of the ECS Fargate deployment configuration. Please provide a valid value and try again."));
             }
+
+            if (cpu == null)
+                return ValidationResult.FailedAsync("Task CPU is null.");
+            if (memory == null)
+                return ValidationResult.FailedAsync("Task Memory is null.");
 
             if (!_cpuMemoryMap.ContainsKey(cpu))
             {

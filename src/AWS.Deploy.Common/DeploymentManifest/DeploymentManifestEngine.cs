@@ -123,7 +123,8 @@ namespace AWS.Deploy.Common.DeploymentManifest
         private async Task<DeploymentManifestModel> ReadManifestFile(string filePath)
         {
             var manifestFilejsonString = await _fileManager.ReadAllTextAsync(filePath);
-            return JsonConvert.DeserializeObject<DeploymentManifestModel>(manifestFilejsonString);
+            return JsonConvert.DeserializeObject<DeploymentManifestModel>(manifestFilejsonString) ??
+                throw new FailedToDeserializeException(DeployToolErrorCode.InvalidDeploymentManifestModel, "The deployment manifest file is invalid.");
         }
 
         /// <summary>

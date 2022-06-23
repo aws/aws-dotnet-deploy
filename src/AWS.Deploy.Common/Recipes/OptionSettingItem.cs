@@ -19,7 +19,7 @@ namespace AWS.Deploy.Common.Recipes
         /// <summary>
         /// Retrieve the value of an <see cref="OptionSettingItem"/> as a specified type.
         /// </summary>
-        T GetValue<T>(IDictionary<string, string> replacementTokens, IDictionary<string, bool>? displayableOptionSettings = null);
+        T? GetValue<T>(IDictionary<string, string> replacementTokens, IDictionary<string, bool>? displayableOptionSettings = null);
 
         /// <summary>
         /// Retrieve the value of an <see cref="OptionSettingItem"/> as an object.

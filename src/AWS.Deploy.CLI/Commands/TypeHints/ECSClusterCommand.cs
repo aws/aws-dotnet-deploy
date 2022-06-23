@@ -55,7 +55,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 idSelector: cluster => cluster.ClusterArn,
                 displaySelector: cluster => cluster.ClusterName,
                 defaultSelector: cluster => cluster.ClusterArn.Equals(currentTypeHintResponse?.ClusterArn),
-                defaultNewName: currentTypeHintResponse.NewClusterName)
+                defaultNewName: currentTypeHintResponse?.NewClusterName ?? string.Empty)
             {
                 AskNewName = true
             };

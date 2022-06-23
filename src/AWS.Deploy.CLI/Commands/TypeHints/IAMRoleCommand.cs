@@ -56,7 +56,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             var userInputConfiguration = new UserInputConfiguration<Role>(
                 idSelector: role => role.Arn,
                 displaySelector: role => role.RoleName,
-                defaultSelector: role => currentTypeHintResponse.RoleArn?.Equals(role.Arn) ?? false);
+                defaultSelector: role => currentTypeHintResponse?.RoleArn?.Equals(role.Arn) ?? false);
 
             var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(existingRoles ,"Select an IAM role", userInputConfiguration);
 
