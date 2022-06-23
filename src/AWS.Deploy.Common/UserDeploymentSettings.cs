@@ -36,7 +36,8 @@ namespace AWS.Deploy.Common
         {
             try
             {
-                var userDeploymentSettings = JsonConvert.DeserializeObject<UserDeploymentSettings>(File.ReadAllText(filePath));
+                var userDeploymentSettings = JsonConvert.DeserializeObject<UserDeploymentSettings>(File.ReadAllText(filePath)) ??
+                    throw new FailedToDeserializeException(DeployToolErrorCode.FailedToDeserializeUserDeploymentFile, "Failed to read user deployment settings file.");
                 if (userDeploymentSettings.OptionSettingsConfig != null)
                     userDeploymentSettings.TraverseRootToLeaf(userDeploymentSettings.OptionSettingsConfig.Root);
                 return userDeploymentSettings;
@@ -56,7 +57,7 @@ namespace AWS.Deploy.Common
         {
             if (!string.IsNullOrEmpty(node.Path) && node.Type.ToString().Equals("Array"))
             {
-                var list = node.Values<string>().Select(x => x.ToString()).ToList();
+                var list = node.Values<string>().Select(x => x?.ToString()).ToList();
                 LeafOptionSettingItems.Add(node.Path, JsonConvert.SerializeObject(list));
                 return;
             }
@@ -70,7 +71,7 @@ namespace AWS.Deploy.Common
                 var path = node.Path;
                 if (path.Contains("['"))
                     path = path.Substring(2, node.Path.Length - 4);
-                LeafOptionSettingItems.Add(path, node.Value<string>());
+                LeafOptionSettingItems.Add(path, node.Value<string>() ?? string.Empty);
                 return;
             }
 

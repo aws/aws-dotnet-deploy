@@ -285,6 +285,8 @@ namespace AWS.Deploy.Orchestration
             // Read this from the OptionSetting instead of recommendation.DeploymentBundle.
             // When its value comes from a replacement token, it wouldn't have been set back to the DeploymentBundle 
             var respositoryName = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, Constants.Docker.ECRRepositoryNameOptionId));
+            if (respositoryName == null)
+                throw new InvalidECRRepositoryNameException(DeployToolErrorCode.ECRRepositoryNameIsNull, "The ECR Repository Name is null.");
 
             string imageTag;
             try

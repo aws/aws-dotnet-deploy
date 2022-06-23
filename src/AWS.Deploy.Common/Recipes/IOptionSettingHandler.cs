@@ -40,7 +40,7 @@ namespace AWS.Deploy.Common.Recipes
         /// Retrieve the <see cref="OptionSettingItem"/> value for a specific <see cref="Recommendation"/>
         /// This method retrieves the value in a specified type.
         /// </summary>
-        T GetOptionSettingValue<T>(Recommendation recommendation, OptionSettingItem optionSetting);
+        T? GetOptionSettingValue<T>(Recommendation recommendation, OptionSettingItem optionSetting);
 
         /// <summary>
         /// Retrieve the <see cref="OptionSettingItem"/> value for a specific <see cref="Recommendation"/>

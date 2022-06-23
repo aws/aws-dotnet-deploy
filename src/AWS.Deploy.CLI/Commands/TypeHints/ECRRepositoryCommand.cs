@@ -37,7 +37,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 idSelector: rep => rep.RepositoryName,
                 displaySelector: rep => rep.RepositoryName,
                 defaultSelector: rep => rep.RepositoryName.Equals(currentRepositoryName),
-                defaultNewName: currentRepositoryName)
+                defaultNewName: currentRepositoryName ?? string.Empty)
             {
                 AskNewName = true,
             };

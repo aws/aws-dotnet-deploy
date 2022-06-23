@@ -13,7 +13,7 @@ namespace AWS.Deploy.Common.Recipes
     /// <see cref="GetValue{T}"/>, <see cref="GetValue"/> and <see cref="SetValueOverride"/> methods
     public partial class OptionSettingItem
     {
-        public T GetValue<T>(IDictionary<string, string> replacementTokens, IDictionary<string, bool>? displayableOptionSettings = null)
+        public T? GetValue<T>(IDictionary<string, string> replacementTokens, IDictionary<string, bool>? displayableOptionSettings = null)
         {
             var value = GetValue(replacementTokens, displayableOptionSettings);
 
@@ -159,7 +159,7 @@ namespace AWS.Deploy.Common.Recipes
                 var deserialized = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(valueOverride));
                 foreach (var childOptionSetting in ChildOptionSettings)
                 {
-                    if (deserialized.TryGetValue(childOptionSetting.Id, out var childValueOverride))
+                    if (deserialized?.TryGetValue(childOptionSetting.Id, out var childValueOverride) ?? false)
                     {
                         await optionSettingHandler.SetOptionSettingValue(recommendation, childOptionSetting, childValueOverride, skipValidation: skipValidation);
                     }

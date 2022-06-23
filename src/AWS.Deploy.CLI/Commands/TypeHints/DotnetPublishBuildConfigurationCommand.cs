@@ -26,7 +26,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             var settingValue =
                 _consoleUtilities.AskUserForValue(
                     string.Empty,
-                    _optionSettingHandler.GetOptionSettingValue<string>(recommendation, optionSetting),
+                    _optionSettingHandler.GetOptionSettingValue<string>(recommendation, optionSetting) ?? string.Empty,
                     allowEmpty: false,
                     resetValue: _optionSettingHandler.GetOptionSettingDefaultValue<string>(recommendation, optionSetting) ?? "");
             recommendation.DeploymentBundle.DotnetPublishBuildConfiguration = settingValue;

@@ -52,7 +52,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 idSelector: vpcConnector => vpcConnector.VpcConnectorArn,
                 displaySelector: vpcConnector => vpcConnector.VpcConnectorName,
                 defaultSelector: vpcConnector => vpcConnector.VpcConnectorArn.Equals(currentVpcConnector),
-                defaultNewName: currentVpcConnector)
+                defaultNewName: currentVpcConnector ?? string.Empty)
             {
                 CanBeEmpty = true,
                 CreateNew = false

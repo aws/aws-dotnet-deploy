@@ -32,7 +32,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             var settingValue = _consoleUtilities
                 .AskUserForValue(
                     string.Empty,
-                    _optionSettingHandler.GetOptionSettingValue<string>(recommendation, optionSetting),
+                    _optionSettingHandler.GetOptionSettingValue<string>(recommendation, optionSetting) ?? string.Empty,
                     allowEmpty: true,
                     resetValue: _optionSettingHandler.GetOptionSettingDefaultValue<string>(recommendation, optionSetting) ?? "",
                     validators: async executionDirectory => await ValidateExecutionDirectory(executionDirectory, recommendation, optionSetting));

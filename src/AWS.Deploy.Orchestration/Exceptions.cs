@@ -70,6 +70,14 @@ namespace AWS.Deploy.Orchestration
     }
 
     /// <summary>
+    /// Exception is thrown if ECR repository name is invalid.
+    /// </summary>
+    public class InvalidECRRepositoryNameException : DeployToolException
+    {
+        public InvalidECRRepositoryNameException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+    }
+
+    /// <summary>
     /// Exception is thrown if docker push attempt failed
     /// </summary>
     public class DockerPushFailedException : DeployToolException
