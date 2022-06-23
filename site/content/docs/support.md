@@ -4,10 +4,10 @@ The table below provides a matrix of supported .NET application types and AWS Co
 
 |                   | .NET Console App   | 	ASP.NET Core    | Blazor WebAssembly   |
 | :---              |    :----:     |          :---:    |    :---:  |
-| Amazon Elastic Container Service (ECS) service| X             | X                 |           |
-| Amazon Elastic Container Service (ECS) task	| X             | X                 |           |
-| AWS App Runner    |              | X                 |           |
-| AWS Elastic Beanstalk     |               | X                 |           |
+| Amazon Elastic Container Service (ECS) service (Linux)| X             | X                 |           |
+| Amazon Elastic Container Service (ECS) task (Linux)	| X             | X                 |           |
+| AWS App Runner (Linux)   |              | X                 |           |
+| AWS Elastic Beanstalk (Linux and Windows)     |               | X                 |           |
 | Amazon S3 & Amazon CloudFront        |               |                   |   X       |
 
 
@@ -33,7 +33,7 @@ The table below provides a matrix of supported .NET application types and AWS Co
 
 ### AWS Elastic Beanstalk
 
-* Supports deployments of ASP.NET Core applications to AWS Elastic Beanstalk on Linux.
+* Supports deployments of ASP.NET Core applications to AWS Elastic Beanstalk on Linux and Windows.
 * Recommended if you want to deploy your application directly to EC2 hosts.
 
 [**AWS Elastic Beanstalk**](https://aws.amazon.com/elasticbeanstalk/) is an easy-to-use service for deploying and scaling web applications and services. AWS Elastic Beanstalk automatically handles the deployment, from capacity provisioning, load balancing, auto-scaling to application health monitoring.

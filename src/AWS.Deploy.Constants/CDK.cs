@@ -9,32 +9,9 @@ namespace AWS.Deploy.Constants
     internal static class CDK
     {
         /// <summary>
-        /// Deployment tool workspace directory to create CDK app during the deployment.
-        /// </summary>
-        public static string DeployToolWorkspaceDirectoryRoot {
-            get
-            {
-                var deployToolWorkspace = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".aws-dotnet-deploy");
-                if (!Directory.Exists(deployToolWorkspace))
-                    Directory.CreateDirectory(deployToolWorkspace);
-                return deployToolWorkspace;
-            }
-        }
-
-        /// <summary>
-        /// Directory that contains CDK projects
-        /// </summary>
-        public static string ProjectsDirectory => Path.Combine(DeployToolWorkspaceDirectoryRoot, "Projects");
-
-        /// <summary>
         /// Default version of CDK CLI
         /// </summary>
         public static readonly Version DefaultCDKVersion = Version.Parse("2.13.0");
-
-        /// <summary>
-        /// The file path of the CDK bootstrap template to be used
-        /// </summary>
-        public static string CDKBootstrapTemplatePath => Path.Combine(DeployToolWorkspaceDirectoryRoot, "CDKBootstrapTemplate.yaml");
 
         /// <summary>
         /// The version number CDK bootstrap specified in CDKBootstrapTemplate.yaml

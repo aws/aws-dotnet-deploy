@@ -77,6 +77,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly IOptionSettingHandler _optionSettingHandler;
         private readonly IValidatorFactory _validatorFactory;
         private readonly IRecipeHandler _recipeHandler;
+        private readonly IDeployToolWorkspaceMetadata _deployToolWorkspaceMetadata;
 
         public CommandFactory(
             IServiceProvider serviceProvider,
@@ -105,7 +106,9 @@ namespace AWS.Deploy.CLI.Commands
             IAWSServiceHandler awsServiceHandler,
             IOptionSettingHandler optionSettingHandler,
             IValidatorFactory validatorFactory,
-            IRecipeHandler recipeHandler)
+            IRecipeHandler recipeHandler,
+            IDeployToolWorkspaceMetadata deployToolWorkspaceMetadata
+            )
         {
             _serviceProvider = serviceProvider;
             _toolInteractiveService = toolInteractiveService;
@@ -134,6 +137,7 @@ namespace AWS.Deploy.CLI.Commands
             _optionSettingHandler = optionSettingHandler;
             _validatorFactory = validatorFactory;
             _recipeHandler = recipeHandler;
+            _deployToolWorkspaceMetadata = deployToolWorkspaceMetadata;
         }
 
         public Command BuildRootCommand()
@@ -236,7 +240,8 @@ namespace AWS.Deploy.CLI.Commands
                         _awsServiceHandler,
                         _optionSettingHandler,
                         _validatorFactory,
-                        _recipeHandler);
+                        _recipeHandler,
+                        _deployToolWorkspaceMetadata);
 
                     var deploymentProjectPath = input.DeploymentProject ?? string.Empty;
                     if (!string.IsNullOrEmpty(deploymentProjectPath))
@@ -257,6 +262,10 @@ namespace AWS.Deploy.CLI.Commands
                         _toolInteractiveService.WriteErrorLine(string.Empty);
                         _toolInteractiveService.WriteErrorLine(e.Message);
                     }
+
+                    _toolInteractiveService.WriteErrorLine(string.Empty);
+                    _toolInteractiveService.WriteErrorLine("For more information, please visit our troubleshooting guide https://aws.github.io/aws-dotnet-deploy/troubleshooting-guide/.");
+                    _toolInteractiveService.WriteErrorLine("If you are still unable to solve this issue and believe this is an issue with the tooling, please cut a ticket https://github.com/aws/aws-dotnet-deploy/issues/new/choose.");
 
                     // bail out with an non-zero return code.
                     return CommandReturnCodes.USER_ERROR;

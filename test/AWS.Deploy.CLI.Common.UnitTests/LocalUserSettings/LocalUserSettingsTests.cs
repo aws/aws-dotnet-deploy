@@ -7,7 +7,10 @@ using System.IO;
 using System.Threading.Tasks;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.Common.IO;
+using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.LocalUserSettings;
+using AWS.Deploy.Orchestration.Utilities;
+using Moq;
 using Xunit;
 
 namespace AWS.Deploy.CLI.Common.UnitTests.LocalUserSettings
@@ -17,13 +20,23 @@ namespace AWS.Deploy.CLI.Common.UnitTests.LocalUserSettings
         private readonly IFileManager _fileManager;
         private readonly IDirectoryManager _directoryManager;
         private readonly ILocalUserSettingsEngine _localUserSettingsEngine;
+        private readonly Mock<IEnvironmentVariableManager> _environmentVariableManager;
+        private readonly IDeployToolWorkspaceMetadata _deployToolWorkspaceMetadata;
 
         public LocalUserSettingsTests()
         {
             _fileManager = new TestFileManager();
             _directoryManager = new DirectoryManager();
             var targetApplicationPath = Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj");
-            _localUserSettingsEngine = new LocalUserSettingsEngine(_fileManager, _directoryManager);
+
+            _environmentVariableManager = new Mock<IEnvironmentVariableManager>();
+            _environmentVariableManager
+                .Setup(x => x.GetEnvironmentVariable(It.IsAny<string>()))
+                .Returns(() => null);
+
+            _deployToolWorkspaceMetadata = new DeployToolWorkspaceMetadata(_directoryManager, _environmentVariableManager.Object);
+
+            _localUserSettingsEngine = new LocalUserSettingsEngine(_fileManager, _directoryManager, _deployToolWorkspaceMetadata);
         }
 
         [Fact]

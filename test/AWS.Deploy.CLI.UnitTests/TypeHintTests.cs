@@ -65,11 +65,11 @@ namespace AWS.Deploy.CLI.UnitTests
             var typeHintCommand = new DynamoDBTableCommand(awsResourceQueryer, null, _optionSettingHandler);
 
             var resources = await typeHintCommand.GetResources(null, null);
-            Assert.Equal(2, resources.Count);
-            Assert.Equal("Table1", resources[0].DisplayName);
-            Assert.Equal("Table1", resources[0].SystemName);
-            Assert.Equal("Table2", resources[1].DisplayName);
-            Assert.Equal("Table2", resources[1].SystemName);
+            Assert.Equal(2, resources.Rows.Count);
+            Assert.Equal("Table1", resources.Rows[0].DisplayName);
+            Assert.Equal("Table1", resources.Rows[0].SystemName);
+            Assert.Equal("Table2", resources.Rows[1].DisplayName);
+            Assert.Equal("Table2", resources.Rows[1].SystemName);
         }
 
         [Fact]
@@ -95,11 +95,11 @@ namespace AWS.Deploy.CLI.UnitTests
             var typeHintCommand = new SQSQueueUrlCommand(awsResourceQueryer, null, _optionSettingHandler);
 
             var resources = await typeHintCommand.GetResources(null, null);
-            Assert.Equal(2, resources.Count);
-            Assert.Equal("queue1", resources[0].DisplayName);
-            Assert.Equal("https://sqs.us-west-2.amazonaws.com/123412341234/queue1", resources[0].SystemName);
-            Assert.Equal("queue2", resources[1].DisplayName);
-            Assert.Equal("https://sqs.us-west-2.amazonaws.com/123412341234/queue2", resources[1].SystemName);
+            Assert.Equal(2, resources.Rows.Count);
+            Assert.Equal("queue1", resources.Rows[0].DisplayName);
+            Assert.Equal("https://sqs.us-west-2.amazonaws.com/123412341234/queue1", resources.Rows[0].SystemName);
+            Assert.Equal("queue2", resources.Rows[1].DisplayName);
+            Assert.Equal("https://sqs.us-west-2.amazonaws.com/123412341234/queue2", resources.Rows[1].SystemName);
         }
 
         [Fact]
@@ -125,11 +125,11 @@ namespace AWS.Deploy.CLI.UnitTests
             var typeHintCommand = new SNSTopicArnsCommand(awsResourceQueryer, null, _optionSettingHandler);
 
             var resources = await typeHintCommand.GetResources(null, null);
-            Assert.Equal(2, resources.Count);
-            Assert.Equal("Topic1", resources[0].DisplayName);
-            Assert.Equal("arn:aws:sns:us-west-2:123412341234:Topic1", resources[0].SystemName);
-            Assert.Equal("Topic2", resources[1].DisplayName);
-            Assert.Equal("arn:aws:sns:us-west-2:123412341234:Topic2", resources[1].SystemName);
+            Assert.Equal(2, resources.Rows.Count);
+            Assert.Equal("Topic1", resources.Rows[0].DisplayName);
+            Assert.Equal("arn:aws:sns:us-west-2:123412341234:Topic1", resources.Rows[0].SystemName);
+            Assert.Equal("Topic2", resources.Rows[1].DisplayName);
+            Assert.Equal("arn:aws:sns:us-west-2:123412341234:Topic2", resources.Rows[1].SystemName);
         }
 
         [Fact]
@@ -147,11 +147,11 @@ namespace AWS.Deploy.CLI.UnitTests
             var typeHintCommand = new S3BucketNameCommand(awsResourceQueryer, null, _optionSettingHandler);
 
             var resources = await typeHintCommand.GetResources(null, null);
-            Assert.Equal(2, resources.Count);
-            Assert.Equal("Bucket1", resources[0].DisplayName);
-            Assert.Equal("Bucket1", resources[0].SystemName);
-            Assert.Equal("Bucket2", resources[1].DisplayName);
-            Assert.Equal("Bucket2", resources[1].SystemName);
+            Assert.Equal(2, resources.Rows.Count);
+            Assert.Equal("Bucket1", resources.Rows[0].DisplayName);
+            Assert.Equal("Bucket1", resources.Rows[0].SystemName);
+            Assert.Equal("Bucket2", resources.Rows[1].DisplayName);
+            Assert.Equal("Bucket2", resources.Rows[1].SystemName);
         }
     }
 }

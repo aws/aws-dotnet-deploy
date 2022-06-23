@@ -32,7 +32,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
         /// Not implemented, specific files are not suggested to the user
         /// </summary>
         /// <returns>Empty list</returns>
-        public Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting) => Task.FromResult<List<TypeHintResource>?>(null);
+        public Task<TypeHintResourceTable> GetResources(Recommendation recommendation, OptionSettingItem optionSetting) => Task.FromResult(new TypeHintResourceTable());
 
         /// <summary>
         /// Prompts the user to enter a path to a file
@@ -44,7 +44,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             var userFilePath = _consoleUtilities
                .AskUserForValue(
                    string.Empty,
-                   _optionSettingHandler.GetOptionSettingValue<string>(recommendation, optionSetting),
+                   _optionSettingHandler.GetOptionSettingValue<string>(recommendation, optionSetting) ?? string.Empty,
                    allowEmpty: typeHintData?.AllowEmpty ?? true,
                    resetValue: _optionSettingHandler.GetOptionSettingDefaultValue<string>(recommendation, optionSetting) ?? "") ;
 

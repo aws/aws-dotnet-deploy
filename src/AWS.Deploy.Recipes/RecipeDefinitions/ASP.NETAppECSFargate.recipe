@@ -2,13 +2,13 @@
     "$schema": "./aws-deploy-recipe-schema.json",
     "Id": "AspNetAppEcsFargate",
     "Version": "0.1.0",
-    "Name": "ASP.NET Core App to Amazon ECS using Fargate",
+    "Name": "ASP.NET Core App to Amazon ECS using AWS Fargate",
     "DeploymentType": "CdkProject",
     "DeploymentBundle": "Container",
     "CdkProjectTemplate": "../CdkTemplates/AspNetAppEcsFargate",
     "CdkProjectTemplateId": "netdeploy.AspNetAppEcsFargate",
-    "Description": "This ASP.NET Core application will be deployed to Amazon Elastic Container Service (Amazon ECS) with compute power managed by AWS Fargate compute engine. If your project does not contain a Dockerfile, it will be automatically generated. Recommended if you want to deploy your application as a container image on Linux.",
-    "ShortDescription": "ASP.NET Core application deployed to Amazon Elastic Container Service (Amazon ECS).",
+    "ShortDescription": "Deploys as a Linux container image to a fully managed container orchestration service. Dockerfile will be automatically generated if needed.",
+    "Description": "This ASP.NET Core application will be deployed to Amazon Elastic Container Service (Amazon ECS) with compute power managed by AWS Fargate compute engine. If your project does not contain a Dockerfile, it will be automatically generated, otherwise an existing Dockerfile will be used. Recommended if you want to deploy your application as a container image on Linux.",
     "TargetService": "Amazon Elastic Container Service",
 
     "DisplayedResources": [
@@ -324,6 +324,9 @@
                                 "Regex": "^vpc-([0-9a-f]{8}|[0-9a-f]{17})$",
                                 "ValidationFailedMessage": "Invalid VPC ID. The VPC ID must start with the \"vpc-\" prefix, followed by either 8 or 17 characters consisting of digits and letters(lower-case) from a to f. For example vpc-abc88de9 is a valid VPC ID."
                             }
+                        },
+                        {
+                            "ValidatorType": "VPCSubnetsInDifferentAZs"
                         }
                     ],
                     "DependsOn": [
@@ -343,11 +346,21 @@
             "Id": "AdditionalECSServiceSecurityGroups",
             "Name": "ECS Service Security Groups",
             "Category": "Permissions",
-            "Description": "A comma-delimited list of EC2 security groups to assign to the ECS service. This is commonly used to provide access to Amazon RDS databases running in their own security groups.",
-            "Type": "String",
-            "DefaultValue": "",
+            "Description": "A list of EC2 security groups to assign to the ECS service. This is commonly used to provide access to Amazon RDS databases running in their own security groups.",
+            "Type": "List",
+            "TypeHint": "ExistingSecurityGroups",
             "AdvancedSetting": true,
-            "Updatable": true
+            "Updatable": true,
+            "Validators": [
+                {
+                    "ValidatorType": "Regex",
+                    "Configuration": {
+                        "Regex": "^sg-([0-9a-f]{8}|[0-9a-f]{17})$",
+                        "AllowEmptyString": true,
+                        "ValidationFailedMessage": "Invalid Security Group ID. The Security Group ID must start with the \"sg-\" prefix, followed by either 8 or 17 characters consisting of digits and letters(lower-case) from a to f. For example sg-abc88de9 is a valid Security Group ID."
+                    }
+                }
+            ]
         },
         {
             "Id": "TaskCpu",

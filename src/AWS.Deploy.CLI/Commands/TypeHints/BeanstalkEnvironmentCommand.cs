@@ -35,10 +35,16 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             return await _awsResourceQueryer.ListOfElasticBeanstalkEnvironments(applicationName);
         }
 
-        public async Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
+        public async Task<TypeHintResourceTable> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var environments = await GetData(recommendation, optionSetting);
-            return environments.Select(x => new TypeHintResource(x.EnvironmentName, x.EnvironmentName)).ToList();
+
+            var resourceTable = new TypeHintResourceTable
+            {
+                Rows = environments.Select(x => new TypeHintResource(x.EnvironmentName, x.EnvironmentName)).ToList()
+            };
+
+            return resourceTable;
         }
 
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
@@ -50,7 +56,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 idSelector: env => env.EnvironmentName,
                 displaySelector: env => env.EnvironmentName,
                 defaultSelector: app => app.EnvironmentName.Equals(currentTypeHintResponse?.EnvironmentName),
-                defaultNewName: currentTypeHintResponse.EnvironmentName)
+                defaultNewName: currentTypeHintResponse?.EnvironmentName ?? string.Empty)
             {
                 AskNewName = true,
             };

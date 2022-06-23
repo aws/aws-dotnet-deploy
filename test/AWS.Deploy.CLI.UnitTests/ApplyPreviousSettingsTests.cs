@@ -55,7 +55,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var optionSettingHandler = new OptionSettingHandler(validatorFactory);
             _recipeHandler = new RecipeHandler(_deploymentManifestEngine, _orchestratorInteractiveService, _directoryManager, _fileManager, optionSettingHandler);
             _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider.Object));
-            _orchestrator = new Orchestrator(null, null, null, null, null, null, null, null, null, null, null, null, null, _optionSettingHandler);
+            _orchestrator = new Orchestrator(null, null, null, null, null, null, null, null, null, null, null, null, null, _optionSettingHandler, null);
         }
 
         private async Task<RecommendationEngine> BuildRecommendationEngine(string testProjectName)
@@ -85,7 +85,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var recommendations = await engine.ComputeRecommendations();
 
-            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
 
             var roleArnValue = roleArn == null ? "null" : $"\"{roleArn}\"";
 
@@ -178,7 +178,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var recommendations = await engine.ComputeRecommendations();
 
-            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
 
             var serializedSettings = @$"
             {{
@@ -206,7 +206,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var recommendations = await engine.ComputeRecommendations();
 
-            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
 
             var serializedSettings = @$"
             {{

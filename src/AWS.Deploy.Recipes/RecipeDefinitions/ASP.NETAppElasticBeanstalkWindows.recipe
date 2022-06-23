@@ -1,0 +1,849 @@
+{
+    "$schema": "./aws-deploy-recipe-schema.json",
+    "Id": "AspNetAppElasticBeanstalkWindows",
+    "Version": "0.1.0",
+    "Name": "ASP.NET Core App to AWS Elastic Beanstalk on Windows",
+    "DeploymentType": "CdkProject",
+    "DeploymentBundle": "DotnetPublishZipFile",
+    "CdkProjectTemplate": "../CdkTemplates/AspNetAppElasticBeanstalkWindows",
+    "CdkProjectTemplateId": "netdeploy.AspNetAppElasticBeanstalkWindows",
+    "Description": "This ASP.NET Core application will be built and deployed to AWS Elastic Beanstalk on Windows. Recommended if you do not want to deploy your application as a container image.",
+    "ShortDescription": "ASP.NET Core application deployed to AWS Elastic Beanstalk on Windows.",
+    "TargetService": "AWS Elastic Beanstalk",
+
+    "DisplayedResources": [
+        {
+            "LogicalId": "RecipeBeanstalkEnvironment83CC12DE",
+            "Description": "Application Endpoint"
+        }
+    ],
+
+    "RecipePriority": 80,
+    "RecommendationRules": [
+        {
+            "Tests": [
+                {
+                    "Type": "MSProjectSdkAttribute",
+                    "Condition": {
+                        "Value": "Microsoft.NET.Sdk.Web"
+                    }
+                },
+                {
+                    "Type": "MSProperty",
+                    "Condition": {
+                        "PropertyName": "TargetFramework",
+                        "AllowedValues": [ "netcoreapp3.1", "net5.0", "net6.0" ]
+                    }
+                }
+            ],
+            "Effect": {
+                "Pass": { "Include": true }
+            }
+        },
+
+        {
+            "Tests": [
+                {
+                    "Type": "FileExists",
+                    "Condition": {
+                        "FileName": "Dockerfile"
+                    }
+                }
+            ],
+            "Effect": {
+                "Fail": {
+                    "PriorityAdjustment": 100,
+                    "Include": true
+                }
+            }
+        },
+
+        {
+            "Tests": [
+                {
+                    "Type": "MSPropertyExists",
+                    "Condition": {
+                        "PropertyName": "AWSProjectType"
+                    }
+                }
+            ],
+            "Effect": {
+                "Pass": { "Include": false },
+                "Fail": { "Include": true }
+            }
+        }
+    ],
+    "Categories": [
+        {
+            "Id": "General",
+            "DisplayName": "General",
+            "Order": 10
+        },
+        {
+            "Id": "Hosting",
+            "DisplayName": "Hosting",
+            "Order": 20
+        },
+        {
+            "Id": "Platform",
+            "DisplayName": "Platform",
+            "Order": 30
+        },
+        {
+            "Id": "RollingUpdates",
+            "DisplayName": "Rolling updates & deployments",
+            "Order": 40
+        },
+        {
+            "Id": "Health",
+            "DisplayName": "Health & Monitoring",
+            "Order": 50
+        },
+        {
+            "Id": "Compute",
+            "DisplayName": "Compute",
+            "Order": 60
+        },
+        {
+            "Id": "LoadBalancer",
+            "DisplayName": "LoadBalancer",
+            "Order": 70
+        },
+        {
+            "Id": "Permissions",
+            "DisplayName": "Permissions",
+            "Order": 80
+        },
+        {
+            "Id": "VPC",
+            "DisplayName": "VPC",
+            "Order": 90
+        },
+        {
+            "Id": "EnvVariables",
+            "DisplayName": "Environment Variables",
+            "Order": 100
+        }
+    ],
+
+    "OptionSettings": [
+        {
+            "Id": "BeanstalkApplication",
+            "Name": "Elastic Beanstalk Application",
+            "Category": "General",
+            "Description": "The Elastic Beanstalk application.",
+            "Type": "Object",
+            "TypeHint": "BeanstalkApplication",
+            "AdvancedSetting": false,
+            "Updatable": false,
+            "ChildOptionSettings": [
+                {
+                    "Id": "CreateNew",
+                    "Name": "Create new Elastic Beanstalk application",
+                    "Description": "Do you want to create new application?",
+                    "Type": "Bool",
+                    "DefaultValue": true,
+                    "AdvancedSetting": false,
+                    "Updatable": false
+                },
+                {
+                    "Id": "ApplicationName",
+                    "Name": "Application Name",
+                    "Description": "The Elastic Beanstalk application name.",
+                    "Type": "String",
+                    "DefaultValue": "{StackName}",
+                    "AdvancedSetting": false,
+                    "Updatable": false,
+                    "DependsOn": [
+                        {
+                            "Id": "BeanstalkApplication.CreateNew",
+                            "Value": true
+                        }
+                    ],
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": {
+                                "Regex": "^[^/]{1,100}$",
+                                "AllowEmptyString": true,
+                                "ValidationFailedMessage": "Invalid Application Name. The Application name can contain up to 100 Unicode characters, not including forward slash (/)."
+                            }
+                        },
+                        {
+                            "ValidatorType": "ExistingResource",
+                            "Configuration": {
+                                "ResourceType": "AWS::ElasticBeanstalk::Application"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Id": "ExistingApplicationName",
+                    "Name": "Application Name",
+                    "Description": "The Elastic Beanstalk application name.",
+                    "Type": "String",
+                    "TypeHint": "ExistingBeanstalkApplication",
+                    "DefaultValue": "{StackName}",
+                    "AdvancedSetting": false,
+                    "Updatable": false,
+                    "DependsOn": [
+                        {
+                            "Id": "BeanstalkApplication.CreateNew",
+                            "Value": false
+                        }
+                    ],
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": {
+                                "Regex": "^[^/]{1,100}$",
+                                "AllowEmptyString": true,
+                                "ValidationFailedMessage": "Invalid Application Name. The Application name can contain up to 100 Unicode characters, not including forward slash (/)."
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Id": "EnvironmentName",
+            "ParentSettingId": "BeanstalkApplication.ApplicationName",
+            "Name": "Environment Name",
+            "Category": "General",
+            "Description": "The Elastic Beanstalk environment name.",
+            "Type": "String",
+            "DefaultValue": "{StackName}-dev",
+            "AdvancedSetting": false,
+            "Updatable": false,
+            "Validators": [
+                {
+                    "ValidatorType": "Regex",
+                    "Configuration": {
+                        "Regex": "^[a-zA-Z0-9][a-zA-Z0-9-]{2,38}[a-zA-Z0-9]$",
+                        "ValidationFailedMessage": "Invalid Environment Name. The Environment Name Must be from 4 to 40 characters in length. The name can contain only letters, numbers, and hyphens. It can't start or end with a hyphen."
+                    }
+                },
+                {
+                    "ValidatorType": "ExistingResource",
+                    "Configuration": {
+                        "ResourceType": "AWS::ElasticBeanstalk::Environment"
+                    }
+                }
+            ]
+        },
+        {
+            "Id": "InstanceType",
+            "Name": "EC2 Instance Type",
+            "Category": "Compute",
+            "Description": "The EC2 instance type of the EC2 instances created for the environment.",
+            "Type": "String",
+            "TypeHint": "WindowsInstanceType",
+            "AdvancedSetting": true,
+            "Updatable": true,
+            "Validators": [
+                {
+                    "ValidatorType": "WindowsInstanceType"
+                }
+            ]
+        },
+        {
+            "Id": "EnvironmentType",
+            "Name": "Environment Type",
+            "Category": "General",
+            "Description": "The type of environment to create; for example, a single instance for development work or load balanced for production.",
+            "Type": "String",
+            "DefaultValue": "SingleInstance",
+            "AllowedValues": [
+                "SingleInstance",
+                "LoadBalanced"
+            ],
+            "ValueMapping": {
+                "SingleInstance": "Single Instance",
+                "LoadBalanced": "Load Balanced"
+            },
+            "AdvancedSetting": false,
+            "Updatable": false
+        },
+        {
+            "Id": "LoadBalancerType",
+            "Name": "Load Balancer Type",
+            "Category": "LoadBalancer",
+            "Description": "The type of load balancer for your environment.",
+            "Type": "String",
+            "DefaultValue": "application",
+            "AllowedValues": [
+                "application",
+                "classic",
+                "network"
+            ],
+            "ValueMapping": {
+                "application": "Application",
+                "classic": "Classic",
+                "network": "Network"
+            },
+            "DependsOn": [
+                {
+                    "Id": "EnvironmentType",
+                    "Value": "LoadBalanced"
+                }
+            ],
+            "AdvancedSetting": true,
+            "Updatable": true
+        },
+        {
+            "Id": "ApplicationIAMRole",
+            "Name": "Application IAM Role",
+            "Category": "Permissions",
+            "Description": "The Identity and Access Management (IAM) role that provides AWS credentials to the application to access AWS services.",
+            "Type": "Object",
+            "TypeHint": "IAMRole",
+            "TypeHintData": {
+                "ServicePrincipal": "ec2.amazonaws.com"
+            },
+            "AdvancedSetting": false,
+            "Updatable": false,
+            "ChildOptionSettings": [
+                {
+                    "Id": "CreateNew",
+                    "Name": "Create New Role",
+                    "Description": "Do you want to create a new role?",
+                    "Type": "Bool",
+                    "DefaultValue": true,
+                    "AdvancedSetting": false,
+                    "Updatable": false
+                },
+                {
+                    "Id": "RoleArn",
+                    "Name": "Existing Role ARN",
+                    "Description": "The ARN of the existing role to use.",
+                    "Type": "String",
+                    "TypeHint": "ExistingIAMRole",
+                    "TypeHintData": {
+                        "ServicePrincipal": "ec2.amazonaws.com"
+                    },
+                    "AdvancedSetting": false,
+                    "Updatable": false,
+                    "DependsOn": [
+                        {
+                            "Id": "ApplicationIAMRole.CreateNew",
+                            "Value": false
+                        }
+                    ],
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": {
+                                "Regex": "arn:.+:iam::[0-9]{12}:.+",
+                                "ValidationFailedMessage": "Invalid IAM Role ARN. The ARN should contain the arn:[PARTITION]:iam namespace, followed by the account ID, and then the resource path. For example - arn:aws:iam::123456789012:role/S3Access is a valid IAM Role ARN. For more information visit https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-arns"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Id": "ServiceIAMRole",
+            "Name": "Service IAM Role",
+            "Category": "Permissions",
+            "Description": "A service role is the IAM role that Elastic Beanstalk assumes when calling other services on your behalf.",
+            "Type": "Object",
+            "TypeHint": "IAMRole",
+            "TypeHintData": {
+                "ServicePrincipal": "elasticbeanstalk.amazonaws.com"
+            },
+            "AdvancedSetting": false,
+            "Updatable": false,
+            "ChildOptionSettings": [
+                {
+                    "Id": "CreateNew",
+                    "Name": "Create New Role",
+                    "Description": "Do you want to create a new role?",
+                    "Type": "Bool",
+                    "DefaultValue": true,
+                    "AdvancedSetting": false,
+                    "Updatable": false
+                },
+                {
+                    "Id": "RoleArn",
+                    "Name": "Existing Role ARN",
+                    "Description": "The ARN of the existing role to use.",
+                    "Type": "String",
+                    "TypeHint": "ExistingIAMRole",
+                    "TypeHintData": {
+                        "ServicePrincipal": "elasticbeanstalk.amazonaws.com"
+                    },
+                    "AdvancedSetting": false,
+                    "Updatable": false,
+                    "DependsOn": [
+                        {
+                            "Id": "ServiceIAMRole.CreateNew",
+                            "Value": false
+                        }
+                    ],
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": {
+                                "Regex": "arn:.+:iam::[0-9]{12}:.+",
+                                "ValidationFailedMessage": "Invalid IAM Role ARN. The ARN should contain the arn:[PARTITION]:iam namespace, followed by the account ID, and then the resource path. For example - arn:aws:iam::123456789012:role/S3Access is a valid IAM Role ARN. For more information visit https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-arns"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Id": "EC2KeyPair",
+            "Name": "Key Pair",
+            "Category": "Permissions",
+            "Description": "The EC2 key pair used to SSH into EC2 instances for the Elastic Beanstalk environment.",
+            "Type": "String",
+            "TypeHint": "EC2KeyPair",
+            "DefaultValue": "",
+            "AdvancedSetting": true,
+            "Updatable": false,
+            "Validators": [
+                {
+                    "ValidatorType": "Regex",
+                    "Configuration": {
+                        "Regex": "^(?! ).+(?<! )$",
+                        "AllowEmptyString": true,
+                        "ValidationFailedMessage": "Invalid EC2KeyPair. The EC2KeyPair can conatin all ASCII characters but without leading and trailing spaces"
+                    }
+                }
+            ]
+        },
+        {
+            "Id": "ElasticBeanstalkPlatformArn",
+            "Name": "Beanstalk Platform",
+            "Category": "Platform",
+            "Description": "The name of the Elastic Beanstalk platform to use with the environment.",
+            "Type": "String",
+            "TypeHint": "DotnetWindowsBeanstalkPlatformArn",
+            "DefaultValue": "{LatestDotnetWindowsBeanstalkPlatformArn}",
+            "AdvancedSetting": true,
+            "Updatable": false,
+            "Validators": [
+                {
+                    "ValidatorType": "Regex",
+                    "Configuration": {
+                        "Regex": "arn:[^:]+:elasticbeanstalk:[^:]+:[^:]*:platform/.+",
+                        "ValidationFailedMessage": "Invalid ElasticBeanstalkPlatform Arn. The ARN should contain the arn:[PARTITION]:elasticbeanstalk namespace, followed by the region, an optional account ID, and then the resource path. For example - arn:aws:elasticbeanstalk:us-east-2:123456789012:platform/MyPlatform/1.0 is a valid Arn. For more information visit https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/AWSHowTo.iam.policies.arn.html"
+                    }
+                }
+            ]
+        },
+        {
+            "Id": "ElasticBeanstalkManagedPlatformUpdates",
+            "Name": "Managed Platform Updates",
+            "Category": "Platform",
+            "Description": "Enable managed platform updates to apply platform updates automatically during a weekly maintenance window that you choose. Your application stays available during the update process.",
+            "Type": "Object",
+            "AdvancedSetting": true,
+            "Updatable": true,
+            "ChildOptionSettings": [
+                {
+                    "Id": "ManagedActionsEnabled",
+                    "Name": "Enable Managed Platform Updates",
+                    "Description": "Do you want to enable Managed Platform Updates?",
+                    "Type": "Bool",
+                    "DefaultValue": true,
+                    "AdvancedSetting": true,
+                    "Updatable": true
+                },
+                {
+                    "Id": "PreferredStartTime",
+                    "Name": "Preferred Start Time",
+                    "Description": "Configure a maintenance window for managed actions in UTC. Valid values are Day and time in the 'day:hour:minute' format. For example, 'Sun:00:00'.",
+                    "Type": "String",
+                    "DefaultValue": "Sun:00:00",
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "ElasticBeanstalkManagedPlatformUpdates.ManagedActionsEnabled",
+                            "Value": true
+                        }
+                    ]
+                },
+                {
+                    "Id": "UpdateLevel",
+                    "Name": "Update Level",
+                    "Description": "The highest level of update to apply with managed platform updates. Platforms are versioned major.minor.patch. For example, 2.0.8 has a major version of 2, a minor version of 0, and a patch version of 8.",
+                    "Type": "String",
+                    "DefaultValue": "minor",
+                    "AllowedValues": [
+                        "minor",
+                        "patch"
+                    ],
+                    "ValueMapping": {
+                        "minor": "Minor",
+                        "patch": "Patch"
+                    },
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "ElasticBeanstalkManagedPlatformUpdates.ManagedActionsEnabled",
+                            "Value": true
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Id": "XRayTracingSupportEnabled",
+            "Name": "Enable AWS X-Ray Tracing Support",
+            "Category": "Health",
+            "Description": "AWS X-Ray is a service that collects data about requests that your application serves, and provides tools you can use to view, filter, and gain insights into that data to identify issues and opportunities for optimization. Do you want to enable AWS X-Ray tracing support?",
+            "Type": "Bool",
+            "DefaultValue": false,
+            "AdvancedSetting": true,
+            "Updatable": true
+        },
+        {
+            "Id": "IISWebSite",
+            "Name": "IIS Web Site",
+            "Category": "Hosting",
+            "Description": "The IIS Web Site the application will be installed in.",
+            "Type": "String",
+            "DefaultValue": "Default Web Site",
+            "AdvancedSetting": true,
+            "Updatable": true
+        },
+        {
+            "Id": "IISAppPath",
+            "Name": "IIS Application Path",
+            "Category": "Hosting",
+            "Description": "The IIS application path that will be the root of the application.",
+            "Type": "String",
+            "DefaultValue": "/",
+            "AdvancedSetting": true,
+            "Updatable": true
+        },
+        {
+            "Id": "EnhancedHealthReporting",
+            "Name": "Enhanced Health Reporting",
+            "Category": "Health",
+            "Description": "Enhanced health reporting provides free real-time application and operating system monitoring of the instances and other resources in your environment.",
+            "Type": "String",
+            "DefaultValue": "enhanced",
+            "AllowedValues": [
+                "enhanced",
+                "basic"
+            ],
+            "ValueMapping": {
+                "enhanced": "Enhanced",
+                "basic": "Basic"
+            },
+            "AdvancedSetting": true,
+            "Updatable": true,
+            "DependsOn": [
+                {
+                    "Id": "ElasticBeanstalkManagedPlatformUpdates.ManagedActionsEnabled",
+                    "Value": false
+                }
+            ]
+        },
+        {
+            "Id": "HealthCheckURL",
+            "Name": "Health Check URL",
+            "Category": "Health",
+            "Description": "Customize the load balancer health check to ensure that your application, and not just the web server, is in a good state.",
+            "Type": "String",
+            "DefaultValue": "/",
+            "DependsOn": [
+                {
+                    "Id": "EnvironmentType",
+                    "Value": "LoadBalanced"
+                }
+            ],
+            "AdvancedSetting": true,
+            "Updatable": true
+        },
+        {
+            "Id": "ElasticBeanstalkRollingUpdates",
+            "Name": "Rolling Updates",
+            "Category": "RollingUpdates",
+            "Description": "When a configuration change requires replacing instances, Elastic Beanstalk can perform the update in batches to avoid downtime while the change is propagated. During a rolling update, capacity is only reduced by the size of a single batch, which you can configure. Elastic Beanstalk takes one batch of instances out of service, terminates them, and then launches a batch with the new configuration. After the new batch starts serving requests, Elastic Beanstalk moves on to the next batch.",
+            "Type": "Object",
+            "TypeHint": "BeanstalkRollingUpdates",
+            "AdvancedSetting": true,
+            "Updatable": true,
+            "DependsOn": [
+                {
+                    "Id": "EnvironmentType",
+                    "Value": "LoadBalanced"
+                }
+            ],
+            "ChildOptionSettings": [
+                {
+                    "Id": "RollingUpdatesEnabled",
+                    "Name": "Enable Rolling Updates",
+                    "Description": "Do you want to enable Rolling Updates?",
+                    "Type": "Bool",
+                    "DefaultValue": false,
+                    "AdvancedSetting": true,
+                    "Updatable": true
+                },
+                {
+                    "Id": "RollingUpdateType",
+                    "Name": "Rolling Update Type",
+                    "Description": "This includes three types: time-based rolling updates, health-based rolling updates, and immutable updates. Time-based rolling updates apply a PauseTime between batches. Health-based rolling updates wait for new instances to pass health checks before moving on to the next batch. Immutable updates launch a full set of instances in a new Auto Scaling group.",
+                    "Type": "String",
+                    "DefaultValue": "Time",
+                    "AllowedValues": [
+                        "Time",
+                        "Health",
+                        "Immutable"
+                    ],
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "ElasticBeanstalkRollingUpdates.RollingUpdatesEnabled",
+                            "Value": true
+                        }
+                    ]
+                },
+                {
+                    "Id": "MaxBatchSize",
+                    "Name": "Max Batch Size",
+                    "Description": "The number of instances included in each batch of the rolling update.",
+                    "Type": "Int",
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "ElasticBeanstalkRollingUpdates.RollingUpdatesEnabled",
+                            "Value": true
+                        }
+                    ],
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": {
+                                "Min": 1,
+                                "Max": 10000,
+                                "AllowEmptyString": true
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Id": "MinInstancesInService",
+                    "Name": "Min Instances In Service",
+                    "Description": "The minimum number of instances that must be in service within the Auto Scaling group while other instances are terminated.",
+                    "Type": "Int",
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "ElasticBeanstalkRollingUpdates.RollingUpdatesEnabled",
+                            "Value": true
+                        }
+                    ],
+                    "Validators": [
+                        {
+                            "ValidatorType": "Range",
+                            "Configuration": {
+                                "Min": 0,
+                                "Max": 9999,
+                                "AllowEmptyString": true
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Id": "PauseTime",
+                    "Name": "Pause Time",
+                    "Description": "The amount of time (in seconds, minutes, or hours) the Elastic Beanstalk service waits after it completed updates to one batch of instances and before it continues on to the next batch. (ISO8601 duration format: PT#H#M#S where each # is the number of hours, minutes, and/or seconds, respectively.)",
+                    "Type": "String",
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "ElasticBeanstalkRollingUpdates.RollingUpdatesEnabled",
+                            "Value": true
+                        }
+                    ],
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": {
+                                "Regex": "^P([0-9]+(?:[,\\.][0-9]+)?Y)?([0-9]+(?:[,\\.][0-9]+)?M)?([0-9]+(?:[,\\.][0-9]+)?D)?(?:T([0-9]+(?:[,\\.][0-9]+)?H)?([0-9]+(?:[,\\.][0-9]+)?M)?([0-9]+(?:[,\\.][0-9]+)?S)?)?$",
+                                "AllowEmptyString": true,
+                                "ValidationFailedMessage": "Invalid PauseTime. The PauseTime follows the ISO8601 duration format: PT#H#M#S where each # is the number of hours, minutes, and/or seconds, respectively."
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Id": "Timeout",
+                    "Name": "Timeout",
+                    "Description": "The maximum amount of time (in minutes or hours) to wait for all instances in a batch of instances to pass health checks before canceling the update. (ISO8601 duration format: PT#H#M#S where each # is the number of hours, minutes, and/or seconds, respectively.)",
+                    "Type": "String",
+                    "DefaultValue": "PT30M",
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "ElasticBeanstalkRollingUpdates.RollingUpdatesEnabled",
+                            "Value": true
+                        }
+                    ],
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": {
+                                "Regex": "^P([0-9]+(?:[,\\.][0-9]+)?Y)?([0-9]+(?:[,\\.][0-9]+)?M)?([0-9]+(?:[,\\.][0-9]+)?D)?(?:T([0-9]+(?:[,\\.][0-9]+)?H)?([0-9]+(?:[,\\.][0-9]+)?M)?([0-9]+(?:[,\\.][0-9]+)?S)?)?$",
+                                "AllowEmptyString": true,
+                                "ValidationFailedMessage": "Invalid Timeout. The Timeout follows the ISO8601 duration format: PT#H#M#S where each # is the number of hours, minutes, and/or seconds, respectively."
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Id": "CNamePrefix",
+            "Name": "CName Prefix",
+            "Category": "Hosting",
+            "Description": "If specified, the environment attempts to use this value as the prefix for the CNAME in your Elastic Beanstalk environment URL. If not specified, the CNAME is generated automatically by appending a random alphanumeric string to the environment name.",
+            "Type": "String",
+            "DefaultValue": "",
+            "AdvancedSetting": true,
+            "Updatable": false
+        },
+        {
+            "Id": "ElasticBeanstalkEnvironmentVariables",
+            "Name": "Environment Variables",
+            "Category": "EnvVariables",
+            "Description": "Configure environment properties for your application.",
+            "Type": "KeyValue",
+            "AdvancedSetting": false,
+            "Updatable": true
+        },
+        {
+            "Id": "VPC",
+            "Name": "Virtual Private Cloud (VPC)",
+            "Category": "VPC",
+            "Description": "A VPC enables you to launch the application into a virtual network that you've defined",
+            "Type": "Object",
+            "AdvancedSetting": true,
+            "Updatable": true,
+            "ChildOptionSettings": [
+                {
+                    "Id": "UseVPC",
+                    "Name": "Use a VPC ",
+                    "Description": "Do you want to use a Virtual Private Cloud (VPC)?",
+                    "Type": "Bool",
+                    "DefaultValue": false,
+                    "AdvancedSetting": true,
+                    "Updatable": false
+                },
+                {
+                    "Id": "VpcId",
+                    "Name": "VPC ID",
+                    "Description": "A list of VPC IDs that App Runner should use when it associates your service with a custom Amazon VPC.",
+                    "Type": "String",
+                    "TypeHint": "ExistingVpc",
+                    "DefaultValue": "{DefaultVpcId}",
+                    "AdvancedSetting": true,
+                    "Updatable": false,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": {
+                                "Regex": "^vpc-([0-9a-f]{8}|[0-9a-f]{17})$",
+                                "ValidationFailedMessage": "Invalid VPC ID. The VPC ID must start with the \"vpc-\" prefix, followed by either 8 or 17 characters consisting of digits and letters(lower-case) from a to f. For example vpc-abc88de9 is a valid VPC ID."
+                            }
+                        }
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "VPC.UseVPC",
+                            "Value": true
+                        }
+                    ]
+                },
+                {
+                    "Id": "Subnets",
+                    "Name": "Subnets",
+                    "Description": "A list of IDs of subnets that Elastic Beanstalk should use when it associates your environment with a custom Amazon VPC. Specify IDs of subnets of a single Amazon VPC.",
+                    "Type": "List",
+                    "TypeHint": "ExistingSubnets",
+                    "ParentSettingId": "VPC.VpcId",
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Required"
+                        },
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": {
+                                "Regex": "^subnet-([0-9a-f]{8}|[0-9a-f]{17})$",
+                                "ValidationFailedMessage": "Invalid Subnet ID. The Subnet ID must start with the \"subnet-\" prefix, followed by either 8 or 17 characters consisting of digits and letters(lower-case) from a to f. For example subnet-abc88de9 is a valid Subnet ID."
+                            }
+                        },
+                        {
+                            "ValidatorType": "SubnetsInVpc",
+                            "Configuration": {
+                                "VpcId": "VPC.VpcId"
+                            }
+                        }
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "VPC.UseVPC",
+                            "Value": true
+                        },
+                        {
+                            "Id": "VPC.VpcId",
+                            "Operation": "NotEmpty"
+                        }
+                    ]
+                },
+                {
+                    "Id": "SecurityGroups",
+                    "Name": "Security Groups",
+                    "Description": "Lists the Amazon EC2 security groups to assign to the EC2 instances in the Auto Scaling group to define firewall rules for the instances.",
+                    "Type": "List",
+                    "TypeHint": "ExistingSecurityGroups",
+                    "ParentSettingId": "VPC.VpcId",
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Required"
+                        },
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": {
+                                "Regex": "^sg-([0-9a-f]{8}|[0-9a-f]{17})$",
+                                "ValidationFailedMessage": "Invalid Security Group ID. The Security Group ID must start with the \"sg-\" prefix, followed by either 8 or 17 characters consisting of digits and letters(lower-case) from a to f. For example sg-abc88de9 is a valid Security Group ID."
+                            }
+                        },
+                        {
+                            "ValidatorType": "SecurityGroupsInVpc",
+                            "Configuration": {
+                                "VpcId": "VPC.VpcId"
+                            }
+                        }
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "VPC.UseVPC",
+                            "Value": true
+                        },
+                        {
+                            "Id": "VPC.VpcId",
+                            "Operation": "NotEmpty"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -1,4 +1,4 @@
-# Other Issues
+# General Issues
 This section of the troubleshooting guide explains how to determine, diagnose, and fix common issues you might encounter during the deployment process.
 
 ## Invalid project path provided
@@ -62,3 +62,9 @@ AWS.Deploy.Tools, internally uses a variety of different services to host your .
 
 * See [here](https://docs.aws.amazon.com/IAM/latest/UserGuide/tutorial_managed-policies.html) for a tutorial on how to create customer managed IAM policies.
 * See [here](https://docs.aws.amazon.com/IAM/latest/UserGuide/troubleshoot_policies.html) for troubleshooting IAM policies.
+
+## Deployment failure due to whitespace character in USERPROFILE path
+
+**Why is this happening**: This happens due to a know issue with the AWS Cloud Development Kit (CDK). The CDK is used to AWS.Deploy.Tools under the covers and it cannot cannot access the `$TEMP` directory inside the `$USERPROFILE` path if it contains a whitespace character.
+
+**Resolution**: See [here](../../docs/getting-started/custom-workspace) for guidance on setting a custom workspace that will be used by AWS.Deploy.tools.

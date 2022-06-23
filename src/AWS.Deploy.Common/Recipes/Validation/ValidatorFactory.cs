@@ -55,11 +55,13 @@ namespace AWS.Deploy.Common.Recipes.Validation
             { OptionSettingItemValidatorList.ExistingResource, typeof(ExistingResourceValidator) },
             { OptionSettingItemValidatorList.FileExists, typeof(FileExistsValidator) },
             { OptionSettingItemValidatorList.StringLength, typeof(StringLengthValidator) },
-            { OptionSettingItemValidatorList.InstanceType, typeof(InstanceTypeValidator) },
+            { OptionSettingItemValidatorList.InstanceType, typeof(LinuxInstanceTypeValidator) },
+            { OptionSettingItemValidatorList.WindowsInstanceType, typeof(WindowsInstanceTypeValidator) },
             { OptionSettingItemValidatorList.SubnetsInVpc, typeof(SubnetsInVpcValidator) },
             { OptionSettingItemValidatorList.SecurityGroupsInVpc, typeof(SecurityGroupsInVpcValidator) },
             { OptionSettingItemValidatorList.Uri, typeof(UriValidator) },
-            { OptionSettingItemValidatorList.Comparison, typeof(ComparisonValidator) }
+            { OptionSettingItemValidatorList.Comparison, typeof(ComparisonValidator) },
+            { OptionSettingItemValidatorList.VPCSubnetsInDifferentAZs, typeof(VPCSubnetsInDifferentAZsValidator) }
         };
 
         private static readonly Dictionary<RecipeValidatorList, Type> _recipeValidatorTypeMapping = new()

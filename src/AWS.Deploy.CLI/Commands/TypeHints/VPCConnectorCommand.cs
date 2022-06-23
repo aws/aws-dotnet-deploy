@@ -35,10 +35,16 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             return await _awsResourceQueryer.DescribeAppRunnerVpcConnectors();
         }
 
-        public async Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
+        public async Task<TypeHintResourceTable> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var vpcConnectors = await GetData();
-            return vpcConnectors.Select(vpcConnector => new TypeHintResource(vpcConnector.VpcConnectorArn, vpcConnector.VpcConnectorName)).ToList();
+
+            var resourceTable = new TypeHintResourceTable()
+            {
+                Rows = vpcConnectors.Select(vpcConnector => new TypeHintResource(vpcConnector.VpcConnectorArn, vpcConnector.VpcConnectorName)).ToList()
+            };
+
+            return resourceTable;
         }
 
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)

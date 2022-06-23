@@ -95,7 +95,7 @@ Resources:
         ComputeType: BUILD_GENERAL1_LARGE
         Type: LINUX_CONTAINER
         ImagePullCredentialsType: CODEBUILD
-        Image: aws/codebuild/amazonlinux2-x86_64-standard:3.0
+        Image: aws/codebuild/standard:5.0
         EnvironmentVariables:
         - Name: TEST_RUNNER_ROLE_ARN
           Type: PLAINTEXT

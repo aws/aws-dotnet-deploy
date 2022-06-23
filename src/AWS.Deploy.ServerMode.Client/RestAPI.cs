@@ -1940,9 +1940,17 @@ namespace AWS.Deploy.ServerMode.Client
     
     }
     
+    /// <summary>Represents a list or table of options, generally used when selecting from
+    /// a list of existing AWS resources to set an OptionSettingItem</summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.4.1.0 (Newtonsoft.Json v13.0.0.0)")]
     public partial class GetConfigSettingResourcesOutput 
     {
+        /// <summary>Columns that should appear above the list of resources when
+        /// presenting the user a table to select from</summary>
+        [Newtonsoft.Json.JsonProperty("columns", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.Generic.ICollection<TypeHintResourceColumn> Columns { get; set; }
+    
+        /// <summary>List of resources that the user could select from</summary>
         [Newtonsoft.Json.JsonProperty("resources", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<TypeHintResourceSummary> Resources { get; set; }
     
@@ -2268,14 +2276,35 @@ namespace AWS.Deploy.ServerMode.Client
     
     }
     
+    /// <summary>Represents a column for a list/grid of AWS.Deploy.CLI.ServerMode.Models.TypeHintResourceSummary rows</summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.4.1.0 (Newtonsoft.Json v13.0.0.0)")]
+    public partial class TypeHintResourceColumn 
+    {
+        /// <summary>Name of the column to be displayed to users</summary>
+        [Newtonsoft.Json.JsonProperty("displayName", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string DisplayName { get; set; }
+    
+    
+    }
+    
+    /// <summary>Represents a single type hint option, generally used when selecting from
+    /// a list of existing AWS resources to set an OptionSettingItem</summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.4.1.0 (Newtonsoft.Json v13.0.0.0)")]
     public partial class TypeHintResourceSummary 
     {
+        /// <summary>Resource Id, used when saving a selected resource to an OptionSettingItem</summary>
         [Newtonsoft.Json.JsonProperty("systemName", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string SystemName { get; set; }
     
+        /// <summary>Resource name, used for display</summary>
         [Newtonsoft.Json.JsonProperty("displayName", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string DisplayName { get; set; }
+    
+        /// <summary>Additional data about the resource, which may be used when displaying a table
+        /// or grid of options for the user to select from. The indices into this list should
+        /// match the column indicies of a list of AWS.Deploy.CLI.ServerMode.Models.TypeHintResourceColumn</summary>
+        [Newtonsoft.Json.JsonProperty("columnDisplayValues", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.Generic.ICollection<string> ColumnDisplayValues { get; set; }
     
     
     }

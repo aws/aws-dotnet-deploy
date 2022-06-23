@@ -12,6 +12,7 @@ namespace AWS.Deploy.Constants
         // Replacement Tokens
         public const string REPLACE_TOKEN_STACK_NAME = "{StackName}";
         public const string REPLACE_TOKEN_LATEST_DOTNET_BEANSTALK_PLATFORM_ARN = "{LatestDotnetBeanstalkPlatformArn}";
+        public const string REPLACE_TOKEN_LATEST_DOTNET_WINDOWS_BEANSTALK_PLATFORM_ARN = "{LatestDotnetWindowsBeanstalkPlatformArn}";
         public const string REPLACE_TOKEN_ECR_REPOSITORY_NAME = "{DefaultECRRepositoryName}";
         public const string REPLACE_TOKEN_ECR_IMAGE_TAG = "{DefaultECRImageTag}";
         public const string REPLACE_TOKEN_DOCKERFILE_PATH = "{DockerfilePath}";

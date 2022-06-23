@@ -169,10 +169,10 @@ namespace AspNetAppEcsFargate
             EcsServiceSecurityGroups = new List<ISecurityGroup>();
             EcsServiceSecurityGroups.Add(WebAccessSecurityGroup);
 
-            if (!string.IsNullOrEmpty(settings.AdditionalECSServiceSecurityGroups))
+            if (settings.AdditionalECSServiceSecurityGroups.Any())
             {
                 var count = 1;
-                foreach (var securityGroupId in settings.AdditionalECSServiceSecurityGroups.Split(','))
+                foreach (var securityGroupId in settings.AdditionalECSServiceSecurityGroups)
                 {
                     EcsServiceSecurityGroups.Add(SecurityGroup.FromSecurityGroupId(this, $"AdditionalGroup-{count++}", securityGroupId.Trim(), new SecurityGroupImportOptions
                     {

@@ -9,7 +9,6 @@ using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.TypeHintData;
-using AWS.Deploy.Orchestration.Data;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AWS.Deploy.CLI.Commands.TypeHints
@@ -19,7 +18,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
     /// </summary>
     public interface ITypeHintCommand
     {
-        Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting);
+        Task<TypeHintResourceTable> GetResources(Recommendation recommendation, OptionSettingItem optionSetting);
         Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting);
     }
 
@@ -46,6 +45,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 { OptionSettingTypeHint.ExistingBeanstalkApplication, ActivatorUtilities.CreateInstance<BeanstalkApplicationCommand>(serviceProvider) },
                 { OptionSettingTypeHint.BeanstalkEnvironment, ActivatorUtilities.CreateInstance<BeanstalkEnvironmentCommand>(serviceProvider) },
                 { OptionSettingTypeHint.DotnetBeanstalkPlatformArn, ActivatorUtilities.CreateInstance<DotnetBeanstalkPlatformArnCommand>(serviceProvider) },
+                { OptionSettingTypeHint.DotnetWindowsBeanstalkPlatformArn, ActivatorUtilities.CreateInstance<DotnetWindowsBeanstalkPlatformArnCommand>(serviceProvider) },
                 { OptionSettingTypeHint.EC2KeyPair, ActivatorUtilities.CreateInstance<EC2KeyPairCommand>(serviceProvider) },
                 { OptionSettingTypeHint.IAMRole, ActivatorUtilities.CreateInstance<IAMRoleCommand>(serviceProvider) },
                 { OptionSettingTypeHint.ExistingIAMRole, ActivatorUtilities.CreateInstance<IAMRoleCommand>(serviceProvider) },
@@ -63,7 +63,8 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 { OptionSettingTypeHint.SQSQueueUrl, ActivatorUtilities.CreateInstance<SQSQueueUrlCommand>(serviceProvider) },
                 { OptionSettingTypeHint.SNSTopicArn, ActivatorUtilities.CreateInstance<SNSTopicArnsCommand>(serviceProvider) },
                 { OptionSettingTypeHint.S3BucketName, ActivatorUtilities.CreateInstance<S3BucketNameCommand>(serviceProvider) },
-                { OptionSettingTypeHint.InstanceType, ActivatorUtilities.CreateInstance<InstanceTypeCommand>(serviceProvider) },
+                { OptionSettingTypeHint.InstanceType, ActivatorUtilities.CreateInstance<LinuxInstanceTypeCommand>(serviceProvider) },
+                { OptionSettingTypeHint.WindowsInstanceType, ActivatorUtilities.CreateInstance<WindowsInstanceTypeCommand>(serviceProvider) },
                 { OptionSettingTypeHint.ECRRepository,  ActivatorUtilities.CreateInstance<ECRRepositoryCommand>(serviceProvider) },
                 { OptionSettingTypeHint.ExistingVpcConnector,  ActivatorUtilities.CreateInstance<ExistingVpcConnectorCommand>(serviceProvider) },
                 { OptionSettingTypeHint.ExistingSubnets,  ActivatorUtilities.CreateInstance<ExistingSubnetsCommand>(serviceProvider) },

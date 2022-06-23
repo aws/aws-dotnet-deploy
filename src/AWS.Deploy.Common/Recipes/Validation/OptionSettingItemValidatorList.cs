@@ -42,9 +42,13 @@ namespace AWS.Deploy.Common.Recipes.Validation
         /// </summary>
         StringLength,
         /// <summary>
-        /// Must be paired with <see cref="InstanceTypeValidator"/>
+        /// Must be paired with <see cref="LinuxInstanceTypeValidator"/>
         /// </summary>
         InstanceType,
+        /// <summary>
+        /// Must be paired with <see cref="WindowsInstanceTypeValidator"/>
+        /// </summary>
+        WindowsInstanceType,
         /// <summary>
         /// Must be paired with <see cref="SubnetsInVpcValidator"/>
         /// </summary>
@@ -60,6 +64,10 @@ namespace AWS.Deploy.Common.Recipes.Validation
         /// <summary>
         /// Must be paired with <see cref="ComparisonValidator"/>
         /// </summary>
-        Comparison
+        Comparison,
+        /// <summary>
+        /// Must be paired with <see cref="VPCSubnetsInDifferentAZsValidator"/>
+        /// </summary>
+        VPCSubnetsInDifferentAZs
     }
 }

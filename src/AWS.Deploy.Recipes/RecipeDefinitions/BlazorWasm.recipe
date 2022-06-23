@@ -7,8 +7,8 @@
     "DeploymentBundle": "DotnetPublishZipFile",
     "CdkProjectTemplate": "../CdkTemplates/BlazorWasm",
     "CdkProjectTemplateId": "netdeploy.BlazorWasm",
-    "Description": "This Blazor WebAssembly application will be built and deployed to a new Amazon Simple Storage Service (Amazon S3) bucket. The Blazor applications will be exposed publicly through a CloudFront distribution using the S3 bucket as the origin.",
-    "ShortDescription": "Blazor WebAssembly application deployed in an Amazon S3 bucket and CloudFront.",
+    "ShortDescription": "Hosts Blazor WebAssembly application in an Amazon S3 bucket with Amazon CloudFront as a content delivery network.",
+    "Description": "This Blazor WebAssembly application will be built and hosted in a new Amazon Simple Storage Service (Amazon S3) bucket. The Blazor application will be exposed publicly through a CloudFront distribution using the Amazon S3 bucket as the origin.",
     "TargetService": "Amazon S3",
 
     "DisplayedResources": [

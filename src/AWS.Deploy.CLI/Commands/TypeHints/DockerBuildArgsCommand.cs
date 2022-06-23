@@ -21,14 +21,14 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             _optionSettingHandler = optionSettingHandler;
         }
 
-        public Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting) => Task.FromResult<List<TypeHintResource>?>(null);
+        public Task<TypeHintResourceTable> GetResources(Recommendation recommendation, OptionSettingItem optionSetting) => Task.FromResult(new TypeHintResourceTable());
 
         public Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var settingValue = _consoleUtilities
                 .AskUserForValue(
                     string.Empty,
-                    _optionSettingHandler.GetOptionSettingValue<string>(recommendation, optionSetting),
+                    _optionSettingHandler.GetOptionSettingValue<string>(recommendation, optionSetting) ?? string.Empty,
                     allowEmpty: true,
                     resetValue: _optionSettingHandler.GetOptionSettingDefaultValue<string>(recommendation, optionSetting) ?? "",
                     validators: async buildArgs => await ValidateBuildArgs(buildArgs, recommendation, optionSetting))

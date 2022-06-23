@@ -1,0 +1,24 @@
+{
+    "author": "AWS",
+    "classifications": [
+        "AWS",
+        ".NET Deployment Tool"
+    ],
+    "name": "ASP.NET Template CDK Project for Elastic Beanstalk deployment on Windows",
+    "identity": "AWS.Deploy.Recipes.AspNetAppElasticBeanstalkWindows",
+    "shortName": "netdeploy.AspNetAppElasticBeanstalkWindows",
+    "tags": {
+        "language": "C#",
+        "type": "project"
+    },
+    "sourceName": "AspNetAppElasticBeanstalkWindows",
+    "preferNameDirectory": true,
+    "symbols": {
+        "AWSDeployRecipesCDKCommonVersion": {
+            "type": "parameter",
+            "description": "The version number of AWS.Deploy.Recipes.CDK.Common to use",
+            "replaces": "AWSDeployRecipesCDKCommonVersion",
+            "datatype": "string"
+        }
+    }
+}

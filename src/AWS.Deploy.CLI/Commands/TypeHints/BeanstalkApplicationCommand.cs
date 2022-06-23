@@ -32,10 +32,16 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             return await _awsResourceQueryer.ListOfElasticBeanstalkApplications();
         }
 
-        public async Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
+        public async Task<TypeHintResourceTable> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var applications = await GetData();
-            return applications.Select(x => new TypeHintResource(x.ApplicationName, x.ApplicationName)).ToList();
+
+            var resourceTable = new TypeHintResourceTable
+            {
+                Rows = applications.Select(x => new TypeHintResource(x.ApplicationName, x.ApplicationName)).ToList()
+            };
+
+            return resourceTable;
         }
 
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
@@ -47,7 +53,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 idSelector: app => app.ApplicationName,
                 displaySelector: app => app.ApplicationName,
                 defaultSelector: app => app.ApplicationName.Equals(currentTypeHintResponse?.ApplicationName),
-                defaultNewName: currentTypeHintResponse.ApplicationName ?? String.Empty)
+                defaultNewName: currentTypeHintResponse?.ApplicationName ?? string.Empty)
             {
                 AskNewName = true,
             };

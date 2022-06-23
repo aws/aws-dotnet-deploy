@@ -22,6 +22,7 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
         private readonly IOptionSettingHandler _optionSettingHandler;
         private readonly Mock<IAWSResourceQueryer> _awsResourceQueryer;
         private readonly Mock<IServiceProvider> _serviceProvider;
+        private readonly Mock<IDeployToolWorkspaceMetadata> _workspaceMetadata;
 
         public CDKProjectHandlerTests()
         {
@@ -31,6 +32,7 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
                 .Setup(x => x.GetService(typeof(IAWSResourceQueryer)))
                 .Returns(_awsResourceQueryer.Object);
             _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider.Object));
+            _workspaceMetadata = new Mock<IDeployToolWorkspaceMetadata>();
         }
 
         [Fact]
@@ -44,7 +46,7 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
             awsResourceQuery.Setup(x => x.GetCloudFormationStack(It.IsAny<string>())).Returns(Task.FromResult<Stack>(null));
 
 
-            var cdkProjectHandler = new CdkProjectHandler(interactiveService.Object, commandLineWrapper.Object, awsResourceQuery.Object, fileManager.Object, _optionSettingHandler);
+            var cdkProjectHandler = new CdkProjectHandler(interactiveService.Object, commandLineWrapper.Object, awsResourceQuery.Object, fileManager.Object, _optionSettingHandler, _workspaceMetadata.Object);
 
             Assert.True(await cdkProjectHandler.DetermineIfCDKBootstrapShouldRun());
         }
@@ -60,7 +62,7 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
             awsResourceQuery.Setup(x => x.GetCloudFormationStack(It.IsAny<string>())).Returns(Task.FromResult<Stack>(new Stack { Parameters = new List<Parameter>() }));
 
 
-            var cdkProjectHandler = new CdkProjectHandler(interactiveService.Object, commandLineWrapper.Object, awsResourceQuery.Object, fileManager.Object, _optionSettingHandler);
+            var cdkProjectHandler = new CdkProjectHandler(interactiveService.Object, commandLineWrapper.Object, awsResourceQuery.Object, fileManager.Object, _optionSettingHandler, _workspaceMetadata.Object);
 
             Assert.True(await cdkProjectHandler.DetermineIfCDKBootstrapShouldRun());
         }
@@ -77,7 +79,7 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
                 new Stack { Parameters = new List<Parameter>() { new Parameter { ParameterKey = "Qualifier", ParameterValue = "q1" } } }));
 
 
-            var cdkProjectHandler = new CdkProjectHandler(interactiveService.Object, commandLineWrapper.Object, awsResourceQuery.Object, fileManager.Object, _optionSettingHandler);
+            var cdkProjectHandler = new CdkProjectHandler(interactiveService.Object, commandLineWrapper.Object, awsResourceQuery.Object, fileManager.Object, _optionSettingHandler, _workspaceMetadata.Object);
 
             Assert.True(await cdkProjectHandler.DetermineIfCDKBootstrapShouldRun());
         }
@@ -96,7 +98,7 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
             awsResourceQuery.Setup(x => x.GetParameterStoreTextValue(It.IsAny<string>())).Returns(Task.FromResult<string>("1"));
 
 
-            var cdkProjectHandler = new CdkProjectHandler(interactiveService.Object, commandLineWrapper.Object, awsResourceQuery.Object, fileManager.Object, _optionSettingHandler);
+            var cdkProjectHandler = new CdkProjectHandler(interactiveService.Object, commandLineWrapper.Object, awsResourceQuery.Object, fileManager.Object, _optionSettingHandler, _workspaceMetadata.Object);
 
             Assert.True(await cdkProjectHandler.DetermineIfCDKBootstrapShouldRun());
         }
@@ -115,7 +117,7 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
             awsResourceQuery.Setup(x => x.GetParameterStoreTextValue(It.IsAny<string>())).Returns(Task.FromResult<string>("100"));
 
 
-            var cdkProjectHandler = new CdkProjectHandler(interactiveService.Object, commandLineWrapper.Object, awsResourceQuery.Object, fileManager.Object, _optionSettingHandler);
+            var cdkProjectHandler = new CdkProjectHandler(interactiveService.Object, commandLineWrapper.Object, awsResourceQuery.Object, fileManager.Object, _optionSettingHandler, _workspaceMetadata.Object);
 
             Assert.False(await cdkProjectHandler.DetermineIfCDKBootstrapShouldRun());
         }
@@ -134,7 +136,7 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
             awsResourceQuery.Setup(x => x.GetParameterStoreTextValue(It.IsAny<string>())).Returns(Task.FromResult<string>(AWS.Deploy.Constants.CDK.CDKTemplateVersion.ToString()));
 
 
-            var cdkProjectHandler = new CdkProjectHandler(interactiveService.Object, commandLineWrapper.Object, awsResourceQuery.Object, fileManager.Object, _optionSettingHandler);
+            var cdkProjectHandler = new CdkProjectHandler(interactiveService.Object, commandLineWrapper.Object, awsResourceQuery.Object, fileManager.Object, _optionSettingHandler, _workspaceMetadata.Object);
 
             Assert.False(await cdkProjectHandler.DetermineIfCDKBootstrapShouldRun());
         }

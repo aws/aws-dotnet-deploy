@@ -127,8 +127,6 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
             string cnamePrefix,
             Dictionary<string, string> elasticBeanstalkEnvironmentVariables,
             VPCConfiguration vpc,
-            SortedSet<string> subnets,
-            SortedSet<string> securityGroups,
             string environmentType = Recipe.ENVIRONMENTTYPE_SINGLEINSTANCE,
             string loadBalancerType = Recipe.LOADBALANCERTYPE_APPLICATION,
             string reverseProxy = Recipe.REVERSEPROXY_NGINX,

@@ -44,6 +44,7 @@ namespace AWS.Deploy.Orchestration
         internal readonly OrchestratorSession? _session;
         internal readonly IAWSServiceHandler? _awsServiceHandler;
         private readonly IOptionSettingHandler? _optionSettingHandler;
+        internal readonly IDeployToolWorkspaceMetadata? _workspaceMetadata;
 
         public Orchestrator(
             OrchestratorSession session,
@@ -59,7 +60,8 @@ namespace AWS.Deploy.Orchestration
             IFileManager fileManager,
             IDirectoryManager directoryManager,
             IAWSServiceHandler awsServiceHandler,
-            IOptionSettingHandler optionSettingHandler)
+            IOptionSettingHandler optionSettingHandler,
+            IDeployToolWorkspaceMetadata deployToolWorkspaceMetadata)
         {
             _session = session;
             _interactiveService = interactiveService;
@@ -75,6 +77,7 @@ namespace AWS.Deploy.Orchestration
             _directoryManager = directoryManager;
             _awsServiceHandler = awsServiceHandler;
             _optionSettingHandler = optionSettingHandler;
+            _workspaceMetadata = deployToolWorkspaceMetadata;
         }
 
         public Orchestrator(OrchestratorSession session, IRecipeHandler recipeHandler)
@@ -170,8 +173,16 @@ namespace AWS.Deploy.Orchestration
                 if (_awsResourceQueryer == null)
                     throw new InvalidOperationException($"{nameof(_awsResourceQueryer)} is null as part of the Orchestrator object");
 
-                var latestPlatform = await _awsResourceQueryer.GetLatestElasticBeanstalkPlatformArn();
+                var latestPlatform = await _awsResourceQueryer.GetLatestElasticBeanstalkPlatformArn(BeanstalkPlatformType.Linux);
                 recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_LATEST_DOTNET_BEANSTALK_PLATFORM_ARN, latestPlatform.PlatformArn);
+            }
+            if (recommendation.ReplacementTokens.ContainsKey(Constants.RecipeIdentifier.REPLACE_TOKEN_LATEST_DOTNET_WINDOWS_BEANSTALK_PLATFORM_ARN))
+            {
+                if (_awsResourceQueryer == null)
+                    throw new InvalidOperationException($"{nameof(_awsResourceQueryer)} is null as part of the Orchestrator object");
+
+                var latestPlatform = await _awsResourceQueryer.GetLatestElasticBeanstalkPlatformArn(BeanstalkPlatformType.Windows);
+                recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_LATEST_DOTNET_WINDOWS_BEANSTALK_PLATFORM_ARN, latestPlatform.PlatformArn);
             }
             if (recommendation.ReplacementTokens.ContainsKey(Constants.RecipeIdentifier.REPLACE_TOKEN_STACK_NAME))
             {
@@ -274,6 +285,8 @@ namespace AWS.Deploy.Orchestration
             // Read this from the OptionSetting instead of recommendation.DeploymentBundle.
             // When its value comes from a replacement token, it wouldn't have been set back to the DeploymentBundle 
             var respositoryName = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, Constants.Docker.ECRRepositoryNameOptionId));
+            if (respositoryName == null)
+                throw new InvalidECRRepositoryNameException(DeployToolErrorCode.ECRRepositoryNameIsNull, "The ECR Repository Name is null.");
 
             string imageTag;
             try

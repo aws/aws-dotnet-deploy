@@ -25,7 +25,7 @@ namespace AWS.Deploy.Orchestration
         private const string DOCKER_INSTALLATION_URL = "https://docs.docker.com/engine/install/";
 
         private readonly ICommandLineWrapper _commandLineWrapper;
-        private static readonly Version MinimumNodeJSVersion = new Version(10,13,0);
+        private static readonly Version MinimumNodeJSVersion = new Version(14,17,0);
 
         public SystemCapabilityEvaluator(ICommandLineWrapper commandLineWrapper)
         {
@@ -97,15 +97,15 @@ namespace AWS.Deploy.Orchestration
             {
                 if (systemCapabilities.NodeJsVersion == null)
                 {
-                    message = $"The selected deployment uses the AWS CDK, which requires Node.js. AWS CDK requires {MinimumNodeJSVersion} of Node.js or later, and the latest LTS version is recommended. " +
-                        "Please restart your IDE/Shell after installing Node.js.";
+
+                    message = $"Install Node.js {MinimumNodeJSVersion} or later and restart your IDE/Shell. The latest Node.js LTS version is recommended. This deployment option uses the AWS CDK, which requires Node.js.";
 
                     capabilities.Add(new SystemCapability(NODEJS_DEPENDENCY_NAME, message, NODEJS_INSTALLATION_URL));
                 }
                 else if (systemCapabilities.NodeJsVersion < MinimumNodeJSVersion)
                 {
-                    message = $"The selected deployment uses the AWS CDK, which requires a version of Node.js higher than your current installation ({systemCapabilities.NodeJsVersion}). " +
-                        $"AWS CDK requires {MinimumNodeJSVersion} of Node.js or later, and the latest LTS version is recommended. Please restart your IDE/Shell after installing Node.js";
+                    message = $"Install Node.js {MinimumNodeJSVersion} or later and restart your IDE/Shell. The latest Node.js LTS version is recommended. This deployment option uses the AWS CDK, which requires Node.js version higher than your current installation ({systemCapabilities.NodeJsVersion}). ";
+
 
                     capabilities.Add(new SystemCapability(NODEJS_DEPENDENCY_NAME, message, NODEJS_INSTALLATION_URL));
                 }
@@ -115,12 +115,12 @@ namespace AWS.Deploy.Orchestration
             {
                 if (!systemCapabilities.DockerInfo.DockerInstalled)
                 {
-                    message = "The selected deployment option requires Docker, which was not detected. Please install and start the appropriate version of Docker for your OS.";
+                    message = "Install and start Docker version appropriate for your OS. This deployment option requires Docker, which was not detected.";
                     capabilities.Add(new SystemCapability(DOCKER_DEPENDENCY_NAME, message, DOCKER_INSTALLATION_URL));
                 }
                 else if (!systemCapabilities.DockerInfo.DockerContainerType.Equals("linux", StringComparison.OrdinalIgnoreCase))
                 {
-                    message = "The deployment tool requires Docker to be running in linux mode. Please switch Docker to linux mode to continue.";
+                    message = "This is Linux-based deployment. Switch your Docker from Windows to Linux container mode.";
                     capabilities.Add(new SystemCapability(DOCKER_DEPENDENCY_NAME, message));
                 }
             }

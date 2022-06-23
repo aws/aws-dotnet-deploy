@@ -483,7 +483,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
             GetDeploymentStatusOutput output = null;
 
-            await WaitUntilHelper.WaitUntil(async () =>
+            await Orchestration.Utilities.Helpers.WaitUntil(async () =>
             {
                 output = (await restApiClient.GetDeploymentStatusAsync(sessionId));
 
@@ -501,7 +501,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
         private async Task WaitTillServerModeReady(RestAPIClient restApiClient)
         {
-            await WaitUntilHelper.WaitUntil(async () =>
+            await Orchestration.Utilities.Helpers.WaitUntil(async () =>
             {
                 SystemStatus status = SystemStatus.Error;
                 try

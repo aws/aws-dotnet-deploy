@@ -36,10 +36,16 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             return await _awsResourceQueryer.ListOfIAMRoles(typeHintData?.ServicePrincipal);
         }
 
-        public async Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
+        public async Task<TypeHintResourceTable> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var existingRoles = await GetData(optionSetting);
-            return existingRoles.Select(x => new TypeHintResource(x.Arn, x.RoleName)).ToList();
+
+            var resourceTable = new TypeHintResourceTable
+            {
+                Rows = existingRoles.Select(x => new TypeHintResource(x.Arn, x.RoleName)).ToList()
+            };
+
+            return resourceTable;
         }
 
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
@@ -50,7 +56,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             var userInputConfiguration = new UserInputConfiguration<Role>(
                 idSelector: role => role.Arn,
                 displaySelector: role => role.RoleName,
-                defaultSelector: role => currentTypeHintResponse.RoleArn?.Equals(role.Arn) ?? false);
+                defaultSelector: role => currentTypeHintResponse?.RoleArn?.Equals(role.Arn) ?? false);
 
             var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(existingRoles ,"Select an IAM role", userInputConfiguration);
 

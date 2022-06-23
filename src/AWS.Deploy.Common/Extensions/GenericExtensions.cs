@@ -11,7 +11,8 @@ namespace AWS.Deploy.Common.Extensions
         public static T DeepCopy<T>(this T obj)
         {
             var serializedObject = JsonConvert.SerializeObject(obj);
-            return JsonConvert.DeserializeObject<T>(serializedObject);
+            return JsonConvert.DeserializeObject<T>(serializedObject) ??
+                throw new FailedToDeserializeException(DeployToolErrorCode.FailedToCreateDeepCopy, "Failed to create a deep copy.");
         }
 
         public static bool TryDeserialize<T>(this object obj, out T? inputList)

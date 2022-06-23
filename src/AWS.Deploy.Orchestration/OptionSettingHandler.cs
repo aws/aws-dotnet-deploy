@@ -207,7 +207,7 @@ namespace AWS.Deploy.Orchestration
         /// <summary>
         /// Retrieves the value of the Option Setting Item in a given recommendation.
         /// </summary>
-        public T GetOptionSettingValue<T>(Recommendation recommendation, OptionSettingItem optionSetting)
+        public T? GetOptionSettingValue<T>(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var displayableOptionSettings = new Dictionary<string, bool>();
             if (optionSetting.Type == OptionSettingValueType.Object)

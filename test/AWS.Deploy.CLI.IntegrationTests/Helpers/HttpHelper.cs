@@ -26,7 +26,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.Helpers
 
             try
             {
-                await WaitUntilHelper.WaitUntil(async () =>
+                await Orchestration.Utilities.Helpers.WaitUntil(async () =>
                 {
                     var httpResponseMessage = await client.GetAsync(url);
                     return httpResponseMessage.IsSuccessStatusCode;

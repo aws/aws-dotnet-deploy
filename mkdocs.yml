@@ -15,6 +15,7 @@ nav:
       - Pre-requisites: docs/getting-started/pre-requisites.md
       - How to install: docs/getting-started/installation.md
       - Set up Credentials: docs/getting-started/setup-creds.md
+      - Set up custom workspace: docs/getting-started/custom-workspace.md
       - Deploy "Hello World": docs/getting-started/run-tool.md
     -  Support matrix: docs/support.md
   #  - Supported deployments:
@@ -51,9 +52,9 @@ nav:
     #  - Listing Deployments: docs/tutorials/list-deployments.md
     #  - Deleting Deployment: docs/tutorials/delete-deployment.md
   - Troubleshooting Guide:
+    - troubleshooting-guide/index.md
     - Missing Dependencies: troubleshooting-guide/missing-dependencies.md
     - Docker Issues: troubleshooting-guide/docker-issues.md
-    - Other Issues: troubleshooting-guide/other-issues.md
   - Contributing to the project: contributing.md
   - FAQs: faq.md
 

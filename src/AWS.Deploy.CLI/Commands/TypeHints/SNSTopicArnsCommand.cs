@@ -26,10 +26,16 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             _optionSettingHandler = optionSettingHandler;
         }
 
-        public async Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
+        public async Task<TypeHintResourceTable> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var topicArns = await _awsResourceQueryer.ListOfSNSTopicArns();
-            return topicArns.Select(topicArn => new TypeHintResource(topicArn, topicArn.Substring(topicArn.LastIndexOf(':') + 1))).ToList();
+
+            var resourceTable = new TypeHintResourceTable
+            {
+                Rows = topicArns.Select(topicArn => new TypeHintResource(topicArn, topicArn.Substring(topicArn.LastIndexOf(':') + 1))).ToList()
+            };
+
+            return resourceTable;
         }
 
         public async Task<object> Execute(Recommendation recommendation, OptionSettingItem optionSetting)
@@ -38,7 +44,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             var currentValue = _optionSettingHandler.GetOptionSettingValue(recommendation, optionSetting);
             var typeHintData = optionSetting.GetTypeHintData<SNSTopicArnsTypeHintData>();
             var currentValueStr = currentValue.ToString() ?? string.Empty;
-            var topicArns = await GetResources(recommendation, optionSetting);
+            var topicArns = (await GetResources(recommendation, optionSetting)).Rows;
 
             var topicNames = topicArns?.Select(topic => topic.DisplayName).ToList() ?? new List<string>();
             var currentName = string.Empty;

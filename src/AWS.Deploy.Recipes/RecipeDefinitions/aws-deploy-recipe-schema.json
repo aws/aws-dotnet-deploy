@@ -493,6 +493,7 @@
                         "BeanstalkEnvironment",
                         "BeanstalkRollingUpdates",
                         "InstanceType",
+                        "WindowsInstanceType",
                         "IAMRole",
                         "ECSCluster",
                         "ECSService",
@@ -611,10 +612,12 @@
                                     "FileExists",
                                     "StringLength",
                                     "InstanceType",
+                                    "WindowsInstanceType",
                                     "SubnetsInVpc",
                                     "SecurityGroupsInVpc",
                                     "Uri",
-                                    "Comparison"
+                                    "Comparison",
+                                    "VPCSubnetsInDifferentAZs"
                                 ]
                             }
                         },

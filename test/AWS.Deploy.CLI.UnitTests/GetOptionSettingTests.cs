@@ -80,7 +80,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var recommendations = await engine.ComputeRecommendations();
 
-            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
 
             var optionSetting = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, jsonPath);
 
@@ -96,7 +96,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var recommendations = await engine.ComputeRecommendations();
 
-            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
 
             Assert.Throws<OptionSettingItemDoesNotExistException>(() => _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, jsonPath));
         }
@@ -110,7 +110,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var recommendations = await engine.ComputeRecommendations();
 
-            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_RECIPE_ID);
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
 
             var managedActionsEnabled = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, $"{optionSetting}.{childSetting}");
             await _optionSettingHandler.SetOptionSettingValue(beanstalkRecommendation, managedActionsEnabled, childValue);

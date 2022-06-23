@@ -299,14 +299,14 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             if (configSetting.TypeHint.HasValue && typeHintCommandFactory.GetCommand(configSetting.TypeHint.Value) is var typeHintCommand && typeHintCommand != null)
             {
                 var output = new GetConfigSettingResourcesOutput();
-                var resources = await typeHintCommand.GetResources(state.SelectedRecommendation, configSetting);
+                var resourceTable = await typeHintCommand.GetResources(state.SelectedRecommendation, configSetting);
 
-                if (resources == null)
+                if (resourceTable == null)
                 {
                     return NotFound("The Config Setting type hint is not recognized.");
                 }
-
-                output.Resources = resources.Select(x => new TypeHintResourceSummary(x.SystemName, x.DisplayName)).ToList();
+                output.Columns = resourceTable.Columns?.Select(column => new Models.TypeHintResourceColumn(column.DisplayName)).ToList();
+                output.Resources = resourceTable.Rows?.Select(resource => new TypeHintResourceSummary(resource.SystemName, resource.DisplayName, resource.ColumnValues)).ToList();
                 return Ok(output);
             }
 
@@ -724,7 +724,8 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 serviceProvider.GetRequiredService<ICommandLineWrapper>(),
                 serviceProvider.GetRequiredService<IAWSResourceQueryer>(),
                 serviceProvider.GetRequiredService<IFileManager>(),
-                serviceProvider.GetRequiredService<IOptionSettingHandler>()
+                serviceProvider.GetRequiredService<IOptionSettingHandler>(),
+                serviceProvider.GetRequiredService<IDeployToolWorkspaceMetadata>()
                 );
         }
 
@@ -754,7 +755,8 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                                     serviceProvider.GetRequiredService<IFileManager>(),
                                     serviceProvider.GetRequiredService<IDirectoryManager>(),
                                     serviceProvider.GetRequiredService<IAWSServiceHandler>(),
-                                    serviceProvider.GetRequiredService<IOptionSettingHandler>()
+                                    serviceProvider.GetRequiredService<IOptionSettingHandler>(),
+                                    serviceProvider.GetRequiredService<IDeployToolWorkspaceMetadata>()
                                 );
         }
     }

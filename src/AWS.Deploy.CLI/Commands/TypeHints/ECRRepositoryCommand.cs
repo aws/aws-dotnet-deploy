@@ -37,7 +37,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 idSelector: rep => rep.RepositoryName,
                 displaySelector: rep => rep.RepositoryName,
                 defaultSelector: rep => rep.RepositoryName.Equals(currentRepositoryName),
-                defaultNewName: currentRepositoryName)
+                defaultNewName: currentRepositoryName ?? string.Empty)
             {
                 AskNewName = true,
             };
@@ -53,10 +53,16 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             return userResponse.SelectedOption?.RepositoryName ?? userResponse.NewName
                 ?? throw new UserPromptForNameReturnedNullException(DeployToolErrorCode.ECRRepositoryPromptForNameReturnedNull, "The user response for an ECR Repository was null");
         }
-        public async Task<List<TypeHintResource>?> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
+        public async Task<TypeHintResourceTable> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
         {
             var repositories = await GetData();
-            return repositories.Select(x => new TypeHintResource(x.RepositoryName, x.RepositoryName)).ToList();
+
+            var resourceTable = new TypeHintResourceTable
+            {
+                Rows = repositories.Select(x => new TypeHintResource(x.RepositoryName, x.RepositoryName)).ToList()
+            };
+
+            return resourceTable;
         }
 
         private async Task<List<Repository>> GetData()
