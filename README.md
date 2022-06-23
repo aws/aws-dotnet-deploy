@@ -1,5 +1,4 @@
-# AWS .NET deployment tool
-
+# AWS .NET deployment tool [![nuget](https://img.shields.io/nuget/v/AWS.Deploy.Tools.svg) ![downloads](https://img.shields.io/nuget/dt/AWS.Deploy.Tools.svg)](https://www.nuget.org/packages/AWS.Deploy.Tools/)
 
 This repository contains the AWS .NET deployment tool for .NET CLI - the opinionated tooling that simplifies deployment of .NET applications. The tool suggests the right AWS compute service to deploy your application to.  It then builds and packages your application as required by the chosen compute service, generates the deployment infrastructure, deploys your application by using the appropriate deployment engine (Cloud Development Kit (CDK) or native service APIs), and displays the endpoint.
 
