@@ -36,6 +36,7 @@ namespace AWS.Deploy.Orchestration
         private readonly IAWSResourceQueryer _awsResourceQueryer;
         private readonly IFileManager _fileManager;
         private readonly IDeployToolWorkspaceMetadata _workspaceMetadata;
+        private readonly ICloudFormationTemplateReader _cloudFormationTemplateReader;
 
         public CdkProjectHandler(
             IOrchestratorInteractiveService interactiveService,
@@ -43,7 +44,8 @@ namespace AWS.Deploy.Orchestration
             IAWSResourceQueryer awsResourceQueryer,
             IFileManager fileManager,
             IOptionSettingHandler optionSettingHandler,
-            IDeployToolWorkspaceMetadata workspaceMetadata)
+            IDeployToolWorkspaceMetadata workspaceMetadata,
+            ICloudFormationTemplateReader cloudFormationTemplateReader)
         {
             _interactiveService = interactiveService;
             _commandLineWrapper = commandLineWrapper;
@@ -52,6 +54,7 @@ namespace AWS.Deploy.Orchestration
             _directoryManager = new DirectoryManager();
             _fileManager = fileManager;
             _workspaceMetadata = workspaceMetadata;
+            _cloudFormationTemplateReader = cloudFormationTemplateReader;
         }
 
         public async Task<string> ConfigureCdkProject(OrchestratorSession session, CloudApplication cloudApplication, Recommendation recommendation)
@@ -177,6 +180,7 @@ namespace AWS.Deploy.Orchestration
 
         public async Task<bool> DetermineIfCDKBootstrapShouldRun()
         {
+            var cdkTemplateVersion = await _cloudFormationTemplateReader.ReadCDKTemplateVersion();
             var stack = await _awsResourceQueryer.GetCloudFormationStack(AWS.Deploy.Constants.CDK.CDKBootstrapStackName);
             if (stack == null)
             {
@@ -194,9 +198,9 @@ namespace AWS.Deploy.Orchestration
             var bootstrapVersionStr = await _awsResourceQueryer.GetParameterStoreTextValue($"/cdk-bootstrap/{qualiferParameter.ParameterValue}/version");
             if (string.IsNullOrEmpty(bootstrapVersionStr) ||
                 !int.TryParse(bootstrapVersionStr, out var bootstrapVersion) ||
-                bootstrapVersion < AWS.Deploy.Constants.CDK.CDKTemplateVersion)
+                bootstrapVersion < cdkTemplateVersion)
             {
-                _interactiveService.LogDebugMessage($"CDK Bootstrap version is out of date: \"{AWS.Deploy.Constants.CDK.CDKTemplateVersion}\" < \"{bootstrapVersionStr}\".");
+                _interactiveService.LogDebugMessage($"CDK Bootstrap version is out of date: \"{cdkTemplateVersion}\" < \"{bootstrapVersionStr}\".");
                 return true;
             }
 

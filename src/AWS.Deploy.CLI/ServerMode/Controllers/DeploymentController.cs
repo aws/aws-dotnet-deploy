@@ -418,7 +418,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             }
             else if(!string.IsNullOrEmpty(input.ExistingDeploymentId))
             {
-                var templateMetadataReader = serviceProvider.GetRequiredService<ITemplateMetadataReader>();
+                var templateMetadataReader = serviceProvider.GetRequiredService<ICloudFormationTemplateReader>();
                 var deployedApplicationQueryer = serviceProvider.GetRequiredService<IDeployedApplicationQueryer>();
                 var optionSettingHandler = serviceProvider.GetRequiredService<IOptionSettingHandler>();
 
@@ -721,7 +721,8 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 serviceProvider.GetRequiredService<IAWSResourceQueryer>(),
                 serviceProvider.GetRequiredService<IFileManager>(),
                 serviceProvider.GetRequiredService<IOptionSettingHandler>(),
-                serviceProvider.GetRequiredService<IDeployToolWorkspaceMetadata>()
+                serviceProvider.GetRequiredService<IDeployToolWorkspaceMetadata>(),
+                serviceProvider.GetRequiredService<ICloudFormationTemplateReader>()
                 );
         }
 

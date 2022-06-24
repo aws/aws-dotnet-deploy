@@ -63,7 +63,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly ICommandLineWrapper _commandLineWrapper;
         private readonly ICdkProjectHandler _cdkProjectHandler;
         private readonly IDeploymentBundleHandler _deploymentBundleHandler;
-        private readonly ITemplateMetadataReader _templateMetadataReader;
+        private readonly ICloudFormationTemplateReader _cloudFormationTemplateReader;
         private readonly IDeployedApplicationQueryer _deployedApplicationQueryer;
         private readonly ITypeHintCommandFactory _typeHintCommandFactory;
         private readonly IDisplayedResourcesHandler _displayedResourceHandler;
@@ -94,7 +94,7 @@ namespace AWS.Deploy.CLI.Commands
             ICommandLineWrapper commandLineWrapper,
             ICdkProjectHandler cdkProjectHandler,
             IDeploymentBundleHandler deploymentBundleHandler,
-            ITemplateMetadataReader templateMetadataReader,
+            ICloudFormationTemplateReader cloudFormationTemplateReader,
             IDeployedApplicationQueryer deployedApplicationQueryer,
             ITypeHintCommandFactory typeHintCommandFactory,
             IDisplayedResourcesHandler displayedResourceHandler,
@@ -124,7 +124,7 @@ namespace AWS.Deploy.CLI.Commands
             _commandLineWrapper = commandLineWrapper;
             _cdkProjectHandler = cdkProjectHandler;
             _deploymentBundleHandler = deploymentBundleHandler;
-            _templateMetadataReader = templateMetadataReader;
+            _cloudFormationTemplateReader = cloudFormationTemplateReader;
             _deployedApplicationQueryer = deployedApplicationQueryer;
             _typeHintCommandFactory = typeHintCommandFactory;
             _displayedResourceHandler = displayedResourceHandler;
@@ -228,7 +228,7 @@ namespace AWS.Deploy.CLI.Commands
                         _deploymentBundleHandler,
                         dockerEngine,
                         _awsResourceQueryer,
-                        _templateMetadataReader,
+                        _cloudFormationTemplateReader,
                         _deployedApplicationQueryer,
                         _typeHintCommandFactory,
                         _displayedResourceHandler,

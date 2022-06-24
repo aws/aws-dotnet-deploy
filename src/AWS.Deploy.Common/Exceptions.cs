@@ -122,7 +122,8 @@ namespace AWS.Deploy.Common
         InvalidDeploymentManifestModel = 10010000,
         FailedToCreateDeepCopy = 10010100,
         FailedToGetOptionSettingValue = 10010200,
-        ECRRepositoryNameIsNull = 10010300
+        ECRRepositoryNameIsNull = 10010300,
+        FailedToReadCdkBootstrapVersion = 10010400
     }
 
     public class ProjectFileNotFoundException : DeployToolException

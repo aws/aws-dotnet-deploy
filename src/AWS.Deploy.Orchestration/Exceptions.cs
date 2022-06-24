@@ -86,6 +86,14 @@ namespace AWS.Deploy.Orchestration
     }
 
     /// <summary>
+    /// Exception is thrown if unable to read CDK Bootstrap version from template
+    /// </summary>
+    public class FailedToReadCdkBootstrapVersionException : DeployToolException
+    {
+        public FailedToReadCdkBootstrapVersionException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+    }
+
+    /// <summary>
     /// Exception is thrown if we cannot retrieve recipe definitions
     /// </summary>
     public class NoRecipeDefinitionsFoundException : DeployToolException

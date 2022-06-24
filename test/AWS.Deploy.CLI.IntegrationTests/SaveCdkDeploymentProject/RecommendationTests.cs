@@ -237,7 +237,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             var fileManager = new FileManager();
             var deploymentManifestEngine = new DeploymentManifestEngine(directoryManager, fileManager);
             var environmentVariableManager = new Mock<IEnvironmentVariableManager>().Object;
-            var deployToolWorkspaceMetadata = new DeployToolWorkspaceMetadata(directoryManager, environmentVariableManager);
+            var deployToolWorkspaceMetadata = new DeployToolWorkspaceMetadata(directoryManager, environmentVariableManager, fileManager);
             var localUserSettingsEngine = new LocalUserSettingsEngine(fileManager, directoryManager, deployToolWorkspaceMetadata);
             var serviceProvider = new Mock<IServiceProvider>();
             var validatorFactory = new ValidatorFactory(serviceProvider.Object);
