@@ -67,4 +67,32 @@ AWS.Deploy.Tools, internally uses a variety of different services to host your .
 
 **Why is this happening**: This happens due to a know issue with the AWS Cloud Development Kit (CDK). The CDK is used by AWS.Deploy.Tools under the covers and it cannot cannot access the `$TEMP` directory inside the `$USERPROFILE` path if it contains a whitespace character.
 
-**Resolution**: See [here](../docs/getting-started/custom-workspace.md) for guidance on setting a custom workspace that will be used by AWS.Deploy.tools.
+**Resolution**: See [here](../docs/getting-started/custom-workspace.md) for guidance on setting a custom workspace that will be used by AWS.Deploy.Tools.
+
+## AWS CDK Bootstrap related Deployment Failure
+
+A common error that is displayed for CDK Bootstrap related deployment failures is the following:
+```
+The AWS CDK Bootstrap, which is the process of provisioning initial resources for the deployment environment, has failed. Please review the output above for additional details [and check out our troubleshooting guide for the most common failure reasons]. You can learn more about CDK bootstrapping at https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html.
+```
+The AWS Deploy Tool for .NET uses [AWS CDK](https://docs.aws.amazon.com/cdk/v2/guide/home.html) to create the AWS infrastructure needed to deploy your application. The AWS CDK is a framework for defining cloud infrastructure in code and provisioning it through AWS CloudFormation. 
+
+Deploying AWS CDK apps into an AWS environment (a combination of an AWS account and region) requires that you provision resources the AWS CDK needs to perform the deployment. These resources include an Amazon S3 bucket for storing files and IAM roles that grant permissions needed to perform deployments. The process of provisioning these initial resources is called [bootstrapping](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html).
+
+The required resources are defined in a AWS CloudFormation stack, called the bootstrap stack, which is usually named `CDKToolkit`. Like any AWS CloudFormation stack, it appears in the AWS CloudFormation console once it has been deployed.
+
+There could be several reasons why you are experiencing this issue. However, the most common ones are related to **Insufficient IAM Permissions** and an **Existing CDK Staging Bucket**. 
+
+**Insufficient IAM Permission**: CDKBoostrap failed because your profile does not have sufficient permissions to create the boostrap stack. Check the log - in this case, you should see an error that looks something like this:
+```
+LookupRole API: iam:GetRole User: arn:aws:iam::123456789101:user/user is not authorized to perform: iam:GetRole on resource
+```
+
+**Resolution**: Add missing IAM permissions to your profile. See our documentation for [recommended IAM policies](https://aws.github.io/aws-dotnet-deploy/docs/getting-started/setup-creds/) for each deployment type.
+
+**Existing CDKToolkit S3 bucket**: In rare cases, it is possible for the CDK Boostrap process to not clean the resources properly after the failed deployment. This causes the next deployment to fail as well, because the S3 bucket already exists. The error could look something like:
+```
+StagingBucket cdk-hnb659fds-assets-123456789101-us-west-2 already exists
+```
+
+**Resolution**: Open the AWS Console, go to S3 service, and manually delete the 'CDKToolkit' S3 bucket. Once the bucket is deleted, go ahead and deploy your application.
