@@ -4,11 +4,11 @@ The table below provides a matrix of supported .NET application types and AWS Co
 
 |                   | .NET Console App   | 	ASP.NET Core    | Blazor WebAssembly   |
 | :---              |    :----:     |          :---:    |    :---:  |
-| Amazon Elastic Container Service (ECS) service (Linux)| X             | X                 |           |
-| Amazon Elastic Container Service (ECS) task (Linux)	| X             | X                 |           |
-| AWS App Runner (Linux)   |              | X                 |           |
-| AWS Elastic Beanstalk (Linux and Windows)     |               | X                 |           |
-| Amazon S3 & Amazon CloudFront        |               |                   |   X       |
+| Amazon Elastic Container Service (ECS) service (Linux)| :heavy_check_mark:             | :heavy_check_mark:               |           |
+| Amazon Elastic Container Service (ECS) task (Linux)	| :heavy_check_mark:             | :heavy_check_mark:                |           |
+| AWS App Runner (Linux)   |              | :heavy_check_mark:                 |           |
+| AWS Elastic Beanstalk (Linux and Windows)     |               | :heavy_check_mark:                 |           |
+| Amazon S3 & Amazon CloudFront        |               |                   |   :heavy_check_mark:       |
 
 
 ### Amazon ECS using AWS Fargate
