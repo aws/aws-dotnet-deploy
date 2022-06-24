@@ -2,8 +2,6 @@
 
 ** AWS Deploy Tool** is an interactive tooling for the .NET CLI and the AWS Toolkit for Visual Studio that helps deploy .NET applications with minimum AWS knowledge, and with the fewest clicks or commands. It works by analyzing .NET projects and guiding developers to the right AWS service. It then selects the right deployment service, builds and packages your application, and creates the deployment infrastructure. It allows for a quick and easy Proof of concept (POC), smooth graduation to CI/CD, and a gradual ramp up on AWS knowledge.
 
-  > Note: AWS Deploy Tool is currently in Developer Preview.
-
 ## Key capabilities
 
 AWS Deploy Tool has the following capabilities:
