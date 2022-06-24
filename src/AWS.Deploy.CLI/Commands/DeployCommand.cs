@@ -38,7 +38,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly IDeploymentBundleHandler _deploymentBundleHandler;
         private readonly IDockerEngine _dockerEngine;
         private readonly IAWSResourceQueryer _awsResourceQueryer;
-        private readonly ITemplateMetadataReader _templateMetadataReader;
+        private readonly ICloudFormationTemplateReader _cloudFormationTemplateReader;
         private readonly IDeployedApplicationQueryer _deployedApplicationQueryer;
         private readonly ITypeHintCommandFactory _typeHintCommandFactory;
         private readonly IDisplayedResourcesHandler _displayedResourcesHandler;
@@ -67,7 +67,7 @@ namespace AWS.Deploy.CLI.Commands
             IDeploymentBundleHandler deploymentBundleHandler,
             IDockerEngine dockerEngine,
             IAWSResourceQueryer awsResourceQueryer,
-            ITemplateMetadataReader templateMetadataReader,
+            ICloudFormationTemplateReader cloudFormationTemplateReader,
             IDeployedApplicationQueryer deployedApplicationQueryer,
             ITypeHintCommandFactory typeHintCommandFactory,
             IDisplayedResourcesHandler displayedResourcesHandler,
@@ -92,7 +92,7 @@ namespace AWS.Deploy.CLI.Commands
             _deploymentBundleHandler = deploymentBundleHandler;
             _dockerEngine = dockerEngine;
             _awsResourceQueryer = awsResourceQueryer;
-            _templateMetadataReader = templateMetadataReader;
+            _cloudFormationTemplateReader = cloudFormationTemplateReader;
             _deployedApplicationQueryer = deployedApplicationQueryer;
             _typeHintCommandFactory = typeHintCommandFactory;
             _displayedResourcesHandler = displayedResourcesHandler;
@@ -339,7 +339,7 @@ namespace AWS.Deploy.CLI.Commands
 
             IDictionary<string, object> previousSettings;
             if (deployedApplication.ResourceType == CloudApplicationResourceType.CloudFormationStack)
-                previousSettings = (await _templateMetadataReader.LoadCloudApplicationMetadata(deployedApplication.Name)).Settings;
+                previousSettings = (await _cloudFormationTemplateReader.LoadCloudApplicationMetadata(deployedApplication.Name)).Settings;
             else
                 previousSettings = await _deployedApplicationQueryer.GetPreviousSettings(deployedApplication);
 
