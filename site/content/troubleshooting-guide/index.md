@@ -65,6 +65,6 @@ AWS.Deploy.Tools, internally uses a variety of different services to host your .
 
 ## Deployment failure due to whitespace character in USERPROFILE path
 
-**Why is this happening**: This happens due to a know issue with the AWS Cloud Development Kit (CDK). The CDK is used to AWS.Deploy.Tools under the covers and it cannot cannot access the `$TEMP` directory inside the `$USERPROFILE` path if it contains a whitespace character.
+**Why is this happening**: This happens due to a know issue with the AWS Cloud Development Kit (CDK). The CDK is used by AWS.Deploy.Tools under the covers and it cannot cannot access the `$TEMP` directory inside the `$USERPROFILE` path if it contains a whitespace character.
 
-**Resolution**: See [here](../../docs/getting-started/custom-workspace) for guidance on setting a custom workspace that will be used by AWS.Deploy.tools.
+**Resolution**: See [here](../docs/getting-started/custom-workspace.md) for guidance on setting a custom workspace that will be used by AWS.Deploy.tools.
