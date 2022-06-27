@@ -1,0 +1,27 @@
+{
+    "AWSProfile": "default",
+    "AWSRegion": "us-west-2",
+    "ApplicationName": "MyAppStack",
+    "RecipeId": "AspNetAppEcsFargate",
+    "Settings":{
+        "ECSCluster": 
+        {
+            "CreateNew": true,
+            "NewClusterName": "MyNewCluster"
+        },
+        "ECSServiceName": "MyNewService",
+        "DesiredCount": 3,
+        "ApplicationIAMRole": 
+        {
+            "CreateNew": true
+        },
+        "Vpc": 
+        {
+            "IsDefault": true
+        },
+        "AdditionalECSServiceSecurityGroups": "",
+        "TaskCpu": 256,
+        "TaskMemory": 512,
+        "DockerExecutionDirectory": "C:\\codebase"
+    }
+}

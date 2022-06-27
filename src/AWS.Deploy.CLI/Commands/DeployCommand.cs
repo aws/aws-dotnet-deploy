@@ -38,7 +38,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly IDeploymentBundleHandler _deploymentBundleHandler;
         private readonly IDockerEngine _dockerEngine;
         private readonly IAWSResourceQueryer _awsResourceQueryer;
-        private readonly ITemplateMetadataReader _templateMetadataReader;
+        private readonly ICloudFormationTemplateReader _cloudFormationTemplateReader;
         private readonly IDeployedApplicationQueryer _deployedApplicationQueryer;
         private readonly ITypeHintCommandFactory _typeHintCommandFactory;
         private readonly IDisplayedResourcesHandler _displayedResourcesHandler;
@@ -55,6 +55,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly IValidatorFactory _validatorFactory;
         private readonly IRecipeHandler _recipeHandler;
         private readonly IDeployToolWorkspaceMetadata _deployToolWorkspaceMetadata;
+        private readonly IDeploymentSettingsHandler _deploymentSettingsHandler;
 
         public DeployCommand(
             IServiceProvider serviceProvider,
@@ -66,7 +67,7 @@ namespace AWS.Deploy.CLI.Commands
             IDeploymentBundleHandler deploymentBundleHandler,
             IDockerEngine dockerEngine,
             IAWSResourceQueryer awsResourceQueryer,
-            ITemplateMetadataReader templateMetadataReader,
+            ICloudFormationTemplateReader cloudFormationTemplateReader,
             IDeployedApplicationQueryer deployedApplicationQueryer,
             ITypeHintCommandFactory typeHintCommandFactory,
             IDisplayedResourcesHandler displayedResourcesHandler,
@@ -81,7 +82,8 @@ namespace AWS.Deploy.CLI.Commands
             IOptionSettingHandler optionSettingHandler,
             IValidatorFactory validatorFactory,
             IRecipeHandler recipeHandler,
-            IDeployToolWorkspaceMetadata deployToolWorkspaceMetadata)
+            IDeployToolWorkspaceMetadata deployToolWorkspaceMetadata,
+            IDeploymentSettingsHandler deploymentSettingsHandler)
         {
             _serviceProvider = serviceProvider;
             _toolInteractiveService = toolInteractiveService;
@@ -90,7 +92,7 @@ namespace AWS.Deploy.CLI.Commands
             _deploymentBundleHandler = deploymentBundleHandler;
             _dockerEngine = dockerEngine;
             _awsResourceQueryer = awsResourceQueryer;
-            _templateMetadataReader = templateMetadataReader;
+            _cloudFormationTemplateReader = cloudFormationTemplateReader;
             _deployedApplicationQueryer = deployedApplicationQueryer;
             _typeHintCommandFactory = typeHintCommandFactory;
             _displayedResourcesHandler = displayedResourcesHandler;
@@ -108,17 +110,18 @@ namespace AWS.Deploy.CLI.Commands
             _validatorFactory = validatorFactory;
             _recipeHandler = recipeHandler;
             _deployToolWorkspaceMetadata = deployToolWorkspaceMetadata;
+            _deploymentSettingsHandler = deploymentSettingsHandler;
         }
 
-        public async Task ExecuteAsync(string applicationName, string deploymentProjectPath, UserDeploymentSettings? userDeploymentSettings = null)
+        public async Task ExecuteAsync(string applicationName, string deploymentProjectPath, DeploymentSettings? deploymentSettings = null)
         {
-            var (orchestrator, selectedRecommendation, cloudApplication) = await InitializeDeployment(applicationName, userDeploymentSettings, deploymentProjectPath);
+            var (orchestrator, selectedRecommendation, cloudApplication) = await InitializeDeployment(applicationName, deploymentSettings, deploymentProjectPath);
 
             // Verify Docker installation and minimum NodeJS version.
             await EvaluateSystemCapabilities(selectedRecommendation);
 
             // Configure option settings.
-            await ConfigureDeployment(cloudApplication, orchestrator, selectedRecommendation, userDeploymentSettings);
+            await ConfigureDeployment(cloudApplication, orchestrator, selectedRecommendation, deploymentSettings);
 
             if (!ConfirmDeployment(selectedRecommendation))
             {
@@ -154,10 +157,10 @@ namespace AWS.Deploy.CLI.Commands
         /// If an existing deployment target is selected, then a re-deployment is initiated with the same deployment recipe.
         /// </summary>
         /// <param name="cloudApplicationName">The cloud application name provided via the --application-name CLI argument</param>
-        /// <param name="userDeploymentSettings">The deserialized object from the user provided config file.<see cref="UserDeploymentSettings"/></param>
+        /// <param name="deploymentSettings">The deserialized object from the user provided config file.<see cref="DeploymentSettings"/></param>
         /// <param name="deploymentProjectPath">The absolute or relative path of the CDK project that will be used for deployment</param>
         /// <returns>A tuple consisting of the Orchestrator object, Selected Recommendation, Cloud Application metadata.</returns>
-        public async Task<(Orchestrator, Recommendation, CloudApplication)> InitializeDeployment(string cloudApplicationName, UserDeploymentSettings? userDeploymentSettings, string deploymentProjectPath)
+        public async Task<(Orchestrator, Recommendation, CloudApplication)> InitializeDeployment(string cloudApplicationName, DeploymentSettings? deploymentSettings, string deploymentProjectPath)
         {
             var orchestrator = new Orchestrator(
                     _session,
@@ -187,7 +190,7 @@ namespace AWS.Deploy.CLI.Commands
 
             if (string.IsNullOrEmpty(cloudApplicationName))
                 // Try finding the CloudApplication name via the user provided config settings.
-                cloudApplicationName = userDeploymentSettings?.ApplicationName ?? string.Empty;
+                cloudApplicationName = deploymentSettings?.ApplicationName ?? string.Empty;
 
             // Prompt the user with a choice to re-deploy to existing targets or deploy to a new cloud application.
             if (string.IsNullOrEmpty(cloudApplicationName))
@@ -207,7 +210,7 @@ namespace AWS.Deploy.CLI.Commands
                 }
 
                 // preset settings for deployment based on last deployment.
-                selectedRecommendation = await GetSelectedRecommendationFromPreviousDeployment(orchestrator, recommendations, deployedApplication, userDeploymentSettings, deploymentProjectPath);
+                selectedRecommendation = await GetSelectedRecommendationFromPreviousDeployment(orchestrator, recommendations, deployedApplication, deploymentSettings, deploymentProjectPath);
             }
             else
             {
@@ -218,7 +221,7 @@ namespace AWS.Deploy.CLI.Commands
                 else
                 {
                     // Filter the recommendation list for a NEW deployment with recipes which have the DisableNewDeployments property set to false.
-                    selectedRecommendation = GetSelectedRecommendation(userDeploymentSettings, recommendations.Where(x => !x.Recipe.DisableNewDeployments).ToList());
+                    selectedRecommendation = GetSelectedRecommendation(deploymentSettings, recommendations.Where(x => !x.Recipe.DisableNewDeployments).ToList());
                 }
 
                 // Ask the user for a new Cloud Application name based on the deployment type of the recipe.
@@ -274,14 +277,14 @@ namespace AWS.Deploy.CLI.Commands
         /// <param name="cloudApplication"><see cref="CloudApplication"/></param>
         /// <param name="orchestrator"><see cref="Orchestrator"/></param>
         /// <param name="selectedRecommendation"><see cref="Recommendation"/></param>
-        /// <param name="userDeploymentSettings"><see cref="UserDeploymentSettings"/></param>
-        public async Task ConfigureDeployment(CloudApplication cloudApplication, Orchestrator orchestrator, Recommendation selectedRecommendation, UserDeploymentSettings? userDeploymentSettings)
+        /// <param name="deploymentSettings"><see cref="DeploymentSettings"/></param>
+        public async Task ConfigureDeployment(CloudApplication cloudApplication, Orchestrator orchestrator, Recommendation selectedRecommendation, DeploymentSettings? deploymentSettings)
         {
             var configurableOptionSettings = selectedRecommendation.GetConfigurableOptionSettingItems();
 
-            if (userDeploymentSettings != null)
+            if (deploymentSettings != null)
             {
-                await ConfigureDeploymentFromConfigFile(selectedRecommendation, userDeploymentSettings);
+                await _deploymentSettingsHandler.ApplySettings(deploymentSettings, selectedRecommendation, _session);
             }
 
             if (!_toolInteractiveService.DisableInteractive)
@@ -314,9 +317,9 @@ namespace AWS.Deploy.CLI.Commands
             return recommendations;
         }
 
-        private async Task<Recommendation> GetSelectedRecommendationFromPreviousDeployment(Orchestrator orchestrator, List<Recommendation> recommendations, CloudApplication deployedApplication, UserDeploymentSettings? userDeploymentSettings, string deploymentProjectPath)
+        private async Task<Recommendation> GetSelectedRecommendationFromPreviousDeployment(Orchestrator orchestrator, List<Recommendation> recommendations, CloudApplication deployedApplication, DeploymentSettings? deploymentSettings, string deploymentProjectPath)
         {
-            var deploymentSettingRecipeId = userDeploymentSettings?.RecipeId;
+            var deploymentSettingRecipeId = deploymentSettings?.RecipeId;
             var selectedRecommendation = await GetRecommendationForRedeployment(recommendations, deployedApplication, deploymentProjectPath);
             if (selectedRecommendation == null)
             {
@@ -331,12 +334,12 @@ namespace AWS.Deploy.CLI.Commands
                 {
                     errorMessage += Environment.NewLine + $"The original deployment recipe ID was {deployedApplication.RecipeId} and the current deployment recipe ID is {deploymentSettingRecipeId}";
                 }
-                throw new InvalidUserDeploymentSettingsException(DeployToolErrorCode.StackCreatedFromDifferentDeploymentRecommendation, errorMessage.Trim());
+                throw new InvalidDeploymentSettingsException(DeployToolErrorCode.StackCreatedFromDifferentDeploymentRecommendation, errorMessage.Trim());
             }
 
             IDictionary<string, object> previousSettings;
             if (deployedApplication.ResourceType == CloudApplicationResourceType.CloudFormationStack)
-                previousSettings = (await _templateMetadataReader.LoadCloudApplicationMetadata(deployedApplication.Name)).Settings;
+                previousSettings = (await _cloudFormationTemplateReader.LoadCloudApplicationMetadata(deployedApplication.Name)).Settings;
             else
                 previousSettings = await _deployedApplicationQueryer.GetPreviousSettings(deployedApplication);
 
@@ -406,88 +409,6 @@ namespace AWS.Deploy.CLI.Commands
             {
                 throw new FailedToFindDeploymentProjectRecipeIdException(DeployToolErrorCode.FailedToFindDeploymentProjectRecipeId, $"Failed to find a recipe ID for the deployment project located at {deploymentProjectPath}", ex);
             }
-        }
-
-        /// <summary>
-        /// This method is used to set the values for Option Setting Items when a deployment is being performed using a user specifed config file.
-        /// </summary>
-        /// <param name="recommendation">The selected recommendation settings used for deployment <see cref="Recommendation"/></param>
-        /// <param name="userDeploymentSettings">The deserialized object from the user provided config file. <see cref="UserDeploymentSettings"/></param>
-        private async Task ConfigureDeploymentFromConfigFile(Recommendation recommendation, UserDeploymentSettings userDeploymentSettings)
-        {
-            foreach (var entry in userDeploymentSettings.LeafOptionSettingItems)
-            {
-                var optionSettingJsonPath = entry.Key;
-                var optionSettingValue = entry.Value;
-
-                var optionSetting = _optionSettingHandler.GetOptionSetting(recommendation, optionSettingJsonPath);
-
-                if (optionSetting == null)
-                    throw new OptionSettingItemDoesNotExistException(DeployToolErrorCode.OptionSettingItemDoesNotExistInRecipe, $"The Option Setting Item {optionSettingJsonPath} does not exist.");
-
-                if (!recommendation.IsExistingCloudApplication || optionSetting.Updatable)
-                {
-                    object settingValue;
-                    try
-                    {
-                        switch (optionSetting.Type)
-                        {
-                            case OptionSettingValueType.String:
-                                settingValue = optionSettingValue;
-                                break;
-                            case OptionSettingValueType.Int:
-                                settingValue = int.Parse(optionSettingValue);
-                                break;
-                            case OptionSettingValueType.Bool:
-                                settingValue = bool.Parse(optionSettingValue);
-                                break;
-                            case OptionSettingValueType.Double:
-                                settingValue = double.Parse(optionSettingValue);
-                                break;
-                            case OptionSettingValueType.KeyValue:
-                                var optionSettingKey = optionSettingJsonPath.Split(".").Last();
-                                var existingValue = _optionSettingHandler.GetOptionSettingValue<Dictionary<string, string>>(recommendation, optionSetting);
-                                existingValue ??= new Dictionary<string, string>();
-                                existingValue[optionSettingKey] = optionSettingValue;
-                                settingValue = existingValue;
-                                break;
-                            case OptionSettingValueType.List:
-                                settingValue = JsonConvert.DeserializeObject<SortedSet<string>>(optionSettingValue) ?? new SortedSet<string>();
-                                break;
-                            default:
-                                throw new InvalidOverrideValueException(DeployToolErrorCode.InvalidValueForOptionSettingItem, $"Invalid value {optionSettingValue} for option setting item {optionSettingJsonPath}");
-                        }
-                    }
-                    catch (Exception exception)
-                    {
-                        _toolInteractiveService.WriteDebugLine(exception.PrettyPrint());
-                        throw new InvalidOverrideValueException(DeployToolErrorCode.InvalidValueForOptionSettingItem, $"Invalid value {optionSettingValue} for option setting item {optionSettingJsonPath}");
-                    }
-
-                    await _optionSettingHandler.SetOptionSettingValue(recommendation, optionSetting, settingValue);
-                }
-            }
-
-            var validatorFailedResults =
-                _validatorFactory.BuildValidators(recommendation.Recipe)
-                            .Select(async validator => await validator.Validate(recommendation, _session))
-                            .Select(x => x.Result)
-                            .Where(x => !x.IsValid)
-                            .ToList();
-
-            if (!validatorFailedResults.Any())
-            {
-                // validation successful
-                // deployment configured
-                return;
-            }
-
-            var errorMessage = "The deployment configuration needs to be adjusted before it can be deployed:" + Environment.NewLine;
-            foreach (var result in validatorFailedResults)
-            {
-                errorMessage += result.ValidationFailedMessage + Environment.NewLine;
-            }
-            throw new InvalidUserDeploymentSettingsException(DeployToolErrorCode.DeploymentConfigurationNeedsAdjusting, errorMessage.Trim());
         }
 
         // This method prompts the user to select a CloudApplication name for existing deployments or create a new one.
@@ -584,12 +505,12 @@ namespace AWS.Deploy.CLI.Commands
         /// <summary>
         /// This method is responsible for selecting a deployment recommendation.
         /// </summary>
-        /// <param name="userDeploymentSettings">The deserialized object from the user provided config file.<see cref="UserDeploymentSettings"/></param>
+        /// <param name="deploymentSettings">The deserialized object from the user provided config file.<see cref="DeploymentSettings"/></param>
         /// <param name="recommendations">A List of available recommendations to choose from.</param>
         /// <returns><see cref="Recommendation"/></returns>
-        private Recommendation GetSelectedRecommendation(UserDeploymentSettings? userDeploymentSettings, List<Recommendation> recommendations)
+        private Recommendation GetSelectedRecommendation(DeploymentSettings? deploymentSettings, List<Recommendation> recommendations)
         {
-            var deploymentSettingsRecipeId = userDeploymentSettings?.RecipeId;
+            var deploymentSettingsRecipeId = deploymentSettings?.RecipeId;
 
             if (string.IsNullOrEmpty(deploymentSettingsRecipeId))
             {
@@ -607,7 +528,7 @@ namespace AWS.Deploy.CLI.Commands
             var selectedRecommendation = recommendations.FirstOrDefault(x => x.Recipe.Id.Equals(deploymentSettingsRecipeId, StringComparison.Ordinal));
             if (selectedRecommendation == null)
             {
-                throw new InvalidUserDeploymentSettingsException(DeployToolErrorCode.InvalidPropertyValueForUserDeployment, $"The user deployment settings provided contains an invalid value for the property '{nameof(userDeploymentSettings.RecipeId)}'.");
+                throw new InvalidDeploymentSettingsException(DeployToolErrorCode.InvalidPropertyValueForUserDeployment, $"The user deployment settings provided contains an invalid value for the property '{nameof(deploymentSettings.RecipeId)}'.");
             }
 
             _toolInteractiveService.WriteLine();
@@ -717,12 +638,7 @@ namespace AWS.Deploy.CLI.Commands
                 {
                     var settingValidatorFailedResults = _optionSettingHandler.RunOptionSettingValidators(recommendation);
 
-                    var recipeValidatorFailedResults =
-                        _validatorFactory.BuildValidators(recommendation.Recipe)
-                            .Select(async validator => await validator.Validate(recommendation, _session))
-                            .Select(x => x.Result)
-                            .Where(x => !x.IsValid)
-                            .ToList();
+                    var recipeValidatorFailedResults = _recipeHandler.RunRecipeValidators(recommendation, _session);
 
                     if (!settingValidatorFailedResults.Any() && !recipeValidatorFailedResults.Any())
                     {

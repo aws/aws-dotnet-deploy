@@ -418,7 +418,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             }
             else if(!string.IsNullOrEmpty(input.ExistingDeploymentId))
             {
-                var templateMetadataReader = serviceProvider.GetRequiredService<ITemplateMetadataReader>();
+                var templateMetadataReader = serviceProvider.GetRequiredService<ICloudFormationTemplateReader>();
                 var deployedApplicationQueryer = serviceProvider.GetRequiredService<IDeployedApplicationQueryer>();
                 var optionSettingHandler = serviceProvider.GetRequiredService<IOptionSettingHandler>();
 
@@ -548,14 +548,10 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 throw new SelectedRecommendationIsNullException("The selected recommendation is null or invalid.");
 
             var optionSettingHandler = serviceProvider.GetRequiredService<IOptionSettingHandler>();
-            var validatorFactory = serviceProvider.GetRequiredService<IValidatorFactory>();
+            var recipeHandler = serviceProvider.GetRequiredService<IRecipeHandler>();
             var settingValidatorFailedResults = optionSettingHandler.RunOptionSettingValidators(state.SelectedRecommendation);
-            var recipeValidatorFailedResults =
-                        validatorFactory.BuildValidators(state.SelectedRecommendation.Recipe)
-                            .Select(async validator => await validator.Validate(state.SelectedRecommendation, orchestratorSession))
-                            .Select(x => x.Result)
-                            .Where(x => !x.IsValid)
-                            .ToList();
+            var recipeValidatorFailedResults = recipeHandler.RunRecipeValidators(state.SelectedRecommendation, orchestratorSession);
+
             if (settingValidatorFailedResults.Any() || recipeValidatorFailedResults.Any())
             {
                 var settingValidationErrorMessage = $"The deployment configuration needs to be adjusted before it can be deployed:{Environment.NewLine}";
@@ -725,7 +721,8 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 serviceProvider.GetRequiredService<IAWSResourceQueryer>(),
                 serviceProvider.GetRequiredService<IFileManager>(),
                 serviceProvider.GetRequiredService<IOptionSettingHandler>(),
-                serviceProvider.GetRequiredService<IDeployToolWorkspaceMetadata>()
+                serviceProvider.GetRequiredService<IDeployToolWorkspaceMetadata>(),
+                serviceProvider.GetRequiredService<ICloudFormationTemplateReader>()
                 );
         }
 

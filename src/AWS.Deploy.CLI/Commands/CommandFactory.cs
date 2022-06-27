@@ -63,7 +63,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly ICommandLineWrapper _commandLineWrapper;
         private readonly ICdkProjectHandler _cdkProjectHandler;
         private readonly IDeploymentBundleHandler _deploymentBundleHandler;
-        private readonly ITemplateMetadataReader _templateMetadataReader;
+        private readonly ICloudFormationTemplateReader _cloudFormationTemplateReader;
         private readonly IDeployedApplicationQueryer _deployedApplicationQueryer;
         private readonly ITypeHintCommandFactory _typeHintCommandFactory;
         private readonly IDisplayedResourcesHandler _displayedResourceHandler;
@@ -78,6 +78,7 @@ namespace AWS.Deploy.CLI.Commands
         private readonly IValidatorFactory _validatorFactory;
         private readonly IRecipeHandler _recipeHandler;
         private readonly IDeployToolWorkspaceMetadata _deployToolWorkspaceMetadata;
+        private readonly IDeploymentSettingsHandler _deploymentSettingsHandler;
 
         public CommandFactory(
             IServiceProvider serviceProvider,
@@ -93,7 +94,7 @@ namespace AWS.Deploy.CLI.Commands
             ICommandLineWrapper commandLineWrapper,
             ICdkProjectHandler cdkProjectHandler,
             IDeploymentBundleHandler deploymentBundleHandler,
-            ITemplateMetadataReader templateMetadataReader,
+            ICloudFormationTemplateReader cloudFormationTemplateReader,
             IDeployedApplicationQueryer deployedApplicationQueryer,
             ITypeHintCommandFactory typeHintCommandFactory,
             IDisplayedResourcesHandler displayedResourceHandler,
@@ -107,8 +108,8 @@ namespace AWS.Deploy.CLI.Commands
             IOptionSettingHandler optionSettingHandler,
             IValidatorFactory validatorFactory,
             IRecipeHandler recipeHandler,
-            IDeployToolWorkspaceMetadata deployToolWorkspaceMetadata
-            )
+            IDeployToolWorkspaceMetadata deployToolWorkspaceMetadata,
+            IDeploymentSettingsHandler deploymentSettingsHandler)
         {
             _serviceProvider = serviceProvider;
             _toolInteractiveService = toolInteractiveService;
@@ -123,7 +124,7 @@ namespace AWS.Deploy.CLI.Commands
             _commandLineWrapper = commandLineWrapper;
             _cdkProjectHandler = cdkProjectHandler;
             _deploymentBundleHandler = deploymentBundleHandler;
-            _templateMetadataReader = templateMetadataReader;
+            _cloudFormationTemplateReader = cloudFormationTemplateReader;
             _deployedApplicationQueryer = deployedApplicationQueryer;
             _typeHintCommandFactory = typeHintCommandFactory;
             _displayedResourceHandler = displayedResourceHandler;
@@ -138,6 +139,7 @@ namespace AWS.Deploy.CLI.Commands
             _validatorFactory = validatorFactory;
             _recipeHandler = recipeHandler;
             _deployToolWorkspaceMetadata = deployToolWorkspaceMetadata;
+            _deploymentSettingsHandler = deploymentSettingsHandler;
         }
 
         public Command BuildRootCommand()
@@ -190,15 +192,15 @@ namespace AWS.Deploy.CLI.Commands
                     var projectDefinition = await _projectParserUtility.Parse(input.ProjectPath ?? "");
                     var targetApplicationDirectoryPath = new DirectoryInfo(projectDefinition.ProjectPath).Parent!.FullName;
 
-                    UserDeploymentSettings? userDeploymentSettings = null;
+                    DeploymentSettings? deploymentSettings = null;
                     if (!string.IsNullOrEmpty(input.Apply))
                     {
                         var applyPath = Path.GetFullPath(input.Apply, targetApplicationDirectoryPath);
-                        userDeploymentSettings = UserDeploymentSettings.ReadSettings(applyPath);
+                        deploymentSettings = await _deploymentSettingsHandler.ReadSettings(applyPath);
                     }
 
-                    var awsCredentials = await _awsUtilities.ResolveAWSCredentials(input.Profile ?? userDeploymentSettings?.AWSProfile);
-                    var awsRegion = _awsUtilities.ResolveAWSRegion(input.Region ?? userDeploymentSettings?.AWSRegion);
+                    var awsCredentials = await _awsUtilities.ResolveAWSCredentials(input.Profile ?? deploymentSettings?.AWSProfile);
+                    var awsRegion = _awsUtilities.ResolveAWSRegion(input.Region ?? deploymentSettings?.AWSRegion);
 
                     _commandLineWrapper.RegisterAWSContext(awsCredentials, awsRegion);
                     _awsClientFactory.RegisterAWSContext(awsCredentials, awsRegion);
@@ -211,7 +213,7 @@ namespace AWS.Deploy.CLI.Commands
                         awsRegion,
                         callerIdentity.Account)
                     {
-                        AWSProfileName = input.Profile ?? userDeploymentSettings?.AWSProfile ?? null
+                        AWSProfileName = input.Profile ?? deploymentSettings?.AWSProfile ?? null
                     };
 
                     var dockerEngine = new DockerEngine.DockerEngine(projectDefinition, _fileManager, _directoryManager);
@@ -226,7 +228,7 @@ namespace AWS.Deploy.CLI.Commands
                         _deploymentBundleHandler,
                         dockerEngine,
                         _awsResourceQueryer,
-                        _templateMetadataReader,
+                        _cloudFormationTemplateReader,
                         _deployedApplicationQueryer,
                         _typeHintCommandFactory,
                         _displayedResourceHandler,
@@ -241,7 +243,8 @@ namespace AWS.Deploy.CLI.Commands
                         _optionSettingHandler,
                         _validatorFactory,
                         _recipeHandler,
-                        _deployToolWorkspaceMetadata);
+                        _deployToolWorkspaceMetadata,
+                        _deploymentSettingsHandler);
 
                     var deploymentProjectPath = input.DeploymentProject ?? string.Empty;
                     if (!string.IsNullOrEmpty(deploymentProjectPath))
@@ -249,7 +252,7 @@ namespace AWS.Deploy.CLI.Commands
                         deploymentProjectPath = Path.GetFullPath(deploymentProjectPath, targetApplicationDirectoryPath);
                     }
 
-                    await deploy.ExecuteAsync(input.ApplicationName ?? string.Empty, deploymentProjectPath, userDeploymentSettings);
+                    await deploy.ExecuteAsync(input.ApplicationName ?? string.Empty, deploymentProjectPath, deploymentSettings);
 
                     return CommandReturnCodes.SUCCESS;
                 }

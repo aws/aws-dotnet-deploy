@@ -22,6 +22,8 @@ using Moq;
 using Newtonsoft.Json;
 using Xunit;
 using AWS.Deploy.CLI.IntegrationTests.Utilities;
+using AWS.Deploy.Orchestration;
+using AWS.Deploy.Common.IO;
 
 namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
 {
@@ -36,11 +38,15 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
 
         private readonly Mock<IAWSClientFactory> _mockAWSClientFactory;
         private readonly Mock<IAmazonCloudFormation> _mockCFClient;
+        private readonly Mock<IDeployToolWorkspaceMetadata> _deployToolWorkspaceMetadata;
+        private readonly IFileManager _fileManager;
 
         public GetApplyOptionSettings()
         {
             _mockAWSClientFactory = new Mock<IAWSClientFactory>();
             _mockCFClient = new Mock<IAmazonCloudFormation>();
+            _deployToolWorkspaceMetadata = new Mock<IDeployToolWorkspaceMetadata>();
+            _fileManager = new TestFileManager();
 
             var serviceCollection = new ServiceCollection();
 
@@ -207,7 +213,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
 
                 var generateCloudFormationTemplateResponse = await restClient.GenerateCloudFormationTemplateAsync(sessionId);
 
-                var metadata = await ServerModeExtensions.GetAppSettingsFromCFTemplate(_mockAWSClientFactory, _mockCFClient, generateCloudFormationTemplateResponse.CloudFormationTemplate, _stackName);
+                var metadata = await ServerModeExtensions.GetAppSettingsFromCFTemplate(_mockAWSClientFactory, _mockCFClient, generateCloudFormationTemplateResponse.CloudFormationTemplate, _stackName, _deployToolWorkspaceMetadata, _fileManager);
 
                 Assert.True(metadata.Settings.ContainsKey("VPCConnector"));
                 var vpcConnector = JsonConvert.DeserializeObject<VPCConnectorTypeHintResponse>(metadata.Settings["VPCConnector"].ToString());

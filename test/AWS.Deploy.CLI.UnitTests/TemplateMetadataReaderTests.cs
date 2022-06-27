@@ -12,11 +12,22 @@ using Moq;
 using System.Collections.Generic;
 using AWS.Deploy.CLI.TypeHintResponses;
 using Newtonsoft.Json;
+using AWS.Deploy.Orchestration;
+using AWS.Deploy.Common.IO;
 
 namespace AWS.Deploy.CLI.UnitTests
 {
     public class TemplateMetadataReaderTests
     {
+        private readonly Mock<IDeployToolWorkspaceMetadata> _deployToolWorkspaceMetadata;
+        private readonly Mock<IFileManager> _fileManager;
+
+        public TemplateMetadataReaderTests()
+        {
+            _deployToolWorkspaceMetadata = new Mock<IDeployToolWorkspaceMetadata>();
+            _fileManager = new Mock<IFileManager>();
+        }
+
         [Fact]
         public async Task ReadJSONMetadata()
         {
@@ -31,7 +42,7 @@ namespace AWS.Deploy.CLI.UnitTests
                     TemplateBody = templateBody
                 }));
 
-            var templateMetadataReader = new TemplateMetadataReader(new TestAWSClientFactory(mockClient.Object));
+            var templateMetadataReader = new CloudFormationTemplateReader(new TestAWSClientFactory(mockClient.Object), _deployToolWorkspaceMetadata.Object, _fileManager.Object);
 
             // ACT
             var metadata = await templateMetadataReader.LoadCloudApplicationMetadata("");
@@ -58,7 +69,7 @@ namespace AWS.Deploy.CLI.UnitTests
                     TemplateBody = templateBody
                 }));
 
-            var templateMetadataReader = new TemplateMetadataReader(new TestAWSClientFactory(mockClient.Object));
+            var templateMetadataReader = new CloudFormationTemplateReader(new TestAWSClientFactory(mockClient.Object), _deployToolWorkspaceMetadata.Object, _fileManager.Object);
 
             // ACT
             var metadata = await templateMetadataReader.LoadCloudApplicationMetadata("");

@@ -57,11 +57,9 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
             // Deploy
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
             var configFilePath = Path.Combine(Directory.GetParent(projectPath).FullName, "ElasticBeanStalkConfigFile.json");
-            ConfigFileHelper.ReplacePlaceholders(configFilePath);
+            var suffix = ConfigFileHelper.ReplacePlaceholders(configFilePath);
 
-            var userDeploymentSettings = UserDeploymentSettings.ReadSettings(configFilePath);
-
-            _stackName = userDeploymentSettings.ApplicationName;
+            _stackName = $"ElasticBeanStalk{suffix}";
 
             var deployArgs = new[] { "deploy", "--project-path", projectPath, "--apply", configFilePath, "--silent", "--diagnostics" };
             Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));

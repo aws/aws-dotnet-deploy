@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AWS.Deploy.Common.Recipes.Validation;
 
 namespace AWS.Deploy.Common.Recipes
 {
@@ -24,5 +25,10 @@ namespace AWS.Deploy.Common.Recipes
         /// other locations that are monitored by the same source control root as the target application that needs to be deployed.
         /// </summary>
         Task<HashSet<string>> LocateCustomRecipePaths(string targetApplicationFullPath, string solutionDirectoryPath);
+
+        /// <summary>
+        /// Runs the recipe level validators and returns a list of failed validations
+        /// </summary>
+        List<ValidationResult> RunRecipeValidators(Recommendation recommendation, IDeployToolValidationContext deployToolValidationContext);
     }
 }

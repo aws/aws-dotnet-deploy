@@ -103,24 +103,39 @@ namespace AWS.Deploy.DockerEngine
         /// </summary>
         private List<string>? GetProjectList()
         {
-            var projectDirectory = Directory.GetParent(_projectPath);
+            var solutionDirectory = Directory.GetParent(_projectPath);
 
-            while (projectDirectory != null)
+            // Climb upward from the csproj until we find a directory with one or more slns
+            while (solutionDirectory != null)
             {
-                var files = projectDirectory.GetFiles("*.sln");
-                if (files.Length > 0)
+                var allSolutionFiles = solutionDirectory.GetFiles("*.sln");
+                if (allSolutionFiles.Length > 0)
                 {
-                    foreach (var solutionFile in files)
+                    foreach (var solutionFile in allSolutionFiles)
                     {
                         var projectList = GetProjectsFromSolutionFile(solutionFile.FullName);
+
                         if (projectList != null)
                         {
+                            // Validate that all referenced projects are at or below the solution, otherwise we'd have to use
+                            // a wider Docker execution directory that is potentially sending more than the project to the Docker daemon
+                            foreach (var project in projectList)
+                            {
+                                var absoluteProjectPath = _directoryManager.GetAbsolutePath(solutionDirectory.FullName, project);
+
+                                if (!_directoryManager.ExistsInsideDirectory(solutionDirectory.FullName, absoluteProjectPath))
+                                {
+                                    throw new DockerEngineException(DeployToolErrorCode.FailedToGenerateDockerFile,
+                                        "Unable to generate a Dockerfile for this project becuase project reference(s) were detected above the solution (.sln) file. " +
+                                        "Consider crafting your own Dockerfile or deploying to an AWS compute service that does not use Docker.");
+                                }
+                            }
                             return projectList;
                         }
                     }
                 }
 
-                projectDirectory = projectDirectory.Parent;
+                solutionDirectory = solutionDirectory.Parent;
             }
 
             return null;

@@ -49,7 +49,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
             var serviceProvider = new Mock<IServiceProvider>();
             var validatorFactory = new ValidatorFactory(serviceProvider.Object);
             var optionSettingHandler = new OptionSettingHandler(validatorFactory);
-            _recipeHandler = new RecipeHandler(_deploymentManifestEngine, _orchestratorInteractiveService.Object, _directoryManager, _fileManager, optionSettingHandler);
+            _recipeHandler = new RecipeHandler(_deploymentManifestEngine, _orchestratorInteractiveService.Object, _directoryManager, _fileManager, optionSettingHandler, validatorFactory);
             _mockAWSResourceQueryer = new Mock<IAWSResourceQueryer>();
             _cloudApplication = new CloudApplication("StackName", "UniqueId", CloudApplicationResourceType.CloudFormationStack, "RecipeId");
             _displayedResourcesFactory = new DisplayedResourceCommandFactory(_mockAWSResourceQueryer.Object);

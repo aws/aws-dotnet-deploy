@@ -51,7 +51,7 @@ namespace AWS.Deploy.CLI.Extensions
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IProjectDefinitionParser), typeof(ProjectDefinitionParser), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IProjectParserUtility), typeof(ProjectParserUtility), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(ISystemCapabilityEvaluator), typeof(SystemCapabilityEvaluator), lifetime));
-            serviceCollection.TryAdd(new ServiceDescriptor(typeof(ITemplateMetadataReader), typeof(TemplateMetadataReader), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICloudFormationTemplateReader), typeof(CloudFormationTemplateReader), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IToolInteractiveService), typeof(ConsoleInteractiveServiceImpl), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(ITypeHintCommandFactory), typeof(TypeHintCommandFactory), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IDisplayedResourceCommandFactory), typeof(DisplayedResourceCommandFactory), lifetime));
@@ -69,6 +69,7 @@ namespace AWS.Deploy.CLI.Extensions
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IRecipeHandler), typeof(RecipeHandler), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IEnvironmentVariableManager), typeof(EnvironmentVariableManager), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IDeployToolWorkspaceMetadata), typeof(DeployToolWorkspaceMetadata), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(IDeploymentSettingsHandler), typeof(DeploymentSettingsHandler), lifetime));
 
             var packageJsonTemplate = typeof(PackageJsonGenerator).Assembly.ReadEmbeddedFile(PackageJsonGenerator.TemplateIdentifier);
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IPackageJsonGenerator), (serviceProvider) => new PackageJsonGenerator(packageJsonTemplate), lifetime));

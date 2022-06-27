@@ -1,0 +1,14 @@
+{
+    "AWSProfile": "default",
+    "AWSRegion": "us-west-2",
+    "ApplicationName": "MyAppStack",
+    "RecipeId": "AspNetAppAppRunner",
+    "Settings":{
+        "VPCConnector":
+        {
+            "CreateNew": true,
+            "Subnets": [ "subnet-1234abcd" ],
+            "SecurityGroups": [ "sg-1234abcd" ]
+        }
+    }
+}

@@ -10,6 +10,8 @@ using Amazon.CloudFormation;
 using Amazon.CloudFormation.Model;
 using Amazon.Runtime;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.IO;
+using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.Utilities;
 using AWS.Deploy.ServerMode.Client;
 using Moq;
@@ -75,15 +77,15 @@ namespace AWS.Deploy.CLI.IntegrationTests.Utilities
             return beanstalkRecommendation;
         }
 
-        public static async Task<CloudApplicationMetadata> GetAppSettingsFromCFTemplate(Mock<IAWSClientFactory> mockAWSClientFactory, Mock<IAmazonCloudFormation> mockCFClient, string cloudFormationTemplate, string stackName)
+        public static async Task<CloudApplicationMetadata> GetAppSettingsFromCFTemplate(Mock<IAWSClientFactory> mockAWSClientFactory, Mock<IAmazonCloudFormation> mockCFClient, string cloudFormationTemplate, string stackName, Mock<IDeployToolWorkspaceMetadata> deployToolWorkspaceMetadata, IFileManager fileManager)
         {
-            var templateMetadataReader = GetTemplateMetadataReader(mockAWSClientFactory, mockCFClient, cloudFormationTemplate);
+            var templateMetadataReader = GetTemplateMetadataReader(mockAWSClientFactory, mockCFClient, cloudFormationTemplate, deployToolWorkspaceMetadata, fileManager);
             return await templateMetadataReader.LoadCloudApplicationMetadata(stackName);
         }
 
-        public static TemplateMetadataReader GetTemplateMetadataReader(Mock<IAWSClientFactory> mockAWSClientFactory, Mock<IAmazonCloudFormation> mockCFClient, string templateBody)
+        public static CloudFormationTemplateReader GetTemplateMetadataReader(Mock<IAWSClientFactory> mockAWSClientFactory, Mock<IAmazonCloudFormation> mockCFClient, string templateBody, Mock<IDeployToolWorkspaceMetadata> deployToolWorkspaceMetadata, IFileManager fileManager)
         {
-            var templateMetadataReader = new TemplateMetadataReader(mockAWSClientFactory.Object);
+            var templateMetadataReader = new CloudFormationTemplateReader(mockAWSClientFactory.Object, deployToolWorkspaceMetadata.Object, fileManager);
             var cfResponse = new GetTemplateResponse();
             cfResponse.TemplateBody = templateBody;
             mockAWSClientFactory.Setup(x => x.GetAWSClient<IAmazonCloudFormation>(It.IsAny<string>())).Returns(mockCFClient.Object);

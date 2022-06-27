@@ -122,7 +122,8 @@ namespace AWS.Deploy.Common
         InvalidDeploymentManifestModel = 10010000,
         FailedToCreateDeepCopy = 10010100,
         FailedToGetOptionSettingValue = 10010200,
-        ECRRepositoryNameIsNull = 10010300
+        ECRRepositoryNameIsNull = 10010300,
+        FailedToReadCdkBootstrapVersion = 10010400
     }
 
     public class ProjectFileNotFoundException : DeployToolException
@@ -236,11 +237,11 @@ namespace AWS.Deploy.Common
     }
 
     /// <summary>
-    /// Throw if an invalid <see cref="UserDeploymentSettings"/> is used.
+    /// Throw if an invalid <see cref="DeploymentSettings"/> is used.
     /// </summary>
-    public class InvalidUserDeploymentSettingsException : DeployToolException
+    public class InvalidDeploymentSettingsException : DeployToolException
     {
-        public InvalidUserDeploymentSettingsException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+        public InvalidDeploymentSettingsException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     /// <summary>

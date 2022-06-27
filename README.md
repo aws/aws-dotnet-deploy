@@ -1,5 +1,4 @@
-# AWS .NET deployment tool
-
+# AWS .NET deployment tool [![nuget](https://img.shields.io/nuget/v/AWS.Deploy.Tools.svg) ![downloads](https://img.shields.io/nuget/dt/AWS.Deploy.Tools.svg)](https://www.nuget.org/packages/AWS.Deploy.Tools/)
 
 This repository contains the AWS .NET deployment tool for .NET CLI - the opinionated tooling that simplifies deployment of .NET applications. The tool suggests the right AWS compute service to deploy your application to.  It then builds and packages your application as required by the chosen compute service, generates the deployment infrastructure, deploys your application by using the appropriate deployment engine (Cloud Development Kit (CDK) or native service APIs), and displays the endpoint.
 
@@ -8,7 +7,7 @@ The tool assumes minimal knowledge of AWS. It is designed to guide you through t
 The goal of the deployment tool is to deploy cloud-native .NET applications that are built with .NET Core 3.1 and above. A cloud-native .NET application is written in .NET with the intent to deploy to Linux. It is not tied to any Windows specific technology such as Windows registry, IIS or MSMQ, and can be deployed on virtualized compute. The tool **cannot** be used to deploy .NET Framework, Desktop, Xamarin, or other applications that do not fit the "cloud-native" criteria.
 
 ## Project Status
-The tool is currently in **developer preview**. It currently has limited support for deployment targets and the settings for those targets. We are looking for feedback on the type of applications users want to deploy to AWS and what features are important to them. Please provide your feedback by opening an [issue in this repository](https://github.com/aws/aws-dotnet-deploy/issues).
+We are looking for feedback on the type of applications users want to deploy to AWS and what features are important to them. Please provide your feedback by opening an [issue in this repository](https://github.com/aws/aws-dotnet-deploy/issues).
 
 ## Pre-requisites
 

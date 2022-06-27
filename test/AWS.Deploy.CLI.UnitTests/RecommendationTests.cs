@@ -61,7 +61,7 @@ namespace AWS.Deploy.CLI.UnitTests
                 _fileManager.InMemoryStore.Add(recipeFile, File.ReadAllText(recipeFile));
             _deploymentManifestEngine = new DeploymentManifestEngine(_directoryManager, _fileManager);
             _orchestratorInteractiveService = new TestToolOrchestratorInteractiveService();
-            _recipeHandler = new RecipeHandler(_deploymentManifestEngine, _orchestratorInteractiveService, _directoryManager, _fileManager, _optionSettingHandler);
+            _recipeHandler = new RecipeHandler(_deploymentManifestEngine, _orchestratorInteractiveService, _directoryManager, _fileManager, _optionSettingHandler, _validatorFactory.Object);
         }
 
         private async Task<RecommendationEngine> BuildRecommendationEngine(string testProjectName)

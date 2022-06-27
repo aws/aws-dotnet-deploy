@@ -14,11 +14,6 @@ namespace AWS.Deploy.Constants
         public static readonly Version DefaultCDKVersion = Version.Parse("2.13.0");
 
         /// <summary>
-        /// The version number CDK bootstrap specified in CDKBootstrapTemplate.yaml
-        /// </summary>
-        public const int CDKTemplateVersion = 12;
-
-        /// <summary>
         /// The name of the CDK bootstrap CloudFormation stack
         /// </summary>
         public const string CDKBootstrapStackName = "CDKToolkit";

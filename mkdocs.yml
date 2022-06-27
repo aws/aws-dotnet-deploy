@@ -71,3 +71,7 @@ theme:
   icon:
     logo: aws-logo-light
   favicon: assets/images/aws-logo-light.svg
+
+markdown_extensions:
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji

@@ -1,7 +1,7 @@
 {
     "$schema": "./aws-deploy-recipe-schema.json",
     "Id": "BlazorWasm",
-    "Version": "0.2.0",
+    "Version": "1.0.0",
     "Name": "Blazor WebAssembly App",
     "DeploymentType": "CdkProject",
     "DeploymentBundle": "DotnetPublishZipFile",

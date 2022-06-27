@@ -34,7 +34,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.LocalUserSettings
                 .Setup(x => x.GetEnvironmentVariable(It.IsAny<string>()))
                 .Returns(() => null);
 
-            _deployToolWorkspaceMetadata = new DeployToolWorkspaceMetadata(_directoryManager, _environmentVariableManager.Object);
+            _deployToolWorkspaceMetadata = new DeployToolWorkspaceMetadata(_directoryManager, _environmentVariableManager.Object, _fileManager);
 
             _localUserSettingsEngine = new LocalUserSettingsEngine(_fileManager, _directoryManager, _deployToolWorkspaceMetadata);
         }

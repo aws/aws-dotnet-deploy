@@ -1,7 +1,7 @@
 {
     "$schema": "./aws-deploy-recipe-schema.json",
     "Id": "PushContainerImageEcr",
-    "Version": "0.1.0",
+    "Version": "1.0.0",
     "Name": "Container Image to Amazon Elastic Container Registry (ECR)",
     "DeploymentType": "ElasticContainerRegistryImage",
     "DeploymentBundle": "Container",
