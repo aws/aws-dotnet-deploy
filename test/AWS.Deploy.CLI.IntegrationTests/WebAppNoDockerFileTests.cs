@@ -52,9 +52,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
             _customWorkspace = Path.Combine(Path.GetTempPath(), $"deploy-tool-workspace{Guid.NewGuid().ToString().Split('-').Last()}");
-            var environmentVariableManager = serviceProvider.GetRequiredService<IEnvironmentVariableManager>();
-            environmentVariableManager.SetEnvironmentVariable("AWS_DOTNET_DEPLOYTOOL_WORKSPACE", _customWorkspace);
-            Directory.CreateDirectory(_customWorkspace);
+            Helpers.Utilities.OverrideDefaultWorkspace(serviceProvider, _customWorkspace);
 
             _app = serviceProvider.GetService<App>();
             Assert.NotNull(_app);
@@ -202,24 +200,6 @@ namespace AWS.Deploy.CLI.IntegrationTests
         ~WebAppNoDockerFileTests()
         {
             Dispose(false);
-        }
-    }
-
-    public class TestEnvironmentVariableManager : IEnvironmentVariableManager
-    {
-        public readonly Dictionary<string, string> store = new Dictionary<string, string>();
-
-        public string GetEnvironmentVariable(string variable)
-        {
-            return store.ContainsKey(variable) ? store[variable] : null;
-        }
-
-        public void SetEnvironmentVariable(string variable, string value)
-        {
-            if (string.Equals(variable, "AWS_DOTNET_DEPLOYTOOL_WORKSPACE"))
-                store[variable] = value;
-            else
-                Environment.SetEnvironmentVariable(variable, value);
         }
     }
 }
