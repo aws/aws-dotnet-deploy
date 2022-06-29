@@ -384,7 +384,7 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
                 var interactiveServices = new TestToolInteractiveServiceImpl(new List<string>
                 {
                     "y", // Free tier
-                    "1", // Architecture x64_86
+                    "1", // Architecture x86_64
                     "1", // CPU 
                     "1", // Memory
                     "1"  // Instance type
@@ -438,13 +438,13 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
                 .Setup(x => x.DescribeInstanceType(It.IsAny<string>()))
                 .ReturnsAsync((string type) =>
                 {
-                    if (type == "t1.x64_86")
+                    if (type == "t1.x86_64")
                     {
                         return new InstanceTypeInfo
                         {
                             ProcessorInfo = new ProcessorInfo
                             {
-                                SupportedArchitectures = new List<string> { "x64_86" }
+                                SupportedArchitectures = new List<string> { "x86_64" }
                             }
                         };
                     }
@@ -464,7 +464,7 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
                         {
                             ProcessorInfo = new ProcessorInfo
                             {
-                                SupportedArchitectures = new List<string> { "x64_86", EC2.FILTER_ARCHITECTURE_ARM64 }
+                                SupportedArchitectures = new List<string> { "x86_64", EC2.FILTER_ARCHITECTURE_ARM64 }
                             }
                         };
                     }
@@ -474,7 +474,7 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
 
             var validator = new WindowsInstanceTypeValidator(_mockAWSResourceQueryer.Object);
 
-            Assert.True(validator.Validate("t1.x64_86", beanstalkRecommendation, instanceTypeSetting).Result.IsValid);
+            Assert.True(validator.Validate("t1.x86_64", beanstalkRecommendation, instanceTypeSetting).Result.IsValid);
             Assert.False(validator.Validate("t1.arm64", beanstalkRecommendation, instanceTypeSetting).Result.IsValid);
             Assert.True(validator.Validate("t1.both", beanstalkRecommendation, instanceTypeSetting).Result.IsValid);
             Assert.False(validator.Validate("t1.fake", beanstalkRecommendation, instanceTypeSetting).Result.IsValid);
@@ -502,13 +502,13 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
                 .Setup(x => x.DescribeInstanceType(It.IsAny<string>()))
                 .ReturnsAsync((string type) =>
                 {
-                    if (type == "t1.x64_86")
+                    if (type == "t1.x86_64")
                     {
                         return new InstanceTypeInfo
                         {
                             ProcessorInfo = new ProcessorInfo
                             {
-                                SupportedArchitectures = new List<string> { "x64_86" }
+                                SupportedArchitectures = new List<string> { "x86_64" }
                             }
                         };
                     }
@@ -528,7 +528,7 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
                         {
                             ProcessorInfo = new ProcessorInfo
                             {
-                                SupportedArchitectures = new List<string> { "x64_86", EC2.FILTER_ARCHITECTURE_ARM64 }
+                                SupportedArchitectures = new List<string> { "x86_64", EC2.FILTER_ARCHITECTURE_ARM64 }
                             }
                         };
                     }
@@ -538,7 +538,7 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
 
             var validator = new LinuxInstanceTypeValidator(_mockAWSResourceQueryer.Object);
 
-            Assert.True(validator.Validate("t1.x64_86", beanstalkRecommendation, instanceTypeSetting).Result.IsValid);
+            Assert.True(validator.Validate("t1.x86_64", beanstalkRecommendation, instanceTypeSetting).Result.IsValid);
             Assert.True(validator.Validate("t1.arm64", beanstalkRecommendation, instanceTypeSetting).Result.IsValid);
             Assert.True(validator.Validate("t1.both", beanstalkRecommendation, instanceTypeSetting).Result.IsValid);
             Assert.False(validator.Validate("t1.fake", beanstalkRecommendation, instanceTypeSetting).Result.IsValid);

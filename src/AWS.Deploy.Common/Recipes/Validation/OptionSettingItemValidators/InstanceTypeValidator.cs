@@ -73,9 +73,9 @@ namespace AWS.Deploy.Common.Recipes.Validation
                 return ValidationResult.Failed($"The specified instance type {rawInstanceType} does not exist in the deployment region.");
             }
 
-            if (string.Equals(_platform, EC2.FILTER_PLATFORM_WINDOWS) && !instanceTypeInfo.ProcessorInfo.SupportedArchitectures.Contains("x64_86"))
+            if (string.Equals(_platform, EC2.FILTER_PLATFORM_WINDOWS) && !instanceTypeInfo.ProcessorInfo.SupportedArchitectures.Contains(EC2.FILTER_ARCHITECTURE_X86_64))
             {
-                return ValidationResult.Failed($"The specified instance type {rawInstanceType} does not support x86_64.");
+                return ValidationResult.Failed($"The specified instance type {rawInstanceType} does not support {EC2.FILTER_ARCHITECTURE_X86_64}.");
             }
 
             return ValidationResult.Valid();
