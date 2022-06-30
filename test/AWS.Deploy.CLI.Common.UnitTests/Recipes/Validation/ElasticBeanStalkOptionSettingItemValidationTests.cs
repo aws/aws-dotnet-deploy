@@ -47,6 +47,23 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         }
 
         [Theory]
+        [InlineData("Sun:00:00", true)]
+        [InlineData("sun:00:00", false)]
+        [InlineData("Suns:00:00", false)]
+        [InlineData("Mon:23:59", true)]
+        [InlineData("Mon:24:00", false)]
+        [InlineData("Mon:00:60", false)]
+        [InlineData("", false)]
+        [InlineData("test", false)]
+        public async Task PreferredStartTimeValidationTest(string value, bool isValid)
+        {
+            var optionSettingItem = new OptionSettingItem("id", "fullyQualifiedId", "name", "description");
+            // valid examples are in the 'day:hour:minute' pattern such as 'Sun:00:00'
+            optionSettingItem.Validators.Add(GetRegexValidatorConfig("^(Mon|Tue|Wed|Thu|Fri|Sat|Sun):(0[0-9]|1\\d|2[0-3]):(0[0-9]|1\\d|2\\d|3\\d|4\\d|5\\d)$"));
+            await Validate(optionSettingItem, value, isValid);
+        }
+
+        [Theory]
         [InlineData("abc-123", true)]
         [InlineData("abc-ABC-123-xyz", true)]
         [InlineData("abc", false)] // invalid length less than 4 characters.
