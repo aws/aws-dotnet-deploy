@@ -27,8 +27,11 @@ nav:
     - Docker support:
       - Dockerfile generation: docs/docker/docker-generation.md
       - Publishing a Docker image: docs/docker/publish-image.md
-    - Deployment recipes: docs/recipe.md
-    - Deployment projects: docs/project.md
+    - Deployment projects: 
+       - Getting Started: docs/deployment-projects/index.md
+       - Tutorial: docs/deployment-projects/tutorial.md
+       - Recipe File: docs/deployment-projects/recipe-file.md
+       - CDK Project: docs/deployment-projects/cdk-project.md
     - Integrating with CI/CD: docs/cicd.md
   - Troubleshooting Guide:
     - troubleshooting-guide/index.md
