@@ -323,6 +323,29 @@
                             }
                         }
                     }
+                },
+
+                {
+                    "if": {
+                        "properties": { "Type": { "const": "NuGetPackageReference" } }
+                    },
+                    "then": {
+                        "properties": {
+                            "Condition": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [ "NuGetPackageName" ],
+                                "properties": {
+                                    "NuGetPackageName": {
+                                        "type": "string",
+                                        "title": "NuGet Package Exists",
+                                        "description": "The name of the NuGet package to check if it being referenced by the project.",
+                                        "minLength": 1
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             ]
         },
@@ -501,6 +524,7 @@
                         "EC2KeyPair",
                         "Vpc",
                         "DotnetBeanstalkPlatformArn",
+                        "DotnetWindowsBeanstalkPlatformArn",
                         "DotnetPublishSelfContainedBuild",
                         "DotnetPublishBuildConfiguration",
                         "DotnetPublishAdditionalBuildArguments",
@@ -516,7 +540,11 @@
                         "ExistingVpcConnector",
                         "ExistingECSCluster",
                         "ExistingApplicationLoadBalancer",
-                        "S3BucketName"
+                        "S3BucketName",
+                        "DynamoDBTableName",
+                        "SQSQueueUrl",
+                        "SNSTopicArn",
+                        "FilePath"
                     ]
                 },
                 "DefaultValue": {
