@@ -20,10 +20,6 @@ AWS Deploy tool is available for download as a NuGet package. See [How to instal
 ### ... in AWS Toolkit for Visual Studio
 The AWS Toolkit for Visual Studio exposes the same deployment functionality via  **Publish to AWS** feature. For information about toolkit versions and using the feature, see [Publish to AWS](https://docs.aws.amazon.com/AWSToolkitVS/latest/UserGuide/publish-experience.html) in the [AWS Toolkit for Visual Studio User Guide](https://docs.aws.amazon.com/AWSToolkitVS/latest/UserGuide/).
 
-## What's new?
-
-TODO
-
 ## Additional Resources
 
 * The [aws-dotnet-deploy](https://github.com/aws/aws-dotnet-deploy) GitHub repo.

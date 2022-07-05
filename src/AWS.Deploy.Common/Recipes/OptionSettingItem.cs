@@ -164,6 +164,7 @@ namespace AWS.Deploy.Common.Recipes
         /// <summary>
         /// The validation state of the setting that contains the validation status and message.
         /// </summary>
+        [JsonIgnore]
         public OptionSettingValidation Validation { get; set; }
 
         public OptionSettingItem(string id, string fullyQualifiedId, string name, string description)
