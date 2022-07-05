@@ -8,17 +8,68 @@ To turn off the interactive features, use the `-s (--silent)` switch. This will 
 
     dotnet aws deploy --silent
 
-### Creating a deployment setting file
+### Creating a deployment settings file
 
-To specify the services to deploy and their configurations for your environment, you need to create deployment settings file. The deployment settings file is a JSON configuration file that contains all of the settings that the deployment tool uses to drive the experience. Here is the [JSON file definition](https://github.com/aws/aws-dotnet-deploy/tree/main/src/AWS.Deploy.Recipes/RecipeDefinitions).
+You can persist the deployment configuration to a JSON file using the `--save-settings <SETTINGS_FILE_PATH)>` switch. This JSON file can be version controlled and plugged into your CI/CD system for future deployments.
 
-Storing deployment settings in a JSON file also allows those settings to be version controlled.
+**Note** - The `--save-settings` switch will only persist settings that have been modified (which means they hold a non-default value). To persist all settings use the `--save-all-settings` switch.
+
+```
+dotnet aws deploy --project-path <PROJECT_PATH> [--save-settings|--save-all-settings] <SETTINGS_FILE_PATH>
+```
+
+**Note** - The `SETTINGS_FILE_PATH` can be an absolute path or relative to the `PROJECT_PATH`.
+
+Here's an example of a web application with the following directory structure:
+
+    MyWebApplication/
+    ┣ MyClassLibrary/
+    ┃ ┣ Class1.cs
+    ┃ ┗ MyClassLibrary.csproj
+    ┣ MyWebApplication/
+    ┃ ┣ Controllers/
+    ┃ ┃ ┗ WeatherForecastController.cs
+    ┃ ┣ appsettings.Development.json
+    ┃ ┣ appsettings.json
+    ┃ ┣ Dockerfile
+    ┃ ┣ MyWebApplication.csproj
+    ┃ ┣ Program.cs
+    ┃ ┣ WeatherForecast.cs
+    ┗ MyWebApplication.sln
+
+To perform a deployment and also persist the deployment configuration to a JSON file, use the following command:
+```
+dotnet aws deploy --project-path MyWebApplication/MyWebApplication/MyWebApplication.csproj --save-settings deploymentsettings.json
+```
+
+This will create a JSON file at `MyWebApplication/MyWebApplication/deploymentsettings.json` with the following structure:
+```
+{
+      "AWSProfile": <AWS_PROFILE>
+      "AWSRegion": <AWS_REGION>,
+      "ApplicationName": <APPLICATION_NAME>,
+      "RecipeId": <RECIPE_ID>
+      "Settings": <JSON_BLOB>
+}
+
+```
+* _**AWSProfile**_: The name of the AWS profile that was used during deployment.
+
+* _**AWSRegion**_: The name of the AWS region where the deployed application is hosted.
+
+* _**ApplicationName**_: The name that is used to identify your cloud application within AWS. If the application is deployed via AWS CDK, then this name points to the CloudFormation stack.
+
+* _**RecipeId**_: The recipe identifier that was used to deploy your application to AWS.
+
+* _**Settings**_: This is a JSON blob that stores the values of all available settings that can be tweaked to adjust the deployment configuration.
 
 ### Invoking from CI/CD
 
-The `--apply` switch on deploy command allows you to specify a deployment settings file.
+The `--apply` switch on the deploy command allows you to specify a deployment settings file.
 
-Deployment settings file path is always relative to the `--project-path`. Here's an example of a web application with the following directory structure:
+```
+dotnet aws deploy --project-path <PROJECT_PATH> --apply <SETTINGS_FILE_PATH>
+```
 
     MyWebApplication/
     ┣ MyClassLibrary/
@@ -36,7 +87,9 @@ Deployment settings file path is always relative to the `--project-path`. Here's
     ┃ ┗ WeatherForecast.cs
     ┗ MyWebApplication.sln
 
-To deploy the application with above directory structure in CI/CD pipeline without any prompts, use the following command:
+To deploy the application with the above directory structure in CI/CD pipeline without any prompts, use the following command:
 
     dotnet aws deploy --silent --project-path MyWebApplication/MyWebApplication/MyWebApplication.csproj --apply deploymentsettings.json
+
+
 
