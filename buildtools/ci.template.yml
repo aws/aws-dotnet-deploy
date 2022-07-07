@@ -15,10 +15,6 @@ Parameters:
     Description: Name of the CodeBuild project.
     Default: "aws-dotnet-deploy-ci"
     Type: String
-  CodeBuildArtifactsBucketName:
-    Description: Name of the buckets where the CodeBuild artifacts will be stored.
-    Default: "aws-dotnet-deploy-codebuild-artifacts"
-    Type: String
   TestRunnerRoleArn:
     Description: Role to assume when running tests.  This role must already exsit.  Role can be a different account.  Example arn:aws:iam:112233445566::role/awsdotnet-deploy-ci-test-runner
     Default: ""
@@ -67,12 +63,6 @@ Resources:
                   - logs:GetLogEvents
                 Resource:
                   - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${CodeBuildProjectName}:*
-              - Effect: Allow
-                Action:
-                  - s3:GetObject
-                  - s3:GetObjectVersion
-                Resource:
-                  - !Sub "${CodeBuildArtifactsBucket.Arn}/*"
 
   GithubOidc:
     Type: AWS::IAM::OIDCProvider
@@ -105,11 +95,7 @@ Resources:
         Location: !Sub https://github.com/${GitHubOrg}/${GitHubRepositoryName}
         BuildSpec: buildtools/ci.buildspec.yml
       Artifacts:
-        Type: S3
-        Packaging: ZIP
-        Location: !GetAtt CodeBuildArtifactsBucket.Arn
-        OverrideArtifactName: true
-
+        Type: NO_ARTIFACTS
 
   CodeBuildProjectRole:
     Type: AWS::IAM::Role
@@ -150,21 +136,6 @@ Resources:
                 Effect: Allow
                 Resource:
                   - !Sub arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:report-group/*
-              - Action:
-                - 's3:PutObject'
-                Effect: Allow
-                Resource:
-                  - !Sub "${CodeBuildArtifactsBucket.Arn}/*"
-
-  CodeBuildArtifactsBucket:
-    Type: 'AWS::S3::Bucket'
-    DeletionPolicy: Retain
-    Properties:
-      BucketName: !Ref CodeBuildArtifactsBucketName
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
 
 Outputs:
   OidcRole:
