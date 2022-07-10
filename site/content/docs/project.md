@@ -29,14 +29,11 @@ The `AppStack class` is the recommended place to add new AWS resources or custom
 
   > Note: Most of the code is located in the generated folder. We don’t recommend you edit the files in there directly, and instead use it for reference. If you want to take updates from the original recipe the deployment project was created from, you can just copy the code into the generated folder.
 
-In the example below, we’ll show you how to add a DynamoDB table....
-
-TODO
 
 ### Customizing deployment settings
-You can also add new settings that will be presented to the user during deployment.
+You can also add new settings that will be presented to the user during deployment. Modify the generated `.recipe` file to correspond to the changes you made to the CDK project.
 
-TODO
+The schema for the recipe file can be found [here](https://github.com/aws/aws-dotnet-deploy/blob/main/src/AWS.Deploy.Recipes/RecipeDefinitions/aws-deploy-recipe-schema.json).
 
 
 ### Specifying external project
