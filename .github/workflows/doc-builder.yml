@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - main
-      - dev
       
   # Allow the workflow to be triggered also manually.
   workflow_dispatch:
