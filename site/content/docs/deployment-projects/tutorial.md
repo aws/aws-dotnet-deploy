@@ -1,35 +1,36 @@
-# Deployment project tutorial
+# Custom deployment project tutorial
 
-For this tutorial we are going to assume we our on a team building the Acme.WebApp project. This web applicaton uses an AWS DynamoDB table as the backend store. We want to create a deployment project the team can use that deploys the application to Amazon Elastic Container Service (ECS) along with the application's DynamoDB table. 
+For this tutorial we going to create a custom deployment project to deploy our Acme.WebApp project. This web application uses an AWS DynamoDB table as the backend store. We want to create a custom deployment project that the team can use to deploy the application to Amazon Elastic Container Service (ECS) along with the application's DynamoDB table. 
 
-***Note: For this tutorial we are not concerned with the logic of the application being deployed. To follow along with this tutorial you can replace Acme.WebApp with any hello world web application.***
+***Note: For this tutorial we are not concerned with the logic of the application being deployed. To follow along with this tutorial you can replace Acme.WebApp with any "hello world" web application.***
 
 
 Tasks we will accomplish:
 
-* Creating a deployment project
-* Modify the deployment project's recipe file to allow the user to configure what DynamoDB table to use.
-* Customize the deployment project's CDK project to create the DynamoDB table and set an environment variable our application can read to know what table to use.
+* Create a custom deployment project
+* Modify the custom deployment project's recipe file to allow the user to configure what DynamoDB table to use.
+* Customize the deployment project's CDK project to create the DynamoDB table and set an environment variable that our application can read to know which table to use.
 
-### Creating deployment project
+### Creating the custom deployment project
 
-To create the deployment project navigate to the project directory of our application. Then run the following command to start creating the deployment project.
+To create the custom deployment project, navigate to the Acme.WebApp project directory and run the following command.
 
     dotnet aws deployment-project generate --output ../Acme.WebApp.DeploymentProject --project-display-name "ASP.NET Core app with DynamoDB" 
 
-The deploy tool will then analyze the project and display what recommendation to use for the starting point of the deployment project. Since we want to deploy to ECS we will pick the option that says "ASP.NET Core App to Amazon ECS using AWS Fargate".
+The AWS Deploy Tool will analyze the Acme.WebApp project and display which built-in recipes can be used as the starting point of the custom deployment project. Since we want to deploy to ECS, pick the option that says "ASP.NET Core App to Amazon ECS using AWS Fargate".
 
-Once the option is picked the deployment project Acme.WebApp.DeploymentProject is created in a sibling project to the application project. The `--project-display-name` switch above configures the name of the recommendation that is shown in the deploy tool when deploying the application project.
+Once the starting recipe is picked, `Acme.WebApp.DeploymentProject` is created in a sibling project to the application project. If you are using Visual Studio you might want to add the new `Acme.WebApp.DeploymentProject` project to your solution.
 
-If you are using Visual Studio you might want to add the Acme.WebApp.DeploymentProject project to your solution.
+The `--project-display-name` switch above configures the name of the recommendation that is shown in the deploy tool when deploying the application project.
+
 
 ### Adding DynamoDB settings to the recipe
 
-For our team members that will use our deployment project we want to give them the choice to either select an existing DynamoDB table or create a new table during deployment. To do that we need to add a few new settings to our deployment project's recipe definition.
+We want to give our team members who will use the custom deployment project the choice to either select an existing DynamoDB table or create a new table during deployment. To do that we need to add a few new settings to our deployment project's recipe definition.
 
-In the directory containing the deployment project open the `Acme.WebApp.DeploymentProject.recipe` file in your JSON editor of choice. In the file find the `OptionSettings` section that contains all of our settings that users can use to configure their project.
+In the directory containing the deployment project open the `Acme.WebApp.DeploymentProject.recipe` file in your JSON editor of choice. Find the `OptionSettings` section that contains the settings users can use to configure their project.
 
-To get started we are going to create a new object level setting called `Backend` to group all of our new settings. The snippet below shows the object level setting which is going to be grouped in the General settings category.
+To get started we are going to create a new "Object" setting called `Backend` to group all of our new settings. The snippet below shows the object-level setting. The options we are about to create will be displayed to the users in the "General" category when configuring their deployment.
 
 ```
   "OptionSettings": [
@@ -54,7 +55,7 @@ To get started we are going to create a new object level setting called `Backend
   }
 ```
 
-Now we are going to create our child settings. The first is a setting to determine if we should create a new table or not. This setting is a `Bool` type which is defaulted to `true`. As a best practice the `Updatable` setting is set to `false` to protected users from making an accidentaly mistake of deleting the table by switching to an existing table in the future. 
+Now we are going to create our child settings. The first is a setting to determine if we should create a new table or not. This setting is a `Bool` type which is defaulted to `true`. As a best practice the `Updatable` setting is set to `false` to protect users from accidentally deleting the table when redeploying in the future.
 
 ```
       "ChildOptionSettings": [
@@ -74,7 +75,7 @@ Now we are going to create our child settings. The first is a setting to determi
 
 ```
 
-If the user unchecks the `CreateNewTable` setting we need to give the user a choice to select an existing table. This `ExistingTableName` setting table is a String type that will store the name of the DynamoDB table to use as the backend store.
+If the user unchecks the `CreateNewTable` setting we need to give them the choice to select an existing table. This `ExistingTableName` setting is a "String" type that will store the name of an existing DynamoDB table to use as the backend store.
 
 ```
       "ChildOptionSettings": [
@@ -116,12 +117,12 @@ If the user unchecks the `CreateNewTable` setting we need to give the user a cho
       ]
 ```
 
-Lets take a deeper dive into the properties for the `ExistingTableName` setting.
+Let us take a deeper dive into the properties for the `ExistingTableName` setting.
 
-* **TypeHint** - set to `DynamoDBTableName` letting the deploy tool know this String type is for DynamoDB tables. The deploy tool uses this information to show a list of tables to pick from.
-* **Updatable** - since changing table names of existing tables is not a destructive change allow for this field to be updated during redeployments.
-* **DependsOn** - Controls this setting only being visible if the previous `CreateNewTable` setting is set to `false`. Notice how the Id is the full name of the setting including the parent Object setting `Backend`.
-* **Validators** - Build a couple validators to make sure the input name matches the regex for table names and that the name matches the required min and max length. Adding validators helps users get feedback right away when there is incorrect values for settings.
+* **TypeHint** - Set to `DynamoDBTableName` which lets the deployment tool know this String type is for the name of a DynamoDB table. The deploy tool uses this information to show users a list of tables to pick from instead of a text-box.
+* **Updatable** - Since modifying the name of an existing table is not a destructive change, we will allow this field to be updated during redeployments.
+* **DependsOn** - This setting will only be visible if the previous `CreateNewTable` setting is set to `false`. Notice how the `Id` is the full name of the setting including the parent "Object" setting `Backend`.
+* **Validators** - This attaches validators to make sure that the user-provided name matches the regex for valid table names and that the name meets the required minimum and maximum lengths. Adding validators provides feedback to users when invalid values are provided in either the CLI or Visual Studio.
 
 Here is the full snippet of the `Backend` Object setting with the child settings.
 ```
@@ -181,13 +182,15 @@ Here is the full snippet of the `Backend` Object setting with the child settings
 
 ### Customizing the deployment project's CDK project
 
-Now that users can customize the backend settings in the deployment tooling the CDK project for the deployment project needs to be updated to react to the new settings.
+Now that users can customize the backend settings when deploying, the CDK project for the custom deployment project needs to be updated to react to the new settings.
 
-***Note: The .NET CDK projects generated by the deploy tool have the C# feature `Nullable` enabled in the project file. If you do not want this feature enabled edit the csproj file and remove the `Nullable` projecty from the PropertyGroup.***
+***Note: The .NET CDK projects generated by the deploy tool have the C# feature `Nullable` enabled in the project file. If you do not want this feature enabled edit the csproj file and remove the `Nullable` project from the PropertyGroup.***
 
 #### Deserializing settings
 
-When the deploy tool executes the CDK project it passes all of the settings collected from the user and deserializes into the `Configuration` type in the CDK project. We need to modify the `Configuration` type to have the new backend settings. Create a new class called `BackendConfiguration` in the `Configurations` directory. Below is the code for this new type with the properties for `CreateNewTable` and `ExistingTableName`.
+When AWS Deploy Tool executes the CDK project it passes all of the settings collected from the user and deserializes them into the `Configuration` type in the CDK project. We need to modify the `Configuration` type to store the new backend settings. 
+
+Create a new class called `BackendConfiguration` in the `Configurations` directory. Below is the code for this new type with the properties for `CreateNewTable` and `ExistingTableName`.
 
 ```
 namespace Acme.WebApp.DeploymentProject.Configurations
@@ -233,11 +236,11 @@ namespace Acme.WebApp.DeploymentProject.Configurations
 }
 ```
 
-Notice the `Backend` property was added to the partial class that is **not** in the Generated directory. In both the Configuration and BackendConfiguration type the property names match the setting ids used in the recipe file. This is important for the data to be property deserialized.
+Notice that the `Backend` property was added to the partial class that is **not** in the `Generated` directory. In both the `Configuration` and `BackendConfiguration` types the property names match the setting ids used in the recipe file. This is important for the data to be property deserialized.
 
 #### CDK Changes
 
-The `AppStack` class is the recommended place to customzie the AWS resources created by the CDK. In the constructor of this class we will modify it check if `CreateNewTable` is set to true. If it is then use the CDK construct to create a table as part of the CloudFormation stack.
+The `AppStack` class is the recommended place to customize the AWS resources created by the CDK. We will modify the constructor of this class to check if `CreateNewTable` is set to true. If it is we will use the CDK construct to create a table as part of the CloudFormation stack.
 
 ```
 using Amazon.CDK.AWS.DynamoDB;
@@ -273,12 +276,15 @@ namespace Acme.WebApp.DeploymentProject
         }
 ```
 
-In the snippet above the table was created before `Recipe` construct. The `Recipe` construct has all of the AWS resources that are part of the original ECS recipe the deployment project was created from. Now that we have our table we need to pass the table name into the application. We are going to do this by setting an environment variable for the application.
+In the snippet above the table is created before `Recipe` construct. The `Recipe` construct has all of the AWS resources that are part of the original, built-in ECS recipe that the custom deployment project was created from. 
 
-The `CustomizeCDKProps` method in `AppStack` is a callback method that gets called for each AWS resources about to be created from the `Recipe` construct. Here is where we can set the environment variable. 
+Now that we have our table we need to pass the table name into our application code. We are going to do this by setting an environment variable that the application code will read.
 
-To know which AWS resource is about to be created compare the `evnt.ResourceLogicalName` property to the public property name on the `Recipe` construct. The system recipes are written to make sure the resource logical name is the same as the public property name. In our scenario we are looking to see if the `AppContainerDefinition` is about to be created. When we determine that the callback is for `AppContainerDefinition` then we cast the `evnt.Props` to the corresponding property object for `AppContainerDefinition` in this case `ContainerDefinitionOptions`. From `ContainerDefinitionOptions` we can set the table name.
+The `CustomizeCDKProps` method in `AppStack` is a callback method that gets called for each AWS resource about to be created from the `Recipe` construct. Here is where we can set the environment variable. 
 
+To know which AWS resource is about to be created, compare the `evnt.ResourceLogicalName` property to the public property name on the `Recipe` construct. The built-in recipes are written to make sure the resource logical name is the same as the public property name. In our scenario we are looking to see if the `AppContainerDefinition` is about to be created. 
+
+When we determine that the callback is for `AppContainerDefinition` then we cast the `evnt.Props` to the corresponding property object for `AppContainerDefinition`, in this case `ContainerDefinitionOptions`. From `ContainerDefinitionOptions` we can set the table name in an environment variable.
 
 ```
 private void CustomizeCDKProps(CustomizePropsEventArgs<Recipe> evnt)
@@ -308,7 +314,7 @@ private void CustomizeCDKProps(CustomizePropsEventArgs<Recipe> evnt)
 
 ### Using the deployment project
 
-Deployment projects are used through the same deployment process as the system recipes. For the CLI deploy tool experience execute the `dotnet aws deploy` command in the application project directory. The new deployment project will be displayed as the recommended option.
+Custom deployment projects are used through the same deployment workflow as the built-in recipes. For the CLI deploy tool, execute the `dotnet aws deploy` command in the application project directory. The custom deployment project will be displayed as the recommended option.
 
 ```
 Recommended Deployment Option
@@ -325,7 +331,7 @@ This ASP.NET Core application will be deployed to Amazon Elastic Container Servi
 
 ```
 
-The settings for the recommendation shows the Backend settings we customized. If we navigate to the backend settings the deploy tool will allow choosing to use a new table or picking an existing table.
+The settings for the recommendation shows the Backend settings we customized. If we navigate to the backend settings the deploy tool will allow the user to choose between using a new table or picking an existing table.
 
 ```
 ...
@@ -346,6 +352,6 @@ Current settings (select number to change its value)
 
 ```
 
-The AWS Toolkit for Visual Studio will also recognize the deployment project when deploying the application project. The deployment project will show up as the highest recommended option and if you edit settings you will be able to choose to use a new table or get a drop down box of available tables in my account.
+The AWS Toolkit for Visual Studio will also recognize the custom deployment project. The deployment project will show up as the highest recommended option and the user will also be able to choose between creating a new table or choosing from a drop-down list of available tables in the account that is being deployed to.
 
-When you are using deployment project for deploying applications the deployment project should be checked in as part of source control. The deployment project is required for redeployments to existing CloudFormation stacks that were created from the deployment project. 
+The custom deployment project should be checked in to your source control. The deployment project is required for redeployments to existing CloudFormation stacks that were created from the custom deployment project. 

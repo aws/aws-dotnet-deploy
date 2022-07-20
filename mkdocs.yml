@@ -27,7 +27,7 @@ nav:
     - Docker support:
       - Dockerfile generation: docs/docker/docker-generation.md
       - Publishing a Docker image: docs/docker/publish-image.md
-    - Deployment projects: 
+    - Custom Deployment Projects: 
        - Getting Started: docs/deployment-projects/index.md
        - Tutorial: docs/deployment-projects/tutorial.md
        - Recipe File: docs/deployment-projects/recipe-file.md
