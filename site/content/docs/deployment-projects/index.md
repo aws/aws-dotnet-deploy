@@ -1,39 +1,42 @@
-# Deployment projects
+# Custom Deployment Projects
 
-### What is a deployment project?
+AWS Deploy Tool comes with multiple recipes that can deploy your .NET application to [several different AWS compute services](../support.md). These built-in recipes let you configure AWS resources related to your application such as IAM roles, virtual private clouds, and load balancers.
 
-A deployment project allows you to customize the resources you deploy to AWS. For example if your deployment require additional application resources like a DynamoDB tables or SQS queues those resources could be added to the deployment project. 
+But what if your application uses additional AWS resources that are not included in the built-in recipes, such as DynamoDB tables or SQS queues? 
 
-When you have a deployment project you use the same deployment experience starting deployment with your application you want to deploy. The list of deployment recommendations will include your deployment projects.
+You can create a **custom deployment project** to expand one of the built-in recipes to manage additional AWS resources and services. 
+
+Once you create a custom deployment project, the AWS Deploy Tool CLI and the AWS Toolkit for Visual Studio will display it alongside the built-in recipes and offer users the same deployment experience.
+
+### Parts of a custom deployment project
+
+A custom deployment project is comprised of two parts. You can follow the getting start guide on this page or the [tutorial](./tutorial.md) to create these, then refer to the full reference guides below.
+
+* [Recipe file](./recipe-file.md) - a JSON file that drives the user experience in both the deploy tool CLI and AWS Toolkit for Visual Studio.  
+* [.NET CDK project](./cdk-project.md) - a C# project that uses the [AWS Cloud Development Kit (CDK)](https://aws.amazon.com/cdk/) to define the infrastructure that will be created for the deployment project. 
 
 ### Getting started
 
-To get started creating a deployment project execute the following command in the directory of the .NET project to deploy.
+To create a custom deployment project, execute the following command in the directory of the .NET project you wish to deploy.
 
     dotnet aws deployment-project generate --output <output-directory> --project-display-name <display-name> 
 
-The `--output` switch sets the directory where the deployment project will be saved to. To customize the name the deployment project that will be shown to users when the .NET project is being deployed use the `--project-display-name` switch.
+The `--output` switch sets the directory where the deployment project will be saved. Use the `--project-display-name` switch to customize the name of the custom recipe that will be shown to users when the .NET project is being deployed.
 
-Once you run the `dotnet aws deployment-project generate` the tool will display a list of system recipes that are compatible for the .NET project. Choose the recipe that is closest to what your project needs. These recipes will be used as the starting point for your deployment project that you can later customize.
+When you run the above command, the tool will display a list of built-in recipes that are compatible with your .NET project. Choose the built-in recipe that is closest to what you wish to deploy. This will be used as the starting point that you can then customize.
 
 Select the starting recipe and then a deployment project will be created in the location of the `--output` directory. Now you can begin customizing the deployment project.
 
 
 ### Add to source control
 
-When you use a deployment project to deploy a .NET project it is important to add the deployment project to source control. Redeployments require the deployment project to be available to the deployment tooling. If a CloudFormation stack was created from a deployment project and that 
+It is important to add the custom deployment project to source control. Redeployments require the custom deployment project to be available to the deployment tooling. If a CloudFormation stack was created from a custom deployment project and that 
 deployment project has been deleted then you will not be able to redeploy to that CloudFormation stack.
 
 
-### Searching for deployment projects
+### Searching for custom deployment projects
 
-When the deploy command is initiated the tooling searchs for the solution of the .NET project and searches for deployment project anywere underneath the solution directory. The deployment projects are sent through the deployment tooling's recommendation engine to make sure they are compatible with the project being deployed.
+When the deploy command is initiated AWS Deploy Tool starts from the solution (.sln) of the .NET project being deployed and searches for custom deployment projects anywhere underneath the solution directory. The custom deployment projects are sent through the deployment tooling's recommendation engine to make sure they are compatible with the .NET project being deployed.
 
-If the deployment project is outside of the solution directory the `--deployment-project` switch for the `dotnet aws deploy` command can be used to pass in the path of the deployment project to use. This is common for shared deployment-projects across multiple solutions.
+If the custom deployment project is outside of the solution directory use the `--deployment-project` switch for the `dotnet aws deploy` command to pass in the path of the custom deployment project to use. This is common when sharing custom deployment projects across multiple solutions.
 
-### Parts of a deployment project
-
-A deployment project is made of 2 parts. Click on the links below for a information about each part.
-
-* [Recipe JSON file](./recipe-file.md) - a JSON file that drives the deployment experience in the deploy tool CLI and AWS Toolkit for Visual Studio.  
-* [.NET CDK project](./cdk-project.md) - a C# project that uses the CDK to define the infrastructure that will be created for the deployment project. 

@@ -1,6 +1,6 @@
 # CDK Project
 
-A deployment project uses a C# Cloud Development Kit (CDK) project to take in the settings collected from the deployment tooling using the recipe and to create the AWS infrastructure as a CloudFormation stack with your project deployed to the infrastructure.
+A custom deployment project uses a C# Cloud Development Kit (CDK) project to create the AWS infrastructure as a CloudFormation stack based on the settings provided by the user and to deploy your project to that infrastructure.
 
 
 ### CDK Refresher
@@ -13,17 +13,17 @@ The following links are useful resources to learn how to write .NET CDK projects
 The main concepts to understand about the CDK are the following.
 
 * Stack - this is the top level container for all of the AWS resources represented as constructs. In deployment projects this type is usually the `AppStack` type in the project.
-* Constructs - AWS resources are modeled as constructs. Some constructs are a 1 to 1 mapping. The CDK also has higher level abstractions where constructs represent a collection of AWS resources to solve a specific problem.
+* Constructs - AWS resources are modeled as constructs. Some constructs are a one-to-one mapping to a single AWS resource. The CDK also has higher level abstractions where a single construct represents a collection of AWS resources that solve a specific problem.
 * Construct properties - For every construct this is a properties object that is created first, all necessary values are set and then passed into the constructor of a construct.
 
 
 ### Main method
 
-The main method for the CDK deployment project must be coded in a certain style to ensure interop with deploy tool. The deploy tool relies on .NET Configuration system to pass along settings from the deploy tool to the CDK project. In the example below `ConfigurationBuilder().AddAWSDeployToolConfiguration(app)` method takes care of reading the settings that were passed into the project from the deploy tool.
+The main method for the CDK deployment project must be coded in a certain style to ensure compatibility with the deploy tool. The deploy tool relies on .NET's Configuration system to pass along settings from the deploy tool to the CDK project. In the example below the `ConfigurationBuilder().AddAWSDeployToolConfiguration(app)` method reads the settings that were passed into the project from the deploy tool.
 
 With the configuration read from the deploy tool, the CDK environment is set to the account and region the deploy tool was configured with.
 
-The other major difference from non deploy tool CDK projects is the call to `CDKRecipeSetup.RegisterStack`. This is required to stamp the CloudFormation stack with the recipe id that created the stack. Future redeployments can target only be made with the originating recipe. It also serializes the settings collected from the deploy tool into the metadata for the CloudFormation stack so redeployments can use the previous settings used for deployment.
+The other major difference from normal CDK projects is the call to `CDKRecipeSetup.RegisterStack`. This is required to stamp the CloudFormation stack with the recipe id that created the stack. Future redeployments can only update existing stacks that were created by the original recipe. It also serializes the settings collected from the deploy tool into the metadata for the CloudFormation stack so redeployments can use the previous settings used for deployment.
 
 ```
 public static void Main(string[] args)
@@ -57,7 +57,7 @@ The layout of the generated CDK project puts all the code that was used to creat
 
 ![Catagories in AWS Toolkit for Visual Studio](../../assets/images/deployment-project-file-layout.png)
 
-It is recommended to not modify the code in the `Generated` directory to make it easier to merge future changes from the starting recipe back into your deployment project. If you do not intend to ever remerge from the starting recipe you modify the code or rearrange the directory layout.
+It is recommended to not modify the code in the `Generated` directory to make it easier to merge future changes from the starting recipe into your custom deployment project. If you do not intend to update your custom deployment project from the original built-in recipe you may modify the code or rearrange the directory layout.
 
 If you choose to not modify the `Generated` code it is recommended to customize the CDK project starting from the `AppStack` class. Here is the constructor of `AppStack`.
 
@@ -82,9 +82,11 @@ internal AppStack(Construct scope, IDeployToolStackProps<Configuration> props)
 }
 ```        
 
-The `var generatedRecipe = new Recipe(this, props.RecipeProps);` line of code creates all of the AWS resources from the `Generated` directory. Your customizations could create new AWS resources via CDK constructs before or after this line. Typically you would create new resourcces before this line if you want those resources to be connected to the resources defined in the `Recipe` type. If you need to create new resources that are connected to the resources defined in the `Recipe` then create them after this line. The instance of `Recipe` has public properties for all of the resources that were created in the `Recipe`.
+The `var generatedRecipe = new Recipe(this, props.RecipeProps);` line of code creates all of the AWS resources from the `Generated` directory. Your customizations could create new AWS resources via CDK constructs before or after this line. Typically you would create new resources before this line if you want those resources to be connected to the resources defined in the `Recipe` type. If you need to create new resources that are connected to the resources defined in the `Recipe` then create them after this line. The instance of `Recipe` has public properties for all of the resources that were created in the `Recipe`.
 
-In this constructor a callback method called `CustomizeCDKProps` is setup. This callback method is called right before any constructs are created from the `Recipe`. This allows modifying the constructs property object before it is passed into the construct. The example below shows the `CustomizeCDKProps` callback that checks to see if the resource being created is the Beanstalk Environment. If it is cast the property object to the appropiate property object and then make whatever customizations operations needed.
+In this constructor a callback method called `CustomizeCDKProps` is setup. This callback method is called right before any constructs are created from the `Recipe`. This allows modifying the construct's property object before it is passed into the construct.
+
+The example below shows the `CustomizeCDKProps` callback that checks to see if the resource being created is the Beanstalk Environment. If it is, cast the property object to the appropriate property object and then make whatever customizations are needed.
 
 ```
 private void CustomizeCDKProps(CustomizePropsEventArgs<Recipe> evnt)
@@ -101,6 +103,6 @@ private void CustomizeCDKProps(CustomizePropsEventArgs<Recipe> evnt)
 
 ### Configuration
 
-The settings collected in the deploy tool are passed into the CDK project and then deserialized into the `Configuration` object defined in the project. If you add new settings to the recipe file you will need to add the Id of the new settings to the `Configuration`. If you added an `Object` setting with a collection of child settings then you need to create a new type with the child setting ids as properties on the new type. Then add a new property on the `Configuration` type for the new type with the property name being the id of the `Object` setting.
+The settings collected in the deploy tool are passed into the CDK project and then deserialized into the `Configuration` object. If you add new settings to the recipe file you will need to add the Id of the new settings to the `Configuration` object. If you added an `Object` setting with a collection of child settings then you need to create a new type with the child setting ids as properties on the new type. Then add a new property on the `Configuration` type for the new type with the property name being the id of the `Object` setting.
 
-The `Configuration` object follows the same pattern as descibed above putting configuration in the `Generated` directory. The `Configuration` type is a partial type and there is also a partial `Configuration.cs` file outside of the `Generated` directory where custom settings should be added.
+The `Configuration` object follows the same `Generated` directory pattern described above. Custom settings should be added to the partial `Configuration.cs` file outside of the `Generated` directory.
