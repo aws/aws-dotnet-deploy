@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
@@ -60,6 +62,39 @@ namespace AWS.Deploy.CLI.IntegrationTests
         {
             var testCredentials = FallbackCredentialsFactory.GetCredentials();
             return Task.FromResult<AWSCredentials>(testCredentials);
+        }
+
+        /// <summary>
+        /// ServerMode must only be connectable from 127.0.0.1 or localhost. This test confirms that connect attempts using
+        /// the host name fail.
+        /// </summary>
+        /// <returns></returns>
+        [Fact]
+        public async Task ConfirmLocalhostOnly()
+        {
+            var portNumber = 4900;
+            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
+            var cancelSource = new CancellationTokenSource();
+
+            _ = serverCommand.ExecuteAsync(cancelSource.Token);
+            try
+            {
+                var restClient = new RestAPIClient($"http://localhost:{portNumber}/", ServerModeHttpClientFactory.ConstructHttpClient(ResolveCredentials));
+                await WaitTillServerModeReady(restClient);
+
+                using var client = new HttpClient();
+
+                var localhostUrl = $"http://localhost:{portNumber}/api/v1/Health";
+                await client.GetStringAsync(localhostUrl);
+
+                var host = Dns.GetHostName();
+                var hostnameUrl = $"http://{host}:{portNumber}/api/v1/Health";
+                await Assert.ThrowsAsync<HttpRequestException>(async () => await client.GetStringAsync(hostnameUrl));
+            }
+            finally
+            {
+                cancelSource.Cancel();
+            }
         }
 
         [Fact]
