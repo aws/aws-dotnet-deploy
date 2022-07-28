@@ -142,7 +142,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var recommendation = _recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
 
             var optionSetting = recommendation.Recipe.OptionSettings.First(x => x.Id.Equals("ElasticBeanstalkEnvironmentVariables"));
-            await Assert.ThrowsAsync<JsonReaderException>(async () => await _optionSettingHandler.SetOptionSettingValue(recommendation, optionSetting, "string"));
+            await Assert.ThrowsAsync<UnsupportedOptionSettingType>(async () => await _optionSettingHandler.SetOptionSettingValue(recommendation, optionSetting, "string"));
         }
 
         /// <summary>

@@ -123,7 +123,8 @@ namespace AWS.Deploy.Common
         FailedToCreateDeepCopy = 10010100,
         FailedToGetOptionSettingValue = 10010200,
         ECRRepositoryNameIsNull = 10010300,
-        FailedToReadCdkBootstrapVersion = 10010400
+        FailedToReadCdkBootstrapVersion = 10010400,
+        UnsupportedOptionSettingType = 10010500
     }
 
     public class ProjectFileNotFoundException : DeployToolException
@@ -218,6 +219,14 @@ namespace AWS.Deploy.Common
     public class ValidationFailedException : DeployToolException
     {
         public ValidationFailedException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+    }
+
+    /// <summary>
+    /// Thrown if <see cref="OptionSettingItem.SetValue"/> is setting a value with an incompatible type.
+    /// </summary>
+    public class UnsupportedOptionSettingType : DeployToolException
+    {
+        public UnsupportedOptionSettingType(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
 
     /// <summary>

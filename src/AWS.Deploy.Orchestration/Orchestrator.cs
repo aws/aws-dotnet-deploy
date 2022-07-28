@@ -151,6 +151,8 @@ namespace AWS.Deploy.Orchestration
         {
             if (_optionSettingHandler == null)
                 throw new InvalidOperationException($"{nameof(_optionSettingHandler)} is null as part of the orchestartor object");
+            if (_interactiveService == null)
+                throw new InvalidOperationException($"{nameof(_interactiveService)} is null as part of the orchestrator object");
 
             var recommendationCopy = recommendation.DeepCopy();
             recommendationCopy.IsExistingCloudApplication = true;
@@ -159,7 +161,15 @@ namespace AWS.Deploy.Orchestration
             {
                 if (previousSettings.TryGetValue(optionSetting.Id, out var value))
                 {
-                    await  _optionSettingHandler.SetOptionSettingValue(recommendationCopy, optionSetting, value, skipValidation: true);
+                    try
+                    {
+                        await _optionSettingHandler.SetOptionSettingValue(recommendationCopy, optionSetting, value, skipValidation: true);
+                    }
+                    catch (UnsupportedOptionSettingType ex)
+                    {
+                        _interactiveService.LogErrorMessage($"Unable to retrieve value of '{optionSetting.Name}' from previous deployment. Make sure to set it again prior to redeployment.");
+                        _interactiveService.LogDebugMessage(ex.Message);
+                    }
                 }
             }
 
