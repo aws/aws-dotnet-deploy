@@ -17,9 +17,9 @@ The main concepts to understand about the CDK are the following.
 * Construct properties - For every construct this is a properties object that is created first, all necessary values are set and then passed into the constructor of a construct.
 
 
-### Main method
+### Main method in Program.cs
 
-The main method for the CDK deployment project must be coded in a certain style to ensure compatibility with the deploy tool. The deploy tool relies on .NET's Configuration system to pass along settings from the deploy tool to the CDK project. In the example below the `ConfigurationBuilder().AddAWSDeployToolConfiguration(app)` method reads the settings that were passed into the project from the deploy tool.
+The `Main` method in `Program.cs` for the CDK deployment project must be coded in a certain style to ensure compatibility with the deploy tool. The deploy tool relies on .NET's Configuration system to pass along settings from the deploy tool to the CDK project. In the example below the `ConfigurationBuilder().AddAWSDeployToolConfiguration(app)` method reads the settings that were passed into the project from the deploy tool.
 
 With the configuration read from the deploy tool, the CDK environment is set to the account and region the deploy tool was configured with.
 

@@ -8,6 +8,9 @@ You can create a **custom deployment project** to expand one of the built-in rec
 
 Once you create a custom deployment project, the AWS Deploy Tool CLI and the AWS Toolkit for Visual Studio will display it alongside the built-in recipes and offer users the same deployment experience.
 
+![Custom Deployment Project in AWS Toolkit for Visual Studio](../../assets/images/custom-deployment-project.png)
+_The recommended publish target is a custom deployment project that manages a DynamoDB table in addition to the ASP.NET Core project._
+
 ### Parts of a custom deployment project
 
 A custom deployment project is comprised of two parts. You can follow the getting start guide on this page or the [tutorial](./tutorial.md) to create these, then refer to the full reference guides below.
