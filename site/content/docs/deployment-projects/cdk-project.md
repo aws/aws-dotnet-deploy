@@ -13,8 +13,8 @@ The following links are useful resources to learn how to write .NET CDK projects
 The main concepts to understand about the CDK are the following.
 
 * Stack - this is the top level container for all of the AWS resources represented as constructs. In deployment projects this type is usually the `AppStack` type in the project.
-* Constructs - AWS resources are modeled as constructs. Some constructs are a one-to-one mapping to a single AWS resource. The CDK also has higher level abstractions where a single construct represents a collection of AWS resources that solve a specific problem.
-* Construct properties - For every construct this is a properties object that is created first, all necessary values are set and then passed into the constructor of a construct.
+* Constructs - AWS resources are modeled as constructs. Some constructs are a one-to-one mapping to a single AWS resource. The CDK also has higher level abstractions where a single construct represents a collection of AWS resources that solve a common problem.
+* Construct properties - For every construct there is a properties object that is created first, all necessary values are set and then passed into the constructor of a construct.
 
 
 ### Main method in Program.cs
