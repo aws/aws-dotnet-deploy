@@ -1,11 +1,8 @@
-# Deployment project recipe
+# Recipe file schema
 
-In the custom deployment project is a JSON file with a `.recipe` extension. This file provides all of the metadata that drives the experience through the AWS Deploy Tool CLI and the AWS Toolkit for Visual Studio.
+Each deployment project has a JSON file with a `.recipe` extension. This recipe file defines the type of .NET projects the recipe is compatible with and the settings that will be shown to users.
 
-The recipe file defines the type of .NET projects the recipe is compatible with and the settings that will be shown to users.
-
-The full schema for the recipe file can be found [here](https://github.com/aws/aws-dotnet-deploy/blob/main/src/AWS.Deploy.Recipes/RecipeDefinitions/aws-deploy-recipe-schema.json).
-
+Read our [tutorial](../../tutorials/custom-project.md) to see how you can modify this file to drive the custom deployment experience and display custom option settings to the users. The full schema for the recipe file can be found [here](https://github.com/aws/aws-dotnet-deploy/blob/main/src/AWS.Deploy.Recipes/RecipeDefinitions/aws-deploy-recipe-schema.json).
 
 ### Top level settings
 
@@ -95,7 +92,7 @@ Here is an example of a rule that checks the project is a web project and target
           "Condition": {
             "Value": "Microsoft.NET.Sdk.Web"
           }
-        },        
+        },
         {
           "Type": "MSProperty",
           "Condition": {
@@ -146,24 +143,24 @@ Here is another example that tests if a project contains a docker file. If it do
   ]
 ```
 
-A recipe is considered compatible if no rule ran an effect that set `Include` to false and if the priority is greater then 0. 
+A recipe is considered compatible if no rule ran an effect that set `Include` to false and if the priority is greater then 0.
 
 To simulate an **"or"** set of rules the starting priority in `RecipePriority` can be set to a negative value meaning it is not included by default. Then you can have a series of tests that adjust the priority to a positive amount. That way if any test rule passes it can adjust the priority to a positive number.
 
 
 ### Setting Categories
 
-The `Categories` property is an array of objects that define the categories for the settings. The AWS Toolkit for Visual Studio uses this array to build the list of categories in the UI for fast navigation to a group of settings. 
+The `Categories` property is an array of objects that define the categories for the settings. The AWS Toolkit for Visual Studio uses this array to build the list of categories in the UI for fast navigation to a group of settings.
 
 ![Catagories in AWS Toolkit for Visual Studio](../../assets/images/vs-catagories.png)
 
-A category is defined with the following properties:  
+A category is defined with the following properties:
 
 * **Id** - the unique id within the recipe for the category.
 * **DisplayName** - the name of the category displayed to users.
 * **Order** - the order in the toolkit for the category. Categories are display in sorted descending order.
 
-Here is an example of defining a custom category that you could use to categorize additional settings added as application resources. 
+Here is an example of defining a custom category that you could use to categorize additional settings added as application resources.
 
 ```
   {
@@ -177,7 +174,7 @@ To assign a setting to a category, set the setting's `Category` property of to t
 
 ### Option Settings
 
-The settings that are shown to users and allows users to customize the deployment in either the CLI or Visual Studio are defined in the `OptionSettings` array. Settings have the following properties. 
+The settings that are shown to users and allows users to customize the deployment in either the CLI or Visual Studio are defined in the `OptionSettings` array. Settings have the following properties.
 
 * **Id** - the id of the setting. Once projects are deployed with the recipe, this id should not change because the id is saved into the CloudFormation stack's template.
 * **Name** - the name of the setting shown to users.
@@ -296,7 +293,7 @@ Here is an example for a setting used for storing an existing IAM role to use. T
               "Value": false
           }
       ],
-      
+
       ...
   }
 ```

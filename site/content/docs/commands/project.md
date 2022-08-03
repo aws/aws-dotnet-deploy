@@ -9,9 +9,12 @@
 ### Description
 Generates and saves the [deployment CDK project](../deployment-projects/index.md) in a user provided directory path without proceeding with a deployment. Allows user to customize the CDK project before deploying the application.
 
+* The `--output` switch sets the directory where the deployment project will be saved.
+* The `--project-display-name` switch sets the name that will be shown when the .NET project is being deployed.
+
 ### Examples
 
-Creates a deployment project based on the .NET project in the current directory. The new deployment project will be saved to a sibling directory called CustomDeploymentProject. The project display name _"Team custom deployment project"_ will be displayed to users when selecting a publish target when deploying with the custom deployment project.
+This example creates a deployment project from the .NET project in the current directory. The  deployment project will be saved to a sibling directory called CustomDeploymentProject. The name _"Team custom deployment project"_ will be displayed in the list of the available deployment options.
 
-    dotnet aws deployment-project generate --output ../CustomDeploymentProject --project-display-name "Team custom deployment project" 
+    dotnet aws deployment-project generate --output ../CustomDeploymentProject --project-display-name "Team custom deployment project"
 

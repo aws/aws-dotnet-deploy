@@ -1,45 +1,48 @@
-# Custom Deployment Projects
+# Deployment Projects
 
-AWS Deploy Tool comes with multiple recipes that can deploy your .NET application to [several different AWS compute services](../support.md). These built-in recipes let you configure AWS resources related to your application such as IAM roles, virtual private clouds, and load balancers.
+### What is a deployment recipe?
 
-But what if your application uses additional AWS resources that are not included in the built-in recipes, such as DynamoDB tables or SQS queues? 
+The tool provides intelligent deployment recommendations that are tailored to your specific .NET application. The recommendation rules are defined in the `deployment recipes`. These recipes let you configure a pre-defined set of AWS resources related to your application such as IAM roles, virtual private clouds, load balancers, and other.
 
-You can create a **custom deployment project** to expand one of the built-in recipes to manage additional AWS resources and services. 
+There is a built-in recipe for [each supported project type](../support.md). All recipe definitions are available [on GitHub](https://github.com/aws/aws-dotnet-deploy/tree/main/src/AWS.Deploy.Recipes/RecipeDefinitions).
 
-Once you create a custom deployment project, the AWS Deploy Tool CLI and the AWS Toolkit for Visual Studio will display it alongside the built-in recipes and offer users the same deployment experience.
+### What is a deployment project?
 
-![Custom Deployment Project in AWS Toolkit for Visual Studio](../../assets/images/custom-deployment-project.png)
-_The recommended publish target is a custom deployment project that manages a DynamoDB table in addition to the ASP.NET Core project._
+What if your application uses additional AWS resources that are not included in the built-in recipe, such as DynamoDB tables or SQS queues? In this case, you can extend one of the existing recipes and create a custom `deployment project` to manage additional AWS resources and services.
 
-### Parts of a custom deployment project
+Once you create and customize your deployment project, it will be displayed alongside the built-in recipes as a custom deployment option.
 
-A custom deployment project is comprised of two parts. You can follow the getting start guide on this page or the [tutorial](./tutorial.md) to create these, then refer to the full reference guides below.
+** Before:** _The recommended deployment target is a built-in recipe for ASP.NET Core applications._
 
-* [Recipe file](./recipe-file.md) - a JSON file that drives the user experience in both the deploy tool CLI and AWS Toolkit for Visual Studio.  
-* [.NET CDK project](./cdk-project.md) - a C# project that uses the [AWS Cloud Development Kit (CDK)](https://aws.amazon.com/cdk/) to define the infrastructure that will be created for the deployment project. 
+![Before](../../assets/images/cliBefore.png)
 
-### Getting started
+** After:** _The recommended deployment target is a custom deployment project that manages a DynamoDB table in addition to the ASP.NET Core project._
 
-To create a custom deployment project, execute the following command in the directory of the .NET project you wish to deploy.
+![After](../../assets/images/cliAfterBorder.png)
 
-    dotnet aws deployment-project generate --output <output-directory> --project-display-name <display-name> 
+### Parts of a deployment project
 
-The `--output` switch sets the directory where the deployment project will be saved. Use the `--project-display-name` switch to customize the name of the custom recipe that will be shown to users when the .NET project is being deployed.
+A deployment project consists of two parts. For details, refer to the full reference guides below.
 
-When you run the above command, the tool will display a list of built-in recipes that are compatible with your .NET project. Choose the built-in recipe that is closest to what you wish to deploy. This will be used as the starting point that you can then customize.
+* [Recipe file](./recipe-file.md) - a  JSON configuration file that drives the deployment experience.
+* [.NET CDK project](./cdk-project.md) - a C# project that uses the [AWS Cloud Development Kit (CDK)](https://aws.amazon.com/cdk/) to define the infrastructure that will be created.
 
-Select the starting recipe and then a deployment project will be created in the location of the `--output` directory. Now you can begin customizing the deployment project.
+### Creating a deployment project
 
+To create a custom deployment project, run this command in the directory of the .NET project you wish to deploy. See [`deployment-project` command](../commands/project.md) for more details.
 
-### Add to source control
+    dotnet aws deployment-project generate --output <output-directory> --project-display-name <display-name>
 
-It is important to add the custom deployment project to source control. Redeployments require the custom deployment project to be available to the deployment tooling. If a CloudFormation stack was created from a custom deployment project and that 
-deployment project has been deleted then you will not be able to redeploy to that CloudFormation stack.
+The list of built-in recipes that are compatible with your .NET project will be displayed. Select the recipe that you will use to customize, and a deployment project will be created in the `--output` directory.
 
+   > Note: It is important to add your deployment projects to source control. If your deployment project has been deleted, you will not be able to re-deploy your application to the same CloudFormation stack.
 
-### Searching for custom deployment projects
+Now you can begin customizing the deployment project. See our [step-by-step tutorial](../../tutorials/custom-project.md) for a step-by-step instructions.
 
-When the deploy command is initiated AWS Deploy Tool starts from the solution (.sln) of the .NET project being deployed and searches for custom deployment projects anywhere underneath the solution directory. The custom deployment projects are sent through the deployment tooling's recommendation engine to make sure they are compatible with the .NET project being deployed.
+### Searching for deployment projects
 
-If the custom deployment project is outside of the solution directory use the `--deployment-project` switch for the `dotnet aws deploy` command to pass in the path of the custom deployment project to use. This is common when sharing custom deployment projects across multiple solutions.
+When you run the `dotnet aws deploy` command, the tool searches for deployment projects anywhere underneath the solution (.sln) directory of project you are deploying. It also ensures that each deployment project iscompatible with the .NET project being deployed.
+
+To point to a deployment project that is outside the solution directory, use the `--deployment-project` switch to pass in the path of the deployment project to use. This is common when sharing deployment projects across multiple solutions.
+
 
