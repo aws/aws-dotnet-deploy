@@ -27,12 +27,13 @@ nav:
     - Docker support:
       - Dockerfile generation: docs/docker/docker-generation.md
       - Publishing a Docker image: docs/docker/publish-image.md
-    - Custom Deployment Projects: 
-       - Getting Started: docs/deployment-projects/index.md
-       - Tutorial: docs/deployment-projects/tutorial.md
+    - Deployment Projects:
+       - Overview: docs/deployment-projects/index.md
        - Recipe File: docs/deployment-projects/recipe-file.md
        - CDK Project: docs/deployment-projects/cdk-project.md
     - Integrating with CI/CD: docs/cicd.md
+  - Tutorials:
+    - Customizing deployment projects: tutorials/custom-project.md
   - Troubleshooting Guide:
     - troubleshooting-guide/index.md
     - Missing Dependencies: troubleshooting-guide/missing-dependencies.md
