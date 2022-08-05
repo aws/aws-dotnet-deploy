@@ -20,3 +20,9 @@ The AWS Deploy Tool  will show you all compute service options available to depl
 
 #### *FAQ: I have an application that has dependency on Windows technology, Can I use the AWS Deploy Tool to deploy it to AWS?*
 ASP.NET Core applications can be deployed to AWS Elastic Beanstalk picking the "ASP.NET Core App to AWS Elastic Beanstalk on Windows" recommendation. The deployment experience is very similar the "ASP.NET Core App to AWS Elastic Beanstalk on Linux" recommendation with additional settings for configuring the Internet Information Services (IIS) resource path and web site.
+
+#### *FAQ: Can I deploy my application from Visual Studio?*
+Yes, you can deploy your application using the "Publish to AWS" feature in the AWS Toolkit for Visual Studio. This feature exposes the same functionality as the AWS Deploy Tool for .NET CLI. To learn more, go to [Publish to AWS](https://docs.aws.amazon.com/toolkit-for-visual-studio/latest/user-guide/publish-experience.html) in the AWS Toolkit for Visual Studio User Guide.
+
+#### *FAQ: Can I invoke AWS Deploy Tool from my CI/CD pipeline?*
+Yes, you can. To learn more, go to [Integrating with CI/CD](docs/cicd.md)

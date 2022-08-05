@@ -14,10 +14,6 @@ To specify the services to deploy and their configurations for your environment,
 
 Storing deployment settings in a JSON file also allows those settings to be version controlled.
 
-This section defines the JSON definitions and syntax that you construct and use a deployment settings file.
-
-TODO
-
 ### Invoking from CI/CD
 
 The `--apply` switch on deploy command allows you to specify a deployment settings file.

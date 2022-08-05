@@ -125,45 +125,57 @@ namespace AWS.Deploy.Common.Recipes
             Validation.ValidationMessage = string.Empty;
             Validation.InvalidValue = null;
 
-            if (valueOverride is bool || valueOverride is int || valueOverride is long || valueOverride is double || valueOverride is Dictionary<string, string> || valueOverride is SortedSet<string>)
+            try
             {
-                _value = valueOverride;
-            }
-            else if (Type.Equals(OptionSettingValueType.KeyValue))
-            {
-                var deserialized = JsonConvert.DeserializeObject<Dictionary<string, string>>(valueOverride?.ToString() ?? "");
-                _value = deserialized;
-            }
-            else if (Type.Equals(OptionSettingValueType.List))
-            {
-                var deserialized = JsonConvert.DeserializeObject<SortedSet<string>>(valueOverride?.ToString() ?? "");
-                _value = deserialized;
-            }
-            else if (valueOverride is string valueOverrideString)
-            {
-                if (bool.TryParse(valueOverrideString, out var valueOverrideBool))
+                if (valueOverride is bool || valueOverride is int || valueOverride is long || valueOverride is double || valueOverride is Dictionary<string, string> || valueOverride is SortedSet<string>)
                 {
-                    _value = valueOverrideBool;
+                    _value = valueOverride;
                 }
-                else if (int.TryParse(valueOverrideString, out var valueOverrideInt))
+                else if (Type.Equals(OptionSettingValueType.KeyValue))
                 {
-                    _value = valueOverrideInt;
+                    var deserialized = JsonConvert.DeserializeObject<Dictionary<string, string>>(valueOverride?.ToString() ?? "");
+                    _value = deserialized;
+                }
+                else if (Type.Equals(OptionSettingValueType.List))
+                {
+                    var deserialized = JsonConvert.DeserializeObject<SortedSet<string>>(valueOverride?.ToString() ?? "");
+                    _value = deserialized;
+                }
+                else if (valueOverride is string valueOverrideString)
+                {
+                    if (bool.TryParse(valueOverrideString, out var valueOverrideBool))
+                    {
+                        _value = valueOverrideBool;
+                    }
+                    else if (int.TryParse(valueOverrideString, out var valueOverrideInt))
+                    {
+                        _value = valueOverrideInt;
+                    }
+                    else
+                    {
+                        _value = valueOverrideString;
+                    }
                 }
                 else
                 {
-                    _value = valueOverrideString;
-                }
-            }
-            else
-            {
-                var deserialized = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(valueOverride));
-                foreach (var childOptionSetting in ChildOptionSettings)
-                {
-                    if (deserialized?.TryGetValue(childOptionSetting.Id, out var childValueOverride) ?? false)
+                    var deserialized = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(valueOverride));
+                    foreach (var childOptionSetting in ChildOptionSettings)
                     {
-                        await optionSettingHandler.SetOptionSettingValue(recommendation, childOptionSetting, childValueOverride, skipValidation: skipValidation);
+                        if (deserialized?.TryGetValue(childOptionSetting.Id, out var childValueOverride) ?? false)
+                        {
+                            await optionSettingHandler.SetOptionSettingValue(recommendation, childOptionSetting, childValueOverride, skipValidation: skipValidation);
+                        }
                     }
                 }
+            }
+            catch (JsonReaderException ex)
+            {
+                Validation.ValidationStatus = ValidationStatus.Invalid;
+                Validation.ValidationMessage = $"The value you are trying to set is invalid.";
+                Validation.InvalidValue = valueOverride;
+                throw new UnsupportedOptionSettingType(DeployToolErrorCode.UnsupportedOptionSettingType,
+                    $"The value you are trying to set for the option setting '{Name}' is invalid.",
+                    ex);
             }
         }
 

@@ -33,7 +33,7 @@ namespace AWS.Deploy.CLI.UnitTests
         private readonly Orchestrator _orchestrator;
         private readonly Mock<IServiceProvider> _serviceProvider;
         private readonly IDeploymentManifestEngine _deploymentManifestEngine;
-        private readonly IOrchestratorInteractiveService _orchestratorInteractiveService;
+        private readonly TestToolOrchestratorInteractiveService _orchestratorInteractiveService;
         private readonly IDirectoryManager _directoryManager;
         private readonly IFileManager _fileManager;
         private readonly IRecipeHandler _recipeHandler;
@@ -55,7 +55,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var optionSettingHandler = new OptionSettingHandler(validatorFactory);
             _recipeHandler = new RecipeHandler(_deploymentManifestEngine, _orchestratorInteractiveService, _directoryManager, _fileManager, optionSettingHandler, validatorFactory);
             _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider.Object));
-            _orchestrator = new Orchestrator(null, null, null, null, null, null, null, null, null, null, null, null, null, _optionSettingHandler, null);
+            _orchestrator = new Orchestrator(null, _orchestratorInteractiveService, null, null, null, null, null, null, null, null, null, null, null, _optionSettingHandler, null);
         }
 
         private async Task<RecommendationEngine> BuildRecommendationEngine(string testProjectName)
@@ -74,6 +74,31 @@ namespace AWS.Deploy.CLI.UnitTests
             };
 
             return new RecommendationEngine(session, _recipeHandler);
+        }
+
+        [Fact]
+        public async Task ApplyPreviousSettings_InvalidType()
+        {
+            var engine = await BuildRecommendationEngine("WebAppWithDockerFile");
+
+            var recommendations = await engine.ComputeRecommendations();
+
+            var fargateRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_ASPNET_CORE_FARGATE_RECIPE_ID);
+
+
+            var serializedSettings = @$"
+            {{
+                ""AdditionalECSServiceSecurityGroups"": ""sg-1234abcd""
+            }}";
+
+            var settings = JsonConvert.DeserializeObject<Dictionary<string, object>>(serializedSettings);
+
+            fargateRecommendation = await _orchestrator.ApplyRecommendationPreviousSettings(fargateRecommendation, settings);
+
+            var additionalECSServiceSecurityGroupsOptionSetting = fargateRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("AdditionalECSServiceSecurityGroups"));
+
+            Assert.Contains($"Unable to retrieve value of '{additionalECSServiceSecurityGroupsOptionSetting.Name}' from previous deployment. Make sure to set it again prior to redeployment.",
+                _orchestratorInteractiveService.ErrorMessages);
         }
 
         [Theory]
