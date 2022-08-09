@@ -71,6 +71,8 @@ namespace AWS.Deploy.Common.Recipes
         /// Checks whether the Option Setting Item can be displayed as part of the settings summary of the previous deployment.
         /// </summary>
         bool IsSummaryDisplayable(Recommendation recommendation, OptionSettingItem optionSettingItem);
+
+
     }
 
 }
