@@ -42,7 +42,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider));
 
             _recipe = new RecipeDefinition("Fargate", "0.1", "Fargate", DeploymentTypes.CdkProject, DeploymentBundleTypes.Container, "", "", "", "", "");
-            _recommendation = new Recommendation(_recipe, null, 100, new Dictionary<string, string>());
+            _recommendation = new Recommendation(_recipe, null, 100, new Dictionary<string, object>());
         }
 
         [Theory]

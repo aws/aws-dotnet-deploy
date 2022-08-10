@@ -29,6 +29,11 @@ namespace AspNetAppAppRunner.Configurations
         public string? VpcConnectorId { get; set; }
 
         /// <summary>
+        /// If set, creates a new VPC whose Subnets and Security Groups will be used to create a new VPC Connector.
+        /// </summary>
+        public bool CreateNewVpc { get; set; }
+
+        /// <summary>
         /// The VPC ID to use for the App Runner service.
         /// </summary>
         public string? VpcId { get; set; }

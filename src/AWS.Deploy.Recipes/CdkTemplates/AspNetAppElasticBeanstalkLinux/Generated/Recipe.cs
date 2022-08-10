@@ -33,6 +33,8 @@ namespace AspNetAppElasticBeanstalkLinux
         
         public const string ENHANCED_HEALTH_REPORTING = "enhanced";
 
+        public Vpc? AppVpc { get; private set; }
+
         public IRole? AppIAMRole { get; private set; }
 
         public IRole? BeanstalkServiceRole { get; private set; }
@@ -62,9 +64,24 @@ namespace AspNetAppElasticBeanstalkLinux
                 Path = props.DotnetPublishZipPath
             });
 
+            ConfigureVpc(settings);
             ConfigureIAM(settings);
             var beanstalkApplicationName = ConfigureApplication(settings);
             ConfigureBeanstalkEnvironment(settings, beanstalkApplicationName);
+        }
+
+        private void ConfigureVpc(Configuration settings)
+        {
+            if (settings.VPC.UseVPC)
+            {
+                if (settings.VPC.CreateNew)
+                {
+                    AppVpc = new Vpc(this, nameof(AppVpc), InvokeCustomizeCDKPropsEvent(nameof(AppVpc), this, new VpcProps
+                    {
+                        MaxAzs = 2
+                    }));
+                }
+            }
         }
 
         private void ConfigureIAM(Configuration settings)
@@ -377,30 +394,77 @@ namespace AspNetAppElasticBeanstalkLinux
 
             if (settings.VPC.UseVPC)
             {
-                optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
+                if (settings.VPC.CreateNew)
                 {
-                    Namespace = "aws:ec2:vpc",
-                    OptionName = "VPCId",
-                    Value = settings.VPC.VpcId
-                });
+                    if (AppVpc == null)
+                        throw new InvalidOperationException($"{nameof(AppVpc)} has not been set. The {nameof(ConfigureVpc)} method should be called before {nameof(ConfigureBeanstalkEnvironment)}");
 
-                if (settings.VPC.Subnets.Any())
+                    optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
+                    {
+                        Namespace = "aws:ec2:vpc",
+                        OptionName = "VPCId",
+                        Value = AppVpc.VpcId
+                    });
+
+                    if (settings.EnvironmentType.Equals(ENVIRONMENTTYPE_SINGLEINSTANCE))
+                    {
+                        optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
+                        {
+                            Namespace = "aws:ec2:vpc",
+                            OptionName = "Subnets",
+                            Value = string.Join(",", AppVpc.PublicSubnets.Select(x => x.SubnetId))
+                        });
+                    }
+                    else if (settings.EnvironmentType.Equals(ENVIRONMENTTYPE_LOADBALANCED))
+                    {
+                        optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
+                        {
+                            Namespace = "aws:ec2:vpc",
+                            OptionName = "Subnets",
+                            Value = string.Join(",", AppVpc.PrivateSubnets.Select(x => x.SubnetId))
+                        });
+                        optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
+                        {
+                            Namespace = "aws:ec2:vpc",
+                            OptionName = "ELBSubnets",
+                            Value = string.Join(",", AppVpc.PublicSubnets.Select(x => x.SubnetId))
+                        });
+                    }
+
+                    optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
+                    {
+                        Namespace = "aws:autoscaling:launchconfiguration",
+                        OptionName = "SecurityGroups",
+                        Value = AppVpc.VpcDefaultSecurityGroup
+                    });
+                }
+                else
                 {
                     optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
                     {
                         Namespace = "aws:ec2:vpc",
-                        OptionName = "Subnets",
-                        Value = string.Join(",", settings.VPC.Subnets)
+                        OptionName = "VPCId",
+                        Value = settings.VPC.VpcId
                     });
 
-                    if (settings.VPC.SecurityGroups.Any())
+                    if (settings.VPC.Subnets.Any())
                     {
                         optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
                         {
-                            Namespace = "aws:autoscaling:launchconfiguration",
-                            OptionName = "SecurityGroups",
-                            Value = string.Join(",", settings.VPC.SecurityGroups)
+                            Namespace = "aws:ec2:vpc",
+                            OptionName = "Subnets",
+                            Value = string.Join(",", settings.VPC.Subnets)
                         });
+
+                        if (settings.VPC.SecurityGroups.Any())
+                        {
+                            optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
+                            {
+                                Namespace = "aws:autoscaling:launchconfiguration",
+                                OptionName = "SecurityGroups",
+                                Value = string.Join(",", settings.VPC.SecurityGroups)
+                            });
+                        }
                     }
                 }
             }

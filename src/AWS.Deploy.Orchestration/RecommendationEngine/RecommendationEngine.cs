@@ -24,9 +24,9 @@ namespace AWS.Deploy.Orchestration.RecommendationEngine
             _recipeHandler = recipeHandler;
         }
 
-        public async Task<List<Recommendation>> ComputeRecommendations(List<string>? recipeDefinitionPaths = null, Dictionary<string, string>? additionalReplacements = null)
+        public async Task<List<Recommendation>> ComputeRecommendations(List<string>? recipeDefinitionPaths = null, Dictionary<string, object>? additionalReplacements = null)
         {
-            additionalReplacements ??= new Dictionary<string, string>();
+            additionalReplacements ??= new Dictionary<string, object>();
 
             var recommendations = new List<Recommendation>();
             var availableRecommendations = await _recipeHandler.GetRecipeDefinitions(recipeDefinitionPaths);

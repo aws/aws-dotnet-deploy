@@ -76,6 +76,30 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             _toolInteractiveService.WriteLine();
             if (createNewVPCConnector)
             {
+                var availableVpcs = await _awsResourceQueryer.GetListOfVpcs();
+                if (!availableVpcs.Any())
+                {
+                    _toolInteractiveService.WriteLine("Your account does not contain a VPC, so we will create one for you and assign its Subnets and Security Groups to the VPC Connector.");
+                    return new VPCConnectorTypeHintResponse
+                    {
+                        UseVPCConnector = true,
+                        CreateNew = true,
+                        CreateNewVpc = true
+                    };
+                }
+
+                var createNewVpcOptionSetting = optionSetting.ChildOptionSettings.First(x => x.Id.Equals("CreateNewVpc"));
+                var createNewVpcOptionSettingValue = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, createNewVpcOptionSetting) ?? "false";
+                var createNewVpcAnswer = _consoleUtilities.AskYesNoQuestion(createNewVpcOptionSetting.Description, createNewVpcOptionSettingValue);
+                var createNewVpc = createNewVpcAnswer == YesNo.Yes;
+                if (createNewVpc)
+                    return new VPCConnectorTypeHintResponse
+                    {
+                        UseVPCConnector = true,
+                        CreateNew = true,
+                        CreateNewVpc = true
+                    };
+
                 _toolInteractiveService.WriteLine("In order to create a new VPC Connector, you need to select 1 or more Subnets as well as 1 or more Security groups.");
                 _toolInteractiveService.WriteLine();
 
@@ -89,7 +113,6 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                     CanBeEmpty = false,
                     CreateNew = false
                 };
-                var availableVpcs = await _awsResourceQueryer.GetListOfVpcs();
                 var vpc = _consoleUtilities.AskUserToChooseOrCreateNew<Vpc>(availableVpcs, "Select a VPC:", userInputConfigurationVPCs);
 
                 if (vpc.SelectedOption == null)
@@ -136,6 +159,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 {
                     UseVPCConnector = true,
                     CreateNew = true,
+                    CreateNewVpc = false,
                     VpcId = vpc.SelectedOption.VpcId,
                     Subnets = subnets,
                     SecurityGroups = securityGroups

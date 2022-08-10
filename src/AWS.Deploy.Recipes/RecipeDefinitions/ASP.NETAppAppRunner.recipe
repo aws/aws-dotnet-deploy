@@ -1,7 +1,7 @@
 {
     "$schema": "./aws-deploy-recipe-schema.json",
     "Id": "AspNetAppAppRunner",
-    "Version": "1.0.0",
+    "Version": "1.0.1",
     "Name": "ASP.NET Core App to AWS App Runner",
     "DeploymentType": "CdkProject",
     "DeploymentBundle": "Container",
@@ -469,6 +469,36 @@
                     ]
                 },
                 {
+                    "Id": "CreateNewVpc",
+                    "Name": "Create New VPC",
+                    "Description": "Do you want to create a new VPC to use for the VPC Connector?",
+                    "Type": "Bool",
+                    "DefaultValue": "{HasNotVpcs}",
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "VpcExists",
+                            "Configuration": {
+                                "FailValue": false,
+                                "DefaultVpc": false,
+                                "ValueType": "Bool",
+                                "ValidationFailedMessage": "You must create a new VPC since there are no existing VPCs to be used."
+                            }
+                        }
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "VPCConnector.UseVPCConnector",
+                            "Value": true
+                        },
+                        {
+                            "Id": "VPCConnector.CreateNew",
+                            "Value": true
+                        }
+                    ]
+                },
+                {
                     "Id": "VpcId",
                     "Name": "VPC ID",
                     "Description": "A list of VPC IDs that App Runner should use when it associates your service with a custom Amazon VPC.",
@@ -494,6 +524,10 @@
                         {
                             "Id": "VPCConnector.CreateNew",
                             "Value": true
+                        },
+                        {
+                            "Id": "VPCConnector.CreateNewVpc",
+                            "Value": false
                         }
                     ]
                 },
@@ -532,6 +566,10 @@
                         {
                             "Id": "VPCConnector.CreateNew",
                             "Value": true
+                        },
+                        {
+                            "Id": "VPCConnector.CreateNewVpc",
+                            "Value": false
                         },
                         {
                             "Id": "VPCConnector.VpcId",
@@ -574,6 +612,10 @@
                         {
                             "Id": "VPCConnector.CreateNew",
                             "Value": true
+                        },
+                        {
+                            "Id": "VPCConnector.CreateNewVpc",
+                            "Value": false
                         },
                         {
                             "Id": "VPCConnector.VpcId",

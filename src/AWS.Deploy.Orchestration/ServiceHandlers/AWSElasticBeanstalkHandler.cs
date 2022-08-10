@@ -90,7 +90,7 @@ namespace AWS.Deploy.Orchestration.ServiceHandlers
                 if (!optionSetting.Updatable)
                     continue;
 
-                var optionSettingValue = optionSetting.GetValue<string>(new Dictionary<string, string>());
+                var optionSettingValue = optionSetting.GetValue<string>(new Dictionary<string, object>());
 
                 additionalSettings.Add(new ConfigurationOptionSetting
                 {
