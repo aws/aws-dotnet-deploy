@@ -487,7 +487,7 @@ namespace AWS.Deploy.Orchestration.Data
                             }
                         }
                     })
-                .Vpcs.FirstAsync());
+                .Vpcs.FirstOrDefaultAsync());
         }
 
         public async Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns(params BeanstalkPlatformType[]? platformTypes)

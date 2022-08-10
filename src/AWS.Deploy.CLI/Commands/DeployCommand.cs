@@ -343,6 +343,8 @@ namespace AWS.Deploy.CLI.Commands
             else
                 previousSettings = await _deployedApplicationQueryer.GetPreviousSettings(deployedApplication);
 
+            await orchestrator.ApplyAllReplacementTokens(selectedRecommendation, deployedApplication.Name);
+
             selectedRecommendation = await orchestrator.ApplyRecommendationPreviousSettings(selectedRecommendation, previousSettings);
 
             var header = $"Loading {deployedApplication.DisplayName} settings:";

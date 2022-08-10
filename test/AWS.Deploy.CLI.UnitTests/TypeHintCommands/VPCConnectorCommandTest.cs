@@ -151,6 +151,7 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
             {
                 "y",
                 "y",
+                "n",
                 "1",
                 "1",
                 "1",

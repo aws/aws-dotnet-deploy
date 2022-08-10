@@ -1,7 +1,7 @@
 {
     "$schema": "./aws-deploy-recipe-schema.json",
     "Id": "ConsoleAppEcsFargateScheduleTask",
-    "Version": "1.0.0",
+    "Version": "1.0.1",
     "Name": "Scheduled Task on Amazon Elastic Container Service (ECS) using AWS Fargate",
     "DeploymentType": "CdkProject",
     "DeploymentBundle": "Container",
@@ -272,18 +272,40 @@
                     "Name": "Use default VPC",
                     "Description": "Do you want to use the default VPC?",
                     "Type": "Bool",
-                    "DefaultValue": true,
+                    "DefaultValue": "{HasDefaultVpc}",
                     "AdvancedSetting": false,
-                    "Updatable": false
+                    "Updatable": false,
+                    "Validators": [
+                        {
+                            "ValidatorType": "VpcExists",
+                            "Configuration": {
+                                "FailValue": true,
+                                "DefaultVpc": true,
+                                "ValueType": "Bool",
+                                "ValidationFailedMessage": "A default VPC could not be found."
+                            }
+                        }
+                    ]
                 },
                 {
                     "Id": "CreateNew",
                     "Name": "Create New VPC",
                     "Description": "Do you want to create a new VPC?",
                     "Type": "Bool",
-                    "DefaultValue": false,
+                    "DefaultValue": "{HasNotVpcs}",
                     "AdvancedSetting": false,
                     "Updatable": false,
+                    "Validators": [
+                        {
+                            "ValidatorType": "VpcExists",
+                            "Configuration": {
+                                "FailValue": false,
+                                "DefaultVpc": false,
+                                "ValueType": "Bool",
+                                "ValidationFailedMessage": "You must create a new VPC since there are no existing VPCs to be used."
+                            }
+                        }
+                    ],
                     "DependsOn": [
                         {
                             "Id": "Vpc.IsDefault",

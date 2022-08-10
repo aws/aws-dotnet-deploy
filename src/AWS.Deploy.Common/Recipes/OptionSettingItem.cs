@@ -19,22 +19,22 @@ namespace AWS.Deploy.Common.Recipes
         /// <summary>
         /// Retrieve the value of an <see cref="OptionSettingItem"/> as a specified type.
         /// </summary>
-        T? GetValue<T>(IDictionary<string, string> replacementTokens, IDictionary<string, bool>? displayableOptionSettings = null);
+        T? GetValue<T>(IDictionary<string, object> replacementTokens, IDictionary<string, bool>? displayableOptionSettings = null);
 
         /// <summary>
         /// Retrieve the value of an <see cref="OptionSettingItem"/> as an object.
         /// </summary>
-        object GetValue(IDictionary<string, string> replacementTokens, IDictionary<string, bool>? displayableOptionSettings = null);
+        object GetValue(IDictionary<string, object> replacementTokens, IDictionary<string, bool>? displayableOptionSettings = null);
 
         /// <summary>
         /// Retrieve the default value of an <see cref="OptionSettingItem"/> as a specified type.
         /// </summary>
-        T? GetDefaultValue<T>(IDictionary<string, string> replacementTokens);
+        T? GetDefaultValue<T>(IDictionary<string, object> replacementTokens);
 
         /// <summary>
         /// Retrieve the default value of an <see cref="OptionSettingItem"/> as an object.
         /// </summary>
-        object? GetDefaultValue(IDictionary<string, string> replacementTokens);
+        object? GetDefaultValue(IDictionary<string, object> replacementTokens);
 
         /// <summary>
         /// Set the value of an <see cref="OptionSettingItem"/> while validating the provided input.

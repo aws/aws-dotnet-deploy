@@ -15,6 +15,7 @@ using CfnService = Amazon.CDK.AWS.AppRunner.CfnService;
 using CfnServiceProps = Amazon.CDK.AWS.AppRunner.CfnServiceProps;
 using Constructs;
 using System.Collections.Generic;
+using Amazon.CDK.AWS.EC2;
 
 // This is a generated file from the original deployment recipe. It is recommended to not modify this file in order
 // to allow easy updates to the file when the original recipe that this project was created from has updates.
@@ -33,6 +34,7 @@ namespace AspNetAppAppRunner
         public IRole? TaskRole { get; private set; }
 
         public CfnVpcConnector? VPCConnector { get; private set; }
+        public Vpc? AppVpc { get; private set; }
 
         public Recipe(Construct scope, IRecipeProps<Configuration> props)
             // The "Recipe" construct ID will be used as part of the CloudFormation logical ID. If the value is changed this will
@@ -44,20 +46,57 @@ namespace AspNetAppAppRunner
             ConfigureAppRunnerService(props);
         }
 
+        private void ConfigureVpc(Configuration settings)
+        {
+            if (settings.VPCConnector.UseVPCConnector)
+            {
+                if (settings.VPCConnector.CreateNew)
+                {
+                    if (settings.VPCConnector.CreateNewVpc)
+                    {
+                        AppVpc = new Vpc(this, nameof(AppVpc), InvokeCustomizeCDKPropsEvent(nameof(AppVpc), this, new VpcProps
+                        {
+                            MaxAzs = 2
+                        }));
+                    }
+                }
+            }
+        }
+
         private void ConfigureVPCConnector(Configuration settings)
         {
             if (settings.VPCConnector.CreateNew)
             {
-                if (settings.VPCConnector.Subnets.Count == 0)
-                    throw new InvalidOrMissingConfigurationException("The provided list of Subnets is null or empty.");
-
-                VPCConnector = new CfnVpcConnector(this, nameof(VPCConnector), InvokeCustomizeCDKPropsEvent(nameof(VPCConnector), this, new CfnVpcConnectorProps
+                if (settings.VPCConnector.CreateNewVpc)
                 {
-                    Subnets = settings.VPCConnector.Subnets.ToArray(),
+                    ConfigureVpc(settings);
 
-                    // the properties below are optional
-                    SecurityGroups = settings.VPCConnector.SecurityGroups.ToArray()
-                }));
+                    if (AppVpc == null)
+                        throw new InvalidOperationException($"{nameof(AppVpc)} has not been set.");
+
+                    VPCConnector = new CfnVpcConnector(this, nameof(VPCConnector), InvokeCustomizeCDKPropsEvent(nameof(VPCConnector), this, new CfnVpcConnectorProps
+                    {
+                        Subnets = AppVpc.PrivateSubnets.Select(x => x.SubnetId).ToArray(),
+
+                        // the properties below are optional
+                        SecurityGroups = new string[] { AppVpc.VpcDefaultSecurityGroup }
+                    }));
+
+                    VPCConnector.Node.AddDependency(AppVpc);
+                }
+                else
+                {
+                    if (settings.VPCConnector.Subnets.Count == 0)
+                        throw new InvalidOrMissingConfigurationException("The provided list of Subnets is null or empty.");
+
+                    VPCConnector = new CfnVpcConnector(this, nameof(VPCConnector), InvokeCustomizeCDKPropsEvent(nameof(VPCConnector), this, new CfnVpcConnectorProps
+                    {
+                        Subnets = settings.VPCConnector.Subnets.ToArray(),
+
+                        // the properties below are optional
+                        SecurityGroups = settings.VPCConnector.SecurityGroups.ToArray()
+                    }));
+                }
             }
         }
 

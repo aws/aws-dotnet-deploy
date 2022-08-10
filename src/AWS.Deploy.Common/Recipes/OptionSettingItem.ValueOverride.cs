@@ -13,14 +13,14 @@ namespace AWS.Deploy.Common.Recipes
     /// <see cref="GetValue{T}"/>, <see cref="GetValue"/> and <see cref="SetValueOverride"/> methods
     public partial class OptionSettingItem
     {
-        public T? GetValue<T>(IDictionary<string, string> replacementTokens, IDictionary<string, bool>? displayableOptionSettings = null)
+        public T? GetValue<T>(IDictionary<string, object> replacementTokens, IDictionary<string, bool>? displayableOptionSettings = null)
         {
             var value = GetValue(replacementTokens, displayableOptionSettings);
 
             return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(value));
         }
 
-        public object GetValue(IDictionary<string, string> replacementTokens, IDictionary<string, bool>? displayableOptionSettings = null)
+        public object GetValue(IDictionary<string, object> replacementTokens, IDictionary<string, bool>? displayableOptionSettings = null)
         {
             if (_value != null)
             {
@@ -60,7 +60,7 @@ namespace AWS.Deploy.Common.Recipes
             return DefaultValue;
         }
 
-        public T? GetDefaultValue<T>(IDictionary<string, string> replacementTokens)
+        public T? GetDefaultValue<T>(IDictionary<string, object> replacementTokens)
         {
             var value = GetDefaultValue(replacementTokens);
             if (value == null)
@@ -71,7 +71,7 @@ namespace AWS.Deploy.Common.Recipes
             return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(value));
         }
 
-        public object? GetDefaultValue(IDictionary<string, string> replacementTokens)
+        public object? GetDefaultValue(IDictionary<string, object> replacementTokens)
         {
             if (DefaultValue == null)
             {
@@ -179,14 +179,30 @@ namespace AWS.Deploy.Common.Recipes
             }
         }
 
-        private string ApplyReplacementTokens(IDictionary<string, string> replacementTokens, string defaultValue)
+        private object ApplyReplacementTokens(IDictionary<string, object> replacementTokens, object defaultValue)
         {
-            foreach (var token in replacementTokens)
+            var defaultValueString = defaultValue?.ToString();
+            if (!string.IsNullOrEmpty(defaultValueString))
             {
-                defaultValue = defaultValue.Replace(token.Key, token.Value);
+                if (Type != OptionSettingValueType.String)
+                {
+                    foreach (var token in replacementTokens)
+                    {
+                        if (defaultValueString.Equals(token.Key))
+                            defaultValue = token.Value;
+                    }
+                }
+                else
+                {
+                    foreach (var token in replacementTokens)
+                    {
+                        defaultValueString = defaultValueString.Replace(token.Key, token.Value.ToString());
+                    }
+                    defaultValue = defaultValueString;
+                }
             }
 
-            return defaultValue;
+            return defaultValue ?? string.Empty;
         }
     }
 }
