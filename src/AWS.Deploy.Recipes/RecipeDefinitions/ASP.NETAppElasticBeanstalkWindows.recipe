@@ -1,7 +1,7 @@
 {
     "$schema": "./aws-deploy-recipe-schema.json",
     "Id": "AspNetAppElasticBeanstalkWindows",
-    "Version": "1.0.0",
+    "Version": "1.0.1",
     "Name": "ASP.NET Core App to AWS Elastic Beanstalk on Windows",
     "DeploymentType": "CdkProject",
     "DeploymentBundle": "DotnetPublishZipFile",
@@ -739,6 +739,7 @@
             "Category": "VPC",
             "Description": "A VPC enables you to launch the application into a virtual network that you've defined",
             "Type": "Object",
+            "TypeHint": "ElasticBeanstalkVpc",
             "AdvancedSetting": true,
             "Updatable": true,
             "ChildOptionSettings": [
@@ -752,9 +753,35 @@
                     "Updatable": false
                 },
                 {
+                    "Id": "CreateNew",
+                    "Name": "Create New VPC",
+                    "Description": "Do you want to create a new VPC?",
+                    "Type": "Bool",
+                    "DefaultValue": "{HasNotVpcs}",
+                    "AdvancedSetting": true,
+                    "Updatable": false,
+                    "Validators": [
+                        {
+                            "ValidatorType": "VpcExists",
+                            "Configuration": {
+                                "FailValue": false,
+                                "DefaultVpc": false,
+                                "ValueType": "Bool",
+                                "ValidationFailedMessage": "You must create a new VPC since there are no existing VPCs to be used."
+                            }
+                        }
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "VPC.UseVPC",
+                            "Value": true
+                        }
+                    ]
+                },
+                {
                     "Id": "VpcId",
                     "Name": "VPC ID",
-                    "Description": "A list of VPC IDs that App Runner should use when it associates your service with a custom Amazon VPC.",
+                    "Description": "A list of VPC IDs that Elastic Beanstalk should use when it associates your service with a custom Amazon VPC.",
                     "Type": "String",
                     "TypeHint": "ExistingVpc",
                     "DefaultValue": "{DefaultVpcId}",
@@ -773,12 +800,16 @@
                         {
                             "Id": "VPC.UseVPC",
                             "Value": true
+                        },
+                        {
+                            "Id": "VPC.CreateNew",
+                            "Value": false
                         }
                     ]
                 },
                 {
                     "Id": "Subnets",
-                    "Name": "Subnets",
+                    "Name": "EC2 Instance Subnets",
                     "Description": "A list of IDs of subnets that Elastic Beanstalk should use when it associates your environment with a custom Amazon VPC. Specify IDs of subnets of a single Amazon VPC.",
                     "Type": "List",
                     "TypeHint": "ExistingSubnets",
@@ -807,6 +838,10 @@
                         {
                             "Id": "VPC.UseVPC",
                             "Value": true
+                        },
+                        {
+                            "Id": "VPC.CreateNew",
+                            "Value": false
                         },
                         {
                             "Id": "VPC.VpcId",
@@ -845,6 +880,10 @@
                         {
                             "Id": "VPC.UseVPC",
                             "Value": true
+                        },
+                        {
+                            "Id": "VPC.CreateNew",
+                            "Value": false
                         },
                         {
                             "Id": "VPC.VpcId",

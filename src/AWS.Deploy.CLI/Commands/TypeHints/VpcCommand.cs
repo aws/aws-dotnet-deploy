@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Amazon.EC2.Model;
 using Amazon.ECS.Model;
+using AWS.Deploy.CLI.Extensions;
 using AWS.Deploy.CLI.TypeHintResponses;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Data;
@@ -17,15 +18,20 @@ using Newtonsoft.Json;
 
 namespace AWS.Deploy.CLI.Commands.TypeHints
 {
+    /// <summary>
+    /// The <see cref="VpcCommand"/> type hint orchestrates the VPC object in ECS Fargate environments.
+    /// </summary>
     public class VpcCommand : ITypeHintCommand
     {
         private readonly IAWSResourceQueryer _awsResourceQueryer;
         private readonly IConsoleUtilities _consoleUtilities;
+        private readonly IToolInteractiveService _toolInteractiveService;
 
-        public VpcCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities)
+        public VpcCommand(IAWSResourceQueryer awsResourceQueryer, IConsoleUtilities consoleUtilities, IToolInteractiveService toolInteractiveService)
         {
             _awsResourceQueryer = awsResourceQueryer;
             _consoleUtilities = consoleUtilities;
+            _toolInteractiveService = toolInteractiveService;
         }
 
         private async Task<List<Vpc>> GetData()
@@ -38,20 +44,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             var vpcs = await GetData();
             var resourceTable = new TypeHintResourceTable();
 
-            resourceTable.Rows =  vpcs.ToDictionary(x => x.VpcId, x => {
-                var name = x.Tags?.FirstOrDefault(x => x.Key == "Name")?.Value ?? string.Empty;
-                var namePart =
-                    string.IsNullOrEmpty(name)
-                        ? ""
-                        : $" ({name}) ";
-
-                var isDefaultPart =
-                    x.IsDefault
-                        ? " *** Account Default VPC ***"
-                        : "";
-
-                return $"{x.VpcId}{namePart}{isDefaultPart}";
-            }).Select(x => new TypeHintResource(x.Key, x.Value)).ToList();
+            resourceTable.Rows =  vpcs.ToDictionary(x => x.VpcId, x => x.GetDisplayableVpc()).Select(x => new TypeHintResource(x.Key, x.Value)).ToList();
 
             return resourceTable;
         }
@@ -62,23 +55,16 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
             var vpcs = await GetData();
 
+            if (!vpcs.Any())
+            {
+                _toolInteractiveService.WriteLine();
+                _toolInteractiveService.WriteLine("There are no VPCs in the selected account. The only option is to create a new one.");
+                return new VpcTypeHintResponse(false, true, string.Empty);
+            }
+
             var userInputConfig = new UserInputConfiguration<Vpc>(
                 idSelector: vpc => vpc.VpcId,
-                displaySelector: vpc =>
-                {
-                    var name = vpc.Tags?.FirstOrDefault(x => x.Key == "Name")?.Value ?? string.Empty;
-                    var namePart =
-                        string.IsNullOrEmpty(name)
-                            ? ""
-                            : $" ({name}) ";
-
-                    var isDefaultPart =
-                        vpc.IsDefault
-                            ? " *** Account Default VPC ***"
-                            : "";
-
-                    return $"{vpc.VpcId}{namePart}{isDefaultPart}";
-                },
+                displaySelector: vpc => vpc.GetDisplayableVpc(),
                 defaultSelector: vpc =>
                     !string.IsNullOrEmpty(currentVpcTypeHintResponse?.VpcId)
                         ? vpc.VpcId == currentVpcTypeHintResponse.VpcId

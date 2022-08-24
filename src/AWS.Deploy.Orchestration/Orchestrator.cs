@@ -220,7 +220,23 @@ namespace AWS.Deploy.Orchestration
                     throw new InvalidOperationException($"{nameof(_awsResourceQueryer)} is null as part of the Orchestrator object");
 
                 var defaultVPC = await _awsResourceQueryer.GetDefaultVpc();
-                recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_DEFAULT_VPC_ID, defaultVPC.VpcId);
+                recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_DEFAULT_VPC_ID, defaultVPC?.VpcId ?? string.Empty);
+            }
+            if (recommendation.ReplacementTokens.ContainsKey(Constants.RecipeIdentifier.REPLACE_TOKEN_HAS_DEFAULT_VPC))
+            {
+                if (_awsResourceQueryer == null)
+                    throw new InvalidOperationException($"{nameof(_awsResourceQueryer)} is null as part of the Orchestrator object");
+
+                var defaultVPC = await _awsResourceQueryer.GetDefaultVpc();
+                recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_HAS_DEFAULT_VPC, defaultVPC != null);
+            }
+            if (recommendation.ReplacementTokens.ContainsKey(Constants.RecipeIdentifier.REPLACE_TOKEN_HAS_NOT_VPCS))
+            {
+                if (_awsResourceQueryer == null)
+                    throw new InvalidOperationException($"{nameof(_awsResourceQueryer)} is null as part of the Orchestrator object");
+
+                var vpcs = await _awsResourceQueryer.GetListOfVpcs();
+                recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_HAS_NOT_VPCS, !vpcs.Any());
             }
         }
 

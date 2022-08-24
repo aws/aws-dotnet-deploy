@@ -462,16 +462,19 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
             var useVpcOptionSetting = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, "VPC.UseVPC");
+            var createNewOptionSetting = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, "VPC.CreateNew");
             var vpcIdOptionSetting = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, "VPC.VpcId");
             var subnetsSetting = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, "VPC.Subnets");
 
             // Before dependency aren't satisfied
             Assert.True(_optionSettingHandler.IsOptionSettingDisplayable(beanstalkRecommendation, useVpcOptionSetting));
+            Assert.False(_optionSettingHandler.IsOptionSettingDisplayable(beanstalkRecommendation, createNewOptionSetting));
             Assert.False(_optionSettingHandler.IsOptionSettingDisplayable(beanstalkRecommendation, vpcIdOptionSetting));
             Assert.False(_optionSettingHandler.IsOptionSettingDisplayable(beanstalkRecommendation, subnetsSetting));
 
             // Satisfy dependencies
             await _optionSettingHandler.SetOptionSettingValue(beanstalkRecommendation, useVpcOptionSetting, true);
+            await _optionSettingHandler.SetOptionSettingValue(beanstalkRecommendation, createNewOptionSetting, false);
             await _optionSettingHandler.SetOptionSettingValue(beanstalkRecommendation, vpcIdOptionSetting, "vpc-1234abcd");
             Assert.True(_optionSettingHandler.IsOptionSettingDisplayable(beanstalkRecommendation, vpcIdOptionSetting));
             Assert.True(_optionSettingHandler.IsOptionSettingDisplayable(beanstalkRecommendation, subnetsSetting));

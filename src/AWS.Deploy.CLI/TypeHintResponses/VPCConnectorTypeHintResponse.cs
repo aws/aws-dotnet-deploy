@@ -15,6 +15,7 @@ namespace AWS.Deploy.CLI.TypeHintResponses
         public string? VpcConnectorId { get; set; }
         public bool UseVPCConnector { get; set; }
         public bool CreateNew { get; set; }
+        public bool CreateNewVpc { get; set; }
         public string? VpcId { get; set; }
         public SortedSet<string> Subnets { get; set; } = new SortedSet<string>();
         public SortedSet<string> SecurityGroups { get; set; } = new SortedSet<string>();

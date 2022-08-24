@@ -1,13 +1,26 @@
 # AWS .NET deployment tool [![nuget](https://img.shields.io/nuget/v/AWS.Deploy.Tools.svg) ![downloads](https://img.shields.io/nuget/dt/AWS.Deploy.Tools.svg)](https://www.nuget.org/packages/AWS.Deploy.Tools/)
 
-This repository contains the AWS .NET deployment tool for .NET CLI - the opinionated tooling that simplifies deployment of .NET applications. The tool suggests the right AWS compute service to deploy your application to.  It then builds and packages your application as required by the chosen compute service, generates the deployment infrastructure, deploys your application by using the appropriate deployment engine (Cloud Development Kit (CDK) or native service APIs), and displays the endpoint.
+## Overview
+This repository contains the AWS Deploy Tool for .NET CLI - the opinionated tooling that simplifies deployment of .NET applications. The tool suggests the right AWS compute service to deploy your application to.  It then builds and packages your application as required by the chosen compute service, generates the deployment infrastructure, deploys your application by using the appropriate deployment engine (Cloud Development Kit (CDK) or native service APIs), and displays the endpoint.
 
 The tool assumes minimal knowledge of AWS. It is designed to guide you through the deployment process and provides suggested defaults. The tool will show you all compute service options available to deploy your application, and will recommend a default with information about why it was chosen. The other compute service options will be shown with an explanation of their differences. If the selected compute option does not match your needs, you can select a different compute service.
 
 The goal of the deployment tool is to deploy cloud-native .NET applications that are built with .NET Core 3.1 and above. A cloud-native .NET application is written in .NET with the intent to deploy to Linux. It is not tied to any Windows specific technology such as Windows registry, IIS or MSMQ, and can be deployed on virtualized compute. The tool **cannot** be used to deploy .NET Framework, Desktop, Xamarin, or other applications that do not fit the "cloud-native" criteria.
 
-## Project Status
-We are looking for feedback on the type of applications users want to deploy to AWS and what features are important to them. Please provide your feedback by opening an [issue in this repository](https://github.com/aws/aws-dotnet-deploy/issues).
+We welcome your feedback! Please let us know what you think by opening an [issue](https://github.com/aws/aws-dotnet-deploy/issues).
+
+
+## Useful Links
+* [Complete Documentation Guide on GitHub.io](https://aws.github.io/aws-dotnet-deploy/) 
+* [AWS Deploy Tool for .NET on NuGet](https://www.nuget.org/packages/AWS.Deploy.Tools)
+* Blog posts:
+  * [AWS Streamlines Deployment experience for .NET applications](https://aws.amazon.com/blogs/developer/aws-announces-a-streamlined-deployment-experience-for-net-applications/)
+  * [Reimagining the AWS .NET deployment experience](http://aws.amazon.com/blogs/developer/reimagining-the-aws-net-deployment-experience/)
+  * [Update on our new AWS .NET Deployment Experience](https://aws.amazon.com/blogs/developer/update-new-net-deployment-experience/)
+  * [Deployment Projects with the new AWS .NET Deployment Experience](https://aws.amazon.com/blogs/developer/dotnet-deployment-projects/)
+* Youtube videos:
+  * [AWS On Air ft. New .NET Deployment Experience - Command Line](https://www.youtube.com/watch?v=5uyL8MXxljc)
+  * [Re:Invent 2021: “What’s new with .NET development and deployment on AWS”](https://www.youtube.com/watch?v=UvTJ_Inb634)
 
 ## Pre-requisites
 
@@ -24,6 +37,7 @@ To take advantage of this library you’ll need:
   * Used when deploying to a container based service like Amazon Elastic Container Service (Amazon ECS)
 * (optional) The zip cli tool
    *   Mac / Linux only. Used when creating zip packages for deployment bundles. The zip cli is used to maintain Linux file permissions.
+
 ## Getting started
 
 The deployment tool is distributed as a .NET Tool from NuGet.org. The installation of the tool is managed with the `dotnet` CLI.
@@ -135,15 +149,10 @@ We welcome community contributions and pull requests. See [CONTRIBUTING](https:/
 
 ## Additional Resources
 
-* [AWS Developer Guide](https://docs.aws.amazon.com/sdk-for-net/v3/developer-guide/deployment-tool.html) Find additional information about developing, deploying, and maintaining your applications using the AWS .Net deployment tool.
 * [AWS Developer Center - Explore .NET on AWS](https://aws.amazon.com/developer/language/net/) Find all the .NET code samples, step-by-step guides, videos, blog content, tools, and information about live events that you need in one place.
 * [AWS Developer Blog - .NET](https://aws.amazon.com/blogs/developer/category/programing-language/dot-net/) Come see what .NET developers at AWS are up to! Learn about new .NET software announcements, guides, and how-to's.
-* [AWS re:Invent 2021 - What’s new with .NET development and deployment on AWS](https://www.youtube.com/watch?v=UvTJ_Inb634) New deployment tooling incorporates best AWS practices right from the start, providing you with recommendations and the optimal deployment option for your .NET application.
 * [@dotnetonaws](https://twitter.com/dotnetonaws) Follow us on twitter!
-* Deployment tool blog posts
-  * [Reimagining the AWS .NET deployment experience](http://aws.amazon.com/blogs/developer/reimagining-the-aws-net-deployment-experience/)
-  * [Update on our new AWS .NET Deployment Experience](https://aws.amazon.com/blogs/developer/update-new-net-deployment-experience/)
-  * [Deployment Projects with the new AWS .NET Deployment Experience](https://aws.amazon.com/blogs/developer/dotnet-deployment-projects/)
+
 
 ## License
 

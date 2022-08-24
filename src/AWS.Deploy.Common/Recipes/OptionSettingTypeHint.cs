@@ -38,6 +38,7 @@ namespace AWS.Deploy.Common.Recipes
         ExistingSubnets,
         ExistingSecurityGroups,
         VPCConnector,
-        FilePath
+        FilePath,
+        ElasticBeanstalkVpc
     };
 }

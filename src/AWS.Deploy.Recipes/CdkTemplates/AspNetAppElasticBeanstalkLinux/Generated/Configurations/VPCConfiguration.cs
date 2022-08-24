@@ -15,6 +15,11 @@ namespace AspNetAppElasticBeanstalkLinux.Configurations
         public bool UseVPC { get; set; }
 
         /// <summary>
+        /// Creates a new VPC if set to true.
+        /// </summary>
+        public bool CreateNew { get; set; }
+
+        /// <summary>
         /// The VPC ID to use for the Elastic Beanstalk service.
         /// </summary>
         public string? VpcId { get; set; }

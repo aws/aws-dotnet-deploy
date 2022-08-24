@@ -61,7 +61,8 @@ namespace AWS.Deploy.Common.Recipes.Validation
             { OptionSettingItemValidatorList.SecurityGroupsInVpc, typeof(SecurityGroupsInVpcValidator) },
             { OptionSettingItemValidatorList.Uri, typeof(UriValidator) },
             { OptionSettingItemValidatorList.Comparison, typeof(ComparisonValidator) },
-            { OptionSettingItemValidatorList.VPCSubnetsInDifferentAZs, typeof(VPCSubnetsInDifferentAZsValidator) }
+            { OptionSettingItemValidatorList.VPCSubnetsInDifferentAZs, typeof(VPCSubnetsInDifferentAZsValidator) },
+            { OptionSettingItemValidatorList.VpcExists, typeof(VpcExistsValidator) }
         };
 
         private static readonly Dictionary<RecipeValidatorList, Type> _recipeValidatorTypeMapping = new()

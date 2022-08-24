@@ -33,11 +33,11 @@ namespace AWS.Deploy.Common
 
         public DeploymentBundle DeploymentBundle { get; }
 
-        public readonly Dictionary<string, string> ReplacementTokens = new();
+        public readonly Dictionary<string, object> ReplacementTokens = new();
 
-        public Recommendation(RecipeDefinition recipe, ProjectDefinition projectDefinition, int computedPriority, Dictionary<string, string> additionalReplacements)
+        public Recommendation(RecipeDefinition recipe, ProjectDefinition projectDefinition, int computedPriority, Dictionary<string, object> additionalReplacements)
         {
-            additionalReplacements ??= new Dictionary<string, string>();
+            additionalReplacements ??= new Dictionary<string, object>();
             Recipe = recipe;
 
             ComputedPriority = computedPriority;
@@ -106,7 +106,7 @@ namespace AWS.Deploy.Common
             }
         }
 
-        public void AddReplacementToken(string key, string value)
+        public void AddReplacementToken(string key, object value)
         {
             ReplacementTokens[key] = value;
         }
