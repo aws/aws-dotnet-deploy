@@ -10,10 +10,10 @@ The following are some examples of the typical permissions that are required.
 
 |Command| Task | Recommended AWS Managed Policies |
 | --- | --- |--- |
-|deploy | Deploying to Amazon ECS | AWSCloudFormationFullAccess, AmazonECS_FullAccess, AmazonEC2ContainerRegistryFullAccess, IAMFullAccess |
-|deploy | Deploying to AWS App Runner| AWSCloudFormationFullAccess, AWSAppRunnerFullAccess, AmazonEC2ContainerRegistryFullAccess, IAMFullAccess|
-|deploy | Deploying to Elastic Beanstalk (deploy) | AWSCloudFormationFullAccess, AdministratorAccess-AWSElasticBeanstalk', AmazonS3FullAccess (*required to upload the application bundle*), IAMFullAccess |
-|deploy | Hosting WebAssembly Blazor App in S3 & CloudFront | AmazonS3FullAccess, CloudFrontFullAccess, IAMFullAccess, AWSLambda_FullAccess (*required to copy from CDKBootstrap bucket to S3 bucket*)|
+|deploy | Deploying to Amazon ECS | AWSCloudFormationFullAccess, AmazonECS_FullAccess, AmazonEC2ContainerRegistryFullAccess, AmazonSSMFullAccess, IAMFullAccess |
+|deploy | Deploying to AWS App Runner| AWSCloudFormationFullAccess, AWSAppRunnerFullAccess, AmazonEC2ContainerRegistryFullAccess, AmazonSSMFullAccess, IAMFullAccess|
+|deploy | Deploying to Elastic Beanstalk (deploy) | AWSCloudFormationFullAccess, AdministratorAccess-AWSElasticBeanstalk, AmazonSSMFullAccess, AmazonS3FullAccess (*required to upload the application bundle*), IAMFullAccess |
+|deploy | Hosting WebAssembly Blazor App in S3 & CloudFront | AmazonS3FullAccess, CloudFrontFullAccess, IAMFullAccess, AmazonSSMFullAccess, AWSLambda_FullAccess (*required to copy from CDKBootstrap bucket to S3 bucket*)|
 | list-deployments | List CF stacks| AWSCloudFormationReadOnlyAccess  |
 | delete-deployment | Delete a CF stack | AWSCloudFormationFullAccess + permissions for resources being deleted |
 
