@@ -21,6 +21,8 @@
 ** Amazon.JSII.Runtime; version 1.54.0 -- https://www.nuget.org/packages/Amazon.JSII.Runtime
 ** AWSSDK.CloudControlApi; version 3.7.2 -- https://www.nuget.org/packages/AWSSDK.CloudControlApi/
 ** AWSSDK.SimpleSystemsManagement; version 3.7.16 -- https://www.nuget.org/packages/AWSSDK.SimpleSystemsManagement/
+** AWSSDK.SSO; version 3.7.0.201 -- https://www.nuget.org/packages/AWSSDK.SSO
+** AWSSDK.SSOOIDC; version 3.7.1.4 -- https://www.nuget.org/packages/AWSSDK.SSOOIDC
  
 Apache License
 Version 2.0, January 2004
@@ -253,6 +255,10 @@ limitations under the License.
     Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 * For AWSSDK.SimpleSystemsManagement see also this required NOTICE:
     Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+* For AWSSDK.SSO see also this required NOTICE:
+    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+* For AWSSDK.SSOOIDC see also this required NOTICE:
+    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
 ------
 
@@ -334,8 +340,6 @@ Copyright (c) 2016 .NET Foundation
 Copyright (c) 2016 .NET Foundation
 ** Microsoft.Extensions.Configuration.Json; version 3.1.7 -- https://www.nuget.org/packages/Microsoft.Bcl.AsyncInterhttps://www.nuget.org/packages/Microsoft.Extensions.Configuration.Jsonfaces
 Copyright (c) .NET Foundation and Contributors
-** System.Text.Json; version 6.0.4 -- https://www.nuget.org/packages/System.Text.Json
-Copyright (c) .NET Foundation and Contributors
 ** Microsoft.Extensions.DependencyInjection; version 6.0.0 -- https://www.nuget.org/packages/Microsoft.Extensions.DependencyInjection
 Copyright (c) .NET Foundation and Contributors
 **  Microsoft.Extensions.DependencyInjection.Abstractions; version 6.0.0 -- https://www.nuget.org/packages/Microsoft.Extensions.DependencyInjection.Abstractions
@@ -344,7 +348,9 @@ Copyright (c) .NET Foundation and Contributors
 Copyright (c) .NET Foundation and Contributors
 ** Microsoft.OpenApi; version 1.2.3 -- https://www.nuget.org/packages/Microsoft.OpenApi/
 Copyright (c) Microsoft Corporation.
-
+** System.Text.Json; version 6.0.4 -- https://www.nuget.org/packages/System.Text.Json
+Copyright (c) .NET Foundation and Contributors
+ 
 All rights reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
