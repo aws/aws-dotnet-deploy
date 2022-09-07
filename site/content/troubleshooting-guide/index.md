@@ -96,3 +96,13 @@ StagingBucket cdk-hnb659fds-assets-123456789101-us-west-2 already exists
 ```
 
 **Resolution**: Open the AWS Console, go to S3 service, and manually delete the 'CDKToolkit' S3 bucket. Once the bucket is deleted, go ahead and deploy your application.
+
+## MemorySize Constraint for Blazor WebAssembly
+When attempting to deploy using the Blazor WebAssembly App recipe, you may see a deployment failure such as:
+```
+Resource handler returned message: "'MemorySize' value failed to satisfy constraint: Member must have value less than or equal to 3008
+```
+
+**Why this is happening:** The [BucketDeployment](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_s3_deployment.BucketDeployment.html) CDK Construct used to deploy the Blazor recipe uses an AWS Lambda function to replicate the application files from the CDK bucket to the deployment bucket. In some versions of the deploy tool the default memory limit for this Lambda function exceeded the 3008MB quota placed on new AWS accounts.
+
+**Resolution:** See [Lambda: Concurrency and memory quotas](https://docs.aws.amazon.com/lambda/latest/dg/troubleshooting-deployment.html#troubleshooting-deployment-quotas) for how to request a quota increase.
