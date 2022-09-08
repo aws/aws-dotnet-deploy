@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Collections.Generic;
 using Amazon.CloudFormation;
 using Amazon.ECS;
 using Amazon.ECS.Model;
@@ -59,14 +60,14 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
         [Fact]
         public async Task PerformDeployment()
         {
-            // Deploy
+            var stackNamePlaceholder = "{StackName}";
+            _stackName = $"WebAppWithDockerFile{Guid.NewGuid().ToString().Split('-').Last()}";
+            _clusterName = $"{_stackName}-cluster";
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
             var configFilePath = Path.Combine(Directory.GetParent(projectPath).FullName, "ECSFargateConfigFile.json");
-            var suffix = ConfigFileHelper.ReplacePlaceholders(configFilePath);
+            ConfigFileHelper.ApplyReplacementTokens(new Dictionary<string, string> { { stackNamePlaceholder, _stackName } }, configFilePath);
 
-            _stackName = $"EcsFargate{suffix}";
-            _clusterName = $"MyNewCluster{suffix}";
-
+            // Deploy
             var deployArgs = new[] { "deploy", "--project-path", projectPath, "--apply", configFilePath, "--silent", "--diagnostics" };
             Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
 

@@ -27,6 +27,13 @@ namespace AWS.Deploy.Common.Recipes
         Task SetOptionSettingValue(Recommendation recommendation, OptionSettingItem optionSettingItem, object value, bool skipValidation = false);
 
         /// <summary>
+        /// This method is used to set values for <see cref="OptionSettingItem"/> bases on the fullyQualifiedId of the option setting.
+        /// Due to different validations that could be put in place, access to other services may be needed.
+        /// This method is meant to control access to those services and determine the value to be set.
+        /// </summary>
+        Task SetOptionSettingValue(Recommendation recommendation, string fullyQualifiedId, object value, bool skipValidation = false);
+
+        /// <summary>
         /// This method retrieves the <see cref="OptionSettingItem"/> related to a specific <see cref="Recommendation"/>.
         /// </summary>
         OptionSettingItem GetOptionSetting(Recommendation recommendation, string? jsonPath);
@@ -71,6 +78,11 @@ namespace AWS.Deploy.Common.Recipes
         /// Checks whether the Option Setting Item can be displayed as part of the settings summary of the previous deployment.
         /// </summary>
         bool IsSummaryDisplayable(Recommendation recommendation, OptionSettingItem optionSettingItem);
-    }
 
+        /// <summary>
+        /// Checks whether the option setting item has been modified by the user. If it has been modified, then it will hold a non-default value
+        /// </summary>
+        /// <returns>true if the option setting item has been modified or false otherwise</returns>
+        bool IsOptionSettingModified(Recommendation recommendation, OptionSettingItem optionSetting);
+    }
 }

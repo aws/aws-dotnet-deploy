@@ -47,6 +47,8 @@ namespace AWS.Deploy.CLI.Commands
         private static readonly Option<string> _optionOutputDirectory = new(new[] { "-o", "--output" }, "Directory path in which the CDK deployment project will be saved.");
         private static readonly Option<string> _optionProjectDisplayName = new(new[] { "--project-display-name" }, "The name of the deployment project that will be displayed in the list of available deployment options.");
         private static readonly Option<string> _optionDeploymentProject = new(new[] { "--deployment-project" }, "The absolute or relative path of the CDK project that will be used for deployment");
+        private static readonly Option<string> _optionSaveSettings = new(new[] { "--save-settings" }, "The absolute or the relative JSON file path where the deployment settings will be saved. Only the settings modified by the user will be persisted");
+        private static readonly Option<string> _optionSaveAllSettings = new(new[] { "--save-all-settings" }, "The absolute or the relative JSON file path where the deployment settings will be saved. All deployment settings will be persisted");
         private static readonly object s_root_command_lock = new();
         private static readonly object s_child_command_lock = new();
 
@@ -180,6 +182,8 @@ namespace AWS.Deploy.CLI.Commands
                 deployCommand.Add(_optionDiagnosticLogging);
                 deployCommand.Add(_optionDisableInteractive);
                 deployCommand.Add(_optionDeploymentProject);
+                deployCommand.Add(_optionSaveSettings);
+                deployCommand.Add(_optionSaveAllSettings);
             }
 
             deployCommand.Handler = CommandHandler.Create(async (DeployCommandHandlerInput input) =>
@@ -252,7 +256,9 @@ namespace AWS.Deploy.CLI.Commands
                         deploymentProjectPath = Path.GetFullPath(deploymentProjectPath, targetApplicationDirectoryPath);
                     }
 
-                    await deploy.ExecuteAsync(input.ApplicationName ?? string.Empty, deploymentProjectPath, deploymentSettings);
+                    var saveSettingsConfig = Helpers.GetSaveSettingsConfiguration(input.SaveSettings, input.SaveAllSettings, targetApplicationDirectoryPath, _fileManager);
+
+                    await deploy.ExecuteAsync(input.ApplicationName ?? string.Empty, deploymentProjectPath, saveSettingsConfig, deploymentSettings);
 
                     return CommandReturnCodes.SUCCESS;
                 }

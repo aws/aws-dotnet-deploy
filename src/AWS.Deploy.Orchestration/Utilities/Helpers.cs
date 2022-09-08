@@ -87,5 +87,47 @@ namespace AWS.Deploy.Orchestration.Utilities
 
             return overridenWorkspace;
         }
+
+        /// <summary>
+        /// Creates a <see cref="SaveSettingsConfiguration"/>
+        /// </summary>
+        /// <param name="saveSettingsPath">Absolute or relative JSON file path where the deployment settings will be saved. Only the settings modified by the user are persisted.</param>
+        /// <param name="saveAllSettingsPath">Absolute or relative JSON file path where the deployment settings will be saved. All deployment settings are persisted.</param>
+        /// <param name="projectDirectoryPath">Absolute path to the user's .NET project directory</param>
+        /// <param name="deploymentSettingsHandler"><see cref="IDeploymentSettingsHandler"/></param>
+        /// <returns><see cref="SaveSettingsConfiguration"/></returns>
+        public static SaveSettingsConfiguration GetSaveSettingsConfiguration(string? saveSettingsPath, string? saveAllSettingsPath, string projectDirectoryPath, IFileManager fileManager)
+        {
+            if (!string.IsNullOrEmpty(saveSettingsPath) && !string.IsNullOrEmpty(saveAllSettingsPath))
+            {
+                throw new FailedToSaveDeploymentSettingsException(DeployToolErrorCode.FailedToSaveDeploymentSettings, "Cannot save deployment settings because invalid arguments were provided. Cannot use --save-settings along with --save-all-settings");
+            }
+
+            var filePath = string.Empty;
+            var saveSettingsType = SaveSettingsType.None;
+
+            if (!string.IsNullOrEmpty(saveSettingsPath))
+            {
+                filePath = saveSettingsPath;
+                saveSettingsType = SaveSettingsType.Modified;
+            }
+            else if (!string.IsNullOrEmpty(saveAllSettingsPath))
+            {
+                filePath = saveAllSettingsPath;
+                saveSettingsType = SaveSettingsType.All;
+            }
+
+            if (!string.IsNullOrEmpty(filePath))
+            {
+                filePath = Path.GetFullPath(filePath, projectDirectoryPath);
+                if (!fileManager.IsFileValidPath(filePath))
+                {
+                    var message = $"Failed to save deployment settings because {filePath} is invalid or its parent directory does not exist on disk.";
+                    throw new FailedToSaveDeploymentSettingsException(DeployToolErrorCode.FailedToSaveDeploymentSettings, message);
+                }
+            }
+
+            return new SaveSettingsConfiguration(saveSettingsType, filePath);
+        }
     }
 }

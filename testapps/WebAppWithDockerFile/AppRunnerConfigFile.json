@@ -1,8 +1,8 @@
 {
-    "ApplicationName": "AppAppRunner{Suffix}",
+    "ApplicationName": "{StackName}",
     "RecipeId": "AspNetAppAppRunner",
     "Settings": {
-        "ServiceName": "MyNewService{Suffix}",
+        "ServiceName": "{StackName}-service",
         "AppRunnerEnvironmentVariables": {
             "TEST_Key1": "Value1",
             "TEST_Key2": "Value2"

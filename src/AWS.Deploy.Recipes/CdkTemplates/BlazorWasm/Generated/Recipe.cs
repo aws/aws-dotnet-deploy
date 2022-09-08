@@ -214,7 +214,7 @@ namespace BlazorWasm
             {
                 Sources = new ISource[] { Source.Asset(Path.Combine(props.DotnetPublishOutputDirectory, "wwwroot")) },
                 DestinationBucket = ContentS3Bucket,
-                MemoryLimit = 4096,
+                MemoryLimit = 3008,
 
                 Distribution = CloudFrontDistribution,
                 DistributionPaths = new string[] { "/*" }

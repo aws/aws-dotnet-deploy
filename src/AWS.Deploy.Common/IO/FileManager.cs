@@ -34,6 +34,15 @@ namespace AWS.Deploy.Common.IO
         /// </returns>
         bool Exists(string path, string directory);
 
+        /// <summary>
+        /// Determines that the specified file path is structurally valid and its parent directory exists on disk.
+        /// This file path can be absolute or relative to the current working directory.
+        /// Note - This method does not check for the existence of a file at the specified path. Use <see cref="Exists(string)"/> or <see cref="Exists(string, string)"/> to check for existence of a file.
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        bool IsFileValidPath(string filePath);
+
         Task<string> ReadAllTextAsync(string path);
         Task<string[]> ReadAllLinesAsync(string path);
         Task WriteAllTextAsync(string filePath, string contents, CancellationToken cancellationToken = default);
@@ -47,7 +56,13 @@ namespace AWS.Deploy.Common.IO
     /// </summary>
     public class FileManager : IFileManager
     {
-        public bool Exists(string path) => IsFileValid(path);
+        public bool Exists(string path)
+        {
+            if (!PathUtilities.IsPathValid(path))
+                return false;
+
+            return File.Exists(path);
+        }
 
         public bool Exists(string path, string directory)
         {
@@ -74,15 +89,17 @@ namespace AWS.Deploy.Common.IO
 
         public long GetSizeInBytes(string filePath) => new FileInfo(filePath).Length;
 
-        private bool IsFileValid(string filePath)
+        public bool IsFileValidPath(string filePath)
         {
             if (!PathUtilities.IsPathValid(filePath))
                 return false;
 
-            if (!File.Exists(filePath))
+            var parentDirectory = Path.GetDirectoryName(filePath);
+            if (string.IsNullOrEmpty(parentDirectory))
+            {
                 return false;
-
-            return true;
+            }
+            return PathUtilities.IsPathValid(parentDirectory) && Directory.Exists(parentDirectory);
         }
     }
 }
