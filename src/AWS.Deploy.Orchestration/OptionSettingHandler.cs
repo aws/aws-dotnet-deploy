@@ -3,10 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Extensions;
+using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Recipes.Validation;
 
@@ -422,6 +424,70 @@ namespace AWS.Deploy.Orchestration
                     return true;
             }
             return false;
+        }
+
+        /// <summary>
+        /// <para>Returns a Dictionary containing the configurable option settings for the specified recommendation. The returned dictionary can contain specific types of option settings depending on the value of <see cref="OptionSettingsType"/>.</para>
+        /// <para>The key in the dictionary is the fully qualified ID of each option setting</para>
+        /// <para>The value in the dictionary is the value of each option setting</para>
+        /// </summary>
+        public Dictionary<string, object> GetOptionSettingsMap(Recommendation recommendation, ProjectDefinition projectDefinition, IDirectoryManager directoryManager, OptionSettingsType optionSettingsType = OptionSettingsType.All)
+        {
+            var projectDirectory = Path.GetDirectoryName(projectDefinition.ProjectPath);
+            if (string.IsNullOrEmpty(projectDirectory))
+            {
+                var message = $"Failed to get deployment settings container because {projectDefinition.ProjectPath} is null or empty";
+                throw new InvalidOperationException(message);
+            }
+
+            var settingsContainer = new Dictionary<string, object>();
+
+            IEnumerable<string> optionSettingsId;
+            var recipeOptionSettingsId = recommendation.GetConfigurableOptionSettingItems().Select(x => x.FullyQualifiedId);
+            var deploymentBundleOptionSettingsId = recommendation.Recipe.DeploymentBundleSettings.Select(x => x.FullyQualifiedId);
+
+            switch (optionSettingsType)
+            {
+                case OptionSettingsType.Recipe:
+                    optionSettingsId = recipeOptionSettingsId.Except(deploymentBundleOptionSettingsId);
+                    break;
+                case OptionSettingsType.DeploymentBundle:
+                    optionSettingsId = deploymentBundleOptionSettingsId;
+                    break;
+                case OptionSettingsType.All:
+                    optionSettingsId = recipeOptionSettingsId.Union(deploymentBundleOptionSettingsId);
+                    break;
+                default:
+                    throw new InvalidOperationException($"{nameof(optionSettingsType)} doest not have a valid type");
+            }
+
+            foreach (var optionSettingId in optionSettingsId)
+            {
+                var optionSetting = GetOptionSetting(recommendation, optionSettingId);
+                var value = GetOptionSettingValue(recommendation, optionSetting);
+                if (optionSetting.TypeHint.HasValue && (optionSetting.TypeHint == OptionSettingTypeHint.FilePath || optionSetting.TypeHint == OptionSettingTypeHint.DockerExecutionDirectory))
+                {
+                    var path = value?.ToString();
+                    if (string.IsNullOrEmpty(path))
+                    {
+                        continue;
+                    }
+
+                    // All file paths or directory paths must be persisted relative the the customers .NET project.
+                    // This is a done to ensure that the resolved paths work correctly across all cloned repos.
+                    // The relative path is also canonicalized to work across Unix and Windows OS.
+                    var absolutePath = directoryManager.GetAbsolutePath(projectDirectory, path);
+                    value = directoryManager.GetRelativePath(projectDirectory, absolutePath)
+                                .Replace(Path.DirectorySeparatorChar, '/');
+                }
+
+                if (value != null)
+                {
+                    settingsContainer[optionSetting.FullyQualifiedId] = value;
+                }
+            }
+
+            return settingsContainer;
         }
     }
 }

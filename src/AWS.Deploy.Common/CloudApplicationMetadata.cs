@@ -27,6 +27,11 @@ namespace AWS.Deploy.Common
         /// </summary>
         public IDictionary<string, object> Settings { get; set; } = new Dictionary<string, object>();
 
+        /// <summary>
+        /// Comprises of option settings that are part of the deployment bundle definition.
+        /// </summary>
+        public IDictionary<string, object> DeploymentBundleSettings { get; set; } = new Dictionary<string , object>();
+
         public CloudApplicationMetadata(string recipeId, string recipeVersion)
         {
             RecipeId = recipeId;

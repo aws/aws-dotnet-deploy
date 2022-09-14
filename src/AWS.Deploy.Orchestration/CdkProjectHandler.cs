@@ -31,7 +31,7 @@ namespace AWS.Deploy.Orchestration
     {
         private readonly IOrchestratorInteractiveService _interactiveService;
         private readonly ICommandLineWrapper _commandLineWrapper;
-        private readonly CdkAppSettingsSerializer _appSettingsBuilder;
+        private readonly ICdkAppSettingsSerializer _appSettingsBuilder;
         private readonly IDirectoryManager _directoryManager;
         private readonly IAWSResourceQueryer _awsResourceQueryer;
         private readonly IFileManager _fileManager;
@@ -42,7 +42,9 @@ namespace AWS.Deploy.Orchestration
             IOrchestratorInteractiveService interactiveService,
             ICommandLineWrapper commandLineWrapper,
             IAWSResourceQueryer awsResourceQueryer,
+            ICdkAppSettingsSerializer cdkAppSettingsSerializer,
             IFileManager fileManager,
+            IDirectoryManager directoryManager,
             IOptionSettingHandler optionSettingHandler,
             IDeployToolWorkspaceMetadata workspaceMetadata,
             ICloudFormationTemplateReader cloudFormationTemplateReader)
@@ -50,8 +52,8 @@ namespace AWS.Deploy.Orchestration
             _interactiveService = interactiveService;
             _commandLineWrapper = commandLineWrapper;
             _awsResourceQueryer = awsResourceQueryer;
-            _appSettingsBuilder = new CdkAppSettingsSerializer(optionSettingHandler);
-            _directoryManager = new DirectoryManager();
+            _appSettingsBuilder = cdkAppSettingsSerializer;
+            _directoryManager = directoryManager;
             _fileManager = fileManager;
             _workspaceMetadata = workspaceMetadata;
             _cloudFormationTemplateReader = cloudFormationTemplateReader;

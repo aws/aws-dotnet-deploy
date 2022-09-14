@@ -361,9 +361,14 @@ namespace AWS.Deploy.CLI.Commands
 
             IDictionary<string, object> previousSettings;
             if (deployedApplication.ResourceType == CloudApplicationResourceType.CloudFormationStack)
-                previousSettings = (await _cloudFormationTemplateReader.LoadCloudApplicationMetadata(deployedApplication.Name)).Settings;
+            {
+                var metadata = await _cloudFormationTemplateReader.LoadCloudApplicationMetadata(deployedApplication.Name);
+                previousSettings = metadata.Settings.Union(metadata.DeploymentBundleSettings).ToDictionary(x => x.Key, x => x.Value);
+            }
             else
+            {
                 previousSettings = await _deployedApplicationQueryer.GetPreviousSettings(deployedApplication);
+            }
 
             await orchestrator.ApplyAllReplacementTokens(selectedRecommendation, deployedApplication.Name);
 
