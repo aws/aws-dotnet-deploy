@@ -28,7 +28,7 @@ namespace AWS.Deploy.Recipes.CDK.Common
             stack.Tags.SetTag(Constants.CloudFormationIdentifier.STACK_TAG, $"{recipeConfiguration.RecipeId}");
 
             // Serializes all AWS .NET deployment tool settings.
-            var json = JsonSerializer.Serialize(
+            var recipeSettingsJson = JsonSerializer.Serialize(
                 recipeConfiguration.Settings,
                 new JsonSerializerOptions
                 {
@@ -47,9 +47,15 @@ namespace AWS.Deploy.Recipes.CDK.Common
             }
 
             // Save the settings, recipe id and version as metadata to the CloudFormation template.
-            metadata[Constants.CloudFormationIdentifier.STACK_METADATA_SETTINGS] = json;
+            metadata[Constants.CloudFormationIdentifier.STACK_METADATA_SETTINGS] = recipeSettingsJson;
             metadata[Constants.CloudFormationIdentifier.STACK_METADATA_RECIPE_ID] = recipeConfiguration.RecipeId;
             metadata[Constants.CloudFormationIdentifier.STACK_METADATA_RECIPE_VERSION] = recipeConfiguration.RecipeVersion;
+
+            // Save the deployment bundle settings.
+            if (!string.IsNullOrEmpty(recipeConfiguration.DeploymentBundleSettings))
+            {
+                metadata[Constants.CloudFormationIdentifier.STACK_METADATA_DEPLOYMENT_BUNDLE_SETTINGS] = recipeConfiguration.DeploymentBundleSettings;
+            }
 
             // For the CDK to pick up the changes to the metadata .NET Dictionary you have to reassign the Metadata property.
             stack.TemplateOptions.Metadata = metadata;

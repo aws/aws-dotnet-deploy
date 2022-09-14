@@ -53,6 +53,10 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var applicationIAMRole = JsonConvert.DeserializeObject<IAMRoleTypeHintResponse>(metadata.Settings["ApplicationIAMRole"].ToString());
             Assert.True(applicationIAMRole.CreateNew);
+
+            Assert.Equal("Dockerfile", metadata.DeploymentBundleSettings["DockerfilePath"]);
+            Assert.Equal(".", metadata.DeploymentBundleSettings["DockerExecutionDirectory"]);
+            Assert.Equal("webappwithdockerfile", metadata.DeploymentBundleSettings["ECRRepositoryName"]);
         }
 
         [Fact]
@@ -76,6 +80,10 @@ namespace AWS.Deploy.CLI.UnitTests
 
             // ASSERT
             Assert.Equal("aws-elasticbeanstalk-role", metadata.Settings["ApplicationIAMRole"].ToString());
+
+            Assert.Equal("Dockerfile", metadata.DeploymentBundleSettings["DockerfilePath"]);
+            Assert.Equal(".", metadata.DeploymentBundleSettings["DockerExecutionDirectory"]);
+            Assert.Equal("webappwithdockerfile", metadata.DeploymentBundleSettings["ECRRepositoryName"]);
         }
     }
 }

@@ -436,9 +436,14 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
                 IDictionary<string, object> previousSettings;
                 if (existingDeployment.ResourceType == CloudApplicationResourceType.CloudFormationStack)
-                    previousSettings = (await templateMetadataReader.LoadCloudApplicationMetadata(existingDeployment.Name)).Settings;
+                {
+                    var metadata = await templateMetadataReader.LoadCloudApplicationMetadata(existingDeployment.Name);
+                    previousSettings = metadata.Settings.Union(metadata.DeploymentBundleSettings).ToDictionary(x => x.Key, x => x.Value);
+                }
                 else
+                {
                     previousSettings = await deployedApplicationQueryer.GetPreviousSettings(existingDeployment);
+                }
 
                 state.SelectedRecommendation = await orchestrator.ApplyRecommendationPreviousSettings(state.SelectedRecommendation, previousSettings);
 
@@ -719,7 +724,9 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 serviceProvider.GetRequiredService<IOrchestratorInteractiveService>(),
                 serviceProvider.GetRequiredService<ICommandLineWrapper>(),
                 serviceProvider.GetRequiredService<IAWSResourceQueryer>(),
+                serviceProvider.GetRequiredService<ICdkAppSettingsSerializer>(),
                 serviceProvider.GetRequiredService<IFileManager>(),
+                serviceProvider.GetRequiredService<IDirectoryManager>(),
                 serviceProvider.GetRequiredService<IOptionSettingHandler>(),
                 serviceProvider.GetRequiredService<IDeployToolWorkspaceMetadata>(),
                 serviceProvider.GetRequiredService<ICloudFormationTemplateReader>()

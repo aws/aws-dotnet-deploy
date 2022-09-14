@@ -23,9 +23,14 @@ namespace AWS.Deploy.Constants
         public const string STACK_DESCRIPTION_PREFIX = "AWSDotnetDeployCDKStack";
 
         /// <summary>
-        /// The CloudFormation template metadata key used to hold the last used settings to deploy the application.
+        /// The CloudFormation template metadata key used to hold the last used recipe option settings to deploy the application.
         /// </summary>
         public const string STACK_METADATA_SETTINGS = "aws-dotnet-deploy-settings";
+
+        /// <summary>
+        /// The CloudFormation template metadata key used to hold the last used deployment bundle settings to deploy the application.
+        /// </summary>
+        public const string STACK_METADATA_DEPLOYMENT_BUNDLE_SETTINGS = "aws-dotnet-deploy-deployment-bundle-settings";
 
         /// <summary>
         /// The CloudFormation template metadata key for storing the id of the AWS .NET deployment tool recipe.

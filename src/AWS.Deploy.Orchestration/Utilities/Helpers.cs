@@ -4,11 +4,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
+using AWS.Deploy.Common.Recipes;
 
 namespace AWS.Deploy.Orchestration.Utilities
 {
@@ -94,7 +96,7 @@ namespace AWS.Deploy.Orchestration.Utilities
         /// <param name="saveSettingsPath">Absolute or relative JSON file path where the deployment settings will be saved. Only the settings modified by the user are persisted.</param>
         /// <param name="saveAllSettingsPath">Absolute or relative JSON file path where the deployment settings will be saved. All deployment settings are persisted.</param>
         /// <param name="projectDirectoryPath">Absolute path to the user's .NET project directory</param>
-        /// <param name="deploymentSettingsHandler"><see cref="IDeploymentSettingsHandler"/></param>
+        /// <param name="fileManager"><see cref="IFileManager"/></param>
         /// <returns><see cref="SaveSettingsConfiguration"/></returns>
         public static SaveSettingsConfiguration GetSaveSettingsConfiguration(string? saveSettingsPath, string? saveAllSettingsPath, string projectDirectoryPath, IFileManager fileManager)
         {
