@@ -96,6 +96,7 @@ Resources:
         BuildSpec: buildtools/ci.buildspec.yml
       Artifacts:
         Type: NO_ARTIFACTS
+      TimeoutInMinutes: 120
 
   CodeBuildProjectRole:
     Type: AWS::IAM::Role
