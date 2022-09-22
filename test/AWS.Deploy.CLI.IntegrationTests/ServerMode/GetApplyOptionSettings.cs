@@ -24,6 +24,7 @@ using Xunit;
 using AWS.Deploy.CLI.IntegrationTests.Utilities;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Common.IO;
+using Newtonsoft.Json.Linq;
 
 namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
 {
@@ -313,6 +314,71 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
 
                 // This is using a real AWSResourceQueryer,
                 // so not asserting on the rows for these two options
+            }
+            finally
+            {
+                cancelSource.Cancel();
+                _stackName = null;
+            }
+        }
+
+        /// <summary>
+        /// Tests that the LoadBalancer.InternetFacing option setting correctly toggles the
+        /// <see href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-elb.html#cfn-ec2-elb-scheme">load balancer scheme</see>.
+        /// </summary>
+        /// <param name="internetFacingValue">desired LoadBalancer.InternetFacing option setting value</param>
+        /// <param name="expectedLoadBalancerScheme">Expected load balancer scheme in the generated CloudFormation template</param>
+        [Theory]
+        [InlineData("true", "internet-facing")]
+        [InlineData("false", "internal")]
+        public async Task GetAndApplyECSFargateSettings_LoadBalancerSchemeConfig(string internetFacingValue, string expectedLoadBalancerScheme)
+        {
+            _stackName = $"ServerModeWebECSFargate{Guid.NewGuid().ToString().Split('-').Last()}";
+
+            var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
+            var portNumber = 4024;
+            using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ServerModeExtensions.ResolveCredentials);
+
+            // Running `cdk diff` to assert against the generated CloudFormation template
+            // for this recipe takes longer than the default timeout
+            httpClient.Timeout = new TimeSpan(0, 0, 120);
+
+            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
+            var cancelSource = new CancellationTokenSource();
+
+            var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
+            try
+            {
+                var baseUrl = $"http://localhost:{portNumber}/";
+                var restClient = new RestAPIClient(baseUrl, httpClient);
+
+                await restClient.WaitTillServerModeReady();
+
+                var sessionId = await restClient.StartDeploymentSession(projectPath, _awsRegion);
+
+                var logOutput = new StringBuilder();
+                await ServerModeExtensions.SetupSignalRConnection(baseUrl, sessionId, logOutput);
+
+                var recommendation = await restClient.GetRecommendationsAndSetDeploymentTarget(sessionId, "AspNetAppEcsFargate", _stackName);
+
+                var response = await restClient.ApplyConfigSettingsAsync(sessionId, new ApplyConfigSettingsInput()
+                {
+                    UpdatedSettings = new Dictionary<string, string>()
+                    {
+                        {"LoadBalancer.InternetFacing", internetFacingValue}
+                    }
+                });
+
+                var generateCloudFormationTemplateResponse = await restClient.GenerateCloudFormationTemplateAsync(sessionId);
+                var cloudFormationTemplate = JObject.Parse(generateCloudFormationTemplateResponse.CloudFormationTemplate);
+
+                // This should find the AWS::ElasticLoadBalancingV2::LoadBalancer resource in the CloudFormation JSON
+                // based on its "Scheme" property, which is what "LoadBalancer.InternetFacing" ultimately drives.
+                // If multiple resources end up with a Scheme property or the LoadBalancer is missing,
+                // this test should fail because .Single() will throw an exception.
+                var loadBalancerSchemeValue = cloudFormationTemplate.SelectTokens("Resources.*.Properties.Scheme").Single();
+
+                Assert.Equal(expectedLoadBalancerScheme, loadBalancerSchemeValue.ToString());
             }
             finally
             {
