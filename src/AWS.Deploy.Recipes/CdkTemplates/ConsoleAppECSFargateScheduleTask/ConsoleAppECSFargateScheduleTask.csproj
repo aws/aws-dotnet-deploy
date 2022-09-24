@@ -25,7 +25,7 @@
 
   <ItemGroup>
     <!-- CDK Construct Library dependencies -->
-    <PackageReference Include="Amazon.CDK.Lib" Version="2.13.0" />
+    <PackageReference Include="Amazon.CDK.Lib" Version="2.43.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.7" />
 
     <!-- jsii Roslyn analyzers (un-comment to obtain compile-time checks for missing required props

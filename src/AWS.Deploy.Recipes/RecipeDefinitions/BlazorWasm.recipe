@@ -330,9 +330,11 @@
             "Category": "Networking",
             "Description": "The maximum http version that users can use to communicate with the CloudFront distribution",
             "Type": "String",
-            "DefaultValue": "HTTP2",
-            "AllowedValues": [ "HTTP2", "HTTP1_1" ],
+            "DefaultValue": "HTTP2_AND_3",
+            "AllowedValues": [ "HTTP2_AND_3", "HTTP3","HTTP2", "HTTP1_1" ],
             "ValueMapping": {
+                "HTTP2_AND_3": "HTTP 2 and 3",
+                "HTTP3": "HTTP 3",
                 "HTTP2": "HTTP 2",
                 "HTTP1_1": "HTTP 1.1"
             },
