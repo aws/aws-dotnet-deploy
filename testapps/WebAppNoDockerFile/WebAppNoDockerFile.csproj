@@ -8,6 +8,12 @@
     <Content Update="ElasticBeanStalkConfigFile.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Update="ElasticBeanStalkConfigFile-Windows.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="ElasticBeanStalkConfigFile-Windows-SelfContained.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

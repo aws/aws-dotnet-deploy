@@ -1,0 +1,7 @@
+{
+    "RecipeId": "AspNetAppElasticBeanstalkWindows",
+    "Settings": {
+        "IISAppPath": "/extra-path",
+        "SelfContainedBuild": true
+    }
+}

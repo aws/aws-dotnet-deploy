@@ -1,7 +1,7 @@
 {
     "$schema": "./aws-deploy-recipe-schema.json",
     "Id": "AspNetAppElasticBeanstalkWindows",
-    "Version": "1.0.1",
+    "Version": "1.0.2",
     "Name": "ASP.NET Core App to AWS Elastic Beanstalk on Windows",
     "DeploymentType": "CdkProject",
     "DeploymentBundle": "DotnetPublishZipFile",
@@ -10,6 +10,7 @@
     "Description": "This ASP.NET Core application will be built and deployed to AWS Elastic Beanstalk on Windows. Recommended if you do not want to deploy your application as a container image.",
     "ShortDescription": "ASP.NET Core application deployed to AWS Elastic Beanstalk on Windows.",
     "TargetService": "AWS Elastic Beanstalk",
+    "TargetPlatform": "Windows",
 
     "DisplayedResources": [
         {

@@ -1,7 +1,7 @@
 {
     "$schema": "./aws-deploy-recipe-schema.json",
     "Id": "ConsoleAppEcsFargateScheduleTask",
-    "Version": "1.0.1",
+    "Version": "1.0.2",
     "Name": "Scheduled Task on Amazon Elastic Container Service (ECS) using AWS Fargate",
     "DeploymentType": "CdkProject",
     "DeploymentBundle": "Container",
@@ -10,6 +10,7 @@
     "Description": "This .NET Console application will be built using a Dockerfile and deployed as a scheduled task to Amazon Elastic Container Service (Amazon ECS) with compute power managed by AWS Fargate compute engine. If your project does not contain a Dockerfile it will be automatically generated, otherwise an existing Dockerfile will be used. Recommended if you want to deploy a scheduled task as a container image on Linux.",
     "ShortDescription": "Deploys a scheduled task as a Linux container image to a fully managed container orchestration service. Dockerfile will be automatically generated if needed.",
     "TargetService": "Amazon Elastic Container Service",
+    "TargetPlatform": "Linux",
 
     "DisplayedResources": [
         {
