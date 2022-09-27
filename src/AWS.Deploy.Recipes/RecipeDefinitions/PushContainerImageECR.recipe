@@ -1,13 +1,14 @@
 {
     "$schema": "./aws-deploy-recipe-schema.json",
     "Id": "PushContainerImageEcr",
-    "Version": "1.0.0",
+    "Version": "1.0.1",
     "Name": "Container Image to Amazon Elastic Container Registry (ECR)",
     "DeploymentType": "ElasticContainerRegistryImage",
     "DeploymentBundle": "Container",
     "Description": "This .NET application will be built using an existing Dockerfile. The Docker container image will then be pushed to Amazon ECR, a fully managed container registry.",
     "ShortDescription": "Pushes container image to a fully managed container registry.",
     "TargetService": "Amazon Elastic Container Service",
+    "TargetPlatform": "Linux",
 
     "RecipePriority": 0,
     "RecommendationRules": [

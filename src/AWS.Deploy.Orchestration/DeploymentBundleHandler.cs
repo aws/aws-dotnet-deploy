@@ -109,7 +109,7 @@ namespace AWS.Deploy.Orchestration
                recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild &&
                !additionalArguments.Contains("--runtime ") &&
                !additionalArguments.Contains("-r ")
-                     ? "--runtime linux-x64"
+                     ? $"--runtime {(recommendation.Recipe.TargetPlatform == TargetPlatform.Windows ? "win-x64" : "linux-x64")}"
                      : "";
             var publishCommand =
                 $"dotnet publish \"{recommendation.ProjectPath}\"" +

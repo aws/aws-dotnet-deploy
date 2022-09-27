@@ -16,6 +16,7 @@
         "Description",
         "ShortDescription",
         "TargetService",
+        "TargetPlatform",
         "RecipePriority",
         "RecommendationRules",
         "OptionSettings"
@@ -94,6 +95,13 @@
             "title": "AWS Target Service",
             "description": "The AWS service that the project will be deployed to",
             "minLength": 1
+        },
+        "TargetPlatform": {
+            "type": "string",
+            "title": "Target Platform",
+            "description": "The environment platform the recipe deploys to. This is used to publish a self-contained .NET application for that platform.",
+            "minLength": 1,
+            "enum": [ "Linux", "Windows" ]
         },
         "DeploymentConfirmation": {
             "$ref": "#/definitions/DeploymentConfirmation"

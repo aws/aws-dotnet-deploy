@@ -56,6 +56,11 @@ namespace AWS.Deploy.Common.Recipes
         public string TargetService { get; set; }
 
         /// <summary>
+        /// The environment platform the recipe deploys to. This is used to publish a self-contained .NET application for that platform.
+        /// </summary>
+        public TargetPlatform? TargetPlatform { get; set; }
+
+        /// <summary>
         /// The list of DisplayedResources that lists logical CloudFormation IDs with a description.
         /// </summary>
         public List<DisplayedResource>? DisplayedResources { get; set; }
