@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO.Compression;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,6 +21,7 @@ using AWS.Deploy.Orchestration.UnitTests.Utilities;
 using AWS.Deploy.Recipes;
 using Moq;
 using Xunit;
+using System.Text.Json;
 
 namespace AWS.Deploy.Orchestration.UnitTests
 {
@@ -172,6 +175,101 @@ namespace AWS.Deploy.Orchestration.UnitTests
             return string.Equals(expected.OptionName, actual.OptionName)
                 && string.Equals(expected.Namespace, actual.Namespace)
                 && string.Equals(expected.Value, actual.Value);
+        }
+
+        /// <summary>
+        /// This method tests in the case of an existing windows beanstalk recipe, if there is no windows manifest file, then one is created and it contains the correct values.
+        /// </summary>
+        [Fact]
+        public async Task SetupWindowsDeploymentManifestTest()
+        {
+            // ARRANGE
+            var engine = await BuildRecommendationEngine("WebAppNoDockerFile");
+            var recommendations = await engine.ComputeRecommendations();
+            var recommendation = recommendations.First(r => r.Recipe.Id.Equals(Constants.RecipeIdentifier.EXISTING_BEANSTALK_WINDOWS_ENVIRONMENT_RECIPE_ID));
+
+            var tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            Directory.CreateDirectory(tempDirectory);
+            var zipPath = Path.Combine(tempDirectory, "testZip.zip");
+            ZipFile.CreateFromDirectory(recommendation.GetProjectDirectory(), zipPath);
+
+            await _optionSettingHandler.SetOptionSettingValue(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, Constants.ElasticBeanstalk.IISWebSiteOptionId), "website");
+            await _optionSettingHandler.SetOptionSettingValue(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, Constants.ElasticBeanstalk.IISAppPathOptionId), "apppath");
+
+            var elasticBeanstalkHandler = new AWSElasticBeanstalkHandler(new Mock<IAWSClientFactory>().Object,
+                new Mock<IOrchestratorInteractiveService>().Object,
+                new Mock<IFileManager>().Object,
+                _optionSettingHandler);
+
+            elasticBeanstalkHandler.SetupWindowsDeploymentManifest(recommendation, zipPath);
+
+            using (FileStream zipToOpen = new FileStream(zipPath, FileMode.Open))
+            {
+                using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
+                {
+                    ZipArchiveEntry readmeEntry = archive.GetEntry("aws-windows-deployment-manifest.json");
+                    var manifestFile = JsonSerializer.Deserialize<ElasticBeanstalkWindowsManifest>(readmeEntry.Open());
+                    Assert.NotNull(manifestFile);
+                    var aspNetCoreWebEntry = Assert.Single(manifestFile.Deployments.AspNetCoreWeb);
+                    Assert.Equal("website", aspNetCoreWebEntry.Parameters.IISWebSite);
+                    Assert.Equal("apppath", aspNetCoreWebEntry.Parameters.IISPath);
+                }
+            }
+        }
+
+        /// <summary>
+        /// This method tests in the case of an existing windows beanstalk recipe, if there is a windows manifest file, then one is updated correctly.
+        /// The manifest file is generated from <see cref="ElasticBeanstalkWindowsManifest"/> and updated to contain the IIS Website and IIS App path.
+        /// </summary>
+        [Fact]
+        public async Task SetupWindowsDeploymentManifestTest_ExistingFile()
+        {
+            // ARRANGE
+            var engine = await BuildRecommendationEngine("WebAppNoDockerFile");
+            var recommendations = await engine.ComputeRecommendations();
+            var recommendation = recommendations.First(r => r.Recipe.Id.Equals(Constants.RecipeIdentifier.EXISTING_BEANSTALK_WINDOWS_ENVIRONMENT_RECIPE_ID));
+
+            var tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            Directory.CreateDirectory(tempDirectory);
+            var manifest = new ElasticBeanstalkWindowsManifest();
+            var deployment = new ElasticBeanstalkWindowsManifest.ManifestDeployments.AspNetCoreWebDeployments();
+            manifest.Deployments.AspNetCoreWeb.Add(deployment);
+            var zipPath = Path.Combine(tempDirectory, "testZip.zip");
+            ZipFile.CreateFromDirectory(recommendation.GetProjectDirectory(), zipPath);
+            using (var zipArchive = ZipFile.Open(zipPath, ZipArchiveMode.Update))
+            {
+                using (var jsonStream = new MemoryStream(JsonSerializer.SerializeToUtf8Bytes(manifest)))
+                {
+                    var zipEntry = zipArchive.CreateEntry(Constants.ElasticBeanstalk.WindowsManifestName);
+                    using var zipEntryStream = zipEntry.Open();
+                    jsonStream.Position = 0;
+                    jsonStream.CopyTo(zipEntryStream);
+                }
+            }
+
+            await _optionSettingHandler.SetOptionSettingValue(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, Constants.ElasticBeanstalk.IISWebSiteOptionId), "website");
+            await _optionSettingHandler.SetOptionSettingValue(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, Constants.ElasticBeanstalk.IISAppPathOptionId), "apppath");
+
+            var elasticBeanstalkHandler = new AWSElasticBeanstalkHandler(new Mock<IAWSClientFactory>().Object,
+                new Mock<IOrchestratorInteractiveService>().Object,
+                new Mock<IFileManager>().Object,
+                _optionSettingHandler);
+
+            elasticBeanstalkHandler.SetupWindowsDeploymentManifest(recommendation, zipPath);
+
+            using (FileStream zipToOpen = new FileStream(zipPath, FileMode.Open))
+            {
+                using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Read))
+                {
+                    ZipArchiveEntry readmeEntry = archive.GetEntry("aws-windows-deployment-manifest.json");
+                    var manifestFileJson = readmeEntry.Open(); 
+                    var manifestFile = JsonSerializer.Deserialize<ElasticBeanstalkWindowsManifest>(manifestFileJson);
+                    Assert.NotNull(manifestFile);
+                    var aspNetCoreWebEntry = Assert.Single(manifestFile.Deployments.AspNetCoreWeb);
+                    Assert.Equal("website", aspNetCoreWebEntry.Parameters.IISWebSite);
+                    Assert.Equal("apppath", aspNetCoreWebEntry.Parameters.IISPath);
+                }
+            }
         }
     }
 }

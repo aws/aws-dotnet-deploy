@@ -442,7 +442,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 }
                 else
                 {
-                    previousSettings = await deployedApplicationQueryer.GetPreviousSettings(existingDeployment);
+                    previousSettings = await deployedApplicationQueryer.GetPreviousSettings(existingDeployment, state.SelectedRecommendation);
                 }
 
                 state.SelectedRecommendation = await orchestrator.ApplyRecommendationPreviousSettings(state.SelectedRecommendation, previousSettings);

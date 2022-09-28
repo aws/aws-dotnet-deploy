@@ -3,7 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO.Compression;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Amazon.ElasticBeanstalk;
@@ -11,15 +14,64 @@ using Amazon.ElasticBeanstalk.Model;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
+using System.Text.Json.Serialization;
 
 namespace AWS.Deploy.Orchestration.ServiceHandlers
 {
     public interface IElasticBeanstalkHandler
     {
+        /// <summary>
+        /// Deployments to Windows Elastic Beanstalk envvironments require a manifest file to be included with the binaries.
+        /// This method creates the manifest file if it doesn't exist, or it creates a new one.
+        /// The two main settings that are updated are IIS Website and IIS App Path.
+        /// </summary>
+        void SetupWindowsDeploymentManifest(Recommendation recommendation, string dotnetZipFilePath);
         Task<S3Location> CreateApplicationStorageLocationAsync(string applicationName, string versionLabel, string deploymentPackage);
         Task<CreateApplicationVersionResponse> CreateApplicationVersionAsync(string applicationName, string versionLabel, S3Location sourceBundle);
         Task<bool> UpdateEnvironmentAsync(string applicationName, string environmentName, string versionLabel, List<ConfigurationOptionSetting> optionSettings);
         List<ConfigurationOptionSetting> GetEnvironmentConfigurationSettings(Recommendation recommendation);
+    }
+
+    /// <summary>
+    /// This class represents the structure of the Windows manifest file to be included with Windows Elastic Beanstalk deployments.
+    /// </summary>
+    public class ElasticBeanstalkWindowsManifest
+    {
+        [JsonPropertyName("manifestVersion")]
+        public int ManifestVersion { get; set; } = 1;
+
+        [JsonPropertyName("deployments")]
+        public ManifestDeployments Deployments { get; set; } = new();
+
+        public class ManifestDeployments
+        {
+
+            [JsonPropertyName("aspNetCoreWeb")]
+            public List<AspNetCoreWebDeployments> AspNetCoreWeb { get; set; } = new();
+
+            public class AspNetCoreWebDeployments
+            {
+
+                [JsonPropertyName("name")]
+                public string Name { get; set; } = "app";
+
+
+                [JsonPropertyName("parameters")]
+                public AspNetCoreWebParameters Parameters { get; set; } = new();
+
+                public class AspNetCoreWebParameters
+                {
+                    [JsonPropertyName("appBundle")]
+                    public string AppBundle { get; set; } = ".";
+
+                    [JsonPropertyName("iisPath")]
+                    public string IISPath { get; set; } = "/";
+
+                    [JsonPropertyName("iisWebSite")]
+                    public string IISWebSite { get; set; } = "Default Web Site";
+                }
+            }
+        }
     }
 
     public class AWSElasticBeanstalkHandler : IElasticBeanstalkHandler
@@ -35,6 +87,121 @@ namespace AWS.Deploy.Orchestration.ServiceHandlers
             _interactiveService = interactiveService;
             _fileManager = fileManager;
             _optionSettingHandler = optionSettingHandler;
+        }
+
+        private T GetOrCreateNode<T>(object? json) where T : new()
+        {
+            try
+            {
+                return JsonSerializer.Deserialize<T>(json?.ToString() ?? string.Empty);
+            }
+            catch
+            {
+                return new T();
+            }
+        }
+
+        /// <summary>
+        /// Deployments to Windows Elastic Beanstalk envvironments require a manifest file to be included with the binaries.
+        /// This method creates the manifest file if it doesn't exist, or it creates a new one.
+        /// The two main settings that are updated are IIS Website and IIS App Path.
+        /// </summary>
+        public void SetupWindowsDeploymentManifest(Recommendation recommendation, string dotnetZipFilePath)
+        {
+            var iisWebSiteOptionSetting = _optionSettingHandler.GetOptionSetting(recommendation, Constants.ElasticBeanstalk.IISWebSiteOptionId);
+            var iisAppPathOptionSetting = _optionSettingHandler.GetOptionSetting(recommendation, Constants.ElasticBeanstalk.IISAppPathOptionId);
+
+            var iisWebSiteValue = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, iisWebSiteOptionSetting);
+            var iisAppPathValue = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, iisAppPathOptionSetting);
+
+            var iisWebSite = !string.IsNullOrEmpty(iisWebSiteValue) ? iisWebSiteValue : "Default Web Site";
+            var iisAppPath = !string.IsNullOrEmpty(iisAppPathValue) ? iisAppPathValue : "/";
+
+            var newManifestFile = new ElasticBeanstalkWindowsManifest();
+            newManifestFile.Deployments.AspNetCoreWeb.Add(new ElasticBeanstalkWindowsManifest.ManifestDeployments.AspNetCoreWebDeployments
+            {
+                Parameters = new ElasticBeanstalkWindowsManifest.ManifestDeployments.AspNetCoreWebDeployments.AspNetCoreWebParameters
+                {
+                    IISPath = iisAppPath,
+                    IISWebSite = iisWebSite
+                }
+            });
+
+            using (var zipArchive = ZipFile.Open(dotnetZipFilePath, ZipArchiveMode.Update))
+            {
+                var zipEntry = zipArchive.GetEntry(Constants.ElasticBeanstalk.WindowsManifestName);
+                var serializedManifest = JsonSerializer.Serialize(new Dictionary<string, object>());
+                if (zipEntry != null)
+                {
+                    using (var streamReader = new StreamReader(zipEntry.Open()))
+                    {
+                        serializedManifest = streamReader.ReadToEnd();
+                    }
+                }
+
+                var jsonDoc = GetOrCreateNode<Dictionary<string, object>>(serializedManifest);
+
+                if (!jsonDoc.ContainsKey("manifestVersion"))
+                {
+                    jsonDoc["manifestVersion"] = newManifestFile.ManifestVersion;
+                }
+
+                if (jsonDoc.ContainsKey("deployments"))
+                {
+                    var deploymentNode = GetOrCreateNode<Dictionary<string, object>>(jsonDoc["deployments"]);
+
+                    if (deploymentNode.ContainsKey("aspNetCoreWeb"))
+                    {
+                        var aspNetCoreWebNode = GetOrCreateNode<List<object>>(deploymentNode["aspNetCoreWeb"]);
+                        if (aspNetCoreWebNode.Count == 0)
+                        {
+                            aspNetCoreWebNode.Add(newManifestFile.Deployments.AspNetCoreWeb[0]);
+                        }
+                        else
+                        {
+                            // We only need 1 entry in the 'aspNetCoreWeb' node that defines the parameters we are interested in. Typically, only 1 entry exists.
+                            var aspNetCoreWebEntry = GetOrCreateNode<Dictionary<string, object>>(JsonSerializer.Serialize(aspNetCoreWebNode[0]));
+
+                            var nameValue = aspNetCoreWebEntry.ContainsKey("name") ? aspNetCoreWebEntry["name"].ToString() : string.Empty;
+                            aspNetCoreWebEntry["name"] = !string.IsNullOrEmpty(nameValue) ? nameValue : newManifestFile.Deployments.AspNetCoreWeb[0].Name;
+
+                            if (aspNetCoreWebEntry.ContainsKey("parameters"))
+                            {
+                                var parametersNode = GetOrCreateNode<Dictionary<string, object>>(aspNetCoreWebEntry["parameters"]);
+                                parametersNode["appBundle"] = ".";
+                                parametersNode["iisPath"] = iisAppPath;
+                                parametersNode["iisWebSite"] = iisWebSite;
+
+                                aspNetCoreWebEntry["parameters"] = parametersNode;
+                            }
+                            else
+                            {
+                                aspNetCoreWebEntry["parameters"] = newManifestFile.Deployments.AspNetCoreWeb[0].Parameters;
+                            }
+                            aspNetCoreWebNode[0] = aspNetCoreWebEntry;
+                        }
+                        deploymentNode["aspNetCoreWeb"] = aspNetCoreWebNode;
+                    }
+                    else
+                    {
+                        deploymentNode["aspNetCoreWeb"] = newManifestFile.Deployments.AspNetCoreWeb;
+                    }
+
+                    jsonDoc["deployments"] = deploymentNode;
+                }
+                else
+                {
+                    jsonDoc["deployments"] = newManifestFile.Deployments;
+                }
+
+                using (var jsonStream = new MemoryStream(JsonSerializer.SerializeToUtf8Bytes(jsonDoc, new JsonSerializerOptions { WriteIndented = true })))
+                {
+                    zipEntry ??= zipArchive.CreateEntry(Constants.ElasticBeanstalk.WindowsManifestName);
+                    using var zipEntryStream = zipEntry.Open();
+                    jsonStream.Position = 0;
+                    jsonStream.CopyTo(zipEntryStream);
+                }
+            }
         }
 
         public async Task<S3Location> CreateApplicationStorageLocationAsync(string applicationName, string versionLabel, string deploymentPackage)
@@ -83,7 +250,20 @@ namespace AWS.Deploy.Orchestration.ServiceHandlers
         {
             var additionalSettings = new List<ConfigurationOptionSetting>();
 
-            foreach (var tuple in Constants.ElasticBeanstalk.OptionSettingQueryList)
+            List<(string OptionSettingId, string OptionSettingNameSpace, string OptionSettingName)> tupleList;
+            switch (recommendation.Recipe.Id)
+            {
+                case Constants.RecipeIdentifier.EXISTING_BEANSTALK_ENVIRONMENT_RECIPE_ID:
+                    tupleList = Constants.ElasticBeanstalk.OptionSettingQueryList;
+                    break;
+                case Constants.RecipeIdentifier.EXISTING_BEANSTALK_WINDOWS_ENVIRONMENT_RECIPE_ID:
+                    tupleList = Constants.ElasticBeanstalk.WindowsOptionSettingQueryList;
+                    break;
+                default:
+                    throw new InvalidOperationException($"The recipe '{recommendation.Recipe.Id}' is not supported.");
+            };
+
+            foreach (var tuple in tupleList)
             {
                 var optionSetting = _optionSettingHandler.GetOptionSetting(recommendation, tuple.OptionSettingId);
 

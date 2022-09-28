@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,6 +28,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
     {
         private readonly Mock<IAWSResourceQueryer> _mockAWSResourceQueryer;
         private readonly IDirectoryManager _directoryManager;
+        private readonly TestFileManager _fileManager;
         private readonly Mock<ILocalUserSettingsEngine> _mockLocalUserSettingsEngine;
         private readonly Mock<IOrchestratorInteractiveService> _mockOrchestratorInteractiveService;
 
@@ -34,6 +36,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
         {
             _mockAWSResourceQueryer = new Mock<IAWSResourceQueryer>();
             _directoryManager = new TestDirectoryManager();
+            _fileManager = new TestFileManager();
             _mockLocalUserSettingsEngine = new Mock<ILocalUserSettingsEngine>();
             _mockOrchestratorInteractiveService = new Mock<IOrchestratorInteractiveService>();
         }
@@ -62,7 +65,8 @@ namespace AWS.Deploy.Orchestration.UnitTests
             var deployedApplicationQueryer = new DeployedApplicationQueryer(
                 _mockAWSResourceQueryer.Object,
                 _mockLocalUserSettingsEngine.Object,
-                _mockOrchestratorInteractiveService.Object);
+                _mockOrchestratorInteractiveService.Object,
+                _fileManager);
 
             var deploymentTypes = new List<DeploymentTypes>() { DeploymentTypes.CdkProject, DeploymentTypes.BeanstalkEnvironment };
             var result = await deployedApplicationQueryer.GetExistingDeployedApplications(deploymentTypes);
@@ -107,7 +111,8 @@ namespace AWS.Deploy.Orchestration.UnitTests
             var deployedApplicationQueryer = new DeployedApplicationQueryer(
                 _mockAWSResourceQueryer.Object,
                 _mockLocalUserSettingsEngine.Object,
-                _mockOrchestratorInteractiveService.Object);
+                _mockOrchestratorInteractiveService.Object,
+                _fileManager);
 
             var recommendations = new List<Recommendation>
             {
@@ -170,7 +175,8 @@ namespace AWS.Deploy.Orchestration.UnitTests
             var deployedApplicationQueryer = new DeployedApplicationQueryer(
                 _mockAWSResourceQueryer.Object,
                 _mockLocalUserSettingsEngine.Object,
-                _mockOrchestratorInteractiveService.Object);
+                _mockOrchestratorInteractiveService.Object,
+                _fileManager);
 
             var recommendations = new List<Recommendation>
             {
@@ -227,7 +233,8 @@ namespace AWS.Deploy.Orchestration.UnitTests
             var deployedApplicationQueryer = new DeployedApplicationQueryer(
                 _mockAWSResourceQueryer.Object,
                 _mockLocalUserSettingsEngine.Object,
-                _mockOrchestratorInteractiveService.Object);
+                _mockOrchestratorInteractiveService.Object,
+                _fileManager);
 
             var deploymentTypes = new List<DeploymentTypes>() { DeploymentTypes.CdkProject, DeploymentTypes.BeanstalkEnvironment };
             var result = await deployedApplicationQueryer.GetExistingDeployedApplications(deploymentTypes);
@@ -286,7 +293,8 @@ namespace AWS.Deploy.Orchestration.UnitTests
             var deployedApplicationQueryer = new DeployedApplicationQueryer(
                 _mockAWSResourceQueryer.Object,
                 _mockLocalUserSettingsEngine.Object,
-                _mockOrchestratorInteractiveService.Object);
+                _mockOrchestratorInteractiveService.Object,
+                _fileManager);
 
             var deploymentTypes = new List<DeploymentTypes>() { DeploymentTypes.CdkProject, DeploymentTypes.BeanstalkEnvironment };
             var result = await deployedApplicationQueryer.GetExistingDeployedApplications(deploymentTypes);
@@ -339,7 +347,8 @@ namespace AWS.Deploy.Orchestration.UnitTests
             var deployedApplicationQueryer = new DeployedApplicationQueryer(
                 _mockAWSResourceQueryer.Object,
                 _mockLocalUserSettingsEngine.Object,
-                _mockOrchestratorInteractiveService.Object);
+                _mockOrchestratorInteractiveService.Object,
+                _fileManager);
 
             var deploymentTypes = new List<DeploymentTypes>() { DeploymentTypes.CdkProject, DeploymentTypes.BeanstalkEnvironment };
             var result = await deployedApplicationQueryer.GetExistingDeployedApplications(deploymentTypes);
@@ -400,7 +409,8 @@ namespace AWS.Deploy.Orchestration.UnitTests
             var deployedApplicationQueryer = new DeployedApplicationQueryer(
                 _mockAWSResourceQueryer.Object,
                 _mockLocalUserSettingsEngine.Object,
-                _mockOrchestratorInteractiveService.Object);
+                _mockOrchestratorInteractiveService.Object,
+                _fileManager);
 
             var deploymentTypes = new List<DeploymentTypes>() { DeploymentTypes.CdkProject, DeploymentTypes.BeanstalkEnvironment };
             var result = await deployedApplicationQueryer.GetExistingDeployedApplications(deploymentTypes);
@@ -446,14 +456,84 @@ namespace AWS.Deploy.Orchestration.UnitTests
             var deployedApplicationQueryer = new DeployedApplicationQueryer(
                 _mockAWSResourceQueryer.Object,
                 _mockLocalUserSettingsEngine.Object,
-                _mockOrchestratorInteractiveService.Object);
+                _mockOrchestratorInteractiveService.Object,
+                _fileManager);
 
-            var optionSettings = await deployedApplicationQueryer.GetPreviousSettings(application);
+            var projectDefinition = new ProjectDefinition(null, "testPath", "", "net6.0");
+            var recipeDefinitiion = new RecipeDefinition("AspNetAppExistingBeanstalkEnvironment", "", "", DeploymentTypes.BeanstalkEnvironment, DeploymentBundleTypes.DotnetPublishZipFile, "", "", "", "", "");
+            var recommendation =  new Recommendation(recipeDefinitiion, projectDefinition, 100, new Dictionary<string, object>());
+
+            var optionSettings = await deployedApplicationQueryer.GetPreviousSettings(application, recommendation);
 
             Assert.Equal("enhanced", optionSettings[Constants.ElasticBeanstalk.EnhancedHealthReportingOptionId]);
             Assert.Equal("/", optionSettings[Constants.ElasticBeanstalk.HealthCheckURLOptionId]);
             Assert.Equal("nginx", optionSettings[Constants.ElasticBeanstalk.ProxyOptionId]);
             Assert.Equal("false", optionSettings[Constants.ElasticBeanstalk.XRayTracingOptionId]);
+        }
+
+        [Fact]
+        public async Task GetPreviousSettings_BeanstalkWindowsEnvironment()
+        {
+            var application = new CloudApplication("name", "Id", CloudApplicationResourceType.BeanstalkEnvironment, "recipe");
+            var configurationSettings = new List<ConfigurationOptionSetting>
+            {
+                new ConfigurationOptionSetting
+                {
+                    Namespace = Constants.ElasticBeanstalk.EnhancedHealthReportingOptionNameSpace,
+                    OptionName = Constants.ElasticBeanstalk.EnhancedHealthReportingOptionName,
+                    Value = "enhanced"
+                },
+                new ConfigurationOptionSetting
+                {
+                    OptionName = Constants.ElasticBeanstalk.HealthCheckURLOptionName,
+                    Namespace = Constants.ElasticBeanstalk.HealthCheckURLOptionNameSpace,
+                    Value = "/"
+                },
+                new ConfigurationOptionSetting
+                {
+                    OptionName = Constants.ElasticBeanstalk.XRayTracingOptionName,
+                    Namespace = Constants.ElasticBeanstalk.XRayTracingOptionNameSpace,
+                    Value = "false"
+                }
+            };
+
+            _mockAWSResourceQueryer
+                .Setup(x => x.GetBeanstalkEnvironmentConfigurationSettings(It.IsAny<string>()))
+                .Returns(Task.FromResult(configurationSettings));
+
+            var deployedApplicationQueryer = new DeployedApplicationQueryer(
+                _mockAWSResourceQueryer.Object,
+                _mockLocalUserSettingsEngine.Object,
+                _mockOrchestratorInteractiveService.Object,
+                _fileManager);
+
+            var manifestJson = @"{
+              ""manifestVersion"": 1,
+              ""deployments"": {
+                ""aspNetCoreWeb"": [
+                  {
+                    ""name"": ""app"",
+                    ""parameters"": {
+                      ""iisPath"": ""/path"",
+                      ""iisWebSite"": ""Default Web Site Custom""
+                    }
+                  }
+                ]
+              }
+            }";
+            _fileManager.InMemoryStore.Add(Path.Combine("testPath", "aws-windows-deployment-manifest.json"), manifestJson);
+            var projectDefinition = new ProjectDefinition(null, Path.Combine("testPath", "project.csproj"), "", "net6.0");
+            var recipeDefinitiion = new RecipeDefinition("AspNetAppExistingBeanstalkWindowsEnvironment", "", "", DeploymentTypes.BeanstalkEnvironment, DeploymentBundleTypes.DotnetPublishZipFile, "", "", "", "", "");
+            var recommendation = new Recommendation(recipeDefinitiion, projectDefinition, 100, new Dictionary<string, object>());
+
+            var optionSettings = await deployedApplicationQueryer.GetPreviousSettings(application, recommendation);
+
+            Assert.Equal("enhanced", optionSettings[Constants.ElasticBeanstalk.EnhancedHealthReportingOptionId]);
+            Assert.Equal("/", optionSettings[Constants.ElasticBeanstalk.HealthCheckURLOptionId]);
+            Assert.Equal("false", optionSettings[Constants.ElasticBeanstalk.XRayTracingOptionId]);
+            Assert.Equal("false", optionSettings[Constants.ElasticBeanstalk.XRayTracingOptionId]);
+            Assert.Equal("/path", optionSettings[Constants.ElasticBeanstalk.IISAppPathOptionId]);
+            Assert.Equal("Default Web Site Custom", optionSettings[Constants.ElasticBeanstalk.IISWebSiteOptionId]);
         }
     }
 }

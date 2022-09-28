@@ -367,7 +367,7 @@ namespace AWS.Deploy.CLI.Commands
             }
             else
             {
-                previousSettings = await _deployedApplicationQueryer.GetPreviousSettings(deployedApplication);
+                previousSettings = await _deployedApplicationQueryer.GetPreviousSettings(deployedApplication, selectedRecommendation);
             }
 
             await orchestrator.ApplyAllReplacementTokens(selectedRecommendation, deployedApplication.Name);

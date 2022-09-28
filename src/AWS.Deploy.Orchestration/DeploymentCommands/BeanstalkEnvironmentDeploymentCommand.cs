@@ -39,6 +39,12 @@ namespace AWS.Deploy.Orchestration.DeploymentCommands
 
             orchestrator._interactiveService.LogSectionStart($"Creating application version", "Uploading deployment bundle to S3 and create an Elastic Beanstalk application version");
 
+            // This step is only required for Elastic Beanstalk Windows deployments since a manifest file needs to be created for that deployment.
+            if (recommendation.Recipe.Id.Equals(Constants.RecipeIdentifier.EXISTING_BEANSTALK_WINDOWS_ENVIRONMENT_RECIPE_ID))
+            {
+                elasticBeanstalkHandler.SetupWindowsDeploymentManifest(recommendation, deploymentPackage);
+            }
+
             var versionLabel = $"v-{DateTime.Now.Ticks}";
             var s3location = await elasticBeanstalkHandler.CreateApplicationStorageLocationAsync(applicationName, versionLabel, deploymentPackage);
             await s3Handler.UploadToS3Async(s3location.S3Bucket, s3location.S3Key, deploymentPackage);

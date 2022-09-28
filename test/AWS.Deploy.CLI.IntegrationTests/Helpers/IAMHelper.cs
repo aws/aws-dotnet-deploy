@@ -23,6 +23,30 @@ namespace AWS.Deploy.CLI.IntegrationTests.Helpers
             _interactiveService = toolInteractiveService;
         }
 
+        /// <summary>
+        /// Delete an existing IAM Role by first removing the role from an existing instance profile and deleting that profile.
+        /// </summary>
+        public async Task DeleteRoleAndInstanceProfileAfterBeanstalkEnvionmentDeployment(string roleName)
+        {
+            var existingRoles = await _awsResourceQueryer.ListOfIAMRoles("ec2.amazonaws.com");
+            var role = existingRoles.FirstOrDefault(x => string.Equals(roleName, x.RoleName));
+            if (role != null)
+            {
+                await _client.RemoveRoleFromInstanceProfileAsync(new RemoveRoleFromInstanceProfileRequest
+                {
+                    RoleName = roleName,
+                    InstanceProfileName = roleName
+                });
+
+                await _client.DeleteInstanceProfileAsync(new DeleteInstanceProfileRequest()
+                {
+                    InstanceProfileName = roleName
+                });
+
+                await _client.DeleteRoleAsync(new DeleteRoleRequest { RoleName = role.RoleName });
+            }
+        }
+
         public async Task CreateRoleForBeanstalkEnvionmentDeployment(string roleName)
         {
             _interactiveService.WriteLine($"Creating role {roleName} for deployment to Elastic Beanstalk environemnt");
@@ -51,7 +75,8 @@ namespace AWS.Deploy.CLI.IntegrationTests.Helpers
                 await _client.CreateRoleAsync(new CreateRoleRequest
                 {
                     RoleName = roleName,
-                    AssumeRolePolicyDocument = assumeRolepolicyDocument.Replace("'", "\"")
+                    AssumeRolePolicyDocument = assumeRolepolicyDocument.Replace("'", "\""),
+                    MaxSessionDuration = 7200
                 });
             }
 
