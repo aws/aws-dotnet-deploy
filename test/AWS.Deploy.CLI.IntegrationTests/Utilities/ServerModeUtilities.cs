@@ -98,5 +98,27 @@ namespace AWS.Deploy.CLI.IntegrationTests.Utilities
             var testCredentials = FallbackCredentialsFactory.GetCredentials();
             return Task.FromResult<AWSCredentials>(testCredentials);
         }
+
+        public static async Task<DeploymentStatus> WaitForDeployment(this RestAPIClient restApiClient, string sessionId)
+        {
+            // Do an initial delay to avoid a race condition of the status being checked before the deployment has kicked off.
+            await Task.Delay(TimeSpan.FromSeconds(3));
+
+            GetDeploymentStatusOutput output = null;
+
+            await Orchestration.Utilities.Helpers.WaitUntil(async () =>
+            {
+                output = (await restApiClient.GetDeploymentStatusAsync(sessionId));
+
+                return output.Status != DeploymentStatus.Executing;
+            }, TimeSpan.FromSeconds(1), TimeSpan.FromMinutes(15));
+
+            if (output.Exception != null)
+            {
+                throw new Exception("Error waiting on stack status: " + output.Exception.Message);
+            }
+
+            return output.Status;
+        }
     }
 }

@@ -530,11 +530,11 @@ namespace AWS.Deploy.Orchestration.Data
             var allPlatformSummaries = new List<PlatformSummary>();
             if (platformTypes.Contains(BeanstalkPlatformType.Linux))
             {
-                allPlatformSummaries.AddRange(await fetchPlatforms(".NET Core"));
+                allPlatformSummaries.AddRange(await fetchPlatforms(Constants.ElasticBeanstalk.LinuxPlatformType));
             }
-            else if (platformTypes.Contains(BeanstalkPlatformType.Windows))
+            if (platformTypes.Contains(BeanstalkPlatformType.Windows))
             {
-                var windowsPlatforms = await fetchPlatforms("Windows Server");
+                var windowsPlatforms = await fetchPlatforms(Constants.ElasticBeanstalk.WindowsPlatformType);
                 SortElasticBeanstalkWindowsPlatforms(windowsPlatforms);
                 allPlatformSummaries.AddRange(windowsPlatforms);
             }

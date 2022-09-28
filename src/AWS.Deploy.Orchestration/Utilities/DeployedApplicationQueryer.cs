@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Amazon.CloudFormation;
 using Amazon.ElasticBeanstalk;
@@ -14,6 +16,7 @@ using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.LocalUserSettings;
+using AWS.Deploy.Orchestration.ServiceHandlers;
 
 namespace AWS.Deploy.Orchestration.Utilities
 {
@@ -37,7 +40,7 @@ namespace AWS.Deploy.Orchestration.Utilities
         /// <summary>
         /// Gets the current option settings associated with the cloud application. This method is only used for non-CloudFormation based cloud applications.
         /// </summary>
-        Task<IDictionary<string, object>> GetPreviousSettings(CloudApplication application);
+        Task<IDictionary<string, object>> GetPreviousSettings(CloudApplication application, Recommendation recommendation);
     }
 
     public class DeployedApplicationQueryer : IDeployedApplicationQueryer
@@ -45,15 +48,18 @@ namespace AWS.Deploy.Orchestration.Utilities
         private readonly IAWSResourceQueryer _awsResourceQueryer;
         private readonly ILocalUserSettingsEngine _localUserSettingsEngine;
         private readonly IOrchestratorInteractiveService _orchestratorInteractiveService;
+        private readonly IFileManager _fileManager;
 
         public DeployedApplicationQueryer(
             IAWSResourceQueryer awsResourceQueryer,
             ILocalUserSettingsEngine localUserSettingsEngine,
-            IOrchestratorInteractiveService orchestratorInteractiveService)
+            IOrchestratorInteractiveService orchestratorInteractiveService,
+            IFileManager fileManager)
         {
             _awsResourceQueryer = awsResourceQueryer;
             _localUserSettingsEngine = localUserSettingsEngine;
             _orchestratorInteractiveService = orchestratorInteractiveService;
+            _fileManager = fileManager;
         }
 
         public async Task<List<CloudApplication>> GetExistingDeployedApplications(List<DeploymentTypes> deploymentTypes)
@@ -139,13 +145,13 @@ namespace AWS.Deploy.Orchestration.Utilities
         /// <summary>
         /// Gets the current option settings associated with the cloud application.This method is only used for non-CloudFormation based cloud applications.
         /// </summary>
-        public async Task<IDictionary<string, object>> GetPreviousSettings(CloudApplication application)
+        public async Task<IDictionary<string, object>> GetPreviousSettings(CloudApplication application, Recommendation recommendation)
         {
             IDictionary<string, object> previousSettings;
             switch (application.ResourceType)
             {
                 case CloudApplicationResourceType.BeanstalkEnvironment:
-                    previousSettings = await GetBeanstalkEnvironmentConfigurationSettings(application.Name);
+                    previousSettings = await GetBeanstalkEnvironmentConfigurationSettings(application.Name, recommendation.Recipe.Id, recommendation.ProjectPath);
                     break;
                 default:
                     throw new InvalidOperationException($"Cannot fetch existing option settings for the following {nameof(CloudApplicationResourceType)}: {application.ResourceType}");
@@ -212,7 +218,8 @@ namespace AWS.Deploy.Orchestration.Utilities
             if (!environments.Any())
                 return validEnvironments;
 
-            var dotnetPlatformArns = (await _awsResourceQueryer.GetElasticBeanstalkPlatformArns()).Select(x => x.PlatformArn).ToList();
+            var dotnetPlatforms = await _awsResourceQueryer.GetElasticBeanstalkPlatformArns();
+            var dotnetPlatformArns = dotnetPlatforms.Select(x => x.PlatformArn).ToList();
 
             // only select environments that have a dotnet specific platform ARN.
             environments = environments.Where(x => x.Status == EnvironmentStatus.Ready && dotnetPlatformArns.Contains(x.PlatformArn)).ToList();
@@ -225,18 +232,34 @@ namespace AWS.Deploy.Orchestration.Utilities
                 if (tags.Any(x => string.Equals(x.Key, Constants.CloudFormationIdentifier.STACK_TAG)))
                     continue;
 
-                validEnvironments.Add(new CloudApplication(env.EnvironmentName, env.EnvironmentId, CloudApplicationResourceType.BeanstalkEnvironment, Constants.RecipeIdentifier.EXISTING_BEANSTALK_ENVIRONMENT_RECIPE_ID, env.DateUpdated));
+                var recipeId = env.PlatformArn.Contains(Constants.ElasticBeanstalk.LinuxPlatformType) ?
+                    Constants.RecipeIdentifier.EXISTING_BEANSTALK_ENVIRONMENT_RECIPE_ID :
+                    Constants.RecipeIdentifier.EXISTING_BEANSTALK_WINDOWS_ENVIRONMENT_RECIPE_ID;
+                validEnvironments.Add(new CloudApplication(env.EnvironmentName, env.EnvironmentId, CloudApplicationResourceType.BeanstalkEnvironment, recipeId, env.DateUpdated));
             }
 
             return validEnvironments;
         }
 
-        private async Task<IDictionary<string, object>> GetBeanstalkEnvironmentConfigurationSettings(string environmentName)
+        private async Task<IDictionary<string, object>> GetBeanstalkEnvironmentConfigurationSettings(string environmentName, string recipeId, string projectPath)
         {
             IDictionary<string, object> optionSettings = new Dictionary<string, object>();
             var configurationSettings = await _awsResourceQueryer.GetBeanstalkEnvironmentConfigurationSettings(environmentName);
 
-            foreach (var tuple in Constants.ElasticBeanstalk.OptionSettingQueryList)
+            List<(string OptionSettingId, string OptionSettingNameSpace, string OptionSettingName)> tupleList;
+            switch (recipeId)
+            {
+                case Constants.RecipeIdentifier.EXISTING_BEANSTALK_ENVIRONMENT_RECIPE_ID:
+                    tupleList = Constants.ElasticBeanstalk.OptionSettingQueryList;
+                    break;
+                case Constants.RecipeIdentifier.EXISTING_BEANSTALK_WINDOWS_ENVIRONMENT_RECIPE_ID:
+                    tupleList = Constants.ElasticBeanstalk.WindowsOptionSettingQueryList;
+                    break;
+                default:
+                    throw new InvalidOperationException($"The recipe '{recipeId}' is not supported.");
+            }
+
+            foreach (var tuple in tupleList)
             {
                 var configurationSetting = GetBeanstalkEnvironmentConfigurationSetting(configurationSettings, tuple.OptionSettingNameSpace, tuple.OptionSettingName);
 
@@ -244,6 +267,20 @@ namespace AWS.Deploy.Orchestration.Utilities
                     continue;
 
                 optionSettings[tuple.OptionSettingId] = configurationSetting.Value;
+            }
+
+            if (recipeId.Equals(Constants.RecipeIdentifier.EXISTING_BEANSTALK_WINDOWS_ENVIRONMENT_RECIPE_ID))
+            {
+                var manifestPath = Path.Combine(Path.GetDirectoryName(projectPath) ?? string.Empty, Constants.ElasticBeanstalk.WindowsManifestName);
+                if (_fileManager.Exists(manifestPath))
+                {
+                    var manifest = JsonSerializer.Deserialize<ElasticBeanstalkWindowsManifest>(await _fileManager.ReadAllTextAsync(manifestPath));
+                    if (manifest.Deployments.AspNetCoreWeb.Count != 0)
+                    {
+                        optionSettings[Constants.ElasticBeanstalk.IISWebSiteOptionId] = manifest.Deployments.AspNetCoreWeb[0].Parameters.IISWebSite;
+                        optionSettings[Constants.ElasticBeanstalk.IISAppPathOptionId] = manifest.Deployments.AspNetCoreWeb[0].Parameters.IISPath;
+                    }
+                }
             }
 
             return optionSettings;
