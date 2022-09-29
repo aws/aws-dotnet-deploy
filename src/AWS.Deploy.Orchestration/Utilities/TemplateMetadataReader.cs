@@ -114,6 +114,12 @@ namespace AWS.Deploy.Orchestration.Utilities
                 var jsonString = cfTemplate.Metadata[Constants.CloudFormationIdentifier.STACK_METADATA_SETTINGS];
                 cloudApplicationMetadata.Settings = JsonConvert.DeserializeObject<IDictionary<string, object>>(jsonString ?? "") ?? new Dictionary<string, object>();
 
+                if (cfTemplate.Metadata.ContainsKey(Constants.CloudFormationIdentifier.STACK_METADATA_DEPLOYMENT_BUNDLE_SETTINGS))
+                {
+                    jsonString = cfTemplate.Metadata[Constants.CloudFormationIdentifier.STACK_METADATA_DEPLOYMENT_BUNDLE_SETTINGS];
+                    cloudApplicationMetadata.DeploymentBundleSettings = JsonConvert.DeserializeObject<IDictionary<string, object>>(jsonString ?? "") ?? new Dictionary<string, object>();
+                }
+
                 return cloudApplicationMetadata;
             }
             catch (Exception e)
@@ -147,6 +153,12 @@ namespace AWS.Deploy.Orchestration.Utilities
 
                 var jsonString = ((YamlScalarNode)metadataNode.Children[new YamlScalarNode(Constants.CloudFormationIdentifier.STACK_METADATA_SETTINGS)]).Value;
                 cloudApplicationMetadata.Settings = JsonConvert.DeserializeObject<IDictionary<string, object>>(jsonString ?? "") ?? new Dictionary<string, object>();
+
+                if (metadataNode.Children.ContainsKey(Constants.CloudFormationIdentifier.STACK_METADATA_DEPLOYMENT_BUNDLE_SETTINGS))
+                {
+                    jsonString = ((YamlScalarNode)metadataNode.Children[new YamlScalarNode(Constants.CloudFormationIdentifier.STACK_METADATA_DEPLOYMENT_BUNDLE_SETTINGS)]).Value;
+                    cloudApplicationMetadata.DeploymentBundleSettings = JsonConvert.DeserializeObject<IDictionary<string, object>>(jsonString ?? "") ?? new Dictionary<string, object>();
+                }
 
                 return cloudApplicationMetadata;
             }

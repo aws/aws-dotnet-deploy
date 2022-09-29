@@ -2,6 +2,7 @@
   "Description": "AWSDotnetDeployCDKStack",
   "Metadata": {
     "aws-dotnet-deploy-settings": "{\"ApplicationIAMRole\":{\"CreateNew\":true,\"RoleArn\":null},\"EnvironmentType\":\"SingleInstance\",\"InstanceType\":\"\",\"BeanstalkEnvironment\":{\"CreateNew\":true,\"EnvironmentName\":\"WebApp1-dev\"},\"BeanstalkApplication\":{\"CreateNew\":true,\"ApplicationName\":\"WebApp1\"},\"ElasticBeanstalkPlatformArn\":\"arn:aws:elasticbeanstalk:us-west-2::platform/.NET Core running on 64bit Amazon Linux 2/2.2.10\",\"LoadBalancerType\":\"application\",\"EC2KeyPair\":\"\",\"ElasticBeanstalkManagedPlatformUpdates\":{\"ManagedActionsEnabled\":true,\"PreferredStartTime\":\"Sun:00:00\",\"UpdateLevel\":\"minor\"},\"XRayTracingSupportEnabled\":false,\"ReverseProxy\":\"nginx\",\"EnhancedHealthReporting\":\"enhanced\",\"HealthCheckURL\":\"/\",\"ElasticBeanstalkRollingUpdates\":{\"RollingUpdatesEnabled\":false,\"RollingUpdateType\":\"Time\",\"MaxBatchSize\":null,\"MinInstancesInService\":null,\"PauseTime\":null,\"Timeout\":\"PT30M\"},\"CNamePrefix\":\"\",\"ElasticBeanstalkEnvironmentVariables\":{}}",
+    "aws-dotnet-deploy-deployment-bundle-settings": "{\"DockerBuildArgs\":\"\",\"DockerfilePath\":\"Dockerfile\",\"DockerExecutionDirectory\":\".\",\"ECRRepositoryName\":\"webappwithdockerfile\"}",
     "aws-dotnet-deploy-recipe-id": "AspNetAppElasticBeanstalkLinux",
     "aws-dotnet-deploy-recipe-version": "0.1.0"
   },

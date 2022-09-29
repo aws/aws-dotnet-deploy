@@ -10,25 +10,24 @@ using System.Threading.Tasks;
 using Amazon.Runtime;
 using AWS.Deploy.CLI.Commands;
 using AWS.Deploy.CLI.IntegrationTests.Utilities;
-using AWS.Deploy.Orchestration.Utilities;
 using AWS.Deploy.ServerMode.Client;
 using Xunit;
 
-namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests
+namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests.ExistingWindowsEnvironment
 {
-    [Collection(nameof(TestContextFixture))]
+    [Collection(nameof(WindowsTestContextFixture))]
     public class ServerModeTests
     {
-        private readonly TestContextFixture _fixture;
-        private const string BEANSTALK_ENVIRONMENT_RECIPE_ID = "AspNetAppExistingBeanstalkEnvironment";
+        private readonly WindowsTestContextFixture _fixture;
+        private const string BEANSTALK_ENVIRONMENT_RECIPE_ID = "AspNetAppExistingBeanstalkWindowsEnvironment";
 
-        public ServerModeTests(TestContextFixture fixture)
+        public ServerModeTests(WindowsTestContextFixture fixture)
         {
             _fixture = fixture;
         }
 
         [Fact]
-        public async Task DeployToExistingBeanstalkEnvironment()
+        public async Task DeployToExistingWindowsBeanstalkEnvironment()
         {
             var projectPath = _fixture.TestAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
             var portNumber = 4031;

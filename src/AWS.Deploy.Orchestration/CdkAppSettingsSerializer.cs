@@ -4,19 +4,30 @@
 using System.Collections.Generic;
 using System.IO;
 using AWS.Deploy.Common;
+using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Recipes.CDK.Common;
 using Newtonsoft.Json;
 
 namespace AWS.Deploy.Orchestration
 {
-    public class CdkAppSettingsSerializer
+    public interface ICdkAppSettingsSerializer
+    {
+        /// <summary>
+        /// Creates the contents for the appsettings.json file inside the CDK project. This file is deserialized into <see cref="IRecipeProps{T}"/> to be used the by the CDK templates.
+        /// </summary>
+        string Build(CloudApplication cloudApplication, Recommendation recommendation, OrchestratorSession session);
+    }
+
+    public class CdkAppSettingsSerializer : ICdkAppSettingsSerializer
     {
         private readonly IOptionSettingHandler _optionSettingHandler;
+        private readonly IDirectoryManager _directoryManager;
 
-        public CdkAppSettingsSerializer(IOptionSettingHandler optionSettingHandler)
+        public CdkAppSettingsSerializer(IOptionSettingHandler optionSettingHandler, IDirectoryManager directoryManager)
         {
             _optionSettingHandler = optionSettingHandler;
+            _directoryManager = directoryManager;
         }
 
         public string Build(CloudApplication cloudApplication, Recommendation recommendation, OrchestratorSession session)
@@ -33,23 +44,21 @@ namespace AWS.Deploy.Orchestration
                 recommendation.Recipe.Version,
                 session.AWSAccountId,
                 session.AWSRegion,
-                new ()
+                settings: _optionSettingHandler.GetOptionSettingsMap(recommendation, session.ProjectDefinition, _directoryManager, OptionSettingsType.Recipe)
                 )
             {
+                // These deployment bundle settings need to be set separately because they are not configurable by the user.
+                // These settings will not be part of the CloudFormation template metadata.
+                // The only exception to this is the ECR Repository name.
                 ECRRepositoryName = recommendation.DeploymentBundle.ECRRepositoryName ?? "",
                 ECRImageTag = recommendation.DeploymentBundle.ECRImageTag ?? "",
                 DotnetPublishZipPath = recommendation.DeploymentBundle.DotnetPublishZipPath ?? "",
                 DotnetPublishOutputDirectory = recommendation.DeploymentBundle.DotnetPublishOutputDirectory ?? ""
             };
 
-            // Option Settings
-            foreach (var optionSetting in recommendation.Recipe.OptionSettings)
-            {
-                var optionSettingValue = _optionSettingHandler.GetOptionSettingValue(recommendation, optionSetting);
-
-                if (optionSettingValue != null)
-                    appSettingsContainer.Settings[optionSetting.Id] = optionSettingValue;
-            }
+            // Persist deployment bundle settings
+            var deploymentBundleSettingsMap = _optionSettingHandler.GetOptionSettingsMap(recommendation, session.ProjectDefinition, _directoryManager, OptionSettingsType.DeploymentBundle);
+            appSettingsContainer.DeploymentBundleSettings = JsonConvert.SerializeObject(deploymentBundleSettingsMap);
 
             return JsonConvert.SerializeObject(appSettingsContainer, Formatting.Indented);
         }

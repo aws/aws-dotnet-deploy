@@ -128,14 +128,16 @@ namespace AWS.Deploy.CLI.IntegrationTests
             Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName), $"{_stackName} still exists.");
         }
 
-        [Fact]
-        public async Task WindowsEBDefaultConfigurations()
+        [Theory]
+        [InlineData("ElasticBeanStalkConfigFile-Windows.json")]
+        [InlineData("ElasticBeanStalkConfigFile-Windows-SelfContained.json")]
+        public async Task WindowsEBDefaultConfigurations(string configFile)
         {
             _stackName = $"WinTest-{Guid.NewGuid().ToString().Split('-').Last()}";
 
             // Deploy
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
-            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--application-name", _stackName, "--diagnostics", "--silent", "--apply",  "ElasticBeanStalkConfigFile-Windows.json" };
+            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--application-name", _stackName, "--diagnostics", "--silent", "--apply", configFile };
             Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
 
             // Verify application is deployed and running

@@ -206,7 +206,7 @@ namespace AspNetAppEcsFargate
                 ServiceLoadBalancer = new ApplicationLoadBalancer(this, nameof(ServiceLoadBalancer), InvokeCustomizeCDKPropsEvent(nameof(ServiceLoadBalancer), this, new ApplicationLoadBalancerProps
                 {
                     Vpc = AppVpc,
-                    InternetFacing = true
+                    InternetFacing = settings.LoadBalancer.InternetFacing
                 }));
 
                 LoadBalancerListener = ServiceLoadBalancer.AddListener(nameof(LoadBalancerListener), InvokeCustomizeCDKPropsEvent(nameof(LoadBalancerListener), this, new ApplicationListenerProps

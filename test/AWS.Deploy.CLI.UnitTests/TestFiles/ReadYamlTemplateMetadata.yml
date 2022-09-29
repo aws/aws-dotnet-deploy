@@ -1,6 +1,7 @@
 Description: AWSDotnetDeployCDKStack
 Metadata:
   aws-dotnet-deploy-settings: '{"ApplicationIAMRole":"aws-elasticbeanstalk-role","EnvironmentType":"SingleInstance","InstanceType":"t2.micro","EnvironmentName":"BeanstalkTest2-dev","ApplicationName":"BeanstalkTest2","SolutionStackName":"64bit Amazon Linux 2 v2.1.2 running .NET Core","LoadBalancerType":"application","UseExistingApplication":false,"EC2KeyPair":""}'
+  aws-dotnet-deploy-deployment-bundle-settings: '{"DockerBuildArgs": "","DockerfilePath": "Dockerfile","DockerExecutionDirectory": ".","ECRRepositoryName": "webappwithdockerfile"}'
   aws-dotnet-deploy-recipe-id: AspNetAppElasticBeanstalkLinux
   aws-dotnet-deploy-recipe-version: 0.1.0
 Parameters:

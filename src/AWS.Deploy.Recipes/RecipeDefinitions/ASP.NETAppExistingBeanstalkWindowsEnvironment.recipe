@@ -1,15 +1,15 @@
 {
     "$schema": "./aws-deploy-recipe-schema.json",
-    "Id": "AspNetAppExistingBeanstalkEnvironment",
-    "Version": "1.0.1",
-    "Name": "ASP.NET Core App to Existing AWS Elastic Beanstalk Environment",
+    "Id": "AspNetAppExistingBeanstalkWindowsEnvironment",
+    "Version": "1.0.0",
+    "Name": "ASP.NET Core App to Existing AWS Elastic Beanstalk Windows Environment",
     "DisableNewDeployments": true,
     "DeploymentType": "BeanstalkEnvironment",
     "DeploymentBundle": "DotnetPublishZipFile",
-    "ShortDescription": "Deploys your application directly to a Linux EC2 instance using AWS Elastic Beanstalk.",
-    "Description": "This ASP.NET Core application will be built and deployed to an existing AWS Elastic Beanstalk environment. Recommended if you want to deploy your application directly to EC2 hosts, not as a container image.",
+    "ShortDescription": "Deploys your application directly to a Windows EC2 instance using AWS Elastic Beanstalk.",
+    "Description": "This ASP.NET Core application will be built and deployed to an existing AWS Elastic Beanstalk Windows environment. Recommended if you want to deploy your application directly to EC2 hosts, not as a container image.",
     "TargetService": "AWS Elastic Beanstalk",
-    "TargetPlatform": "Linux",
+    "TargetPlatform": "Windows",
 
     "RecipePriority": 0,
     "RecommendationRules": [
@@ -49,6 +49,26 @@
     ],
     "OptionSettings": [
         {
+            "Id": "IISWebSite",
+            "Name": "IIS Web Site",
+            "Category": "Hosting",
+            "Description": "The IIS Web Site the application will be installed in.",
+            "Type": "String",
+            "DefaultValue": "Default Web Site",
+            "AdvancedSetting": true,
+            "Updatable": true
+        },
+        {
+            "Id": "IISAppPath",
+            "Name": "IIS Application Path",
+            "Category": "Hosting",
+            "Description": "The IIS application path that will be the root of the application.",
+            "Type": "String",
+            "DefaultValue": "/",
+            "AdvancedSetting": true,
+            "Updatable": true
+        },
+        {
             "Id": "EnhancedHealthReporting",
             "Name": "Enhanced Health Reporting",
             "Category": "Health",
@@ -73,20 +93,6 @@
             "Description": "AWS X-Ray is a service that collects data about requests that your application serves, and provides tools you can use to view, filter, and gain insights into that data to identify issues and opportunities for optimization. Do you want to enable AWS X-Ray tracing support?",
             "Type": "Bool",
             "DefaultValue": false,
-            "AdvancedSetting": false,
-            "Updatable": true
-        },
-        {
-            "Id": "ReverseProxy",
-            "Name": "Reverse Proxy",
-            "Category": "Hosting",
-            "Description": "By default Nginx is used as a reverse proxy in front of the .NET Core web server Kestrel. To use Kestrel as the front facing web server then select `none` as the reverse proxy.",
-            "Type": "String",
-            "DefaultValue": "nginx",
-            "AllowedValues": [
-                "nginx",
-                "none"
-            ],
             "AdvancedSetting": false,
             "Updatable": true
         },

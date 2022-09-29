@@ -43,12 +43,6 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
             _testAppManager = new TestAppManager();
         }
 
-        public Task<AWSCredentials> ResolveCredentials()
-        {
-            var testCredentials = FallbackCredentialsFactory.GetCredentials();
-            return Task.FromResult<AWSCredentials>(testCredentials);
-        }
-
         [Fact]
         public async Task DependentOptionSettingsGetInvalidated()
         {
@@ -56,7 +50,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
 
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
             var portNumber = 4022;
-            using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ResolveCredentials);
+            using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ServerModeExtensions.ResolveCredentials);
 
             var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
             var cancelSource = new CancellationTokenSource();
@@ -147,7 +141,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
 
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
             var portNumber = 4022;
-            using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ResolveCredentials);
+            using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ServerModeExtensions.ResolveCredentials);
 
             var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
             var cancelSource = new CancellationTokenSource();

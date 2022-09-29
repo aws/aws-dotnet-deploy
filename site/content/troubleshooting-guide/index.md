@@ -106,3 +106,13 @@ Resource handler returned message: "'MemorySize' value failed to satisfy constra
 **Why this is happening:** The [BucketDeployment](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_s3_deployment.BucketDeployment.html) CDK Construct used to deploy the Blazor recipe uses an AWS Lambda function to replicate the application files from the CDK bucket to the deployment bucket. In some versions of the deploy tool the default memory limit for this Lambda function exceeded the 3008MB quota placed on new AWS accounts.
 
 **Resolution:** See [Lambda: Concurrency and memory quotas](https://docs.aws.amazon.com/lambda/latest/dg/troubleshooting-deployment.html#troubleshooting-deployment-quotas) for how to request a quota increase.
+
+## App Runner Failed with _Resource handler returned message: "null"_
+When attempting to deploy to App Runner, creation of the `AWS::AppRunner::Service` resource may fail with a message such as:
+```
+CREATE_FAILED | AWS::AppRunner::Service | Recipe/AppRunnerService (RecipeAppRunnerService) Resource handler returned message: "null"
+```
+
+**Why this is happening:** This error could happen for a variety of reasons, such as the application failing its initial health check or limited permissions.
+
+**Resolution:** The resolution will depend on the failure reason. To aid diagnosis, attempt to deploy your application again. While it is deploying, navigate to the the Deployment and Application logs sections of _App Runner > Services > [name of your cloud application]_ in the AWS Console and review the logs for any unexpected errors. See [Viewing App Runner logs streamed to CloudWatch Logs](https://docs.aws.amazon.com/apprunner/latest/dg/monitor-cwl.html) for more details.

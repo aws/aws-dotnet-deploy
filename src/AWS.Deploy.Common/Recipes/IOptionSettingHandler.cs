@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes.Validation;
 
 namespace AWS.Deploy.Common.Recipes
@@ -84,5 +85,12 @@ namespace AWS.Deploy.Common.Recipes
         /// </summary>
         /// <returns>true if the option setting item has been modified or false otherwise</returns>
         bool IsOptionSettingModified(Recommendation recommendation, OptionSettingItem optionSetting);
+
+        /// <summary>
+        /// <para>Returns a Dictionary containing the  configurable option settings for the specified recommendation. The returned dictionary can contain specific types of option settings depending on the value of <see cref="OptionSettingsType"/>.</para>
+        /// <para>The key in the dictionary is the fully qualified ID of each option setting</para>
+        /// <para>The value in the dictionary is the value of each option setting</para>
+        /// </summary>
+        Dictionary<string, object> GetOptionSettingsMap(Recommendation recommendation, ProjectDefinition projectDefinition, IDirectoryManager directoryManager, OptionSettingsType optionSettingsType = OptionSettingsType.All);
     }
 }

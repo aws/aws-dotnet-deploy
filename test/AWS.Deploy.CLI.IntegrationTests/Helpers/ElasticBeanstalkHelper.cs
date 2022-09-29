@@ -61,7 +61,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.Helpers
             });
         }
 
-        public async Task<bool> CreateEnvironmentAsync(string applicationName, string environmentName, string versionLabel)
+        public async Task<bool> CreateEnvironmentAsync(string applicationName, string environmentName, string versionLabel, BeanstalkPlatformType platformType)
         {
             _interactiveService.WriteLine($"Creating new Elastic Beanstalk environment {environmentName} with versionLabel {versionLabel}");
 
@@ -72,7 +72,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.Helpers
                 ApplicationName = applicationName,
                 EnvironmentName = environmentName,
                 VersionLabel = versionLabel,
-                PlatformArn = (await _awsResourceQueryer.GetLatestElasticBeanstalkPlatformArn(BeanstalkPlatformType.Linux)).PlatformArn,
+                PlatformArn = (await _awsResourceQueryer.GetLatestElasticBeanstalkPlatformArn(platformType)).PlatformArn,
                 OptionSettings = new List<ConfigurationOptionSetting>
                 {
                     new ConfigurationOptionSetting("aws:autoscaling:launchconfiguration", "IamInstanceProfile", "aws-elasticbeanstalk-ec2-role"),

@@ -17,6 +17,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v1
         with:
           role-to-assume: ${{ secrets.CI_AWS_ROLE_ARN }}
+          role-duration-seconds: 7200
           aws-region: us-west-2
       - name: Run CodeBuild
         id: codebuild

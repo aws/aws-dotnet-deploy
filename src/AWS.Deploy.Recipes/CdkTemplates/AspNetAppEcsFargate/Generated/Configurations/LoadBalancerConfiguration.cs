@@ -68,6 +68,10 @@ namespace AspNetAppEcsFargate.Configurations
         /// </summary>
         public double ListenerConditionPriority { get; set; } = 100;
 
+        /// <summary>
+        /// Whether the load balancer has an internet-routable address.
+        /// </summary>
+        public bool InternetFacing { get; set; } = true;
 
         /// A parameterless constructor is needed for <see cref="Microsoft.Extensions.Configuration.ConfigurationBuilder"/>
         /// or the classes will fail to initialize.

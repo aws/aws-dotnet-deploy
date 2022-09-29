@@ -1,7 +1,7 @@
 {
     "$schema": "./aws-deploy-recipe-schema.json",
     "Id": "BlazorWasm",
-    "Version": "1.0.0",
+    "Version": "1.0.1",
     "Name": "Blazor WebAssembly App",
     "DeploymentType": "CdkProject",
     "DeploymentBundle": "DotnetPublishZipFile",
@@ -10,6 +10,7 @@
     "ShortDescription": "Hosts Blazor WebAssembly application in an Amazon S3 bucket with Amazon CloudFront as a content delivery network.",
     "Description": "This Blazor WebAssembly application will be built and hosted in a new Amazon Simple Storage Service (Amazon S3) bucket. The Blazor application will be exposed publicly through a CloudFront distribution using the Amazon S3 bucket as the origin.",
     "TargetService": "Amazon S3",
+    "TargetPlatform": "Linux",
 
     "DisplayedResources": [
         {
@@ -330,9 +331,11 @@
             "Category": "Networking",
             "Description": "The maximum http version that users can use to communicate with the CloudFront distribution",
             "Type": "String",
-            "DefaultValue": "HTTP2",
-            "AllowedValues": [ "HTTP2", "HTTP1_1" ],
+            "DefaultValue": "HTTP2_AND_3",
+            "AllowedValues": [ "HTTP2_AND_3", "HTTP3","HTTP2", "HTTP1_1" ],
             "ValueMapping": {
+                "HTTP2_AND_3": "HTTP 2 and 3",
+                "HTTP3": "HTTP 3",
                 "HTTP2": "HTTP 2",
                 "HTTP1_1": "HTTP 1.1"
             },

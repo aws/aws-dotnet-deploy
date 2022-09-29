@@ -11,6 +11,7 @@ using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Recipes.Validation;
+using AWS.Deploy.Orchestration.Utilities;
 using Newtonsoft.Json;
 
 namespace AWS.Deploy.Orchestration
@@ -128,35 +129,18 @@ namespace AWS.Deploy.Orchestration
                 AWSRegion = orchestratorSession.AWSRegion,
                 ApplicationName = recommendation.Recipe.DeploymentType == DeploymentTypes.ElasticContainerRegistryImage ? null : cloudApplication.Name,
                 RecipeId = cloudApplication.RecipeId,
-                Settings = new Dictionary<string, object>()
+                Settings = _optionSettingHandler.GetOptionSettingsMap(recommendation, orchestratorSession.ProjectDefinition, _directoryManager)
             };
 
-            var optionSettings = recommendation.GetConfigurableOptionSettingItems();
-            foreach (var optionSetting in optionSettings)
+            if (saveSettingsConfig.SettingsType == SaveSettingsType.Modified)
             {
-                if (saveSettingsConfig.SettingsType == SaveSettingsType.Modified && !_optionSettingHandler.IsOptionSettingModified(recommendation, optionSetting))
+                foreach (var optionSetting in recommendation.GetConfigurableOptionSettingItems())
                 {
-                    continue;
-                }
-
-                var id = optionSetting.FullyQualifiedId;
-                var value = _optionSettingHandler.GetOptionSettingValue(recommendation, optionSetting);
-                if (optionSetting.TypeHint.HasValue && (optionSetting.TypeHint == OptionSettingTypeHint.FilePath || optionSetting.TypeHint == OptionSettingTypeHint.DockerExecutionDirectory))
-                {
-                    var path = value?.ToString();
-                    if (string.IsNullOrEmpty(path))
+                    if (!_optionSettingHandler.IsOptionSettingModified(recommendation, optionSetting))
                     {
-                        continue;
+                        deploymentSettings.Settings.Remove(optionSetting.FullyQualifiedId);
                     }
-
-                    // All file paths or directory paths must be persisted relative the the customers .NET project.
-                    // This is a done to ensure that the resolved paths work correctly across all cloned repos.
-                    // The relative path is also canonicalized to work across Unix and Windows OS.
-                    var absolutePath = _directoryManager.GetAbsolutePath(projectDirectory, path);
-                    value = _directoryManager.GetRelativePath(projectDirectory, absolutePath)
-                                .Replace(Path.DirectorySeparatorChar, '/');
                 }
-                deploymentSettings.Settings[id] = value;
             }
 
             try

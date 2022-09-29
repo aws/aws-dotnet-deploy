@@ -8,6 +8,7 @@ namespace AWS.Deploy.Constants
     {
         // Recipe IDs
         public const string EXISTING_BEANSTALK_ENVIRONMENT_RECIPE_ID = "AspNetAppExistingBeanstalkEnvironment";
+        public const string EXISTING_BEANSTALK_WINDOWS_ENVIRONMENT_RECIPE_ID = "AspNetAppExistingBeanstalkWindowsEnvironment";
         public const string PUSH_TO_ECR_RECIPE_ID = "PushContainerImageEcr";
 
         // Replacement Tokens

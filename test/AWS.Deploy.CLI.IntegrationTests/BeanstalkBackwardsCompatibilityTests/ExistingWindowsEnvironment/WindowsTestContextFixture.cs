@@ -3,7 +3,9 @@
 
 using System;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Amazon.ElasticBeanstalk;
 using Amazon.IdentityManagement;
@@ -15,18 +17,18 @@ using AWS.Deploy.CLI.IntegrationTests.Services;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.IO;
-using AWS.Deploy.Orchestration.Data;
+using AWS.Deploy.Orchestration.ServiceHandlers;
 using AWS.Deploy.Orchestration.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
-namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests
+namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests.ExistingWindowsEnvironment
 {
     /// <summary>
     /// The goal of this class is to be used as shared context between a collection of tests.
     /// More info could be found here https://xunit.net/docs/shared-context
     /// </summary>
-    public class TestContextFixture : IAsyncLifetime
+    public class WindowsTestContextFixture : IAsyncLifetime
     {
         public readonly App App;
         public readonly HttpHelper HttpHelper;
@@ -36,6 +38,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests
         public readonly ICommandLineWrapper CommandLineWrapper;
         public readonly IZipFileManager ZipFileManager;
         public readonly IToolInteractiveService ToolInteractiveService;
+        public readonly IElasticBeanstalkHandler ElasticBeanstalkHandler;
         public readonly InMemoryInteractiveService InteractiveService;
         public readonly ElasticBeanstalkHelper EBHelper;
         public readonly IAMHelper IAMHelper;
@@ -46,7 +49,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests
         public readonly string RoleName;
         public string EnvironmentId;
 
-        public TestContextFixture()
+        public WindowsTestContextFixture()
         {
             var serviceCollection = new ServiceCollection();
 
@@ -81,6 +84,9 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests
             DirectoryManager = serviceProvider.GetService<IDirectoryManager>();
             Assert.NotNull(DirectoryManager);
 
+            ElasticBeanstalkHandler = serviceProvider.GetService<IElasticBeanstalkHandler>();
+            Assert.NotNull(ElasticBeanstalkHandler);
+
             HttpHelper = new HttpHelper(InteractiveService);
             TestAppManager = new TestAppManager();
 
@@ -112,9 +118,11 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests
 
             await ZipFileManager.CreateFromDirectory(publishDirectoryInfo.FullName, zipFilePath);
 
+            SetupWindowsDeploymentManifest(zipFilePath);
+
             await EBHelper.CreateApplicationAsync(ApplicationName);
             await EBHelper.CreateApplicationVersionAsync(ApplicationName, VersionLabel, zipFilePath);
-            var success = await EBHelper.CreateEnvironmentAsync(ApplicationName, EnvironmentName, VersionLabel, BeanstalkPlatformType.Linux);
+            var success = await EBHelper.CreateEnvironmentAsync(ApplicationName, EnvironmentName, VersionLabel, BeanstalkPlatformType.Windows);
             Assert.True(success);
 
             var environmentDescription = await AWSResourceQueryer.DescribeElasticBeanstalkEnvironment(EnvironmentName);
@@ -122,6 +130,50 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests
 
             // URL could take few more minutes to come live, therefore, we want to wait and keep trying for a specified timeout
             await HttpHelper.WaitUntilSuccessStatusCode(environmentDescription.CNAME, TimeSpan.FromSeconds(5), TimeSpan.FromMinutes(5));
+        }
+
+        public void SetupWindowsDeploymentManifest(string dotnetZipFilePath)
+        {
+            const string MANIFEST_FILENAME = "aws-windows-deployment-manifest.json";
+
+            var jsonStream = new MemoryStream();
+            using (var jsonWriter = new Utf8JsonWriter(jsonStream))
+            {
+                jsonWriter.WriteStartObject();
+                jsonWriter.WritePropertyName("manifestVersion");
+                jsonWriter.WriteNumberValue(1);
+
+                jsonWriter.WriteStartObject("deployments");
+                jsonWriter.WriteStartArray("aspNetCoreWeb");
+
+                jsonWriter.WriteStartObject();
+                jsonWriter.WritePropertyName("name");
+                jsonWriter.WriteStringValue("MainApp");
+
+                jsonWriter.WriteStartObject("parameters");
+                jsonWriter.WritePropertyName("appBundle");
+                jsonWriter.WriteStringValue(".");
+                jsonWriter.WritePropertyName("iisWebSite");
+                jsonWriter.WriteStringValue("Default Web Site");
+                jsonWriter.WritePropertyName("iisPath");
+                jsonWriter.WriteStringValue("/");
+                jsonWriter.WriteEndObject();
+
+                jsonWriter.WriteEndObject();
+
+                jsonWriter.WriteEndArray();
+                jsonWriter.WriteEndObject();
+                jsonWriter.WriteEndObject();
+            }
+
+            using (var zipArchive = ZipFile.Open(dotnetZipFilePath, ZipArchiveMode.Update))
+            {
+                var zipEntry = zipArchive.CreateEntry(MANIFEST_FILENAME);
+                using var zipEntryStream = zipEntry.Open();
+                jsonStream.Position = 0;
+                jsonStream.CopyTo(zipEntryStream);
+
+            }
         }
 
         public async Task DisposeAsync()

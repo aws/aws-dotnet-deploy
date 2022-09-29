@@ -38,6 +38,7 @@ namespace AWS.Deploy.CLI.Extensions
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IAWSUtilities), typeof(AWSUtilities), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICDKInstaller), typeof(CDKInstaller), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICDKManager), typeof(CDKManager), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICdkAppSettingsSerializer), typeof(CdkAppSettingsSerializer), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICdkProjectHandler), typeof(CdkProjectHandler), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICloudApplicationNameGenerator), typeof(CloudApplicationNameGenerator), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICommandLineWrapper), typeof(CommandLineWrapper), lifetime));
