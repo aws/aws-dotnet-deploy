@@ -318,5 +318,27 @@ namespace AWS.Deploy.Common
 
             return $"{Environment.NewLine}{e.Message}{Environment.NewLine}{e.StackTrace}{PrettyPrint(e.InnerException)}";
         }
+
+        /// <summary>
+        /// Returns the truncated error message by only preserving the leading and trailing k characters.
+        /// The message will only be truncated if its length is greater than 2*k.
+        /// </summary>
+        /// <param name="numChars">Species the number of leading and trailing characters to preserve.</param>
+        /// <returns>The truncated error message or <see cref="string.Empty"/> if the error message is null or empty.</returns>
+        public static string GetTruncatedErrorMessage(this Exception? e, int numChars = 500)
+        {
+            var message = e?.Message;
+
+            if (string.IsNullOrEmpty(message))
+                return string.Empty;
+
+            if (message.Length <= 2*numChars)
+                return message;
+
+            var firstKChars = message.Substring(0, numChars);
+            var lastkChars = message.Substring(message.Length - numChars);
+            var seperator = $"{Environment.NewLine}...{Environment.NewLine}Error truncated to the first and last {numChars} characters{Environment.NewLine}...{Environment.NewLine}";
+            return $"{firstKChars}{seperator}{lastkChars}";
+        }
     }
 }
