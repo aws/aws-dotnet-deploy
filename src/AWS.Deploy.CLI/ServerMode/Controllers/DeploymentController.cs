@@ -615,13 +615,14 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 if (state.DeploymentTask.Exception != null)
                 {
                     var innerException = state.DeploymentTask.Exception.InnerException;
+                    var message = innerException.GetTruncatedErrorMessage();
                     if (innerException is DeployToolException deployToolException)
                     {
-                        output.Exception = new DeployToolExceptionSummary(deployToolException.ErrorCode.ToString(), deployToolException.Message, deployToolException.ProcessExitCode);
+                        output.Exception = new DeployToolExceptionSummary(deployToolException.ErrorCode.ToString(), message, deployToolException.ProcessExitCode);
                     }
                     else
                     {
-                        output.Exception = new DeployToolExceptionSummary(DeployToolErrorCode.UnexpectedError.ToString(), innerException?.Message ?? string.Empty);
+                        output.Exception = new DeployToolExceptionSummary(DeployToolErrorCode.UnexpectedError.ToString(), message);
                     }
                 }
             }
