@@ -195,6 +195,21 @@ namespace ConsoleAppEcsFargateService
                 fargateServiceProps.SecurityGroups = ecsServiceSecurityGroups.ToArray();
             }
 
+            if (settings.Vpc.Subnets.Any())
+            {
+                var subnetSelection = new SubnetSelection();
+                subnetSelection.Subnets = new ISubnet[settings.Vpc.Subnets.Count];
+                var count = 0;
+
+                foreach (var subnetName in settings.Vpc.Subnets)
+                {
+                    subnetSelection.Subnets[count] = Subnet.FromSubnetId(this, $"SelectedSubnet-{count + 1}", subnetName.Trim());
+                    count++;
+                }
+
+                fargateServiceProps.VpcSubnets = subnetSelection;
+            }
+
             AppFargateService = new FargateService(this, nameof(AppFargateService), InvokeCustomizeCDKPropsEvent(nameof(AppFargateService), this, fargateServiceProps));
         }
 

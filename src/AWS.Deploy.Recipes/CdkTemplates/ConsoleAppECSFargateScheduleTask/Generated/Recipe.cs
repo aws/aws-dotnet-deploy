@@ -16,6 +16,7 @@ using ConsoleAppECSFargateScheduleTask.Configurations;
 
 using Protocol = Amazon.CDK.AWS.ECS.Protocol;
 using Schedule = Amazon.CDK.AWS.ApplicationAutoScaling.Schedule;
+using System.Linq;
 using Constructs;
 
 // This is a generated file from the original deployment recipe. It is recommended to not modify this file in order
@@ -162,8 +163,19 @@ namespace ConsoleAppECSFargateScheduleTask
             if (AppTaskDefinition == null)
                 throw new InvalidOperationException($"{nameof(AppTaskDefinition)} has not been set. The {nameof(ConfigureTaskDefinition)} method should be called before {nameof(ConfigureScheduledTask)}");
 
-            SubnetSelection? subnetSelection = null;
-            if (settings.Vpc.IsDefault)
+            var subnetSelection = new SubnetSelection();
+            if (settings.Vpc.Subnets.Any())
+            {
+                var count = 0;
+                subnetSelection.Subnets = new ISubnet[settings.Vpc.Subnets.Count];
+
+                foreach (var subnetName in settings.Vpc.Subnets)
+                {
+                    subnetSelection.Subnets[count] = Subnet.FromSubnetId(this, $"SelectedSubnet-{count + 1}", subnetName.Trim());
+                    count++;
+                }
+            }
+            else if (settings.Vpc.IsDefault)
             {
                 subnetSelection = new SubnetSelection
                 {

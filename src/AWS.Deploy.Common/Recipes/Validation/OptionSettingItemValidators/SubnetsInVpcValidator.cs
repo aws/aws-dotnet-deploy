@@ -51,6 +51,13 @@ namespace AWS.Deploy.Common.Recipes.Validation
                 return ValidationResult.Valid();
             }
 
+            // Subnets were added to the ECS Fargate recipes after GA, so could not be marked required.
+            // It is valid for a user to not specify subnets, and then fallback on CDK's defaulting logic.
+            if (string.IsNullOrEmpty(input?.ToString()))
+            {
+                return ValidationResult.Valid();
+            }
+
             return new ValidationResult
             {
                 IsValid = subnetIds.Contains(input?.ToString()),

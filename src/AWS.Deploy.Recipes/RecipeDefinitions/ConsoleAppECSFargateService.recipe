@@ -411,6 +411,42 @@
                             "Value": false
                         }
                     ]
+                },
+                {
+                    "Id": "Subnets",
+                    "Name": "Subnets",
+                    "Description": "A list of IDs of the subnets that will be associated with the Fargate service. Specify IDs of subnets from a single Amazon VPC. If specific subnets are not listed, public subnets will be used if the default VPC is selected, otherwise the first available subnets that are private, isolated, then public, in that order.",
+                    "Type": "List",
+                    "TypeHint": "ExistingSubnets",
+                    "ParentSettingId": "Vpc.VpcId",
+                    "AdvancedSetting": true,
+                    "Updatable": true,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": {
+                                "Regex": "^subnet-([0-9a-f]{8}|[0-9a-f]{17})$",
+                                "AllowEmptyString": true,
+                                "ValidationFailedMessage": "Invalid Subnet ID. The Subnet ID must start with the \"subnet-\" prefix, followed by either 8 or 17 characters consisting of digits and letters(lower-case) from a to f. For example subnet-abc88de9 is a valid Subnet ID."
+                            }
+                        },
+                        {
+                            "ValidatorType": "SubnetsInVpc",
+                            "Configuration": {
+                                "VpcId": "Vpc.VpcId"
+                            }
+                        }
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "Vpc.CreateNew",
+                            "Value": false
+                        },
+                        {
+                            "Id": "Vpc.VpcId",
+                            "Operation": "NotEmpty"
+                        }
+                    ]
                 }
             ]
         },

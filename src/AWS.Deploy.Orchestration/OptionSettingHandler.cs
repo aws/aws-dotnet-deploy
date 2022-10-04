@@ -210,8 +210,8 @@ namespace AWS.Deploy.Orchestration
                 optionSetting = optionSettings.FirstOrDefault(os => os.Id.Equals(ids[i]));
                 if (optionSetting == null)
                 {
-                    throw new OptionSettingItemDoesNotExistException(DeployToolErrorCode.OptionSettingItemDoesNotExistInRecipe, $"An option setting item with the specified fully qualified Id '{jsonPath}' cannot be found in the" +
-                    $" '{recipe.Name}' recipe.");
+                    throw new OptionSettingItemDoesNotExistException(DeployToolErrorCode.OptionSettingItemDoesNotExistInRecipe, $"An option setting item with the Id '{ids[i]}' " +
+                        $"cannot be found in the '{recipe.Name}' recipe while processing fully qualified Id {jsonPath}.");
                 }
                 if (optionSetting.Type.Equals(OptionSettingValueType.KeyValue))
                 {

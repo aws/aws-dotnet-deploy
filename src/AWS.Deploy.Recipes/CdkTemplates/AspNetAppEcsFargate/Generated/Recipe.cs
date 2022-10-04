@@ -181,6 +181,18 @@ namespace AspNetAppEcsFargate
                 }
             }
 
+            var subnetSelection = new SubnetSelection();
+            if (settings.Vpc.Subnets.Any())
+            {
+                var count = 0;
+                subnetSelection.Subnets = new ISubnet[settings.Vpc.Subnets.Count];
+                foreach (var subnetName in settings.Vpc.Subnets)
+                {
+                    subnetSelection.Subnets[count] = Subnet.FromSubnetId(this, $"SelectedSubnet-{count + 1}", subnetName.Trim());
+                    count++;
+                }
+            }
+
             AppFargateService = new FargateService(this, nameof(AppFargateService), InvokeCustomizeCDKPropsEvent(nameof(AppFargateService), this, new FargateServiceProps
             {
                 Cluster = EcsCluster,
@@ -188,7 +200,8 @@ namespace AspNetAppEcsFargate
                 DesiredCount = settings.DesiredCount,
                 ServiceName = settings.ECSServiceName,
                 AssignPublicIp = settings.Vpc.IsDefault,
-                SecurityGroups = EcsServiceSecurityGroups.ToArray()
+                SecurityGroups = EcsServiceSecurityGroups.ToArray(),
+                VpcSubnets = subnetSelection
             }));
         }
 
