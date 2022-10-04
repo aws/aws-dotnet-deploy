@@ -471,8 +471,38 @@ namespace AWS.Deploy.Orchestration.UnitTests
             Assert.Equal("false", optionSettings[Constants.ElasticBeanstalk.XRayTracingOptionId]);
         }
 
-        [Fact]
-        public async Task GetPreviousSettings_BeanstalkWindowsEnvironment()
+        [Theory]
+
+        [InlineData(@"{
+              ""manifestVersion"": 1,
+              ""deployments"": {
+                ""aspNetCoreWeb"": [
+                  {
+                    ""name"": ""app"",
+                    ""parameters"": {
+                      ""iisPath"": ""/path"",
+                      ""iisWebSite"": ""Default Web Site Custom""
+                    }
+                  }
+                ]
+              }
+            }")]
+        [InlineData(@"{
+              ""manifestVersion"": 1,
+              // comments
+              ""deployments"": {
+                ""aspNetCoreWeb"": [
+                  {
+                    ""name"": ""app"",
+                    ""parameters"": {
+                      ""iisPath"": ""/path"",
+                      ""iisWebSite"": ""Default Web Site Custom""
+                    }
+                  }
+                ]
+              }
+            }")]
+        public async Task GetPreviousSettings_BeanstalkWindowsEnvironment(string manifestJson)
         {
             var application = new CloudApplication("name", "Id", CloudApplicationResourceType.BeanstalkEnvironment, "recipe");
             var configurationSettings = new List<ConfigurationOptionSetting>
@@ -507,20 +537,6 @@ namespace AWS.Deploy.Orchestration.UnitTests
                 _mockOrchestratorInteractiveService.Object,
                 _fileManager);
 
-            var manifestJson = @"{
-              ""manifestVersion"": 1,
-              ""deployments"": {
-                ""aspNetCoreWeb"": [
-                  {
-                    ""name"": ""app"",
-                    ""parameters"": {
-                      ""iisPath"": ""/path"",
-                      ""iisWebSite"": ""Default Web Site Custom""
-                    }
-                  }
-                ]
-              }
-            }";
             _fileManager.InMemoryStore.Add(Path.Combine("testPath", "aws-windows-deployment-manifest.json"), manifestJson);
             var projectDefinition = new ProjectDefinition(null, Path.Combine("testPath", "project.csproj"), "", "net6.0");
             var recipeDefinitiion = new RecipeDefinition("AspNetAppExistingBeanstalkWindowsEnvironment", "", "", DeploymentTypes.BeanstalkEnvironment, DeploymentBundleTypes.DotnetPublishZipFile, "", "", "", "", "");
