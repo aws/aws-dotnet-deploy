@@ -93,7 +93,7 @@ namespace AWS.Deploy.Orchestration.ServiceHandlers
         {
             try
             {
-                return JsonSerializer.Deserialize<T>(json?.ToString() ?? string.Empty);
+                return JsonSerializer.Deserialize<T>(json?.ToString() ?? string.Empty, new JsonSerializerOptions { ReadCommentHandling = JsonCommentHandling.Skip });
             }
             catch
             {

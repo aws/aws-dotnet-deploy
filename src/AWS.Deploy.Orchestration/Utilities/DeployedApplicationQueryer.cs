@@ -271,19 +271,41 @@ namespace AWS.Deploy.Orchestration.Utilities
 
             if (recipeId.Equals(Constants.RecipeIdentifier.EXISTING_BEANSTALK_WINDOWS_ENVIRONMENT_RECIPE_ID))
             {
-                var manifestPath = Path.Combine(Path.GetDirectoryName(projectPath) ?? string.Empty, Constants.ElasticBeanstalk.WindowsManifestName);
-                if (_fileManager.Exists(manifestPath))
+                var windowsManifest = await GetBeanstalkWindowsManifest(projectPath);
+                if (windowsManifest != null && windowsManifest.Deployments.AspNetCoreWeb.Count != 0)
                 {
-                    var manifest = JsonSerializer.Deserialize<ElasticBeanstalkWindowsManifest>(await _fileManager.ReadAllTextAsync(manifestPath));
-                    if (manifest.Deployments.AspNetCoreWeb.Count != 0)
-                    {
-                        optionSettings[Constants.ElasticBeanstalk.IISWebSiteOptionId] = manifest.Deployments.AspNetCoreWeb[0].Parameters.IISWebSite;
-                        optionSettings[Constants.ElasticBeanstalk.IISAppPathOptionId] = manifest.Deployments.AspNetCoreWeb[0].Parameters.IISPath;
-                    }
+                    optionSettings[Constants.ElasticBeanstalk.IISWebSiteOptionId] = windowsManifest.Deployments.AspNetCoreWeb[0].Parameters.IISWebSite;
+                    optionSettings[Constants.ElasticBeanstalk.IISAppPathOptionId] = windowsManifest.Deployments.AspNetCoreWeb[0].Parameters.IISPath;
                 }
             }
 
             return optionSettings;
+        }
+
+        private async Task<ElasticBeanstalkWindowsManifest?> GetBeanstalkWindowsManifest(string projectPath)
+        {
+            try
+            {
+                var manifestPath = Path.Combine(Path.GetDirectoryName(projectPath) ?? string.Empty, Constants.ElasticBeanstalk.WindowsManifestName);
+                if (_fileManager.Exists(manifestPath))
+                {
+                    var manifest = JsonSerializer.Deserialize<ElasticBeanstalkWindowsManifest>(await _fileManager.ReadAllTextAsync(manifestPath), new JsonSerializerOptions
+                    {
+                        ReadCommentHandling = JsonCommentHandling.Skip
+                    });
+
+                    return manifest;
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidWindowsManifestFileException(
+                    DeployToolErrorCode.InvalidWindowsManifestFile,
+                    $"We detected a malformed Elastic Beanstalk Windows manifest file '{Constants.ElasticBeanstalk.WindowsManifestName}' in your project and were not able to load the previous settings from that file.",
+                    ex);
+            }
         }
 
         private ConfigurationOptionSetting GetBeanstalkEnvironmentConfigurationSetting(List<ConfigurationOptionSetting> configurationSettings, string optionNameSpace, string optionName)

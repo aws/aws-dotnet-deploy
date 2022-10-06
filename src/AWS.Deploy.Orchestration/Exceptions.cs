@@ -260,4 +260,12 @@ namespace AWS.Deploy.Orchestration
     {
         public InvalidDeployToolWorkspaceException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
+
+    /// <summary>
+    /// Throw if the deploy tool detects an invalid windows elastic beanstalk manifest file.
+    /// </summary>
+    public class InvalidWindowsManifestFileException : DeployToolException
+    {
+        public InvalidWindowsManifestFileException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
+    }
 }
