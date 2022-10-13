@@ -11,7 +11,8 @@ We welcome your feedback! Please let us know what you think by opening an [issue
 
 
 ## Useful Links
-* [Complete Documentation Guide on GitHub.io](https://aws.github.io/aws-dotnet-deploy/) 
+* [Complete Documentation Guide on GitHub.io](https://aws.github.io/aws-dotnet-deploy/)
+* [Contributing to the Project](https://aws.github.io/aws-dotnet-deploy/contributing/)
 * [AWS Deploy Tool for .NET on NuGet](https://www.nuget.org/packages/AWS.Deploy.Tools)
 * Blog posts:
   * [AWS Streamlines Deployment experience for .NET applications](https://aws.amazon.com/blogs/developer/aws-announces-a-streamlined-deployment-experience-for-net-applications/)
