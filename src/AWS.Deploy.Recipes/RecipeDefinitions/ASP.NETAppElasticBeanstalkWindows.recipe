@@ -423,7 +423,7 @@
             "TypeHint": "DotnetWindowsBeanstalkPlatformArn",
             "DefaultValue": "{LatestDotnetWindowsBeanstalkPlatformArn}",
             "AdvancedSetting": true,
-            "Updatable": false,
+            "Updatable": true,
             "Validators": [
                 {
                     "ValidatorType": "Regex",

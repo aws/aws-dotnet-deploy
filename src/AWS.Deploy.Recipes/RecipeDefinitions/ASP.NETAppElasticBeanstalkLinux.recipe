@@ -434,7 +434,7 @@
             "TypeHint": "DotnetBeanstalkPlatformArn",
             "DefaultValue": "{LatestDotnetBeanstalkPlatformArn}",
             "AdvancedSetting": true,
-            "Updatable": false,
+            "Updatable": true,
             "Validators": [
                 {
                     "ValidatorType": "Regex",
