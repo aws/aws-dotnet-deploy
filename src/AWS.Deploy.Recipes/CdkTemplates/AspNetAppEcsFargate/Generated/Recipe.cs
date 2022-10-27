@@ -182,11 +182,11 @@ namespace AspNetAppEcsFargate
             }
 
             var subnetSelection = new SubnetSelection();
-            if (settings.Vpc.Subnets.Any())
+            if (settings.Subnets.Any())
             {
                 var count = 0;
-                subnetSelection.Subnets = new ISubnet[settings.Vpc.Subnets.Count];
-                foreach (var subnetName in settings.Vpc.Subnets)
+                subnetSelection.Subnets = new ISubnet[settings.Subnets.Count];
+                foreach (var subnetName in settings.Subnets)
                 {
                     subnetSelection.Subnets[count] = Subnet.FromSubnetId(this, $"SelectedSubnet-{count + 1}", subnetName.Trim());
                     count++;

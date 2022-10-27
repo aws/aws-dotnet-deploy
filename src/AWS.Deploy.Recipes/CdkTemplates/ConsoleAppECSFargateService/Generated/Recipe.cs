@@ -195,13 +195,13 @@ namespace ConsoleAppEcsFargateService
                 fargateServiceProps.SecurityGroups = ecsServiceSecurityGroups.ToArray();
             }
 
-            if (settings.Vpc.Subnets.Any())
+            if (settings.Subnets.Any())
             {
                 var subnetSelection = new SubnetSelection();
-                subnetSelection.Subnets = new ISubnet[settings.Vpc.Subnets.Count];
+                subnetSelection.Subnets = new ISubnet[settings.Subnets.Count];
                 var count = 0;
 
-                foreach (var subnetName in settings.Vpc.Subnets)
+                foreach (var subnetName in settings.Subnets)
                 {
                     subnetSelection.Subnets[count] = Subnet.FromSubnetId(this, $"SelectedSubnet-{count + 1}", subnetName.Trim());
                     count++;

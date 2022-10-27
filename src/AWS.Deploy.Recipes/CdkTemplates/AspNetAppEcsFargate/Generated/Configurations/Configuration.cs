@@ -39,6 +39,12 @@ namespace AspNetAppEcsFargate.Configurations
         public VpcConfiguration Vpc { get; set; }
 
         /// <summary>
+        /// A list of IDs of the subnets that will be associated with the Fargate service.
+        /// Specify IDs of subnets from a single Amazon VPC.
+        /// </summary>
+        public SortedSet<string> Subnets { get; set; } = new SortedSet<string>();
+
+        /// <summary>
         /// List of security groups assigned to the ECS service.
         /// </summary>
         public SortedSet<string> AdditionalECSServiceSecurityGroups { get; set; } = new SortedSet<string>();

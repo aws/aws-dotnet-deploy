@@ -164,12 +164,12 @@ namespace ConsoleAppECSFargateScheduleTask
                 throw new InvalidOperationException($"{nameof(AppTaskDefinition)} has not been set. The {nameof(ConfigureTaskDefinition)} method should be called before {nameof(ConfigureScheduledTask)}");
 
             var subnetSelection = new SubnetSelection();
-            if (settings.Vpc.Subnets.Any())
+            if (settings.Subnets.Any())
             {
                 var count = 0;
-                subnetSelection.Subnets = new ISubnet[settings.Vpc.Subnets.Count];
+                subnetSelection.Subnets = new ISubnet[settings.Subnets.Count];
 
-                foreach (var subnetName in settings.Vpc.Subnets)
+                foreach (var subnetName in settings.Subnets)
                 {
                     subnetSelection.Subnets[count] = Subnet.FromSubnetId(this, $"SelectedSubnet-{count + 1}", subnetName.Trim());
                     count++;

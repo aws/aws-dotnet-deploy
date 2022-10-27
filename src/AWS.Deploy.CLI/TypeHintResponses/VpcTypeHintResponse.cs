@@ -1,7 +1,6 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.\r
 // SPDX-License-Identifier: Apache-2.0
 
-using System.Collections.Generic;
 using AWS.Deploy.Common.Recipes;
 
 namespace AWS.Deploy.CLI.TypeHintResponses
@@ -19,11 +18,6 @@ namespace AWS.Deploy.CLI.TypeHintResponses
         public bool CreateNew { get;set; }
         public string VpcId { get; set; }
 
-        /// <summary>
-        /// The IDs of the subnets that will be associated with the Fargate service.
-        /// </summary>
-        public SortedSet<string> Subnets { get; set; } = new SortedSet<string>();
-
         public VpcTypeHintResponse(
             bool isDefault,
             bool createNew,
@@ -34,9 +28,12 @@ namespace AWS.Deploy.CLI.TypeHintResponses
             VpcId = vpcId;
         }
 
-        /// <summary>
-        /// Returns null to use to the CLI's default display, which will handle child options
-        /// </summary>
-        public string? ToDisplayString() => null;
+        public string ToDisplayString()
+        {
+            if (CreateNew)
+                return Constants.CLI.CREATE_NEW_LABEL;
+
+            return $"{VpcId}{(IsDefault ? Constants.CLI.DEFAULT_LABEL : "")}";
+        }
     }
 }

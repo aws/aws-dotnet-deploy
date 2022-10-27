@@ -33,6 +33,12 @@ namespace ConsoleAppECSFargateScheduleTask.Configurations
         /// </summary>
         public VpcConfiguration Vpc { get; set; }
 
+        /// <summary>
+        /// A list of IDs of the subnets that will be associated with the Fargate service.
+        /// Specify IDs of subnets from a single Amazon VPC.
+        /// </summary>
+        public SortedSet<string> Subnets { get; set; } = new SortedSet<string>();
+
         /// <inheritdoc cref="FargateTaskDefinitionProps.Cpu"/>
         public double? TaskCpu { get; set; }
 

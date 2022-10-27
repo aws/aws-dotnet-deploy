@@ -5,12 +5,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Amazon.EC2.Model;
+using Amazon.ECS.Model;
 using AWS.Deploy.CLI.Extensions;
 using AWS.Deploy.CLI.TypeHintResponses;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.TypeHintData;
+using AWS.Deploy.Orchestration;
+using AWS.Deploy.Orchestration.Data;
+using Newtonsoft.Json;
 
 namespace AWS.Deploy.CLI.Commands.TypeHints
 {
@@ -71,52 +75,11 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 "Select a VPC",
                 userInputConfig);
 
-            var response = new VpcTypeHintResponse(
+            return new VpcTypeHintResponse(
                 userResponse.SelectedOption?.IsDefault == true,
                 userResponse.CreateNew,
                 userResponse.SelectedOption?.VpcId ?? ""
                 );
-
-            // If creating a new VPC, the user is unable to specify specific subnet(s) at this point
-            if (response.CreateNew)
-            {
-                return response;
-            }
-
-            // Otherwise prompt the user to select one or more subnets
-            if (!string.IsNullOrEmpty(response.VpcId))
-            {
-                var availableSubnets = (await _awsResourceQueryer.DescribeSubnets(response.VpcId)).OrderBy(x => x.SubnetId).ToList();
-
-                // If there are no subnets, don't use this VPC
-                if (!availableSubnets.Any())
-                {
-                    _toolInteractiveService.WriteLine();
-                    _toolInteractiveService.WriteLine("The selected VPC does not have any Subnets. Please select a VPC with Subnets or create a new one.");
-
-                    // Reset back to "Create New". In the event that the default VPC was selected AND doesn't have subnets,
-                    // there isn't a clear subnet to reset back to.
-                    return new VpcTypeHintResponse(false, true, string.Empty);
-                }
-
-               var userInputConfigurationSubnets = new UserInputConfiguration<Subnet>(
-                idSelector: subnet => subnet.SubnetId,
-                displaySelector: subnet => $"{subnet.SubnetId.PadRight(24)} | {subnet.VpcId.PadRight(21)} | {subnet.AvailabilityZone}",
-                defaultSelector: subnet => false)
-                {
-                    CanBeEmpty = true,  // Subnets were added to this type hint after 1.0, so we cannot require them here. We'll continue to fallback on CDK's defaulting logic
-                    CreateNew = false
-                };
-
-                var subnetsOptionSetting = optionSetting.ChildOptionSettings.First(x => x.Id.Equals("Subnets"));
-                _toolInteractiveService.WriteLine($"{subnetsOptionSetting.Id}:");
-                _toolInteractiveService.WriteLine(subnetsOptionSetting.Description);
-                var subnets = _consoleUtilities.AskUserForList(userInputConfigurationSubnets, availableSubnets, subnetsOptionSetting, recommendation);
-
-                response.Subnets = subnets;
-            }
-
-            return response;
         }
     }
 }

@@ -7,8 +7,6 @@
 // This class is marked as a partial class. If you add new settings to the recipe file, those settings should be
 // added to partial versions of this class outside of the Generated folder for example in the Configuration folder.
 
-using System.Collections.Generic;
-
 namespace ConsoleAppECSFargateScheduleTask.Configurations
 {
     public partial class VpcConfiguration
@@ -28,12 +26,6 @@ namespace ConsoleAppECSFargateScheduleTask.Configurations
         /// then use an existing VPC by referencing through <see cref="VpcId"/>
         /// </summary>
         public string VpcId { get; set; }
-
-        /// <summary>
-        /// A list of IDs of the subnets that will be associated with the Fargate service.
-        /// Specify IDs of subnets from a single Amazon VPC.
-        /// </summary>
-        public SortedSet<string> Subnets { get; set; } = new SortedSet<string>();
 
         /// A parameterless constructor is needed for <see cref="Microsoft.Extensions.Configuration.ConfigurationBuilder"/>
         /// or the classes will fail to initialize.

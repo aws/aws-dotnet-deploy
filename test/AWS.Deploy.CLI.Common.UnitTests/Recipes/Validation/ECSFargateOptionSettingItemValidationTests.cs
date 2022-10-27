@@ -17,6 +17,8 @@ using Xunit;
 using ResourceNotFoundException = Amazon.CloudControlApi.Model.ResourceNotFoundException;
 using Task = System.Threading.Tasks.Task;
 using System.Collections.Generic;
+using Amazon.ECS.Model;
+using Amazon.EC2.Model;
 
 namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
 {
@@ -238,6 +240,55 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             await Validate(optionSettingItem, "vpc-1234abcd", false);
         }
 
+        /// <summary>
+        /// Tests that specifying a VPC without explicitly listing subnets is valid.
+        /// Subnets were added to the ECS recipes after GA, so were not marked required.
+        /// The recipe CDK code will fallback to the construct's defaulting logic.
+        /// </summary>
+        [Fact]
+        public async Task VpcIdWithoutSubnets_Valid()
+        {
+            PrepareMockVPCsAndSubnets(_awsResourceQueryer);
+
+            var (vpcIdOption, vpcDefaultOption, subnetsOption) = PrepareECSVpcOptions();
+
+            subnetsOption.Validators.Add(GetSubnetsInVpcValidatorConfig(_awsResourceQueryer, _optionSettingHandler));
+
+            await _optionSettingHandler.SetOptionSettingValue(_recommendation, vpcIdOption, "vpc1");
+            await _optionSettingHandler.SetOptionSettingValue(_recommendation, vpcDefaultOption, true);
+
+            await Validate(subnetsOption, new SortedSet<string> { }, true);
+        }
+
+        /// <summary>
+        /// Tests the relationship between an explicit VPC ID, whether "Default VPC" is checked,
+        /// and any subnet(s) that are specified.
+        /// </summary>
+        /// <param name="vpcId">selected VPC Id</param>
+        /// <param name="isDefaultVpcSelected">whether the "Default VPC" radio is selected</param>
+        /// <param name="selectedSubnet">selected subnet</param>
+        /// <param name="isValid">Whether or not the test case is expected to be valid</param>
+        [Theory]
+        [InlineData("vpc1", true, "subnet-1a", true)]   // Valid because the subnet does belong to the default VPC
+        [InlineData("vpc1", true, "subnet-2a", false)]  // Invalid because the subnet does not belong to the default VPC
+        [InlineData("vpc2", false, "subnet-2a", true)]  // Valid because the subnet does belong to the non-default VPC
+        [InlineData("vpc2", false, "subnet-1a", false)] // Invalid because the subnet does not belong to the non-default VPC
+        [InlineData("vpc2", true, "subnet-1a", true)]   // Valid because "true" for IsDefaultVPC overrides the "vpc2", so the subnet matches
+        [InlineData("vpc2", true, "subnet-2a", false)]  // Invalid because "true" for IsDefaultVPC overrides the "vpc2", so the subnet does not match
+        public async Task VpcId_DefaultVpc_Subnet_Relationship(string vpcId, bool isDefaultVpcSelected, string selectedSubnet, bool isValid)
+        {
+            PrepareMockVPCsAndSubnets(_awsResourceQueryer);
+
+            var (vpcIdOption, vpcDefaultOption, subnetsOption) = PrepareECSVpcOptions();
+
+            subnetsOption.Validators.Add(GetSubnetsInVpcValidatorConfig(_awsResourceQueryer, _optionSettingHandler));
+
+            await _optionSettingHandler.SetOptionSettingValue(_recommendation, vpcIdOption, vpcId);
+            await _optionSettingHandler.SetOptionSettingValue(_recommendation, vpcDefaultOption, isDefaultVpcSelected);
+
+            await Validate(subnetsOption, new SortedSet<string> { selectedSubnet }, isValid);
+        }
+
         [Fact]
         public async Task ECSClusterNameValidationTest_Invalid()
         {
@@ -368,6 +419,70 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
                 }
             };
             return stringLengthValidatorConfig;
+        }
+
+        /// <summary>
+        /// Prepares a <see cref="SubnetsInVpcValidator"/> for testing
+        /// </summary>
+        private OptionSettingItemValidatorConfig GetSubnetsInVpcValidatorConfig(Mock<IAWSResourceQueryer> awsResourceQueryer, IOptionSettingHandler optionSettingHandler)
+        {
+            var validator = new SubnetsInVpcValidator(awsResourceQueryer.Object, optionSettingHandler);
+            validator.VpcId = "Vpc.VpcId";
+            validator.DefaultVpcOptionPath = "Vpc.IsDefault";
+
+            return new OptionSettingItemValidatorConfig
+            {
+                ValidatorType = OptionSettingItemValidatorList.SubnetsInVpc,
+                Configuration = validator
+            };
+        }
+
+        /// <summary>
+        /// Mocks the provided <see cref="IAWSResourceQueryer"> to return the following
+        ///   1. Default vpc1 with subnet-1a and subnet-1b
+        ///   2. Non-default vpc2 with subnet-2a and subnet-2b
+        /// </summary>
+        /// <param name="awsResourceQueryer">Mocked AWS Resource Queryer</param>
+        private void PrepareMockVPCsAndSubnets(Mock<IAWSResourceQueryer> awsResourceQueryer)
+        {
+            awsResourceQueryer.Setup(x => x.GetListOfVpcs()).ReturnsAsync(
+                new List<Vpc> {
+                                new Vpc { VpcId = "vpc1", IsDefault = true },
+                                new Vpc {VpcId = "vpc2"}
+                });
+
+            awsResourceQueryer.Setup(x => x.DescribeSubnets("vpc1")).ReturnsAsync(
+                new List<Subnet> {
+                    new Subnet { SubnetId = "subnet-1a", AvailabilityZoneId = "a" },
+                    new Subnet { SubnetId = "subnet-1b", AvailabilityZoneId = "b" }
+                });
+
+            awsResourceQueryer.Setup(x => x.DescribeSubnets("vpc2")).ReturnsAsync(
+                new List<Subnet> {
+                    new Subnet { SubnetId = "subnet-2a", AvailabilityZoneId = "a" },
+                    new Subnet { SubnetId = "subnet-2b", AvailabilityZoneId = "b" }
+                });
+
+            awsResourceQueryer.Setup(x => x.GetDefaultVpc()).ReturnsAsync(new Vpc { VpcId = "vpc1", IsDefault = true });
+        }
+
+        /// <summary>
+        /// Prepares VPC-related options that match the ECS Fargate recipes for testing
+        /// </summary>
+        /// <returns>The "Vpc.VpcId" option, the "Vpc.IsDefault" option, and the "Subnets" option</returns>
+        private (OptionSettingItem, OptionSettingItem, OptionSettingItem) PrepareECSVpcOptions()
+        {
+            var vpcIdOption = new OptionSettingItem("VpcId", "Vpc.VpcId", "name", "description");
+            var vpcDefaultOption = new OptionSettingItem("IsDefault", "Vpc.IsDefault", "name", "description");
+            var subnetsOption = new OptionSettingItem("Subnets", "Subnets", "name", "");
+
+            var vpc = new OptionSettingItem("Vpc", "Vpc", "", "");
+            vpc.ChildOptionSettings.Add(vpcIdOption);
+            vpc.ChildOptionSettings.Add(vpcDefaultOption);
+
+            _recipe.OptionSettings.Add(vpc);
+
+            return (vpcIdOption, vpcDefaultOption, subnetsOption);
         }
 
         private async Task Validate<T>(OptionSettingItem optionSettingItem, T value, bool isValid)
