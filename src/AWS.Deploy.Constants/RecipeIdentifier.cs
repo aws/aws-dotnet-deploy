@@ -36,5 +36,7 @@ namespace AWS.Deploy.Constants
         /// Id for the 'dotnet build --self-contained' recipe option
         /// </summary>
         public const string DotnetPublishSelfContainedBuildOptionId = "SelfContainedBuild";
+
+        public const string TARGET_SERVICE_ELASTIC_BEANSTALK = "AWS Elastic Beanstalk";
     }
 }

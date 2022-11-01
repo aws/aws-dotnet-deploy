@@ -44,6 +44,10 @@ namespace AWS.Deploy.Orchestration.DeploymentCommands
             {
                 elasticBeanstalkHandler.SetupWindowsDeploymentManifest(recommendation, deploymentPackage);
             }
+            else if (recommendation.Recipe.Id.Equals(Constants.RecipeIdentifier.EXISTING_BEANSTALK_ENVIRONMENT_RECIPE_ID))
+            {
+                elasticBeanstalkHandler.SetupProcfileForSelfContained(deploymentPackage);
+            }
 
             var versionLabel = $"v-{DateTime.Now.Ticks}";
             var s3location = await elasticBeanstalkHandler.CreateApplicationStorageLocationAsync(applicationName, versionLabel, deploymentPackage);

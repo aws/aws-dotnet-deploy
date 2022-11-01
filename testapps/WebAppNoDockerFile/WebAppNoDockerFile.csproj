@@ -5,6 +5,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Update="Existing-ElasticBeanStalkConfigFile-Linux-SelfContained.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="ElasticBeanStalkConfigFile-Linux.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="ElasticBeanStalkConfigFile-Linux-SelfContained.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Update="ElasticBeanStalkConfigFile.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

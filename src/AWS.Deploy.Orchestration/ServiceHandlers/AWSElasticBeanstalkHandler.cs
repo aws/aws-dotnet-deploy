@@ -26,6 +26,14 @@ namespace AWS.Deploy.Orchestration.ServiceHandlers
         /// The two main settings that are updated are IIS Website and IIS App Path.
         /// </summary>
         void SetupWindowsDeploymentManifest(Recommendation recommendation, string dotnetZipFilePath);
+
+        /// <summary>
+        /// When deploying a self contained deployment bundle, Beanstalk needs a Procfile to tell the environment what process to start up.
+        /// Check out the AWS Elastic Beanstalk developer guide for more information on Procfiles
+        /// https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/dotnet-linux-procfile.html
+        /// </summary>
+        void SetupProcfileForSelfContained(string dotnetZipFilePath);
+
         Task<S3Location> CreateApplicationStorageLocationAsync(string applicationName, string versionLabel, string deploymentPackage);
         Task<CreateApplicationVersionResponse> CreateApplicationVersionAsync(string applicationName, string versionLabel, S3Location sourceBundle);
         Task<bool> UpdateEnvironmentAsync(string applicationName, string environmentName, string versionLabel, List<ConfigurationOptionSetting> optionSettings);
@@ -201,6 +209,65 @@ namespace AWS.Deploy.Orchestration.ServiceHandlers
                     jsonStream.Position = 0;
                     jsonStream.CopyTo(zipEntryStream);
                 }
+            }
+        }
+
+        /// <summary>
+        /// When deploying a self contained deployment bundle, Beanstalk needs a Procfile to tell the environment what process to start up.
+        /// Check out the AWS Elastic Beanstalk developer guide for more information on Procfiles
+        /// https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/dotnet-linux-procfile.html
+        ///
+        /// This code is a copy of the code in the AspNetAppElasticBeanstalkLinux CDK recipe definition. Any changes to this method
+        /// should be made into that version as well.
+        /// </summary>
+        /// <param name="dotnetZipFilePath"></param>
+        public void SetupProcfileForSelfContained(string dotnetZipFilePath)
+        {
+            const string RUNTIME_CONFIG_SUFFIX = ".runtimeconfig.json";
+            const string PROCFILE_NAME = "Procfile";
+
+            string runtimeConfigFilename;
+            string runtimeConfigJson;
+            using (var zipArchive = ZipFile.Open(dotnetZipFilePath, ZipArchiveMode.Read))
+            {
+                // Skip Procfile setup if one already exists.
+                if (zipArchive.GetEntry(PROCFILE_NAME) != null)
+                {
+                    return;
+                }
+
+                var runtimeConfigEntry = zipArchive.Entries.FirstOrDefault(x => x.Name.EndsWith(RUNTIME_CONFIG_SUFFIX));
+                if (runtimeConfigEntry == null)
+                {
+                    return;
+                }
+
+                runtimeConfigFilename = runtimeConfigEntry.Name;
+                using var stream = runtimeConfigEntry.Open();
+                runtimeConfigJson = new StreamReader(stream).ReadToEnd();
+            }
+
+            var runtimeConfigDoc = JsonDocument.Parse(runtimeConfigJson);
+
+            if (!runtimeConfigDoc.RootElement.TryGetProperty("runtimeOptions", out var runtimeOptionsNode))
+            {
+                return;
+            }
+
+            // If there are includedFrameworks then the zip file is a self contained deployment bundle.
+            if (!runtimeOptionsNode.TryGetProperty("includedFrameworks", out _))
+            {
+                return;
+            }
+
+            var executableName = runtimeConfigFilename.Substring(0, runtimeConfigFilename.Length - RUNTIME_CONFIG_SUFFIX.Length);
+            var procCommand = $"web: ./{executableName}";
+
+            using (var zipArchive = ZipFile.Open(dotnetZipFilePath, ZipArchiveMode.Update))
+            {
+                var procfileEntry = zipArchive.CreateEntry(PROCFILE_NAME);
+                using var zipEntryStream = procfileEntry.Open();
+                zipEntryStream.Write(System.Text.UTF8Encoding.UTF8.GetBytes(procCommand));
             }
         }
 
