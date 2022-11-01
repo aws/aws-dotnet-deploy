@@ -13,6 +13,7 @@ using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Utilities;
+using AWS.Deploy.Constants;
 using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.Utilities;
 
@@ -102,6 +103,13 @@ namespace AWS.Deploy.Orchestration
         {
             _interactiveService.LogInfoMessage(string.Empty);
             _interactiveService.LogInfoMessage("Creating Dotnet Publish Zip file...");
+
+            // Since Beanstalk doesn't currently have .NET 7 preinstalled we need to make sure we are doing a self contained publish when creating the deployment bundle.
+            if (recommendation.Recipe.TargetService == RecipeIdentifier.TARGET_SERVICE_ELASTIC_BEANSTALK && recommendation.ProjectDefinition.TargetFramework == "net7.0")
+            {
+                _interactiveService.LogInfoMessage("Using self contained publish since AWS Elastic Beanstalk does not currently have .NET 7 preinstalled");
+                recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild = true;
+            }
 
             var publishDirectoryInfo = _directoryManager.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
             var additionalArguments = recommendation.DeploymentBundle.DotnetPublishAdditionalBuildArguments;

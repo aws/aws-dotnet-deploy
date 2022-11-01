@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO.Compression;
+using System.Text.Json;
 using Amazon.CDK;
 using Amazon.CDK.AWS.ElasticBeanstalk;
 using Amazon.CDK.AWS.IAM;
@@ -13,6 +15,7 @@ using AspNetAppElasticBeanstalkLinux.Configurations;
 using Constructs;
 using System.Linq;
 using Amazon.CDK.AWS.EC2;
+using System.IO;
 
 // This is a generated file from the original deployment recipe. It is recommended to not modify this file in order
 // to allow easy updates to the file when the original recipe that this project was created from has updates.
@@ -58,6 +61,9 @@ namespace AspNetAppElasticBeanstalkLinux
 
             if (string.IsNullOrEmpty(props.DotnetPublishZipPath))
                 throw new InvalidOrMissingConfigurationException("The provided path containing the dotnet publish zip file is null or empty.");
+
+            // Self contained deployment bundles need a Procfile to tell Beanstalk what process to start.
+            SetupProcfileForSelfContained(props.DotnetPublishZipPath);
 
             ApplicationAsset = new Asset(this, "Asset", new AssetProps
             {
@@ -479,6 +485,62 @@ namespace AspNetAppElasticBeanstalkLinux
                 // This line is critical - reference the label created in this same stack
                 VersionLabel = ApplicationVersion.Ref,
             }));
+        }
+
+        /// <summary>
+        /// When deploying a self contained deployment bundle, Beanstalk needs a Procfile to tell the environment what process to start up.
+        /// Check out the AWS Elastic Beanstalk developer guide for more information on Procfiles
+        /// https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/dotnet-linux-procfile.html
+        /// </summary>
+        /// <param name="dotnetZipFilePath"></param>
+        static void SetupProcfileForSelfContained(string dotnetZipFilePath)
+        {
+            const string RUNTIME_CONFIG_SUFFIX = ".runtimeconfig.json";
+            const string PROCFILE_NAME = "Procfile";
+
+            string runtimeConfigFilename;
+            string runtimeConfigJson;
+            using (var zipArchive = ZipFile.Open(dotnetZipFilePath, ZipArchiveMode.Read))
+            {
+                // Skip Procfile setup if one already exists.
+                if (zipArchive.GetEntry(PROCFILE_NAME) != null)
+                {
+                    return;
+                }
+
+                var runtimeConfigEntry = zipArchive.Entries.FirstOrDefault(x => x.Name.EndsWith(RUNTIME_CONFIG_SUFFIX));
+                if (runtimeConfigEntry == null)
+                {
+                    return;
+                }
+
+                runtimeConfigFilename = runtimeConfigEntry.Name;
+                using var stream = runtimeConfigEntry.Open();
+                runtimeConfigJson = new StreamReader(stream).ReadToEnd();
+            }
+
+            var runtimeConfigDoc = JsonDocument.Parse(runtimeConfigJson);
+
+            if (!runtimeConfigDoc.RootElement.TryGetProperty("runtimeOptions", out var runtimeOptionsNode))
+            {
+                return;
+            }
+
+            // If there are includedFrameworks then the zip file is a self contained deployment bundle.
+            if (!runtimeOptionsNode.TryGetProperty("includedFrameworks", out _))
+            {
+                return;
+            }
+
+            var executableName = runtimeConfigFilename.Substring(0, runtimeConfigFilename.Length - RUNTIME_CONFIG_SUFFIX.Length);
+            var procCommand = $"web: ./{executableName}";
+
+            using (var zipArchive = ZipFile.Open(dotnetZipFilePath, ZipArchiveMode.Update))
+            {
+                var procfileEntry = zipArchive.CreateEntry(PROCFILE_NAME);
+                using var zipEntryStream = procfileEntry.Open();
+                zipEntryStream.Write(System.Text.UTF8Encoding.UTF8.GetBytes(procCommand));
+            }
         }
     }
 }

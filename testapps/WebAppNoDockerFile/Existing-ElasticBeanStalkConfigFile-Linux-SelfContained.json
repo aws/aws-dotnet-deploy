@@ -1,0 +1,6 @@
+{
+    "RecipeId": "AspNetAppExistingBeanstalkEnvironment",
+    "Settings": {
+        "SelfContainedBuild": true
+    }
+}
