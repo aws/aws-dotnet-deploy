@@ -68,72 +68,14 @@ namespace AWS.Deploy.CLI.IntegrationTests
             _testAppManager = new TestAppManager();
         }
 
-        [Fact]
-        public async Task DefaultConfigurations()
-        {
-            _stackName = $"WebAppNoDockerFile{Guid.NewGuid().ToString().Split('-').Last()}";
-            var saveSettingsFilePath = Path.Combine(Path.GetTempPath(), $"DeploymentSettings-{Guid.NewGuid().ToString().Split('-').Last()}.json");
-
-            // Arrange input for deploy
-            await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Select default recommendation
-            await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Select default option settings
-            await _interactiveService.StdInWriter.FlushAsync();
-
-            // Deploy
-            var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
-            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--application-name", _stackName, "--diagnostics", "--save-settings", saveSettingsFilePath };
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
-
-            // Verify application is deployed and running
-            Assert.Equal(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
-
-            var deployStdOut = _interactiveService.StdOutReader.ReadAllLines();
-
-            var tempCdkProjectLine = deployStdOut.First(line => line.StartsWith("Saving AWS CDK deployment project to: "));
-            var tempCdkProject = tempCdkProjectLine.Split(": ")[1].Trim();
-            Assert.False(Directory.Exists(tempCdkProject), $"{tempCdkProject} must not exist.");
-
-            // Example:     Endpoint: http://52.36.216.238/
-            var endpointLine = deployStdOut.First(line => line.Trim().StartsWith($"Endpoint"));
-            var applicationUrl = endpointLine.Substring(endpointLine.IndexOf(":") + 1).Trim();
-            Assert.True(Uri.IsWellFormedUriString(applicationUrl, UriKind.Absolute));
-
-            // URL could take few more minutes to come live, therefore, we want to wait and keep trying for a specified timeout
-            await _httpHelper.WaitUntilSuccessStatusCode(applicationUrl, TimeSpan.FromSeconds(5), TimeSpan.FromMinutes(5));
-
-            // Check the overridden workspace
-            Assert.True(File.Exists(Path.Combine(_customWorkspace, "CDKBootstrapTemplate.yaml")));
-            Assert.True(Directory.Exists(Path.Combine(_customWorkspace, "temp")));
-            Assert.True(Directory.Exists(Path.Combine(_customWorkspace, "Projects")));
-
-            // Verify existence of the saved deployment settings file
-            Assert.True(File.Exists(saveSettingsFilePath));
-
-            // list
-            var listArgs = new[] { "list-deployments", "--diagnostics" };
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(listArgs));;
-
-            // Verify stack exists in list of deployments
-            var listStdOut = _interactiveService.StdOutReader.ReadAllLines().Select(x => x.Split()[0]).ToList();
-            Assert.Contains(listStdOut, (deployment) => _stackName.Equals(deployment));
-
-            // Arrange input for delete
-            // Use --silent flag to delete without user prompts
-            var deleteArgs = new[] { "delete-deployment", _stackName, "--diagnostics", "--silent" };
-
-            // Delete
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deleteArgs));;
-
-            // Verify application is deleted
-            Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName), $"{_stackName} still exists.");
-        }
-
         [Theory]
-        [InlineData("ElasticBeanStalkConfigFile-Windows.json")]
-        [InlineData("ElasticBeanStalkConfigFile-Windows-SelfContained.json")]
-        public async Task WindowsEBDefaultConfigurations(string configFile)
+        [InlineData("ElasticBeanStalkConfigFile-Linux.json", true)]
+        [InlineData("ElasticBeanStalkConfigFile-Linux-SelfContained.json", true)]
+        [InlineData("ElasticBeanStalkConfigFile-Windows.json", false)]
+        [InlineData("ElasticBeanStalkConfigFile-Windows-SelfContained.json", false)]
+        public async Task EBDefaultConfigurations(string configFile, bool linux)
         {
-            _stackName = $"WinTest-{Guid.NewGuid().ToString().Split('-').Last()}";
+            _stackName = $"BeanstalkTest-{Guid.NewGuid().ToString().Split('-').Last()}";
 
             // Deploy
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
@@ -154,8 +96,11 @@ namespace AWS.Deploy.CLI.IntegrationTests
             var applicationUrl = endpointLine.Substring(endpointLine.IndexOf(":") + 1).Trim();
             Assert.True(Uri.IsWellFormedUriString(applicationUrl, UriKind.Absolute));
 
-            // "extra-path" is the IISAppPath set in the config file.
-            applicationUrl = new Uri(new Uri(applicationUrl), "extra-path").AbsoluteUri;
+            if(!linux)
+            {
+                // "extra-path" is the IISAppPath set in the config file.
+                applicationUrl = new Uri(new Uri(applicationUrl), "extra-path").AbsoluteUri;
+            }
 
             // URL could take few more minutes to come live, therefore, we want to wait and keep trying for a specified timeout
             await _httpHelper.WaitUntilSuccessStatusCode(applicationUrl, TimeSpan.FromSeconds(5), TimeSpan.FromMinutes(5));

@@ -1,0 +1,6 @@
+{
+    "RecipeId": "AspNetAppElasticBeanstalkLinux",
+    "Settings": {
+        "SelfContainedBuild": true
+    }
+}
