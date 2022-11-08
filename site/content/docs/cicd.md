@@ -6,7 +6,9 @@ You can use AWS Deploy Tool when developing your app using any Continuous Deploy
 
 To turn off the interactive features, use the `-s (--silent)` switch. This will ensure the tool never prompts for any questions that could block an automated process.
 
-    dotnet aws deploy --silent
+```
+dotnet aws deploy --silent
+```
 
 ### Creating a deployment settings file
 
@@ -38,12 +40,14 @@ Here's an example of a web application with the following directory structure:
     ┗ MyWebApplication.sln
 
 To perform a deployment and also persist the deployment configuration to a JSON file, use the following command:
+
 ```
 dotnet aws deploy --project-path MyWebApplication/MyWebApplication/MyWebApplication.csproj --save-settings deploymentsettings.json
 ```
 
 This will create a JSON file at `MyWebApplication/MyWebApplication/deploymentsettings.json` with the following structure:
-```
+
+```json
 {
       "AWSProfile": <AWS_PROFILE>
       "AWSRegion": <AWS_REGION>,
@@ -51,8 +55,8 @@ This will create a JSON file at `MyWebApplication/MyWebApplication/deploymentset
       "RecipeId": <RECIPE_ID>
       "Settings": <JSON_BLOB>
 }
-
 ```
+
 * _**AWSProfile**_: The name of the AWS profile that was used during deployment.
 
 * _**AWSRegion**_: The name of the AWS region where the deployed application is hosted.
@@ -89,7 +93,6 @@ dotnet aws deploy --project-path <PROJECT_PATH> --apply <SETTINGS_FILE_PATH>
 
 To deploy the application with the above directory structure in CI/CD pipeline without any prompts, use the following command:
 
-    dotnet aws deploy --silent --project-path MyWebApplication/MyWebApplication/MyWebApplication.csproj --apply deploymentsettings.json
-
-
-
+```
+dotnet aws deploy --silent --project-path MyWebApplication/MyWebApplication/MyWebApplication.csproj --apply deploymentsettings.json
+```

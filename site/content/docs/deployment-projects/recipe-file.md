@@ -2,7 +2,7 @@
 
 Each deployment project has a JSON file with a `.recipe` extension. This recipe file defines the type of .NET projects the recipe is compatible with and the settings that will be shown to users.
 
-Read our [tutorial](../../tutorials/custom-project.md) to see how you can modify this file to drive the custom deployment experience and display custom option settings to the users. The full schema for the recipe file can be found [here](https://github.com/aws/aws-dotnet-deploy/blob/main/src/AWS.Deploy.Recipes/RecipeDefinitions/aws-deploy-recipe-schema.json).
+Read our [tutorial](../../tutorials/custom-project.md) to see how you can modify this file to drive the custom deployment experience and display custom option settings to users. The full schema for the recipe file can be found [here](https://github.com/aws/aws-dotnet-deploy/blob/main/src/AWS.Deploy.Recipes/RecipeDefinitions/aws-deploy-recipe-schema.json).
 
 ### Top level settings
 
@@ -14,7 +14,7 @@ This is the list of top level properties in the recipe definition.
 * **Description** - longer description shown when hovering over the recommendation in Visual Studio.
 * **TargetService** - the main AWS service the application will be deployed to. Visual Studio uses this to provide visual indicators.
 * **DeploymentType** - for deployment projects this value should always be `CdkProject`.
-* **DeploymentBundle** - how the .NET project being deploying should be bundled. Allowed values are `Container` and `DotnetPublishZipFile`.
+* **DeploymentBundle** - how the .NET project being deployed should be bundled. Allowed values are `Container` and `DotnetPublishZipFile`.
 * **DisplayedResources** - the list of resources to display to users at the end of the deployment.
 * **RecipePriority** - the priority of the recipe in the compatibility list.
 * **RecommendationRules** - the list of rules to determine the recipe's compatibility with the project being deployed.
@@ -24,17 +24,19 @@ This is the list of top level properties in the recipe definition.
 
 ### Displayed Resources
 
-The `DisplayedResources` array contains a list of resources that the deployment tooling should display after deployment is complete. This is typically the primary resources for a deployment project like an Elastic Beanstalk Environment or a Load Balancer that allows the user to quickly see their application deployed to AWS.
+The `DisplayedResources` array contains a list of resources that the deployment tooling should display after deployment is complete. This is typically the primary resources for a deployment project like an AWS Elastic Beanstalk Environment or a Load Balancer that allows the user to quickly see their application deployed to AWS.
 
-Here is an example for a recipe that wants to the Elastic Beanstalk environment to be displayed after deployment.
+Here is an example for a recipe that displays the endpoint of the Elastic Beanstalk environment after deployment.
 
-```
-    "DisplayedResources": [
-        {
-            "LogicalId": "RecipeBeanstalkEnvironment83CC12DE",
-            "Description": "Application Endpoint"
-        }
-    ],
+```json
+...
+"DisplayedResources": [
+    {
+        "LogicalId": "RecipeBeanstalkEnvironment83CC12DE",
+        "Description": "Application Endpoint"
+    }
+],
+...
 ```
 
 `DisplayedResources` objects have the following properties:
@@ -52,6 +54,7 @@ The recipe file defines a collection of rules that the deployment tool executes 
 The deploy tool supports a collection of tests that can be run against the .NET project being deployed. Here is an example of a test that checks the version of .NET the project is targeting.
 
 ```json
+...
 {
     "Type": "MSProperty",
     "Condition": {
@@ -62,6 +65,7 @@ The deploy tool supports a collection of tests that can be run against the .NET 
         ]
     }
 }
+...
 ```
 
 The `Type` property determines the type of test to run. The `Condition` contains the data needed to evaluate the test, in this case the MSBuild property to check and the allowed values. Each type of test can have a different set of properties for the `Condition`.
@@ -73,7 +77,7 @@ The `Type` property determines the type of test to run. The `Condition` contains
 | MSProjectSdkAttribute | Compares the `Sdk` attribute at the root element of the project file to a given value. | <ul><li>Value - the expected value. For example `Microsoft.NET.Sdk.Web` for web projects.</li></ul> |
 | MSProperty | Compares the property in a project file property group. | <ul><li>PropertyName - the property to compare.</li><li>AllowedValues - an array of possible values for the property.</li></ul> |
 | MSPropertyExists | Test to see if a property in a property group exists. | <ul><li>PropertyName - the property test for existence.</li></ul> |
-| FileExists | Tests to see if a file exist. For example checking to see a `Dockerfile` exists. | <ul><li>FileName - the file to test for existence. </li></ul> |
+| FileExists | Tests to see if a file exists. For example checking to see a `Dockerfile` exists. | <ul><li>FileName - the file to test for existence. </li></ul> |
 | NuGetPackageReference | Test to see if the project has a `PackageReference` to a NuGet package. | <ul><li>NuGetPackageName - the NuGet package to test if it is being referenced. </li></ul> |
 
 
@@ -81,109 +85,114 @@ The `Type` property determines the type of test to run. The `Condition` contains
 
 A rules effect defines the behavior of the rule depending on if its test(s) pass or not. Effects can either mark the recipe as not included in the compatible list or adjust the priority for the recipe.
 
-Here is an example of a rule that checks the project is a web project and targets .NET Core 3.1 or .NET 6. If both tests pass the effect's `Pass` property instructs the deployment tooling to include the recipe. If either one of the two tests fail the `Fail` effect is run, removing the recipe from the included compatible list.
+Here is an example of a rule that checks if the project is a web project and targets .NET Core 3.1 or .NET 6. If both tests pass the effect's `Pass` property instructs the deployment tooling to include the recipe. If either one of the two tests fail the `Fail` effect is run, removing the recipe from the included compatible list.
 
 ```json
-  "RecommendationRules": [
-    {
-      "Tests": [
-        {
-          "Type": "MSProjectSdkAttribute",
-          "Condition": {
-            "Value": "Microsoft.NET.Sdk.Web"
-          }
-        },
-        {
-          "Type": "MSProperty",
-          "Condition": {
-            "PropertyName": "TargetFramework",
-            "AllowedValues": [
-              "netcoreapp3.1",
-              "net6.0"
-            ]
-          }
+...
+"RecommendationRules": [
+  {
+    "Tests": [
+      {
+        "Type": "MSProjectSdkAttribute",
+        "Condition": {
+          "Value": "Microsoft.NET.Sdk.Web"
         }
-      ],
-      "Effect": {
-        "Pass": {
-          "Include": true
-        },
-        "Fail": {
-          "Include": false
+      },
+      {
+        "Type": "MSProperty",
+        "Condition": {
+          "PropertyName": "TargetFramework",
+          "AllowedValues": [
+            "netcoreapp3.1",
+            "net6.0"
+          ]
         }
       }
+    ],
+    "Effect": {
+      "Pass": {
+        "Include": true
+      },
+      "Fail": {
+        "Include": false
+      }
     }
-  ]
+  }
+]
+...
 ```
 
-Here is another example that tests if a project contains a docker file. If it does not include a docker file it reduces the priority of the recipe.
+Here is another example that tests if a project contains a Dockerfile. If it does not, it reduces the priority of the recipe.
 
 ```json
-  "RecommendationRules": [
-        ...
+...
+"RecommendationRules": [
+      ...
 
-        {
-            "Tests": [
-                {
-                    "Type": "FileExists",
-                    "Condition": {
-                        "FileName": "Dockerfile"
-                    }
-                }
-            ],
-            "Effect": {
-                "Fail": {
-                    "PriorityAdjustment": -100,
-                    "Include": true
-                }
-            }
-        },
-
-        ...
-  ]
+      {
+          "Tests": [
+              {
+                  "Type": "FileExists",
+                  "Condition": {
+                      "FileName": "Dockerfile"
+                  }
+              }
+          ],
+          "Effect": {
+              "Fail": {
+                  "PriorityAdjustment": -100,
+                  "Include": true
+              }
+          }
+      },
+      ...
+]
+...
 ```
 
 A recipe is considered compatible if no rule ran an effect that set `Include` to false and if the priority is greater then 0.
 
-To simulate an **"or"** set of rules the starting priority in `RecipePriority` can be set to a negative value meaning it is not included by default. Then you can have a series of tests that adjust the priority to a positive amount. That way if any test rule passes it can adjust the priority to a positive number.
+To simulate an **"or"** set of rules the starting priority in `RecipePriority` can be set to a negative value meaning it is not included by default. Then you can have a series of tests that adjust the priority to a positive amount. That way, if any test rule passes it can adjust the priority to a positive number.
 
 
 ### Setting Categories
 
 The `Categories` property is an array of objects that define the categories for the settings. The AWS Toolkit for Visual Studio uses this array to build the list of categories in the UI for fast navigation to a group of settings.
 
-![Catagories in AWS Toolkit for Visual Studio](../../assets/images/vs-catagories.png)
+![Categories in AWS Toolkit for Visual Studio](../../assets/images/vs-catagories.png)
 
 A category is defined with the following properties:
 
 * **Id** - the unique id within the recipe for the category.
 * **DisplayName** - the name of the category displayed to users.
-* **Order** - the order in the toolkit for the category. Categories are display in sorted descending order.
+* **Order** - the order in the toolkit UI for the category. Categories are display in sorted descending order.
 
 Here is an example of defining a custom category that you could use to categorize additional settings added as application resources.
 
-```
-  {
-      "Id": "AppResources",
-      "DisplayName": "Application Resources",
-      "Order": 15
-  }
+```json
+...
+{
+    "Id": "AppResources",
+    "DisplayName": "Application Resources",
+    "Order": 15
+}
+...
 ```
 
-To assign a setting to a category, set the setting's `Category` property of to the `Id` of a category. Only top level settings can be assigned a category. Any top level settings that are not assigned a category will be placed in the `General` category.
+To assign a setting to a category, set the setting's `Category` property to the `Id` of a category. Only top level settings can be assigned a category. Any top level settings that are not assigned a category will be placed in the `General` category.
 
 ### Option Settings
 
-The settings that are shown to users and allows users to customize the deployment in either the CLI or Visual Studio are defined in the `OptionSettings` array. Settings have the following properties.
+The settings that are shown to users and allow them to customize the deployment in either the CLI or Visual Studio are defined in the `OptionSettings` array. Settings have the following properties.
 
 * **Id** - the id of the setting. Once projects are deployed with the recipe, this id should not change because the id is saved into the CloudFormation stack's template.
 * **Name** - the name of the setting shown to users.
 * **Description** - the informational text shown to users for the setting.
 * **Type** - the data type of the setting.
 * **DefaultValue** - the default value for the setting.
-* **TypeHint** - a hint to the deployment tooling what the meaning of the setting is.
+* **TypeHint** - a hint to the deployment tooling what the meaning of the setting's value is. Some examples are an Amazon DynamoDB table name or the name of an Amazon SNS topic.
 * **TypeHintData** - additional information to pass into the type hint.
-* **AdvancedSetting** - a boolean for whether this setting is an advanced use case. If true the setting might not be shown to users unless the request to see all settings.
+* **AdvancedSetting** - a boolean for whether this setting is an advanced use case. If true the setting might not be shown to users unless they request to see all settings.
 * **Updatable** - a boolean that controls whether a setting can be modified during redeployment. It is recommended to set this to `false` for settings where deleting resources once they exist would make the application unavailable.
 * **AllowedValues** - the list of possible values.
 * **ValueMapping** - a mapping between values in the `AllowedValues` list to user friendly display names for each allowed value.
@@ -213,18 +222,18 @@ Type hints are used to control the user experience in the CLI or Visual Studio. 
 
 Some type hints require additional configuration which can specified in the `TypeHintData` property. For example if a setting has a type hint of `ExistingIAMRole` the tool should only show roles that can be assumed by the target service. Here is a example of configuring the `ServicePrincipal` for the type hint to filter the list of roles to pick from.
 
-```
-    {
-        "Id": "RoleArn",
-        "Name": "Existing Role ARN",
-        "Description": "The ARN of the existing role to use.",
-        "Type": "String",
-        "TypeHint": "ExistingIAMRole",
-        "TypeHintData": {
-            "ServicePrincipal": "ecs-tasks.amazonaws.com"
-        },
-
-    ...
+```json
+...
+{
+    "Id": "RoleArn",
+    "Name": "Existing Role ARN",
+    "Description": "The ARN of the existing role to use.",
+    "Type": "String",
+    "TypeHint": "ExistingIAMRole",
+    "TypeHintData": {
+        "ServicePrincipal": "ecs-tasks.amazonaws.com"
+    },
+...
 ```
 
 Here is the list of available type hints in the deployment tooling.
@@ -232,7 +241,7 @@ Here is the list of available type hints in the deployment tooling.
 | Type Hint |  Type Hint Data | Notes |
 | --------- | ----------- | ---- |
 | IAMRole | <ul><li>ServicePrincipal - the service principal the role can be assumed by.</li></ul> | Set at `Object` level that controls whether to create a new role or select an existing role. |
-| ExistingIAMRole | <ul><li>ServicePrincipal - the service principal the role can be assumed by.</li></ul> | Set at the `String` setting level for storing the existing IAM role arn. |
+| ExistingIAMRole | <ul><li>ServicePrincipal - the service principal the role can be assumed by.</li></ul> | Set at the `String` setting level for storing the existing IAM role ARN. |
 | ECSCluster | | Set at the `Object` setting level that controls whether to create or select an existing ECS cluster. |
 | ExistingECSCluster | | Set at the `String` setting level for storing the existing ECS Cluster Name. |
 | ECSService | | |
@@ -266,68 +275,67 @@ Here is the list of available type hints in the deployment tooling.
 
 #### DependsOn
 
-The `DependsOn` property is an array of conditions to determine if a setting should be visible based on the values for other setting(s). For example if a user selects the setting to create a new IAM role then the setting for the selecting an existing IAM role should not be displayed.
+The `DependsOn` property is an array of conditions to determine if a setting should be visible based on the values for other setting(s). For example if a user selects the setting to create a new IAM role then the setting for selecting an existing IAM role should not be displayed.
 
 Each item in the `DependsOn` array has the following properties.
 
-* **Id** - the id of the setting compare. The id should be full id including all parent object id settings. The format is <parent-object-setting-id>.<setting-id>.
+* **Id** - the id of the setting to compare. The id should be the full id including all parent object id settings. The format is <parent-object-setting-id>.<setting-id>.
 * **Operation** - the operation to run. Allowed values are `NotEmpty` and `Equals`. If operation is not set then the default is `Equals`.
 * **Value** - the value to compare when the operation is `Equals`.
 
-Here is an example for a setting used for storing an existing IAM role to use. The value is  displayed if the setting `ApplicationIAMRole.CreateNew` is set false.
-```
-  {
-      "Id": "RoleArn",
-      "Name": "Existing Role ARN",
-      "Description": "The ARN of the existing role to use.",
-      "Type": "String",
-      "TypeHint": "ExistingIAMRole",
-      "TypeHintData": {
-          "ServicePrincipal": "tasks.apprunner.amazonaws.com"
-      },
-      "AdvancedSetting": false,
-      "Updatable": true,
-      "DependsOn": [
-          {
-              "Id": "ApplicationIAMRole.CreateNew",
-              "Value": false
-          }
-      ],
-
-      ...
-  }
+Here is an example for a setting used for storing an existing IAM role to use. The value is displayed if the setting `ApplicationIAMRole.CreateNew` is set `false`.
+```json
+...
+{
+    "Id": "RoleArn",
+    "Name": "Existing Role ARN",
+    "Description": "The ARN of the existing role to use.",
+    "Type": "String",
+    "TypeHint": "ExistingIAMRole",
+    "TypeHintData": {
+        "ServicePrincipal": "tasks.apprunner.amazonaws.com"
+    },
+    "AdvancedSetting": false,
+    "Updatable": true,
+    "DependsOn": [
+        {
+            "Id": "ApplicationIAMRole.CreateNew",
+            "Value": false
+        }
+    ],
+    ...
+}
+...
 ```
 
 #### Validators
 
-Validators allow telling the user when a setting has an invalid value before starting the deployment. Each setting can have a list of validators specified in the `Validators` array. Validators can do simple checks like making sure string values are of a certain format as well as make AWS service calls to make sure the value of an existing resource exists.
+Validators inform the user when a setting has an invalid value before starting the deployment. Each setting can have a list of validators specified in the `Validators` array. Validators can do simple checks like making sure string values are of a certain format, as well as make AWS service calls to make sure the value of an existing resource exists.
 
 Here is an example of a validator for a port setting that ensures the value is within the range 0 to 51200.
 
 ```json
-    ...
-
-    {
-        "Id": "Port",
-        "Name": "Port",
-        "Category": "General",
-        "Description": "The port the container is listening for requests on.",
-        "Type": "Int",
-        "DefaultValue": 80,
-        "AdvancedSetting": false,
-        "Updatable": true,
-        "Validators": [
-            {
-                "ValidatorType": "Range",
-                "Configuration": {
-                    "Min": 0,
-                    "Max": 51200
-                }
+...
+{
+    "Id": "Port",
+    "Name": "Port",
+    "Category": "General",
+    "Description": "The port the container is listening for requests on.",
+    "Type": "Int",
+    "DefaultValue": 80,
+    "AdvancedSetting": false,
+    "Updatable": true,
+    "Validators": [
+        {
+            "ValidatorType": "Range",
+            "Configuration": {
+                "Min": 0,
+                "Max": 51200
             }
-        ]
-    }
-
-    ...
+        }
+    ]
+}
+...
 ```
 
 The `ValidatorType` property determines the type of validator to run. The `Configuration` contains the data needed to evaluate the validator, in this case the min and max values. Each type of validator can have a different set of properties for the `Configuration`.
@@ -346,9 +354,7 @@ The `ValidatorType` property determines the type of validator to run. The `Confi
 | InstanceType | Validates the string value is a valid Linux EC2 instance type. | |
 | WindowsInstanceType | Validates the string value is a valid Windows EC2 instance type. | |
 | SubnetsInVpc | Validates the subnets are in the configured VPC. | <ul><li>VpcId - the id of the setting that has the VPC configured for.</li><li>ValidationFailedMessage - the error message shown if the validator fails.</li></ul> |
-| SecurityGroupsInVpc | Validates the security group are in the configured VPC. | <ul><li>VpcId - the id of the setting that has the VPC configured for.</li><li>ValidationFailedMessage - the error message shown if the validator fails.</li></ul> |
+| SecurityGroupsInVpc | Validates the security group are in the configured VPC. | <ul><li>VpcId - the id of the setting that contains the VPC configuration.</li><li>ValidationFailedMessage - the error message shown if the validator fails.</li></ul> |
 | Uri | Validates the value is a well-formed URI string. | <ul><li>ValidationFailedMessage - the error message shown if the validator fails.</li></ul> |
 | Comparison | Compares this setting with another setting. | <ul><li>SettingId - the setting to compare to.</li><li>Operation - the comparison operation. Allowed values are `GreaterThan`.</li></ul> |
 | VPCSubnetsInDifferentAZs | Validates that the selected VPC must have at least two subnets in two different Availability Zones  | <ul><li>ValidationFailedMessage - the error message shown if the validator fails.</li></ul> |
-
-
