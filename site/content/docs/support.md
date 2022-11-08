@@ -11,9 +11,9 @@ The table below provides a matrix of supported .NET application types and AWS Co
 | Amazon S3 & Amazon CloudFront        |               |                   |   :heavy_check_mark:       |
 
 
-### Amazon ECS using AWS Fargate
+### Amazon Elastic Container Service (Amazon ECS) using AWS Fargate
 
-* Supports deployments of .NET applications as a service (e.g. web application or a background processor) or as a scheduled task (e.g. end-of-day process) to Amazon Elastic Container Service (Amazon ECS) with compute power managed by AWS Fargate serverless compute engine.
+* Supports deployments of .NET applications as a service (e.g. web application or a background processor) or as a scheduled task (e.g. end-of-day process) to Amazon Elastic Container Service (Amazon ECS) with compute power managed by the AWS Fargate serverless compute engine.
 * Recommended if you want to deploy a service or a scheduled task as a container image on Linux.
 
 > **Note: This compute requires a Dockerfile. IF YOUR PROJECT DOES NOT CONTAIN A DOCKERFILE, THE DEPLOYMENT TOOL WILL ATTEMPT TO AUTOMATICALLY GENERATE IT,** otherwise an existing Dockerfile will be used.

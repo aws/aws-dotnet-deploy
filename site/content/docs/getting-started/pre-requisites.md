@@ -3,7 +3,7 @@
 To run the AWS Deploy Tool, you need the following pre-requisites set up in your environment:
 
 #### AWS Account
-* *An AWS account* with a local credential profile configured in the shared AWS config and credentials files. For information on setting up a profile, see our [SDK Reference Guide](https://docs.aws.amazon.com/sdkref/latest/guide/access-users.html).
+* An *AWS account* with a local credential profile configured in the shared AWS config and credentials files. For information on setting up a profile, see our [SDK Reference Guide](https://docs.aws.amazon.com/sdkref/latest/guide/access-users.html).
 
 * The local credential profile can be configured by a variety of tools. For example, the credential profile can be configured with the [AWS Toolkit for Visual Studio](https://docs.aws.amazon.com/toolkit-for-visual-studio/latest/user-guide/credentials.html) or the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html), among others.
 
@@ -14,7 +14,7 @@ To run the AWS Deploy Tool, you need the following pre-requisites set up in your
 
 * The .NET CLI is included with the [.NET SDK](https://docs.microsoft.com/en-us/dotnet/core/sdk). For information about how to install or update .NET, see [https://dotnet.microsoft.com/](https://dotnet.microsoft.com/).
 
-* The application you are deploying  must be built from .NET Core 3.1 or later (for example, .NET Core 3.1, .NET 5.0, .NET 6.0). To see what version you have, run the following on the command prompt or in a terminal:
+* The application you are deploying must be built from .NET Core 3.1 or later (for example, .NET Core 3.1, .NET 5.0, .NET 6.0). To see what version you have, run the following on the command prompt or in a terminal:
 
 ```
 dotnet --version

@@ -11,12 +11,12 @@ This section of the troubleshooting guide explains how to determine, diagnose, a
 
 There are multiple reasons your deployment may fail during the Docker build step.
 
-### **Invalid Dockerfile** 
+### **Invalid Dockerfile**
 **Why is this happening**: If there is a syntax error or invalid argument in your Dockerfile, the Docker build command may fail with an error message like this:
 
 ```
 failed to solve with frontend dockerfile.v0: failed to create LLB definition: <additional error message>
-``` 
+```
 **Resolution**:
 Correct any syntax errors or invalid arguments in your Dockerfile. Consult [Docker's Dockerfile reference](https://docs.docker.com/engine/reference/builder/) for the expected syntax for each instruction.
 
@@ -35,11 +35,11 @@ AWS.Deploy.Tools allows you to specify an alternative Docker execution directory
 ---
 
 ### Missing project dependencies
-**Why is this happening**: 
-The Docker build command may fail during the `RUN dotnet build` instruction if all of your project dependencies are not specified in the Dockerfile. 
+**Why is this happening**:
+The Docker build command may fail during the `RUN dotnet build` instruction if all of your project dependencies are not specified in the Dockerfile.
 
 **Resolution**:
-Ensure all dependencies from your project and solution files are included in your Dockerfile. A good starting point is to inspect the solution file and add the relevant projects to the Dockerfile. 
+Ensure all dependencies from your project and solution files are included in your Dockerfile. A good starting point is to inspect the solution file and add the relevant projects to the Dockerfile.
 
 If a custom Dockerfile is not initally provided, AWS.Deploy.Tools will generate one if you select a container-based deployment. The generated Dockerfile will include the projects currently defined in your solution file. This Dockerfile is persisted on disk. If you add a new dependency to the solution file in the future, you must manually add a new entry for it in the persisted Dockerfile.
 
@@ -70,7 +70,7 @@ If your container is able to access the internet but the package restore is fail
 ---
 
 ## Failed to push Docker Image
-**Why is this happening**: AWS.Deploy.Tools builds the Docker image and pushes it to Amazon Elastic Container Registry (Amazon ECR). 
+**Why is this happening**: AWS.Deploy.Tools builds the Docker image and pushes it to Amazon Elastic Container Registry (Amazon ECR).
 
 If you are missing the required AWS Identity and Access Management (IAM) permissions to perform actions against ECR repositories, the deployment may fail the following error message:
 
