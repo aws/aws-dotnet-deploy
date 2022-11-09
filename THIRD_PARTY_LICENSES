@@ -1,28 +1,29 @@
-** AWSSDK.AppRunner; version 3.7.3.11 -- https://www.nuget.org/packages/AWSSDK.AppRunner/
-** AWSSDK.CloudFront; version 3.7.3.10 -- https://www.nuget.org/packages/AWSSDK.CloudFront/
-** AWSSDK.CloudWatchEvents; version 3.7.3.14 -- https://www.nuget.org/packages/AWSSDK.CloudWatchEvents/
-** AWSSDK.DynamoDBv2; version 3.7.0.83 -- https://www.nuget.org/packages/AWSSDK.DynamoDBv2/
-** AWSSDK.EC2; version 3.7.19.1 -- https://www.nuget.org/packages/AWSSDK.EC2/
-** AWSSDK.ElasticLoadBalancingV2; version 3.7.0.48 -- https://www.nuget.org/packages/AWSSDK.ElasticLoadBalancingV2/
-** AWSSDK.S3; version 3.7.1.17 -- https://www.nuget.org/packages/AWSSDK.S3/
-** AWSSDK.SimpleNotificationService; version 3.7.2.53 -- https://www.nuget.org/packages/AWSSDK.SimpleNotificationService/
-** AWSSDK.SQS; version 3.7.2.53 -- https://www.nuget.org/packages/AWSSDK.SQS/
-** AWSSDK.CloudFormation; version 3.7.7.14 -- https://www.nuget.org/packages/AWSSDK.CloudFormation
-** AWSSDK.Core; version 3.7.6 -- https://www.nuget.org/packages/AWSSDK.Core
 ** AWSSDK.EC2; version 3.7.19.1 -- https://www.nuget.org/packages/AWSSDK.EC2
-** AWSSDK.ECR; version 3.7.0.45 -- https://www.nuget.org/packages/AWSSDK.ECR
-** AWSSDK.ECS; version 3.7.2.20 -- https://www.nuget.org/packages/AWSSDK.ECS
-** AWSSDK.ElasticBeanstalk; version 3.7.0.45 -- https://www.nuget.org/packages/AWSSDK.ElasticBeanstalk
-** AWSSDK.Extensions.NETCore.Setup; version 3.7.1 -- https://www.nuget.org/packages/AWSSDK.Extensions.NETCore.Setup
-** AWSSDK.IdentityManagement; version 3.7.2.25 -- https://www.nuget.org/packages/AWSSDK.IdentityManagement
-** AWSSDK.SecurityToken; version 3.7.1.35 -- https://www.nuget.org/packages/AWSSDK.SecurityToken
 ** Constructs; version 10.0.0 -- https://www.nuget.org/packages/Constructs
-** Amazon.CDK.Lib; version 2.43.1 -- https://www.nuget.org/packages/Amazon.CDK.Lib/
 ** Amazon.JSII.Runtime; version 1.54.0 -- https://www.nuget.org/packages/Amazon.JSII.Runtime
-** AWSSDK.CloudControlApi; version 3.7.2 -- https://www.nuget.org/packages/AWSSDK.CloudControlApi/
-** AWSSDK.SimpleSystemsManagement; version 3.7.16 -- https://www.nuget.org/packages/AWSSDK.SimpleSystemsManagement/
-** AWSSDK.SSO; version 3.7.0.201 -- https://www.nuget.org/packages/AWSSDK.SSO
-** AWSSDK.SSOOIDC; version 3.7.1.4 -- https://www.nuget.org/packages/AWSSDK.SSOOIDC
+** AWSSDK.IdentityManagement; version 3.7.100.15 -- https://www.nuget.org/packages/AWSSDK.IdentityManagement
+** AWSSDK.CloudFormation; version 3.7.101.9 -- https://www.nuget.org/packages/AWSSDK.CloudFormation
+** AWSSDK.SecurityToken; version 3.7.100.14 -- https://www.nuget.org/packages/AWSSDK.SecurityToken
+** AWSSDK.SSO; version 3.7.100.14 -- https://www.nuget.org/packages/AWSSDK.SSO
+** AWSSDK.SSOOIDC; version 3.7.100.14 -- https://www.nuget.org/packages/AWSSDK.SSOOIDC
+** AWSSDK.CloudControlApi; version 3.7.100.14 -- https://www.nuget.org/packages/AWSSDK.CloudControlApi/
+** AWSSDK.CloudWatchEvents; version 3.7.100.14 -- https://www.nuget.org/packages/AWSSDK.CloudWatchEvents/
+** AWSSDK.EC2; version 3.7.105.3 -- https://www.nuget.org/packages/AWSSDK.EC2/
+** AWSSDK.Extensions.NETCore.Setup; version 3.7.2 -- https://www.nuget.org/packages/AWSSDK.Extensions.NETCore.Setup
+** AWSSDK.AppRunner; version 3.7.102.7 -- https://www.nuget.org/packages/AWSSDK.AppRunner/
+** AWSSDK.CloudFront; version 3.7.100.14 -- https://www.nuget.org/packages/AWSSDK.CloudFront/
+** AWSSDK.DynamoDBv2; version 3.7.100.14 -- https://www.nuget.org/packages/AWSSDK.DynamoDBv2/
+** AWSSDK.ECR; version 3.7.100.14 -- https://www.nuget.org/packages/AWSSDK.ECR
+** AWSSDK.ECS; version 3.7.100.14 -- https://www.nuget.org/packages/AWSSDK.ECS
+** AWSSDK.S3; version 3.7.101.14 -- https://www.nuget.org/packages/AWSSDK.S3/
+** AWSSDK.SimpleSystemsManagement; version 3.7.101.4 -- https://www.nuget.org/packages/AWSSDK.SimpleSystemsManagement/
+** AWSSDK.SimpleNotificationService; version 3.7.100.14 -- https://www.nuget.org/packages/AWSSDK.SimpleNotificationService/
+** AWSSDK.SQS; version 3.7.100.14 -- https://www.nuget.org/packages/AWSSDK.SQS/
+** AWSSDK.ElasticBeanstalk; version 3.7.100.14 -- https://www.nuget.org/packages/AWSSDK.ElasticBeanstalk
+** AWSSDK.ElasticLoadBalancingV2; version 3.7.100.14 -- https://www.nuget.org/packages/AWSSDK.ElasticLoadBalancingV2/
+** AWSSDK.Core; version 3.7.100.14 -- https://www.nuget.org/packages/AWSSDK.Core
+** AWSSDK.CloudWatchLogs; version 3.7.101.7 -- https://www.nuget.org/packages/AWSSDK.CloudWatchLogs
+** Amazon.CDK.Lib; version 2.43.1 -- https://www.nuget.org/packages/Amazon.CDK.Lib/
  
 Apache License
 Version 2.0, January 2004
@@ -207,58 +208,60 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-* For AWSSDK.AppRunner see also this required NOTICE:
-    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-* For AWSSDK.CloudFront see also this required NOTICE:
-    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-* For AWSSDK.CloudWatchEvents see also this required NOTICE:
-    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-* For AWSSDK.DynamoDBv2 see also this required NOTICE:
-    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 * For AWSSDK.EC2 see also this required NOTICE:
-    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-* For AWSSDK.ElasticLoadBalancingV2 see also this required NOTICE:
-    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-* For AWSSDK.S3 see also this required NOTICE:
-    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-* For AWSSDK.SimpleNotificationService see also this required NOTICE:
-    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-* For AWSSDK.SQS see also this required NOTICE:
-    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-* For AWSSDK.CloudFormation see also this required NOTICE:
-    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-* For AWSSDK.Core see also this required NOTICE:
-    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-* For AWSSDK.EC2 see also this required NOTICE:
-    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-* For AWSSDK.ECR see also this required NOTICE:
-    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-* For AWSSDK.ECS see also this required NOTICE:
-    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-* For AWSSDK.ElasticBeanstalk see also this required NOTICE:
-    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-* For AWSSDK.Extensions.NETCore.Setup see also this required NOTICE:
-    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-* For AWSSDK.IdentityManagement see also this required NOTICE:
-    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-* For AWSSDK.SecurityToken see also this required NOTICE:
     Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 * For Constructs see also this required NOTICE:
     Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
-* For Amazon.CDK.Lib see also this required NOTICE:
-    AWS Cloud Development Kit (AWS CDK)
-    Copyright 2018-2022 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 * For Amazon.JSII.Runtime see also this required NOTICE:
     AWS Cloud Development Kit (AWS CDK)
     Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
-* For AWSSDK.CloudControlApi see also this required NOTICE:
+* For AWSSDK.IdentityManagement see also this required NOTICE:
     Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-* For AWSSDK.SimpleSystemsManagement see also this required NOTICE:
+* For AWSSDK.CloudFormation see also this required NOTICE:
+    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+* For AWSSDK.SecurityToken see also this required NOTICE:
     Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 * For AWSSDK.SSO see also this required NOTICE:
     Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 * For AWSSDK.SSOOIDC see also this required NOTICE:
     Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+* For AWSSDK.CloudControlApi see also this required NOTICE:
+    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+* For AWSSDK.CloudWatchEvents see also this required NOTICE:
+    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+* For AWSSDK.EC2 see also this required NOTICE:
+    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+* For AWSSDK.Extensions.NETCore.Setup see also this required NOTICE:
+    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+* For AWSSDK.AppRunner see also this required NOTICE:
+    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+* For AWSSDK.CloudFront see also this required NOTICE:
+    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+* For AWSSDK.DynamoDBv2 see also this required NOTICE:
+    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+* For AWSSDK.ECR see also this required NOTICE:
+    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+* For AWSSDK.ECS see also this required NOTICE:
+    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+* For AWSSDK.S3 see also this required NOTICE:
+    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+* For AWSSDK.SimpleSystemsManagement see also this required NOTICE:
+    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+* For AWSSDK.SimpleNotificationService see also this required NOTICE:
+    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+* For AWSSDK.SQS see also this required NOTICE:
+    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+* For AWSSDK.ElasticBeanstalk see also this required NOTICE:
+    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+* For AWSSDK.ElasticLoadBalancingV2 see also this required NOTICE:
+    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+* For AWSSDK.Core see also this required NOTICE:
+    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+* For AWSSDK.CloudWatchLogs see also this required NOTICE:
+    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+* For Amazon.CDK.Lib see also this required NOTICE:
+    AWS Cloud Development Kit (AWS CDK)
+    Copyright 2018-2022 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
 ------
 

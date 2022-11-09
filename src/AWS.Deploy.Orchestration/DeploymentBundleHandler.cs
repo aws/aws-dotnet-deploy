@@ -16,6 +16,7 @@ using AWS.Deploy.Common.Utilities;
 using AWS.Deploy.Constants;
 using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.Utilities;
+using Recommendation = AWS.Deploy.Common.Recommendation;
 
 namespace AWS.Deploy.Orchestration
 {
