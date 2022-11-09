@@ -21,11 +21,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.IdentityManagement" Version="3.7.2.25" />
-    <PackageReference Include="AWSSDK.CloudFormation" Version="3.7.7.14" />
-    <PackageReference Include="AWSSDK.SecurityToken" Version="3.7.1.35" />
-    <PackageReference Include="AWSSDK.SSO" Version="3.7.0.201" />
-    <PackageReference Include="AWSSDK.SSOOIDC" Version="3.7.1.4" />
+    <PackageReference Include="AWSSDK.IdentityManagement" Version="3.7.100.15" />
+    <PackageReference Include="AWSSDK.CloudFormation" Version="3.7.101.9" />
+    <PackageReference Include="AWSSDK.SecurityToken" Version="3.7.100.14" />
+    <PackageReference Include="AWSSDK.SSO" Version="3.7.100.14" />
+    <PackageReference Include="AWSSDK.SSOOIDC" Version="3.7.100.14" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.1.2" />
     <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.1.2" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20574.7" />
