@@ -22,6 +22,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
             bool streamOutputToInteractiveService = true,
             Action<TryRunResult> onComplete = null,
             bool redirectIO = true,
+            string stdin = null,
             IDictionary<string, string> environmentVariables = null,
             CancellationToken cancelToken = default,
             bool needAwsCredentials = false)

@@ -210,8 +210,8 @@ namespace AWS.Deploy.Orchestration
             var authToken = Encoding.UTF8.GetString(authTokenBytes);
             var decodedTokens = authToken.Split(':');
 
-            var dockerLoginCommand = $"docker login --username {decodedTokens[0]} --password {decodedTokens[1]} {authorizationTokens[0].ProxyEndpoint}";
-            var result = await _commandLineWrapper.TryRunWithResult(dockerLoginCommand, streamOutputToInteractiveService: true);
+            var dockerLoginCommand = $"docker login --username {decodedTokens[0]} --password-stdin {authorizationTokens[0].ProxyEndpoint}";
+            var result = await _commandLineWrapper.TryRunWithResult(dockerLoginCommand, streamOutputToInteractiveService: true, stdin: decodedTokens[1]);
 
             if (result.ExitCode != 0)
             {
