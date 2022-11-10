@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -42,6 +43,7 @@ namespace AWS.Deploy.CLI.Utilities
             bool streamOutputToInteractiveService = true,
             Action<TryRunResult>? onComplete = null,
             bool redirectIO = true,
+            string? stdin = null,
             IDictionary<string, string>? environmentVariables = null,
             CancellationToken cancelToken = default,
             bool needAwsCredentials = false)
@@ -58,7 +60,7 @@ namespace AWS.Deploy.CLI.Utilities
                         ? $"/c {command}"
                         : $"-c \"{command}\"",
 
-                RedirectStandardInput = redirectIO,
+                RedirectStandardInput = redirectIO || stdin != null,
                 RedirectStandardOutput = redirectIO,
                 RedirectStandardError = redirectIO,
                 UseShellExecute = false,
@@ -106,6 +108,12 @@ namespace AWS.Deploy.CLI.Utilities
                 };
                 process.BeginOutputReadLine();
                 process.BeginErrorReadLine();
+            }
+
+            if(stdin != null)
+            {
+                process.StandardInput.Write(stdin);
+                process.StandardInput.Close();
             }
 
             // poll for process to prevent blocking the main thread

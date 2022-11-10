@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -50,6 +51,7 @@ namespace AWS.Deploy.Orchestration.Utilities
             bool streamOutputToInteractiveService = true,
             Action<TryRunResult>? onComplete = null,
             bool redirectIO = true,
+            string? stdin = null,
             IDictionary<string, string>? environmentVariables = null,
             CancellationToken cancelToken = default,
             bool needAwsCredentials = false);
@@ -86,6 +88,9 @@ namespace AWS.Deploy.Orchestration.Utilities
         /// By default, <see cref="Process.StandardInput"/>, <see cref="Process.StandardOutput"/> and <see cref="Process.StandardError"/> will be redirected.
         /// Set this to false to avoid redirection.
         /// </param>
+        /// <param name="stdin">
+        /// Text to pass into the process through standard input.
+        /// </param>
         /// <param name="environmentVariables">
         /// <see cref="command"/> is executed as a child process of running process which inherits the parent process's environment variables.
         /// <see cref="environmentVariables"/> allows to add (replace if exists) extra environment variables to the child process.
@@ -103,6 +108,7 @@ namespace AWS.Deploy.Orchestration.Utilities
             string workingDirectory = "",
             bool streamOutputToInteractiveService = false,
             bool redirectIO = true,
+            string? stdin = null,
             IDictionary<string, string>? environmentVariables = null,
             CancellationToken cancelToken = default,
             bool needAwsCredentials = false)
@@ -115,6 +121,7 @@ namespace AWS.Deploy.Orchestration.Utilities
                 streamOutputToInteractiveService,
                 onComplete: runResult => result = runResult,
                 redirectIO: redirectIO,
+                stdin: stdin,
                 environmentVariables: environmentVariables,
                 cancelToken: cancelToken,
                 needAwsCredentials: needAwsCredentials);
