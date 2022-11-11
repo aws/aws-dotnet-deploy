@@ -14,8 +14,8 @@ nav:
     - Getting started:
       - Pre-requisites: docs/getting-started/pre-requisites.md
       - How to install: docs/getting-started/installation.md
-      - Set up Credentials: docs/getting-started/setup-creds.md
-      - Set up custom workspace: docs/getting-started/custom-workspace.md
+      - Set up credentials: docs/getting-started/setup-creds.md
+      - Set up a custom workspace: docs/getting-started/custom-workspace.md
       - Deploy "Hello World": docs/getting-started/run-tool.md
     -  Support matrix: docs/support.md
     - Commands:
