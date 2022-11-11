@@ -1,4 +1,4 @@
-# Set up custom workspace
+# Set up a custom workspace
 
 The default workspace used by AWS.Deploy.Tools is `$USERPROFILE/.aws-dotnet-deploy` on Windows and `$USER/.aws-dotnet-deploy` on Unix based OS. This workspace is used to create the CDK project and any other temporary files used by the tool.
 

@@ -1,4 +1,4 @@
-# Setting up credentials
+# Set up credentials
 
 AWS.Deploy.Tools internally uses a variety of different tools and services to host your .NET application on AWS. To run the AWS Deploy Tool, you must configure a credential profile that provides access to the AWS account you wish to deploy to. Your credentials must have permissions for certain services, depending on the tasks that you're trying to perform.
 
@@ -12,7 +12,7 @@ The following are some examples of the typical permissions that are required.
 | --- | --- |--- |
 |deploy | Deploying to Amazon ECS | AWSCloudFormationFullAccess, AmazonECS_FullAccess, AmazonEC2ContainerRegistryFullAccess, AmazonSSMFullAccess, IAMFullAccess |
 |deploy | Deploying to AWS App Runner| AWSCloudFormationFullAccess, AWSAppRunnerFullAccess, AmazonEC2ContainerRegistryFullAccess, AmazonSSMFullAccess, IAMFullAccess|
-|deploy | Deploying to AWS Elastic Beanstalk (deploy) | AWSCloudFormationFullAccess, AdministratorAccess-AWSElasticBeanstalk, AmazonSSMFullAccess, AmazonS3FullAccess (*required to upload the application bundle*), IAMFullAccess |
+|deploy | Deploying to AWS Elastic Beanstalk | AWSCloudFormationFullAccess, AdministratorAccess-AWSElasticBeanstalk, AmazonSSMFullAccess, AmazonS3FullAccess (*required to upload the application bundle*), IAMFullAccess |
 |deploy | Hosting WebAssembly Blazor App in Amazon S3 & Amazon CloudFront | AmazonS3FullAccess, CloudFrontFullAccess, IAMFullAccess, AmazonSSMFullAccess, AWSLambda_FullAccess (*required to copy from CDKBootstrap bucket to S3 bucket*)|
 | list-deployments | List AWS CloudFormation stacks| AWSCloudFormationReadOnlyAccess  |
 | delete-deployment | Delete an AWS CloudFormation stack | AWSCloudFormationFullAccess + permissions for resources being deleted |
