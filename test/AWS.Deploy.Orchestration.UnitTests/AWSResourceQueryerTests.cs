@@ -5,7 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Amazon.EC2;
+using Amazon.EC2.Model;
 using Amazon.ElasticBeanstalk.Model;
+using Amazon.Runtime;
 using Amazon.SecurityToken;
 using Amazon.SecurityToken.Model;
 using AWS.Deploy.Common;
@@ -20,12 +23,32 @@ namespace AWS.Deploy.Orchestration.UnitTests
         private readonly Mock<IAWSClientFactory> _mockAWSClientFactory;
         private readonly Mock<IAmazonSecurityTokenService> _mockSTSClient;
         private readonly Mock<IAmazonSecurityTokenService> _mockSTSClientDefaultRegion;
+        private readonly Mock<IAmazonEC2> _mockEC2Client;
 
         public AWSResourceQueryerTests()
         {
             _mockAWSClientFactory = new Mock<IAWSClientFactory>();
             _mockSTSClient = new Mock<IAmazonSecurityTokenService>();
             _mockSTSClientDefaultRegion = new Mock<IAmazonSecurityTokenService>();
+            _mockEC2Client = new Mock<IAmazonEC2>();
+        }
+
+        [Fact]
+        public async Task GetDefaultVPC_UnauthorizedAccess()
+        {
+            var awsResourceQueryer = new AWSResourceQueryer(_mockAWSClientFactory.Object);
+            var vpcResponse = new DescribeVpcsResponse();
+            var unauthorizedException = new AmazonServiceException("You are not authorized to perform this operation.")
+            {
+                ErrorCode = "UnauthorizedOperation"
+            };
+
+            _mockAWSClientFactory.Setup(x => x.GetAWSClient<IAmazonEC2>(It.IsAny<string>())).Returns(_mockEC2Client.Object);
+            _mockEC2Client.Setup(x => x.Paginators.DescribeVpcs(It.IsAny<DescribeVpcsRequest>())).Throws(unauthorizedException);
+
+            var exceptionThrown = await Assert.ThrowsAsync<ResourceQueryException>(awsResourceQueryer.GetDefaultVpc);
+            Assert.Equal(DeployToolErrorCode.ResourceQuery, exceptionThrown.ErrorCode);
+            Assert.Contains("Error attempting to retrieve the default VPC (UnauthorizedOperation).", exceptionThrown.Message);
         }
 
         [Fact]
