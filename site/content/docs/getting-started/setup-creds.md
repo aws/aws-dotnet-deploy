@@ -1,10 +1,28 @@
 # Set up credentials
 
-AWS.Deploy.Tools internally uses a variety of different tools and services to host your .NET application on AWS. To run the AWS Deploy Tool, you must configure a credential profile that provides access to the AWS account you wish to deploy to. Your credentials must have permissions for certain services, depending on the tasks that you're trying to perform.
+The AWS Deploy Tool for .NET internally uses a variety of different tools and services to host your .NET application on AWS. To run the AWS Deploy Tool, you must configure a credential profile that provides access to the AWS account you wish to deploy to. Your credentials must have permissions for certain services, depending on the tasks that you're trying to perform.
 
 ### Recommended policies
 
-The following are some examples of the typical permissions that are required.
+The AWS Deploy Tool for .NET uses [AWS Cloud Development Kit (CDK)](https://docs.aws.amazon.com/cdk/v2/guide/home.html) to create the AWS infrastructure needed to deploy your application. Deploying via AWS CDK will assume roles that were created when [bootstrapping](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html) CDK for the account and region you are deploying into. Ensure that the profile you are deploying with has permission to assume the CDK deployment roles. This can be done with a policy such as:
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "sts:AssumeRole"
+            ],
+            "Resource": [
+                "arn:aws:iam::*:role/cdk-*"
+            ]
+        }
+    ]
+}
+```
+
+In addition to permission to assume the CDK deployment roles, the following are examples of using [AWS managed policies](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html#aws-managed-policies) to provide additional permissions that are required for different commands.
 
   > *Note: Additional permissions might be required, depending on the type of application you're deploying and the services it uses.*
 
