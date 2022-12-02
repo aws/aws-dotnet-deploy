@@ -1,0 +1,352 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "./aws-deploy-deployment-config-schema.json",
+    "title": "AWS .NET deployment tool deployment configuration",
+    "description": "Deployment configuration schema containing settings used for deployment",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "AWSProfile",
+        "AWSRegion",
+        "ApplicationName",
+        "RecipeId",
+        "Settings"
+    ],
+    "properties": {
+        "$schema": {
+            "type": "string",
+            "title": "Schema",
+            "description": "JSON schema for the document",
+            "minLength": 1
+        },
+        "AWSProfile": {
+            "type": "string",
+            "title": "AWS Profile",
+            "description": "The AWS profile to use from the AWS credentials file.",
+            "minLength": 1
+        },
+        "AWSRegion": {
+            "type": "string",
+            "title": "AWS Region",
+            "description": "The AWS region where the application will be deployed.",
+            "minLength": 1
+        },
+        "ApplicationName": {
+            "type": "string",
+            "title": "Application Name",
+            "description": "The name of the application",
+            "minLength": 1
+        },
+        "RecipeId": {
+            "type": "string",
+            "title": "Recipe Id",
+            "description": "The unique identifier of the recipe used to deploy the application.",
+            "minLength": 1,
+            "enum": [
+                "AspNetAppAppRunner",
+                "AspNetAppEcsFargate",
+                "AspNetAppElasticBeanstalkLinux",
+                "AspNetAppElasticBeanstalkWindows",
+                "AspNetAppExistingBeanstalkEnvironment",
+                "AspNetAppExistingBeanstalkWindowsEnvironment",
+                "BlazorWasm",
+                "ConsoleAppEcsFargateScheduleTask",
+                "ConsoleAppEcsFargateService",
+                "PushContainerImageEcr"
+            ]
+        },
+        "Settings": {
+            "type": "object"
+        }
+    },
+    "oneOf": [
+        {
+            "properties": {
+                "RecipeId": {
+                    "const": "AspNetAppAppRunner"
+                },
+                "Settings": {
+                    "$ref": "#/definitions/AspNetAppAppRunnerSettings"
+                }
+            }
+        }
+    ],
+    "definitions": {
+        "AspNetAppAppRunnerSettings": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "ServiceName": {
+                    "type": "string",
+                    "title": "The unique id for the category.",
+                    "description": "The unique id for the category in the recipe. This value is applied to each top level setting to map settings to categories.",
+                    "minLength": 1,
+                    "pattern": "^([A-Za-z0-9][A-Za-z0-9_-]{3,39})$"
+                },
+                "Port": {
+                    "type": "integer",
+                    "title": "Port",
+                    "description": "The port the container is listening for requests on.",
+                    "minimum": 0,
+                    "maximum": 51200,
+                    "default": 80
+                },
+                "StartCommand": {
+                    "type": "string",
+                    "title": "Start Command",
+                    "description": "Override the start command from the image's default start command."
+                },
+                "ApplicationIAMRole": {
+                    "type": "object",
+                    "title": "Application IAM Role",
+                    "description": "The Identity and Access Management (IAM) role that provides AWS credentials to the application to access AWS services.",
+                    "properties": {
+                        "CreateNew": {
+                            "type": "boolean",
+                            "title": "Create New Role",
+                            "description": "Do you want to create a new role?",
+                            "default": true
+                        },
+                        "RoleArn": {
+                            "type": "string",
+                            "title": "Existing Role ARN",
+                            "description": "The ARN of the existing role to use.",
+                            "pattern": "arn:(aws|aws-us-gov|aws-cn|aws-iso|aws-iso-b):iam::[0-9]{12}:(role|role/service-role)/[\\w+=,.@\\-/]{1,1000}"
+                        }
+                    },
+                    "required": [ "CreateNew" ],
+                    "additionalProperties": false,
+                    "dependencies": {
+                        "RoleArn": {
+                            "properties": {
+                                "CreateNew": { "const": false}
+                            },
+                            "required": ["CreateNew"]
+                        }
+                    }
+                },
+                "ServiceAccessIAMRole": {
+                    "type": "object",
+                    "title": "Service Access IAM Role",
+                    "description": "The Identity and Access Management (IAM) role that provides gives the AWS App Runner service access to pull the container image from ECR.",
+                    "properties": {
+                        "CreateNew": {
+                            "type": "boolean",
+                            "title": "Create New Role",
+                            "description": "Do you want to create a new role?",
+                            "default": true
+                        },
+                        "RoleArn": {
+                            "type": "string",
+                            "title": "Existing Role ARN",
+                            "description": "The ARN of the existing role to use.",
+                            "pattern": "arn:(aws|aws-us-gov|aws-cn|aws-iso|aws-iso-b):iam::[0-9]{12}:(role|role/service-role)/[\\w+=,.@\\-/]{1,1000}"
+                        }
+                    },
+                    "required": [ "CreateNew" ],
+                    "additionalProperties": false,
+                    "dependencies": {
+                        "RoleArn": {
+                            "properties": {
+                                "CreateNew": { "const": false}
+                            },
+                            "required": ["CreateNew"]
+                        }
+                    }
+                },
+                "Cpu": {
+                    "type": "string",
+                    "title": "Cpu",
+                    "description": "The number of CPU units reserved for each instance of your App Runner service.",
+                    "enum": [
+                        "1024",
+                        "2048"
+                    ],
+                    "default": "1024"
+                },
+                "Memory": {
+                    "type": "string",
+                    "title": "Memory",
+                    "description": "The amount of memory reserved for each instance of your App Runner service.",
+                    "enum": [
+                        "2048",
+                        "3072",
+                        "4096"
+                    ],
+                    "default": "2048"
+                },
+                "EncryptionKmsKey": {
+                    "type": "string",
+                    "title": "Encryption KMS Key",
+                    "description": "The ARN of the KMS key that's used for encryption of application logs.",
+                    "minLength": 0,
+                    "pattern": "arn:aws(-[\\w]+)*:kms:[a-z\\-]+-[0-9]{1}:[0-9]{12}:key/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                },
+                "HealthCheckProtocol": {
+                    "type": "string",
+                    "title": "Health Check Protocol",
+                    "description": "The IP protocol that App Runner uses to perform health checks for your service.",
+                    "enum": [
+                        "HTTP",
+                        "TCP"
+                    ],
+                    "default": "TCP"
+                },
+                "HealthCheckPath": {
+                    "type": "string",
+                    "title": "Health Check Path",
+                    "description": "The URL that health check requests are sent to."
+                },
+                "HealthCheckInterval": {
+                    "type": "integer",
+                    "title": "Health Check Interval",
+                    "description": "The time interval, in seconds, between health checks.",
+                    "minimum": 1,
+                    "maximum": 20,
+                    "default": 5
+                },
+                "HealthCheckTimeout": {
+                    "type": "integer",
+                    "title": "Health Check Timeout",
+                    "description": "The time, in seconds, to wait for a health check response before deciding it failed.",
+                    "minimum": 1,
+                    "maximum": 20,
+                    "default": 2
+                },
+                "HealthCheckHealthyThreshold": {
+                    "type": "integer",
+                    "title": "Health Check Healthy Threshold",
+                    "description": "The number of consecutive checks that must succeed before App Runner decides that the service is healthy.",
+                    "minimum": 1,
+                    "maximum": 20,
+                    "default": 3
+                },
+                "HealthCheckUnhealthyThreshold": {
+                    "type": "integer",
+                    "title": "Health Check Unhealthy Threshold",
+                    "description": "The number of consecutive checks that must fail before App Runner decides that the service is unhealthy.",
+                    "minimum": 1,
+                    "maximum": 20,
+                    "default": 3
+                },
+                "VPCConnector": {
+                    "type": "object",
+                    "title": "VPC Connector",
+                    "description": "App Runner requires this resource when you want to associate your App Runner service to a custom Amazon Virtual Private Cloud (Amazon VPC).",
+                    "properties": {
+                        "UseVPCConnector": {
+                            "type": "boolean",
+                            "title": "Use VPC Connector",
+                            "description": "Do you want to use a VPC Connector to connect to a VPC?",
+                            "default": false
+                        },
+                        "CreateNew": {
+                            "type": "boolean",
+                            "title": "Create New VPC Connector",
+                            "description": "Do you want to create a new VPC Connector?",
+                            "default": false
+                        },
+                        "VpcConnectorId": {
+                            "type": "string",
+                            "title": "Existing VPC Connector ID",
+                            "description": "The ID of the existing VPC Connector to use.",
+                            "pattern": "arn:(aws|aws-us-gov|aws-cn|aws-iso|aws-iso-b):apprunner:\\w+(?:-\\w+)+:[0-9]{12}:vpcconnector/[\\w+=,.@\\-/]{1,1000}"
+                        },
+                        "CreateNewVpc": {
+                            "type": "boolean",
+                            "title": "Create New VPC",
+                            "description": "Do you want to create a new VPC to use for the VPC Connector?"
+                        },
+                        "VpcId": {
+                            "type": "string",
+                            "title": "VPC ID",
+                            "description": "A list of VPC IDs that App Runner should use when it associates your service with a custom Amazon VPC.",
+                            "pattern": "^vpc-([0-9a-f]{8}|[0-9a-f]{17})$",
+                            "minLength": 1
+                        },
+                        "Subnets": {
+                            "type": "array",
+                            "title": "Subnets",
+                            "description": "A list of IDs of subnets that App Runner should use when it associates your service with a custom Amazon VPC. Specify IDs of subnets of a single Amazon VPC. App Runner determines the Amazon VPC from the subnets you specify.",
+                            "items": { 
+                                "type": "string",
+                                "pattern": "^vpc-([0-9a-f]{8}|[0-9a-f]{17})$"
+                            }
+                        },
+                        "SecurityGroups": {
+                            "type": "array",
+                            "title": "Security Groups",
+                            "description": "A list of IDs of security groups that App Runner should use for access to AWS resources under the specified subnets. If not specified, App Runner uses the default security group of the Amazon VPC. The default security group allows all outbound traffic.",
+                            "items": { 
+                                "type": "string",
+                                "pattern": "^sg-([0-9a-f]{8}|[0-9a-f]{17})$"
+                            }
+                        }
+                    },
+                    "required": [ "UseVPCConnector" ],
+                    "additionalProperties": false,
+                    "dependencies": {
+                        "CreateNew": {
+                            "properties": {
+                                "UseVPCConnector": { "const": true }
+                            },
+                            "required": ["UseVPCConnector"]
+                        },
+                        "VpcConnectorId": {
+                            "properties": {
+                                "UseVPCConnector": { "const": true },
+                                "CreateNew": { "const": false }
+                            },
+                            "required": ["UseVPCConnector", "CreateNew"]
+                        },
+                        "CreateNewVpc": {
+                            "properties": {
+                                "UseVPCConnector": { "const": true },
+                                "CreateNew": { "const": true }
+                            },
+                            "required": ["UseVPCConnector", "CreateNew"]
+                        },
+                        "VpcId": {
+                            "properties": {
+                                "UseVPCConnector": { "const": true },
+                                "CreateNew": { "const": true },
+                                "CreateNewVpc": { "const": false }
+                            },
+                            "required": ["UseVPCConnector", "CreateNew", "CreateNewVpc"]
+                        },
+                        "Subnets": {
+                            "properties": {
+                                "UseVPCConnector": { "const": true },
+                                "CreateNew": { "const": true },
+                                "CreateNewVpc": { "const": false }
+                            },
+                            "required": ["UseVPCConnector", "CreateNew", "CreateNewVpc", "VpcId"]
+                        },
+                        "SecurityGroups": {
+                            "properties": {
+                                "UseVPCConnector": { "const": true },
+                                "CreateNew": { "const": true },
+                                "CreateNewVpc": { "const": false }
+                            },
+                            "required": ["UseVPCConnector", "CreateNew", "CreateNewVpc", "VpcId"]
+                        }
+                    }
+                },
+                "AppRunnerEnvironmentVariables": {
+                    "type": "object",
+                    "title": "Environment Variables",
+                    "description": "Configure environment properties for your application.",
+                    "additionalProperties": { "type": "string" }
+                }
+            },
+            "dependencies": {
+                "HealthCheckPath": {
+                  "properties": {
+                    "HealthCheckProtocol": { "const": "HTTP" }
+                  },
+                  "required": ["HealthCheckProtocol"]
+                }
+              }
+        }
+    }
+}
