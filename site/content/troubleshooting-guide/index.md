@@ -27,24 +27,25 @@ Recipe configurations target different AWS services and there may be incompatibi
 Another reason why there are no recommendations generated is if your application's `.csproj` file is using a variable for the `TargetFramework` property.
 For example:
 
+```xml
+<Project Sdk="Microsoft.NET.Sdk.Web">
+	<PropertyGroup>
+		<TargetFrameworkVersion>net6.0</TargetFrameworkVersion>
+		<TargetFramework>$(TargetFrameworkVersion)</TargetFramework>
+	</PropertyGroup>
+</Project>
+```
 
-    <Project Sdk="Microsoft.NET.Sdk.Web">
-	    <PropertyGroup>
-		    <TargetFrameworkVersion>net5.0</TargetFrameworkVersion>
-		    <TargetFramework>$(TargetFrameworkVersion)</TargetFramework>
-	    </PropertyGroup>
-	</Project>
-    
 No recommendations will be generated for the above `.csproj` file.
-**This is a bug which we will address**: [GitHub issue](https://github.com/aws/aws-dotnet-deploy/issues/550). 
+**This is a bug which we will address**: [GitHub issue](https://github.com/aws/aws-dotnet-deploy/issues/550).
 
-Meanwhile, please provide explicit values for the `TargetFramework` property. 
+Meanwhile, please provide explicit values for the `TargetFramework` property.
 
 **Resolution**: If you think that your project is not correctly recognized by our tool and no recommendations are generated, then file a [GitHub issue](https://github.com/aws/aws-dotnet-deploy/issues/new/choose) describing your project and also providing relevant details about your `.csproj` or `.fsproj` file. This will help us understand and narrow down the gaps in our recommendation engine and customer use cases.
 
 ## Deployment failures related to JSON configuration file
 
-**Why is this happening**: AWS.Deploy.Tools allows for prompt-less deployments using a JSON configuration file. This workflow can easily be plugged into your CI/CD pipeline for automated deployments. 
+**Why is this happening**: AWS.Deploy.Tools allows for prompt-less deployments using a JSON configuration file. This workflow can easily be plugged into your CI/CD pipeline for automated deployments.
 
 If a deployment failure occurs while using a configuration file, It is possible that the configuration file has the wrong definition or the wrong format.
 
@@ -75,13 +76,13 @@ A common error that is displayed for CDK Bootstrap related deployment failures i
 ```
 The AWS CDK Bootstrap, which is the process of provisioning initial resources for the deployment environment, has failed. Please review the output above for additional details [and check out our troubleshooting guide for the most common failure reasons]. You can learn more about CDK bootstrapping at https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html.
 ```
-The AWS Deploy Tool for .NET uses [AWS CDK](https://docs.aws.amazon.com/cdk/v2/guide/home.html) to create the AWS infrastructure needed to deploy your application. The AWS CDK is a framework for defining cloud infrastructure in code and provisioning it through AWS CloudFormation. 
+The AWS Deploy Tool for .NET uses [AWS CDK](https://docs.aws.amazon.com/cdk/v2/guide/home.html) to create the AWS infrastructure needed to deploy your application. The AWS CDK is a framework for defining cloud infrastructure in code and provisioning it through AWS CloudFormation.
 
 Deploying AWS CDK apps into an AWS environment (a combination of an AWS account and region) requires that you provision resources the AWS CDK needs to perform the deployment. These resources include an Amazon S3 bucket for storing files and IAM roles that grant permissions needed to perform deployments. The process of provisioning these initial resources is called [bootstrapping](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html).
 
 The required resources are defined in a AWS CloudFormation stack, called the bootstrap stack, which is usually named `CDKToolkit`. Like any AWS CloudFormation stack, it appears in the AWS CloudFormation console once it has been deployed.
 
-There could be several reasons why you are experiencing this issue. However, the most common ones are related to **Insufficient IAM Permissions** and an **Existing CDK Staging Bucket**. 
+There could be several reasons why you are experiencing this issue. However, the most common ones are related to **Insufficient IAM Permissions** and an **Existing CDK Staging Bucket**.
 
 **Insufficient IAM Permission**: CDKBoostrap failed because your profile does not have sufficient permissions to create the boostrap stack. Check the log - in this case, you should see an error that looks something like this:
 ```

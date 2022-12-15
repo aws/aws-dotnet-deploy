@@ -53,8 +53,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
         }
 
         [Theory]
-        [InlineData("testapps", "BlazorWasm31", "BlazorWasm31.csproj")]
-        [InlineData("testapps", "BlazorWasm50", "BlazorWasm50.csproj")]
+        [InlineData("testapps", "BlazorWasm60", "BlazorWasm60.csproj")]
         public async Task DefaultConfigurations(params string[] components)
         {
             _stackName = $"{components[1]}{Guid.NewGuid().ToString().Split('-').Last()}";
@@ -77,7 +76,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             var tempCdkProject = tempCdkProjectLine.Split(": ")[1].Trim();
             Assert.False(Directory.Exists(tempCdkProject), $"{tempCdkProject} must not exist.");
 
-            // Example URL string: BlazorWasm5068e7a879d5ee.EndpointURL = http://blazorwasm5068e7a879d5ee-blazorhostc7106839-a2585dcq9xve.s3-website-us-west-2.amazonaws.com/
+            // Example URL string: BlazorWasm6068e7a879d5ee.EndpointURL = http://blazorwasm6068e7a879d5ee-blazorhostc7106839-a2585dcq9xve.s3-website-us-west-2.amazonaws.com/
             var applicationUrl = deployStdOut.First(line => line.Contains("https://") && line.Contains("cloudfront.net/"))
                 .Split("=")[1]
                 .Trim();

@@ -308,7 +308,7 @@ namespace AWS.Deploy.Orchestration.Utilities
             }
         }
 
-        private ConfigurationOptionSetting GetBeanstalkEnvironmentConfigurationSetting(List<ConfigurationOptionSetting> configurationSettings, string optionNameSpace, string optionName)
+        private ConfigurationOptionSetting? GetBeanstalkEnvironmentConfigurationSetting(List<ConfigurationOptionSetting> configurationSettings, string optionNameSpace, string optionName)
         {
             var configurationSetting = configurationSettings
                 .FirstOrDefault(x => string.Equals(optionNameSpace, x.Namespace) && string.Equals(optionName, x.OptionName));

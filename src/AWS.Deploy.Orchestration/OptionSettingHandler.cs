@@ -315,12 +315,14 @@ namespace AWS.Deploy.Orchestration
                         {
                             if (dependsOnOptionSetting.Type == OptionSettingValueType.List &&
                                 dependsOnOptionSettingValue.TryDeserialize<SortedSet<string>>(out var listValue) &&
+                                listValue != null &&
                                 !listValue.Any())
                             {
                                 return false;
                             }
                             else if (dependsOnOptionSetting.Type == OptionSettingValueType.KeyValue &&
                                 dependsOnOptionSettingValue.TryDeserialize<Dictionary<string, string>>(out var keyValue) &&
+                                keyValue != null &&
                                 !keyValue.Any())
                             {
                                 return false;

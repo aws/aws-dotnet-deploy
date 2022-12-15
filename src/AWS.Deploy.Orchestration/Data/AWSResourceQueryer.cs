@@ -65,9 +65,10 @@ namespace AWS.Deploy.Orchestration.Data
             };
 
             return await HandleException(async () => {
-                var resource = await cloudControlApiClient.GetResourceAsync(request);
-                return resource.ResourceDescription;
-            });
+                    var resource = await cloudControlApiClient.GetResourceAsync(request);
+                    return resource.ResourceDescription;
+                },
+                $"Error attempting to retrieve Cloud Control API resource '{identifier}'");
         }
 
         /// <summary>
@@ -100,7 +101,8 @@ namespace AWS.Deploy.Orchestration.Data
             return await HandleException(async () => await ec2Client.Paginators
                 .DescribeSubnets(request)
                 .Subnets
-                .ToListAsync());
+                .ToListAsync(),
+                "Error attempting to describe available subnets");
         }
 
         /// <summary>
@@ -133,7 +135,8 @@ namespace AWS.Deploy.Orchestration.Data
             return await HandleException(async () => await ec2Client.Paginators
                 .DescribeSecurityGroups(request)
                 .SecurityGroups
-                .ToListAsync());
+                .ToListAsync(),
+                "Error attempting to describe available security groups");
         }
 
         public async Task<List<StackEvent>> GetCloudFormationStackEvents(string stackName)
@@ -147,7 +150,8 @@ namespace AWS.Deploy.Orchestration.Data
             return await HandleException(async () => await cfClient.Paginators
                 .DescribeStackEvents(request)
                 .StackEvents
-                .ToListAsync());
+                .ToListAsync(),
+                $"Error attempting to describe available CloudFormation stack events of '{stackName}'");
         }
 
         public async Task<List<InstanceTypeInfo>> ListOfAvailableInstanceTypes()
@@ -164,7 +168,8 @@ namespace AWS.Deploy.Orchestration.Data
                 }
 
                 return instanceTypes;
-            });
+            },
+            "Error attempting to describe available instance types");
         }
 
         public async Task<InstanceTypeInfo?> DescribeInstanceType(string instanceType)
@@ -180,7 +185,8 @@ namespace AWS.Deploy.Orchestration.Data
             {
                 var response = await ec2Client.DescribeInstanceTypesAsync(request);
                 return response.InstanceTypes.FirstOrDefault();
-            });
+            },
+            $"Error attempting to describe instance type '{instanceType}'");
         }
 
         public async Task<List<VpcConnector>> DescribeAppRunnerVpcConnectors()
@@ -190,7 +196,8 @@ namespace AWS.Deploy.Orchestration.Data
             {
                 var connections = await appRunnerClient.ListVpcConnectorsAsync(new ListVpcConnectorsRequest());
                 return connections.VpcConnectors;
-            });
+            },
+            "Error attempting to describe available App Runner VPC connectors");
         }
 
         public async Task<Amazon.AppRunner.Model.Service> DescribeAppRunnerService(string serviceArn)
@@ -210,7 +217,8 @@ namespace AWS.Deploy.Orchestration.Data
                 }
 
                 return service;
-            });
+            },
+            $"Error attempting to describe App Runner service '{serviceArn}'");
         }
 
         public async Task<List<StackResource>> DescribeCloudFormationResources(string stackName)
@@ -221,7 +229,8 @@ namespace AWS.Deploy.Orchestration.Data
                 var resources = await cfClient.DescribeStackResourcesAsync(new DescribeStackResourcesRequest { StackName = stackName });
 
                 return resources.StackResources;
-            });
+            },
+            $"Error attempting to describe CloudFormation resources of '{stackName}'");
         }
 
         public async Task<EnvironmentDescription> DescribeElasticBeanstalkEnvironment(string environmentName)
@@ -239,7 +248,8 @@ namespace AWS.Deploy.Orchestration.Data
                 }
 
                 return environment.Environments.First();
-            });
+            },
+            $"Error attempting to describe Elastic Beanstalk environment '{environmentName}'");
         }
 
         public async Task<Amazon.ElasticLoadBalancingV2.Model.LoadBalancer> DescribeElasticLoadBalancer(string loadBalancerArn)
@@ -262,7 +272,8 @@ namespace AWS.Deploy.Orchestration.Data
                 }
 
                 return loadBalancers.LoadBalancers.First();
-            });
+            },
+            $"Error attempting to describe Elastic Load Balancer '{loadBalancerArn}'");
         }
 
         public async Task<List<Amazon.ElasticLoadBalancingV2.Model.Listener>> DescribeElasticLoadBalancerListeners(string loadBalancerArn)
@@ -281,7 +292,8 @@ namespace AWS.Deploy.Orchestration.Data
                 }
 
                 return listeners.Listeners;
-            });
+            },
+            $"Error attempting to describe Elastic Load Balancer listeners of '{loadBalancerArn}'");
         }
 
         public async Task<DescribeRuleResponse> DescribeCloudWatchRule(string ruleName)
@@ -300,7 +312,8 @@ namespace AWS.Deploy.Orchestration.Data
                 }
 
                 return rule;
-            });
+            },
+            $"Error attempting to describe CloudWatch rule '{ruleName}'");
         }
 
         public async Task<string> GetS3BucketLocation(string bucketName)
@@ -312,7 +325,8 @@ namespace AWS.Deploy.Orchestration.Data
 
             var s3Client = _awsClientFactory.GetAWSClient<IAmazonS3>();
 
-            var location = await HandleException(async () => await s3Client.GetBucketLocationAsync(bucketName));
+            var location = await HandleException(async () => await s3Client.GetBucketLocationAsync(bucketName),
+            $"Error attempting to retrieve S3 bucket location of '{bucketName}'");
 
             var region = "";
             if (location.Location.Equals(S3Region.USEast1))
@@ -329,7 +343,8 @@ namespace AWS.Deploy.Orchestration.Data
         {
             var s3Client = _awsClientFactory.GetAWSClient<IAmazonS3>();
 
-            var response = await HandleException(async () => await s3Client.GetBucketWebsiteAsync(bucketName));
+            var response = await HandleException(async () => await s3Client.GetBucketWebsiteAsync(bucketName),
+            $"Error attempting to retrieve S3 bucket website configuration of '{bucketName}'");
 
             return response.WebsiteConfiguration;
         }
@@ -357,7 +372,8 @@ namespace AWS.Deploy.Orchestration.Data
 
 
                 return await ecsClient.DescribeClustersAsync(request);
-            });
+            },
+            "Error attempting to list available ECS clusters");
 
             return clusters.Clusters;
         }
@@ -369,7 +385,8 @@ namespace AWS.Deploy.Orchestration.Data
             if (!string.IsNullOrEmpty(applicationName))
                 request.ApplicationNames = new List<string> { applicationName };
 
-            var applications = await HandleException(async () => await beanstalkClient.DescribeApplicationsAsync(request));
+            var applications = await HandleException(async () => await beanstalkClient.DescribeApplicationsAsync(request),
+            "Error attempting to list available Elastic Beanstalk applications");
             return applications.Applications;
         }
 
@@ -398,7 +415,8 @@ namespace AWS.Deploy.Orchestration.Data
                 } while (!string.IsNullOrEmpty(request.NextToken));
 
                 return environments;
-            });
+            },
+            "Error attempting to list available Elastic Beanstalk environments");
         }
 
         public async Task<List<Amazon.ElasticBeanstalk.Model.Tag>> ListElasticBeanstalkResourceTags(string resourceArn)
@@ -407,7 +425,8 @@ namespace AWS.Deploy.Orchestration.Data
             var response = await HandleException(async () => await beanstalkClient.ListTagsForResourceAsync(new Amazon.ElasticBeanstalk.Model.ListTagsForResourceRequest
             {
                 ResourceArn = resourceArn
-            }));
+            }),
+            $"Error attempting to list available Elastic Beanstalk resource tags of '{resourceArn}'");
 
             return response.ResourceTags;
         }
@@ -415,7 +434,8 @@ namespace AWS.Deploy.Orchestration.Data
         public async Task<List<KeyPairInfo>> ListOfEC2KeyPairs()
         {
             var ec2Client = _awsClientFactory.GetAWSClient<IAmazonEC2>();
-            var response = await HandleException(async () => await ec2Client.DescribeKeyPairsAsync());
+            var response = await HandleException(async () => await ec2Client.DescribeKeyPairsAsync(),
+            "Error attempting to list available EC2 key pairs");
 
             return response.KeyPairs;
         }
@@ -426,7 +446,8 @@ namespace AWS.Deploy.Orchestration.Data
 
             var request = new CreateKeyPairRequest { KeyName = keyName };
 
-            var response = await HandleException(async () => await ec2Client.CreateKeyPairAsync(request));
+            var response = await HandleException(async () => await ec2Client.CreateKeyPairAsync(request),
+            "Error attempting to create EC2 key pair");
 
             await File.WriteAllTextAsync(Path.Combine(saveLocation, $"{keyName}.pem"), response.KeyPair.KeyMaterial);
 
@@ -450,7 +471,8 @@ namespace AWS.Deploy.Orchestration.Data
                 }
 
                 return roles;
-            });
+            },
+            "Error attempting to list available IAM roles");
         }
 
         private static bool AssumeRoleServicePrincipalSelector(Role role, string? servicePrincipal)
@@ -469,7 +491,8 @@ namespace AWS.Deploy.Orchestration.Data
                 .Vpcs
                 .OrderByDescending(x => x.IsDefault)
                 .ThenBy(x => x.VpcId)
-                .ToListAsync());
+                .ToListAsync(),
+                "Error attempting to describe available VPCs");
         }
 
         public async Task<Vpc> GetDefaultVpc()
@@ -487,7 +510,8 @@ namespace AWS.Deploy.Orchestration.Data
                             }
                         }
                     })
-                .Vpcs.FirstOrDefaultAsync());
+                .Vpcs.FirstOrDefaultAsync(),
+                "Error attempting to retrieve the default VPC");
         }
 
         public async Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns(params BeanstalkPlatformType[]? platformTypes)
@@ -500,26 +524,27 @@ namespace AWS.Deploy.Orchestration.Data
 
             Func<string, Task<List<PlatformSummary>>> fetchPlatforms = async (platformName) =>
             {
-            var request = new ListPlatformVersionsRequest
-            {
-                Filters = new List<PlatformFilter>
+                var request = new ListPlatformVersionsRequest
                 {
-                    new PlatformFilter
+                    Filters = new List<PlatformFilter>
                     {
-                        Operator = "=",
-                        Type = "PlatformStatus",
-                        Values = { "Ready" }
-                        },
                         new PlatformFilter
                         {
-                            Operator = "contains",
-                            Type = "PlatformName",
-                            Values = { platformName }
+                            Operator = "=",
+                            Type = "PlatformStatus",
+                            Values = { "Ready" }
+                            },
+                            new PlatformFilter
+                            {
+                                Operator = "contains",
+                                Type = "PlatformName",
+                                Values = { platformName }
+                        }
                     }
-                }
-            };
+                };
 
-                var platforms = await HandleException(async () => (await beanstalkClient.Paginators.ListPlatformVersions(request).PlatformSummaryList.ToListAsync()));
+                var platforms = await HandleException(async () => (await beanstalkClient.Paginators.ListPlatformVersions(request).PlatformSummaryList.ToListAsync()),
+                "Error attempting to list available Elastic Beanstalk platform versions");
 
                 // Filter out old test platforms that only internal accounts would be able to see.
                 platforms = platforms.Where(x => !string.IsNullOrEmpty(x.PlatformBranchName)).ToList();
@@ -653,7 +678,8 @@ namespace AWS.Deploy.Orchestration.Data
         {
             var ecrClient = _awsClientFactory.GetAWSClient<IAmazonECR>();
 
-            var response = await HandleException(async () => await ecrClient.GetAuthorizationTokenAsync(new GetAuthorizationTokenRequest()));
+            var response = await HandleException(async () => await ecrClient.GetAuthorizationTokenAsync(new GetAuthorizationTokenRequest()),
+            "Error attempting to retrieve ECR authorization token");
 
             return response.AuthorizationData;
         }
@@ -679,7 +705,8 @@ namespace AWS.Deploy.Orchestration.Data
                 {
                     return new List<Repository>();
                 }
-            });
+            },
+            "Error attempting to list available ECR repositories");
         }
 
         public async Task<Repository> CreateECRRepository(string repositoryName)
@@ -691,7 +718,8 @@ namespace AWS.Deploy.Orchestration.Data
                 RepositoryName = repositoryName
             };
 
-            var response = await HandleException(async () => await ecrClient.CreateRepositoryAsync(request));
+            var response = await HandleException(async () => await ecrClient.CreateRepositoryAsync(request),
+            "Error attempting to create an ECR repository");
 
             return response.Repository;
         }
@@ -701,7 +729,8 @@ namespace AWS.Deploy.Orchestration.Data
             using var cloudFormationClient = _awsClientFactory.GetAWSClient<IAmazonCloudFormation>();
             return await HandleException(async () => await cloudFormationClient.Paginators
                 .DescribeStacks(new DescribeStacksRequest())
-                .Stacks.ToListAsync());
+                .Stacks.ToListAsync(),
+                "Error attempting to describe available CloudFormation stacks");
         }
 
         public async Task<Stack?> GetCloudFormationStack(string stackName)
@@ -720,7 +749,8 @@ namespace AWS.Deploy.Orchestration.Data
                 {
                     return null;
                 }
-            });
+            },
+            $"Error attempting to retrieve the CloudFormation stack '{stackName}'");
         }
 
         public async Task<GetCallerIdentityResponse> GetCallerIdentity(string awsRegion)
@@ -763,7 +793,8 @@ namespace AWS.Deploy.Orchestration.Data
                         $"We were unable to access the AWS region '{awsRegion}'. Make sure you have correct permissions for that region and the region is accessible.",
                         ex);
                 }
-            });
+            },
+            "Error attempting to retrieve the STS caller identity");
         }
 
         public async Task<List<Amazon.ElasticLoadBalancingV2.Model.LoadBalancer>> ListOfLoadBalancers(Amazon.ElasticLoadBalancingV2.LoadBalancerTypeEnum loadBalancerType)
@@ -775,7 +806,8 @@ namespace AWS.Deploy.Orchestration.Data
                 return await client.Paginators.DescribeLoadBalancers(new DescribeLoadBalancersRequest())
                     .LoadBalancers.Where(loadBalancer => loadBalancer.Type == loadBalancerType)
                     .ToListAsync();
-            });
+            },
+            "Error attempting to list available Elastic load balancers");
         }
 
         public async Task<Distribution> GetCloudFrontDistribution(string distributionId)
@@ -790,19 +822,22 @@ namespace AWS.Deploy.Orchestration.Data
                 });
 
                 return response.Distribution;
-            });
+            },
+            $"Error attempting to retrieve the CloudFront distribution '{distributionId}'");
         }
 
         public async Task<List<string>> ListOfDyanmoDBTables()
         {
             var client = _awsClientFactory.GetAWSClient<IAmazonDynamoDB>();
-            return await HandleException(async () => await client.Paginators.ListTables(new ListTablesRequest()).TableNames.ToListAsync());
+            return await HandleException(async () => await client.Paginators.ListTables(new ListTablesRequest()).TableNames.ToListAsync(),
+            "Error attempting to list available DynamoDB tables");
         }
 
         public async Task<List<string>> ListOfSQSQueuesUrls()
         {
             var client = _awsClientFactory.GetAWSClient<IAmazonSQS>();
-            return await HandleException(async () => await client.Paginators.ListQueues(new ListQueuesRequest()).QueueUrls.ToListAsync());
+            return await HandleException(async () => await client.Paginators.ListQueues(new ListQueuesRequest()).QueueUrls.ToListAsync(),
+            "Error attempting to list available SQS queue URLs");
         }
 
         public async Task<List<string>> ListOfSNSTopicArns()
@@ -811,13 +846,15 @@ namespace AWS.Deploy.Orchestration.Data
             return await HandleException(async () =>
             {
                 return await client.Paginators.ListTopics(new ListTopicsRequest()).Topics.Select(topic => topic.TopicArn).ToListAsync();
-            });
+            },
+            "Error attempting to list available SNS topics");
         }
 
         public async Task<List<Amazon.S3.Model.S3Bucket>> ListOfS3Buckets()
         {
             var client = _awsClientFactory.GetAWSClient<IAmazonS3>();
-            return await HandleException(async () => (await client.ListBucketsAsync()).Buckets.ToList());
+            return await HandleException(async () => (await client.ListBucketsAsync()).Buckets.ToList(),
+            "Error attempting to list available S3 buckets");
         }
 
         public async Task<List<ConfigurationOptionSetting>> GetBeanstalkEnvironmentConfigurationSettings(string environmentName)
@@ -836,7 +873,8 @@ namespace AWS.Deploy.Orchestration.Data
                 optionSetting.AddRange(response.ConfigurationSettings.SelectMany(settingDescription => settingDescription.OptionSettings));
 
                 return optionSetting;
-            });
+            },
+            $"Error attempting to retrieve Elastic Beanstalk environment configuration settings for '{environmentName}'");
         }
 
         public async Task<Repository> DescribeECRRepository(string respositoryName)
@@ -859,7 +897,8 @@ namespace AWS.Deploy.Orchestration.Data
                 }
 
                 return response.Repositories.First();
-            });
+            },
+            $"Error attempting to describe ECR repository '{respositoryName}'");
         }
 
         public async Task<string?> GetParameterStoreTextValue(string parameterName)
@@ -877,10 +916,11 @@ namespace AWS.Deploy.Orchestration.Data
                 {
                     return null;
                 }
-            });
+            },
+            $"Error attempting to retrieve SSM parameter store value of '{parameterName}'");
         }
 
-        private async Task<T> HandleException<T>(Func<Task<T>> action)
+        private async Task<T> HandleException<T>(Func<Task<T>> action, string exceptionMessage)
         {
             try
             {
@@ -889,9 +929,30 @@ namespace AWS.Deploy.Orchestration.Data
             catch (AmazonServiceException e)
             {
                 var messageBuilder = new StringBuilder();
-                if (!string.IsNullOrEmpty(e.ErrorCode))
+
+                var userMessage = string.Empty;
+                if (!string.IsNullOrEmpty(exceptionMessage))
                 {
-                    messageBuilder.AppendLine($"{e.ErrorCode}");
+                    if (!string.IsNullOrEmpty(e.ErrorCode))
+                    {
+                        userMessage += $"{exceptionMessage} ({e.ErrorCode}).";
+                    }
+                    else
+                    {
+                        userMessage += $"{exceptionMessage}.";
+                    }
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(e.ErrorCode))
+                    {
+                        userMessage += e.ErrorCode;
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(userMessage))
+                {
+                    messageBuilder.AppendLine(userMessage);
                 }
 
                 if (!string.IsNullOrEmpty(e.Message))

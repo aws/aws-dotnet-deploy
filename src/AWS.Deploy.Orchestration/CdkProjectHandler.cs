@@ -68,7 +68,9 @@ namespace AWS.Deploy.Orchestration
                     throw new InvalidOperationException($"{nameof(recommendation.Recipe.RecipePath)} cannot be null");
 
                 // The CDK deployment project is already saved in the same directory.
-                cdkProjectPath = _directoryManager.GetDirectoryInfo(recommendation.Recipe.RecipePath).Parent.FullName;
+                cdkProjectPath = _directoryManager.GetDirectoryInfo(recommendation.Recipe.RecipePath).Parent?.FullName;
+                if (string.IsNullOrEmpty(cdkProjectPath))
+                    throw new InvalidOperationException($"The CDK Project Path cannot be null.");
             }
             else
             {

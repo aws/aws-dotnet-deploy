@@ -41,6 +41,11 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
         public bool RedirectIO { get; set; }
 
         /// <summary>
+        /// Specifies the input that should be piped into standard input for the process.
+        /// </summary>
+        public string Stdin { get; set; }
+
+        /// <summary>
         /// The cancellation token for the async task.
         /// </summary>
         public CancellationToken CancelToken { get; set; }
@@ -56,6 +61,7 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
             bool streamOutputToInteractiveService = true,
             Action<TryRunResult> onComplete = null,
             bool redirectIO = true,
+            string stdin = null,
             IDictionary<string, string> environmentVariables = null,
             CancellationToken cancelToken = default,
             bool needAwsCredentials = false)
@@ -67,6 +73,7 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
                 StreamOutputToInteractiveService = streamOutputToInteractiveService,
                 OnCompleteAction = onComplete,
                 RedirectIO = redirectIO,
+                Stdin = stdin,
                 CancelToken = cancelToken
             });
 

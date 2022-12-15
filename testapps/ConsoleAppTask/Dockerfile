@@ -2,10 +2,10 @@
 # Dockerfile paths are adjusted to allow docker build from the root of the repository
 # This is required for integration tests
 
-FROM mcr.microsoft.com/dotnet/core/runtime:3.1-buster-slim AS base
+FROM mcr.microsoft.com/dotnet/runtime:6.0 AS base
 WORKDIR /app
 
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 COPY ["ConsoleAppTask.csproj", "ConsoleAppTask/"]
 RUN dotnet restore "ConsoleAppTask/ConsoleAppTask.csproj"

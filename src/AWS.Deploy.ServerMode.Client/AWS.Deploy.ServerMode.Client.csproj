@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <!-- The target framework is used by the toolkit and can only use netstandard2.0 -->
     <TargetFramework>netstandard2.0</TargetFramework>
     <Product>AWS .NET deployment tool Server Mode Client</Product>
     <Description>Package to access the APIs exposed by the deployment tool server mode. This package is not intended for direct usage.</Description>

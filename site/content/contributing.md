@@ -207,10 +207,11 @@ Material for MkDocs is a theme for MkDocs, a static site generator geared toward
 ```
 pip install mkdocs-material
 ```
+
 For, other installation options [see here](https://squidfunk.github.io/mkdocs-material/getting-started/)
 
 ### Deploying to a Local Server
-MkDocs comes with a built-in dev-server that lets you preview your documentation as you work on it. 
+MkDocs comes with a built-in dev-server that lets you preview your documentation as you work on it.
 
 From the root of the project repository, run the following command:
 ```

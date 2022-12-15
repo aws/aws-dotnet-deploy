@@ -154,8 +154,7 @@ namespace AWS.Deploy.CLI.UnitTests
         }
 
         [Theory]
-        [InlineData("BlazorWasm31")]
-        [InlineData("BlazorWasm50")]
+        [InlineData("BlazorWasm60")]
         public async Task BlazorWasmTest(string projectName)
         {
             var engine = await BuildRecommendationEngine(projectName);

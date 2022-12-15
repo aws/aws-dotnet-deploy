@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -42,6 +43,7 @@ namespace AWS.Deploy.CLI.Utilities
             bool streamOutputToInteractiveService = true,
             Action<TryRunResult>? onComplete = null,
             bool redirectIO = true,
+            string? stdin = null,
             IDictionary<string, string>? environmentVariables = null,
             CancellationToken cancelToken = default,
             bool needAwsCredentials = false)
@@ -58,7 +60,7 @@ namespace AWS.Deploy.CLI.Utilities
                         ? $"/c {command}"
                         : $"-c \"{command}\"",
 
-                RedirectStandardInput = redirectIO,
+                RedirectStandardInput = redirectIO || stdin != null,
                 RedirectStandardOutput = redirectIO,
                 RedirectStandardError = redirectIO,
                 UseShellExecute = false,
@@ -108,21 +110,13 @@ namespace AWS.Deploy.CLI.Utilities
                 process.BeginErrorReadLine();
             }
 
-            // poll for process to prevent blocking the main thread
-            // as opposed to using process.WaitForExit()
-            // in .net5 we can use process.WaitForExitAsync()
-            while (true)
+            if(stdin != null)
             {
-                if (process.HasExited)
-                {
-                    // In some cases, process might have exited but OutputDataReceived or ErrorDataReceived could still be writing
-                    // asynchronously, adding a delay should cover most of the cases.
-                    await Task.Delay(TimeSpan.FromSeconds(1), cancelToken);
-                    break;
-                }
-
-                await Task.Delay(TimeSpan.FromMilliseconds(50), cancelToken);
+                process.StandardInput.Write(stdin);
+                process.StandardInput.Close();
             }
+
+            await process.WaitForExitAsync();
 
             if (onComplete != null)
             {
