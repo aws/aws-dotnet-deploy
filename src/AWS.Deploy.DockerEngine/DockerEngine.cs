@@ -158,7 +158,7 @@ namespace AWS.Deploy.DockerEngine
                 sdkType = "Microsoft.NET.Sdk";
             }
 
-            var mappings = definitions.FirstOrDefault(x => x.SdkType.Equals(sdkType));
+            var mappings = definitions?.FirstOrDefault(x => x.SdkType.Equals(sdkType));
             if (mappings == null)
                 throw new UnsupportedProjectException(DeployToolErrorCode.NoValidDockerMappingForSdkType, $"The project with SDK Type {_project.SdkType} is not supported.");
 

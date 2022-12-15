@@ -116,21 +116,7 @@ namespace AWS.Deploy.CLI.Utilities
                 process.StandardInput.Close();
             }
 
-            // poll for process to prevent blocking the main thread
-            // as opposed to using process.WaitForExit()
-            // in .net5 we can use process.WaitForExitAsync()
-            while (true)
-            {
-                if (process.HasExited)
-                {
-                    // In some cases, process might have exited but OutputDataReceived or ErrorDataReceived could still be writing
-                    // asynchronously, adding a delay should cover most of the cases.
-                    await Task.Delay(TimeSpan.FromSeconds(1), cancelToken);
-                    break;
-                }
-
-                await Task.Delay(TimeSpan.FromMilliseconds(50), cancelToken);
-            }
+            await process.WaitForExitAsync();
 
             if (onComplete != null)
             {

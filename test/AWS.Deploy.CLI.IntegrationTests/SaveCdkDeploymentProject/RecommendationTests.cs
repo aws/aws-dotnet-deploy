@@ -219,7 +219,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             // ARRANGE
             var tempDirectoryPath = new TestAppManager().GetProjectPath(string.Empty);
             var webAppWithDockerFilePath = Path.Combine(tempDirectoryPath, "testapps", "WebAppWithDockerFile");
-            var blazorAppPath = Path.Combine(tempDirectoryPath, "testapps", "BlazorWasm50");
+            var blazorAppPath = Path.Combine(tempDirectoryPath, "testapps", "BlazorWasm60");
             var orchestrator = await GetOrchestrator(blazorAppPath);
             await _commandLineWrapper.Run("git init", tempDirectoryPath);
 

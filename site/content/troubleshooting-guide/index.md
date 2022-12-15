@@ -30,7 +30,7 @@ For example:
 ```xml
 <Project Sdk="Microsoft.NET.Sdk.Web">
 	<PropertyGroup>
-		<TargetFrameworkVersion>net5.0</TargetFrameworkVersion>
+		<TargetFrameworkVersion>net6.0</TargetFrameworkVersion>
 		<TargetFramework>$(TargetFrameworkVersion)</TargetFramework>
 	</PropertyGroup>
 </Project>

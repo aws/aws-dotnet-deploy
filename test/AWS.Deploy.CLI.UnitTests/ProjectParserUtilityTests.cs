@@ -26,8 +26,7 @@ namespace AWS.Deploy.CLI.UnitTests
         [InlineData("MessageProcessingApp", "MessageProcessingApp.csproj")]
         [InlineData("ContosoUniversityBackendService", "ContosoUniversityBackendService.csproj")]
         [InlineData("ContosoUniversityWeb", "ContosoUniversity.csproj")]
-        [InlineData("BlazorWasm31", "BlazorWasm31.csproj")]
-        [InlineData("BlazorWasm50", "BlazorWasm50.csproj")]
+        [InlineData("BlazorWasm60", "BlazorWasm60.csproj")]
         public async Task ParseProjectDefinitionWithRelativeProjectPath(string projectName, string csprojName)
         {
             //Arrange
@@ -57,8 +56,7 @@ namespace AWS.Deploy.CLI.UnitTests
         [InlineData("MessageProcessingApp", "MessageProcessingApp.csproj")]
         [InlineData("ContosoUniversityBackendService", "ContosoUniversityBackendService.csproj")]
         [InlineData("ContosoUniversityWeb", "ContosoUniversity.csproj")]
-        [InlineData("BlazorWasm31", "BlazorWasm31.csproj")]
-        [InlineData("BlazorWasm50", "BlazorWasm50.csproj")]
+        [InlineData("BlazorWasm60", "BlazorWasm60.csproj")]
         public async Task ParseProjectDefinitionWithAbsoluteProjectPath(string projectName, string csprojName)
         {
             //Arrange

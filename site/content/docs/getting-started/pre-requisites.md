@@ -9,12 +9,12 @@ To run the AWS Deploy Tool, you need the following pre-requisites set up in your
 
   > Note: You need to make sure to add the appropriate AWS permissions to your credentials’ profile / assumed role. See [Setting up Credentials](setup-creds.md)
 
-#### .NET Core 3.1 or later
-* .NET CLI - the deployment tool can be  used from the .NET command-line interface (CLI) - a cross-platform toolchain for developing, building, running, and publishing .NET applications.
+#### .NET 6 or later
+* .NET CLI - the deployment tool can be used from the .NET command-line interface (CLI) - a cross-platform toolchain for developing, building, running, and publishing .NET applications.
 
 * The .NET CLI is included with the [.NET SDK](https://docs.microsoft.com/en-us/dotnet/core/sdk). For information about how to install or update .NET, see [https://dotnet.microsoft.com/](https://dotnet.microsoft.com/).
 
-* The application you are deploying must be built from .NET Core 3.1 or later (for example, .NET Core 3.1, .NET 5.0, .NET 6.0). To see what version you have, run the following on the command prompt or in a terminal:
+* The deployment tool requires .NET 6 or later to be installed. However, the deployment tool supports deploying applications built using .NET Core 3.1 or later (for example, .NET Core 3.1, .NET 5.0, .NET 6.0, .NET 7). To see what version you have, run the following on the command prompt or in a terminal:
 
 ```
 dotnet --version

@@ -225,7 +225,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
 
         [Theory]
         [InlineData("", true)]
-        [InlineData("--no-restore --nologo --framework net5.0", true)]
+        [InlineData("--no-restore --nologo --framework net6.0", true)]
         [InlineData("-o dir", false)]                   // -o or --output is reserved by the deploy tool
         [InlineData("--output dir", false)]
         [InlineData("-c Release", false)]               // -c or --configuration is controlled by DotnetPublishBuildConfiguration instead
