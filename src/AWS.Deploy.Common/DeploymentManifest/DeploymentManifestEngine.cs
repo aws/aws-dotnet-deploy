@@ -49,7 +49,7 @@ namespace AWS.Deploy.Common.DeploymentManifest
                     return;
 
                 var deploymentManifestFilePath = GetDeploymentManifestFilePath(targetApplicationFullPath);
-                var targetApplicationDirectoryPath = _directoryManager.GetDirectoryInfo(targetApplicationFullPath).Parent.FullName;
+                var targetApplicationDirectoryPath = _directoryManager.GetDirectoryInfo(targetApplicationFullPath).Parent?.FullName ?? string.Empty;
                 var saveCdkDirectoryRelativePath = _directoryManager.GetRelativePath(targetApplicationDirectoryPath, saveCdkDirectoryFullPath);
 
                 DeploymentManifestModel deploymentManifestModel;
@@ -92,7 +92,7 @@ namespace AWS.Deploy.Common.DeploymentManifest
         {
             var recipeDefinitionPaths = new List<string>();
             var deploymentManifestFilePath = GetDeploymentManifestFilePath(targetApplicationFullPath);
-            var targetApplicationDirectoryPath = _directoryManager.GetDirectoryInfo(targetApplicationFullPath).Parent.FullName;
+            var targetApplicationDirectoryPath = _directoryManager.GetDirectoryInfo(targetApplicationFullPath).Parent?.FullName ?? string.Empty;
 
             if (_fileManager.Exists(deploymentManifestFilePath))
             {
@@ -144,7 +144,7 @@ namespace AWS.Deploy.Common.DeploymentManifest
         /// <returns>The path to the deployment-manifest file.</returns>
         private string GetDeploymentManifestFilePath(string targetApplicationFullPath)
         {
-            var projectDirectoryFullPath = _directoryManager.GetDirectoryInfo(targetApplicationFullPath).Parent.FullName;
+            var projectDirectoryFullPath = _directoryManager.GetDirectoryInfo(targetApplicationFullPath).Parent?.FullName ?? string.Empty;
             var deploymentManifestFileFullPath = Path.Combine(projectDirectoryFullPath, DEPLOYMENT_MANIFEST_FILE_NAME);
             return deploymentManifestFileFullPath;
         }

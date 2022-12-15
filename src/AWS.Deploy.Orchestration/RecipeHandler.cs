@@ -135,7 +135,7 @@ namespace AWS.Deploy.Orchestration
         {
             var targetApplicationFullPath = new DirectoryInfo(projectDefinition.ProjectPath).FullName;
             var solutionDirectoryPath = !string.IsNullOrEmpty(projectDefinition.ProjectSolutionPath) ?
-                new DirectoryInfo(projectDefinition.ProjectSolutionPath).Parent.FullName : string.Empty;
+                new DirectoryInfo(projectDefinition.ProjectSolutionPath).Parent?.FullName ?? string.Empty : string.Empty;
 
             return await LocateCustomRecipePaths(targetApplicationFullPath, solutionDirectoryPath);
         }
@@ -217,7 +217,7 @@ namespace AWS.Deploy.Orchestration
         /// <returns>A list of recipe definition paths.</returns>
         private List<string> LocateAlternateRecipePaths(string targetApplicationFullPath, string solutionDirectoryPath)
         {
-            var targetApplicationDirectoryPath = _directoryManager.GetDirectoryInfo(targetApplicationFullPath).Parent.FullName;
+            var targetApplicationDirectoryPath = _directoryManager.GetDirectoryInfo(targetApplicationFullPath).Parent?.FullName ?? string.Empty;
             var fileSystemRootPath = _directoryManager.GetDirectoryInfo(targetApplicationDirectoryPath).Root.FullName;
             var rootDirectoryPath = GetSourceControlRootDirectory(targetApplicationDirectoryPath);
 
@@ -253,7 +253,10 @@ namespace AWS.Deploy.Orchestration
                 {
                     if (recipeFilePath.Contains(_ignorePathSubstring))
                         continue;
-                    recipePaths.Add(_directoryManager.GetDirectoryInfo(recipeFilePath).Parent.FullName);
+                    var directoryParent = _directoryManager.GetDirectoryInfo(recipeFilePath).Parent?.FullName;
+                    if (string.IsNullOrEmpty(directoryParent))
+                        continue;
+                    recipePaths.Add(directoryParent);
                 }
             }
             return recipePaths;

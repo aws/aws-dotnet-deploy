@@ -341,8 +341,6 @@ Copyright (c) 2016 .NET Foundation
 Copyright (c) 2016 .NET Foundation
 ** Microsoft.TemplateEngine.Orchestrator.RunnableProjects; version 5.0.1 -- https://www.nuget.org/packages/Microsoft.TemplateEngine.Orchestrator.RunnableProjects
 Copyright (c) 2016 .NET Foundation
-** Microsoft.Extensions.Configuration.Json; version 3.1.7 -- https://www.nuget.org/packages/Microsoft.Bcl.AsyncInterhttps://www.nuget.org/packages/Microsoft.Extensions.Configuration.Jsonfaces
-Copyright (c) .NET Foundation and Contributors
 ** Microsoft.Extensions.DependencyInjection; version 6.0.0 -- https://www.nuget.org/packages/Microsoft.Extensions.DependencyInjection
 Copyright (c) .NET Foundation and Contributors
 **  Microsoft.Extensions.DependencyInjection.Abstractions; version 6.0.0 -- https://www.nuget.org/packages/Microsoft.Extensions.DependencyInjection.Abstractions
@@ -352,6 +350,8 @@ Copyright (c) .NET Foundation and Contributors
 ** Microsoft.OpenApi; version 1.2.3 -- https://www.nuget.org/packages/Microsoft.OpenApi/
 Copyright (c) Microsoft Corporation.
 ** System.Text.Json; version 6.0.4 -- https://www.nuget.org/packages/System.Text.Json
+Copyright (c) .NET Foundation and Contributors
+** Microsoft.Extensions.Configuration.Json; version 6.0.0 -- https://www.nuget.org/packages/Microsoft.Bcl.AsyncInterhttps://www.nuget.org/packages/Microsoft.Extensions.Configuration.Jsonfaces
 Copyright (c) .NET Foundation and Contributors
  
 All rights reserved.

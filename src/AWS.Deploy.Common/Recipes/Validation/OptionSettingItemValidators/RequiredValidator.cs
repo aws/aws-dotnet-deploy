@@ -19,11 +19,11 @@ namespace AWS.Deploy.Common.Recipes.Validation
         public Task<ValidationResult> Validate(object input, Recommendation recommendation, OptionSettingItem optionSettingItem)
         {
             var message = ValidationFailedMessage.Replace("{{OptionSetting}}", optionSettingItem.Name);
-            if (input?.TryDeserialize<SortedSet<string>>(out var inputList) ?? false)
+            if (input?.TryDeserialize<SortedSet<string>>(out var inputList) ?? false && inputList != null)
             {
                 return Task.FromResult<ValidationResult>(new()
                 {
-                    IsValid = inputList.Any(),
+                    IsValid = inputList!.Any(),
                     ValidationFailedMessage = message
                 });
             }

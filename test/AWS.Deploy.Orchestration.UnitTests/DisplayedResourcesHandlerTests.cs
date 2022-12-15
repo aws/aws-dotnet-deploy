@@ -135,7 +135,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
         [Fact]
         public async Task GetDeploymentOutputs_S3BucketWithWebSiteConfig()
         {
-            var engine = await BuildRecommendationEngine("BlazorWasm31");
+            var engine = await BuildRecommendationEngine("BlazorWasm60");
             var recommendations = await engine.ComputeRecommendations();
             var recommendation = recommendations.First(r => r.Recipe.Id.Equals("BlazorWasm"));
 
@@ -162,7 +162,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
         [Fact]
         public async Task GetDeploymentOutputs_S3BucketWithoutWebSiteConfig()
         {
-            var engine = await BuildRecommendationEngine("BlazorWasm31");
+            var engine = await BuildRecommendationEngine("BlazorWasm60");
             var recommendations = await engine.ComputeRecommendations();
             var recommendation = recommendations.First(r => r.Recipe.Id.Equals("BlazorWasm"));
 
@@ -186,7 +186,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
         [Fact]
         public async Task GetDeploymentOutputs_CloudFrontDistribution()
         {
-            var engine = await BuildRecommendationEngine("BlazorWasm31");
+            var engine = await BuildRecommendationEngine("BlazorWasm60");
             var recommendations = await engine.ComputeRecommendations();
             var recommendation = recommendations.First(r => r.Recipe.Id.Equals("BlazorWasm"));
 
