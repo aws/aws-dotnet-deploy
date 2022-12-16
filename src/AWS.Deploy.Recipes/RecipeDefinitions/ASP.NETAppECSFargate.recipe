@@ -382,6 +382,13 @@
                         "AllowEmptyString": true,
                         "ValidationFailedMessage": "Invalid Security Group ID. The Security Group ID must start with the \"sg-\" prefix, followed by either 8 or 17 characters consisting of digits and letters(lower-case) from a to f. For example sg-abc88de9 is a valid Security Group ID."
                     }
+                },
+                {
+                    "ValidatorType": "SecurityGroupsInVpc",
+                    "Configuration": {
+                        "VpcId": "Vpc.VpcId",
+                        "IsDefaultVpcOptionSettingId": "Vpc.IsDefault"
+                    }
                 }
             ]
         },
