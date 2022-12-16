@@ -17,6 +17,7 @@ using Xunit;
 using ResourceNotFoundException = Amazon.CloudControlApi.Model.ResourceNotFoundException;
 using Task = System.Threading.Tasks.Task;
 using System.Collections.Generic;
+using Amazon.EC2.Model;
 
 namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
 {
@@ -292,6 +293,48 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             await Validate(optionSettingItem, Path.Join("C:", "other_project"), false);
         }
 
+        /// <summary>
+        /// Tests the relationship between an explicit VPC ID, whether "Default VPC" is checked,
+        /// and any security groups that are specified.
+        /// </summary>
+        /// <param name="vpcId">selected VPC Id</param>
+        /// <param name="isDefaultVpcSelected">whether the "Default VPC" radio is selected</param>
+        /// <param name="selectedSecurityGroups">selected security groups</param>
+        /// <param name="isValid">Whether or not the test case is expected to be valid</param>
+        [Theory]
+        // The Console Service recipe uses a comma-seperated string of security groups
+        [InlineData("vpc1", true, "", true)]                // Valid because the security groups are optional
+        [InlineData("vpc1", true, "sg-1a,sg-1b", true)]     // Valid because the security group does belong to the default VPC
+        [InlineData("vpc1", true, "sg-1a,sg-2a", false)]    // Invalid because the security group does not belong to the default VPC
+        [InlineData("vpc2", false, "sg-2a", true)]          // Valid because the security group does belong to the non-default VPC
+        [InlineData("vpc2", false, "sg-1a", false)]         // Invalid because the security group does not belong to the non-default VPC
+        [InlineData("vpc2", true, "sg-1a", true)]           // Valid because "true" for IsDefaultVPC overrides the "vpc2", so the security group matches
+        [InlineData("vpc2", true, "sg-2a", false)]          // Invalid because "true" for IsDefaultVPC overrides the "vpc2", so the security group does not match
+        //
+        // The ASP.NET on Fargate recipe uses a JSON list of security groups (these are same cases from above)
+        //
+        [InlineData("vpc1", true, "[]", true)]
+        [InlineData("vpc1", true, "[\"sg-1a\",\"sg-1b\"]", true)]
+        [InlineData("vpc1", true, "[\"sg-1a\",\"sg-2a\"]", false)]
+        [InlineData("vpc2", false, "[\"sg-2a\"]", true)]
+        [InlineData("vpc2", false, "[\"sg-1a\"]", false)]
+        [InlineData("vpc2", true, "[\"sg-1a\"]", true)]
+        [InlineData("vpc2", true, "[\"sg-2a\"]", false)]
+
+        public async Task VpcId_DefaultVpc_SecurityGroups_Relationship(string vpcId, bool isDefaultVpcSelected, object selectedSecurityGroups, bool isValid)
+        {
+            PrepareMockVPCsAndSecurityGroups(_awsResourceQueryer);
+
+            var (vpcIdOption, vpcDefaultOption, securityGroupsOption) = PrepareECSVpcOptions();
+
+            securityGroupsOption.Validators.Add(GetSecurityGroupsInVpcValidatorConfig(_awsResourceQueryer, _optionSettingHandler));
+
+            await _optionSettingHandler.SetOptionSettingValue(_recommendation, vpcIdOption, vpcId);
+            await _optionSettingHandler.SetOptionSettingValue(_recommendation, vpcDefaultOption, isDefaultVpcSelected);
+
+            await Validate(securityGroupsOption, selectedSecurityGroups, isValid);
+        }
+
         private OptionSettingItemValidatorConfig GetRegexValidatorConfig(string regex)
         {
             var regexValidatorConfig = new OptionSettingItemValidatorConfig
@@ -386,6 +429,70 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
                 exception.ShouldBeNull();
             else
                 exception.ShouldNotBeNull();
+        }
+
+        /// <summary>
+        /// Prepares a <see cref="SecurityGroupsInVpcValidator"/> for testing
+        /// </summary>
+        private OptionSettingItemValidatorConfig GetSecurityGroupsInVpcValidatorConfig(Mock<IAWSResourceQueryer> awsResourceQueryer, IOptionSettingHandler optionSettingHandler)
+        {
+            var validator = new SecurityGroupsInVpcValidator(awsResourceQueryer.Object, optionSettingHandler);
+            validator.VpcId = "Vpc.VpcId";
+            validator.IsDefaultVpcOptionSettingId = "Vpc.IsDefault";
+
+            return new OptionSettingItemValidatorConfig
+            {
+                ValidatorType = OptionSettingItemValidatorList.SecurityGroupsInVpc,
+                Configuration = validator
+            };
+        }
+
+        /// <summary>
+        /// Mocks the provided <see cref="IAWSResourceQueryer"> to return the following
+        ///   1. Default vpc1 with security groups sg-1a and sg-1b
+        ///   2. Non-default vpc2 with security groups sg-2a and sg-2b
+        /// </summary>
+        /// <param name="awsResourceQueryer">Mocked AWS Resource Queryer</param>
+        private void PrepareMockVPCsAndSecurityGroups(Mock<IAWSResourceQueryer> awsResourceQueryer)
+        {
+            awsResourceQueryer.Setup(x => x.GetListOfVpcs()).ReturnsAsync(
+                new List<Vpc> {
+                    new Vpc { VpcId = "vpc1", IsDefault = true },
+                    new Vpc { VpcId = "vpc2"}
+                });
+
+            awsResourceQueryer.Setup(x => x.DescribeSecurityGroups("vpc1")).ReturnsAsync(
+                new List<SecurityGroup> {
+                    new SecurityGroup { GroupId = "sg-1a", VpcId  = "vpc1" },
+                    new SecurityGroup { GroupId = "sg-1b", VpcId  = "vpc1" }
+                });
+
+            awsResourceQueryer.Setup(x => x.DescribeSecurityGroups("vpc2")).ReturnsAsync(
+                new List<SecurityGroup> {
+                    new SecurityGroup { GroupId = "sg-2a", VpcId  = "vpc2" },
+                    new SecurityGroup { GroupId = "sg-2a", VpcId  = "vpc2" }
+                });
+
+            awsResourceQueryer.Setup(x => x.GetDefaultVpc()).ReturnsAsync(new Vpc { VpcId = "vpc1", IsDefault = true });
+        }
+
+        /// <summary>
+        /// Prepares VPC-related options that match the ECS Fargate recipes for testing
+        /// </summary>
+        /// <returns>The "Vpc.VpcId" option, the "Vpc.IsDefault" option, and the "ECSServiceSecurityGroups" option</returns>
+        private (OptionSettingItem, OptionSettingItem, OptionSettingItem) PrepareECSVpcOptions()
+        {
+            var vpcIdOption = new OptionSettingItem("VpcId", "Vpc.VpcId", "name", "description");
+            var vpcDefaultOption = new OptionSettingItem("IsDefault", "Vpc.IsDefault", "name", "description");
+            var ecsServiceSecurityGroupsOption = new OptionSettingItem("ECSServiceSecurityGroups", "ECSServiceSecurityGroups", "name", "");
+
+            var vpc = new OptionSettingItem("Vpc", "Vpc", "", "");
+            vpc.ChildOptionSettings.Add(vpcIdOption);
+            vpc.ChildOptionSettings.Add(vpcDefaultOption);
+
+            _recipe.OptionSettings.Add(vpc);
+
+            return (vpcIdOption, vpcDefaultOption, ecsServiceSecurityGroupsOption);
         }
     }
 }

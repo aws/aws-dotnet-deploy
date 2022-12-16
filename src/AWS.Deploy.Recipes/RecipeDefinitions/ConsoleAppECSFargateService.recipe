@@ -422,7 +422,16 @@
             "Type": "String",
             "DefaultValue": "",
             "AdvancedSetting": true,
-            "Updatable": true
+            "Updatable": true,
+            "Validators": [
+                {
+                    "ValidatorType": "SecurityGroupsInVpc",
+                    "Configuration": {
+                        "VpcId": "Vpc.VpcId",
+                        "IsDefaultVpcOptionSettingId": "Vpc.IsDefault"
+                    }
+                }
+            ]
         },
         {
             "Id": "TaskCpu",
