@@ -20,10 +20,10 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
 
         public IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = default)
         {
-            return new MockAsyncEnumerator<T>(_data);
+            return new MockAsyncEnumerator(_data);
         }
 
-        class MockAsyncEnumerator<T> : IAsyncEnumerator<T>
+        class MockAsyncEnumerator : IAsyncEnumerator<T>
         {
             readonly T[] _data;
             int _position;
