@@ -449,6 +449,8 @@ namespace AWS.Deploy.Orchestration.Data
             var response = await HandleException(async () => await ec2Client.CreateKeyPairAsync(request),
             "Error attempting to create EC2 key pair");
 
+            // We're creating the key pair at a user-defined location, and want to support relative paths
+            // nosemgrep: csharp.lang.security.filesystem.unsafe-path-combine.unsafe-path-combine
             await File.WriteAllTextAsync(Path.Combine(saveLocation, $"{keyName}.pem"), response.KeyPair.KeyMaterial);
 
             return response.KeyPair.KeyName;
