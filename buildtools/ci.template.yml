@@ -1,4 +1,8 @@
 Parameters:
+  MainAWSAccountId:
+    Type: String
+    Default: ""
+    Description: The Account ID of the Main account containing the Lambda function that will trigger the CI CodeBuild project.
   GitHubOrg:
     Type: String
     Default: "aws"
@@ -15,12 +19,8 @@ Parameters:
     Description: Name of the CodeBuild project.
     Default: "aws-dotnet-deploy-ci"
     Type: String
-  TestRunnerRoleArn:
-    Description: Role to assume when running tests.  This role must already exsit.  Role can be a different account.  Example arn:aws:iam:112233445566::role/awsdotnet-deploy-ci-test-runner
-    Default: ""
-    Type: String
-  OidcRoleRoleName:
-    Description: Name of the role to use for the OIDC provider.
+  TestRunnerTrustRoleName:
+    Description: Name of the role to allow GitHub to execute CodeBuild jobs.
     Default: "aws-dotnet-deploy-ci-role"
     Type: String
 
@@ -31,12 +31,17 @@ Conditions:
     - ""
 
 Resources:
-  OidcRole:
+  TestRunnerTrustRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Ref OidcRoleRoleName
+      RoleName: !Ref TestRunnerTrustRoleName
+      MaxSessionDuration: 7200
       AssumeRolePolicyDocument:
         Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${MainAWSAccountId}:root
+            Action: sts:AssumeRole
           - Effect: Allow
             Action: sts:AssumeRoleWithWebIdentity
             Principal:
@@ -56,6 +61,8 @@ Resources:
                 Action:
                   - codebuild:StartBuild
                   - codebuild:BatchGetBuilds
+                  - codebuild:BatchGetProjects
+                  - codebuild:ListBuildsForProject
                 Resource:
                   - !Sub arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${CodeBuildProjectName}
               - Effect: Allow
@@ -63,6 +70,11 @@ Resources:
                   - logs:GetLogEvents
                 Resource:
                   - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${CodeBuildProjectName}:*
+              - Effect: Allow
+                Action:
+                  - sts:GetCallerIdentity
+                Resource: 
+                  - '*'
 
   GithubOidc:
     Type: AWS::IAM::OIDCProvider
@@ -86,10 +98,6 @@ Resources:
         Type: LINUX_CONTAINER
         ImagePullCredentialsType: CODEBUILD
         Image: aws/codebuild/standard:5.0
-        EnvironmentVariables:
-        - Name: TEST_RUNNER_ROLE_ARN
-          Type: PLAINTEXT
-          Value: !Ref TestRunnerRoleArn
       Source:
         Type: GITHUB
         Location: !Sub https://github.com/${GitHubOrg}/${GitHubRepositoryName}
@@ -102,6 +110,7 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       RoleName: !Sub ${CodeBuildProjectName}-codebuild-service-role
+      MaxSessionDuration: 7200
       AssumeRolePolicyDocument:
         Statement:
         - Action: ['sts:AssumeRole']
@@ -116,30 +125,13 @@ Resources:
             Version: '2012-10-17'
             Statement:
               - Action:
-                - 'logs:CreateLogGroup'
-                - 'logs:PutLogEvents'
-                - 'logs:CreateLogStream'
+                - '*'
                 Effect: Allow
                 Resource:
-                  - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${CodeBuildProjectName}"
-                  - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${CodeBuildProjectName}:*"
-              - Action:
-                - 'sts:AssumeRole'
-                Effect: Allow
-                Resource:
-                  - !Ref TestRunnerRoleArn
-              - Action:
-                - codebuild:BatchPutTestCases
-                - codebuild:CreateReport
-                - codebuild:CreateReportGroup
-                - codebuild:UpdateReport
-                - codebuild:UpdateReportGroup
-                Effect: Allow
-                Resource:
-                  - !Sub arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:report-group/*
+                  - '*'
 
 Outputs:
-  OidcRole:
-    Value: !GetAtt OidcRole.Arn
+  TestRunnerTrustRole:
+    Value: !GetAtt TestRunnerTrustRole.Arn
   CodeBuildProjectName:
     Value: !Sub ${CodeBuildProjectName}
