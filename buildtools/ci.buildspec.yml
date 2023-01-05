@@ -10,24 +10,12 @@ phases:
       - export PATH="$PATH:$HOME/.dotnet"
   pre_build:
     commands:
-      - export ORIGINAL_AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-      - export ORIGINAL_AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-      - export ORIGINAL_AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN
       - export DOTNET_CLI_TELEMETRY_OPTOUT=1
-      - eval $(aws sts assume-role --role-arn arn:aws:iam::610240510716:role/aws-dotnet-deploy-ci-test-runner --role-session-name test | jq -r '.Credentials | "export AWS_ACCESS_KEY_ID=\(.AccessKeyId)\nexport AWS_SECRET_ACCESS_KEY=\(.SecretAccessKey)\nexport AWS_SESSION_TOKEN=\(.SessionToken)\n"')
 
   build:
     commands:
       - dotnet build AWS.Deploy.sln -c Release
       - dotnet test AWS.Deploy.sln -c Release --no-build --logger trx --results-directory ./testresults
-  post_build:
-    commands:
-      - export AWS_ACCESS_KEY_ID=${ORIGINAL_AWS_ACCESS_KEY_ID}
-      - export AWS_SECRET_ACCESS_KEY=${ORIGINAL_AWS_SECRET_ACCESS_KEY}
-      - export AWS_SESSION_TOKEN=${ORIGINAL_AWS_SESSION_TOKEN}
-      - unset ORIGINAL_AWS_ACCESS_KEY_ID
-      - unset ORIGINAL_AWS_SECRET_ACCESS_KEY
-      - unset ORIGINAL_AWS_SESSION_TOKEN
 reports:
     aws-dotnet-deploy-tests:
         file-format: VisualStudioTrx

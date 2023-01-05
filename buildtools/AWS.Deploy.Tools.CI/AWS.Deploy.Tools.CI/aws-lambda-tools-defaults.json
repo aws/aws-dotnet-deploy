@@ -1,0 +1,5 @@
+{
+    "template" : "serverless.template",
+    "stack-name" : "AWS-Deploy-Tools-CI",
+    "template-parameters" : "\"GitHubOrg\"=\"aws\";\"GitHubRepositoryName\"=\"aws-dotnet-deploy\""
+}
