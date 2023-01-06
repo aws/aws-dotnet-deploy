@@ -1,6 +1,6 @@
 # Integrating with CI/CD
 
-You can use AWS Deploy Tool when developing your app using any Continuous Deployment system. Continuous Deployment systems let you automatically build, test and deploy your application each time you check in updates to your source code. Before you can use AWS Deploy Tool in your CD pipeline, you must have [required pre-requisites](../docs/getting-started/pre-requisites.md) installed and configured in the CD environment.
+You can use AWS Deploy Tool when developing your app using any Continuous Deployment system. Continuous Deployment systems let you automatically build, test and deploy your application each time you check in updates to your source code. Before you can use AWS Deploy Tool in your CD pipeline, you must have [required pre-requisites](../../docs/getting-started/pre-requisites.md) installed and configured in the CD environment.
 
 ### Suppressing prompts with `--silent`
 
@@ -49,10 +49,10 @@ This will create a JSON file at `MyWebApplication/MyWebApplication/deploymentset
 
 ```json
 {
-      "AWSProfile": <AWS_PROFILE>
+      "AWSProfile": <AWS_PROFILE>,
       "AWSRegion": <AWS_REGION>,
       "ApplicationName": <APPLICATION_NAME>,
-      "RecipeId": <RECIPE_ID>
+      "RecipeId": <RECIPE_ID>,
       "Settings": <JSON_BLOB>
 }
 ```
@@ -66,6 +66,8 @@ This will create a JSON file at `MyWebApplication/MyWebApplication/deploymentset
 * _**RecipeId**_: The recipe identifier that was used to deploy your application to AWS.
 
 * _**Settings**_: This is a JSON blob that stores the values of all available settings that can be tweaked to adjust the deployment configuration.
+
+For more info on how to create your own `Deployment settings file`, go to [Creating a deployment settings file](deployment-settings-file.md)
 
 ### Invoking from CI/CD
 

@@ -13,7 +13,7 @@ AWS Deploy Tool has the following capabilities:
 * **Help with learning AWS CDK for .NET!** - Gradually learn the underlying AWS tools that AWS Deploy Tool for .NET is built on, such as the AWS CDK.
 
 ### Availability
-####... in .NET CLI
+#### ... in .NET CLI
 
 AWS Deploy Tool for .NET is available for download as a NuGet package. See [How to install](docs/getting-started/installation.md) section.
 

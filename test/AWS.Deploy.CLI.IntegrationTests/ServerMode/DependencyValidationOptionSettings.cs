@@ -15,6 +15,7 @@ using AWS.Deploy.CLI.Extensions;
 using AWS.Deploy.CLI.IntegrationTests.Extensions;
 using AWS.Deploy.CLI.IntegrationTests.Utilities;
 using AWS.Deploy.ServerMode.Client;
+using AWS.Deploy.ServerMode.Client.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -50,7 +51,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
 
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
             var portNumber = 4022;
-            using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ServerModeExtensions.ResolveCredentials);
+            using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ServerModeUtilities.ResolveDefaultCredentials);
 
             var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
             var cancelSource = new CancellationTokenSource();
@@ -61,7 +62,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
                 var baseUrl = $"http://localhost:{portNumber}/";
                 var restClient = new RestAPIClient(baseUrl, httpClient);
 
-                await restClient.WaitTillServerModeReady();
+                await restClient.WaitUntilServerModeReady();
 
                 var sessionId = await restClient.StartDeploymentSession(projectPath, _awsRegion);
 
@@ -141,7 +142,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
 
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
             var portNumber = 4022;
-            using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ServerModeExtensions.ResolveCredentials);
+            using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ServerModeUtilities.ResolveDefaultCredentials);
 
             var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
             var cancelSource = new CancellationTokenSource();
@@ -152,7 +153,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
                 var baseUrl = $"http://localhost:{portNumber}/";
                 var restClient = new RestAPIClient(baseUrl, httpClient);
 
-                await restClient.WaitTillServerModeReady();
+                await restClient.WaitUntilServerModeReady();
 
                 var sessionId = await restClient.StartDeploymentSession(projectPath, _awsRegion);
 

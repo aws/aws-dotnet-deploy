@@ -1,0 +1,52 @@
+name: Detect Doc Generator Changes
+
+on: [pull_request]
+
+permissions:
+  id-token: write
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        role-to-assume: ${{ secrets.CI_AWS_ROLE_ARN }}
+        role-duration-seconds: 7200
+        aws-region: us-west-2
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: '0'
+    - name: Setup .NET Core 6.0
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --no-restore
+    - name: Run Client Generator
+      run: |
+        cd ./src/AWS.Deploy.DocGenerator
+        dotnet run --project ./AWS.Deploy.DocGenerator.csproj
+    - name: Check For Git Untracked Changes
+      id: gitcheck
+      shell: pwsh
+      run: |
+        $newFiles=$(git ls-files --others --exclude-standard | wc -l)
+        $modifiedFiles=$(git diff --name-only | wc -l)
+        "newFiles=$newFiles" >> $env:GITHUB_OUTPUT
+        "modifiedFiles=$modifiedFiles" >> $env:GITHUB_OUTPUT
+    - name: Fail If New Files Detected
+      if: steps.gitcheck.outputs.newFiles != 0
+      run: |
+        echo "New files have been generated after running 'AWS.Deploy.DocGenerator'. Make sure to add the new files to your working branch."
+        exit 1
+    - name: Fail If Modified Files Detected
+      if: steps.gitcheck.outputs.modifiedFiles != 0
+      run: |
+        echo "Updated files have been generated after running 'AWS.Deploy.DocGenerator'. Make sure to commit the updated files to your working branch."
+        exit 1

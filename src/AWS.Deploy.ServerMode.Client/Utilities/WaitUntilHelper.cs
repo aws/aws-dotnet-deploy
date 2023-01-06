@@ -6,11 +6,11 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AWS.Deploy.ServerMode.Client
+namespace AWS.Deploy.ServerMode.Client.Utilities
 {
     internal static class WaitUntilHelper
     {
-        private static async Task WaitUntil(Func<Task<bool>> predicate, TimeSpan frequency, TimeSpan timeout, CancellationToken cancellationToken)
+        public static async Task WaitUntil(Func<Task<bool>> predicate, TimeSpan frequency, TimeSpan timeout, CancellationToken cancellationToken)
         {
             var waitTask = Task.Run(async () =>
             {
