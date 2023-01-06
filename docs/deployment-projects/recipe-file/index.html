@@ -1,0 +1,1730 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Deploy .NET applications on AWS">
+      
+      
+      
+        <link rel="canonical" href="https://aws.github.io/aws-dotnet-deploy/docs/deployment-projects/recipe-file/">
+      
+      <link rel="icon" href="../../../assets/images/aws-logo-light.svg">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-8.2.9">
+    
+    
+      
+        <title>Recipe File - AWS .NET deployment tool</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.120efc48.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.9647289d.min.css">
+        
+          
+          
+          <meta name="theme-color" content="#4051b5">
+        
+      
+    
+    
+    
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="indigo" data-md-color-accent="">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#recipe-file-schema" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="AWS .NET deployment tool" class="md-header__button md-logo" aria-label="AWS .NET deployment tool" data-md-component="logo">
+      
+  
+  <?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 19.0.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 304 182" style="enable-background:new 0 0 304 182;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#FFFFFF;}
+	.st1{fill-rule:evenodd;clip-rule:evenodd;fill:#FFFFFF;}
+</style>
+<g>
+	<path class="st0" d="M86.4,66.4c0,3.7,0.4,6.7,1.1,8.9c0.8,2.2,1.8,4.6,3.2,7.2c0.5,0.8,0.7,1.6,0.7,2.3c0,1-0.6,2-1.9,3l-6.3,4.2
+		c-0.9,0.6-1.8,0.9-2.6,0.9c-1,0-2-0.5-3-1.4C76.2,90,75,88.4,74,86.8c-1-1.7-2-3.6-3.1-5.9c-7.8,9.2-17.6,13.8-29.4,13.8
+		c-8.4,0-15.1-2.4-20-7.2c-4.9-4.8-7.4-11.2-7.4-19.2c0-8.5,3-15.4,9.1-20.6c6.1-5.2,14.2-7.8,24.5-7.8c3.4,0,6.9,0.3,10.6,0.8
+		c3.7,0.5,7.5,1.3,11.5,2.2v-7.3c0-7.6-1.6-12.9-4.7-16c-3.2-3.1-8.6-4.6-16.3-4.6c-3.5,0-7.1,0.4-10.8,1.3c-3.7,0.9-7.3,2-10.8,3.4
+		c-1.6,0.7-2.8,1.1-3.5,1.3c-0.7,0.2-1.2,0.3-1.6,0.3c-1.4,0-2.1-1-2.1-3.1v-4.9c0-1.6,0.2-2.8,0.7-3.5c0.5-0.7,1.4-1.4,2.8-2.1
+		c3.5-1.8,7.7-3.3,12.6-4.5c4.9-1.3,10.1-1.9,15.6-1.9c11.9,0,20.6,2.7,26.2,8.1c5.5,5.4,8.3,13.6,8.3,24.6V66.4z M45.8,81.6
+		c3.3,0,6.7-0.6,10.3-1.8c3.6-1.2,6.8-3.4,9.5-6.4c1.6-1.9,2.8-4,3.4-6.4c0.6-2.4,1-5.3,1-8.7v-4.2c-2.9-0.7-6-1.3-9.2-1.7
+		c-3.2-0.4-6.3-0.6-9.4-0.6c-6.7,0-11.6,1.3-14.9,4c-3.3,2.7-4.9,6.5-4.9,11.5c0,4.7,1.2,8.2,3.7,10.6
+		C37.7,80.4,41.2,81.6,45.8,81.6z M126.1,92.4c-1.8,0-3-0.3-3.8-1c-0.8-0.6-1.5-2-2.1-3.9L96.7,10.2c-0.6-2-0.9-3.3-0.9-4
+		c0-1.6,0.8-2.5,2.4-2.5h9.8c1.9,0,3.2,0.3,3.9,1c0.8,0.6,1.4,2,2,3.9l16.8,66.2l15.6-66.2c0.5-2,1.1-3.3,1.9-3.9c0.8-0.6,2.2-1,4-1
+		h8c1.9,0,3.2,0.3,4,1c0.8,0.6,1.5,2,1.9,3.9l15.8,67l17.3-67c0.6-2,1.3-3.3,2-3.9c0.8-0.6,2.1-1,3.9-1h9.3c1.6,0,2.5,0.8,2.5,2.5
+		c0,0.5-0.1,1-0.2,1.6c-0.1,0.6-0.3,1.4-0.7,2.5l-24.1,77.3c-0.6,2-1.3,3.3-2.1,3.9c-0.8,0.6-2.1,1-3.8,1h-8.6c-1.9,0-3.2-0.3-4-1
+		c-0.8-0.7-1.5-2-1.9-4L156,23l-15.4,64.4c-0.5,2-1.1,3.3-1.9,4c-0.8,0.7-2.2,1-4,1H126.1z M254.6,95.1c-5.2,0-10.4-0.6-15.4-1.8
+		c-5-1.2-8.9-2.5-11.5-4c-1.6-0.9-2.7-1.9-3.1-2.8c-0.4-0.9-0.6-1.9-0.6-2.8v-5.1c0-2.1,0.8-3.1,2.3-3.1c0.6,0,1.2,0.1,1.8,0.3
+		c0.6,0.2,1.5,0.6,2.5,1c3.4,1.5,7.1,2.7,11,3.5c4,0.8,7.9,1.2,11.9,1.2c6.3,0,11.2-1.1,14.6-3.3c3.4-2.2,5.2-5.4,5.2-9.5
+		c0-2.8-0.9-5.1-2.7-7c-1.8-1.9-5.2-3.6-10.1-5.2L246,52c-7.3-2.3-12.7-5.7-16-10.2c-3.3-4.4-5-9.3-5-14.5c0-4.2,0.9-7.9,2.7-11.1
+		c1.8-3.2,4.2-6,7.2-8.2c3-2.3,6.4-4,10.4-5.2c4-1.2,8.2-1.7,12.6-1.7c2.2,0,4.5,0.1,6.7,0.4c2.3,0.3,4.4,0.7,6.5,1.1
+		c2,0.5,3.9,1,5.7,1.6c1.8,0.6,3.2,1.2,4.2,1.8c1.4,0.8,2.4,1.6,3,2.5c0.6,0.8,0.9,1.9,0.9,3.3v4.7c0,2.1-0.8,3.2-2.3,3.2
+		c-0.8,0-2.1-0.4-3.8-1.2c-5.7-2.6-12.1-3.9-19.2-3.9c-5.7,0-10.2,0.9-13.3,2.8c-3.1,1.9-4.7,4.8-4.7,8.9c0,2.8,1,5.2,3,7.1
+		c2,1.9,5.7,3.8,11,5.5l14.2,4.5c7.2,2.3,12.4,5.5,15.5,9.6c3.1,4.1,4.6,8.8,4.6,14c0,4.3-0.9,8.2-2.6,11.6
+		c-1.8,3.4-4.2,6.4-7.3,8.8c-3.1,2.5-6.8,4.3-11.1,5.6C264.4,94.4,259.7,95.1,254.6,95.1z"/>
+	<g>
+		<path class="st1" d="M273.5,143.7c-32.9,24.3-80.7,37.2-121.8,37.2c-57.6,0-109.5-21.3-148.7-56.7c-3.1-2.8-0.3-6.6,3.4-4.4
+			c42.4,24.6,94.7,39.5,148.8,39.5c36.5,0,76.6-7.6,113.5-23.2C274.2,133.6,278.9,139.7,273.5,143.7z"/>
+		<path class="st1" d="M287.2,128.1c-4.2-5.4-27.8-2.6-38.5-1.3c-3.2,0.4-3.7-2.4-0.8-4.5c18.8-13.2,49.7-9.4,53.3-5
+			c3.6,4.5-1,35.4-18.6,50.2c-2.7,2.3-5.3,1.1-4.1-1.9C282.5,155.7,291.4,133.4,287.2,128.1z"/>
+	</g>
+</g>
+</svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AWS .NET deployment tool
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Recipe File
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/aws/aws-dotnet-deploy" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    aws/aws-dotnet-deploy
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="AWS .NET deployment tool" class="md-nav__button md-logo" aria-label="AWS .NET deployment tool" data-md-component="logo">
+      
+  
+  <?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 19.0.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 304 182" style="enable-background:new 0 0 304 182;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#FFFFFF;}
+	.st1{fill-rule:evenodd;clip-rule:evenodd;fill:#FFFFFF;}
+</style>
+<g>
+	<path class="st0" d="M86.4,66.4c0,3.7,0.4,6.7,1.1,8.9c0.8,2.2,1.8,4.6,3.2,7.2c0.5,0.8,0.7,1.6,0.7,2.3c0,1-0.6,2-1.9,3l-6.3,4.2
+		c-0.9,0.6-1.8,0.9-2.6,0.9c-1,0-2-0.5-3-1.4C76.2,90,75,88.4,74,86.8c-1-1.7-2-3.6-3.1-5.9c-7.8,9.2-17.6,13.8-29.4,13.8
+		c-8.4,0-15.1-2.4-20-7.2c-4.9-4.8-7.4-11.2-7.4-19.2c0-8.5,3-15.4,9.1-20.6c6.1-5.2,14.2-7.8,24.5-7.8c3.4,0,6.9,0.3,10.6,0.8
+		c3.7,0.5,7.5,1.3,11.5,2.2v-7.3c0-7.6-1.6-12.9-4.7-16c-3.2-3.1-8.6-4.6-16.3-4.6c-3.5,0-7.1,0.4-10.8,1.3c-3.7,0.9-7.3,2-10.8,3.4
+		c-1.6,0.7-2.8,1.1-3.5,1.3c-0.7,0.2-1.2,0.3-1.6,0.3c-1.4,0-2.1-1-2.1-3.1v-4.9c0-1.6,0.2-2.8,0.7-3.5c0.5-0.7,1.4-1.4,2.8-2.1
+		c3.5-1.8,7.7-3.3,12.6-4.5c4.9-1.3,10.1-1.9,15.6-1.9c11.9,0,20.6,2.7,26.2,8.1c5.5,5.4,8.3,13.6,8.3,24.6V66.4z M45.8,81.6
+		c3.3,0,6.7-0.6,10.3-1.8c3.6-1.2,6.8-3.4,9.5-6.4c1.6-1.9,2.8-4,3.4-6.4c0.6-2.4,1-5.3,1-8.7v-4.2c-2.9-0.7-6-1.3-9.2-1.7
+		c-3.2-0.4-6.3-0.6-9.4-0.6c-6.7,0-11.6,1.3-14.9,4c-3.3,2.7-4.9,6.5-4.9,11.5c0,4.7,1.2,8.2,3.7,10.6
+		C37.7,80.4,41.2,81.6,45.8,81.6z M126.1,92.4c-1.8,0-3-0.3-3.8-1c-0.8-0.6-1.5-2-2.1-3.9L96.7,10.2c-0.6-2-0.9-3.3-0.9-4
+		c0-1.6,0.8-2.5,2.4-2.5h9.8c1.9,0,3.2,0.3,3.9,1c0.8,0.6,1.4,2,2,3.9l16.8,66.2l15.6-66.2c0.5-2,1.1-3.3,1.9-3.9c0.8-0.6,2.2-1,4-1
+		h8c1.9,0,3.2,0.3,4,1c0.8,0.6,1.5,2,1.9,3.9l15.8,67l17.3-67c0.6-2,1.3-3.3,2-3.9c0.8-0.6,2.1-1,3.9-1h9.3c1.6,0,2.5,0.8,2.5,2.5
+		c0,0.5-0.1,1-0.2,1.6c-0.1,0.6-0.3,1.4-0.7,2.5l-24.1,77.3c-0.6,2-1.3,3.3-2.1,3.9c-0.8,0.6-2.1,1-3.8,1h-8.6c-1.9,0-3.2-0.3-4-1
+		c-0.8-0.7-1.5-2-1.9-4L156,23l-15.4,64.4c-0.5,2-1.1,3.3-1.9,4c-0.8,0.7-2.2,1-4,1H126.1z M254.6,95.1c-5.2,0-10.4-0.6-15.4-1.8
+		c-5-1.2-8.9-2.5-11.5-4c-1.6-0.9-2.7-1.9-3.1-2.8c-0.4-0.9-0.6-1.9-0.6-2.8v-5.1c0-2.1,0.8-3.1,2.3-3.1c0.6,0,1.2,0.1,1.8,0.3
+		c0.6,0.2,1.5,0.6,2.5,1c3.4,1.5,7.1,2.7,11,3.5c4,0.8,7.9,1.2,11.9,1.2c6.3,0,11.2-1.1,14.6-3.3c3.4-2.2,5.2-5.4,5.2-9.5
+		c0-2.8-0.9-5.1-2.7-7c-1.8-1.9-5.2-3.6-10.1-5.2L246,52c-7.3-2.3-12.7-5.7-16-10.2c-3.3-4.4-5-9.3-5-14.5c0-4.2,0.9-7.9,2.7-11.1
+		c1.8-3.2,4.2-6,7.2-8.2c3-2.3,6.4-4,10.4-5.2c4-1.2,8.2-1.7,12.6-1.7c2.2,0,4.5,0.1,6.7,0.4c2.3,0.3,4.4,0.7,6.5,1.1
+		c2,0.5,3.9,1,5.7,1.6c1.8,0.6,3.2,1.2,4.2,1.8c1.4,0.8,2.4,1.6,3,2.5c0.6,0.8,0.9,1.9,0.9,3.3v4.7c0,2.1-0.8,3.2-2.3,3.2
+		c-0.8,0-2.1-0.4-3.8-1.2c-5.7-2.6-12.1-3.9-19.2-3.9c-5.7,0-10.2,0.9-13.3,2.8c-3.1,1.9-4.7,4.8-4.7,8.9c0,2.8,1,5.2,3,7.1
+		c2,1.9,5.7,3.8,11,5.5l14.2,4.5c7.2,2.3,12.4,5.5,15.5,9.6c3.1,4.1,4.6,8.8,4.6,14c0,4.3-0.9,8.2-2.6,11.6
+		c-1.8,3.4-4.2,6.4-7.3,8.8c-3.1,2.5-6.8,4.3-11.1,5.6C264.4,94.4,259.7,95.1,254.6,95.1z"/>
+	<g>
+		<path class="st1" d="M273.5,143.7c-32.9,24.3-80.7,37.2-121.8,37.2c-57.6,0-109.5-21.3-148.7-56.7c-3.1-2.8-0.3-6.6,3.4-4.4
+			c42.4,24.6,94.7,39.5,148.8,39.5c36.5,0,76.6-7.6,113.5-23.2C274.2,133.6,278.9,139.7,273.5,143.7z"/>
+		<path class="st1" d="M287.2,128.1c-4.2-5.4-27.8-2.6-38.5-1.3c-3.2,0.4-3.7-2.4-0.8-4.5c18.8-13.2,49.7-9.4,53.3-5
+			c3.6,4.5-1,35.4-18.6,50.2c-2.7,2.3-5.3,1.1-4.1-1.9C282.5,155.7,291.4,133.4,287.2,128.1z"/>
+	</g>
+</g>
+</svg>
+
+    </a>
+    AWS .NET deployment tool
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/aws/aws-dotnet-deploy" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    aws/aws-dotnet-deploy
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2">
+          Documentation
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Documentation" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Documentation
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_1" type="checkbox" id="__nav_2_1" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_1">
+          Getting started
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Getting started" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_1">
+          <span class="md-nav__icon md-icon"></span>
+          Getting started
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/pre-requisites/" class="md-nav__link">
+        Pre-requisites
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/installation/" class="md-nav__link">
+        How to install
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/setup-creds/" class="md-nav__link">
+        Set up credentials
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/custom-workspace/" class="md-nav__link">
+        Set up a custom workspace
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/run-tool/" class="md-nav__link">
+        Deploy "Hello World"
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../support/" class="md-nav__link">
+        Support matrix
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_3" type="checkbox" id="__nav_2_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_3">
+          Commands
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Commands" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_3">
+          <span class="md-nav__icon md-icon"></span>
+          Commands
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/deploy/" class="md-nav__link">
+        deploy
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/list/" class="md-nav__link">
+        list-deployments
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/delete/" class="md-nav__link">
+        delete-deployment
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/project/" class="md-nav__link">
+        deployment-project
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/server-mode/" class="md-nav__link">
+        server-mode
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_4" type="checkbox" id="__nav_2_4" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_4">
+          Docker support
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Docker support" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_4">
+          <span class="md-nav__icon md-icon"></span>
+          Docker support
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker/docker-generation/" class="md-nav__link">
+        Dockerfile generation
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker/publish-image/" class="md-nav__link">
+        Publishing a Docker image
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_5" type="checkbox" id="__nav_2_5" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_5">
+          Deployment Projects
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Deployment Projects" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_5">
+          <span class="md-nav__icon md-icon"></span>
+          Deployment Projects
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Recipe File
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Recipe File
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#top-level-settings" class="md-nav__link">
+    Top level settings
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#displayed-resources" class="md-nav__link">
+    Displayed Resources
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#compatibility-rules" class="md-nav__link">
+    Compatibility Rules
+  </a>
+  
+    <nav class="md-nav" aria-label="Compatibility Rules">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tests" class="md-nav__link">
+    Tests
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#available-tests" class="md-nav__link">
+    Available Tests
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#effect" class="md-nav__link">
+    Effect
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setting-categories" class="md-nav__link">
+    Setting Categories
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#option-settings" class="md-nav__link">
+    Option Settings
+  </a>
+  
+    <nav class="md-nav" aria-label="Option Settings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#setting-data-types" class="md-nav__link">
+    Setting Data Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#typehint" class="md-nav__link">
+    TypeHint
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dependson" class="md-nav__link">
+    DependsOn
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validators" class="md-nav__link">
+    Validators
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cdk-project/" class="md-nav__link">
+        CDK Project
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cicd/" class="md-nav__link">
+        Integrating with CI/CD
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3">
+          Tutorials
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Tutorials" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Tutorials
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/custom-project/" class="md-nav__link">
+        Customizing deployment projects
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4">
+          Troubleshooting Guide
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Troubleshooting Guide" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Troubleshooting Guide
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../troubleshooting-guide/" class="md-nav__link">
+        General Issues
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../troubleshooting-guide/missing-dependencies/" class="md-nav__link">
+        Missing Dependencies
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../troubleshooting-guide/docker-issues/" class="md-nav__link">
+        Docker Issues
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../contributing/" class="md-nav__link">
+        Contributing to the project
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../faq/" class="md-nav__link">
+        FAQs
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#top-level-settings" class="md-nav__link">
+    Top level settings
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#displayed-resources" class="md-nav__link">
+    Displayed Resources
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#compatibility-rules" class="md-nav__link">
+    Compatibility Rules
+  </a>
+  
+    <nav class="md-nav" aria-label="Compatibility Rules">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tests" class="md-nav__link">
+    Tests
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#available-tests" class="md-nav__link">
+    Available Tests
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#effect" class="md-nav__link">
+    Effect
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setting-categories" class="md-nav__link">
+    Setting Categories
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#option-settings" class="md-nav__link">
+    Option Settings
+  </a>
+  
+    <nav class="md-nav" aria-label="Option Settings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#setting-data-types" class="md-nav__link">
+    Setting Data Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#typehint" class="md-nav__link">
+    TypeHint
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dependson" class="md-nav__link">
+    DependsOn
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validators" class="md-nav__link">
+    Validators
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+  <a href="https://github.com/aws/aws-dotnet-deploy/edit/main/site/content/docs/deployment-projects/recipe-file.md" title="Edit this page" class="md-content__button md-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+
+
+<h1 id="recipe-file-schema">Recipe file schema</h1>
+<p>Each deployment project has a JSON file with a <code>.recipe</code> extension. This recipe file defines the type of .NET projects the recipe is compatible with and the settings that will be shown to users.</p>
+<p>Read our <a href="../../../tutorials/custom-project/">tutorial</a> to see how you can modify this file to drive the custom deployment experience and display custom option settings to users. The full schema for the recipe file can be found <a href="https://github.com/aws/aws-dotnet-deploy/blob/main/src/AWS.Deploy.Recipes/RecipeDefinitions/aws-deploy-recipe-schema.json">here</a>.</p>
+<h3 id="top-level-settings">Top level settings</h3>
+<p>This is the list of top level properties in the recipe definition.</p>
+<ul>
+<li><strong>Id</strong> - the Id of the deployment project. The CloudFormation stack will be tagged with this Id which is used to identify which stacks to update when redeploying.</li>
+<li><strong>Name</strong> - the name of the deployment project, shown in the list of recommendations.</li>
+<li><strong>ShortDescription</strong> - description used when showing the list of recommendations.</li>
+<li><strong>Description</strong> - longer description shown when hovering over the recommendation in Visual Studio.</li>
+<li><strong>TargetService</strong> - the main AWS service the application will be deployed to. Visual Studio uses this to provide visual indicators.</li>
+<li><strong>DeploymentType</strong> - for deployment projects this value should always be <code>CdkProject</code>.</li>
+<li><strong>DeploymentBundle</strong> - how the .NET project being deployed should be bundled. Allowed values are <code>Container</code> and <code>DotnetPublishZipFile</code>.</li>
+<li><strong>DisplayedResources</strong> - the list of resources to display to users at the end of the deployment.</li>
+<li><strong>RecipePriority</strong> - the priority of the recipe in the compatibility list.</li>
+<li><strong>RecommendationRules</strong> - the list of rules to determine the recipe's compatibility with the project being deployed.</li>
+<li><strong>Categories</strong> - the list of categories for the option settings.</li>
+<li><strong>OptionSettings</strong> - the list of settings users can configure during deployment.</li>
+</ul>
+<h3 id="displayed-resources">Displayed Resources</h3>
+<p>The <code>DisplayedResources</code> array contains a list of resources that the deployment tooling should display after deployment is complete. This is typically the primary resources for a deployment project like an AWS Elastic Beanstalk Environment or a Load Balancer that allows the user to quickly see their application deployed to AWS.</p>
+<p>Here is an example for a recipe that displays the endpoint of the Elastic Beanstalk environment after deployment.</p>
+<pre><code class="language-json">...
+&quot;DisplayedResources&quot;: [
+    {
+        &quot;LogicalId&quot;: &quot;RecipeBeanstalkEnvironment83CC12DE&quot;,
+        &quot;Description&quot;: &quot;Application Endpoint&quot;
+    }
+],
+...
+</code></pre>
+<p><code>DisplayedResources</code> objects have the following properties:</p>
+<ul>
+<li><strong>LogicalId</strong> - the CloudFormation logical id of the AWS resource. The CDK will generate a unique hash as the suffix of the logical resource id. The easiest way to figure out the value to set here is to do an initial deployment of the deployment project and then look up the logical id in the CloudFormation console.</li>
+<li><strong>Description</strong> - a description for the resource shown to users in the list of display resources.</li>
+</ul>
+<h3 id="compatibility-rules">Compatibility Rules</h3>
+<p>The recipe file defines a collection of rules that the deployment tool executes against the .NET project being deployed to determine if the recipe is compatible with the .NET project. A rule is made up of a list of tests to run and the effect to apply.</p>
+<h4 id="tests">Tests</h4>
+<p>The deploy tool supports a collection of tests that can be run against the .NET project being deployed. Here is an example of a test that checks the version of .NET the project is targeting.</p>
+<pre><code class="language-json">...
+{
+    &quot;Type&quot;: &quot;MSProperty&quot;,
+    &quot;Condition&quot;: {
+        &quot;PropertyName&quot;: &quot;TargetFramework&quot;,
+        &quot;AllowedValues&quot;: [
+            &quot;netcoreapp3.1&quot;,
+            &quot;net6.0&quot;
+        ]
+    }
+}
+...
+</code></pre>
+<p>The <code>Type</code> property determines the type of test to run. The <code>Condition</code> contains the data needed to evaluate the test, in this case the MSBuild property to check and the allowed values. Each type of test can have a different set of properties for the <code>Condition</code>.</p>
+<h4 id="available-tests">Available Tests</h4>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+<th>Conditions properties</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MSProjectSdkAttribute</td>
+<td>Compares the <code>Sdk</code> attribute at the root element of the project file to a given value.</td>
+<td><ul><li>Value - the expected value. For example <code>Microsoft.NET.Sdk.Web</code> for web projects.</li></ul></td>
+</tr>
+<tr>
+<td>MSProperty</td>
+<td>Compares the property in a project file property group.</td>
+<td><ul><li>PropertyName - the property to compare.</li><li>AllowedValues - an array of possible values for the property.</li></ul></td>
+</tr>
+<tr>
+<td>MSPropertyExists</td>
+<td>Test to see if a property in a property group exists.</td>
+<td><ul><li>PropertyName - the property test for existence.</li></ul></td>
+</tr>
+<tr>
+<td>FileExists</td>
+<td>Tests to see if a file exists. For example checking to see a <code>Dockerfile</code> exists.</td>
+<td><ul><li>FileName - the file to test for existence. </li></ul></td>
+</tr>
+<tr>
+<td>NuGetPackageReference</td>
+<td>Test to see if the project has a <code>PackageReference</code> to a NuGet package.</td>
+<td><ul><li>NuGetPackageName - the NuGet package to test if it is being referenced. </li></ul></td>
+</tr>
+</tbody>
+</table>
+<h4 id="effect">Effect</h4>
+<p>A rules effect defines the behavior of the rule depending on if its test(s) pass or not. Effects can either mark the recipe as not included in the compatible list or adjust the priority for the recipe.</p>
+<p>Here is an example of a rule that checks if the project is a web project and targets .NET Core 3.1 or .NET 6. If both tests pass the effect's <code>Pass</code> property instructs the deployment tooling to include the recipe. If either one of the two tests fail the <code>Fail</code> effect is run, removing the recipe from the included compatible list.</p>
+<pre><code class="language-json">...
+&quot;RecommendationRules&quot;: [
+  {
+    &quot;Tests&quot;: [
+      {
+        &quot;Type&quot;: &quot;MSProjectSdkAttribute&quot;,
+        &quot;Condition&quot;: {
+          &quot;Value&quot;: &quot;Microsoft.NET.Sdk.Web&quot;
+        }
+      },
+      {
+        &quot;Type&quot;: &quot;MSProperty&quot;,
+        &quot;Condition&quot;: {
+          &quot;PropertyName&quot;: &quot;TargetFramework&quot;,
+          &quot;AllowedValues&quot;: [
+            &quot;netcoreapp3.1&quot;,
+            &quot;net6.0&quot;
+          ]
+        }
+      }
+    ],
+    &quot;Effect&quot;: {
+      &quot;Pass&quot;: {
+        &quot;Include&quot;: true
+      },
+      &quot;Fail&quot;: {
+        &quot;Include&quot;: false
+      }
+    }
+  }
+]
+...
+</code></pre>
+<p>Here is another example that tests if a project contains a Dockerfile. If it does not, it reduces the priority of the recipe.</p>
+<pre><code class="language-json">...
+&quot;RecommendationRules&quot;: [
+      ...
+
+      {
+          &quot;Tests&quot;: [
+              {
+                  &quot;Type&quot;: &quot;FileExists&quot;,
+                  &quot;Condition&quot;: {
+                      &quot;FileName&quot;: &quot;Dockerfile&quot;
+                  }
+              }
+          ],
+          &quot;Effect&quot;: {
+              &quot;Fail&quot;: {
+                  &quot;PriorityAdjustment&quot;: -100,
+                  &quot;Include&quot;: true
+              }
+          }
+      },
+      ...
+]
+...
+</code></pre>
+<p>A recipe is considered compatible if no rule ran an effect that set <code>Include</code> to false and if the priority is greater then 0.</p>
+<p>To simulate an <strong>"or"</strong> set of rules the starting priority in <code>RecipePriority</code> can be set to a negative value meaning it is not included by default. Then you can have a series of tests that adjust the priority to a positive amount. That way, if any test rule passes it can adjust the priority to a positive number.</p>
+<h3 id="setting-categories">Setting Categories</h3>
+<p>The <code>Categories</code> property is an array of objects that define the categories for the settings. The AWS Toolkit for Visual Studio uses this array to build the list of categories in the UI for fast navigation to a group of settings.</p>
+<p><img alt="Categories in AWS Toolkit for Visual Studio" src="../../../assets/images/vs-catagories.png" /></p>
+<p>A category is defined with the following properties:</p>
+<ul>
+<li><strong>Id</strong> - the unique id within the recipe for the category.</li>
+<li><strong>DisplayName</strong> - the name of the category displayed to users.</li>
+<li><strong>Order</strong> - the order in the toolkit UI for the category. Categories are display in sorted descending order.</li>
+</ul>
+<p>Here is an example of defining a custom category that you could use to categorize additional settings added as application resources.</p>
+<pre><code class="language-json">...
+{
+    &quot;Id&quot;: &quot;AppResources&quot;,
+    &quot;DisplayName&quot;: &quot;Application Resources&quot;,
+    &quot;Order&quot;: 15
+}
+...
+</code></pre>
+<p>To assign a setting to a category, set the setting's <code>Category</code> property to the <code>Id</code> of a category. Only top level settings can be assigned a category. Any top level settings that are not assigned a category will be placed in the <code>General</code> category.</p>
+<h3 id="option-settings">Option Settings</h3>
+<p>The settings that are shown to users and allow them to customize the deployment in either the CLI or Visual Studio are defined in the <code>OptionSettings</code> array. Settings have the following properties.</p>
+<ul>
+<li><strong>Id</strong> - the id of the setting. Once projects are deployed with the recipe, this id should not change because the id is saved into the CloudFormation stack's template.</li>
+<li><strong>Name</strong> - the name of the setting shown to users.</li>
+<li><strong>Description</strong> - the informational text shown to users for the setting.</li>
+<li><strong>Type</strong> - the data type of the setting.</li>
+<li><strong>DefaultValue</strong> - the default value for the setting.</li>
+<li><strong>TypeHint</strong> - a hint to the deployment tooling what the meaning of the setting's value is. Some examples are an Amazon DynamoDB table name or the name of an Amazon SNS topic.</li>
+<li><strong>TypeHintData</strong> - additional information to pass into the type hint.</li>
+<li><strong>AdvancedSetting</strong> - a boolean for whether this setting is an advanced use case. If true the setting might not be shown to users unless they request to see all settings.</li>
+<li><strong>Updatable</strong> - a boolean that controls whether a setting can be modified during redeployment. It is recommended to set this to <code>false</code> for settings where deleting resources once they exist would make the application unavailable.</li>
+<li><strong>AllowedValues</strong> - the list of possible values.</li>
+<li><strong>ValueMapping</strong> - a mapping between values in the <code>AllowedValues</code> list to user friendly display names for each allowed value.</li>
+<li><strong>ChildOptionSettings</strong> - if the <code>Type</code> property is set to <code>Object</code> this list contains a child option settings.</li>
+<li><strong>DependsOn</strong> - a list of expressions to determine if this setting should be visible.</li>
+<li><strong>Validators</strong> - a list of validators to run when values are set for the setting to ensure the value is valid.</li>
+<li><strong>ParentSettingId</strong> - the id of a setting that represents the parent of this setting. For example a setting that allows picking EC2 subnets would set the <code>ParentSettingId</code> to the setting that defines the <code>VPC</code> to use for deployment. The type hint for the setting can use this field to filter the list of subnets that are valid for the selected VPC.</li>
+</ul>
+<h4 id="setting-data-types">Setting Data Types</h4>
+<p>Settings can have the following data types:</p>
+<ul>
+<li>String</li>
+<li>Int</li>
+<li>Double</li>
+<li>Bool</li>
+<li>KeyValue</li>
+<li>List</li>
+<li>Object</li>
+</ul>
+<p>If the data type is set to <code>Object</code> the setting has child settings that are defined in the  <code>ChildOptionSettings</code> array for the setting.</p>
+<h4 id="typehint">TypeHint</h4>
+<p>Type hints are used to control the user experience in the CLI or Visual Studio. For example if the <code>TypeHint</code> property is set to <code>ExistingECSCluster</code> the deployment tool knows this <code>String</code> data type setting should be set to the name of an existing ECS cluster and  presents the list of existing clusters to the user.</p>
+<p>Some type hints require additional configuration which can specified in the <code>TypeHintData</code> property. For example if a setting has a type hint of <code>ExistingIAMRole</code> the tool should only show roles that can be assumed by the target service. Here is a example of configuring the <code>ServicePrincipal</code> for the type hint to filter the list of roles to pick from.</p>
+<pre><code class="language-json">...
+{
+    &quot;Id&quot;: &quot;RoleArn&quot;,
+    &quot;Name&quot;: &quot;Existing Role ARN&quot;,
+    &quot;Description&quot;: &quot;The ARN of the existing role to use.&quot;,
+    &quot;Type&quot;: &quot;String&quot;,
+    &quot;TypeHint&quot;: &quot;ExistingIAMRole&quot;,
+    &quot;TypeHintData&quot;: {
+        &quot;ServicePrincipal&quot;: &quot;ecs-tasks.amazonaws.com&quot;
+    },
+...
+</code></pre>
+<p>Here is the list of available type hints in the deployment tooling.</p>
+<table>
+<thead>
+<tr>
+<th>Type Hint</th>
+<th>Type Hint Data</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>IAMRole</td>
+<td><ul><li>ServicePrincipal - the service principal the role can be assumed by.</li></ul></td>
+<td>Set at <code>Object</code> level that controls whether to create a new role or select an existing role.</td>
+</tr>
+<tr>
+<td>ExistingIAMRole</td>
+<td><ul><li>ServicePrincipal - the service principal the role can be assumed by.</li></ul></td>
+<td>Set at the <code>String</code> setting level for storing the existing IAM role ARN.</td>
+</tr>
+<tr>
+<td>ECSCluster</td>
+<td></td>
+<td>Set at the <code>Object</code> setting level that controls whether to create or select an existing ECS cluster.</td>
+</tr>
+<tr>
+<td>ExistingECSCluster</td>
+<td></td>
+<td>Set at the <code>String</code> setting level for storing the existing ECS Cluster Name.</td>
+</tr>
+<tr>
+<td>ECSService</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>ECSTaskSchedule</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>EC2KeyPair</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Vpc</td>
+<td></td>
+<td>Set at the <code>Object</code> level that controls whether to create a new VPC or select an existing VPC.</td>
+</tr>
+<tr>
+<td>ExistingVpc</td>
+<td></td>
+<td>Set at the <code>String</code> setting level for storing the existing VPC ID.</td>
+</tr>
+<tr>
+<td>AppRunnerService</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>VPCConnector</td>
+<td></td>
+<td>Set at the <code>Object</code> level for creating or selecting an App Runner VPC Connector.</td>
+</tr>
+<tr>
+<td>ExistingVpcConnector</td>
+<td></td>
+<td>Set at the <code>String</code> setting level for storing the existing VPC Connector id.</td>
+</tr>
+<tr>
+<td>BeanstalkRollingUpdates</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>ExistingSubnets</td>
+<td></td>
+<td><code>ParentSettingId</code> should be set to a setting for the VPC.</td>
+</tr>
+<tr>
+<td>ExistingSecurityGroups</td>
+<td></td>
+<td><code>ParentSettingId</code> should be set to a setting for the VPC.</td>
+</tr>
+<tr>
+<td>ExistingBeanstalkApplication</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>ExistingApplicationLoadBalancer</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>InstanceType</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>WindowsInstanceType</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>S3BucketName</td>
+<td><ul><li>AllowNoValue - determines whether to allow no value to be set.</li></ul></td>
+<td></td>
+</tr>
+<tr>
+<td>DynamoDBTableName</td>
+<td><ul><li>AllowNoValue - determines whether to allow no value to be set.</li></ul></td>
+<td></td>
+</tr>
+<tr>
+<td>SQSQueueUrl</td>
+<td><ul><li>AllowNoValue - determines whether to allow no value to be set.</li></ul></td>
+<td></td>
+</tr>
+<tr>
+<td>SNSTopicArn</td>
+<td><ul><li>AllowNoValue - determines whether to allow no value to be set.</li></ul></td>
+<td></td>
+</tr>
+<tr>
+<td>FilePath</td>
+<td><ul><li>Filter - the filter that appears in the file dialog box.</li><li>DefaultExtension - the default extension used if the user specifies a file name without an extension.</li><li>Title - the title of the file dialog box.</li><li>CheckFileExists - if true the deployment tooling ensures the file exists.</li><li>AllowEmpty - controls whether an empty value is allowed.</li></ul></td>
+<td></td>
+</tr>
+<tr>
+<td>DotnetBeanstalkPlatformArn</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>DotnetWindowsBeanstalkPlatformArn</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>DotnetPublishSelfContainedBuild</td>
+<td></td>
+<td>Used internally to validate build configuration.</td>
+</tr>
+<tr>
+<td>DotnetPublishBuildConfiguration</td>
+<td></td>
+<td>Used internally to validate build configuration.</td>
+</tr>
+<tr>
+<td>DotnetPublishAdditionalBuildArguments</td>
+<td></td>
+<td>Used internally to validate build configuration.</td>
+</tr>
+<tr>
+<td>DockerExecutionDirectory</td>
+<td></td>
+<td>Used internally to validate build configuration.</td>
+</tr>
+<tr>
+<td>DockerBuildArgs</td>
+<td></td>
+<td>Used internally to validate build configuration.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="dependson">DependsOn</h4>
+<p>The <code>DependsOn</code> property is an array of conditions to determine if a setting should be visible based on the values for other setting(s). For example if a user selects the setting to create a new IAM role then the setting for selecting an existing IAM role should not be displayed.</p>
+<p>Each item in the <code>DependsOn</code> array has the following properties.</p>
+<ul>
+<li><strong>Id</strong> - the id of the setting to compare. The id should be the full id including all parent object id settings. The format is <parent-object-setting-id>.<setting-id>.</li>
+<li><strong>Operation</strong> - the operation to run. Allowed values are <code>NotEmpty</code> and <code>Equals</code>. If operation is not set then the default is <code>Equals</code>.</li>
+<li><strong>Value</strong> - the value to compare when the operation is <code>Equals</code>.</li>
+</ul>
+<p>Here is an example for a setting used for storing an existing IAM role to use. The value is displayed if the setting <code>ApplicationIAMRole.CreateNew</code> is set <code>false</code>.</p>
+<pre><code class="language-json">...
+{
+    &quot;Id&quot;: &quot;RoleArn&quot;,
+    &quot;Name&quot;: &quot;Existing Role ARN&quot;,
+    &quot;Description&quot;: &quot;The ARN of the existing role to use.&quot;,
+    &quot;Type&quot;: &quot;String&quot;,
+    &quot;TypeHint&quot;: &quot;ExistingIAMRole&quot;,
+    &quot;TypeHintData&quot;: {
+        &quot;ServicePrincipal&quot;: &quot;tasks.apprunner.amazonaws.com&quot;
+    },
+    &quot;AdvancedSetting&quot;: false,
+    &quot;Updatable&quot;: true,
+    &quot;DependsOn&quot;: [
+        {
+            &quot;Id&quot;: &quot;ApplicationIAMRole.CreateNew&quot;,
+            &quot;Value&quot;: false
+        }
+    ],
+    ...
+}
+...
+</code></pre>
+<h4 id="validators">Validators</h4>
+<p>Validators inform the user when a setting has an invalid value before starting the deployment. Each setting can have a list of validators specified in the <code>Validators</code> array. Validators can do simple checks like making sure string values are of a certain format, as well as make AWS service calls to make sure the value of an existing resource exists.</p>
+<p>Here is an example of a validator for a port setting that ensures the value is within the range 0 to 51200.</p>
+<pre><code class="language-json">...
+{
+    &quot;Id&quot;: &quot;Port&quot;,
+    &quot;Name&quot;: &quot;Port&quot;,
+    &quot;Category&quot;: &quot;General&quot;,
+    &quot;Description&quot;: &quot;The port the container is listening for requests on.&quot;,
+    &quot;Type&quot;: &quot;Int&quot;,
+    &quot;DefaultValue&quot;: 80,
+    &quot;AdvancedSetting&quot;: false,
+    &quot;Updatable&quot;: true,
+    &quot;Validators&quot;: [
+        {
+            &quot;ValidatorType&quot;: &quot;Range&quot;,
+            &quot;Configuration&quot;: {
+                &quot;Min&quot;: 0,
+                &quot;Max&quot;: 51200
+            }
+        }
+    ]
+}
+...
+</code></pre>
+<p>The <code>ValidatorType</code> property determines the type of validator to run. The <code>Configuration</code> contains the data needed to evaluate the validator, in this case the min and max values. Each type of validator can have a different set of properties for the <code>Configuration</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Validator Type</th>
+<th>Description</th>
+<th>Configuration properties</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Range</td>
+<td>For numeric settings define the min and max values.</td>
+<td><ul><li>Min - the min value.</li><li>Max - the max value.</li><li>ValidationFailedMessage - the error message shown if the validator fails.</li><li>AllowEmptyString - boolean that if true allows empty values to be set.</li></ul></td>
+</tr>
+<tr>
+<td>Regex</td>
+<td>For string settings define a regular expression that the value must match.</td>
+<td><ul><li>Regex - the regular expression to match against the value of the setting.</li><li>ValidationFailedMessage - the error message shown if the validator fails.</li><li>AllowEmptyString - boolean that if true allows empty values to be set.</li></ul></td>
+</tr>
+<tr>
+<td>Required</td>
+<td>A value is required for the setting.</td>
+<td><ul><li>ValidationFailedMessage - the error message shown if the validator fails.</li></ul></td>
+</tr>
+<tr>
+<td>DirectoryExists</td>
+<td>For string settings representing a directory. Validates the directory exists.</td>
+<td></td>
+</tr>
+<tr>
+<td>DockerBuildArgs</td>
+<td>Ensures the value is valid for being passed to the <code>docker build</code> command.</td>
+<td></td>
+</tr>
+<tr>
+<td>DotnetPublishArgs</td>
+<td>Ensures the value is valid for being passed to the <code>dotnet publish</code> command.</td>
+<td></td>
+</tr>
+<tr>
+<td>ExistingResource</td>
+<td>Using the <a href="https://docs.aws.amazon.com/cloudcontrolapi/latest/APIReference/API_GetResource.html">AWS Cloud Control API GetResource</a>, ensure that the AWS resource exists.</td>
+<td><ul><li>ResourceType - the AWS resource type to search for. For example <code>AWS::ECS::Cluster</code> for an ECS cluster.</li></ul></td>
+</tr>
+<tr>
+<td>FileExists</td>
+<td>For string settings representing a file path. Validates the file exists.</td>
+<td><ul><li>ValidationFailedMessage - the error message shown if the validator fails.</li><li>AllowEmptyString - boolean that if true allows empty values to be set.</li></ul></td>
+</tr>
+<tr>
+<td>StringLength</td>
+<td>Validates the length of a string setting.</td>
+<td><ul><li>MinLength - the min length for the string.</li><li>MaxLength - the max length for the string.</li><li>ValidationFailedMessage - the error message shown if the validator fails.</li></ul></td>
+</tr>
+<tr>
+<td>InstanceType</td>
+<td>Validates the string value is a valid Linux EC2 instance type.</td>
+<td></td>
+</tr>
+<tr>
+<td>WindowsInstanceType</td>
+<td>Validates the string value is a valid Windows EC2 instance type.</td>
+<td></td>
+</tr>
+<tr>
+<td>SubnetsInVpc</td>
+<td>Validates the subnets are in the configured VPC.</td>
+<td><ul><li>VpcId - the id of the setting that has the VPC configured for.</li><li>ValidationFailedMessage - the error message shown if the validator fails.</li></ul></td>
+</tr>
+<tr>
+<td>SecurityGroupsInVpc</td>
+<td>Validates the security group are in the configured VPC.</td>
+<td><ul><li>VpcId - the id of the setting that contains the VPC configuration.</li><li>ValidationFailedMessage - the error message shown if the validator fails.</li></ul></td>
+</tr>
+<tr>
+<td>Uri</td>
+<td>Validates the value is a well-formed URI string.</td>
+<td><ul><li>ValidationFailedMessage - the error message shown if the validator fails.</li></ul></td>
+</tr>
+<tr>
+<td>Comparison</td>
+<td>Compares this setting with another setting.</td>
+<td><ul><li>SettingId - the setting to compare to.</li><li>Operation - the comparison operation. Allowed values are <code>GreaterThan</code>.</li></ul></td>
+</tr>
+<tr>
+<td>VPCSubnetsInDifferentAZs</td>
+<td>Validates that the selected VPC must have at least two subnets in two different Availability Zones</td>
+<td><ul><li>ValidationFailedMessage - the error message shown if the validator fails.</li></ul></td>
+</tr>
+</tbody>
+</table>
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        
+        <a href="../" class="md-footer__link md-footer__link--prev" aria-label="Previous: Overview" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Overview
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../cdk-project/" class="md-footer__link md-footer__link--next" aria-label="Next: CDK Project" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              CDK Project
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      &copy; 2022, Amazon Web Services, Inc. or its affiliates. All rights reserved.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["tabs", "instant"], "search": "../../../assets/javascripts/workers/search.2a1c317c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.6e54b5cd.min.js"></script>
+      
+    
+  </body>
+</html>
