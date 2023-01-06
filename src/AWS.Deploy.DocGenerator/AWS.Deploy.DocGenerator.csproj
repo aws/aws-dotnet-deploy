@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AWS.Deploy.CLI\AWS.Deploy.CLI.csproj" />
+    <ProjectReference Include="..\AWS.Deploy.ServerMode.Client\AWS.Deploy.ServerMode.Client.csproj" />
+  </ItemGroup>
+
+</Project>

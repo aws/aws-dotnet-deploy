@@ -21,23 +21,6 @@ namespace AWS.Deploy.CLI.IntegrationTests.Utilities
 {
     public static class ServerModeExtensions
     {
-        public static async Task WaitTillServerModeReady(this RestAPIClient restApiClient)
-        {
-            await Orchestration.Utilities.Helpers.WaitUntil(async () =>
-            {
-                SystemStatus status = SystemStatus.Error;
-                try
-                {
-                    status = (await restApiClient.HealthAsync()).Status;
-                }
-                catch (Exception)
-                {
-                }
-
-                return status == SystemStatus.Ready;
-            }, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(10));
-        }
-
         public static async Task<string> StartDeploymentSession(this RestAPIClient restClient, string projectPath, string awsRegion)
         {
             var startSessionOutput = await restClient.StartDeploymentSessionAsync(new StartDeploymentSessionInput
@@ -91,12 +74,6 @@ namespace AWS.Deploy.CLI.IntegrationTests.Utilities
             mockAWSClientFactory.Setup(x => x.GetAWSClient<IAmazonCloudFormation>(It.IsAny<string>())).Returns(mockCFClient.Object);
             mockCFClient.Setup(x => x.GetTemplateAsync(It.IsAny<GetTemplateRequest>(), It.IsAny<CancellationToken>())).ReturnsAsync(cfResponse);
             return templateMetadataReader;
-        }
-
-        public static Task<AWSCredentials> ResolveCredentials()
-        {
-            var testCredentials = FallbackCredentialsFactory.GetCredentials();
-            return Task.FromResult<AWSCredentials>(testCredentials);
         }
 
         public static async Task<DeploymentStatus> WaitForDeployment(this RestAPIClient restApiClient, string sessionId)

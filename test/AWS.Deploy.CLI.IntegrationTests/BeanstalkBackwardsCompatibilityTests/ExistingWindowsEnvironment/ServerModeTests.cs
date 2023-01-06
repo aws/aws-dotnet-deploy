@@ -11,6 +11,7 @@ using Amazon.Runtime;
 using AWS.Deploy.CLI.Commands;
 using AWS.Deploy.CLI.IntegrationTests.Utilities;
 using AWS.Deploy.ServerMode.Client;
+using AWS.Deploy.ServerMode.Client.Utilities;
 using Xunit;
 
 namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests.ExistingWindowsEnvironment
@@ -31,7 +32,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests.E
         {
             var projectPath = _fixture.TestAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
             var portNumber = 4031;
-            using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ServerModeExtensions.ResolveCredentials);
+            using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ServerModeUtilities.ResolveDefaultCredentials);
 
             var serverCommand = new ServerModeCommand(_fixture.ToolInteractiveService, portNumber, null, true);
             var cancelSource = new CancellationTokenSource();
@@ -42,7 +43,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests.E
                 var baseUrl = $"http://localhost:{portNumber}/";
                 var restClient = new RestAPIClient(baseUrl, httpClient);
 
-                await restClient.WaitTillServerModeReady();
+                await restClient.WaitUntilServerModeReady();
 
                 var startSessionOutput = await restClient.StartDeploymentSessionAsync(new StartDeploymentSessionInput
                 {
