@@ -75,7 +75,12 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests
                     ExistingDeploymentId = _fixture.EnvironmentId
                 });
 
-                await restClient.StartDeploymentAsync(sessionId);
+                await restClient.StartDeploymentAsync(
+                    sessionId,
+                    new StartDeploymentInput
+                    {
+                        DirectDeploy = true
+                    });
 
                 await restClient.WaitForDeployment(sessionId);
 

@@ -235,7 +235,12 @@ namespace AWS.Deploy.CLI.IntegrationTests
                     NewDeploymentRecipeId = fargateRecommendation.RecipeId
                 });
 
-                await restClient.StartDeploymentAsync(sessionId);
+                await restClient.StartDeploymentAsync(
+                    sessionId,
+                    new StartDeploymentInput
+                    {
+                        DirectDeploy = true
+                    });
 
                 await restClient.WaitForDeployment(sessionId);
 

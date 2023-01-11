@@ -97,7 +97,14 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
                 });
                 Assert.Empty(applyConfigSettingsResponse.FailedConfigUpdates);
 
-                var exceptionThrown = await Assert.ThrowsAsync<ApiException>(async () => await restClient.StartDeploymentAsync(sessionId));
+                var exceptionThrown = await Assert.ThrowsAsync<ApiException>(
+                    async () =>
+                    await restClient.StartDeploymentAsync(
+                        sessionId,
+                        new StartDeploymentInput
+                        {
+                            DirectDeploy = true
+                        }));
                 Assert.Contains("Cpu value 4096 is not compatible with memory value 512.", exceptionThrown.Response);
             }
             finally

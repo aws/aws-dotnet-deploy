@@ -132,12 +132,12 @@ namespace AWS.Deploy.ServerMode.Client
     
         /// <summary>Begin execution of the deployment.</summary>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task StartDeploymentAsync(string sessionId);
+        System.Threading.Tasks.Task StartDeploymentAsync(string sessionId, StartDeploymentInput body);
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>Begin execution of the deployment.</summary>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task StartDeploymentAsync(string sessionId, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task StartDeploymentAsync(string sessionId, StartDeploymentInput body, System.Threading.CancellationToken cancellationToken);
     
         /// <summary>Gets the status of the deployment.</summary>
         /// <returns>Success</returns>
@@ -1146,15 +1146,15 @@ namespace AWS.Deploy.ServerMode.Client
     
         /// <summary>Begin execution of the deployment.</summary>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task StartDeploymentAsync(string sessionId)
+        public System.Threading.Tasks.Task StartDeploymentAsync(string sessionId, StartDeploymentInput body)
         {
-            return StartDeploymentAsync(sessionId, System.Threading.CancellationToken.None);
+            return StartDeploymentAsync(sessionId, body, System.Threading.CancellationToken.None);
         }
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>Begin execution of the deployment.</summary>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task StartDeploymentAsync(string sessionId, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task StartDeploymentAsync(string sessionId, StartDeploymentInput body, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/v1/Deployment/session/<sessionId>/execute?");
@@ -1170,7 +1170,9 @@ namespace AWS.Deploy.ServerMode.Client
             {
                 using (var request_ = new System.Net.Http.HttpRequestMessage())
                 {
-                    request_.Content = new System.Net.Http.StringContent(string.Empty, System.Text.Encoding.UTF8, "application/json");
+                    var content_ = new System.Net.Http.StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(body, _settings.Value));
+                    content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
+                    request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("POST");
     
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -2222,6 +2224,15 @@ namespace AWS.Deploy.ServerMode.Client
     
         [Newtonsoft.Json.JsonProperty("existingDeploymentId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string ExistingDeploymentId { get; set; }
+    
+    
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.4.1.0 (Newtonsoft.Json v13.0.0.0)")]
+    public partial class StartDeploymentInput 
+    {
+        [Newtonsoft.Json.JsonProperty("directDeploy", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public bool DirectDeploy { get; set; }
     
     
     }

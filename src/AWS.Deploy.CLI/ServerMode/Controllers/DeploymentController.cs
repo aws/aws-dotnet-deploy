@@ -535,7 +535,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
         [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound)]
         [ProducesResponseType(Microsoft.AspNetCore.Http.StatusCodes.Status424FailedDependency)]
         [Authorize]
-        public async Task<IActionResult> StartDeployment(string sessionId)
+        public async Task<IActionResult> StartDeployment(string sessionId, [FromBody] StartDeploymentInput input)
         {
             var state = _stateServer.Get(sessionId);
             if (state == null)
@@ -580,6 +580,9 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
             if (capabilities.Any())
                 return Problem($"Unable to start deployment due to missing system capabilities.{Environment.NewLine}{missingCapabilitiesMessage}", statusCode: Microsoft.AspNetCore.Http.StatusCodes.Status424FailedDependency);
+
+            var cdkProjectHandler = serviceProvider.GetRequiredService<ICdkProjectHandler>();
+            cdkProjectHandler.DirectDeploy = input.DirectDeploy;
 
             var task = new DeployRecommendationTask(orchestratorSession, orchestrator, state.ApplicationDetails, state.SelectedRecommendation);
             state.DeploymentTask = task.Execute();
