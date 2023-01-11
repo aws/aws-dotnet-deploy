@@ -17,7 +17,6 @@ using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.CDK;
 using AWS.Deploy.Recipes;
 using Moq;
-using Xunit;
 using Should;
 using AWS.Deploy.Common.Recipes;
 using Newtonsoft.Json;
@@ -27,9 +26,11 @@ using AWS.Deploy.Orchestration.LocalUserSettings;
 using AWS.Deploy.Orchestration.Utilities;
 using AWS.Deploy.Orchestration.ServiceHandlers;
 using AWS.Deploy.Common.Recipes.Validation;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 {
+    [TestClass]
     public class RecommendationTests : IDisposable
     {
         private readonly CommandLineWrapper _commandLineWrapper;
@@ -41,7 +42,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             _commandLineWrapper = new CommandLineWrapper(_inMemoryInteractiveService);
         }
 
-        [Fact]
+        [TestMethod]
         public async Task GenerateRecommendationsForDeploymentProject()
         {
             // ARRANGE
@@ -55,13 +56,13 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 
             // ASSERT
             var anyNonCdkRecommendations = recommendations.Where(x => x.Recipe.DeploymentType != DeploymentTypes.CdkProject);
-            Assert.False(anyNonCdkRecommendations.Any());
+            Assert.IsFalse(anyNonCdkRecommendations.Any());
 
-            Assert.NotNull(recommendations.FirstOrDefault(x => x.Recipe.Id == "AspNetAppEcsFargate"));
-            Assert.NotNull(recommendations.FirstOrDefault(x => x.Recipe.Id == "AspNetAppElasticBeanstalkLinux"));
+            Assert.IsNotNull(recommendations.FirstOrDefault(x => x.Recipe.Id == "AspNetAppEcsFargate"));
+            Assert.IsNotNull(recommendations.FirstOrDefault(x => x.Recipe.Id == "AspNetAppElasticBeanstalkLinux"));
         }
 
-        [Fact]
+        [TestMethod]
         public async Task GenerateRecommendationsWithoutCustomRecipes()
         {
             // ARRANGE
@@ -84,7 +85,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             recommendations[6].Name.ShouldEqual("Container Image to Amazon Elastic Container Registry (ECR)"); // default recipe
         }
 
-        [Fact]
+        [TestMethod]
         public async Task GenerateRecommendationsFromCustomRecipesWithManifestFile()
         {
             // ARRANGE
@@ -135,7 +136,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             File.Exists(Path.Combine(webAppWithDockerFilePath, "aws-deployments.json")).ShouldBeTrue();
         }
 
-        [Fact]
+        [TestMethod]
         public async Task GenerateRecommendationsFromCustomRecipesWithoutManifestFile()
         {
             // ARRANGE
@@ -185,7 +186,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             File.Exists(Path.Combine(webAppNoDockerFilePath, "aws-deployments.json")).ShouldBeFalse();
         }
 
-        [Fact]
+        [TestMethod]
         public async Task GenerateRecommendationsFromCompatibleDeploymentProject()
         {
             // ARRANGE
@@ -213,7 +214,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             recommendations[0].Recipe.RecipePath.ShouldEqual(Path.Combine(saveDirectoryPathEcsProject, "ECS-CDK.recipe"));
         }
 
-        [Fact]
+        [TestMethod]
         public async Task GenerateRecommendationsFromIncompatibleDeploymentProject()
         {
             // ARRANGE

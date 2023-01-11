@@ -15,11 +15,12 @@ using AWS.Deploy.CLI.IntegrationTests.Services;
 using AWS.Deploy.Orchestration.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Xunit;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Environment = System.Environment;
 
 namespace AWS.Deploy.CLI.IntegrationTests
 {
+    [TestClass]
     public class WebAppNoDockerFileTests : IDisposable
     {
         private readonly HttpHelper _httpHelper;
@@ -55,10 +56,10 @@ namespace AWS.Deploy.CLI.IntegrationTests
             Helpers.Utilities.OverrideDefaultWorkspace(serviceProvider, _customWorkspace);
 
             _app = serviceProvider.GetService<App>();
-            Assert.NotNull(_app);
+            Assert.IsNotNull(_app);
 
             _interactiveService = serviceProvider.GetService<InMemoryInteractiveService>();
-            Assert.NotNull(_interactiveService);
+            Assert.IsNotNull(_interactiveService);
 
             _httpHelper = new HttpHelper(_interactiveService);
 
@@ -68,11 +69,11 @@ namespace AWS.Deploy.CLI.IntegrationTests
             _testAppManager = new TestAppManager();
         }
 
-        [Theory]
-        [InlineData("ElasticBeanStalkConfigFile-Linux.json", true)]
-        [InlineData("ElasticBeanStalkConfigFile-Linux-SelfContained.json", true)]
-        [InlineData("ElasticBeanStalkConfigFile-Windows.json", false)]
-        [InlineData("ElasticBeanStalkConfigFile-Windows-SelfContained.json", false)]
+        [TestMethod]
+        [DataRow("ElasticBeanStalkConfigFile-Linux.json", true)]
+        [DataRow("ElasticBeanStalkConfigFile-Linux-SelfContained.json", true)]
+        [DataRow("ElasticBeanStalkConfigFile-Windows.json", false)]
+        [DataRow("ElasticBeanStalkConfigFile-Windows-SelfContained.json", false)]
         public async Task EBDefaultConfigurations(string configFile, bool linux)
         {
             _stackName = $"BeanstalkTest-{Guid.NewGuid().ToString().Split('-').Last()}";
@@ -80,21 +81,21 @@ namespace AWS.Deploy.CLI.IntegrationTests
             // Deploy
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
             var deployArgs = new[] { "deploy", "--project-path", projectPath, "--application-name", _stackName, "--diagnostics", "--silent", "--apply", configFile, "--direct-deploy" };
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
+            Assert.AreEqual(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
 
             // Verify application is deployed and running
-            Assert.Equal(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
+            Assert.AreEqual(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
 
             var deployStdOut = _interactiveService.StdOutReader.ReadAllLines();
 
             var tempCdkProjectLine = deployStdOut.First(line => line.StartsWith("Saving AWS CDK deployment project to: "));
             var tempCdkProject = tempCdkProjectLine.Split(": ")[1].Trim();
-            Assert.False(Directory.Exists(tempCdkProject), $"{tempCdkProject} must not exist.");
+            Assert.IsFalse(Directory.Exists(tempCdkProject), $"{tempCdkProject} must not exist.");
 
             // Example:     Endpoint: http://52.36.216.238/
             var endpointLine = deployStdOut.First(line => line.Trim().StartsWith($"Endpoint"));
             var applicationUrl = endpointLine.Substring(endpointLine.IndexOf(":") + 1).Trim();
-            Assert.True(Uri.IsWellFormedUriString(applicationUrl, UriKind.Absolute));
+            Assert.IsTrue(Uri.IsWellFormedUriString(applicationUrl, UriKind.Absolute));
 
             if(!linux)
             {
@@ -107,21 +108,21 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
             // list
             var listArgs = new[] { "list-deployments", "--diagnostics" };
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(listArgs)); ;
+            Assert.AreEqual(CommandReturnCodes.SUCCESS, await _app.Run(listArgs)); ;
 
             // Verify stack exists in list of deployments
             var listStdOut = _interactiveService.StdOutReader.ReadAllLines().Select(x => x.Split()[0]).ToList();
-            Assert.Contains(listStdOut, (deployment) => _stackName.Equals(deployment));
+            CollectionAssert.Contains(listStdOut, _stackName);
 
             // Arrange input for delete
             // Use --silent flag to delete without user prompts
             var deleteArgs = new[] { "delete-deployment", _stackName, "--diagnostics", "--silent" };
 
             // Delete
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deleteArgs)); ;
+            Assert.AreEqual(CommandReturnCodes.SUCCESS, await _app.Run(deleteArgs)); ;
 
             // Verify application is deleted
-            Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName), $"{_stackName} still exists.");
+            Assert.IsTrue(await _cloudFormationHelper.IsStackDeleted(_stackName), $"{_stackName} still exists.");
         }
 
         public void Dispose()

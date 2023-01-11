@@ -16,10 +16,11 @@ using AWS.Deploy.CLI.IntegrationTests.Extensions;
 using AWS.Deploy.CLI.IntegrationTests.Utilities;
 using AWS.Deploy.ServerMode.Client;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
 {
+    [TestClass]
     public class DependencyValidationOptionSettings : IDisposable
     {
         private bool _isDisposed;
@@ -43,7 +44,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
             _testAppManager = new TestAppManager();
         }
 
-        [Fact]
+        [TestMethod]
         public async Task DependentOptionSettingsGetInvalidated()
         {
             _stackName = $"ServerModeWebAppRunner{Guid.NewGuid().ToString().Split('-').Last()}";
@@ -71,17 +72,17 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
                 var beanstalkRecommendation = await restClient.GetRecommendationsAndSetDeploymentTarget(sessionId, "AspNetAppElasticBeanstalkLinux", _stackName);
 
                 var applicationIAMRole = (await restClient.GetConfigSettingsAsync(sessionId)).OptionSettings.First(x => x.Id.Equals("ApplicationIAMRole"));
-                Assert.Equal(ValidationStatus.Valid, applicationIAMRole.Validation.ValidationStatus);
-                Assert.True(string.IsNullOrEmpty(applicationIAMRole.Validation.ValidationMessage));
-                Assert.Null(applicationIAMRole.Validation.InvalidValue);
+                Assert.AreEqual(ValidationStatus.Valid, applicationIAMRole.Validation.ValidationStatus);
+                Assert.IsTrue(string.IsNullOrEmpty(applicationIAMRole.Validation.ValidationMessage));
+                Assert.IsNull(applicationIAMRole.Validation.InvalidValue);
                 var validCreateNew = applicationIAMRole.ChildOptionSettings.First(x => x.Id.Equals("CreateNew"));
-                Assert.Equal(ValidationStatus.Valid, validCreateNew.Validation.ValidationStatus);
-                Assert.True(string.IsNullOrEmpty(validCreateNew.Validation.ValidationMessage));
-                Assert.Null(validCreateNew.Validation.InvalidValue);
+                Assert.AreEqual(ValidationStatus.Valid, validCreateNew.Validation.ValidationStatus);
+                Assert.IsTrue(string.IsNullOrEmpty(validCreateNew.Validation.ValidationMessage));
+                Assert.IsNull(validCreateNew.Validation.InvalidValue);
                 var validRoleArn = applicationIAMRole.ChildOptionSettings.First(x => x.Id.Equals("RoleArn"));
-                Assert.Equal(ValidationStatus.Valid, validRoleArn.Validation.ValidationStatus);
-                Assert.True(string.IsNullOrEmpty(validRoleArn.Validation.ValidationMessage));
-                Assert.Null(validRoleArn.Validation.InvalidValue);
+                Assert.AreEqual(ValidationStatus.Valid, validRoleArn.Validation.ValidationStatus);
+                Assert.IsTrue(string.IsNullOrEmpty(validRoleArn.Validation.ValidationMessage));
+                Assert.IsNull(validRoleArn.Validation.InvalidValue);
 
                 var applyConfigResponse = await restClient.ApplyConfigSettingsAsync(sessionId, new ApplyConfigSettingsInput()
                 {
@@ -92,19 +93,19 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
                 });
 
                 applicationIAMRole = (await restClient.GetConfigSettingsAsync(sessionId)).OptionSettings.First(x => x.Id.Equals("ApplicationIAMRole"));
-                Assert.Equal(ValidationStatus.Valid, applicationIAMRole.Validation.ValidationStatus);
-                Assert.True(string.IsNullOrEmpty(applicationIAMRole.Validation.ValidationMessage));
-                Assert.Null(applicationIAMRole.Validation.InvalidValue);
+                Assert.AreEqual(ValidationStatus.Valid, applicationIAMRole.Validation.ValidationStatus);
+                Assert.IsTrue(string.IsNullOrEmpty(applicationIAMRole.Validation.ValidationMessage));
+                Assert.IsNull(applicationIAMRole.Validation.InvalidValue);
                 validCreateNew = applicationIAMRole.ChildOptionSettings.First(x => x.Id.Equals("CreateNew"));
-                Assert.Equal(ValidationStatus.Valid, validCreateNew.Validation.ValidationStatus);
-                Assert.True(string.IsNullOrEmpty(validCreateNew.Validation.ValidationMessage));
-                Assert.Null(validCreateNew.Validation.InvalidValue);
+                Assert.AreEqual(ValidationStatus.Valid, validCreateNew.Validation.ValidationStatus);
+                Assert.IsTrue(string.IsNullOrEmpty(validCreateNew.Validation.ValidationMessage));
+                Assert.IsNull(validCreateNew.Validation.InvalidValue);
                 validRoleArn = applicationIAMRole.ChildOptionSettings.First(x => x.Id.Equals("RoleArn"));
-                Assert.Equal(ValidationStatus.Invalid, validRoleArn.Validation.ValidationStatus);
-                Assert.Equal("Invalid IAM Role ARN. The ARN should contain the arn:[PARTITION]:iam namespace, followed by the account ID, and then the resource path. For example - arn:aws:iam::123456789012:role/S3Access is a valid IAM Role ARN. For more information visit https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-arns",
+                Assert.AreEqual(ValidationStatus.Invalid, validRoleArn.Validation.ValidationStatus);
+                Assert.AreEqual("Invalid IAM Role ARN. The ARN should contain the arn:[PARTITION]:iam namespace, followed by the account ID, and then the resource path. For example - arn:aws:iam::123456789012:role/S3Access is a valid IAM Role ARN. For more information visit https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-arns",
                     validRoleArn.Validation.ValidationMessage);
-                Assert.NotNull(validRoleArn.Validation.InvalidValue);
-                Assert.True(string.IsNullOrEmpty(validRoleArn.Validation.InvalidValue.ToString()));
+                Assert.IsNotNull(validRoleArn.Validation.InvalidValue);
+                Assert.IsTrue(string.IsNullOrEmpty(validRoleArn.Validation.InvalidValue.ToString()));
 
                 applyConfigResponse = await restClient.ApplyConfigSettingsAsync(sessionId, new ApplyConfigSettingsInput()
                 {
@@ -115,17 +116,17 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
                 });
 
                 applicationIAMRole = (await restClient.GetConfigSettingsAsync(sessionId)).OptionSettings.First(x => x.Id.Equals("ApplicationIAMRole"));
-                Assert.Equal(ValidationStatus.Valid, applicationIAMRole.Validation.ValidationStatus);
-                Assert.True(string.IsNullOrEmpty(applicationIAMRole.Validation.ValidationMessage));
-                Assert.Null(applicationIAMRole.Validation.InvalidValue);
+                Assert.AreEqual(ValidationStatus.Valid, applicationIAMRole.Validation.ValidationStatus);
+                Assert.IsTrue(string.IsNullOrEmpty(applicationIAMRole.Validation.ValidationMessage));
+                Assert.IsNull(applicationIAMRole.Validation.InvalidValue);
                 validCreateNew = applicationIAMRole.ChildOptionSettings.First(x => x.Id.Equals("CreateNew"));
-                Assert.Equal(ValidationStatus.Valid, validCreateNew.Validation.ValidationStatus);
-                Assert.True(string.IsNullOrEmpty(validCreateNew.Validation.ValidationMessage));
-                Assert.Null(validCreateNew.Validation.InvalidValue);
+                Assert.AreEqual(ValidationStatus.Valid, validCreateNew.Validation.ValidationStatus);
+                Assert.IsTrue(string.IsNullOrEmpty(validCreateNew.Validation.ValidationMessage));
+                Assert.IsNull(validCreateNew.Validation.InvalidValue);
                 validRoleArn = applicationIAMRole.ChildOptionSettings.First(x => x.Id.Equals("RoleArn"));
-                Assert.Equal(ValidationStatus.Valid, validRoleArn.Validation.ValidationStatus);
-                Assert.True(string.IsNullOrEmpty(validRoleArn.Validation.ValidationMessage));
-                Assert.Null(validRoleArn.Validation.InvalidValue);
+                Assert.AreEqual(ValidationStatus.Valid, validRoleArn.Validation.ValidationStatus);
+                Assert.IsTrue(string.IsNullOrEmpty(validRoleArn.Validation.ValidationMessage));
+                Assert.IsNull(validRoleArn.Validation.InvalidValue);
             }
             finally
             {
@@ -134,7 +135,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
             }
         }
 
-        [Fact]
+        [TestMethod]
         public async Task SettingInvalidValue()
         {
             _stackName = $"ServerModeWebAppRunner{Guid.NewGuid().ToString().Split('-').Last()}";
@@ -162,11 +163,11 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
                 var beanstalkRecommendation = await restClient.GetRecommendationsAndSetDeploymentTarget(sessionId, "AspNetAppElasticBeanstalkLinux", _stackName);
 
                 var applicationIAMRole = (await restClient.GetConfigSettingsAsync(sessionId)).OptionSettings.First(x => x.Id.Equals("ApplicationIAMRole"));
-                Assert.Null(applicationIAMRole.Validation.InvalidValue);
+                Assert.IsNull(applicationIAMRole.Validation.InvalidValue);
                 var validCreateNew = applicationIAMRole.ChildOptionSettings.First(x => x.Id.Equals("CreateNew"));
-                Assert.Null(validCreateNew.Validation.InvalidValue);
+                Assert.IsNull(validCreateNew.Validation.InvalidValue);
                 var validRoleArn = applicationIAMRole.ChildOptionSettings.First(x => x.Id.Equals("RoleArn"));
-                Assert.Null(validRoleArn.Validation.InvalidValue);
+                Assert.IsNull(validRoleArn.Validation.InvalidValue);
 
                 var applyConfigResponse = await restClient.ApplyConfigSettingsAsync(sessionId, new ApplyConfigSettingsInput()
                 {
@@ -178,12 +179,12 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
                 });
 
                 applicationIAMRole = (await restClient.GetConfigSettingsAsync(sessionId)).OptionSettings.First(x => x.Id.Equals("ApplicationIAMRole"));
-                Assert.Null(applicationIAMRole.Validation.InvalidValue);
+                Assert.IsNull(applicationIAMRole.Validation.InvalidValue);
                 validCreateNew = applicationIAMRole.ChildOptionSettings.First(x => x.Id.Equals("CreateNew"));
-                Assert.Null(validCreateNew.Validation.InvalidValue);
+                Assert.IsNull(validCreateNew.Validation.InvalidValue);
                 validRoleArn = applicationIAMRole.ChildOptionSettings.First(x => x.Id.Equals("RoleArn"));
-                Assert.NotNull(validRoleArn.Validation.InvalidValue);
-                Assert.Equal("fakeArn", validRoleArn.Validation.InvalidValue);
+                Assert.IsNotNull(validRoleArn.Validation.InvalidValue);
+                Assert.AreEqual("fakeArn", validRoleArn.Validation.InvalidValue);
 
                 applyConfigResponse = await restClient.ApplyConfigSettingsAsync(sessionId, new ApplyConfigSettingsInput()
                 {
@@ -194,11 +195,11 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
                 });
 
                 applicationIAMRole = (await restClient.GetConfigSettingsAsync(sessionId)).OptionSettings.First(x => x.Id.Equals("ApplicationIAMRole"));
-                Assert.Null(applicationIAMRole.Validation.InvalidValue);
+                Assert.IsNull(applicationIAMRole.Validation.InvalidValue);
                 validCreateNew = applicationIAMRole.ChildOptionSettings.First(x => x.Id.Equals("CreateNew"));
-                Assert.Null(validCreateNew.Validation.InvalidValue);
+                Assert.IsNull(validCreateNew.Validation.InvalidValue);
                 validRoleArn = applicationIAMRole.ChildOptionSettings.First(x => x.Id.Equals("RoleArn"));
-                Assert.Null(validRoleArn.Validation.InvalidValue);
+                Assert.IsNull(validRoleArn.Validation.InvalidValue);
 
                 applyConfigResponse = await restClient.ApplyConfigSettingsAsync(sessionId, new ApplyConfigSettingsInput()
                 {
@@ -209,11 +210,11 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
                 });
 
                 applicationIAMRole = (await restClient.GetConfigSettingsAsync(sessionId)).OptionSettings.First(x => x.Id.Equals("ApplicationIAMRole"));
-                Assert.Null(applicationIAMRole.Validation.InvalidValue);
+                Assert.IsNull(applicationIAMRole.Validation.InvalidValue);
                 validCreateNew = applicationIAMRole.ChildOptionSettings.First(x => x.Id.Equals("CreateNew"));
-                Assert.Null(validCreateNew.Validation.InvalidValue);
+                Assert.IsNull(validCreateNew.Validation.InvalidValue);
                 validRoleArn = applicationIAMRole.ChildOptionSettings.First(x => x.Id.Equals("RoleArn"));
-                Assert.Null(validRoleArn.Validation.InvalidValue);
+                Assert.IsNull(validRoleArn.Validation.InvalidValue);
             }
             finally
             {

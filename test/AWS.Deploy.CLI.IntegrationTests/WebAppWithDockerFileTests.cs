@@ -15,11 +15,12 @@ using AWS.Deploy.CLI.IntegrationTests.Extensions;
 using AWS.Deploy.CLI.IntegrationTests.Helpers;
 using AWS.Deploy.CLI.IntegrationTests.Services;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 using Task = System.Threading.Tasks.Task;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace AWS.Deploy.CLI.IntegrationTests
 {
+    [TestClass]
     public class WebAppWithDockerFileTests : IDisposable
     {
         private readonly HttpHelper _httpHelper;
@@ -44,10 +45,10 @@ namespace AWS.Deploy.CLI.IntegrationTests
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
             _app = serviceProvider.GetService<App>();
-            Assert.NotNull(_app);
+            Assert.IsNotNull(_app);
 
             _interactiveService = serviceProvider.GetService<InMemoryInteractiveService>();
-            Assert.NotNull(_interactiveService);
+            Assert.IsNotNull(_interactiveService);
 
             _httpHelper = new HttpHelper(_interactiveService);
 
@@ -57,7 +58,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             _testAppManager = new TestAppManager();
         }
 
-        [Fact]
+        [TestMethod]
         public async Task DefaultConfigurations()
         {
             _stackName = $"WebAppWithDockerFile{Guid.NewGuid().ToString().Split('-').Last()}";
@@ -70,19 +71,19 @@ namespace AWS.Deploy.CLI.IntegrationTests
             // Deploy
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
             var deployArgs = new[] { "deploy", "--project-path", projectPath, "--application-name", _stackName, "--diagnostics", "--direct-deploy" };
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
+            Assert.AreEqual(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
 
             // Verify application is deployed and running
-            Assert.Equal(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
+            Assert.AreEqual(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
 
             var cluster = await _ecsHelper.GetCluster(_stackName);
-            Assert.Equal("ACTIVE", cluster.Status);
+            Assert.AreEqual("ACTIVE", cluster.Status);
 
             var deployStdOut = _interactiveService.StdOutReader.ReadAllLines();
 
             var tempCdkProjectLine = deployStdOut.First(line => line.StartsWith("Saving AWS CDK deployment project to: "));
             var tempCdkProject = tempCdkProjectLine.Split(": ")[1].Trim();
-            Assert.False(Directory.Exists(tempCdkProject), $"{tempCdkProject} must not exist.");
+            Assert.IsFalse(Directory.Exists(tempCdkProject), $"{tempCdkProject} must not exist.");
 
             var applicationUrl = deployStdOut.First(line => line.Trim().StartsWith("Endpoint:"))
                 .Split(" ")[1]
@@ -93,11 +94,12 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
             // list
             var listArgs = new[] { "list-deployments", "--diagnostics" };
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(listArgs));;
+            Assert.AreEqual(CommandReturnCodes.SUCCESS, await _app.Run(listArgs));;
 
             // Verify stack exists in list of deployments
             var listDeployStdOut = _interactiveService.StdOutReader.ReadAllLines().Select(x => x.Split()[0]).ToList();
-            Assert.Contains(listDeployStdOut, (deployment) => _stackName.Equals(deployment));
+            CollectionAssert.Contains(listDeployStdOut, _stackName);
+            
 
             // Arrange input for re-deployment
             await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Select default option settings
@@ -105,9 +107,9 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
             // Perform re-deployment
             deployArgs = new[] { "deploy", "--project-path", projectPath, "--application-name", _stackName, "--diagnostics", "--direct-deploy" };
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
-            Assert.Equal(StackStatus.UPDATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
-            Assert.Equal("ACTIVE", cluster.Status);
+            Assert.AreEqual(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
+            Assert.AreEqual(StackStatus.UPDATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
+            Assert.AreEqual("ACTIVE", cluster.Status);
 
             // Arrange input for delete
             await _interactiveService.StdInWriter.WriteAsync("y"); // Confirm delete
@@ -115,13 +117,13 @@ namespace AWS.Deploy.CLI.IntegrationTests
             var deleteArgs = new[] { "delete-deployment", _stackName, "--diagnostics" };
 
             // Delete
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deleteArgs));;
+            Assert.AreEqual(CommandReturnCodes.SUCCESS, await _app.Run(deleteArgs));;
 
             // Verify application is deleted
-            Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName), $"{_stackName} still exists.");
+            Assert.IsTrue(await _cloudFormationHelper.IsStackDeleted(_stackName), $"{_stackName} still exists.");
         }
 
-        [Fact]
+        [TestMethod]
         public async Task AppRunnerDeployment()
         {
             var stackNamePlaceholder = "{StackName}";
@@ -132,10 +134,10 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
             // Deploy
             var deployArgs = new[] { "deploy", "--project-path", projectPath, "--application-name", _stackName, "--diagnostics", "--apply", configFilePath, "--silent", "--direct-deploy" };
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
+            Assert.AreEqual(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
 
             // Verify application is deployed and running
-            Assert.Equal(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
+            Assert.AreEqual(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
 
             var deployStdOut = _interactiveService.StdOutReader.ReadAllLines();
 
@@ -143,7 +145,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
                 .Split("=")[1]
                 .Trim();
 
-            Assert.Contains("awsapprunner", applicationUrl);
+            StringAssert.Contains("awsapprunner", applicationUrl);
 
             // URL could take few more minutes to come live, therefore, we want to wait and keep trying for a specified timeout
             await _httpHelper.WaitUntilSuccessStatusCode(applicationUrl, TimeSpan.FromSeconds(5), TimeSpan.FromMinutes(5));
@@ -152,15 +154,15 @@ namespace AWS.Deploy.CLI.IntegrationTests
             var checkEnvironmentVariableUrl = applicationUrl + "envvar/TEST_Key1";
             using var httpClient = new HttpClient();
             var envVarValue = await httpClient.GetStringAsync(checkEnvironmentVariableUrl);
-            Assert.Equal("Value1", envVarValue);
+            Assert.AreEqual("Value1", envVarValue);
 
             // list
             var listArgs = new[] { "list-deployments", "--diagnostics" };
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(listArgs));;
+            Assert.AreEqual(CommandReturnCodes.SUCCESS, await _app.Run(listArgs));;
 
             // Verify stack exists in list of deployments
             var listDeployStdOut = _interactiveService.StdOutReader.ReadAllLines().Select(x => x.Split()[0]).ToList();
-            Assert.Contains(listDeployStdOut, (deployment) => _stackName.Equals(deployment));
+            CollectionAssert.Contains(listDeployStdOut, _stackName);
 
             // Arrange input for delete
             await _interactiveService.StdInWriter.WriteAsync("y"); // Confirm delete
@@ -168,10 +170,10 @@ namespace AWS.Deploy.CLI.IntegrationTests
             var deleteArgs = new[] { "delete-deployment", _stackName, "--diagnostics" };
 
             // Delete
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deleteArgs));;
+            Assert.AreEqual(CommandReturnCodes.SUCCESS, await _app.Run(deleteArgs));;
 
             // Verify application is deleted
-            Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName));
+            Assert.IsTrue(await _cloudFormationHelper.IsStackDeleted(_stackName));
         }
 
         public void Dispose()

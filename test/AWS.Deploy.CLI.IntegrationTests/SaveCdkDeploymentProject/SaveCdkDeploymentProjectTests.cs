@@ -7,13 +7,14 @@ using System.Linq;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.CLI.IntegrationTests.Services;
 using AWS.Deploy.CLI.Utilities;
-using Xunit;
 using Task = System.Threading.Tasks.Task;
 using Newtonsoft.Json;
 using AWS.Deploy.Common.Recipes;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 {
+    [TestClass]
     public class SaveCdkDeploymentProjectTests : IDisposable
     {
         private readonly CommandLineWrapper _commandLineWrapper;
@@ -25,7 +26,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             _commandLineWrapper = new CommandLineWrapper(_inMemoryInteractiveService);
         }
 
-        [Fact]
+        [TestMethod]
         public async Task DefaultSaveDirectory()
         {
             var tempDirectoryPath = new TestAppManager().GetProjectPath(string.Empty);
@@ -36,13 +37,13 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 
             // Verify a bug fix that the IDictionary for TypeHintData was not getting serialized.
             var recipeFilePath = Directory.GetFiles(targetApplicationProjectPath + ".Deployment", "*.recipe", SearchOption.TopDirectoryOnly).FirstOrDefault();
-            Assert.True(File.Exists(recipeFilePath));
+            Assert.IsTrue(File.Exists(recipeFilePath));
             var recipeRoot = JsonConvert.DeserializeObject<RecipeDefinition>(File.ReadAllText(recipeFilePath));
             var applicationIAMRoleSetting = recipeRoot.OptionSettings.FirstOrDefault(x => string.Equals(x.Id, "ApplicationIAMRole"));
-            Assert.Equal("ecs-tasks.amazonaws.com", applicationIAMRoleSetting.TypeHintData["ServicePrincipal"]);
+            Assert.AreEqual("ecs-tasks.amazonaws.com", applicationIAMRoleSetting.TypeHintData["ServicePrincipal"]);
         }
 
-        [Fact]
+        [TestMethod]
         public async Task CustomSaveDirectory()
         {
             var tempDirectoryPath = new TestAppManager().GetProjectPath(string.Empty);
@@ -53,7 +54,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             await Utilities.CreateCDKDeploymentProject(targetApplicationProjectPath, saveDirectoryPath);
         }
 
-        [Fact]
+        [TestMethod]
         public async Task InvalidSaveCdkDirectoryInsideProjectDirectory()
         {
             var tempDirectoryPath = new TestAppManager().GetProjectPath(string.Empty);
@@ -64,7 +65,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             await Utilities.CreateCDKDeploymentProject(targetApplicationProjectPath, saveDirectoryPath, false);
         }
 
-        [Fact]
+        [TestMethod]
         public async Task InvalidNonEmptySaveCdkDirectory()
         {
             var tempDirectoryPath = new TestAppManager().GetProjectPath(string.Empty);

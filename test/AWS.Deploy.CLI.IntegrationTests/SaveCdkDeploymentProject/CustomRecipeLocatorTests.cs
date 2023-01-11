@@ -7,7 +7,6 @@ using AWS.Deploy.CLI.Utilities;
 using AWS.Deploy.Common.DeploymentManifest;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Orchestration;
-using Xunit;
 using Task = System.Threading.Tasks.Task;
 using Should;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
@@ -15,9 +14,11 @@ using AWS.Deploy.CLI.IntegrationTests.Services;
 using AWS.Deploy.Common.Recipes;
 using Moq;
 using AWS.Deploy.Common.Recipes.Validation;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 {
+    [TestClass]
     public class CustomRecipeLocatorTests : IDisposable
     {
         private readonly CommandLineWrapper _commandLineWrapper;
@@ -28,7 +29,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             _inMemoryInteractiveService = new InMemoryInteractiveService();
             _commandLineWrapper = new CommandLineWrapper(_inMemoryInteractiveService);        }
 
-        [Fact]
+        [TestMethod]
         public async Task LocateCustomRecipePathsWithManifestFile()
         {
             var tempDirectoryPath = new TestAppManager().GetProjectPath(string.Empty);
@@ -52,7 +53,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             customRecipePaths.ShouldContain(Path.Combine(tempDirectoryPath, "MyCdkApp1"));
         }
 
-        [Fact]
+        [TestMethod]
         public async Task LocateCustomRecipePathsWithoutManifestFile()
         {
             var tempDirectoryPath = new TestAppManager().GetProjectPath(string.Empty);
