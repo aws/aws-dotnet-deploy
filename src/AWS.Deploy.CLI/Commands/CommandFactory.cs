@@ -49,6 +49,7 @@ namespace AWS.Deploy.CLI.Commands
         private static readonly Option<string> _optionDeploymentProject = new(new[] { "--deployment-project" }, "The absolute or relative path of the CDK project that will be used for deployment");
         private static readonly Option<string> _optionSaveSettings = new(new[] { "--save-settings" }, "The absolute or the relative JSON file path where the deployment settings will be saved. Only the settings modified by the user will be persisted");
         private static readonly Option<string> _optionSaveAllSettings = new(new[] { "--save-all-settings" }, "The absolute or the relative JSON file path where the deployment settings will be saved. All deployment settings will be persisted");
+        private static readonly Option<string> _optionDirectDeploy = new(new[] { "--direct-deploy" }, "Skips CloudFormation changeset creation and updates stack directly. This option is only for CloudFormation stack-based deployments.");
         private static readonly object s_root_command_lock = new();
         private static readonly object s_child_command_lock = new();
 
@@ -184,6 +185,7 @@ namespace AWS.Deploy.CLI.Commands
                 deployCommand.Add(_optionDeploymentProject);
                 deployCommand.Add(_optionSaveSettings);
                 deployCommand.Add(_optionSaveAllSettings);
+                deployCommand.Add(_optionDirectDeploy);
             }
 
             deployCommand.Handler = CommandHandler.Create(async (DeployCommandHandlerInput input) =>
@@ -221,6 +223,8 @@ namespace AWS.Deploy.CLI.Commands
                     };
 
                     var dockerEngine = new DockerEngine.DockerEngine(projectDefinition, _fileManager, _directoryManager);
+
+                    _cdkProjectHandler.DirectDeploy = input.DirectDeploy;
 
                     var deploy = new DeployCommand(
                         _serviceProvider,

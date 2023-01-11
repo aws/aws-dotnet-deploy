@@ -69,7 +69,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             await _interactiveService.StdInWriter.FlushAsync();
 
             // Deploy
-            var deployArgs = new[] { "deploy", "--project-path", _testAppManager.GetProjectPath(Path.Combine(components)), "--application-name", _stackName, "--diagnostics" };
+            var deployArgs = new[] { "deploy", "--project-path", _testAppManager.GetProjectPath(Path.Combine(components)), "--application-name", _stackName, "--diagnostics", "--direct-deploy" };
             Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
 
             // Verify application is deployed and running
@@ -102,7 +102,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             await _interactiveService.StdInWriter.FlushAsync();
 
             // Perform re-deployment
-            deployArgs = new[] { "deploy", "--project-path", _testAppManager.GetProjectPath(Path.Combine(components)), "--application-name", _stackName, "--diagnostics" };
+            deployArgs = new[] { "deploy", "--project-path", _testAppManager.GetProjectPath(Path.Combine(components)), "--application-name", _stackName, "--diagnostics", "--direct-deploy" };
             Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
             Assert.Equal(StackStatus.UPDATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
 

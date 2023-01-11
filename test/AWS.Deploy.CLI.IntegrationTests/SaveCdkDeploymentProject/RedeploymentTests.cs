@@ -70,14 +70,14 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             await Utilities.CreateCDKDeploymentProjectWithRecipeName(projectPath, "Custom App Runner Recipe", "2", incompatibleDeploymentProjectPath, underSourceControl: false);
 
             // attempt re-deployment using incompatible CDK project
-            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--deployment-project", incompatibleDeploymentProjectPath, "--application-name", _stackName, "--diagnostics" };
+            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--deployment-project", incompatibleDeploymentProjectPath, "--application-name", _stackName, "--diagnostics", "--direct-deploy" };
             var returnCode = await _app.Run(deployArgs);
             Assert.Equal(CommandReturnCodes.USER_ERROR, returnCode);
 
             // attempt re-deployment using compatible CDK project
             await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Select default option settings
             await _interactiveService.StdInWriter.FlushAsync();
-            deployArgs = new[] { "deploy", "--project-path", projectPath, "--deployment-project", compatibleDeploymentProjectPath, "--application-name", _stackName, "--diagnostics" };
+            deployArgs = new[] { "deploy", "--project-path", projectPath, "--deployment-project", compatibleDeploymentProjectPath, "--application-name", _stackName, "--diagnostics", "--direct-deploy" };
             returnCode = await _app.Run(deployArgs);
             Assert.Equal(CommandReturnCodes.SUCCESS, returnCode);
             Assert.Equal(StackStatus.UPDATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
@@ -96,7 +96,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             await _interactiveService.StdInWriter.FlushAsync();
 
             // Deploy
-            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--application-name", _stackName, "--diagnostics" };
+            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--application-name", _stackName, "--diagnostics", "--direct-deploy" };
             var returnCode = await _app.Run(deployArgs);
             Assert.Equal(CommandReturnCodes.SUCCESS, returnCode);
 

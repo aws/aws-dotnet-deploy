@@ -77,7 +77,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
             _stackName = $"WebAppNoDockerFile{Guid.NewGuid().ToString().Split('-').Last()}";
             ConfigFileHelper.ApplyReplacementTokens(new Dictionary<string, string> { {stackNamePlaceholder, _stackName } }, configFilePath);
 
-            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--apply", configFilePath, "--silent", "--diagnostics" };
+            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--apply", configFilePath, "--silent", "--diagnostics", "--direct-deploy" };
             Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
 
             // Verify application is deployed and running

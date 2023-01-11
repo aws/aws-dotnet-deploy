@@ -59,5 +59,10 @@ namespace AWS.Deploy.CLI.Commands.CommandHandlerInput
         /// The absolute or the relative JSON file path where the deployment settings will be saved. All deployment settings are persisted.
         /// </summary>
         public string? SaveAllSettings { get; set; }
+
+        /// <summary>
+        /// Flag to skip creating CloudFormation changeset and deploy stack directly to CloudFormation.
+        /// </summary>
+        public bool DirectDeploy { get; set; }
     }
 }

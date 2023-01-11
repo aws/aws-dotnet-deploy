@@ -20,6 +20,8 @@ namespace AWS.Deploy.Orchestration
 {
     public interface ICdkProjectHandler
     {
+        bool DirectDeploy { get; set; }
+
         Task<string> ConfigureCdkProject(OrchestratorSession session, CloudApplication cloudApplication, Recommendation recommendation);
         string CreateCdkProject(Recommendation recommendation, OrchestratorSession session, string? saveDirectoryPath = null);
         Task DeployCdkProject(OrchestratorSession session, CloudApplication cloudApplication, string cdkProjectPath, Recommendation recommendation);
@@ -29,6 +31,8 @@ namespace AWS.Deploy.Orchestration
 
     public class CdkProjectHandler : ICdkProjectHandler
     {
+        public bool DirectDeploy { get; set; }
+
         private readonly IOrchestratorInteractiveService _interactiveService;
         private readonly ICommandLineWrapper _commandLineWrapper;
         private readonly ICdkAppSettingsSerializer _appSettingsBuilder;
@@ -138,9 +142,11 @@ namespace AWS.Deploy.Orchestration
             _interactiveService.LogSectionStart("Deploying AWS CDK project",
                 "Use the CDK project to create or update the AWS CloudFormation stack and deploy the project to the AWS resources in the stack.");
 
+            var directDeployArgument = DirectDeploy ? "--method=direct " : string.Empty;
+
             // Handover to CDK command line tool
             // Use a CDK Context parameter to specify the settings file that has been serialized.
-            var cdkDeployTask = _commandLineWrapper.TryRunWithResult( $"npx cdk deploy --require-approval never -c {Constants.CloudFormationIdentifier.SETTINGS_PATH_CDK_CONTEXT_PARAMETER}=\"{appSettingsFilePath}\"",
+            var cdkDeployTask = _commandLineWrapper.TryRunWithResult( $"npx cdk deploy {directDeployArgument}--require-approval never -c {Constants.CloudFormationIdentifier.SETTINGS_PATH_CDK_CONTEXT_PARAMETER}=\"{appSettingsFilePath}\"",
                 workingDirectory: cdkProjectPath,
                 environmentVariables: environmentVariables,
                 needAwsCredentials: true,
