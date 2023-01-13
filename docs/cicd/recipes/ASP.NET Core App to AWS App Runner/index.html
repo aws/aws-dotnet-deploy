@@ -10,21 +10,21 @@
       
       
       
-        <link rel="canonical" href="https://aws.github.io/aws-dotnet-deploy/docs/cicd/">
+        <link rel="canonical" href="https://aws.github.io/aws-dotnet-deploy/docs/cicd/recipes/ASP.NET%20Core%20App%20to%20AWS%20App%20Runner/">
       
-      <link rel="icon" href="../../assets/images/aws-logo-light.svg">
+      <link rel="icon" href="../../../../assets/images/aws-logo-light.svg">
       <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-8.2.9">
     
     
       
-        <title>Integrating with CI/CD - AWS .NET deployment tool</title>
+        <title>ASP.NET Core App to AWS App Runner - AWS .NET deployment tool</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.120efc48.min.css">
+      <link rel="stylesheet" href="../../../../assets/stylesheets/main.120efc48.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.9647289d.min.css">
+        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.9647289d.min.css">
         
           
           
@@ -37,7 +37,7 @@
       
     
     
-    <script>__md_scope=new URL("../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -60,11 +60,6 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
-        
-        <a href="#integrating-with-cicd" class="md-skip">
-          Skip to content
-        </a>
-      
     </div>
     <div data-md-component="announce">
       
@@ -75,7 +70,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="AWS .NET deployment tool" class="md-header__button md-logo" aria-label="AWS .NET deployment tool" data-md-component="logo">
+    <a href="../../../.." title="AWS .NET deployment tool" class="md-header__button md-logo" aria-label="AWS .NET deployment tool" data-md-component="logo">
       
   
   <?xml version="1.0" encoding="utf-8"?>
@@ -131,7 +126,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Integrating with CI/CD
+              ASP.NET Core App to AWS App Runner
             
           </span>
         </div>
@@ -210,7 +205,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="AWS .NET deployment tool" class="md-nav__button md-logo" aria-label="AWS .NET deployment tool" data-md-component="logo">
+    <a href="../../../.." title="AWS .NET deployment tool" class="md-nav__button md-logo" aria-label="AWS .NET deployment tool" data-md-component="logo">
       
   
   <?xml version="1.0" encoding="utf-8"?>
@@ -278,7 +273,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href="../../../.." class="md-nav__link">
         Overview
       </a>
     </li>
@@ -347,7 +342,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/pre-requisites/" class="md-nav__link">
+      <a href="../../../getting-started/pre-requisites/" class="md-nav__link">
         Pre-requisites
       </a>
     </li>
@@ -361,7 +356,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/installation/" class="md-nav__link">
+      <a href="../../../getting-started/installation/" class="md-nav__link">
         How to install
       </a>
     </li>
@@ -375,7 +370,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/setup-creds/" class="md-nav__link">
+      <a href="../../../getting-started/setup-creds/" class="md-nav__link">
         Set up credentials
       </a>
     </li>
@@ -389,7 +384,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/custom-workspace/" class="md-nav__link">
+      <a href="../../../getting-started/custom-workspace/" class="md-nav__link">
         Set up a custom workspace
       </a>
     </li>
@@ -403,7 +398,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/run-tool/" class="md-nav__link">
+      <a href="../../../getting-started/run-tool/" class="md-nav__link">
         Deploy "Hello World"
       </a>
     </li>
@@ -424,7 +419,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../support/" class="md-nav__link">
+      <a href="../../../support/" class="md-nav__link">
         Support matrix
       </a>
     </li>
@@ -464,7 +459,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/deploy/" class="md-nav__link">
+      <a href="../../../commands/deploy/" class="md-nav__link">
         deploy
       </a>
     </li>
@@ -478,7 +473,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/list/" class="md-nav__link">
+      <a href="../../../commands/list/" class="md-nav__link">
         list-deployments
       </a>
     </li>
@@ -492,7 +487,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/delete/" class="md-nav__link">
+      <a href="../../../commands/delete/" class="md-nav__link">
         delete-deployment
       </a>
     </li>
@@ -506,7 +501,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/project/" class="md-nav__link">
+      <a href="../../../commands/project/" class="md-nav__link">
         deployment-project
       </a>
     </li>
@@ -520,7 +515,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commands/server-mode/" class="md-nav__link">
+      <a href="../../../commands/server-mode/" class="md-nav__link">
         server-mode
       </a>
     </li>
@@ -567,7 +562,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../docker/docker-generation/" class="md-nav__link">
+      <a href="../../../docker/docker-generation/" class="md-nav__link">
         Dockerfile generation
       </a>
     </li>
@@ -581,7 +576,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../docker/publish-image/" class="md-nav__link">
+      <a href="../../../docker/publish-image/" class="md-nav__link">
         Publishing a Docker image
       </a>
     </li>
@@ -628,7 +623,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../deployment-projects/" class="md-nav__link">
+      <a href="../../../deployment-projects/" class="md-nav__link">
         Overview
       </a>
     </li>
@@ -642,7 +637,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../deployment-projects/recipe-file/" class="md-nav__link">
+      <a href="../../../deployment-projects/recipe-file/" class="md-nav__link">
         Recipe File
       </a>
     </li>
@@ -656,7 +651,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../deployment-projects/cdk-project/" class="md-nav__link">
+      <a href="../../../deployment-projects/cdk-project/" class="md-nav__link">
         CDK Project
       </a>
     </li>
@@ -678,63 +673,240 @@
     
   
   
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <label class="md-nav__link md-nav__link--active" for="__toc">
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_6" type="checkbox" id="__nav_2_6" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_6">
           Integrating with CI/CD
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <a href="./" class="md-nav__link md-nav__link--active">
-        Integrating with CI/CD
-      </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+      <nav class="md-nav" aria-label="Integrating with CI/CD" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_6">
+          <span class="md-nav__icon md-icon"></span>
+          Integrating with CI/CD
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cicd/" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment-settings-file/" class="md-nav__link">
+        Deployment Settings File
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
   
   
     
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
-        <li class="md-nav__item">
-  <a href="#suppressing-prompts-with-silent" class="md-nav__link">
-    Suppressing prompts with --silent
-  </a>
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_6_3" type="checkbox" id="__nav_2_6_3" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_6_3">
+          Deployment Recipes
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Deployment Recipes" data-md-level="3">
+        <label class="md-nav__title" for="__nav_2_6_3">
+          <span class="md-nav__icon md-icon"></span>
+          Deployment Recipes
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#creating-a-deployment-settings-file" class="md-nav__link">
-    Creating a deployment settings file
-  </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#invoking-from-cicd" class="md-nav__link">
-    Invoking from CI/CD
-  </a>
+    
   
-</li>
-      
-    </ul>
   
-</nav>
+    <li class="md-nav__item md-nav__item--active">
       
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        ASP.NET Core App to AWS App Runner
+      </a>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ASP.NET%20Core%20App%20to%20AWS%20Elastic%20Beanstalk%20on%20Linux/" class="md-nav__link">
+        ASP.NET Core App to AWS Elastic Beanstalk on Linux
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ASP.NET%20Core%20App%20to%20AWS%20Elastic%20Beanstalk%20on%20Windows/" class="md-nav__link">
+        ASP.NET Core App to AWS Elastic Beanstalk on Windows
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ASP.NET%20Core%20App%20to%20Amazon%20ECS%20using%20AWS%20Fargate/" class="md-nav__link">
+        ASP.NET Core App to Amazon ECS using AWS Fargate
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ASP.NET%20Core%20App%20to%20Existing%20AWS%20Elastic%20Beanstalk%20Environment/" class="md-nav__link">
+        ASP.NET Core App to Existing AWS Elastic Beanstalk Environment
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ASP.NET%20Core%20App%20to%20Existing%20AWS%20Elastic%20Beanstalk%20Windows%20Environment/" class="md-nav__link">
+        ASP.NET Core App to Existing AWS Elastic Beanstalk Windows Environment
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Blazor%20WebAssembly%20App/" class="md-nav__link">
+        Blazor WebAssembly App
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Container%20Image%20to%20Amazon%20Elastic%20Container%20Registry%20%28ECR%29/" class="md-nav__link">
+        Container Image to Amazon Elastic Container Registry (ECR)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Scheduled%20Task%20on%20Amazon%20Elastic%20Container%20Service%20%28ECS%29%20using%20AWS%20Fargate/" class="md-nav__link">
+        Scheduled Task on Amazon Elastic Container Service (ECS) using AWS Fargate
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Service%20on%20Amazon%20Elastic%20Container%20Service%20%28ECS%29%20using%20AWS%20Fargate/" class="md-nav__link">
+        Service on Amazon Elastic Container Service (ECS) using AWS Fargate
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -780,7 +952,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/custom-project/" class="md-nav__link">
+      <a href="../../../../tutorials/custom-project/" class="md-nav__link">
         Customizing deployment projects
       </a>
     </li>
@@ -828,7 +1000,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../troubleshooting-guide/" class="md-nav__link">
+      <a href="../../../../troubleshooting-guide/" class="md-nav__link">
         General Issues
       </a>
     </li>
@@ -842,7 +1014,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../troubleshooting-guide/missing-dependencies/" class="md-nav__link">
+      <a href="../../../../troubleshooting-guide/missing-dependencies/" class="md-nav__link">
         Missing Dependencies
       </a>
     </li>
@@ -856,7 +1028,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../troubleshooting-guide/docker-issues/" class="md-nav__link">
+      <a href="../../../../troubleshooting-guide/docker-issues/" class="md-nav__link">
         Docker Issues
       </a>
     </li>
@@ -878,7 +1050,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../contributing/" class="md-nav__link">
+      <a href="../../../../contributing/" class="md-nav__link">
         Contributing to the project
       </a>
     </li>
@@ -893,7 +1065,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../faq/" class="md-nav__link">
+      <a href="../../../../faq/" class="md-nav__link">
         FAQs
       </a>
     </li>
@@ -917,37 +1089,6 @@
   
   
   
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#suppressing-prompts-with-silent" class="md-nav__link">
-    Suppressing prompts with --silent
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#creating-a-deployment-settings-file" class="md-nav__link">
-    Creating a deployment settings file
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#invoking-from-cicd" class="md-nav__link">
-    Invoking from CI/CD
-  </a>
-  
-</li>
-      
-    </ul>
   
 </nav>
                   </div>
@@ -959,92 +1100,214 @@
             <article class="md-content__inner md-typeset">
               
                 
-  <a href="https://github.com/aws/aws-dotnet-deploy/edit/main/site/content/docs/cicd.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/aws/aws-dotnet-deploy/edit/main/site/content/docs/cicd/recipes/ASP.NET Core App to AWS App Runner.md" title="Edit this page" class="md-content__button md-icon">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
 
-<h1 id="integrating-with-cicd">Integrating with CI/CD</h1>
-<p>You can use AWS Deploy Tool when developing your app using any Continuous Deployment system. Continuous Deployment systems let you automatically build, test and deploy your application each time you check in updates to your source code. Before you can use AWS Deploy Tool in your CD pipeline, you must have <a href="../getting-started/pre-requisites/">required pre-requisites</a> installed and configured in the CD environment.</p>
-<h3 id="suppressing-prompts-with-silent">Suppressing prompts with <code>--silent</code></h3>
-<p>To turn off the interactive features, use the <code>-s (--silent)</code> switch. This will ensure the tool never prompts for any questions that could block an automated process.</p>
-<pre><code>dotnet aws deploy --silent
-</code></pre>
-<h3 id="creating-a-deployment-settings-file">Creating a deployment settings file</h3>
-<p>You can persist the deployment configuration to a JSON file using the <code>--save-settings &lt;SETTINGS_FILE_PATH)&gt;</code> switch. This JSON file can be version controlled and plugged into your CI/CD system for future deployments.</p>
-<p><strong>Note</strong> - The <code>--save-settings</code> switch will only persist settings that have been modified (which means they hold a non-default value). To persist all settings use the <code>--save-all-settings</code> switch.</p>
-<pre><code>dotnet aws deploy --project-path &lt;PROJECT_PATH&gt; [--save-settings|--save-all-settings] &lt;SETTINGS_FILE_PATH&gt;
-</code></pre>
-<p><strong>Note</strong> - The <code>SETTINGS_FILE_PATH</code> can be an absolute path or relative to the <code>PROJECT_PATH</code>.</p>
-<p>Here's an example of a web application with the following directory structure:</p>
-<pre><code>MyWebApplication/
-┣ MyClassLibrary/
-┃ ┣ Class1.cs
-┃ ┗ MyClassLibrary.csproj
-┣ MyWebApplication/
-┃ ┣ Controllers/
-┃ ┃ ┗ WeatherForecastController.cs
-┃ ┣ appsettings.Development.json
-┃ ┣ appsettings.json
-┃ ┣ Dockerfile
-┃ ┣ MyWebApplication.csproj
-┃ ┣ Program.cs
-┃ ┣ WeatherForecast.cs
-┗ MyWebApplication.sln
-</code></pre>
-<p>To perform a deployment and also persist the deployment configuration to a JSON file, use the following command:</p>
-<pre><code>dotnet aws deploy --project-path MyWebApplication/MyWebApplication/MyWebApplication.csproj --save-settings deploymentsettings.json
-</code></pre>
-<p>This will create a JSON file at <code>MyWebApplication/MyWebApplication/deploymentsettings.json</code> with the following structure:</p>
-<pre><code class="language-json">{
-      &quot;AWSProfile&quot;: &lt;AWS_PROFILE&gt;
-      &quot;AWSRegion&quot;: &lt;AWS_REGION&gt;,
-      &quot;ApplicationName&quot;: &lt;APPLICATION_NAME&gt;,
-      &quot;RecipeId&quot;: &lt;RECIPE_ID&gt;
-      &quot;Settings&quot;: &lt;JSON_BLOB&gt;
-}
-</code></pre>
+  <h1>ASP.NET Core App to AWS App Runner</h1>
+
+<p><strong>Recipe ID:</strong> AspNetAppAppRunner</p>
+<p><strong>Recipe Description:</strong> This ASP.NET Core application will be built as a container image on Linux and deployed to AWS App Runner, a fully managed service for web applications and APIs. If your project does not contain a Dockerfile, it will be automatically generated, otherwise an existing Dockerfile will be used. Recommended if you want to deploy your web application as a Linux container image on a fully managed environment.</p>
+<p><strong>Settings:</strong></p>
 <ul>
-<li>
-<p><em><strong>AWSProfile</strong></em>: The name of the AWS profile that was used during deployment.</p>
+<li><strong>Service Name</strong><ul>
+<li>ID: ServiceName</li>
+<li>Description: The name of the AWS App Runner service.</li>
+<li>Type: String</li>
+</ul>
 </li>
-<li>
-<p><em><strong>AWSRegion</strong></em>: The name of the AWS region where the deployed application is hosted.</p>
+<li><strong>Port</strong><ul>
+<li>ID: Port</li>
+<li>Description: The port the container is listening for requests on.</li>
+<li>Type: Int</li>
+</ul>
 </li>
-<li>
-<p><em><strong>ApplicationName</strong></em>: The name that is used to identify your cloud application within AWS. If the application is deployed via AWS CDK, then this name points to the CloudFormation stack.</p>
+<li><strong>Start Command</strong><ul>
+<li>ID: StartCommand</li>
+<li>Description: Override the start command from the image's default start command.</li>
+<li>Type: String</li>
+</ul>
 </li>
-<li>
-<p><em><strong>RecipeId</strong></em>: The recipe identifier that was used to deploy your application to AWS.</p>
+<li><strong>Application IAM Role</strong><ul>
+<li>ID: ApplicationIAMRole</li>
+<li>Description: The Identity and Access Management (IAM) role that provides AWS credentials to the application to access AWS services.</li>
+<li>Type: Object</li>
+<li>Settings:<ul>
+<li><strong>Create New Role</strong><ul>
+<li>ID: CreateNew</li>
+<li>Description: Do you want to create a new role?</li>
+<li>Type: Bool</li>
+</ul>
 </li>
-<li>
-<p><em><strong>Settings</strong></em>: This is a JSON blob that stores the values of all available settings that can be tweaked to adjust the deployment configuration.</p>
+<li><strong>Existing Role ARN</strong><ul>
+<li>ID: RoleArn</li>
+<li>Description: The ARN of the existing role to use.</li>
+<li>Type: String</li>
+</ul>
 </li>
 </ul>
-<h3 id="invoking-from-cicd">Invoking from CI/CD</h3>
-<p>The <code>--apply</code> switch on the deploy command allows you to specify a deployment settings file.</p>
-<pre><code>dotnet aws deploy --project-path &lt;PROJECT_PATH&gt; --apply &lt;SETTINGS_FILE_PATH&gt;
-</code></pre>
-<pre><code>MyWebApplication/
-┣ MyClassLibrary/
-┃ ┣ Class1.cs
-┃ ┗ MyClassLibrary.csproj
-┣ MyWebApplication/
-┃ ┣ Controllers/
-┃ ┃ ┗ WeatherForecastController.cs
-┃ ┣ appsettings.Development.json
-┃ ┣ appsettings.json
-┃ ┣ deploymentsettings.json
-┃ ┣ Dockerfile
-┃ ┣ MyWebApplication.csproj
-┃ ┣ Program.cs
-┃ ┗ WeatherForecast.cs
-┗ MyWebApplication.sln
-</code></pre>
-<p>To deploy the application with the above directory structure in CI/CD pipeline without any prompts, use the following command:</p>
-<pre><code>dotnet aws deploy --silent --project-path MyWebApplication/MyWebApplication/MyWebApplication.csproj --apply deploymentsettings.json
-</code></pre>
+</li>
+</ul>
+</li>
+<li><strong>Service Access IAM Role</strong><ul>
+<li>ID: ServiceAccessIAMRole</li>
+<li>Description: The Identity and Access Management (IAM) role that provides gives the AWS App Runner service access to pull the container image from ECR.</li>
+<li>Type: Object</li>
+<li>Settings:<ul>
+<li><strong>Create New Role</strong><ul>
+<li>ID: CreateNew</li>
+<li>Description: Do you want to create a new role?</li>
+<li>Type: Bool</li>
+</ul>
+</li>
+<li><strong>Existing Role ARN</strong><ul>
+<li>ID: RoleArn</li>
+<li>Description: The ARN of the existing role to use.</li>
+<li>Type: String</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>CPU</strong><ul>
+<li>ID: Cpu</li>
+<li>Description: The number of CPU units reserved for each instance of your App Runner service.</li>
+<li>Type: String</li>
+</ul>
+</li>
+<li><strong>Memory</strong><ul>
+<li>ID: Memory</li>
+<li>Description: The amount of memory reserved for each instance of your App Runner service.</li>
+<li>Type: String</li>
+</ul>
+</li>
+<li><strong>Encryption KMS Key</strong><ul>
+<li>ID: EncryptionKmsKey</li>
+<li>Description: The ARN of the KMS key that's used for encryption of application logs.</li>
+<li>Type: String</li>
+</ul>
+</li>
+<li><strong>Health Check Protocol</strong><ul>
+<li>ID: HealthCheckProtocol</li>
+<li>Description: The IP protocol that App Runner uses to perform health checks for your service.</li>
+<li>Type: String</li>
+</ul>
+</li>
+<li><strong>Health Check Path</strong><ul>
+<li>ID: HealthCheckPath</li>
+<li>Description: The URL that health check requests are sent to.</li>
+<li>Type: String</li>
+</ul>
+</li>
+<li><strong>Health Check Interval</strong><ul>
+<li>ID: HealthCheckInterval</li>
+<li>Description: The time interval, in seconds, between health checks.</li>
+<li>Type: Int</li>
+</ul>
+</li>
+<li><strong>Health Check Timeout</strong><ul>
+<li>ID: HealthCheckTimeout</li>
+<li>Description: The time, in seconds, to wait for a health check response before deciding it failed.</li>
+<li>Type: Int</li>
+</ul>
+</li>
+<li><strong>Health Check Healthy Threshold</strong><ul>
+<li>ID: HealthCheckHealthyThreshold</li>
+<li>Description: The number of consecutive checks that must succeed before App Runner decides that the service is healthy.</li>
+<li>Type: Int</li>
+</ul>
+</li>
+<li><strong>Health Check Unhealthy Threshold</strong><ul>
+<li>ID: HealthCheckUnhealthyThreshold</li>
+<li>Description: The number of consecutive checks that must fail before App Runner decides that the service is unhealthy.</li>
+<li>Type: Int</li>
+</ul>
+</li>
+<li><strong>VPC Connector</strong><ul>
+<li>ID: VPCConnector</li>
+<li>Description: App Runner requires this resource when you want to associate your App Runner service to a custom Amazon Virtual Private Cloud (Amazon VPC).</li>
+<li>Type: Object</li>
+<li>Settings:<ul>
+<li><strong>Use VPC Connector</strong><ul>
+<li>ID: UseVPCConnector</li>
+<li>Description: Do you want to use a VPC Connector to connect to a VPC?</li>
+<li>Type: Bool</li>
+</ul>
+</li>
+<li><strong>Create New VPC Connector</strong><ul>
+<li>ID: CreateNew</li>
+<li>Description: Do you want to create a new VPC Connector?</li>
+<li>Type: Bool</li>
+</ul>
+</li>
+<li><strong>Existing VPC Connector ID</strong><ul>
+<li>ID: VpcConnectorId</li>
+<li>Description: The ID of the existing VPC Connector to use.</li>
+<li>Type: String</li>
+</ul>
+</li>
+<li><strong>Create New VPC</strong><ul>
+<li>ID: CreateNewVpc</li>
+<li>Description: Do you want to create a new VPC to use for the VPC Connector?</li>
+<li>Type: Bool</li>
+</ul>
+</li>
+<li><strong>VPC ID</strong><ul>
+<li>ID: VpcId</li>
+<li>Description: A list of VPC IDs that App Runner should use when it associates your service with a custom Amazon VPC.</li>
+<li>Type: String</li>
+</ul>
+</li>
+<li><strong>Subnets</strong><ul>
+<li>ID: Subnets</li>
+<li>Description: A list of IDs of subnets that App Runner should use when it associates your service with a custom Amazon VPC. Specify IDs of subnets of a single Amazon VPC. App Runner determines the Amazon VPC from the subnets you specify.</li>
+<li>Type: List</li>
+</ul>
+</li>
+<li><strong>Security Groups</strong><ul>
+<li>ID: SecurityGroups</li>
+<li>Description: A list of IDs of security groups that App Runner should use for access to AWS resources under the specified subnets. If not specified, App Runner uses the default security group of the Amazon VPC. The default security group allows all outbound traffic.</li>
+<li>Type: List</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Environment Variables</strong><ul>
+<li>ID: AppRunnerEnvironmentVariables</li>
+<li>Description: Configure environment properties for your application.</li>
+<li>Type: KeyValue</li>
+</ul>
+</li>
+<li><strong>Docker Build Args</strong><ul>
+<li>ID: DockerBuildArgs</li>
+<li>Description: The list of additional options to append to the <code>docker build</code> command.</li>
+<li>Type: String</li>
+</ul>
+</li>
+<li><strong>Dockerfile Path</strong><ul>
+<li>ID: DockerfilePath</li>
+<li>Description: Specify a path to a Dockerfile as either an absolute path or a path relative to the project.</li>
+<li>Type: String</li>
+</ul>
+</li>
+<li><strong>Docker Execution Directory</strong><ul>
+<li>ID: DockerExecutionDirectory</li>
+<li>Description: Specifies the docker execution directory where the docker build command will be executed from.</li>
+<li>Type: String</li>
+</ul>
+</li>
+<li><strong>ECR Repository Name</strong><ul>
+<li>ID: ECRRepositoryName</li>
+<li>Description: Specifies the ECR repository where the Docker images will be stored</li>
+<li>Type: String</li>
+</ul>
+</li>
+</ul>
 
               
             </article>
@@ -1058,7 +1321,7 @@
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../deployment-projects/cdk-project/" class="md-footer__link md-footer__link--prev" aria-label="Previous: CDK Project" rel="prev">
+        <a href="../../deployment-settings-file/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Deployment Settings File" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -1067,20 +1330,20 @@
               <span class="md-footer__direction">
                 Previous
               </span>
-              CDK Project
+              Deployment Settings File
             </div>
           </div>
         </a>
       
       
         
-        <a href="../../tutorials/custom-project/" class="md-footer__link md-footer__link--next" aria-label="Next: Customizing deployment projects" rel="next">
+        <a href="../ASP.NET%20Core%20App%20to%20AWS%20Elastic%20Beanstalk%20on%20Linux/" class="md-footer__link md-footer__link--next" aria-label="Next: ASP.NET Core App to AWS Elastic Beanstalk on Linux" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Customizing deployment projects
+              ASP.NET Core App to AWS Elastic Beanstalk on Linux
             </div>
           </div>
           <div class="md-footer__button md-icon">
@@ -1114,10 +1377,10 @@
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "../..", "features": ["tabs", "instant"], "search": "../../assets/javascripts/workers/search.2a1c317c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../../../..", "features": ["tabs", "instant"], "search": "../../../../assets/javascripts/workers/search.2a1c317c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.6e54b5cd.min.js"></script>
+      <script src="../../../../assets/javascripts/bundle.6e54b5cd.min.js"></script>
       
     
   </body>
