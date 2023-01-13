@@ -1,4 +1,4 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32126.317
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -67,6 +67,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApiNET6", "testapps\WebApiNET6\WebApiNET6.csproj", "{B2EA65BD-9FFE-4452-B2DC-574EB1A9FAF1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorWasm60", "testapps\BlazorWasm60\BlazorWasm60.csproj", "{CEEBEC39-40E5-4A9B-878A-6EDB52B9B43E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AWS.Deploy.DocGenerator", "src\AWS.Deploy.DocGenerator\AWS.Deploy.DocGenerator.csproj", "{6D4BD0C2-C2A0-4AFB-BC22-623DD64A4F84}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AWS.Deploy.DocGenerator.UnitTests", "test\AWS.Deploy.DocGenerator.UnitTests\AWS.Deploy.DocGenerator.UnitTests.csproj", "{7E661545-7DFD-4FE3-A5F9-767FAE30DFFE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -166,6 +170,14 @@ Global
 		{CEEBEC39-40E5-4A9B-878A-6EDB52B9B43E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CEEBEC39-40E5-4A9B-878A-6EDB52B9B43E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CEEBEC39-40E5-4A9B-878A-6EDB52B9B43E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D4BD0C2-C2A0-4AFB-BC22-623DD64A4F84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D4BD0C2-C2A0-4AFB-BC22-623DD64A4F84}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D4BD0C2-C2A0-4AFB-BC22-623DD64A4F84}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D4BD0C2-C2A0-4AFB-BC22-623DD64A4F84}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E661545-7DFD-4FE3-A5F9-767FAE30DFFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E661545-7DFD-4FE3-A5F9-767FAE30DFFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E661545-7DFD-4FE3-A5F9-767FAE30DFFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E661545-7DFD-4FE3-A5F9-767FAE30DFFE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -196,6 +208,8 @@ Global
 		{7C330493-9BF7-4DB6-815B-807C08500AC6} = {C3A0C716-BDEA-4393-B223-AF8F8531522A}
 		{B2EA65BD-9FFE-4452-B2DC-574EB1A9FAF1} = {C3A0C716-BDEA-4393-B223-AF8F8531522A}
 		{CEEBEC39-40E5-4A9B-878A-6EDB52B9B43E} = {C3A0C716-BDEA-4393-B223-AF8F8531522A}
+		{6D4BD0C2-C2A0-4AFB-BC22-623DD64A4F84} = {11C7056E-93C1-408B-BD87-5270595BBE0E}
+		{7E661545-7DFD-4FE3-A5F9-767FAE30DFFE} = {BD466B5C-D8B0-4069-98A9-6DC8F01FA757}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5A4B2863-1763-4496-B122-651A38A4F5D7}

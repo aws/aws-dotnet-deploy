@@ -31,7 +31,11 @@ nav:
        - Overview: docs/deployment-projects/index.md
        - Recipe File: docs/deployment-projects/recipe-file.md
        - CDK Project: docs/deployment-projects/cdk-project.md
-    - Integrating with CI/CD: docs/cicd.md
+    - Integrating with CI/CD: 
+       - Overview: docs/cicd/cicd.md
+       - Deployment Settings File: docs/cicd/deployment-settings-file.md
+       - Deployment Recipes:
+           - ... | flat
   - Tutorials:
     - Customizing deployment projects: tutorials/custom-project.md
   - Troubleshooting Guide:
@@ -58,3 +62,7 @@ theme:
 markdown_extensions:
   - pymdownx.emoji:
       emoji_index: !!python/name:materialx.emoji.twemoji
+
+plugins:
+    - search
+    - awesome-pages
