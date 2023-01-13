@@ -40,7 +40,16 @@ jobs:
         run: |
           cd ./src/AWS.Deploy.DocGenerator
           dotnet run --project ./AWS.Deploy.DocGenerator.csproj
+      - name: Check For Git Untracked Changes
+        id: gitcheck
+        shell: pwsh
+        run: |
+          $newFiles=$(git ls-files --others --exclude-standard | wc -l)
+          $modifiedFiles=$(git diff --name-only | wc -l)
+          "newFiles=$newFiles" >> $env:GITHUB_OUTPUT
+          "modifiedFiles=$modifiedFiles" >> $env:GITHUB_OUTPUT
       - name: Commit and Push next version
+        if: steps.gitcheck.outputs.newFiles != 0 || steps.gitcheck.outputs.modifiedFiles != 0
         id: commit-push
         run: |
           git config --global user.email "github-aws-sdk-dotnet-automation@amazon.com"
