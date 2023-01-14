@@ -6,8 +6,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using AWS.Deploy.CLI.IntegrationTests.Services;
 using AWS.Deploy.Common;
-using AWS.Deploy.Orchestration.Utilities;
-using Xunit;
+using NUnit.Framework;
 
 namespace AWS.Deploy.CLI.IntegrationTests.Helpers
 {

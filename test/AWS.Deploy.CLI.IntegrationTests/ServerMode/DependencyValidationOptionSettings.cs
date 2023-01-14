@@ -8,7 +8,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Amazon.Runtime;
 using AWS.Deploy.CLI.Commands;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.CLI.Extensions;
@@ -17,20 +16,20 @@ using AWS.Deploy.CLI.IntegrationTests.Utilities;
 using AWS.Deploy.ServerMode.Client;
 using AWS.Deploy.ServerMode.Client.Utilities;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
+using NUnit.Framework;
 
 namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
 {
-    public class DependencyValidationOptionSettings : IDisposable
+    [TestFixture]
+    public class DependencyValidationOptionSettings
     {
-        private bool _isDisposed;
-        private string _stackName;
-        private readonly IServiceProvider _serviceProvider;
+        private IServiceProvider _serviceProvider;
 
-        private readonly string _awsRegion;
-        private readonly TestAppManager _testAppManager;
+        private string _awsRegion;
+        private TestAppManager _testAppManager;
 
-        public DependencyValidationOptionSettings()
+        [SetUp]
+        public void Initialize()
         {
             var serviceCollection = new ServiceCollection();
 
@@ -44,10 +43,10 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
             _testAppManager = new TestAppManager();
         }
 
-        [Fact]
+        [Test]
         public async Task DependentOptionSettingsGetInvalidated()
         {
-            _stackName = $"ServerModeWebAppRunner{Guid.NewGuid().ToString().Split('-').Last()}";
+            var stackName = $"ServerModeWebAppRunner{Guid.NewGuid().ToString().Split('-').Last()}";
 
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
             var portNumber = 4022;
@@ -69,18 +68,18 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
                 var logOutput = new StringBuilder();
                 await ServerModeExtensions.SetupSignalRConnection(baseUrl, sessionId, logOutput);
 
-                var beanstalkRecommendation = await restClient.GetRecommendationsAndSetDeploymentTarget(sessionId, "AspNetAppElasticBeanstalkLinux", _stackName);
+                var beanstalkRecommendation = await restClient.GetRecommendationsAndSetDeploymentTarget(sessionId, "AspNetAppElasticBeanstalkLinux", stackName);
 
                 var applicationIAMRole = (await restClient.GetConfigSettingsAsync(sessionId)).OptionSettings.First(x => x.Id.Equals("ApplicationIAMRole"));
-                Assert.Equal(ValidationStatus.Valid, applicationIAMRole.Validation.ValidationStatus);
+                Assert.AreEqual(ValidationStatus.Valid, applicationIAMRole.Validation.ValidationStatus);
                 Assert.True(string.IsNullOrEmpty(applicationIAMRole.Validation.ValidationMessage));
                 Assert.Null(applicationIAMRole.Validation.InvalidValue);
                 var validCreateNew = applicationIAMRole.ChildOptionSettings.First(x => x.Id.Equals("CreateNew"));
-                Assert.Equal(ValidationStatus.Valid, validCreateNew.Validation.ValidationStatus);
+                Assert.AreEqual(ValidationStatus.Valid, validCreateNew.Validation.ValidationStatus);
                 Assert.True(string.IsNullOrEmpty(validCreateNew.Validation.ValidationMessage));
                 Assert.Null(validCreateNew.Validation.InvalidValue);
                 var validRoleArn = applicationIAMRole.ChildOptionSettings.First(x => x.Id.Equals("RoleArn"));
-                Assert.Equal(ValidationStatus.Valid, validRoleArn.Validation.ValidationStatus);
+                Assert.AreEqual(ValidationStatus.Valid, validRoleArn.Validation.ValidationStatus);
                 Assert.True(string.IsNullOrEmpty(validRoleArn.Validation.ValidationMessage));
                 Assert.Null(validRoleArn.Validation.InvalidValue);
 
@@ -93,16 +92,16 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
                 });
 
                 applicationIAMRole = (await restClient.GetConfigSettingsAsync(sessionId)).OptionSettings.First(x => x.Id.Equals("ApplicationIAMRole"));
-                Assert.Equal(ValidationStatus.Valid, applicationIAMRole.Validation.ValidationStatus);
+                Assert.AreEqual(ValidationStatus.Valid, applicationIAMRole.Validation.ValidationStatus);
                 Assert.True(string.IsNullOrEmpty(applicationIAMRole.Validation.ValidationMessage));
                 Assert.Null(applicationIAMRole.Validation.InvalidValue);
                 validCreateNew = applicationIAMRole.ChildOptionSettings.First(x => x.Id.Equals("CreateNew"));
-                Assert.Equal(ValidationStatus.Valid, validCreateNew.Validation.ValidationStatus);
+                Assert.AreEqual(ValidationStatus.Valid, validCreateNew.Validation.ValidationStatus);
                 Assert.True(string.IsNullOrEmpty(validCreateNew.Validation.ValidationMessage));
                 Assert.Null(validCreateNew.Validation.InvalidValue);
                 validRoleArn = applicationIAMRole.ChildOptionSettings.First(x => x.Id.Equals("RoleArn"));
-                Assert.Equal(ValidationStatus.Invalid, validRoleArn.Validation.ValidationStatus);
-                Assert.Equal("Invalid IAM Role ARN. The ARN should contain the arn:[PARTITION]:iam namespace, followed by the account ID, and then the resource path. For example - arn:aws:iam::123456789012:role/S3Access is a valid IAM Role ARN. For more information visit https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-arns",
+                Assert.AreEqual(ValidationStatus.Invalid, validRoleArn.Validation.ValidationStatus);
+                Assert.AreEqual("Invalid IAM Role ARN. The ARN should contain the arn:[PARTITION]:iam namespace, followed by the account ID, and then the resource path. For example - arn:aws:iam::123456789012:role/S3Access is a valid IAM Role ARN. For more information visit https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-arns",
                     validRoleArn.Validation.ValidationMessage);
                 Assert.NotNull(validRoleArn.Validation.InvalidValue);
                 Assert.True(string.IsNullOrEmpty(validRoleArn.Validation.InvalidValue.ToString()));
@@ -116,29 +115,28 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
                 });
 
                 applicationIAMRole = (await restClient.GetConfigSettingsAsync(sessionId)).OptionSettings.First(x => x.Id.Equals("ApplicationIAMRole"));
-                Assert.Equal(ValidationStatus.Valid, applicationIAMRole.Validation.ValidationStatus);
+                Assert.AreEqual(ValidationStatus.Valid, applicationIAMRole.Validation.ValidationStatus);
                 Assert.True(string.IsNullOrEmpty(applicationIAMRole.Validation.ValidationMessage));
                 Assert.Null(applicationIAMRole.Validation.InvalidValue);
                 validCreateNew = applicationIAMRole.ChildOptionSettings.First(x => x.Id.Equals("CreateNew"));
-                Assert.Equal(ValidationStatus.Valid, validCreateNew.Validation.ValidationStatus);
+                Assert.AreEqual(ValidationStatus.Valid, validCreateNew.Validation.ValidationStatus);
                 Assert.True(string.IsNullOrEmpty(validCreateNew.Validation.ValidationMessage));
                 Assert.Null(validCreateNew.Validation.InvalidValue);
                 validRoleArn = applicationIAMRole.ChildOptionSettings.First(x => x.Id.Equals("RoleArn"));
-                Assert.Equal(ValidationStatus.Valid, validRoleArn.Validation.ValidationStatus);
+                Assert.AreEqual(ValidationStatus.Valid, validRoleArn.Validation.ValidationStatus);
                 Assert.True(string.IsNullOrEmpty(validRoleArn.Validation.ValidationMessage));
                 Assert.Null(validRoleArn.Validation.InvalidValue);
             }
             finally
             {
                 cancelSource.Cancel();
-                _stackName = null;
             }
         }
 
-        [Fact]
+        [Test]
         public async Task SettingInvalidValue()
         {
-            _stackName = $"ServerModeWebAppRunner{Guid.NewGuid().ToString().Split('-').Last()}";
+            var stackName = $"ServerModeWebAppRunner{Guid.NewGuid().ToString().Split('-').Last()}";
 
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
             var portNumber = 4022;
@@ -160,7 +158,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
                 var logOutput = new StringBuilder();
                 await ServerModeExtensions.SetupSignalRConnection(baseUrl, sessionId, logOutput);
 
-                var beanstalkRecommendation = await restClient.GetRecommendationsAndSetDeploymentTarget(sessionId, "AspNetAppElasticBeanstalkLinux", _stackName);
+                var beanstalkRecommendation = await restClient.GetRecommendationsAndSetDeploymentTarget(sessionId, "AspNetAppElasticBeanstalkLinux", stackName);
 
                 var applicationIAMRole = (await restClient.GetConfigSettingsAsync(sessionId)).OptionSettings.First(x => x.Id.Equals("ApplicationIAMRole"));
                 Assert.Null(applicationIAMRole.Validation.InvalidValue);
@@ -184,7 +182,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
                 Assert.Null(validCreateNew.Validation.InvalidValue);
                 validRoleArn = applicationIAMRole.ChildOptionSettings.First(x => x.Id.Equals("RoleArn"));
                 Assert.NotNull(validRoleArn.Validation.InvalidValue);
-                Assert.Equal("fakeArn", validRoleArn.Validation.InvalidValue);
+                Assert.AreEqual("fakeArn", validRoleArn.Validation.InvalidValue);
 
                 applyConfigResponse = await restClient.ApplyConfigSettingsAsync(sessionId, new ApplyConfigSettingsInput()
                 {
@@ -219,26 +217,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
             finally
             {
                 cancelSource.Cancel();
-                _stackName = null;
             }
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_isDisposed) return;
-
-            _isDisposed = true;
-        }
-
-        ~DependencyValidationOptionSettings()
-        {
-            Dispose(false);
         }
     }
 }

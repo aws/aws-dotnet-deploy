@@ -20,30 +20,30 @@ using AWS.Deploy.Common.TypeHintData;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Newtonsoft.Json;
-using Xunit;
 using AWS.Deploy.CLI.IntegrationTests.Utilities;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Common.IO;
 using Newtonsoft.Json.Linq;
 using AWS.Deploy.ServerMode.Client.Utilities;
+using NUnit.Framework;
 
 namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
 {
-    public class GetApplyOptionSettings : IDisposable
+    [TestFixture]
+    public class GetApplyOptionSettings
     {
-        private bool _isDisposed;
-        private string _stackName;
-        private readonly IServiceProvider _serviceProvider;
+        private IServiceProvider _serviceProvider;
 
-        private readonly string _awsRegion;
-        private readonly TestAppManager _testAppManager;
+        private string _awsRegion;
+        private TestAppManager _testAppManager;
 
-        private readonly Mock<IAWSClientFactory> _mockAWSClientFactory;
-        private readonly Mock<IAmazonCloudFormation> _mockCFClient;
-        private readonly Mock<IDeployToolWorkspaceMetadata> _deployToolWorkspaceMetadata;
-        private readonly IFileManager _fileManager;
+        private Mock<IAWSClientFactory> _mockAWSClientFactory;
+        private Mock<IAmazonCloudFormation> _mockCFClient;
+        private Mock<IDeployToolWorkspaceMetadata> _deployToolWorkspaceMetadata;
+        private IFileManager _fileManager;
 
-        public GetApplyOptionSettings()
+        [SetUp]
+        public void Initialize()
         {
             _mockAWSClientFactory = new Mock<IAWSClientFactory>();
             _mockCFClient = new Mock<IAmazonCloudFormation>();
@@ -62,10 +62,10 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
             _testAppManager = new TestAppManager();
         }
 
-        [Fact]
+        [Test]
         public async Task GetAndApplyAppRunnerSettings_RecipeValidatorsAreRun()
         {
-            _stackName = $"ServerModeWebAppRunner{Guid.NewGuid().ToString().Split('-').Last()}";
+            var stackName = $"ServerModeWebAppRunner{Guid.NewGuid().ToString().Split('-').Last()}";
 
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
             var portNumber = 4026;
@@ -87,7 +87,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
                 var logOutput = new StringBuilder();
                 await ServerModeExtensions.SetupSignalRConnection(baseUrl, sessionId, logOutput);
 
-                var fargateRecommendation = await restClient.GetRecommendationsAndSetDeploymentTarget(sessionId, "AspNetAppEcsFargate", _stackName);
+                var fargateRecommendation = await restClient.GetRecommendationsAndSetDeploymentTarget(sessionId, "AspNetAppEcsFargate", stackName);
 
                 var applyConfigSettingsResponse = await restClient.ApplyConfigSettingsAsync(sessionId, new ApplyConfigSettingsInput()
                 {
@@ -96,22 +96,21 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
                         {"TaskCpu", "4096"}
                     }
                 });
-                Assert.Empty(applyConfigSettingsResponse.FailedConfigUpdates);
+                Assert.IsEmpty(applyConfigSettingsResponse.FailedConfigUpdates);
 
-                var exceptionThrown = await Assert.ThrowsAsync<ApiException>(async () => await restClient.StartDeploymentAsync(sessionId));
-                Assert.Contains("Cpu value 4096 is not compatible with memory value 512.", exceptionThrown.Response);
+                var exceptionThrown = Assert.ThrowsAsync<ApiException>(async () => await restClient.StartDeploymentAsync(sessionId));
+                StringAssert.Contains("Cpu value 4096 is not compatible with memory value 512.", exceptionThrown.Response);
             }
             finally
             {
                 cancelSource.Cancel();
-                _stackName = null;
             }
         }
 
-        [Fact]
+        [Test]
         public async Task GetAndApplyAppRunnerSettings_FailedUpdatesReturnSettingId()
         {
-            _stackName = $"ServerModeWebAppRunner{Guid.NewGuid().ToString().Split('-').Last()}";
+            var stackName = $"ServerModeWebAppRunner{Guid.NewGuid().ToString().Split('-').Last()}";
 
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
             var portNumber = 4027;
@@ -133,7 +132,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
                 var logOutput = new StringBuilder();
                 await ServerModeExtensions.SetupSignalRConnection(baseUrl, sessionId, logOutput);
 
-                var fargateRecommendation = await restClient.GetRecommendationsAndSetDeploymentTarget(sessionId, "AspNetAppEcsFargate", _stackName);
+                var fargateRecommendation = await restClient.GetRecommendationsAndSetDeploymentTarget(sessionId, "AspNetAppEcsFargate", stackName);
 
                 var applyConfigSettingsResponse = await restClient.ApplyConfigSettingsAsync(sessionId, new ApplyConfigSettingsInput()
                 {
@@ -142,20 +141,19 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
                         {"DesiredCount", "test"}
                     }
                 });
-                Assert.Single(applyConfigSettingsResponse.FailedConfigUpdates);
-                Assert.Equal("DesiredCount", applyConfigSettingsResponse.FailedConfigUpdates.Keys.First());
+                Assert.AreEqual(1, applyConfigSettingsResponse.FailedConfigUpdates.Count);
+                Assert.AreEqual("DesiredCount", applyConfigSettingsResponse.FailedConfigUpdates.Keys.First());
             }
             finally
             {
                 cancelSource.Cancel();
-                _stackName = null;
             }
         }
 
-        [Fact]
+        [Test]
         public async Task GetAndApplyAppRunnerSettings_VPCConnector()
         {
-            _stackName = $"ServerModeWebAppRunner{Guid.NewGuid().ToString().Split('-').Last()}";
+            var stackName = $"ServerModeWebAppRunner{Guid.NewGuid().ToString().Split('-').Last()}";
 
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
             var portNumber = 4021;
@@ -177,14 +175,14 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
                 var logOutput = new StringBuilder();
                 await ServerModeExtensions.SetupSignalRConnection(baseUrl, sessionId, logOutput);
 
-                var appRunnerRecommendation = await restClient.GetRecommendationsAndSetDeploymentTarget(sessionId, "AspNetAppAppRunner", _stackName);
+                var appRunnerRecommendation = await restClient.GetRecommendationsAndSetDeploymentTarget(sessionId, "AspNetAppAppRunner", stackName);
 
                 var vpcResources = await restClient.GetConfigSettingResourcesAsync(sessionId, "VPCConnector.VpcId");
                 var subnetsResourcesEmpty = await restClient.GetConfigSettingResourcesAsync(sessionId, "VPCConnector.Subnets");
                 var securityGroupsResourcesEmpty = await restClient.GetConfigSettingResourcesAsync(sessionId, "VPCConnector.SecurityGroups");
-                Assert.NotEmpty(vpcResources.Resources);
-                Assert.NotEmpty(subnetsResourcesEmpty.Resources);
-                Assert.NotEmpty(securityGroupsResourcesEmpty.Resources);
+                Assert.IsNotEmpty(vpcResources.Resources);
+                Assert.IsNotEmpty(subnetsResourcesEmpty.Resources);
+                Assert.IsNotEmpty(securityGroupsResourcesEmpty.Resources);
 
                 var vpcId = vpcResources.Resources.First().SystemName;
                 await restClient.ApplyConfigSettingsAsync(sessionId, new ApplyConfigSettingsInput()
@@ -199,8 +197,8 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
 
                 var subnetsResources = await restClient.GetConfigSettingResourcesAsync(sessionId, "VPCConnector.Subnets");
                 var securityGroupsResources = await restClient.GetConfigSettingResourcesAsync(sessionId, "VPCConnector.SecurityGroups");
-                Assert.NotEmpty(subnetsResources.Resources);
-                Assert.NotEmpty(securityGroupsResources.Resources);
+                Assert.IsNotEmpty(subnetsResources.Resources);
+                Assert.IsNotEmpty(securityGroupsResources.Resources);
 
                 var subnet = subnetsResources.Resources.Last().SystemName;
                 var securityGroup = securityGroupsResources.Resources.First().SystemName;
@@ -215,27 +213,26 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
 
                 var generateCloudFormationTemplateResponse = await restClient.GenerateCloudFormationTemplateAsync(sessionId);
 
-                var metadata = await ServerModeExtensions.GetAppSettingsFromCFTemplate(_mockAWSClientFactory, _mockCFClient, generateCloudFormationTemplateResponse.CloudFormationTemplate, _stackName, _deployToolWorkspaceMetadata, _fileManager);
+                var metadata = await ServerModeExtensions.GetAppSettingsFromCFTemplate(_mockAWSClientFactory, _mockCFClient, generateCloudFormationTemplateResponse.CloudFormationTemplate, stackName, _deployToolWorkspaceMetadata, _fileManager);
 
                 Assert.True(metadata.Settings.ContainsKey("VPCConnector"));
                 var vpcConnector = JsonConvert.DeserializeObject<VPCConnectorTypeHintResponse>(metadata.Settings["VPCConnector"].ToString());
                 Assert.True(vpcConnector.UseVPCConnector);
                 Assert.True(vpcConnector.CreateNew);
-                Assert.Equal(vpcId, vpcConnector.VpcId);
-                Assert.Contains<string>(subnet, vpcConnector.Subnets);
-                Assert.Contains<string>(securityGroup, vpcConnector.SecurityGroups);
+                Assert.AreEqual(vpcId, vpcConnector.VpcId);
+                CollectionAssert.Contains(vpcConnector.Subnets, subnet);
+                CollectionAssert.Contains(vpcConnector.SecurityGroups, securityGroup);
             }
             finally
             {
                 cancelSource.Cancel();
-                _stackName = null;
             }
         }
 
-        [Fact]
+        [Test]
         public async Task GetAppRunnerConfigSettings_TypeHintData()
         {
-            _stackName = $"ServerModeWebAppRunner{Guid.NewGuid().ToString().Split('-').Last()}";
+            var stackName = $"ServerModeWebAppRunner{Guid.NewGuid().ToString().Split('-').Last()}";
 
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
             var portNumber = 4002;
@@ -257,18 +254,18 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
                 var logOutput = new StringBuilder();
                 await ServerModeExtensions.SetupSignalRConnection(baseUrl, sessionId, logOutput);
 
-                await restClient.GetRecommendationsAndSetDeploymentTarget(sessionId, "AspNetAppAppRunner", _stackName);
+                await restClient.GetRecommendationsAndSetDeploymentTarget(sessionId, "AspNetAppAppRunner", stackName);
 
                 var configSettings = restClient.GetConfigSettingsAsync(sessionId);
-                Assert.NotEmpty(configSettings.Result.OptionSettings);
-                var iamRoleSetting = Assert.Single(configSettings.Result.OptionSettings, o => o.Id == "ApplicationIAMRole");
-                Assert.NotEmpty(iamRoleSetting.TypeHintData);
-                Assert.Equal("tasks.apprunner.amazonaws.com", iamRoleSetting.TypeHintData[nameof(IAMRoleTypeHintData.ServicePrincipal)]);
+                Assert.IsNotEmpty(configSettings.Result.OptionSettings);
+                var iamRoleSetting = configSettings.Result.OptionSettings.FirstOrDefault(o => o.Id == "ApplicationIAMRole");
+                Assert.NotNull(iamRoleSetting);
+                Assert.IsNotEmpty(iamRoleSetting.TypeHintData);
+                Assert.AreEqual("tasks.apprunner.amazonaws.com", iamRoleSetting.TypeHintData[nameof(IAMRoleTypeHintData.ServicePrincipal)]);
             }
             finally
             {
                 cancelSource.Cancel();
-                _stackName = null;
             }
         }
 
@@ -276,10 +273,10 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
         /// Tests that GetConfigSettingResourcesAsync for App Runner's
         /// VPC Connector child settings return TypeHintResourceColumns
         /// </summary>
-        [Fact]
+        [Test]
         public async Task GetConfigSettingResources_VpcConnectorOptions()
         {
-            _stackName = $"ServerModeWebAppRunner{Guid.NewGuid().ToString().Split('-').Last()}";
+            var stackName = $"ServerModeWebAppRunner{Guid.NewGuid().ToString().Split('-').Last()}";
 
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
             var portNumber = 4023;
@@ -298,20 +295,16 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
 
                 var sessionId = await restClient.StartDeploymentSession(projectPath, _awsRegion);
 
-                await restClient.GetRecommendationsAndSetDeploymentTarget(sessionId, "AspNetAppAppRunner", _stackName);
+                await restClient.GetRecommendationsAndSetDeploymentTarget(sessionId, "AspNetAppAppRunner", stackName);
 
                 // Assert that the Subnets and SecurityGroups options are returning columns 
                 var subnets = await restClient.GetConfigSettingResourcesAsync(sessionId, "VPCConnector.Subnets");
-                Assert.Collection(subnets.Columns,
-                    column => Assert.NotNull(column),   // Subnet Id
-                    column => Assert.NotNull(column),   // VPC
-                    column => Assert.NotNull(column));  // Availability Zone
+                Assert.That(subnets.Columns, Has.Exactly(3).Items); // Subnet Id, VPC, Availability Zone
+                Assert.That(subnets.Columns, Is.All.Not.Null);
 
                 var securityGroups = await restClient.GetConfigSettingResourcesAsync(sessionId, "VPCConnector.SecurityGroups");
-                Assert.Collection(securityGroups.Columns,
-                    column => Assert.NotNull(column),   // Name
-                    column => Assert.NotNull(column),   // Id
-                    column => Assert.NotNull(column));  // VPC
+                Assert.That(securityGroups.Columns, Has.Exactly(3).Items); // Name, Id, VPC
+                Assert.That(securityGroups.Columns, Is.All.Not.Null);
 
                 // This is using a real AWSResourceQueryer,
                 // so not asserting on the rows for these two options
@@ -319,7 +312,6 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
             finally
             {
                 cancelSource.Cancel();
-                _stackName = null;
             }
         }
 
@@ -329,21 +321,20 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
         /// </summary>
         /// <param name="internetFacingValue">desired LoadBalancer.InternetFacing option setting value</param>
         /// <param name="expectedLoadBalancerScheme">Expected load balancer scheme in the generated CloudFormation template</param>
-        [Theory]
-        [InlineData("true", "internet-facing")]
-        [InlineData("false", "internal")]
-        public async Task GetAndApplyECSFargateSettings_LoadBalancerSchemeConfig(string internetFacingValue, string expectedLoadBalancerScheme)
+        [Test]
+        [TestCase("true", "internet-facing", 4024)]
+        [TestCase("false", "internal", 4025)]
+        public async Task GetAndApplyECSFargateSettings_LoadBalancerSchemeConfig(string internetFacingValue, string expectedLoadBalancerScheme, int portNumber)
         {
-            _stackName = $"ServerModeWebECSFargate{Guid.NewGuid().ToString().Split('-').Last()}";
+            var stackName = $"ServerModeWebECSFargate{Guid.NewGuid().ToString().Split('-').Last()}";
 
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
-            var portNumber = 4024;
             using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ServerModeUtilities.ResolveDefaultCredentials);
-
+            
             // Running `cdk diff` to assert against the generated CloudFormation template
             // for this recipe takes longer than the default timeout
             httpClient.Timeout = new TimeSpan(0, 0, 120);
-
+            
             var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
             var cancelSource = new CancellationTokenSource();
 
@@ -356,11 +347,11 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
                 await restClient.WaitUntilServerModeReady();
 
                 var sessionId = await restClient.StartDeploymentSession(projectPath, _awsRegion);
-
+                
                 var logOutput = new StringBuilder();
                 await ServerModeExtensions.SetupSignalRConnection(baseUrl, sessionId, logOutput);
 
-                var recommendation = await restClient.GetRecommendationsAndSetDeploymentTarget(sessionId, "AspNetAppEcsFargate", _stackName);
+                var recommendation = await restClient.GetRecommendationsAndSetDeploymentTarget(sessionId, "AspNetAppEcsFargate", stackName);
 
                 var response = await restClient.ApplyConfigSettingsAsync(sessionId, new ApplyConfigSettingsInput()
                 {
@@ -379,31 +370,12 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
                 // this test should fail because .Single() will throw an exception.
                 var loadBalancerSchemeValue = cloudFormationTemplate.SelectTokens("Resources.*.Properties.Scheme").Single();
 
-                Assert.Equal(expectedLoadBalancerScheme, loadBalancerSchemeValue.ToString());
+                Assert.AreEqual(expectedLoadBalancerScheme, loadBalancerSchemeValue.ToString());
             }
             finally
             {
                 cancelSource.Cancel();
-                _stackName = null;
             }
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_isDisposed) return;
-
-            _isDisposed = true;
-        }
-
-        ~GetApplyOptionSettings()
-        {
-            Dispose(false);
         }
     }
 }

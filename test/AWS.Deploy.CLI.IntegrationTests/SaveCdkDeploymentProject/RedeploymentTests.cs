@@ -12,22 +12,23 @@ using AWS.Deploy.CLI.IntegrationTests.Extensions;
 using AWS.Deploy.CLI.IntegrationTests.Helpers;
 using AWS.Deploy.CLI.IntegrationTests.Services;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
+using NUnit.Framework;
 using Task = System.Threading.Tasks.Task;
 
 namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 {
-    public class RedeploymentTests : IDisposable
+    [TestFixture]
+    public class RedeploymentTests
     {
-        private readonly HttpHelper _httpHelper;
-        private readonly CloudFormationHelper _cloudFormationHelper;
-        private readonly ECSHelper _ecsHelper;
-        private readonly App _app;
-        private readonly InMemoryInteractiveService _interactiveService;
-        private bool _isDisposed;
+        private HttpHelper _httpHelper;
+        private CloudFormationHelper _cloudFormationHelper;
+        private  ECSHelper _ecsHelper;
+        private App _app;
+        private InMemoryInteractiveService _interactiveService;
         private string _stackName;
 
-        public RedeploymentTests()
+        [SetUp]
+        public void Initialize()
         {
             var serviceCollection = new ServiceCollection();
 
@@ -51,7 +52,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             _ecsHelper = new ECSHelper(ecsClient);
         }
 
-        [Fact]
+        [Test]
         public async Task AttemptWorkFlow()
         {
             _stackName = $"WebAppWithDockerFile{Guid.NewGuid().ToString().Split('-').Last()}";
@@ -72,17 +73,17 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             // attempt re-deployment using incompatible CDK project
             var deployArgs = new[] { "deploy", "--project-path", projectPath, "--deployment-project", incompatibleDeploymentProjectPath, "--application-name", _stackName, "--diagnostics" };
             var returnCode = await _app.Run(deployArgs);
-            Assert.Equal(CommandReturnCodes.USER_ERROR, returnCode);
+            Assert.AreEqual(CommandReturnCodes.USER_ERROR, returnCode);
 
             // attempt re-deployment using compatible CDK project
             await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Select default option settings
             await _interactiveService.StdInWriter.FlushAsync();
             deployArgs = new[] { "deploy", "--project-path", projectPath, "--deployment-project", compatibleDeploymentProjectPath, "--application-name", _stackName, "--diagnostics" };
             returnCode = await _app.Run(deployArgs);
-            Assert.Equal(CommandReturnCodes.SUCCESS, returnCode);
-            Assert.Equal(StackStatus.UPDATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
+            Assert.AreEqual(CommandReturnCodes.SUCCESS, returnCode);
+            Assert.AreEqual(StackStatus.UPDATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
             var cluster = await _ecsHelper.GetCluster(_stackName);
-            Assert.Equal(TaskDefinitionStatus.ACTIVE, cluster.Status);
+            Assert.AreEqual(TaskDefinitionStatus.ACTIVE, cluster.Status);
 
             // Delete stack
             await DeleteStack();
@@ -98,13 +99,13 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             // Deploy
             var deployArgs = new[] { "deploy", "--project-path", projectPath, "--application-name", _stackName, "--diagnostics" };
             var returnCode = await _app.Run(deployArgs);
-            Assert.Equal(CommandReturnCodes.SUCCESS, returnCode);
+            Assert.AreEqual(CommandReturnCodes.SUCCESS, returnCode);
 
             // Verify application is deployed and running
-            Assert.Equal(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
+            Assert.AreEqual(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
 
             var cluster = await _ecsHelper.GetCluster(_stackName);
-            Assert.Equal(TaskDefinitionStatus.ACTIVE, cluster.Status);
+            Assert.AreEqual(TaskDefinitionStatus.ACTIVE, cluster.Status);
 
             var deployStdOut = _interactiveService.StdOutReader.ReadAllLines();
 
@@ -118,11 +119,11 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             // list
             var listArgs = new[] { "list-deployments", "--diagnostics" };
             returnCode = await _app.Run(listArgs);
-            Assert.Equal(CommandReturnCodes.SUCCESS, returnCode);
+            Assert.AreEqual(CommandReturnCodes.SUCCESS, returnCode);
 
             // Verify stack exists in list of deployments
             var listDeployStdOut = _interactiveService.StdOutReader.ReadAllLines().Select(x => x.Split()[0]).ToList();
-            Assert.Contains(listDeployStdOut, (deployment) => _stackName.Equals(deployment));
+            CollectionAssert.Contains(listDeployStdOut, _stackName);
         }
 
         private async Task DeleteStack()
@@ -134,39 +135,22 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 
             // Delete
             var returnCode = await _app.Run(deleteArgs);
-            Assert.Equal(CommandReturnCodes.SUCCESS, returnCode);
+            Assert.AreEqual(CommandReturnCodes.SUCCESS, returnCode);
 
             // Verify application is deleted
             Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName), $"{_stackName} still exists.");
         }
 
-        public void Dispose()
+        [TearDown]
+        public async Task Cleanup()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_isDisposed) return;
-
-            if (disposing)
+            var isStackDeleted = await _cloudFormationHelper.IsStackDeleted(_stackName);
+            if (!isStackDeleted)
             {
-                var isStackDeleted = _cloudFormationHelper.IsStackDeleted(_stackName).GetAwaiter().GetResult();
-                if (!isStackDeleted)
-                {
-                    _cloudFormationHelper.DeleteStack(_stackName).GetAwaiter().GetResult();
-                }
-
-                _interactiveService.ReadStdOutStartToEnd();
+                await _cloudFormationHelper.DeleteStack(_stackName);
             }
 
-            _isDisposed = true;
-        }
-
-        ~RedeploymentTests()
-        {
-            Dispose(false);
+            _interactiveService.ReadStdOutStartToEnd();
         }
     }
 }

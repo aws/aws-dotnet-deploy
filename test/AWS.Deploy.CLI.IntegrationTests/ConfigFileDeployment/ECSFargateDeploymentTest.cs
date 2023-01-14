@@ -7,31 +7,31 @@ using System.Linq;
 using System.Collections.Generic;
 using Amazon.CloudFormation;
 using Amazon.ECS;
-using Amazon.ECS.Model;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.CLI.Extensions;
 using AWS.Deploy.CLI.IntegrationTests.Extensions;
 using AWS.Deploy.CLI.IntegrationTests.Helpers;
 using AWS.Deploy.CLI.IntegrationTests.Services;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 using Task = System.Threading.Tasks.Task;
+using NUnit.Framework;
 
 namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
 {
-    public class ECSFargateDeploymentTest : IDisposable
+    [TestFixture]
+    public class ECSFargateDeploymentTest
     {
-        private readonly HttpHelper _httpHelper;
-        private readonly CloudFormationHelper _cloudFormationHelper;
-        private readonly ECSHelper _ecsHelper;
-        private readonly App _app;
-        private readonly InMemoryInteractiveService _interactiveService;
-        private bool _isDisposed;
+        private HttpHelper _httpHelper;
+        private CloudFormationHelper _cloudFormationHelper;
+        private ECSHelper _ecsHelper;
+        private App _app;
+        private InMemoryInteractiveService _interactiveService;
         private string _stackName;
         private string _clusterName;
-        private readonly TestAppManager _testAppManager;
+        private TestAppManager _testAppManager;
 
-        public ECSFargateDeploymentTest()
+        [SetUp]
+        public void Initialize()
         {
             var ecsClient = new AmazonECSClient();
             _ecsHelper = new ECSHelper(ecsClient);
@@ -57,7 +57,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
             _testAppManager = new TestAppManager();
         }
 
-        [Fact]
+        [Test]
         public async Task PerformDeployment()
         {
             var stackNamePlaceholder = "{StackName}";
@@ -69,14 +69,14 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
 
             // Deploy
             var deployArgs = new[] { "deploy", "--project-path", projectPath, "--apply", configFilePath, "--silent", "--diagnostics" };
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
+            Assert.AreEqual(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
 
             // Verify application is deployed and running
-            Assert.Equal(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
+            Assert.AreEqual(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
 
             var cluster = await _ecsHelper.GetCluster(_clusterName);
-            Assert.Equal("ACTIVE", cluster.Status);
-            Assert.Equal(cluster.ClusterName, _clusterName);
+            Assert.AreEqual("ACTIVE", cluster.Status);
+            Assert.AreEqual(cluster.ClusterName, _clusterName);
 
             var deployStdOut = _interactiveService.StdOutReader.ReadAllLines();
 
@@ -89,11 +89,11 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
 
             // list
             var listArgs = new[] { "list-deployments", "--diagnostics" };
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(listArgs));;
+            Assert.AreEqual(CommandReturnCodes.SUCCESS, await _app.Run(listArgs));;
 
             // Verify stack exists in list of deployments
             var listDeployStdOut = _interactiveService.StdOutReader.ReadAllLines().Select(x => x.Split()[0]).ToList();
-            Assert.Contains(listDeployStdOut, (deployment) => _stackName.Equals(deployment));
+            CollectionAssert.Contains(listDeployStdOut, _stackName);
 
             // Arrange input for delete
             await _interactiveService.StdInWriter.WriteAsync("y"); // Confirm delete
@@ -101,39 +101,22 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
             var deleteArgs = new[] { "delete-deployment", _stackName, "--diagnostics" };
 
             // Delete
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deleteArgs));;
+            Assert.AreEqual(CommandReturnCodes.SUCCESS, await _app.Run(deleteArgs));;
 
             // Verify application is deleted
             Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName), $"{_stackName} still exists.");
         }
 
-        public void Dispose()
+        [TearDown]
+        public async Task Cleanup()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_isDisposed) return;
-
-            if (disposing)
+            var isStackDeleted = await _cloudFormationHelper.IsStackDeleted(_stackName);
+            if (!isStackDeleted)
             {
-                var isStackDeleted = _cloudFormationHelper.IsStackDeleted(_stackName).GetAwaiter().GetResult();
-                if (!isStackDeleted)
-                {
-                    _cloudFormationHelper.DeleteStack(_stackName).GetAwaiter().GetResult();
-                }
-
-                _interactiveService.ReadStdOutStartToEnd();
+                await _cloudFormationHelper.DeleteStack(_stackName);
             }
 
-            _isDisposed = true;
-        }
-
-        ~ECSFargateDeploymentTest()
-        {
-            Dispose(false);
+            _interactiveService.ReadStdOutStartToEnd();
         }
     }
 }

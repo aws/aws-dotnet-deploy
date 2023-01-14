@@ -14,22 +14,23 @@ using AWS.Deploy.CLI.IntegrationTests.Helpers;
 using AWS.Deploy.CLI.IntegrationTests.Services;
 using AWS.Deploy.Orchestration;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
+using NUnit.Framework;
 
 namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
 {
-    public class ElasticBeanStalkDeploymentTest : IDisposable
+    [TestFixture]
+    public class ElasticBeanStalkDeploymentTest
     {
-        private readonly HttpHelper _httpHelper;
-        private readonly CloudFormationHelper _cloudFormationHelper;
-        private readonly App _app;
-        private readonly InMemoryInteractiveService _interactiveService;
-        private bool _isDisposed;
+        private HttpHelper _httpHelper;
+        private CloudFormationHelper _cloudFormationHelper;
+        private App _app;
+        private InMemoryInteractiveService _interactiveService;
         private string _stackName;
-        private readonly TestAppManager _testAppManager;
-        private readonly IServiceProvider _serviceProvider;
+        private TestAppManager _testAppManager;
+        private IServiceProvider _serviceProvider;
 
-        public ElasticBeanStalkDeploymentTest()
+        [SetUp]
+        public void Initialize()
         {
             var serviceCollection = new ServiceCollection();
 
@@ -52,7 +53,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
             _testAppManager = new TestAppManager();
         }
 
-        [Fact]
+        [Test]
         public async Task PerformDeployment()
         {
             // Create the config file
@@ -78,10 +79,10 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
             ConfigFileHelper.ApplyReplacementTokens(new Dictionary<string, string> { {stackNamePlaceholder, _stackName } }, configFilePath);
 
             var deployArgs = new[] { "deploy", "--project-path", projectPath, "--apply", configFilePath, "--silent", "--diagnostics" };
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
+            Assert.AreEqual(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
 
             // Verify application is deployed and running
-            Assert.Equal(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
+            Assert.AreEqual(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
 
             var deployStdOut = _interactiveService.StdOutReader.ReadAllLines();
 
@@ -95,11 +96,11 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
 
             // list
             var listArgs = new[] { "list-deployments", "--diagnostics" };
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(listArgs));;
+            Assert.AreEqual(CommandReturnCodes.SUCCESS, await _app.Run(listArgs));;
 
             // Verify stack exists in list of deployments
             var listDeployStdOut = _interactiveService.StdOutReader.ReadAllLines().Select(x => x.Split()[0]).ToList();
-            Assert.Contains(listDeployStdOut, (deployment) => _stackName.Equals(deployment));
+            CollectionAssert.Contains(listDeployStdOut, _stackName);
 
             // Arrange input for delete
             await _interactiveService.StdInWriter.WriteAsync("y"); // Confirm delete
@@ -107,7 +108,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
             var deleteArgs = new[] { "delete-deployment", _stackName, "--diagnostics" };
 
             // Delete
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deleteArgs));;
+            Assert.AreEqual(CommandReturnCodes.SUCCESS, await _app.Run(deleteArgs));;
 
             // Verify application is deleted
             Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName), $"{_stackName} still exists.");
@@ -115,33 +116,16 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
             _interactiveService.ReadStdOutStartToEnd();
         }
 
-        public void Dispose()
+        [TearDown]
+        public async Task Cleanup()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_isDisposed) return;
-
-            if (disposing)
+            var isStackDeleted = await _cloudFormationHelper.IsStackDeleted(_stackName);
+            if (!isStackDeleted)
             {
-                var isStackDeleted = _cloudFormationHelper.IsStackDeleted(_stackName).GetAwaiter().GetResult();
-                if (!isStackDeleted)
-                {
-                    _cloudFormationHelper.DeleteStack(_stackName).GetAwaiter().GetResult();
-                }
-
-                _interactiveService.ReadStdOutStartToEnd();
+                await _cloudFormationHelper.DeleteStack(_stackName);
             }
 
-            _isDisposed = true;
-        }
-
-        ~ElasticBeanStalkDeploymentTest()
-        {
-            Dispose(false);
+            _interactiveService.ReadStdOutStartToEnd();
         }
     }
 }

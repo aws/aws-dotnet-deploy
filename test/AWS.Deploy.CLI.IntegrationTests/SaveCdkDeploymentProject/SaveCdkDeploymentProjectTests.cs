@@ -1,31 +1,32 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-using System;
 using System.IO;
 using System.Linq;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.CLI.IntegrationTests.Services;
 using AWS.Deploy.CLI.Utilities;
-using Xunit;
 using Task = System.Threading.Tasks.Task;
 using Newtonsoft.Json;
 using AWS.Deploy.Common.Recipes;
+using NUnit.Framework;
 
 namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 {
-    public class SaveCdkDeploymentProjectTests : IDisposable
+    [TestFixture]
+    public class SaveCdkDeploymentProjectTests
     {
-        private readonly CommandLineWrapper _commandLineWrapper;
-        private readonly InMemoryInteractiveService _inMemoryInteractiveService;
+        private CommandLineWrapper _commandLineWrapper;
+        private InMemoryInteractiveService _inMemoryInteractiveService;
 
-        public SaveCdkDeploymentProjectTests()
+        [SetUp]
+        public void Initialize()
         {
             _inMemoryInteractiveService = new InMemoryInteractiveService();
             _commandLineWrapper = new CommandLineWrapper(_inMemoryInteractiveService);
         }
 
-        [Fact]
+        [Test]
         public async Task DefaultSaveDirectory()
         {
             var tempDirectoryPath = new TestAppManager().GetProjectPath(string.Empty);
@@ -39,10 +40,10 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             Assert.True(File.Exists(recipeFilePath));
             var recipeRoot = JsonConvert.DeserializeObject<RecipeDefinition>(File.ReadAllText(recipeFilePath));
             var applicationIAMRoleSetting = recipeRoot.OptionSettings.FirstOrDefault(x => string.Equals(x.Id, "ApplicationIAMRole"));
-            Assert.Equal("ecs-tasks.amazonaws.com", applicationIAMRoleSetting.TypeHintData["ServicePrincipal"]);
+            Assert.AreEqual("ecs-tasks.amazonaws.com", applicationIAMRoleSetting.TypeHintData["ServicePrincipal"]);
         }
 
-        [Fact]
+        [Test]
         public async Task CustomSaveDirectory()
         {
             var tempDirectoryPath = new TestAppManager().GetProjectPath(string.Empty);
@@ -53,7 +54,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             await Utilities.CreateCDKDeploymentProject(targetApplicationProjectPath, saveDirectoryPath);
         }
 
-        [Fact]
+        [Test]
         public async Task InvalidSaveCdkDirectoryInsideProjectDirectory()
         {
             var tempDirectoryPath = new TestAppManager().GetProjectPath(string.Empty);
@@ -64,7 +65,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             await Utilities.CreateCDKDeploymentProject(targetApplicationProjectPath, saveDirectoryPath, false);
         }
 
-        [Fact]
+        [Test]
         public async Task InvalidNonEmptySaveCdkDirectory()
         {
             var tempDirectoryPath = new TestAppManager().GetProjectPath(string.Empty);
@@ -76,20 +77,10 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             await Utilities.CreateCDKDeploymentProject(targetApplicationProjectPath, saveDirectoryPath, false);
         }
 
-        protected virtual void Dispose(bool disposing)
+        [TearDown]
+        public void Cleanup()
         {
-            if (disposing)
-            {
-                _inMemoryInteractiveService.ReadStdOutStartToEnd();
-            }
+            _inMemoryInteractiveService.ReadStdOutStartToEnd();
         }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        ~SaveCdkDeploymentProjectTests() => Dispose(false);
     }
 }

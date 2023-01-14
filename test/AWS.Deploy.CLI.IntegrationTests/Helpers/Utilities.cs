@@ -2,12 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using AWS.Deploy.Orchestration.Utilities;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace AWS.Deploy.CLI.IntegrationTests.Helpers
 {

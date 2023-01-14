@@ -12,23 +12,23 @@ using AWS.Deploy.CLI.IntegrationTests.Extensions;
 using AWS.Deploy.CLI.IntegrationTests.Helpers;
 using AWS.Deploy.CLI.IntegrationTests.Services;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
-using static System.Net.WebRequestMethods;
+using NUnit.Framework;
 
 namespace AWS.Deploy.CLI.IntegrationTests
 {
-    public class BlazorWasmTests : IDisposable
+    [TestFixture]
+    public class BlazorWasmTests
     {
-        private readonly HttpHelper _httpHelper;
-        private readonly CloudFormationHelper _cloudFormationHelper;
-        private readonly CloudFrontHelper _cloudFrontHelper;
-        private readonly InMemoryInteractiveService _interactiveService;
-        private readonly App _app;
+        private HttpHelper _httpHelper;
+        private CloudFormationHelper _cloudFormationHelper;
+        private CloudFrontHelper _cloudFrontHelper;
+        private InMemoryInteractiveService _interactiveService;
+        private App _app;
         private string _stackName;
-        private bool _isDisposed;
-        private readonly TestAppManager _testAppManager;
+        private TestAppManager _testAppManager;
 
-        public BlazorWasmTests()
+        [SetUp]
+        public void Initialize()
         {
             var serviceCollection = new ServiceCollection();
 
@@ -52,8 +52,8 @@ namespace AWS.Deploy.CLI.IntegrationTests
             _testAppManager = new TestAppManager();
         }
 
-        [Theory]
-        [InlineData("testapps", "BlazorWasm60", "BlazorWasm60.csproj")]
+        [Test]
+        [TestCase("testapps", "BlazorWasm60", "BlazorWasm60.csproj")]
         public async Task DefaultConfigurations(params string[] components)
         {
             _stackName = $"{components[1]}{Guid.NewGuid().ToString().Split('-').Last()}";
@@ -65,10 +65,10 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
             // Deploy
             var deployArgs = new[] { "deploy", "--project-path", _testAppManager.GetProjectPath(Path.Combine(components)), "--application-name", _stackName, "--diagnostics" };
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
+            Assert.AreEqual(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
 
             // Verify application is deployed and running
-            Assert.Equal(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
+            Assert.AreEqual(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
 
             var deployStdOut = _interactiveService.StdOutReader.ReadAllLines();
 
@@ -87,15 +87,15 @@ namespace AWS.Deploy.CLI.IntegrationTests
             // The initial state of logging should be false, the test will test enabling logging during redeployment.
             var distributionId = await _cloudFormationHelper.GetResourceId(_stackName, "RecipeCloudFrontDistribution2BE25932");
             var distribution = await _cloudFrontHelper.GetDistribution(distributionId);
-            Assert.Equal(Amazon.CloudFront.PriceClass.PriceClass_All, distribution.DistributionConfig.PriceClass);
+            Assert.AreEqual(Amazon.CloudFront.PriceClass.PriceClass_All, distribution.DistributionConfig.PriceClass);
 
             // list
             var listArgs = new[] { "list-deployments", "--diagnostics" };
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(listArgs));;
+            Assert.AreEqual(CommandReturnCodes.SUCCESS, await _app.Run(listArgs));;
 
             // Verify stack exists in list of deployments
             var listDeployStdOut = _interactiveService.StdOutReader.ReadAllLines().Select(x => x.Split()[0]).ToList();
-            Assert.Contains(listDeployStdOut, (deployment) => _stackName.Equals(deployment));
+            CollectionAssert.Contains(listDeployStdOut, _stackName);
 
             // Setup for redeployment turning on access logging via settings file.
             await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Select default option settings
@@ -103,13 +103,13 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
             var applyLoggingSettingsFile = Path.Combine(Directory.GetParent(_testAppManager.GetProjectPath(Path.Combine(components))).FullName, "apply-settings.json");
             deployArgs = new[] { "deploy", "--project-path", _testAppManager.GetProjectPath(Path.Combine(components)), "--application-name", _stackName, "--diagnostics", "--apply", applyLoggingSettingsFile };
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
+            Assert.AreEqual(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
 
             // URL could take few more minutes to come live, therefore, we want to wait and keep trying for a specified timeout
             await _httpHelper.WaitUntilSuccessStatusCode(applicationUrl, TimeSpan.FromSeconds(5), TimeSpan.FromMinutes(5));
 
             distribution = await _cloudFrontHelper.GetDistribution(distributionId);
-            Assert.Equal(Amazon.CloudFront.PriceClass.PriceClass_100, distribution.DistributionConfig.PriceClass);
+            Assert.AreEqual(Amazon.CloudFront.PriceClass.PriceClass_100, distribution.DistributionConfig.PriceClass);
 
             // Arrange input for delete
             await _interactiveService.StdInWriter.WriteAsync("y"); // Confirm delete
@@ -117,39 +117,22 @@ namespace AWS.Deploy.CLI.IntegrationTests
             var deleteArgs = new[] { "delete-deployment", _stackName, "--diagnostics" };
 
             // Delete
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deleteArgs));;
+            Assert.AreEqual(CommandReturnCodes.SUCCESS, await _app.Run(deleteArgs));;
 
             // Verify application is deleted
             Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName), $"{_stackName} still exists.");
         }
 
-        public void Dispose()
+        [TearDown]
+        public async Task Cleanup()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_isDisposed) return;
-
-            if (disposing)
+            var isStackDeleted = await _cloudFormationHelper.IsStackDeleted(_stackName);
+            if (!isStackDeleted)
             {
-                var isStackDeleted = _cloudFormationHelper.IsStackDeleted(_stackName).GetAwaiter().GetResult();
-                if (!isStackDeleted)
-                {
-                    _cloudFormationHelper.DeleteStack(_stackName).GetAwaiter().GetResult();
-                }
-
-                _interactiveService.ReadStdOutStartToEnd();
+                await _cloudFormationHelper.DeleteStack(_stackName);
             }
 
-            _isDisposed = true;
-        }
-
-        ~BlazorWasmTests()
-        {
-            Dispose(false);
+            _interactiveService.ReadStdOutStartToEnd();
         }
     }
 }

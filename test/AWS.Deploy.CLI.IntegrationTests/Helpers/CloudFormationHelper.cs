@@ -1,12 +1,9 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-using System;
 using System.Threading.Tasks;
 using Amazon.CloudFormation;
 using Amazon.CloudFormation.Model;
-using AWS.Deploy.Common;
-using Xunit;
 
 namespace AWS.Deploy.CLI.IntegrationTests.Helpers
 {

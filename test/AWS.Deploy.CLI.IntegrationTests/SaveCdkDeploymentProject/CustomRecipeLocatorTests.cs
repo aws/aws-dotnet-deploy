@@ -7,7 +7,6 @@ using AWS.Deploy.CLI.Utilities;
 using AWS.Deploy.Common.DeploymentManifest;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Orchestration;
-using Xunit;
 using Task = System.Threading.Tasks.Task;
 using Should;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
@@ -15,20 +14,23 @@ using AWS.Deploy.CLI.IntegrationTests.Services;
 using AWS.Deploy.Common.Recipes;
 using Moq;
 using AWS.Deploy.Common.Recipes.Validation;
+using NUnit.Framework;
 
 namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 {
-    public class CustomRecipeLocatorTests : IDisposable
+    [TestFixture]
+    public class CustomRecipeLocatorTests
     {
-        private readonly CommandLineWrapper _commandLineWrapper;
-        private readonly InMemoryInteractiveService _inMemoryInteractiveService;
+        private CommandLineWrapper _commandLineWrapper;
+        private InMemoryInteractiveService _inMemoryInteractiveService;
 
-        public CustomRecipeLocatorTests()
+        [SetUp]
+        public void Initialize()
         {
             _inMemoryInteractiveService = new InMemoryInteractiveService();
             _commandLineWrapper = new CommandLineWrapper(_inMemoryInteractiveService);        }
 
-        [Fact]
+        [Test]
         public async Task LocateCustomRecipePathsWithManifestFile()
         {
             var tempDirectoryPath = new TestAppManager().GetProjectPath(string.Empty);
@@ -52,7 +54,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             customRecipePaths.ShouldContain(Path.Combine(tempDirectoryPath, "MyCdkApp1"));
         }
 
-        [Fact]
+        [Test]
         public async Task LocateCustomRecipePathsWithoutManifestFile()
         {
             var tempDirectoryPath = new TestAppManager().GetProjectPath(string.Empty);
@@ -89,20 +91,10 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             return new RecipeHandler(deploymentManifestEngine, _inMemoryInteractiveService, directoryManager, fileManager, optionSettingHandler, validatorFactory);
         }
 
-        protected virtual void Dispose(bool disposing)
+        [TearDown]
+        public void Cleanup()
         {
-            if (disposing)
-            {
-                _inMemoryInteractiveService.ReadStdOutStartToEnd();
-            }
+            _inMemoryInteractiveService.ReadStdOutStartToEnd();
         }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        ~CustomRecipeLocatorTests() => Dispose(false);
     }
 }

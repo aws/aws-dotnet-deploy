@@ -2,10 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using AWS.Deploy.CLI.Utilities;
 using AWS.Deploy.CLI.IntegrationTests.Utilities;
@@ -15,9 +13,7 @@ using AWS.Deploy.Common.IO;
 using AWS.Deploy.DockerEngine;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.CDK;
-using AWS.Deploy.Recipes;
 using Moq;
-using Xunit;
 using Should;
 using AWS.Deploy.Common.Recipes;
 using Newtonsoft.Json;
@@ -27,21 +23,24 @@ using AWS.Deploy.Orchestration.LocalUserSettings;
 using AWS.Deploy.Orchestration.Utilities;
 using AWS.Deploy.Orchestration.ServiceHandlers;
 using AWS.Deploy.Common.Recipes.Validation;
+using NUnit.Framework;
 
 namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 {
-    public class RecommendationTests : IDisposable
+    [TestFixture]
+    public class RecommendationTests
     {
-        private readonly CommandLineWrapper _commandLineWrapper;
-        private readonly InMemoryInteractiveService _inMemoryInteractiveService;
+        private CommandLineWrapper _commandLineWrapper;
+        private InMemoryInteractiveService _inMemoryInteractiveService;
 
-        public RecommendationTests()
+        [SetUp]
+        public void Initialize()
         {
             _inMemoryInteractiveService  = new InMemoryInteractiveService();
             _commandLineWrapper = new CommandLineWrapper(_inMemoryInteractiveService);
         }
 
-        [Fact]
+        [Test]
         public async Task GenerateRecommendationsForDeploymentProject()
         {
             // ARRANGE
@@ -61,7 +60,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             Assert.NotNull(recommendations.FirstOrDefault(x => x.Recipe.Id == "AspNetAppElasticBeanstalkLinux"));
         }
 
-        [Fact]
+        [Test]
         public async Task GenerateRecommendationsWithoutCustomRecipes()
         {
             // ARRANGE
@@ -84,7 +83,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             recommendations[6].Name.ShouldEqual("Container Image to Amazon Elastic Container Registry (ECR)"); // default recipe
         }
 
-        [Fact]
+        [Test]
         public async Task GenerateRecommendationsFromCustomRecipesWithManifestFile()
         {
             // ARRANGE
@@ -135,7 +134,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             File.Exists(Path.Combine(webAppWithDockerFilePath, "aws-deployments.json")).ShouldBeTrue();
         }
 
-        [Fact]
+        [Test]
         public async Task GenerateRecommendationsFromCustomRecipesWithoutManifestFile()
         {
             // ARRANGE
@@ -185,7 +184,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             File.Exists(Path.Combine(webAppNoDockerFilePath, "aws-deployments.json")).ShouldBeFalse();
         }
 
-        [Fact]
+        [Test]
         public async Task GenerateRecommendationsFromCompatibleDeploymentProject()
         {
             // ARRANGE
@@ -213,7 +212,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             recommendations[0].Recipe.RecipePath.ShouldEqual(Path.Combine(saveDirectoryPathEcsProject, "ECS-CDK.recipe"));
         }
 
-        [Fact]
+        [Test]
         public async Task GenerateRecommendationsFromIncompatibleDeploymentProject()
         {
             // ARRANGE
@@ -273,20 +272,10 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             return recipe.Id;
         }
 
-        protected virtual void Dispose(bool disposing)
+        [TearDown]
+        public void Cleanup()
         {
-            if (disposing)
-            {
-                _inMemoryInteractiveService.ReadStdOutStartToEnd();
-            }
+            _inMemoryInteractiveService.ReadStdOutStartToEnd();
         }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        ~RecommendationTests() => Dispose(false);
     }
 }

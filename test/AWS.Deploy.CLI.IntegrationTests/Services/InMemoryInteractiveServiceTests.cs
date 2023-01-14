@@ -2,28 +2,28 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
-using Xunit;
-using Should;
+using NUnit.Framework;
 
 namespace AWS.Deploy.CLI.IntegrationTests.Services
 {
+    [TestFixture]
     public class InMemoryInteractiveServiceTests
     {
-        [Fact]
+        [Test]
         public void Write()
         {
             var service = new InMemoryInteractiveService();
 
             service.Write("Hello");
 
-            Assert.Equal("Hello", service.StdOutReader.ReadToEnd());
+            Assert.AreEqual("Hello", service.StdOutReader.ReadToEnd());
 
             service.Write("World");
 
-            Assert.Equal("World", service.StdOutReader.ReadToEnd());
+            Assert.AreEqual("World", service.StdOutReader.ReadToEnd());
         }
 
-        [Fact]
+        [Test]
         public void WriteLine()
         {
             var service = new InMemoryInteractiveService();
@@ -32,20 +32,20 @@ namespace AWS.Deploy.CLI.IntegrationTests.Services
             service.WriteLine("Line 2");
             service.WriteLine("Line 3");
 
-            Assert.Equal("Line 1", service.StdOutReader.ReadLine());
-            Assert.Equal("Line 2", service.StdOutReader.ReadLine());
-            Assert.Equal("Line 3", service.StdOutReader.ReadLine());
+            Assert.AreEqual("Line 1", service.StdOutReader.ReadLine());
+            Assert.AreEqual("Line 2", service.StdOutReader.ReadLine());
+            Assert.AreEqual("Line 3", service.StdOutReader.ReadLine());
 
             service.WriteLine("Line 4");
             service.WriteLine("Line 5");
             service.WriteLine("Line 6");
 
-            Assert.Equal("Line 4", service.StdOutReader.ReadLine());
-            Assert.Equal("Line 5", service.StdOutReader.ReadLine());
-            Assert.Equal("Line 6", service.StdOutReader.ReadLine());
+            Assert.AreEqual("Line 4", service.StdOutReader.ReadLine());
+            Assert.AreEqual("Line 5", service.StdOutReader.ReadLine());
+            Assert.AreEqual("Line 6", service.StdOutReader.ReadLine());
         }
 
-        [Fact]
+        [Test]
         public void WriteErrorLine()
         {
             var service = new InMemoryInteractiveService();
@@ -54,20 +54,20 @@ namespace AWS.Deploy.CLI.IntegrationTests.Services
             service.WriteErrorLine("Error Line 2");
             service.WriteErrorLine("Error Line 3");
 
-            Assert.Equal("Error Line 1", service.StdOutReader.ReadLine());
-            Assert.Equal("Error Line 2", service.StdOutReader.ReadLine());
-            Assert.Equal("Error Line 3", service.StdOutReader.ReadLine());
+            Assert.AreEqual("Error Line 1", service.StdOutReader.ReadLine());
+            Assert.AreEqual("Error Line 2", service.StdOutReader.ReadLine());
+            Assert.AreEqual("Error Line 3", service.StdOutReader.ReadLine());
 
             service.WriteErrorLine("Error Line 4");
             service.WriteErrorLine("Error Line 5");
             service.WriteErrorLine("Error Line 6");
 
-            Assert.Equal("Error Line 4", service.StdOutReader.ReadLine());
-            Assert.Equal("Error Line 5", service.StdOutReader.ReadLine());
-            Assert.Equal("Error Line 6", service.StdOutReader.ReadLine());
+            Assert.AreEqual("Error Line 4", service.StdOutReader.ReadLine());
+            Assert.AreEqual("Error Line 5", service.StdOutReader.ReadLine());
+            Assert.AreEqual("Error Line 6", service.StdOutReader.ReadLine());
         }
 
-        [Fact]
+        [Test]
         public void WriteDebugLine()
         {
             var service = new InMemoryInteractiveService();
@@ -76,20 +76,20 @@ namespace AWS.Deploy.CLI.IntegrationTests.Services
             service.WriteDebugLine("Debug Line 2");
             service.WriteDebugLine("Debug Line 3");
 
-            Assert.Equal("Debug Line 1", service.StdOutReader.ReadLine());
-            Assert.Equal("Debug Line 2", service.StdOutReader.ReadLine());
-            Assert.Equal("Debug Line 3", service.StdOutReader.ReadLine());
+            Assert.AreEqual("Debug Line 1", service.StdOutReader.ReadLine());
+            Assert.AreEqual("Debug Line 2", service.StdOutReader.ReadLine());
+            Assert.AreEqual("Debug Line 3", service.StdOutReader.ReadLine());
 
             service.WriteDebugLine("Debug Line 4");
             service.WriteDebugLine("Debug Line 5");
             service.WriteDebugLine("Debug Line 6");
 
-            Assert.Equal("Debug Line 4", service.StdOutReader.ReadLine());
-            Assert.Equal("Debug Line 5", service.StdOutReader.ReadLine());
-            Assert.Equal("Debug Line 6", service.StdOutReader.ReadLine());
+            Assert.AreEqual("Debug Line 4", service.StdOutReader.ReadLine());
+            Assert.AreEqual("Debug Line 5", service.StdOutReader.ReadLine());
+            Assert.AreEqual("Debug Line 6", service.StdOutReader.ReadLine());
         }
 
-        [Fact]
+        [Test]
         public void ReadLine()
         {
             var service = new InMemoryInteractiveService();
@@ -99,21 +99,21 @@ namespace AWS.Deploy.CLI.IntegrationTests.Services
             service.StdInWriter.WriteLine("Line 3");
             service.StdInWriter.Flush();
 
-            Assert.Equal("Line 1", service.ReadLine());
-            Assert.Equal("Line 2", service.ReadLine());
-            Assert.Equal("Line 3", service.ReadLine());
+            Assert.AreEqual("Line 1", service.ReadLine());
+            Assert.AreEqual("Line 2", service.ReadLine());
+            Assert.AreEqual("Line 3", service.ReadLine());
 
             service.StdInWriter.WriteLine("Line 4");
             service.StdInWriter.WriteLine("Line 5");
             service.StdInWriter.WriteLine("Line 6");
             service.StdInWriter.Flush();
 
-            Assert.Equal("Line 4", service.ReadLine());
-            Assert.Equal("Line 5", service.ReadLine());
-            Assert.Equal("Line 6", service.ReadLine());
+            Assert.AreEqual("Line 4", service.ReadLine());
+            Assert.AreEqual("Line 5", service.ReadLine());
+            Assert.AreEqual("Line 6", service.ReadLine());
         }
 
-        [Fact]
+        [Test]
         public void ReadKey()
         {
             var service = new InMemoryInteractiveService();
@@ -123,21 +123,21 @@ namespace AWS.Deploy.CLI.IntegrationTests.Services
             service.StdInWriter.Write(ConsoleKey.C);
             service.StdInWriter.Flush();
 
-            Assert.Equal(ConsoleKey.A, service.ReadKey(false).Key);
-            Assert.Equal(ConsoleKey.B, service.ReadKey(false).Key);
-            Assert.Equal(ConsoleKey.C, service.ReadKey(false).Key);
+            Assert.AreEqual(ConsoleKey.A, service.ReadKey(false).Key);
+            Assert.AreEqual(ConsoleKey.B, service.ReadKey(false).Key);
+            Assert.AreEqual(ConsoleKey.C, service.ReadKey(false).Key);
 
             service.StdInWriter.Write(ConsoleKey.D);
             service.StdInWriter.Write(ConsoleKey.E);
             service.StdInWriter.Write(ConsoleKey.F);
             service.StdInWriter.Flush();
 
-            Assert.Equal(ConsoleKey.D, service.ReadKey(false).Key);
-            Assert.Equal(ConsoleKey.E, service.ReadKey(false).Key);
-            Assert.Equal(ConsoleKey.F, service.ReadKey(false).Key);
+            Assert.AreEqual(ConsoleKey.D, service.ReadKey(false).Key);
+            Assert.AreEqual(ConsoleKey.E, service.ReadKey(false).Key);
+            Assert.AreEqual(ConsoleKey.F, service.ReadKey(false).Key);
         }
 
-        [Fact]
+        [Test]
         public void ReadLineSetToNull()
         {
             var service = new InMemoryInteractiveService();

@@ -15,23 +15,24 @@ using AWS.Deploy.CLI.IntegrationTests.Services;
 using AWS.Deploy.Orchestration.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Xunit;
-using Environment = System.Environment;
+using NUnit.Framework;
+[assembly:Parallelizable(ParallelScope.Children)]
 
 namespace AWS.Deploy.CLI.IntegrationTests
 {
-    public class WebAppNoDockerFileTests : IDisposable
+    [TestFixture]
+    public class WebAppNoDockerFileTests
     {
-        private readonly HttpHelper _httpHelper;
-        private readonly CloudFormationHelper _cloudFormationHelper;
-        private readonly App _app;
-        private readonly InMemoryInteractiveService _interactiveService;
-        private bool _isDisposed;
-        private string _stackName;
-        private readonly TestAppManager _testAppManager;
-        private readonly string _customWorkspace;
+        private HttpHelper _httpHelper;
+        private CloudFormationHelper _cloudFormationHelper;
+        private App _app;
+        private InMemoryInteractiveService _interactiveService;
+        //private string _stackName;
+        private TestAppManager _testAppManager;
+        private string _customWorkspace;
 
-        public WebAppNoDockerFileTests()
+        [SetUp]
+        public void Initialize()
         {
             var serviceCollection = new ServiceCollection();
 
@@ -68,22 +69,22 @@ namespace AWS.Deploy.CLI.IntegrationTests
             _testAppManager = new TestAppManager();
         }
 
-        [Theory]
-        [InlineData("ElasticBeanStalkConfigFile-Linux.json", true)]
-        [InlineData("ElasticBeanStalkConfigFile-Linux-SelfContained.json", true)]
-        [InlineData("ElasticBeanStalkConfigFile-Windows.json", false)]
-        [InlineData("ElasticBeanStalkConfigFile-Windows-SelfContained.json", false)]
+        [Test]
+        [TestCase("ElasticBeanStalkConfigFile-Linux.json", true)]
+        [TestCase("ElasticBeanStalkConfigFile-Linux-SelfContained.json", true)]
+        [TestCase("ElasticBeanStalkConfigFile-Windows.json", false)]
+        [TestCase("ElasticBeanStalkConfigFile-Windows-SelfContained.json", false)]
         public async Task EBDefaultConfigurations(string configFile, bool linux)
         {
-            _stackName = $"BeanstalkTest-{Guid.NewGuid().ToString().Split('-').Last()}";
+            var _stackName = $"BeanstalkTest-{Guid.NewGuid().ToString().Split('-').Last()}";
 
             // Deploy
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
             var deployArgs = new[] { "deploy", "--project-path", projectPath, "--application-name", _stackName, "--diagnostics", "--silent", "--apply", configFile };
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
+            Assert.AreEqual(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
 
             // Verify application is deployed and running
-            Assert.Equal(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
+            Assert.AreEqual(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
 
             var deployStdOut = _interactiveService.StdOutReader.ReadAllLines();
 
@@ -107,50 +108,35 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
             // list
             var listArgs = new[] { "list-deployments", "--diagnostics" };
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(listArgs)); ;
+            Assert.AreEqual(CommandReturnCodes.SUCCESS, await _app.Run(listArgs)); ;
 
             // Verify stack exists in list of deployments
             var listStdOut = _interactiveService.StdOutReader.ReadAllLines().Select(x => x.Split()[0]).ToList();
-            Assert.Contains(listStdOut, (deployment) => _stackName.Equals(deployment));
+            CollectionAssert.Contains(listStdOut, _stackName);
 
             // Arrange input for delete
             // Use --silent flag to delete without user prompts
             var deleteArgs = new[] { "delete-deployment", _stackName, "--diagnostics", "--silent" };
 
             // Delete
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deleteArgs)); ;
+            Assert.AreEqual(CommandReturnCodes.SUCCESS, await _app.Run(deleteArgs)); ;
 
             // Verify application is deleted
             Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName), $"{_stackName} still exists.");
+
+            await Cleanup(_stackName);
         }
 
-        public void Dispose()
+        //[TearDown]
+        public async Task Cleanup(string _stackName)
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_isDisposed) return;
-
-            if (disposing)
+            var isStackDeleted = await _cloudFormationHelper.IsStackDeleted(_stackName);
+            if (!isStackDeleted)
             {
-                var isStackDeleted = _cloudFormationHelper.IsStackDeleted(_stackName).GetAwaiter().GetResult();
-                if (!isStackDeleted)
-                {
-                    _cloudFormationHelper.DeleteStack(_stackName).GetAwaiter().GetResult();
-                }
-
-                _interactiveService.ReadStdOutStartToEnd();
+                await _cloudFormationHelper.DeleteStack(_stackName);
             }
 
-            _isDisposed = true;
-        }
-
-        ~WebAppNoDockerFileTests()
-        {
-            Dispose(false);
+            _interactiveService.ReadStdOutStartToEnd();
         }
     }
 }

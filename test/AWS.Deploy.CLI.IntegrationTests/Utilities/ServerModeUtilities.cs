@@ -15,7 +15,7 @@ using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.Utilities;
 using AWS.Deploy.ServerMode.Client;
 using Moq;
-using Xunit;
+using NUnit.Framework;
 
 namespace AWS.Deploy.CLI.IntegrationTests.Utilities
 {
@@ -41,11 +41,11 @@ namespace AWS.Deploy.CLI.IntegrationTests.Utilities
 
             ServerModeTests.RegisterSignalRMessageCallbacks(signalRClient, logOutput);
         }
-
+        
         public static async Task<RecommendationSummary> GetRecommendationsAndSetDeploymentTarget(this RestAPIClient restClient, string sessionId, string recipeId, string stackName)
         {
             var getRecommendationOutput = await restClient.GetRecommendationsAsync(sessionId);
-            Assert.NotEmpty(getRecommendationOutput.Recommendations);
+            Assert.IsNotEmpty(getRecommendationOutput.Recommendations);
 
             var beanstalkRecommendation =
                 getRecommendationOutput.Recommendations.FirstOrDefault(x => string.Equals(x.RecipeId, recipeId));

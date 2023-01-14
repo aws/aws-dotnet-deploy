@@ -13,7 +13,6 @@ using Amazon.S3;
 using Amazon.S3.Transfer;
 using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.IO;
-using AWS.Deploy.Orchestration.Data;
 
 namespace AWS.Deploy.CLI.IntegrationTests.Helpers
 {

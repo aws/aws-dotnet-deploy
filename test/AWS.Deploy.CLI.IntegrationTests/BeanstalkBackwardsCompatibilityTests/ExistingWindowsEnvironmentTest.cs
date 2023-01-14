@@ -2,34 +2,42 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
-using System.IO;
-using System.IO.Compression;
+using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
+using System.Text;
 using System.Threading.Tasks;
 using Amazon.ElasticBeanstalk;
 using Amazon.IdentityManagement;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
-using AWS.Deploy.CLI.Extensions;
-using AWS.Deploy.CLI.IntegrationTests.Extensions;
 using AWS.Deploy.CLI.IntegrationTests.Helpers;
 using AWS.Deploy.CLI.IntegrationTests.Services;
-using AWS.Deploy.Common;
 using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.IO;
+using AWS.Deploy.Common;
 using AWS.Deploy.Orchestration.ServiceHandlers;
 using AWS.Deploy.Orchestration.Utilities;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
+using AWS.Deploy.CLI.Extensions;
+using AWS.Deploy.CLI.IntegrationTests.Extensions;
+using NUnit.Framework;
+using System.IO;
+using System.IO.Compression;
+using System.Text.Json;
+using AWS.Deploy.Common.Recipes;
+using Moq;
+using AWS.Deploy.CLI.Commands;
+using AWS.Deploy.CLI.IntegrationTests.Utilities;
+using AWS.Deploy.ServerMode.Client;
+using System.Threading;
+using AWS.Deploy.ServerMode.Client.Utilities;
 
-namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests.ExistingWindowsEnvironment
+namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests
 {
-    /// <summary>
-    /// The goal of this class is to be used as shared context between a collection of tests.
-    /// More info could be found here https://xunit.net/docs/shared-context
-    /// </summary>
-    public class WindowsTestContextFixture : IAsyncLifetime
+    [TestFixture]
+    public class ExistingWindowsEnvironmentTest
     {
+        private const string BEANSTALK_ENVIRONMENT_RECIPE_ID = "AspNetAppExistingBeanstalkWindowsEnvironment";
+
         public readonly App App;
         public readonly HttpHelper HttpHelper;
         public readonly IAWSResourceQueryer AWSResourceQueryer;
@@ -49,7 +57,12 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests.E
         public readonly string RoleName;
         public string EnvironmentId;
 
-        public WindowsTestContextFixture()
+        private readonly AWSElasticBeanstalkHandler _awsElasticBeanstalkHandler;
+        private readonly Mock<IOptionSettingHandler> _optionSettingHandler;
+        private readonly ProjectDefinitionParser _projectDefinitionParser;
+        private readonly RecipeDefinition _recipeDefinition;
+
+        public ExistingWindowsEnvironmentTest()
         {
             var serviceCollection = new ServiceCollection();
 
@@ -98,8 +111,24 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests.E
 
             EBHelper = new ElasticBeanstalkHelper(new AmazonElasticBeanstalkClient(Amazon.RegionEndpoint.USWest2), AWSResourceQueryer, ToolInteractiveService);
             IAMHelper = new IAMHelper(new AmazonIdentityManagementServiceClient(), AWSResourceQueryer, ToolInteractiveService);
+
+            _projectDefinitionParser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
+            _optionSettingHandler = new Mock<IOptionSettingHandler>();
+            _awsElasticBeanstalkHandler = new AWSElasticBeanstalkHandler(null, null, null, _optionSettingHandler.Object);
+            _recipeDefinition = new Mock<RecipeDefinition>(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<Deploy.Common.Recipes.DeploymentTypes>(),
+                It.IsAny<DeploymentBundleTypes>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>()).Object;
         }
 
+        [OneTimeSetUp]
         public async Task InitializeAsync()
         {
             await IAMHelper.CreateRoleForBeanstalkEnvionmentDeployment(RoleName);
@@ -114,7 +143,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests.E
                 $" -c release";
 
             var result = await CommandLineWrapper.TryRunWithResult(publishCommand, streamOutputToInteractiveService: true);
-            Assert.Equal(0, result.ExitCode);
+            Assert.AreEqual(0, result.ExitCode);
 
             await ZipFileManager.CreateFromDirectory(publishDirectoryInfo.FullName, zipFilePath);
 
@@ -176,7 +205,96 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests.E
             }
         }
 
-        public async Task DisposeAsync()
+        [Test]
+        public async Task DeployToExistingBeanstalkEnvironment()
+        {
+            var projectPath = TestAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
+            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--application-name", EnvironmentName, "--diagnostics", "--silent", "--region", "us-west-2" };
+            Assert.AreEqual(CommandReturnCodes.SUCCESS, await App.Run(deployArgs));
+
+            var environmentDescription = await AWSResourceQueryer.DescribeElasticBeanstalkEnvironment(EnvironmentName);
+
+            // URL could take few more minutes to come live, therefore, we want to wait and keep trying for a specified timeout
+            await HttpHelper.WaitUntilSuccessStatusCode(environmentDescription.CNAME, TimeSpan.FromSeconds(5), TimeSpan.FromMinutes(5));
+
+            var successMessagePrefix = $"The Elastic Beanstalk Environment {EnvironmentName} has been successfully updated";
+            var deployStdOutput = InteractiveService.StdOutReader.ReadAllLines();
+            var successMessage = deployStdOutput.First(line => line.Trim().StartsWith(successMessagePrefix));
+            Assert.False(string.IsNullOrEmpty(successMessage));
+
+            var expectedVersionLabel = successMessage.Split(" ").Last();
+            Assert.True(await EBHelper.VerifyEnvironmentVersionLabel(EnvironmentName, expectedVersionLabel));
+        }
+
+        [Test]
+        public async Task ServerModeDeployToExistingWindowsBeanstalkEnvironment()
+        {
+            var projectPath = TestAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
+            var portNumber = 4031;
+            using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ServerModeUtilities.ResolveDefaultCredentials);
+
+            var serverCommand = new ServerModeCommand(ToolInteractiveService, portNumber, null, true);
+            var cancelSource = new CancellationTokenSource();
+
+            var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
+            try
+            {
+                var baseUrl = $"http://localhost:{portNumber}/";
+                var restClient = new RestAPIClient(baseUrl, httpClient);
+
+                await restClient.WaitUntilServerModeReady();
+
+                var startSessionOutput = await restClient.StartDeploymentSessionAsync(new StartDeploymentSessionInput
+                {
+                    AwsRegion = "us-west-2",
+                    ProjectPath = projectPath
+                });
+
+                var sessionId = startSessionOutput.SessionId;
+                Assert.NotNull(sessionId);
+
+                var existingDeployments = await restClient.GetExistingDeploymentsAsync(sessionId);
+                var existingDeployment = existingDeployments.ExistingDeployments.First(x => string.Equals(EnvironmentName, x.Name));
+
+                Assert.AreEqual(EnvironmentName, existingDeployment.Name);
+                Assert.AreEqual(BEANSTALK_ENVIRONMENT_RECIPE_ID, existingDeployment.RecipeId);
+                Assert.Null(existingDeployment.BaseRecipeId);
+                Assert.False(existingDeployment.IsPersistedDeploymentProject);
+                Assert.AreEqual(EnvironmentId, existingDeployment.ExistingDeploymentId);
+                Assert.AreEqual(Deploy.ServerMode.Client.DeploymentTypes.BeanstalkEnvironment, existingDeployment.DeploymentType);
+
+                var signalRClient = new DeploymentCommunicationClient(baseUrl);
+                await signalRClient.JoinSession(sessionId);
+
+                var logOutput = new StringBuilder();
+                AWS.Deploy.CLI.IntegrationTests.ServerModeTests.RegisterSignalRMessageCallbacks(signalRClient, logOutput);
+
+                await restClient.SetDeploymentTargetAsync(sessionId, new SetDeploymentTargetInput
+                {
+                    ExistingDeploymentId = EnvironmentId
+                });
+
+                await restClient.StartDeploymentAsync(sessionId);
+
+                await restClient.WaitForDeployment(sessionId);
+
+                Assert.True(logOutput.Length > 0);
+                var successMessagePrefix = $"The Elastic Beanstalk Environment {EnvironmentName} has been successfully updated";
+                var deployStdOutput = logOutput.ToString().Split(Environment.NewLine);
+                var successMessage = deployStdOutput.First(line => line.Trim().StartsWith(successMessagePrefix));
+                Assert.False(string.IsNullOrEmpty(successMessage));
+
+                var expectedVersionLabel = successMessage.Split(" ").Last();
+                Assert.True(await EBHelper.VerifyEnvironmentVersionLabel(EnvironmentName, expectedVersionLabel));
+            }
+            finally
+            {
+                cancelSource.Cancel();
+            }
+        }
+
+        [OneTimeTearDown]
+        public async Task Cleanup()
         {
             var success = await EBHelper.DeleteApplication(ApplicationName, EnvironmentName);
             await IAMHelper.DeleteRoleAndInstanceProfileAfterBeanstalkEnvionmentDeployment(RoleName);
