@@ -24,9 +24,9 @@ namespace AWS.Deploy.CLI.IntegrationTests.Extensions
         /// <param name="serviceCollection"><see cref="IServiceCollection"/> instance that holds the app dependencies.</param>
         public static void AddTestServices(this IServiceCollection serviceCollection)
         {
-            serviceCollection.AddSingleton<InMemoryInteractiveService>();
-            serviceCollection.AddSingleton<IToolInteractiveService>(serviceProvider => serviceProvider.GetService<InMemoryInteractiveService>());
-            serviceCollection.AddSingleton<IOrchestratorInteractiveService>(serviceProvider => serviceProvider.GetService<InMemoryInteractiveService>());
+            serviceCollection.AddTransient<InMemoryInteractiveService>();
+            serviceCollection.AddTransient<IToolInteractiveService>(serviceProvider => serviceProvider.GetService<InMemoryInteractiveService>());
+            serviceCollection.AddTransient<IOrchestratorInteractiveService>(serviceProvider => serviceProvider.GetService<InMemoryInteractiveService>());
         }
     }
 }

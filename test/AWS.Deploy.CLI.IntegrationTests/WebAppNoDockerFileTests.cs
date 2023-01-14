@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,9 +28,9 @@ namespace AWS.Deploy.CLI.IntegrationTests
         private CloudFormationHelper _cloudFormationHelper;
         private App _app;
         private InMemoryInteractiveService _interactiveService;
-        //private string _stackName;
         private TestAppManager _testAppManager;
         private string _customWorkspace;
+        private readonly Dictionary<string, string> _stackNames = new Dictionary<string, string>();
 
         [SetUp]
         public void Initialize()
@@ -76,15 +77,16 @@ namespace AWS.Deploy.CLI.IntegrationTests
         [TestCase("ElasticBeanStalkConfigFile-Windows-SelfContained.json", false)]
         public async Task EBDefaultConfigurations(string configFile, bool linux)
         {
-            var _stackName = $"BeanstalkTest-{Guid.NewGuid().ToString().Split('-').Last()}";
+            var stackName = $"BeanstalkTest-{Guid.NewGuid().ToString().Split('-').Last()}";
+            _stackNames.Add(TestContext.CurrentContext.Test.ID, stackName);
 
             // Deploy
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
-            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--application-name", _stackName, "--diagnostics", "--silent", "--apply", configFile };
+            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--application-name", stackName, "--diagnostics", "--silent", "--apply", configFile };
             Assert.AreEqual(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
 
             // Verify application is deployed and running
-            Assert.AreEqual(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
+            Assert.AreEqual(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(stackName));
 
             var deployStdOut = _interactiveService.StdOutReader.ReadAllLines();
 
@@ -112,28 +114,27 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
             // Verify stack exists in list of deployments
             var listStdOut = _interactiveService.StdOutReader.ReadAllLines().Select(x => x.Split()[0]).ToList();
-            CollectionAssert.Contains(listStdOut, _stackName);
+            CollectionAssert.Contains(listStdOut, stackName);
 
             // Arrange input for delete
             // Use --silent flag to delete without user prompts
-            var deleteArgs = new[] { "delete-deployment", _stackName, "--diagnostics", "--silent" };
+            var deleteArgs = new[] { "delete-deployment", stackName, "--diagnostics", "--silent" };
 
             // Delete
             Assert.AreEqual(CommandReturnCodes.SUCCESS, await _app.Run(deleteArgs)); ;
 
             // Verify application is deleted
-            Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName), $"{_stackName} still exists.");
-
-            await Cleanup(_stackName);
+            Assert.True(await _cloudFormationHelper.IsStackDeleted(stackName), $"{stackName} still exists.");
         }
 
-        //[TearDown]
-        public async Task Cleanup(string _stackName)
+        [TearDown]
+        public async Task Cleanup()
         {
-            var isStackDeleted = await _cloudFormationHelper.IsStackDeleted(_stackName);
+            var stackName = _stackNames[TestContext.CurrentContext.Test.ID];
+            var isStackDeleted = await _cloudFormationHelper.IsStackDeleted(stackName);
             if (!isStackDeleted)
             {
-                await _cloudFormationHelper.DeleteStack(_stackName);
+                await _cloudFormationHelper.DeleteStack(stackName);
             }
 
             _interactiveService.ReadStdOutStartToEnd();
