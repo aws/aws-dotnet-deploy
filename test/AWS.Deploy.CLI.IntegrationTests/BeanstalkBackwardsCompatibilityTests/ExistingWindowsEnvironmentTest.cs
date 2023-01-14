@@ -66,7 +66,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests
         {
             var serviceCollection = new ServiceCollection();
 
-            serviceCollection.AddCustomServices();
+            serviceCollection.AddCustomServices(ServiceLifetime.Scoped);
             serviceCollection.AddTestServices();
 
             var serviceProvider = serviceCollection.BuildServiceProvider();

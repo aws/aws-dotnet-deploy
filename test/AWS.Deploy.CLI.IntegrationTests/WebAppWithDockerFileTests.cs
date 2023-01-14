@@ -40,7 +40,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
             var serviceCollection = new ServiceCollection();
 
-            serviceCollection.AddCustomServices();
+            serviceCollection.AddCustomServices(ServiceLifetime.Scoped);
             serviceCollection.AddTestServices();
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
@@ -152,7 +152,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             // URL could take few more minutes to come live, therefore, we want to wait and keep trying for a specified timeout
             await _httpHelper.WaitUntilSuccessStatusCode(applicationUrl, TimeSpan.FromSeconds(5), TimeSpan.FromMinutes(5));
 
-            // Ensure environemnt variables specified in AppRunnerConfigFile.json are set for the service. 
+            // Ensure environemnt variables specified in AppRunnerConfigFile.json are set for the service.
             var checkEnvironmentVariableUrl = applicationUrl + "envvar/TEST_Key1";
             using var httpClient = new HttpClient();
             var envVarValue = await httpClient.GetStringAsync(checkEnvironmentVariableUrl);

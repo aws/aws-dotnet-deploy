@@ -52,7 +52,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
 
             var serviceCollection = new ServiceCollection();
 
-            serviceCollection.AddCustomServices();
+            serviceCollection.AddCustomServices(ServiceLifetime.Scoped);
             serviceCollection.AddTestServices();
 
             _serviceProvider = serviceCollection.BuildServiceProvider();
@@ -297,7 +297,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
 
                 await restClient.GetRecommendationsAndSetDeploymentTarget(sessionId, "AspNetAppAppRunner", stackName);
 
-                // Assert that the Subnets and SecurityGroups options are returning columns 
+                // Assert that the Subnets and SecurityGroups options are returning columns
                 var subnets = await restClient.GetConfigSettingResourcesAsync(sessionId, "VPCConnector.Subnets");
                 Assert.That(subnets.Columns, Has.Exactly(3).Items); // Subnet Id, VPC, Availability Zone
                 Assert.That(subnets.Columns, Is.All.Not.Null);
@@ -330,11 +330,11 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
 
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
             using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ServerModeUtilities.ResolveDefaultCredentials);
-            
+
             // Running `cdk diff` to assert against the generated CloudFormation template
             // for this recipe takes longer than the default timeout
             httpClient.Timeout = new TimeSpan(0, 0, 120);
-            
+
             var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
             var cancelSource = new CancellationTokenSource();
 
@@ -347,7 +347,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
                 await restClient.WaitUntilServerModeReady();
 
                 var sessionId = await restClient.StartDeploymentSession(projectPath, _awsRegion);
-                
+
                 var logOutput = new StringBuilder();
                 await ServerModeExtensions.SetupSignalRConnection(baseUrl, sessionId, logOutput);
 

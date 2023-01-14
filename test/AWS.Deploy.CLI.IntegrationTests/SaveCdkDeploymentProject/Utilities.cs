@@ -31,19 +31,19 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             {
                 saveDirectoryPath = targetApplicationPath + ".Deployment";
                 deployArgs = new[] { "deployment-project", "generate", "--project-path", targetApplicationPath, "--diagnostics" };
-            }  
+            }
             else
             {
                 deployArgs = new[] { "deployment-project", "generate", "--project-path", targetApplicationPath, "--output", saveDirectoryPath, "--diagnostics" };
             }
-                
+
 
             var returnCode = await app.Run(deployArgs);
 
             // Verify project is saved
             var stdOut = interactiveService.StdOutReader.ReadAllLines();
             var successMessage = $"Saving AWS CDK deployment project to: {saveDirectoryPath}";
-            
+
             if (!isValid)
             {
                 returnCode.ShouldEqual(CommandReturnCodes.USER_ERROR);
@@ -106,7 +106,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
         {
             var serviceCollection = new ServiceCollection();
 
-            serviceCollection.AddCustomServices();
+            serviceCollection.AddCustomServices(ServiceLifetime.Scoped);
             serviceCollection.AddTestServices();
 
             var serviceProvider = serviceCollection.BuildServiceProvider();

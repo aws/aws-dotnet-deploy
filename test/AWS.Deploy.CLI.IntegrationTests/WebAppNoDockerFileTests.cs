@@ -37,7 +37,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
         {
             var serviceCollection = new ServiceCollection();
 
-            serviceCollection.AddCustomServices();
+            serviceCollection.AddCustomServices(ServiceLifetime.Scoped);
             serviceCollection.AddTestServices();
 
             foreach (var item in serviceCollection)

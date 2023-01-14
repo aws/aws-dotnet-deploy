@@ -38,7 +38,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
 
             var serviceCollection = new ServiceCollection();
 
-            serviceCollection.AddCustomServices();
+            serviceCollection.AddCustomServices(ServiceLifetime.Scoped);
             serviceCollection.AddTestServices();
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
