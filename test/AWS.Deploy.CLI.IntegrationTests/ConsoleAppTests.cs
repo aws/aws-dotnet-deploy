@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -26,8 +27,8 @@ namespace AWS.Deploy.CLI.IntegrationTests
         private CloudWatchLogsHelper _cloudWatchLogsHelper;
         private App _app;
         private InMemoryInteractiveService _interactiveService;
-        private string _stackName;
         private TestAppManager _testAppManager;
+        private readonly Dictionary<string, string> _stackNames = new Dictionary<string, string>();
 
         [SetUp]
         public void Initialize()
@@ -62,7 +63,8 @@ namespace AWS.Deploy.CLI.IntegrationTests
         [TestCase("testapps", "ConsoleAppTask", "ConsoleAppTask.csproj")]
         public async Task DefaultConfigurations(params string[] components)
         {
-            _stackName = $"{components[1]}{Guid.NewGuid().ToString().Split('-').Last()}";
+            var stackName = $"{components[1]}{Guid.NewGuid().ToString().Split('-').Last()}";
+            _stackNames.Add(TestContext.CurrentContext.Test.ID, stackName);
 
             // Arrange input for deploy
             await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Select default recommendation
@@ -70,17 +72,17 @@ namespace AWS.Deploy.CLI.IntegrationTests
             await _interactiveService.StdInWriter.FlushAsync();
 
             // Deploy
-            var deployArgs = new[] { "deploy", "--project-path", _testAppManager.GetProjectPath(Path.Combine(components)), "--application-name", _stackName, "--diagnostics" };
+            var deployArgs = new[] { "deploy", "--project-path", _testAppManager.GetProjectPath(Path.Combine(components)), "--application-name", stackName, "--diagnostics" };
             Assert.AreEqual(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
 
             // Verify application is deployed and running
-            Assert.AreEqual(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
+            Assert.AreEqual(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(stackName));
 
-            var cluster = await _ecsHelper.GetCluster(_stackName);
+            var cluster = await _ecsHelper.GetCluster(stackName);
             Assert.AreEqual("ACTIVE", cluster.Status);
 
             // Verify CloudWatch logs
-            var logGroup = await _ecsHelper.GetLogGroup(_stackName);
+            var logGroup = await _ecsHelper.GetLogGroup(stackName);
             var logMessages = await _cloudWatchLogsHelper.GetLogMessages(logGroup);
             CollectionAssert.Contains(logMessages, "Hello World!");
 
@@ -96,36 +98,37 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
             // Verify stack exists in list of deployments
             var listStdOut = _interactiveService.StdOutReader.ReadAllLines().Select(x => x.Split()[0]).ToList();
-            CollectionAssert.Contains(listStdOut, _stackName);
+            CollectionAssert.Contains(listStdOut, stackName);
 
             // Arrange input for re-deployment
             await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Select default option settings
             await _interactiveService.StdInWriter.FlushAsync();
 
             // Perform re-deployment
-            deployArgs = new[] { "deploy", "--project-path", _testAppManager.GetProjectPath(Path.Combine(components)), "--application-name", _stackName, "--diagnostics" };
+            deployArgs = new[] { "deploy", "--project-path", _testAppManager.GetProjectPath(Path.Combine(components)), "--application-name", stackName, "--diagnostics" };
             Assert.AreEqual(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
-            Assert.AreEqual(StackStatus.UPDATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
+            Assert.AreEqual(StackStatus.UPDATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(stackName));
 
             // Arrange input for delete
             await _interactiveService.StdInWriter.WriteAsync("y"); // Confirm delete
             await _interactiveService.StdInWriter.FlushAsync();
-            var deleteArgs = new[] { "delete-deployment", _stackName, "--diagnostics" };
+            var deleteArgs = new[] { "delete-deployment", stackName, "--diagnostics" };
 
             // Delete
             Assert.AreEqual(CommandReturnCodes.SUCCESS, await _app.Run(deleteArgs));;
 
             // Verify application is deleted
-            Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName), $"{_stackName} still exists.");
+            Assert.True(await _cloudFormationHelper.IsStackDeleted(stackName), $"{stackName} still exists.");
         }
 
         [TearDown]
         public async Task Cleanup()
         {
-            var isStackDeleted = await _cloudFormationHelper.IsStackDeleted(_stackName);
+            var stackName = _stackNames[TestContext.CurrentContext.Test.ID];
+            var isStackDeleted = await _cloudFormationHelper.IsStackDeleted(stackName);
             if (!isStackDeleted)
             {
-                await _cloudFormationHelper.DeleteStack(_stackName);
+                await _cloudFormationHelper.DeleteStack(stackName);
             }
 
             _interactiveService.ReadStdOutStartToEnd();
