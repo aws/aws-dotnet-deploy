@@ -64,7 +64,7 @@ namespace AWS.Deploy.Common.Recipes.Validation
                 }
                 else // Anything else is unexpected, so proceed with usual exception handling
                 {
-                   throw ex;
+                   throw;
                 }
             }
 
