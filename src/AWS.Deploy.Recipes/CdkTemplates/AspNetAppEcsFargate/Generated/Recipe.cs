@@ -151,7 +151,8 @@ namespace AspNetAppEcsFargate
             {
                 Image = ContainerImage.FromEcrRepository(EcrRepository, recipeConfiguration.ECRImageTag),
                 Logging = AppLogging,
-                Environment = settings.ECSEnvironmentVariables
+                Environment = settings.ECSEnvironmentVariables,
+                MemoryLimitMiB = settings.TaskMemory
             }));
 
             AppContainerDefinition.AddPortMappings(new PortMapping
