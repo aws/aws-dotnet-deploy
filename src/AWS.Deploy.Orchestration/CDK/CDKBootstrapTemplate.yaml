@@ -204,8 +204,8 @@ Resources:
             Status: Enabled
             NoncurrentVersionExpiration:
               NoncurrentDays: 365
-    UpdateReplacePolicy: Delete
-    DeletionPolicy: Delete
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
   StagingBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
@@ -461,30 +461,19 @@ Resources:
                   StringNotEquals:
                     s3:ResourceAccount:
                       Ref: AWS::AccountId
-              - Fn::If:
-                  - HasTrustedAccounts
-                  - Sid: PipelineCrossAccountArtifactsKey
-                    Effect: Allow
-                    Action:
-                      - kms:Decrypt
-                      - kms:DescribeKey
-                      - kms:Encrypt
-                      - kms:ReEncrypt*
-                      - kms:GenerateDataKey*
-                    Resource:
-                      Fn::Split:
-                        - "|"
-                        - Fn::Sub:
-                            - arn:aws:kms:*:${JoinedAccounts}:*
-                            - JoinedAccounts:
-                                Fn::Join:
-                                  - ":*|arn:aws:kms:*:"
-                                  - Ref: TrustedAccounts
-                    Condition:
-                      StringEquals:
-                        kms:ViaService:
-                          Fn::Sub: s3.${AWS::Region}.amazonaws.com
-                  - Ref: AWS::NoValue
+              - Sid: PipelineCrossAccountArtifactsKey
+                Effect: Allow
+                Action:
+                  - kms:Decrypt
+                  - kms:DescribeKey
+                  - kms:Encrypt
+                  - kms:ReEncrypt*
+                  - kms:GenerateDataKey*
+                Resource: "*"
+                Condition:
+                  StringEquals:
+                    kms:ViaService:
+                      Fn::Sub: s3.${AWS::Region}.amazonaws.com
               - Action: iam:PassRole
                 Resource:
                   Fn::Sub: ${CloudFormationExecutionRole.Arn}
@@ -595,7 +584,7 @@ Resources:
       Type: String
       Name:
         Fn::Sub: /cdk-bootstrap/${Qualifier}/version
-      Value: "17"
+      Value: "18"
 Outputs:
   BucketName:
     Description: The name of the S3 bucket owned by the CDK toolkit stack
