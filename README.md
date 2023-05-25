@@ -1,6 +1,5 @@
 # AWS .NET deployment tool
 
-
 This repository contains the AWS .NET deployment tool for .NET CLI - the opinionated tooling that simplifies deployment of .NET applications. The tool suggests the right AWS compute service to deploy your application to.  It then builds and packages your application as required by the chosen compute service, generates the deployment infrastructure, deploys your application by using the appropriate deployment engine (Cloud Development Kit (CDK) or native service APIs), and displays the endpoint.
 
 The tool assumes minimal knowledge of AWS. It is designed to guide you through the deployment process and provides suggested defaults. The tool will show you all compute service options available to deploy your application, and will recommend a default with information about why it was chosen. The other compute service options will be shown with an explanation of their differences. If the selected compute option does not match your needs, you can select a different compute service.
