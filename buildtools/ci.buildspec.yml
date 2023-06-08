@@ -3,7 +3,7 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      nodejs: 14
+      nodejs: 16
     commands:
       # install .NET SDK
       - curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --channel 6.0
