@@ -60,7 +60,7 @@ namespace AWS.Deploy.Orchestration
             }
             catch (IOException ex)
             {
-                throw new InvalidDeploymentSettingsException(DeployToolErrorCode.DeploymentConfigurationNotFound, $"An error occurred while trying to read the deployment settings file located at {filePath}. Make sure the file exists and is readable.", ex);
+                throw new InvalidDeploymentSettingsException(DeployToolErrorCode.DeploymentConfigurationNotFound, $"An error occurred while trying to read the deployment settings file located at {filePath}. Make sure the path you provided exists on your file system, and is readable.", ex);
             }
             catch (Exception ex)
             {
