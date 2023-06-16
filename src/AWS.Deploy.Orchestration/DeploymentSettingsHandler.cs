@@ -58,9 +58,13 @@ namespace AWS.Deploy.Orchestration
                 var userDeploymentSettings = JsonConvert.DeserializeObject<DeploymentSettings>(contents);
                 return userDeploymentSettings;
             }
+            catch (IOException ex)
+            {
+                throw new InvalidDeploymentSettingsException(DeployToolErrorCode.DeploymentConfigurationNotFound, $"An error occured while trying to read the deployment settings file located at {filePath}. Make sure the file exists and is readable.", ex);
+            }
             catch (Exception ex)
             {
-                throw new InvalidDeploymentSettingsException(DeployToolErrorCode.FailedToDeserializeUserDeploymentFile, $"An error occured while trying to deserialize the deployment settings file located at {filePath}", ex);
+                throw new InvalidDeploymentSettingsException(DeployToolErrorCode.FailedToDeserializeUserDeploymentFile, $"An error occured while trying to deserialize the deployment settings file located at {filePath}.\n  {ex.Message}", ex);
             }
         }
 

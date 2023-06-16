@@ -246,6 +246,38 @@ namespace AWS.Deploy.CLI.Common.UnitTests.ConfigFileDeployment
             Assert.Equal(expectedSnapshot, actualSnapshot);
         }
 
+        [Fact]
+        public async Task ReadSettings_InvalidJson()
+        {
+            // ARRANGE
+            var recommendations = await _recommendationEngine.ComputeRecommendations();
+            var selectedRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, "AspNetAppAppRunner"));
+            var filePath = Path.Combine("ConfigFileDeployment", "TestFiles", "InvalidConfigFile.json");
+
+            // ACT
+            var readAction = async () => await _deploymentSettingsHandler.ReadSettings(filePath);
+
+            // ASSERT
+            var ex = await Assert.ThrowsAsync<InvalidDeploymentSettingsException>(readAction);
+            Assert.Contains("An error occured while trying to deserialize the deployment settings file", ex.Message);
+        }
+
+        [Fact]
+        public async Task ReadSettings_FileNotFound()
+        {
+            // ARRANGE
+            var recommendations = await _recommendationEngine.ComputeRecommendations();
+            var selectedRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, "AspNetAppAppRunner"));
+            var filePath = Path.Combine("ConfigFileDeployment", "TestFiles", "AppRunnerConfigFile");
+
+            // ACT
+            var readAction = async () => await _deploymentSettingsHandler.ReadSettings(filePath);
+
+            // ASSERT
+            var ex = await Assert.ThrowsAsync<InvalidDeploymentSettingsException>(readAction);
+            Assert.Contains("An error occured while trying to read the deployment settings file", ex.Message);
+        }
+
         private object GetOptionSettingValue(Recommendation recommendation, string fullyQualifiedId)
         {
             var optionSetting = _optionSettingHandler.GetOptionSetting(recommendation, fullyQualifiedId);
