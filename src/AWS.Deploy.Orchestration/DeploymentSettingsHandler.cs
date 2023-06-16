@@ -60,11 +60,11 @@ namespace AWS.Deploy.Orchestration
             }
             catch (IOException ex)
             {
-                throw new InvalidDeploymentSettingsException(DeployToolErrorCode.DeploymentConfigurationNotFound, $"An error occured while trying to read the deployment settings file located at {filePath}. Make sure the file exists and is readable.", ex);
+                throw new InvalidDeploymentSettingsException(DeployToolErrorCode.DeploymentConfigurationNotFound, $"An error occurred while trying to read the deployment settings file located at {filePath}. Make sure the file exists and is readable.", ex);
             }
             catch (Exception ex)
             {
-                throw new InvalidDeploymentSettingsException(DeployToolErrorCode.FailedToDeserializeUserDeploymentFile, $"An error occured while trying to deserialize the deployment settings file located at {filePath}.\n  {ex.Message}", ex);
+                throw new InvalidDeploymentSettingsException(DeployToolErrorCode.FailedToDeserializeUserDeploymentFile, $"An error occurred while trying to deserialize the deployment settings file located at {filePath}.\n  {ex.Message}", ex);
             }
         }
 
