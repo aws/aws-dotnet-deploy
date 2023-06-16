@@ -259,7 +259,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.ConfigFileDeployment
 
             // ASSERT
             var ex = await Assert.ThrowsAsync<InvalidDeploymentSettingsException>(readAction);
-            Assert.Contains("An error occured while trying to deserialize the deployment settings file", ex.Message);
+            Assert.Contains("An error occurred while trying to deserialize the deployment settings file", ex.Message);
         }
 
         [Fact]
@@ -275,7 +275,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.ConfigFileDeployment
 
             // ASSERT
             var ex = await Assert.ThrowsAsync<InvalidDeploymentSettingsException>(readAction);
-            Assert.Contains("An error occured while trying to read the deployment settings file", ex.Message);
+            Assert.Contains("An error occurred while trying to read the deployment settings file", ex.Message);
         }
 
         private object GetOptionSettingValue(Recommendation recommendation, string fullyQualifiedId)
