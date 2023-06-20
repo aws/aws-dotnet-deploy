@@ -52,19 +52,22 @@ namespace AWS.Deploy.Orchestration
 
         public async Task<DeploymentSettings?> ReadSettings(string filePath)
         {
-            try
+            if (_fileManager.Exists(filePath))
             {
-                var contents = await _fileManager.ReadAllTextAsync(filePath);
-                var userDeploymentSettings = JsonConvert.DeserializeObject<DeploymentSettings>(contents);
-                return userDeploymentSettings;
+                try
+                {
+                    var contents = await _fileManager.ReadAllTextAsync(filePath);
+                    var userDeploymentSettings = JsonConvert.DeserializeObject<DeploymentSettings>(contents);
+                    return userDeploymentSettings;
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidDeploymentSettingsException(DeployToolErrorCode.FailedToDeserializeUserDeploymentFile, $"An error occurred while trying to deserialize the deployment settings file located at {filePath}.\n  {ex.Message}", ex);
+                }
             }
-            catch (IOException ex)
+            else
             {
-                throw new InvalidDeploymentSettingsException(DeployToolErrorCode.DeploymentConfigurationNotFound, $"An error occurred while trying to read the deployment settings file located at {filePath}. Make sure the path you provided exists on your file system, and is readable.", ex);
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidDeploymentSettingsException(DeployToolErrorCode.FailedToDeserializeUserDeploymentFile, $"An error occurred while trying to deserialize the deployment settings file located at {filePath}.\n  {ex.Message}", ex);
+                throw new InvalidDeploymentSettingsException(DeployToolErrorCode.UserDeploymentFileNotFound, $"The deployment settings file located at {filePath} doesn't exist.");
             }
         }
 
