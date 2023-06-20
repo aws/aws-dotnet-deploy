@@ -127,7 +127,7 @@ namespace AWS.Deploy.Common
         UnsupportedOptionSettingType = 10010500,
         FailedToSaveDeploymentSettings = 10010600,
         InvalidWindowsManifestFile = 10010700,
-        DeploymentConfigurationNotFound = 10010800,
+        UserDeploymentFileNotFound = 10010800,
     }
 
     public class ProjectFileNotFoundException : DeployToolException
