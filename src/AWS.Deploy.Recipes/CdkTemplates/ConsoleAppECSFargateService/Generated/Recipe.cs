@@ -133,7 +133,8 @@ namespace ConsoleAppEcsFargateService
             {
                 Image = ContainerImage.FromEcrRepository(ecrRepository, props.ECRImageTag),
                 Logging = AppLogging,
-                Environment = settings.ECSEnvironmentVariables
+                Environment = settings.ECSEnvironmentVariables,
+                MemoryLimitMiB = settings.TaskMemory
             };
 
             AppTaskDefinition.AddContainer(nameof(AppContainerDefinition), InvokeCustomizeCDKPropsEvent(nameof(AppContainerDefinition), this, AppContainerDefinition));

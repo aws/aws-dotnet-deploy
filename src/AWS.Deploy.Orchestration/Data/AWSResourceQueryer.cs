@@ -587,7 +587,10 @@ namespace AWS.Deploy.Orchestration.Data
 
             if (!platforms.Any())
             {
-                throw new FailedToFindElasticBeanstalkSolutionStackException(DeployToolErrorCode.FailedToFindElasticBeanstalkSolutionStack, "Cannot use Elastic Beanstalk deployments because we cannot find a .NET Core Solution Stack to use. One possible reason could be that Elastic Beanstalk is not enabled in your region if you are using a non-default region.");
+                throw new FailedToFindElasticBeanstalkSolutionStackException(DeployToolErrorCode.FailedToFindElasticBeanstalkSolutionStack,
+                    "Cannot use Elastic Beanstalk deployments because we cannot find a .NET Core Solution Stack to use. " +
+                    "Possible reasons could be that Elastic Beanstalk is not enabled in your region if you are using a non-default region, " +
+                    "or that the configured credentials lack permission to call ListPlatformVersions.");
             }
 
             return platforms.First();

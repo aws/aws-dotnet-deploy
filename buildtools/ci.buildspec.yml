@@ -3,7 +3,7 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      nodejs: 14
+      nodejs: 16
     commands:
       # install .NET SDK
       - curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --channel 6.0
@@ -15,7 +15,13 @@ phases:
   build:
     commands:
       - dotnet build AWS.Deploy.sln -c Release
-      - dotnet test AWS.Deploy.sln -c Release --no-build --logger trx --results-directory ./testresults
+      - dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover AWS.Deploy.sln -c Release --no-build --logger trx --results-directory ./testresults
+
+  post_build:
+    steps:
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d #v3
+        
 reports:
     aws-dotnet-deploy-tests:
         file-format: VisualStudioTrx

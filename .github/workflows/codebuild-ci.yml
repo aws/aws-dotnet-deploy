@@ -1,6 +1,11 @@
 name: AWS CodeBuild CI
 
 on:
+  # Manually trigger on specific branches
+  workflow_dispatch: 
+  push:
+    branches:
+      - dev
   pull_request:
     branches:
       - main
@@ -19,10 +24,12 @@ jobs:
           role-to-assume: ${{ secrets.CI_MAIN_TESTING_ACCOUNT_ROLE_ARN }}
           role-duration-seconds: 7200
           aws-region: us-west-2
+
       - name: Setup .NET Core 6.0
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 6.0.x
+
       - name: Invoke Load Balancer Lambda
         id: lambda
         shell: pwsh
@@ -30,17 +37,23 @@ jobs:
           aws lambda invoke response.json --function-name "${{ secrets.CI_TESTING_LOAD_BALANCER_LAMBDA_NAME }}" --cli-binary-format raw-in-base64-out --payload '{\"Roles\": \"${{ secrets.CI_TEST_RUNNER_ACCOUNT_ROLES }}\", \"ProjectName\": \"${{ secrets.CI_TESTING_CODE_BUILD_PROJECT_NAME }}\", \"Branch\": \"${{ github.sha }}\"}'
           $roleArn=$(cat ./response.json)
           "roleArn=$($roleArn -replace '"', '')" >> $env:GITHUB_OUTPUT
+
       - name: Configure Test Runner Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           role-to-assume: ${{ steps.lambda.outputs.roleArn }}
           role-duration-seconds: 7200
           aws-region: us-west-2
+
       - name: Run CodeBuild
         id: codebuild
         uses: aws-actions/aws-codebuild-run-build@v1.0.3
         with:
           project-name: ${{ secrets.CI_TESTING_CODE_BUILD_PROJECT_NAME }}
+          env-vars-for-codebuild: CODECOV_TOKEN
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
       - name: CodeBuild Link
         shell: pwsh
         run: |

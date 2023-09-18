@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Amazon.CloudFormation;
+using Amazon.ECS;
 using Amazon.Runtime;
 using AWS.Deploy.CLI.Commands;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
@@ -244,6 +245,13 @@ namespace AWS.Deploy.CLI.IntegrationTests
                 Assert.Equal(StackStatus.CREATE_COMPLETE, stackStatus);
 
                 Assert.True(logOutput.Length > 0);
+
+                // Check to make sure the task memory setting was copied to the container defintion memory limit;
+                var taskDefinitionId = await _cloudFormationHelper.GetResourceId(_stackName, "RecipeAppTaskDefinitionAC7F53DB");
+                using var ecsClient = new AmazonECSClient(Amazon.RegionEndpoint.GetBySystemName(_awsRegion));
+                var taskDefinition = (await ecsClient.DescribeTaskDefinitionAsync(new Amazon.ECS.Model.DescribeTaskDefinitionRequest { TaskDefinition = taskDefinitionId })).TaskDefinition;
+                var containerDefinition = taskDefinition.ContainerDefinitions[0];
+                Assert.Equal(int.Parse(taskDefinition.Memory), containerDefinition.Memory);
 
                 // Make sure section header is return to output log
                 Assert.Contains("Creating deployment image", logOutput.ToString());

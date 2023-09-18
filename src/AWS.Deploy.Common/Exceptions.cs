@@ -126,7 +126,8 @@ namespace AWS.Deploy.Common
         FailedToReadCdkBootstrapVersion = 10010400,
         UnsupportedOptionSettingType = 10010500,
         FailedToSaveDeploymentSettings = 10010600,
-        InvalidWindowsManifestFile = 10010700
+        InvalidWindowsManifestFile = 10010700,
+        UserDeploymentFileNotFound = 10010800,
     }
 
     public class ProjectFileNotFoundException : DeployToolException

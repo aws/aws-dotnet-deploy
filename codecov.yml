@@ -1,0 +1,2 @@
+codecov:
+  branch: dev # set the default branch to 'dev'. This branch provides the coverage baselines during pull requests.
