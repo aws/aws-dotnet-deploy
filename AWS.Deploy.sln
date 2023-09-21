@@ -1,4 +1,5 @@
-﻿Microsoft Visual Studio Solution File, Format Version 12.00
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32126.317
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -36,12 +37,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AWS.Deploy.DockerEngine", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AWS.Deploy.Common", "src\AWS.Deploy.Common\AWS.Deploy.Common.csproj", "{3AAC19A6-02E8-45D0-BDD0-CAD0FBE15F64}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ManualLinuxTesting", "ManualLinuxTesting", "{D0172E70-D5BC-4EDE-84E4-9ADB67B5F8FB}"
-	ProjectSection(SolutionItems) = preProject
-		test\ManualLinuxTesting\Dockerfile = test\ManualLinuxTesting\Dockerfile
-		test\ManualLinuxTesting\Readme.md = test\ManualLinuxTesting\Readme.md
-	EndProjectSection
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AWS.Deploy.Recipes.CDK.Common", "src\AWS.Deploy.Recipes.CDK.Common\AWS.Deploy.Recipes.CDK.Common.csproj", "{FAE4D4C5-9107-4622-A050-E30CC70BE754}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AWS.Deploy.Orchestration.UnitTests", "test\AWS.Deploy.Orchestration.UnitTests\AWS.Deploy.Orchestration.UnitTests.csproj", "{3F7A5CA6-7178-4DBF-8DAD-6A63684C7A8E}"
@@ -70,7 +65,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorWasm60", "testapps\Bl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AWS.Deploy.DocGenerator", "src\AWS.Deploy.DocGenerator\AWS.Deploy.DocGenerator.csproj", "{6D4BD0C2-C2A0-4AFB-BC22-623DD64A4F84}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AWS.Deploy.DocGenerator.UnitTests", "test\AWS.Deploy.DocGenerator.UnitTests\AWS.Deploy.DocGenerator.UnitTests.csproj", "{7E661545-7DFD-4FE3-A5F9-767FAE30DFFE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AWS.Deploy.DocGenerator.UnitTests", "test\AWS.Deploy.DocGenerator.UnitTests\AWS.Deploy.DocGenerator.UnitTests.csproj", "{7E661545-7DFD-4FE3-A5F9-767FAE30DFFE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -194,7 +189,6 @@ Global
 		{F06F9F2B-9018-4357-9ECB-EAF3D9EC335C} = {11C7056E-93C1-408B-BD87-5270595BBE0E}
 		{4C4F07CE-4C88-44C6-864F-C5E563712EE2} = {11C7056E-93C1-408B-BD87-5270595BBE0E}
 		{3AAC19A6-02E8-45D0-BDD0-CAD0FBE15F64} = {11C7056E-93C1-408B-BD87-5270595BBE0E}
-		{D0172E70-D5BC-4EDE-84E4-9ADB67B5F8FB} = {BD466B5C-D8B0-4069-98A9-6DC8F01FA757}
 		{FAE4D4C5-9107-4622-A050-E30CC70BE754} = {11C7056E-93C1-408B-BD87-5270595BBE0E}
 		{3F7A5CA6-7178-4DBF-8DAD-6A63684C7A8E} = {BD466B5C-D8B0-4069-98A9-6DC8F01FA757}
 		{4AD9D400-3F3D-4076-B34C-0F88576C1889} = {BD466B5C-D8B0-4069-98A9-6DC8F01FA757}
