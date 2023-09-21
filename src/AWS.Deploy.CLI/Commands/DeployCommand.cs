@@ -586,7 +586,7 @@ namespace AWS.Deploy.CLI.Commands
             {
                 if (_toolInteractiveService.DisableInteractive)
                 {
-                    throw ex;
+                    throw;
                 }
 
                 _toolInteractiveService.WriteLine("Docker builds usually fail due to executing them from a working directory that is incompatible with the Dockerfile." +
@@ -615,7 +615,7 @@ namespace AWS.Deploy.CLI.Commands
                 }
                 else
                 {
-                    throw ex;
+                    throw;
                 }
             }
         }
