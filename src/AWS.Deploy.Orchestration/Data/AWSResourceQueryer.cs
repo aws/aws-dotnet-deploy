@@ -497,7 +497,7 @@ namespace AWS.Deploy.Orchestration.Data
                 "Error attempting to describe available VPCs");
         }
 
-        public async Task<Vpc> GetDefaultVpc()
+        public async Task<Vpc?> GetDefaultVpc()
         {
             var vpcClient = _awsClientFactory.GetAWSClient<IAmazonEC2>();
 

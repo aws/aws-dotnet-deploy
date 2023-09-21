@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <!-- The target framework is used by the toolkit and can only use netstandard2.0 -->
@@ -15,9 +15,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.Core" Version="3.7.100.14" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="5.0.5" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="AWSSDK.Core" Version="3.7.202.11" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="6.0.22" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>
