@@ -23,6 +23,9 @@
     <Content Update="ElasticBeanStalkConfigFile-Windows-SelfContained.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Update="DockerImageUploaderConfigFile.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

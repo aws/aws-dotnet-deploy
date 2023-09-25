@@ -1,0 +1,7 @@
+{
+    "RecipeId": "PushContainerImageEcr",
+    "settings": {
+        "ImageTag": "latest",
+        "ECRRepositoryName": "do-not-delete-deploytoolwebapp"
+    }
+}
