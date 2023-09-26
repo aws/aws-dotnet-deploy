@@ -14,6 +14,7 @@ using AWS.Deploy.Common.DeploymentManifest;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Recipes.Validation;
+using AWS.Deploy.Constants;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.RecommendationEngine;
 using AWS.Deploy.Recipes;
@@ -196,6 +197,38 @@ namespace AWS.Deploy.CLI.UnitTests
             recommendation.DeploymentBundle.DotnetPublishAdditionalBuildArguments = "--nologo";
 
             await _deploymentBundleHandler.CreateDotnetPublishZip(recommendation);
+
+            var expectedCommand =
+                $"dotnet publish \"{project.ProjectPath}\"" +
+                $" -o \"{_directoryManager.CreatedDirectories.First()}\"" +
+                " -c Release" +
+                " --runtime linux-x64" +
+                " --nologo" +
+                " --self-contained true";
+
+            Assert.Equal(expectedCommand, _commandLineWrapper.CommandsToExecute.First().Command);
+        }
+
+        /// <summary>
+        /// Since Beanstalk doesn't currently have .NET 7 and .NET 8 preinstalled we need to make sure we are doing a self-contained publish when creating the deployment bundle.
+        /// This test checks when the target framework is net7.0 or net8.0, then we are performing a self-contained build.
+        /// </summary>
+        [Fact]
+        public async Task CreateDotnetPublishZip_SelfContained_Net7_Net8()
+        {
+            var projectPath = SystemIOUtilities.ResolvePath(Path.Combine("docker", "WebAppNet8"));
+            var project = await _projectDefinitionParser.Parse(projectPath);
+            _recipeDefinition.TargetService = RecipeIdentifier.TARGET_SERVICE_ELASTIC_BEANSTALK;
+            var recommendation = new Recommendation(_recipeDefinition, project, 100, new Dictionary<string, object>());
+
+            recommendation.DeploymentBundle.DotnetPublishBuildConfiguration = "Release";
+            recommendation.DeploymentBundle.DotnetPublishAdditionalBuildArguments = "--nologo";
+
+            Assert.False(recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild);
+
+            await _deploymentBundleHandler.CreateDotnetPublishZip(recommendation);
+
+            Assert.True(recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild);
 
             var expectedCommand =
                 $"dotnet publish \"{project.ProjectPath}\"" +

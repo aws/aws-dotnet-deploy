@@ -26,6 +26,7 @@ namespace AWS.Deploy.CLI.UnitTests
         [InlineData("ConsoleSdkType", "")]
         [InlineData("WorkerServiceExample", "")]
         [InlineData("WebAppNet7", "")]
+        [InlineData("WebAppNet8", "")]
         public async Task DockerGenerate(string topLevelFolder, string projectName)
         {
             await DockerGenerateTestHelper(topLevelFolder, projectName);
