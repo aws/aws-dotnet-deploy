@@ -1,3 +1,4 @@
+# Pushes Docker images created from the deploy tool's Dockerfile templates to an internal ECR so that they can be scanned for security vulnerabilities.
 name: Upload Docker Images
 
 on:
@@ -39,5 +40,5 @@ jobs:
 
     - name: Run Docker Image Uploader
       run: |
-        cd ./src/AWS.Deploy.DockerImageUploader
+        cd ./test/AWS.Deploy.DockerImageUploader
         dotnet run --project ./AWS.Deploy.DockerImageUploader.csproj

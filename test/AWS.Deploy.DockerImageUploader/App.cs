@@ -12,6 +12,9 @@ using System.IO;
 
 namespace AWS.Deploy.DockerImageUploader
 {
+    /// <summary>
+    /// This serves as the dependency injection container for the console application.
+    /// </summary>
     public class App
     {
         private readonly IFileManager _fileManager;
@@ -19,7 +22,7 @@ namespace AWS.Deploy.DockerImageUploader
         private readonly IProjectDefinitionParser _projectDefinitionParser;
         private readonly CLI.App _deployToolCli;
 
-        private readonly List<string> _testApps = new List<string> { "WebApiNET6", "ConsoleAppTask" };
+        private readonly List<string> _testApps = new() { "WebApiNET6", "ConsoleAppTask" };
 
         public App(IServiceProvider serviceProvider)
         {
@@ -29,7 +32,12 @@ namespace AWS.Deploy.DockerImageUploader
             _deployToolCli = serviceProvider.GetRequiredService<CLI.App>();
         }
 
-        public async Task Run(string[] args)
+        /// <summary>
+        /// Generates Dockerfiles for test applications using
+        /// the <see href="https://github.com/aws/aws-dotnet-deploy/blob/main/src/AWS.Deploy.DockerEngine/Templates/Dockerfile.template">Dockerfile template</see>.
+        /// It will then build and push the images to Amazon ECR where they are continuously scanned for security vulnerabilities.
+        /// </summary>
+        public async Task Run()
         {
             foreach (var testApp in _testApps)
             {
@@ -52,19 +60,19 @@ namespace AWS.Deploy.DockerImageUploader
 
         private string ResolvePath(string projectName)
         {
-            const string srcDir = "src";
-            var srcDirPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            while (srcDirPath != null && !string.Equals(new DirectoryInfo(srcDirPath).Name, srcDir, StringComparison.OrdinalIgnoreCase))
+            const string testDir = "test";
+            var testDirPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            while (testDirPath != null && !string.Equals(new DirectoryInfo(testDirPath).Name, testDir, StringComparison.OrdinalIgnoreCase))
             {
-                srcDirPath = Directory.GetParent(srcDirPath)?.FullName;
+                testDirPath = Directory.GetParent(testDirPath)?.FullName;
             }
 
-            if (string.IsNullOrEmpty(srcDirPath))
+            if (string.IsNullOrEmpty(testDirPath))
             {
-                throw new Exception($"Failed to find path to '{srcDir}' directory.");
+                throw new Exception($"Failed to find path to '{testDir}' directory.");
             }
 
-            return Path.Combine(srcDirPath, "..", "testapps", projectName);
+            return Path.Combine(testDirPath, "..", "testapps", projectName);
         }
     }
 }

@@ -8,6 +8,11 @@ using System;
 
 namespace AWS.Deploy.DockerImageUploader
 {
+    /// <summary>
+    /// This console app generates a docker file for a .NET console application and a web application via
+    /// the <see href="https://github.com/aws/aws-dotnet-deploy/blob/main/src/AWS.Deploy.DockerEngine/Templates/Dockerfile.template">Dockerfile template</see>.
+    /// It will then build and push the images to Amazon ECR where they are continuously scanned for security vulnerabilities.
+    /// </summary>
     internal class Program
     {
         public static async Task Main(string[] args)
@@ -26,7 +31,7 @@ namespace AWS.Deploy.DockerImageUploader
                                     " Verify that all the required dependencies to instantiate DockerImageUploader are present.");
             }
 
-            await app.Run(args);
+            await app.Run();
         }
     }
 }
