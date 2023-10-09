@@ -33,6 +33,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.ConfigFileDeployment
         private const string BEANSTALK_PLATFORM_ARN_TOKEN = "{LatestDotnetBeanstalkPlatformArn}";
         private const string STACK_NAME_TOKEN = "{StackName}";
         private const string DEFAULT_VPC_ID_TOKEN = "{DefaultVpcId}";
+        private const string DEFAULT_CONTAINER_PORT_TOKEN = "{DefaultContainerPort}";
 
         public DeploymentSettingsHandlerTests()
         {
@@ -200,6 +201,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.ConfigFileDeployment
             // ARRANGE - add replacement tokens
             selectedRecommendation.AddReplacementToken(STACK_NAME_TOKEN, "MyAppStack");
             selectedRecommendation.AddReplacementToken(DEFAULT_VPC_ID_TOKEN, "vpc-12345678");
+            selectedRecommendation.AddReplacementToken(DEFAULT_CONTAINER_PORT_TOKEN, 80);
 
             // ARRANGE - Modify option setting items
             await _optionSettingHandler.SetOptionSettingValue(selectedRecommendation, "ServiceName", "MyAppRunnerService");

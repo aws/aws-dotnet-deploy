@@ -29,6 +29,10 @@
     * ID: DesiredCount
     * Description: The desired number of ECS tasks to run for the service.
     * Type: Int
+* **Container Port**
+    * ID: Port
+    * Description: The port the container is listening for requests on.
+    * Type: Int
 * **Application IAM Role**
     * ID: ApplicationIAMRole
     * Description: The Identity and Access Management (IAM) role that provides AWS credentials to the application to access AWS services.

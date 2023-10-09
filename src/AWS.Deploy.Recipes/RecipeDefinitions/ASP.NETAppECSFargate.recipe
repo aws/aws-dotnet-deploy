@@ -41,7 +41,7 @@
                     "Type": "MSProperty",
                     "Condition": {
                         "PropertyName": "TargetFramework",
-                        "AllowedValues": [ "netcoreapp3.1", "net5.0", "net6.0", "net7.0" ]
+                        "AllowedValues": [ "netcoreapp3.1", "net5.0", "net6.0", "net7.0", "net8.0" ]
                     }
                 }
             ]
@@ -220,6 +220,26 @@
                     "Configuration": {
                         "Min": 1,
                         "Max": 5000
+                    }
+                }
+            ]
+        },
+        {
+            "Id": "Port",
+            "Name": "Container Port",
+            "Category": "General",
+            "Description": "The port the container is listening for requests on.",
+            "Type": "Int",
+            "TypeHint": "DockerHttpPort",
+            "DefaultValue": "{DefaultContainerPort}",
+            "AdvancedSetting": false,
+            "Updatable": true,
+            "Validators": [
+                {
+                    "ValidatorType": "Range",
+                    "Configuration": {
+                        "Min": 0,
+                        "Max": 65535
                     }
                 }
             ]
