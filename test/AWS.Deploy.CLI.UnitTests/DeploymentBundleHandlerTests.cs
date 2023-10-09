@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Amazon.Runtime;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
@@ -160,6 +161,29 @@ namespace AWS.Deploy.CLI.UnitTests
             await _deploymentBundleHandler.PushDockerImageToECR(recommendation, repositoryName, "ConsoleAppTask:latest");
 
             Assert.Equal(repositoryName, recommendation.DeploymentBundle.ECRRepositoryName);
+        }
+
+        [Fact]
+        public async Task InspectDockerImage_ExecutedCommandCheck()
+        {
+            var projectPath = new DirectoryInfo(SystemIOUtilities.ResolvePath("WebAppNet8WithCustomDockerFile")).FullName;
+            var project = await _projectDefinitionParser.Parse(projectPath);
+            var recommendation = new Recommendation(_recipeDefinition, project, 100, new Dictionary<string, object>());
+
+            recommendation.DeploymentBundle.DockerExecutionDirectory = projectPath;
+
+            await _deploymentBundleHandler.InspectDockerImageEnvironmentVariables(recommendation, "imageTag");
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                Assert.Equal("docker inspect --format '{{ index (index .Config.Env) }}' imageTag",
+                _commandLineWrapper.CommandsToExecute.First().Command);
+            }
+            else
+            {
+                Assert.Equal("docker inspect --format \"{{ index (index .Config.Env) }}\" imageTag",
+                _commandLineWrapper.CommandsToExecute.First().Command);
+            }
         }
 
         [Fact]

@@ -6,11 +6,11 @@ EXPOSE 8081
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["WebAppNet8.csproj", ""]
-RUN dotnet restore "WebAppNet8.csproj"
+COPY ["WebAppNet8WithCustomDockerFile.csproj", ""]
+RUN dotnet restore "WebAppNet8WithCustomDockerFile.csproj"
 COPY . .
 WORKDIR "/src/"
-RUN dotnet build "WebAppNet8.csproj" -c Release -o /app/build
+RUN dotnet build "WebAppNet8WithCustomDockerFile.csproj" -c Release -o /app/build
 
 FROM build AS publish
 RUN apt-get update -yq \
@@ -20,9 +20,10 @@ RUN apt-get update -yq \
     && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_18.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list \
     && apt-get update -yq \
     && apt-get install nodejs -yq
-RUN dotnet publish "WebAppNet8.csproj" -c Release -o /app/publish
+RUN dotnet publish "WebAppNet8WithCustomDockerFile.csproj" -c Release -o /app/publish
 
 FROM base AS final
+ENV ASPNETCORE_HTTP_PORTS=80
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "WebAppNet8.dll"]
+ENTRYPOINT ["dotnet", "WebAppNet8WithCustomDockerFile.dll"]
