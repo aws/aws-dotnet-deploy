@@ -1,7 +1,6 @@
-FROM {docker-base-image} AS base
+FROM {docker-base-image} AS base{non-root-user}
 WORKDIR /app
-EXPOSE 80
-EXPOSE 443
+{exposed-ports}
 
 FROM {docker-build-image} AS build
 WORKDIR /src

@@ -29,6 +29,11 @@ namespace AspNetAppEcsFargate.Configurations
         public string ECSServiceName { get; set; }
 
         /// <summary>
+        /// The port that your application listens to in the container. Defaults to port 80.
+        /// </summary>
+        public int Port { get; set; } = 80;
+
+        /// <summary>
         /// The ECS cluster that will host the deployed application.
         /// </summary>
         public ECSClusterConfiguration ECSCluster { get; set; }

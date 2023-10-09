@@ -26,6 +26,11 @@ namespace AWS.Deploy.Constants
         public const string DockerBuildArgsOptionId = "DockerBuildArgs";
 
         /// <summary>
+        /// Id for the Docker HTTP Port recipe option
+        /// </summary>
+        public const string DockerHttpPortOptionId = "Port";
+
+        /// <summary>
         /// Id for the ECR Repository Name recipe option
         /// </summary>
         public const string ECRRepositoryNameOptionId = "ECRRepositoryName";
@@ -34,5 +39,10 @@ namespace AWS.Deploy.Constants
         /// Id for the Docker Image Tag recipe option
         /// </summary>
         public const string ImageTagOptionId = "ImageTag";
+
+        /// <summary>
+        /// The environment variable that .NET uses to determine the HTTP port
+        /// </summary>
+        public static readonly string DotnetHttpPortEnvironmentVariable = "ASPNETCORE_HTTP_PORTS";
     }
 }

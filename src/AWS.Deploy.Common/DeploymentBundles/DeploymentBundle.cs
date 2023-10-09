@@ -1,8 +1,6 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-using System.IO;
-
 namespace AWS.Deploy.Common
 {
     /// <summary>
@@ -24,6 +22,11 @@ namespace AWS.Deploy.Common
         /// The path to the Dockerfile. This can either be an absolute path or relative to the project directory.
         /// </summary>
         public string DockerfilePath { get; set; } = "";
+
+        /// <summary>
+        /// The HTTP port to expose in the container.
+        /// </summary>
+        public int DockerfileHttpPort { get; set; } = 80;
 
         /// <summary>
         /// The ECR Repository Name where the docker image will be pushed to.

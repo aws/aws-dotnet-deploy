@@ -163,6 +163,21 @@ namespace AWS.Deploy.CLI.UnitTests
         }
 
         [Fact]
+        public async Task InspectDockerImage_ExecutedCommandCheck()
+        {
+            var projectPath = new DirectoryInfo(SystemIOUtilities.ResolvePath("WebAppNet8WithCustomDockerFile")).FullName;
+            var project = await _projectDefinitionParser.Parse(projectPath);
+            var recommendation = new Recommendation(_recipeDefinition, project, 100, new Dictionary<string, object>());
+
+            recommendation.DeploymentBundle.DockerExecutionDirectory = projectPath;
+
+            await _deploymentBundleHandler.InspectDockerImageEnvironmentVariables(recommendation, "imageTag");
+
+            Assert.Equal("docker inspect --format \"{{ index (index .Config.Env) }}\" imageTag",
+                _commandLineWrapper.CommandsToExecute.First().Command);
+        }
+
+        [Fact]
         public async Task CreateDotnetPublishZip_NotSelfContained()
         {
             var projectPath = SystemIOUtilities.ResolvePath("ConsoleAppTask");

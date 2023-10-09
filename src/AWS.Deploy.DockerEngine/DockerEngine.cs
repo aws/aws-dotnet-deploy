@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
-using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Utilities;
 using Newtonsoft.Json;
 
@@ -18,14 +17,23 @@ namespace AWS.Deploy.DockerEngine
         /// <summary>
         /// Generates a docker file
         /// </summary>
-        void GenerateDockerFile();
+        /// <param name="recommendation">The currently selected recommendation</param>
+        void GenerateDockerFile(Recommendation recommendation);
 
         /// <summary>
         /// Inspects the Dockerfile associated with the recommendation
         /// and determines the appropriate Docker Execution Directory,
         /// if one is not set.
         /// </summary>
+        /// <param name="recommendation">The currently selected recommendation</param>
         void DetermineDockerExecutionDirectory(Recommendation recommendation);
+
+        /// <summary>
+        /// Determines the appropriate HTTP port that the underlying container is using.
+        /// </summary>
+        /// <param name="recommendation">The currently selected recommendation</param>
+        /// <returns>The default HTTP port used by the container</returns>
+        int DetermineDefaultDockerPort(Recommendation recommendation);
     }
 
     /// <summary>
@@ -54,7 +62,8 @@ namespace AWS.Deploy.DockerEngine
         /// <summary>
         /// Generates a docker file
         /// </summary>
-        public void GenerateDockerFile()
+        /// <param name="recommendation">The currently selected recommendation</param>
+        public void GenerateDockerFile(Recommendation recommendation)
         {
             var projectFileName = Path.GetFileName(_projectPath);
             var imageMapping = GetImageMapping();
@@ -63,7 +72,8 @@ namespace AWS.Deploy.DockerEngine
                 throw new UnknownDockerImageException(DeployToolErrorCode.NoValidDockerImageForProject, $"Unable to determine a valid docker base and build image for project of type {_project.SdkType} and Target Framework {_project.TargetFramework}");
             }
 
-            var dockerFile = new DockerFile(imageMapping, projectFileName, _project.AssemblyName);
+            var dockerFile = new DockerFile(
+                imageMapping, projectFileName, _project.AssemblyName, recommendation.DeploymentBundle.DockerfileHttpPort, UseRootUser(recommendation));
             var projectDirectory = Path.GetDirectoryName(_projectPath) ?? "";
             var projectList = GetProjectList();
             dockerFile.WriteDockerFile(projectDirectory, projectList);
@@ -171,7 +181,7 @@ namespace AWS.Deploy.DockerEngine
         /// and determines the appropriate Docker Execution Directory,
         /// if one is not set.
         /// </summary>
-        /// <param name="recommendation"></param>
+        /// <param name="recommendation">The currently selected recommendation</param>
         public void DetermineDockerExecutionDirectory(Recommendation recommendation)
         {
             if (string.IsNullOrEmpty(recommendation.DeploymentBundle.DockerExecutionDirectory))
@@ -195,6 +205,40 @@ namespace AWS.Deploy.DockerEngine
                         }
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Determines the appropriate HTTP port that the underlying container is using.
+        /// </summary>
+        /// <param name="recommendation">The currently selected recommendation</param>
+        /// <returns>The default HTTP port used by the container</returns>
+        public int DetermineDefaultDockerPort(Recommendation recommendation)
+        {
+            switch (recommendation.ProjectDefinition.TargetFramework)
+            {
+                case "net8.0":
+                    return 8080;
+
+                default:
+                    return 80;
+            }
+        }
+
+        /// <summary>
+        /// Checks whether to use a root or non-root user in the underlying container.
+        /// </summary>
+        /// <param name="recommendation">The currently selected recommendation</param>
+        /// <returns>true if a root user is used, else false</returns>
+        private bool UseRootUser(Recommendation recommendation)
+        {
+            switch (recommendation.ProjectDefinition.TargetFramework)
+            {
+                case "net8.0":
+                    return false;
+
+                default:
+                    return true;
             }
         }
     }

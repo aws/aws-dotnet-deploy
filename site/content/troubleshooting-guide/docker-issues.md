@@ -84,3 +84,15 @@ Failed to push Docker Image
 **Why is this happening** You may see this if your project has project references (.csproj, .vbproj) that are located in a higher folder than the solution file (.sln) that AWS.Deploy.Tools is using to generate a Dockerfile. In this case AWS.Deploy.Tools will not generate a Dockerfile to avoid a large build context that can result in long builds.
 
 **Resolution**: If you would still like to deploy to an [AWS service that requires Docker](../docs/support.md), you must create your own Dockerfile and set an appropriate "Docker Execution Directory" in the deployment options. Alternatively you may choose another deployment target that does not require Docker, such as AWS Elastic Beanstalk.
+
+
+## Application deployment stuck or fails because of health check
+
+Microsoft has made changes to the base images used in .NET8 which now expose 8080 as the default HTTP port instead of the port 80 which was used in previous versions. In addition to that, Microsoft now uses a non-root user by default.
+
+As we added support for deploying .NET8 container-based applications, the container port setting in the recipes that support it now defaults to 8080 for .NET8 and 80 in previous versions. For applications that do not have a `dockerfile`, we generate one accordingly. However, for applications that have their own `dockerfile`, the user is responsible for setting and exposing the proper port. If the container port is different from the port exposed in the container, the deployment might keep going endlessly untill it reaches a timeout from the underlying services, or you might receive an error related to the health check.
+
+In the tool, we have added a warning message if we detect that the container port setting is different from the one exposed in the container. The warning message is as follows:
+```
+The HTTP port you have chosen in your deployment settings is different than the .NET HTTP port exposed in the container.
+```

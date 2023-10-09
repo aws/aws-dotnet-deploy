@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Amazon.ECR.Model;
@@ -14,7 +13,6 @@ using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Utilities;
 using AWS.Deploy.Constants;
-using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.Utilities;
 using Recommendation = AWS.Deploy.Common.Recommendation;
 
@@ -25,6 +23,15 @@ namespace AWS.Deploy.Orchestration
         Task BuildDockerImage(CloudApplication cloudApplication, Recommendation recommendation, string imageTag);
         Task<string> CreateDotnetPublishZip(Recommendation recommendation);
         Task PushDockerImageToECR(Recommendation recommendation, string repositoryName, string sourceTag);
+
+        /// <summary>
+        /// Inspects the already built docker image by using 'docker inspect'
+        /// to return the environment variables used in the container.
+        /// </summary>
+        /// <param name="recommendation">The currently selected recommendation</param>
+        /// <param name="sourceTag">The docker tag of the built image</param>
+        /// <returns>A dictionary that represents the environment varibales from the container</returns>
+        Task<Dictionary<string, string>> InspectDockerImageEnvironmentVariables(Recommendation recommendation, string sourceTag);
     }
 
     public class DeploymentBundleHandler : IDeploymentBundleHandler
@@ -266,6 +273,44 @@ namespace AWS.Deploy.Orchestration
                     errorMessage = $"Failed to push Docker Image due to the following reason:{Environment.NewLine}{result.StandardError}";
                 throw new DockerPushFailedException(DeployToolErrorCode.DockerPushFailed, errorMessage, result.ExitCode);
             }
+        }
+
+        /// <summary>
+        /// Inspects the already built docker image by using 'docker inspect'
+        /// to return the environment variables used in the container.
+        /// </summary>
+        /// <param name="recommendation">The currently selected recommendation</param>
+        /// <param name="sourceTag">The docker tag of the built image</param>
+        /// <returns>A dictionary that represents the environment varibales from the container</returns>
+        public async Task<Dictionary<string, string>> InspectDockerImageEnvironmentVariables(Recommendation recommendation, string sourceTag)
+        {
+            var dockerInspectCommand = "docker inspect --format \"{{ index (index .Config.Env) }}\" " + sourceTag;
+            var result = await _commandLineWrapper.TryRunWithResult(dockerInspectCommand, streamOutputToInteractiveService: false);
+
+            if (result.ExitCode != 0)
+            {
+                var errorMessage = "Failed to inspect Docker Image";
+                if (!string.IsNullOrEmpty(result.StandardError))
+                    errorMessage = $"Failed to inspect Docker Image due to the following reason:{Environment.NewLine}{result.StandardError}";
+                throw new DockerInspectFailedException(DeployToolErrorCode.DockerInspectFailed, errorMessage, result.ExitCode);
+            }
+
+            var environmentVariables = new Dictionary<string, string>();
+
+            if (!string.IsNullOrWhiteSpace(result.StandardOut))
+            {
+                var lines = result.StandardOut.TrimStart('[').TrimEnd(']').Split(' ');
+                foreach (var line in lines)
+                {
+                    var keyValuePair = line.Split('=');
+                    if (keyValuePair.Length < 2)
+                        continue;
+
+                    environmentVariables[keyValuePair[0].Trim()] = keyValuePair[1].Trim();
+                }
+            }
+
+            return environmentVariables;
         }
     }
 }

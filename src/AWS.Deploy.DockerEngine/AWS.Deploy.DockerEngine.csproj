@@ -24,4 +24,6 @@
     <PackageReference Include="System.Text.Json" Version="6.0.8" />
   </ItemGroup>
 
+  <Import Project="..\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems" Label="Shared" />
+
 </Project>

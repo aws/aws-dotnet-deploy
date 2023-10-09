@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AWS.Deploy.Common;
@@ -14,11 +13,9 @@ using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Utilities;
 using AWS.Deploy.DockerEngine;
 using AWS.Deploy.Orchestration.CDK;
-using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.DeploymentCommands;
 using AWS.Deploy.Orchestration.LocalUserSettings;
 using AWS.Deploy.Orchestration.ServiceHandlers;
-using AWS.Deploy.Orchestration.Utilities;
 using AWS.Deploy.Recipes;
 
 namespace AWS.Deploy.Orchestration
@@ -238,6 +235,15 @@ namespace AWS.Deploy.Orchestration
                 var vpcs = await _awsResourceQueryer.GetListOfVpcs();
                 recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_HAS_NOT_VPCS, !vpcs.Any());
             }
+            if (recommendation.ReplacementTokens.ContainsKey(Constants.RecipeIdentifier.REPLACE_TOKEN_DEFAULT_CONTAINER_PORT))
+            {
+                if (_dockerEngine == null)
+                    throw new InvalidOperationException($"{nameof(_dockerEngine)} is null as part of the Orchestrator object");
+
+                var defaultPort = _dockerEngine.DetermineDefaultDockerPort(recommendation);
+                recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_DEFAULT_CONTAINER_PORT, defaultPort);
+                recommendation.DeploymentBundle.DockerfileHttpPort = defaultPort;
+            }
         }
 
         public async Task DeployRecommendation(CloudApplication cloudApplication, Recommendation recommendation)
@@ -297,7 +303,7 @@ namespace AWS.Deploy.Orchestration
                 _interactiveService.LogInfoMessage("Generating Dockerfile...");
                 try
                 {
-                    _dockerEngine.GenerateDockerFile();
+                    _dockerEngine.GenerateDockerFile(recommendation);
                 }
                 catch (DockerEngineExceptionBase ex)
                 {
@@ -330,6 +336,31 @@ namespace AWS.Deploy.Orchestration
             // These option settings need to be persisted back as they are not always provided by the user and we have custom logic to determine their values
             await _optionSettingHandler.SetOptionSettingValue(recommendation, Constants.Docker.DockerExecutionDirectoryOptionId, recommendation.DeploymentBundle.DockerExecutionDirectory);
             await _optionSettingHandler.SetOptionSettingValue(recommendation, Constants.Docker.DockerfileOptionId, recommendation.DeploymentBundle.DockerfilePath);
+
+            // Try to inspect the container environment variables to provide better insights on the HTTP port to use for the container.
+            // If we run into issues doing so, we can proceed without throwing a terminating exception.
+            try
+            {
+                var environmentVariables = await _deploymentBundleHandler.InspectDockerImageEnvironmentVariables(recommendation, imageTag);
+
+                if (environmentVariables.ContainsKey(Constants.Docker.DotnetHttpPortEnvironmentVariable))
+                {
+                    var httpPort = environmentVariables[Constants.Docker.DotnetHttpPortEnvironmentVariable];
+
+                    // Assuming a single value can be specified
+                    if (int.TryParse(httpPort, out var httpPortInt))
+                    {
+                        if (recommendation.DeploymentBundle.DockerfileHttpPort != httpPortInt)
+                        {
+                            _interactiveService.LogInfoMessage($"The HTTP port you have chosen in your deployment settings is different than the .NET HTTP port exposed in the container. " +
+                                $"The container has the environment variable {Constants.Docker.DotnetHttpPortEnvironmentVariable}={httpPortInt}, " +
+                                $"whereas the port you chose in the deployment settings is {recommendation.DeploymentBundle.DockerfileHttpPort}." +
+                                $"The deployment may fail the health check if these 2 ports are misaligned.");
+                        }
+                    }
+                }
+            }
+            catch (DockerInspectFailedException) { }
 
             _interactiveService.LogSectionStart("Pushing container image to Elastic Container Registry (ECR)", "Using the docker CLI to log on to ECR and push the local image to ECR.");
             await _deploymentBundleHandler.PushDockerImageToECR(recommendation, respositoryName, imageTag);

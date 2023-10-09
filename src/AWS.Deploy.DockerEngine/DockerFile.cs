@@ -13,13 +13,13 @@ namespace AWS.Deploy.DockerEngine
     /// </summary>
     public class DockerFile
     {
-        private const string DockerFileName = "Dockerfile";
-
         private readonly ImageMapping _imageMapping;
         private readonly string _projectName;
         private readonly string _assemblyName;
+        private readonly int _port;
+        private readonly bool _useRootUser;
 
-        public DockerFile(ImageMapping imageMapping, string projectName, string? assemblyName)
+        public DockerFile(ImageMapping imageMapping, string projectName, string? assemblyName, int port, bool useRootUser)
         {
             if (imageMapping == null)
             {
@@ -39,6 +39,8 @@ namespace AWS.Deploy.DockerEngine
             _imageMapping = imageMapping;
             _projectName = projectName;
             _assemblyName = assemblyName;
+            _port = port;
+            _useRootUser = useRootUser;
         }
 
         /// <summary>
@@ -79,10 +81,40 @@ namespace AWS.Deploy.DockerEngine
                 .Replace("{project-name}", _projectName)
                 .Replace("{assembly-name}", _assemblyName);
 
+            // Microsoft exposes 8081 along with 8080 in their .NET8 templates. I am preserving that behavior here when port 8080 is used.
+            if (_port == 8080)
+            {
+                dockerFile = dockerFile
+                    .Replace("{exposed-ports}", $"EXPOSE {_port}\r\nEXPOSE 8081");
+            }
+            // Microsoft exposes 443 along with 80 in their .NET7 and older templates. I am preserving that behavior here when port 80 is used.
+            else if (_port == 80)
+            {
+                dockerFile = dockerFile
+                    .Replace("{exposed-ports}", $"EXPOSE {_port}\r\nEXPOSE 443");
+            }
+            // For all other ports, it is up to the user to expose the HTTPS port in the dockerfile. 
+            else
+            {
+                dockerFile = dockerFile
+                    .Replace("{exposed-ports}", $"EXPOSE {_port}");
+            }
+
+            if (_useRootUser)
+            {
+                dockerFile = dockerFile
+                    .Replace("{non-root-user}", string.Empty);
+            }
+            else
+            {
+                dockerFile = dockerFile
+                    .Replace("{non-root-user}", "\r\nUSER app");
+            }
+
             // ProjectDefinitionParser will have transformed projectDirectory to an absolute path, 
             // and DockerFileName is static so traversal should not be possible here.
             // nosemgrep: csharp.lang.security.filesystem.unsafe-path-combine.unsafe-path-combine
-            File.WriteAllText(Path.Combine(projectDirectory, DockerFileName), dockerFile);
+            File.WriteAllText(Path.Combine(projectDirectory, Constants.Docker.DefaultDockerfileName), dockerFile);
         }
     }
 }
