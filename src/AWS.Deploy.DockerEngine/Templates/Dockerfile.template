@@ -1,7 +1,6 @@
-FROM {docker-base-image} AS base
+FROM {docker-base-image} AS base{non-root-user}
 WORKDIR /app
-EXPOSE 80
-EXPOSE 443
+{exposed-ports}
 
 FROM {docker-build-image} AS build
 WORKDIR /src
@@ -21,7 +20,7 @@ RUN apt-get update -yq \
     && apt-get install nodejs -yq
 RUN dotnet publish "{project-name}" -c Release -o /app/publish
 
-FROM base AS final
+FROM base AS final{http-port-env-variable}
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "{assembly-name}.dll"]

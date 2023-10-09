@@ -86,6 +86,14 @@ namespace AWS.Deploy.Orchestration
     }
 
     /// <summary>
+    /// Exception is thrown if docker inspect attempt failed
+    /// </summary>
+    public class DockerInspectFailedException : DeployToolException
+    {
+        public DockerInspectFailedException(DeployToolErrorCode errorCode, string message, int processExitCode, Exception? innerException = null) : base(errorCode, message, innerException, processExitCode) { }
+    }
+
+    /// <summary>
     /// Exception is thrown if unable to read CDK Bootstrap version from template
     /// </summary>
     public class FailedToReadCdkBootstrapVersionException : DeployToolException

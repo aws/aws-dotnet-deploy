@@ -318,7 +318,7 @@ Here is an example of a validator for a port setting that ensures the value is w
 ...
 {
     "Id": "Port",
-    "Name": "Port",
+    "Name": "Container Port",
     "Category": "General",
     "Description": "The port the container is listening for requests on.",
     "Type": "Int",

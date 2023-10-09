@@ -122,6 +122,46 @@ namespace AWS.Deploy.CLI.IntegrationTests
         }
 
         [Fact]
+        public async Task CustomContainerPortConfigurations()
+        {
+            var stackNamePlaceholder = "{StackName}";
+            _stackName = $"WebAppNoDockerFile{Guid.NewGuid().ToString().Split('-').Last()}";
+
+            // Arrange input for deploy
+            await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Select default recommendation
+            await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Select default option settings
+            await _interactiveService.StdInWriter.FlushAsync();
+
+            // Deploy
+            var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
+            var configFilePath = Path.Combine(Directory.GetParent(projectPath).FullName, "ECSFargateCustomPortConfigFile.json");
+            ConfigFileHelper.ApplyReplacementTokens(new Dictionary<string, string> { { stackNamePlaceholder, _stackName } }, configFilePath);
+
+            // Deploy
+            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--application-name", _stackName, "--diagnostics", "--apply", configFilePath, "--silent" };
+            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
+
+            // Verify application is deployed and running
+            Assert.Equal(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
+
+            var cluster = await _ecsHelper.GetCluster(_stackName);
+            Assert.Equal("ACTIVE", cluster.Status);
+
+            var deployStdOut = _interactiveService.StdOutReader.ReadAllLines();
+
+            var tempCdkProjectLine = deployStdOut.First(line => line.StartsWith("Saving AWS CDK deployment project to: "));
+            var tempCdkProject = tempCdkProjectLine.Split(": ")[1].Trim();
+            Assert.False(Directory.Exists(tempCdkProject), $"{tempCdkProject} must not exist.");
+
+            var applicationUrl = deployStdOut.First(line => line.Trim().StartsWith("Endpoint:"))
+                .Split(" ")[1]
+                .Trim();
+
+            // URL could take few more minutes to come live, therefore, we want to wait and keep trying for a specified timeout
+            await _httpHelper.WaitUntilSuccessStatusCode(applicationUrl, TimeSpan.FromSeconds(5), TimeSpan.FromMinutes(5));
+        }
+
+        [Fact]
         public async Task AppRunnerDeployment()
         {
             var stackNamePlaceholder = "{StackName}";
