@@ -291,7 +291,7 @@ namespace AWS.Deploy.Orchestration
             {
                 var errorMessage = "Failed to inspect Docker Image";
                 if (!string.IsNullOrEmpty(result.StandardError))
-                    errorMessage = $"Failed to inspect Docker Image due to the following reason:{Environment.NewLine}{result.StandardError}";
+                    errorMessage = $"Failed to inspect Docker Image due to the following reason:{Environment.NewLine}{result.StandardError}\nwith the following command: {dockerInspectCommand}";
                 throw new DockerInspectFailedException(DeployToolErrorCode.DockerInspectFailed, errorMessage, result.ExitCode);
             }
 
