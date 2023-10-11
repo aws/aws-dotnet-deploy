@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Amazon.ECR.Model;
@@ -284,8 +285,9 @@ namespace AWS.Deploy.Orchestration
         /// <returns>A dictionary that represents the environment varibales from the container</returns>
         public async Task<Dictionary<string, string>> InspectDockerImageEnvironmentVariables(Recommendation recommendation, string sourceTag)
         {
-            //var dockerInspectCommand = "docker inspect --format \"{{ index (index .Config.Env) }}\" " + sourceTag;
-            var dockerInspectCommand = "docker inspect --format '{{ index (index .Config.Env) }}' " + sourceTag;
+            var dockerInspectCommand = "docker inspect --format \"{{ index (index .Config.Env) }}\" " + sourceTag;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                dockerInspectCommand = "docker inspect --format '{{ index (index .Config.Env) }}' " + sourceTag;
             var result = await _commandLineWrapper.TryRunWithResult(dockerInspectCommand, streamOutputToInteractiveService: false);
 
             if (result.ExitCode != 0)
