@@ -360,7 +360,7 @@ namespace AWS.Deploy.Orchestration
                     }
                 }
             }
-            catch (DockerInspectFailedException) { }
+            catch (DockerInspectFailedException ex) { _interactiveService.LogInfoMessage(ex.Message); }
 
             _interactiveService.LogSectionStart("Pushing container image to Elastic Container Registry (ECR)", "Using the docker CLI to log on to ECR and push the local image to ECR.");
             await _deploymentBundleHandler.PushDockerImageToECR(recommendation, respositoryName, imageTag);

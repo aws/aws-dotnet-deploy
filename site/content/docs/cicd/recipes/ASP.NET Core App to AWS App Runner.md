@@ -8,7 +8,7 @@
     * ID: ServiceName
     * Description: The name of the AWS App Runner service.
     * Type: String
-* **Port**
+* **Container Port**
     * ID: Port
     * Description: The port the container is listening for requests on.
     * Type: Int
