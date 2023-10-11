@@ -341,17 +341,26 @@ namespace AWS.Deploy.Orchestration
             // If we run into issues doing so, we can proceed without throwing a terminating exception.
             try
             {
+                _interactiveService.LogInfoMessage("1");
                 var environmentVariables = await _deploymentBundleHandler.InspectDockerImageEnvironmentVariables(recommendation, imageTag);
 
+                _interactiveService.LogInfoMessage("2");
                 if (environmentVariables.ContainsKey(Constants.Docker.DotnetHttpPortEnvironmentVariable))
                 {
+                    _interactiveService.LogInfoMessage("3");
                     var httpPort = environmentVariables[Constants.Docker.DotnetHttpPortEnvironmentVariable];
 
+                    _interactiveService.LogInfoMessage($"httpPort: {httpPort}");
+                    _interactiveService.LogInfoMessage("4");
                     // Assuming a single value can be specified
                     if (int.TryParse(httpPort, out var httpPortInt))
                     {
+                        _interactiveService.LogInfoMessage($"httpPortInt: {httpPortInt}");
+                        _interactiveService.LogInfoMessage("5");
                         if (recommendation.DeploymentBundle.DockerfileHttpPort != httpPortInt)
                         {
+                            _interactiveService.LogInfoMessage($"DockerfileHttpPort: {recommendation.DeploymentBundle.DockerfileHttpPort}");
+                            _interactiveService.LogInfoMessage("6");
                             _interactiveService.LogInfoMessage($"The HTTP port you have chosen in your deployment settings is different than the .NET HTTP port exposed in the container. " +
                                 $"The container has the environment variable {Constants.Docker.DotnetHttpPortEnvironmentVariable}={httpPortInt}, " +
                                 $"whereas the port you chose in the deployment settings is {recommendation.DeploymentBundle.DockerfileHttpPort}." +
