@@ -284,14 +284,15 @@ namespace AWS.Deploy.Orchestration
         /// <returns>A dictionary that represents the environment varibales from the container</returns>
         public async Task<Dictionary<string, string>> InspectDockerImageEnvironmentVariables(Recommendation recommendation, string sourceTag)
         {
-            var dockerInspectCommand = "docker inspect --format \"{{ index (index .Config.Env) }}\" " + sourceTag;
+            //var dockerInspectCommand = "docker inspect --format \"{{ index (index .Config.Env) }}\" " + sourceTag;
+            var dockerInspectCommand = "docker inspect --format '{{ index (index .Config.Env) }}' " + sourceTag;
             var result = await _commandLineWrapper.TryRunWithResult(dockerInspectCommand, streamOutputToInteractiveService: false);
 
             if (result.ExitCode != 0)
             {
                 var errorMessage = "Failed to inspect Docker Image";
                 if (!string.IsNullOrEmpty(result.StandardError))
-                    errorMessage = $"Failed to inspect Docker Image due to the following reason:{Environment.NewLine}{result.StandardError}\nwith the following command: {dockerInspectCommand}";
+                    errorMessage = $"Failed to inspect Docker Image due to the following reason:{Environment.NewLine}{result.StandardError}\nwith the following command: {dockerInspectCommand} ";
                 throw new DockerInspectFailedException(DeployToolErrorCode.DockerInspectFailed, errorMessage, result.ExitCode);
             }
 
