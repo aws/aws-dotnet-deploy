@@ -9,6 +9,10 @@ using System.Collections.Generic;
 using System;
 using System.Threading.Tasks;
 using System.IO;
+using System.Linq;
+using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Orchestration;
+using AWS.Deploy.Orchestration.RecommendationEngine;
 
 namespace AWS.Deploy.DockerImageUploader
 {
@@ -20,6 +24,7 @@ namespace AWS.Deploy.DockerImageUploader
         private readonly IFileManager _fileManager;
         private readonly IDirectoryManager _directoryManager;
         private readonly IProjectDefinitionParser _projectDefinitionParser;
+        private readonly IRecipeHandler _recipeHandler;
         private readonly CLI.App _deployToolCli;
 
         private readonly List<string> _testApps = new() { "WebApiNET6", "ConsoleAppTask" };
@@ -29,6 +34,7 @@ namespace AWS.Deploy.DockerImageUploader
             _projectDefinitionParser = serviceProvider.GetRequiredService<IProjectDefinitionParser>();
             _fileManager = serviceProvider.GetRequiredService<IFileManager>();
             _directoryManager = serviceProvider.GetRequiredService<IDirectoryManager>();
+            _recipeHandler = serviceProvider.GetRequiredService<IRecipeHandler>();
             _deployToolCli = serviceProvider.GetRequiredService<CLI.App>();
         }
 
@@ -49,9 +55,11 @@ namespace AWS.Deploy.DockerImageUploader
         private async Task CreateImageAndPushToECR(string projectPath)
         {
             var projectDefinition = await _projectDefinitionParser.Parse(projectPath);
-
+            var orchestratorSession = new OrchestratorSession(projectDefinition);
+            var recommendationEngine = new RecommendationEngine(orchestratorSession, _recipeHandler);
+            var recommendations = await recommendationEngine.ComputeRecommendations();
             var dockerEngine = new DockerEngine.DockerEngine(projectDefinition, _fileManager, _directoryManager);
-            dockerEngine.GenerateDockerFile();
+            dockerEngine.GenerateDockerFile(recommendations.First());
 
             var configFilePath = Path.Combine(projectPath, "DockerImageUploaderConfigFile.json");
             var deployArgs = new[] { "deploy", "--project-path", projectPath, "--diagnostics", "--apply", configFilePath, "--silent" };
