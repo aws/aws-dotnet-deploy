@@ -1116,6 +1116,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#application-deployment-stuck-or-fails-because-of-health-check" class="md-nav__link">
+    Application deployment stuck or fails because of health check
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1249,6 +1256,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#application-deployment-stuck-or-fails-because-of-health-check" class="md-nav__link">
+    Application deployment stuck or fails because of health check
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1317,6 +1331,10 @@ Your container may be unable to access the internet or NuGet for a variety of ne
 <h2 id="failed-to-generate-a-dockerfile">Failed to generate a Dockerfile</h2>
 <p><strong>Why is this happening</strong> You may see this if your project has project references (.csproj, .vbproj) that are located in a higher folder than the solution file (.sln) that AWS.Deploy.Tools is using to generate a Dockerfile. In this case AWS.Deploy.Tools will not generate a Dockerfile to avoid a large build context that can result in long builds.</p>
 <p><strong>Resolution</strong>: If you would still like to deploy to an <a href="../../docs/support/">AWS service that requires Docker</a>, you must create your own Dockerfile and set an appropriate "Docker Execution Directory" in the deployment options. Alternatively you may choose another deployment target that does not require Docker, such as AWS Elastic Beanstalk.</p>
+<h2 id="application-deployment-stuck-or-fails-because-of-health-check">Application deployment stuck or fails because of health check</h2>
+<p>Microsoft has made changes to the base images used in .NET 8 which now expose 8080 as the default HTTP port instead of the port 80 which was used in previous versions. In addition to that, Microsoft now uses a non-root user by default.</p>
+<p>As we added support for deploying .NET 8 container-based applications, the container port setting in the recipes that support it now defaults to 8080 for .NET 8 and 80 in previous versions. For applications that do not have a <code>dockerfile</code>, we generate one accordingly. However, for applications that have their own <code>dockerfile</code>, the user is responsible for setting and exposing the proper port. If the container port is different from the port exposed in the container, the deployment might keep going until it reaches a timeout from the underlying services, or you might receive an error related to the health check.</p>
+<p>In the tool, we have added a warning message if we detect that the container port setting is different from the one exposed in the container.</p>
 
               
             </article>
