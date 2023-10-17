@@ -67,6 +67,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AWS.Deploy.DocGenerator", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AWS.Deploy.DocGenerator.UnitTests", "test\AWS.Deploy.DocGenerator.UnitTests\AWS.Deploy.DocGenerator.UnitTests.csproj", "{7E661545-7DFD-4FE3-A5F9-767FAE30DFFE}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AWS.Deploy.DockerImageUploader", "test\AWS.Deploy.DockerImageUploader\AWS.Deploy.DockerImageUploader.csproj", "{49A1C020-F4C8-4B28-A6B2-6AD3C8452E69}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -173,6 +175,10 @@ Global
 		{7E661545-7DFD-4FE3-A5F9-767FAE30DFFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7E661545-7DFD-4FE3-A5F9-767FAE30DFFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7E661545-7DFD-4FE3-A5F9-767FAE30DFFE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{49A1C020-F4C8-4B28-A6B2-6AD3C8452E69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49A1C020-F4C8-4B28-A6B2-6AD3C8452E69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49A1C020-F4C8-4B28-A6B2-6AD3C8452E69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49A1C020-F4C8-4B28-A6B2-6AD3C8452E69}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -204,6 +210,7 @@ Global
 		{CEEBEC39-40E5-4A9B-878A-6EDB52B9B43E} = {C3A0C716-BDEA-4393-B223-AF8F8531522A}
 		{6D4BD0C2-C2A0-4AFB-BC22-623DD64A4F84} = {11C7056E-93C1-408B-BD87-5270595BBE0E}
 		{7E661545-7DFD-4FE3-A5F9-767FAE30DFFE} = {BD466B5C-D8B0-4069-98A9-6DC8F01FA757}
+		{49A1C020-F4C8-4B28-A6B2-6AD3C8452E69} = {BD466B5C-D8B0-4069-98A9-6DC8F01FA757}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5A4B2863-1763-4496-B122-651A38A4F5D7}
