@@ -129,6 +129,9 @@ namespace AWS.Deploy.Orchestration
                 case Constants.Docker.DockerBuildArgsOptionId:
                     recommendation.DeploymentBundle.DockerBuildArgs = value.ToString() ?? string.Empty;
                     break;
+                case Constants.Docker.DockerHttpPortOptionId:
+                    recommendation.DeploymentBundle.DockerfileHttpPort = Convert.ToInt32(value);
+                    break;
                 case Constants.Docker.ECRRepositoryNameOptionId:
                     recommendation.DeploymentBundle.ECRRepositoryName = value.ToString() ?? string.Empty;
                     break;

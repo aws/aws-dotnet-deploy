@@ -34,9 +34,9 @@ namespace AspNetAppAppRunner.Configurations
         public string ServiceName { get; set; }
 
         /// <summary>
-        /// The port that your application listens to in the container. Defaults to port 80.
+        /// The port that your application listens to in the container. Defaults to port 8080.
         /// </summary>
-        public int Port { get; set; } = 80;
+        public int Port { get; set; } = 8080;
 
         /// <summary>
         /// An optional command that App Runner runs to start the application in the source image. If specified, this command overrides the Docker image’s default start command.
@@ -118,7 +118,7 @@ namespace AspNetAppAppRunner.Configurations
             VPCConnector = vpcConnector;
             ServiceAccessIAMRole = serviceAccessIAMRole;
             ServiceName = serviceName;
-            Port = port ?? 80;
+            Port = port ?? 8080;
             HealthCheckProtocol = healthCheckProtocol;
             Cpu = cpu;
             Memory = memory;

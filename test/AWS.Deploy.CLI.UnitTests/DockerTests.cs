@@ -1,6 +1,8 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+extern alias DockerEngine;
+
 using System;
 using System.IO;
 using System.Reflection;
@@ -8,9 +10,11 @@ using System.Threading.Tasks;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
-using AWS.Deploy.DockerEngine;
+using DockerEngine.AWS.Deploy.DockerEngine;
 using Should;
 using Xunit;
+using AWS.Deploy.CLI.UnitTests.Utilities;
+using System.Linq;
 
 namespace AWS.Deploy.CLI.UnitTests
 {
@@ -26,6 +30,7 @@ namespace AWS.Deploy.CLI.UnitTests
         [InlineData("ConsoleSdkType", "")]
         [InlineData("WorkerServiceExample", "")]
         [InlineData("WebAppNet7", "")]
+        [InlineData("WebAppNet8", "")]
         public async Task DockerGenerate(string topLevelFolder, string projectName)
         {
             await DockerGenerateTestHelper(topLevelFolder, projectName);
@@ -72,15 +77,31 @@ namespace AWS.Deploy.CLI.UnitTests
         /// </summary>
         private async Task DockerGenerateTestHelper(string topLevelFolder, string projectName)
         {
+            var fileManager = new FileManager();
+            var directoryManager = new DirectoryManager();
+
             var projectPath = ResolvePath(Path.Combine(topLevelFolder, projectName));
 
-            var fileManager = new FileManager();
+            // ARRANGE - select recommendation
+            var recommendationEngine = await HelperFunctions.BuildRecommendationEngine(
+                () => projectPath,
+                fileManager,
+                directoryManager,
+                "us-west-2",
+                "123456789012",
+                "default"
+            );
 
-            var project = await new ProjectDefinitionParser(fileManager, new DirectoryManager()).Parse(projectPath);
+            var recommendations = await recommendationEngine.ComputeRecommendations();
+            var selectedRecommendation = recommendations.First();
 
-            var engine = new DockerEngine.DockerEngine(project, fileManager, new TestDirectoryManager());
+            var projectDefinition = await new ProjectDefinitionParser(fileManager, new DirectoryManager()).Parse(projectPath);
 
-            engine.GenerateDockerFile();
+            var engine = new DockerEngine.AWS.Deploy.DockerEngine.DockerEngine(projectDefinition, fileManager, new TestDirectoryManager());
+
+            selectedRecommendation.DeploymentBundle.DockerfileHttpPort = engine.DetermineDefaultDockerPort(selectedRecommendation);
+
+            engine.GenerateDockerFile(selectedRecommendation);
 
             AssertDockerFilesAreEqual(projectPath);
         }

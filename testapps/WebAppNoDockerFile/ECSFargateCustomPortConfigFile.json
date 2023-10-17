@@ -1,0 +1,7 @@
+{
+    "ApplicationName": "{StackName}",
+    "RecipeId": "AspNetAppEcsFargate",
+    "Settings": {
+        "Port": 51200
+    }
+}

@@ -21,6 +21,7 @@ namespace AWS.Deploy.Constants
         public const string REPLACE_TOKEN_DEFAULT_VPC_ID = "{DefaultVpcId}";
         public const string REPLACE_TOKEN_HAS_DEFAULT_VPC = "{HasDefaultVpc}";
         public const string REPLACE_TOKEN_HAS_NOT_VPCS = "{HasNotVpcs}";
+        public const string REPLACE_TOKEN_DEFAULT_CONTAINER_PORT = "{DefaultContainerPort}";
 
         /// <summary>
         /// Id for the 'dotnet publish --configuration' recipe option

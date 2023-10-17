@@ -91,6 +91,7 @@ namespace AWS.Deploy.CLI.UnitTests
             selectedRecommendation.AddReplacementToken(RecipeIdentifier.REPLACE_TOKEN_STACK_NAME, "MyAppStack");
             selectedRecommendation.AddReplacementToken(RecipeIdentifier.REPLACE_TOKEN_DEFAULT_VPC_ID, "vpc-12345678");
             selectedRecommendation.AddReplacementToken(RecipeIdentifier.REPLACE_TOKEN_HAS_DEFAULT_VPC, true);
+            selectedRecommendation.AddReplacementToken(RecipeIdentifier.REPLACE_TOKEN_DEFAULT_CONTAINER_PORT, 80);
 
             // ARRANGE - modify settings so that they are different from their default values
             await _optionSettingHandler.SetOptionSettingValue(selectedRecommendation, "ECSServiceName", "MyECSService", skipValidation: true);
