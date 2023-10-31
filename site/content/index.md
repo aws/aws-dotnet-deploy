@@ -1,6 +1,6 @@
 # About the AWS Deploy Tool for .NET
 
-** AWS Deploy Tool for .NET** is an interactive tool for the .NET CLI and the AWS Toolkit for Visual Studio that helps deploy .NET applications with minimum AWS knowledge, and with the fewest clicks or commands.
+**AWS Deploy Tool for .NET** is an interactive tool for the .NET CLI and the AWS Toolkit for Visual Studio that helps deploy .NET applications with minimum AWS knowledge, and with the fewest clicks or commands.
 
 ### Key capabilities
 
