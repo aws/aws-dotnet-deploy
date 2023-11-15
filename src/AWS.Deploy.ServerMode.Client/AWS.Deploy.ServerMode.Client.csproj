@@ -17,7 +17,9 @@
   <ItemGroup>
     <PackageReference Include="AWSSDK.Core" Version="3.7.202.11" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="6.0.22" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <!-- We are pining Newtonsoft.Json to 13.0.1 to maintain compatibility with the VS Toolkit. 
+    https://devblogs.microsoft.com/visualstudio/using-newtonsoft-json-in-a-visual-studio-extension/-->
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 
   <ItemGroup>
