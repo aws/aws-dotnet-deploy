@@ -24,7 +24,7 @@
     <PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="3.7.200.42" />
     <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.200.42" />
     <PackageReference Include="AWSSDK.SQS" Version="3.7.200.43" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="AWSSDK.ElasticBeanstalk" Version="3.7.200.42" />
     <PackageReference Include="AWSSDK.ElasticLoadBalancingV2" Version="3.7.201.27" />
   </ItemGroup>
