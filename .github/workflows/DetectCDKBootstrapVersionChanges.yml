@@ -14,6 +14,24 @@ jobs:
     - name: Install AWS CDK
       run: |
         npm install -g aws-cdk
+    - name: Get Staging Bucket Update/Replace Policy
+      id: stagingBucketUpdateReplacePolicy
+      run: |
+        echo "::set-output name=update-replace-policy::$(yq '.Resources.StagingBucket.UpdateReplacePolicy' 'src/AWS.Deploy.Orchestration/CDK/CDKBootstrapTemplate.yaml')"
+    - name: Get Staging Bucket Deletion Policy
+      id: stagingBucketDeletionPolicy
+      run: |
+        echo "::set-output name=deletion-policy::$(yq '.Resources.StagingBucket.DeletionPolicy' 'src/AWS.Deploy.Orchestration/CDK/CDKBootstrapTemplate.yaml')"
+    - name: Fail If Update/Replace Policy Not 'Delete'
+      if: steps.stagingBucketUpdateReplacePolicy.outputs.update-replace-policy != 'Delete'
+      run: |
+        echo "The 'UpdateReplacePolicy' of the 'StaginBucket' in the CDK bootstrap template should be 'Delete'."
+        exit 1
+    - name: Fail If Deletion Policy Not 'Delete'
+      if: steps.stagingBucketDeletionPolicy.outputs.deletion-policy != 'Delete'
+      run: |
+        echo "The 'DeletionPolicy' of the 'StaginBucket' in the CDK bootstrap template should be 'Delete'."
+        exit 1
     - name: Save New CDK Bootstrap Template
       run: |
         cdk bootstrap --show-template > newTemplate.yml
