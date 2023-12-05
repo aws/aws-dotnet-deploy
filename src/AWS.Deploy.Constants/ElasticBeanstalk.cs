@@ -22,7 +22,7 @@ namespace AWS.Deploy.Constants
         public const string HealthCheckURLOptionNameSpace = "aws:elasticbeanstalk:application";
         public const string HealthCheckURLOptionName = "Application Healthcheck URL";
 
-        public const string LinuxPlatformType = ".NET Core";
+        public const string LinuxPlatformType = ".NET";
         public const string WindowsPlatformType = "Windows Server";
 
         public const string IISAppPathOptionId = "IISAppPath";
