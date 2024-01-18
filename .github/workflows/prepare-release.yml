@@ -25,7 +25,7 @@ jobs:
       id: read-current-version
       run: |
         version=$(jq -r ".version" version.json)
-        echo "::set-output name=VERSION::$version"
+        echo "VERSION=$version" >> $GITHUB_OUTPUT
 
     - name: Pull Request
       id: pull-request
@@ -52,7 +52,7 @@ jobs:
         version=$(jq -r .version version.json)
         major=$(echo $version | awk '{split($0, components, "."); print components[1]}')
         minor=$(echo $version | awk '{split($0, components, "."); print components[2]+1}')
-        echo "::set-output name=VERSION::$major.$minor"
+        echo "VERSION=$major.$minor" >> $GITHUB_OUTPUT
 
     - name: Commit and Push next version
       id: commit-push
@@ -66,7 +66,7 @@ jobs:
         git add version.json
         git commit -m "build: version bump to ${{ steps.build-next-version.outputs.VERSION }}"
         git push origin $branch
-        echo "::set-output name=BRANCH::$branch"
+        echo "BRANCH=$branch" >> $GITHUB_OUTPUT
 
     - name: pull-request
       uses: repo-sync/pull-request@v2
