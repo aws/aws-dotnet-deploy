@@ -15,11 +15,11 @@ jobs:
     - name: Get Staging Bucket Update/Replace Policy
       id: stagingBucketUpdateReplacePolicy
       run: |
-        echo "::set-output name=update-replace-policy::$(yq '.Resources.StagingBucket.UpdateReplacePolicy' 'src/AWS.Deploy.Orchestration/CDK/CDKBootstrapTemplate.yaml')"
+        echo "update-replace-policy=$(yq '.Resources.StagingBucket.UpdateReplacePolicy' 'src/AWS.Deploy.Orchestration/CDK/CDKBootstrapTemplate.yaml')" >> $GITHUB_OUTPUT
     - name: Get Staging Bucket Deletion Policy
       id: stagingBucketDeletionPolicy
       run: |
-        echo "::set-output name=deletion-policy::$(yq '.Resources.StagingBucket.DeletionPolicy' 'src/AWS.Deploy.Orchestration/CDK/CDKBootstrapTemplate.yaml')"
+        echo "deletion-policy=$(yq '.Resources.StagingBucket.DeletionPolicy' 'src/AWS.Deploy.Orchestration/CDK/CDKBootstrapTemplate.yaml')" >> $GITHUB_OUTPUT
     - name: Fail If Update/Replace Policy Not 'Delete'
       if: steps.stagingBucketUpdateReplacePolicy.outputs.update-replace-policy != 'Delete'
       run: |
@@ -36,11 +36,11 @@ jobs:
     - name: Get Latest CDK Bootstrap Version
       id: latestBootstrapVersion
       run: |
-        echo "::set-output name=latest-version::$(yq '.Resources.CdkBootstrapVersion.Properties.Value' 'newTemplate.yml')"
+        echo "latest-version=$(yq '.Resources.CdkBootstrapVersion.Properties.Value' 'newTemplate.yml')" >> $GITHUB_OUTPUT
     - name: Get Current CDK Bootstrap Version
       id: currentBootstrapVersion
       run: |
-        echo "::set-output name=current-version::$(yq '.Resources.CdkBootstrapVersion.Properties.Value' 'src/AWS.Deploy.Orchestration/CDK/CDKBootstrapTemplate.yaml')"
+        echo "current-version=$(yq '.Resources.CdkBootstrapVersion.Properties.Value' 'src/AWS.Deploy.Orchestration/CDK/CDKBootstrapTemplate.yaml')" >> $GITHUB_OUTPUT
     - name: Fail If CDK Bootstrap Template Changes Detected
       if: steps.currentBootstrapVersion.outputs.current-version != steps.latestBootstrapVersion.outputs.latest-version
       run: |
