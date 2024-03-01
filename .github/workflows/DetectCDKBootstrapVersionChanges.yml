@@ -3,10 +3,8 @@ name: Detect CDK Bootstrap Version Changes
 on: [pull_request]
 
 jobs:
-  build:
-
+  detect-cdk-bootstrap-changes:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
       with:
