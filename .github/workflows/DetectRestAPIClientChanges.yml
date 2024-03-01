@@ -3,10 +3,8 @@ name: Detect Rest API Client Changes
 on: [pull_request]
 
 jobs:
-  build:
-
+  detect-restapi-client-changes:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
       with:
