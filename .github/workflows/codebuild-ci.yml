@@ -35,7 +35,7 @@ jobs:
         id: lambda
         shell: pwsh
         run: |
-          aws lambda invoke response.json --function-name "${{ secrets.CI_TESTING_LOAD_BALANCER_LAMBDA_NAME }}" --cli-binary-format raw-in-base64-out --payload '{\"Roles\": \"${{ secrets.CI_TEST_RUNNER_ACCOUNT_ROLES }}\", \"ProjectName\": \"${{ secrets.CI_TESTING_CODE_BUILD_PROJECT_NAME }}\", \"Branch\": \"${{ github.sha }}\"}'
+          aws lambda invoke response.json --function-name "${{ secrets.CI_TESTING_LOAD_BALANCER_LAMBDA_NAME }}" --cli-binary-format raw-in-base64-out --payload '{"Roles": "${{ secrets.CI_TEST_RUNNER_ACCOUNT_ROLES }}", "ProjectName": "${{ secrets.CI_TESTING_CODE_BUILD_PROJECT_NAME }}", "Branch": "${{ github.sha }}"}'
           $roleArn=$(cat ./response.json)
           "roleArn=$($roleArn -replace '"', '')" >> $env:GITHUB_OUTPUT
 
