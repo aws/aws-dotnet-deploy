@@ -68,15 +68,16 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
                 {
                     new SecurityGroup()
                     {
-                        GroupId = "group1"
+                        GroupId = "group1-id",
+                        GroupName = "group1-name"
                     }
                 });
 
             var resources = await command.GetResources(appRunnerRecommendation, securityGroupsOptionSetting);
 
             Assert.Single(resources.Rows);
-            Assert.Equal("group1", resources.Rows[0].DisplayName);
-            Assert.Equal("group1", resources.Rows[0].SystemName);
+            Assert.Equal("group1-name (group1-id)", resources.Rows[0].DisplayName);
+            Assert.Equal("group1-id", resources.Rows[0].SystemName);
         }
 
         [Fact]
