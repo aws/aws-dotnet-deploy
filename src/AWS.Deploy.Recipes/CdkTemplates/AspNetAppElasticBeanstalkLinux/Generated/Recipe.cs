@@ -193,7 +193,7 @@ namespace AspNetAppElasticBeanstalkLinux
                     ApplicationName = beanstalkApplicationName
                 }));
 
-                ApplicationVersion.AddDependsOn(BeanstalkApplication);
+                ApplicationVersion.AddDependency(BeanstalkApplication);
             }
 
             return beanstalkApplicationName;
