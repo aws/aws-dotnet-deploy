@@ -132,6 +132,7 @@ namespace BlazorWasm
                     var loggingBucket = new Bucket(this, nameof(AccessLoggingBucket), InvokeCustomizeCDKPropsEvent(nameof(AccessLoggingBucket), this, new BucketProps
                     {
                         RemovalPolicy = RemovalPolicy.RETAIN,
+                        AccessControl = BucketAccessControl.LOG_DELIVERY_WRITE
                     }));
 
                     distributionProps.LogBucket = loggingBucket;
