@@ -52,7 +52,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
             foreach (var securityGroup in securityGroups.OrderBy(securityGroup => securityGroup.VpcId))
             {
-                var row = new TypeHintResource(securityGroup.GroupId, securityGroup.GroupId);
+                var row = new TypeHintResource(securityGroup.GroupId, $"{securityGroup.GroupName} ({securityGroup.GroupId})");
                 row.ColumnValues.Add(securityGroup.GroupName);
                 row.ColumnValues.Add(securityGroup.GroupId);
                 row.ColumnValues.Add(securityGroup.VpcId);
