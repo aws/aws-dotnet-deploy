@@ -66,3 +66,6 @@ markdown_extensions:
 plugins:
     - search
     - awesome-pages
+
+extra_javascript:
+  - assets/js/beacon_scode.js
