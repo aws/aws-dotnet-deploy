@@ -1,0 +1,90 @@
+<Project ToolsVersion="Current" DefaultTargets="smoke-tests" xmlns="http://schemas.microsoft.com/developer/msbuild/2003"> 
+    <PropertyGroup>
+        <RootPath Condition="'$(RootPath)'==''">$(MSBuildProjectDirectory)</RootPath>
+
+        <!-- We need to skip recipes that use Docker when running on Windows CodeBuild -->
+        <ShouldRunDockerTests>true</ShouldRunDockerTests>
+        <ShouldRunDockerTests Condition="'$(OS)' == 'Windows_NT' AND '$(CODEBUILD_BUILD_ID)' != ''">false</ShouldRunDockerTests>
+
+        <!-- Generate a suffix for CloudFormation stack names, in case multiple smoke tests are running at once -->
+        <SafeOperatingSystem>$(OS)</SafeOperatingSystem>
+        <SafeOperatingSystem Condition="'$(OS)' == 'Windows_NT'">Windows</SafeOperatingSystem> <!-- need to remove _ for CloudFormation-->
+        <Suffix>$(SafeOperatingSystem)-$([System.DateTimeOffset]::UtcNow.ToUnixTimeSeconds())</Suffix>
+
+        <BlazorAppName>CanaryBlazorApp-$(Suffix)</BlazorAppName>
+        <ECSFargateAppName>CanaryECSFargateApp-$(Suffix)</ECSFargateAppName>
+        <AppRunnerAppName>CanaryAppRunnerApp-$(Suffix)</AppRunnerAppName>
+        <BeanstalkWindowsAppName>CanaryEBWinApp-$(Suffix)</BeanstalkWindowsAppName>
+        <BeanstalkLinuxAppName>CanaryEBLinuxApp-$(Suffix)</BeanstalkLinuxAppName>
+        <PushImageECRAppName>CanaryEBWinApp-$(Suffix)</PushImageECRAppName>
+        <BeanstalkLinuxAppName>CanaryEBLinuxApp-$(Suffix)</BeanstalkLinuxAppName>
+        <ECSServiceAppName>CanaryECSServiceApp-$(Suffix)</ECSServiceAppName>
+    </PropertyGroup>
+
+    <Target Name="smoke-tests" DependsOnTargets="run-blazor;run-fargate;run-apprunner;run-beanstalk-windows;run-beanstalk-linux;run-container-ecr;run-ecs-service" />
+
+    <Target Name="initialize">
+        <!-- Install the latest version of the deploy tool-->
+        <Exec Command="dotnet tool install -g aws.deploy.tools" />
+    </Target>
+
+    <Target Name="run-blazor" DependsOnTargets="initialize">
+        <Exec WorkingDirectory="../testapps/BlazorWasm60" Command="dotnet aws deploy --apply apply-settings.json --application-name $(BlazorAppName) --profile test-runner --silent" />
+        <OnError ExecuteTargets="cleanup-blazor" />
+    </Target>
+
+    <Target Name="cleanup-blazor" AfterTargets="run-blazor">
+        <Exec Command="dotnet aws delete-deployment $(BlazorAppName)  --profile test-runner --silent" />
+    </Target>
+
+    <Target Name="run-fargate" Condition="'$(ShouldRunDockerTests)' == 'true'" DependsOnTargets="initialize">
+        <Exec WorkingDirectory="../testapps/WebAppWithDockerFile" Command="dotnet aws deploy --apply ../../buildtools/canarysettings/ECSFargateCanary.json --application-name $(ECSFargateAppName) --profile test-runner --silent" />
+        <OnError ExecuteTargets="cleanup-fargate" />
+    </Target>
+
+    <Target Name="cleanup-fargate" Condition="'$(ShouldRunDockerTests)' == 'true'" AfterTargets="run-fargate">
+        <Exec Command="dotnet aws delete-deployment $(ECSFargateAppName) --profile test-runner --silent" />
+    </Target>
+
+    <Target Name="run-apprunner" Condition="'$(ShouldRunDockerTests)' == 'true'" DependsOnTargets="initialize">
+        <Exec WorkingDirectory="../testapps/WebAppWithDockerFile" Command="dotnet aws deploy --apply ../../buildtools/canarysettings/AppRunnerCanary.json --application-name $(AppRunnerAppName) --profile test-runner --silent" />
+        <OnError ExecuteTargets="cleanup-apprunner" />
+    </Target>
+
+    <Target Name="cleanup-apprunner" Condition="'$(ShouldRunDockerTests)' == 'true'" AfterTargets="run-apprunner">
+        <Exec Command="dotnet aws delete-deployment $(AppRunnerAppName) --profile test-runner --silent" />
+    </Target>
+
+    <Target Name="run-beanstalk-windows" DependsOnTargets="initialize">
+        <Exec WorkingDirectory="../testapps/WebAppNoDockerFile" Command="dotnet aws deploy --apply ElasticBeanStalkConfigFile-Windows.json --application-name $(BeanstalkWindowsAppName) --profile test-runner --silent" />
+        <OnError ExecuteTargets="cleanup-beanstalk-windows" />
+    </Target>
+
+    <Target Name="cleanup-beanstalk-windows" AfterTargets="run-beanstalk-windows">
+        <Exec Command="dotnet aws delete-deployment $(BeanstalkWindowsAppName) --profile test-runner --silent" />
+    </Target>
+
+    <Target Name="run-beanstalk-linux" DependsOnTargets="initialize">
+        <Exec WorkingDirectory="../testapps/WebAppNoDockerFile" Command="dotnet aws deploy --apply ElasticBeanStalkConfigFile-Linux.json --application-name $(BeanstalkLinuxAppName) --profile test-runner --silent" />
+        <OnError ExecuteTargets="cleanup-beanstalk-linux" />
+    </Target>
+
+    <Target Name="cleanup-beanstalk-linux" AfterTargets="run-beanstalk-linux">
+        <Exec Command="dotnet aws delete-deployment $(BeanstalkLinuxAppName) --profile test-runner --silent" />
+    </Target>
+
+    <Target Name="run-container-ecr" Condition="'$(ShouldRunDockerTests)' == 'true'" DependsOnTargets="initialize">
+        <Exec WorkingDirectory="../testapps/ConsoleAppTask" Command="dotnet aws deploy --apply ../../buildtools/canarysettings/PushContainerImageCanary.json --profile test-runner --silent" />
+        <!-- This one doesn't have a cleanup step since it doesn't use CloudFormation -->
+    </Target>
+
+    <Target Name="run-ecs-service" Condition="'$(ShouldRunDockerTests)' == 'true'" DependsOnTargets="">
+        <Exec WorkingDirectory="../testapps/ConsoleAppService" Command="dotnet aws deploy --apply ../../buildtools/canarysettings/ECSServiceCanary.json --application-name $(ECSServiceAppName) --profile test-runner --silent" />
+        <OnError ExecuteTargets="cleanup-ecs-service" />
+    </Target>
+
+    <Target Name="cleanup-ecs-service" Condition="'$(ShouldRunDockerTests)' == 'true'" AfterTargets="run-ecs-service">
+        <Exec Command="dotnet aws delete-deployment $(ECSServiceAppName) --profile test-runner --silent" />
+    </Target>
+
+</Project>
