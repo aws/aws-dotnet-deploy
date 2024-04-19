@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.CloudWatchLogs" Version="3.7.200.42" />
-    <PackageReference Include="AWSSDK.ECS" Version="3.7.201.12" />
+    <PackageReference Include="AWSSDK.CloudWatchLogs" Version="3.7.305.18" />
+    <PackageReference Include="AWSSDK.ECS" Version="3.7.305.39" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
     <PackageReference Include="xunit" Version="2.4.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
