@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using System.Collections.Generic;
 using System.CommandLine;
-using System.Linq;
+using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using AWS.Deploy.CLI.Commands;
 
@@ -48,29 +50,55 @@ namespace AWS.Deploy.CLI
         private static void SetExecutionEnvironment(string[] args)
         {
             const string envName = "AWS_EXECUTION_ENV";
-            const string awsDotnetDeployCLI = "aws-dotnet-deploy-cli";
 
-            var assemblyVersion = typeof(Program).Assembly
-                .GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute), false)
-                .FirstOrDefault()
-                as AssemblyInformationalVersionAttribute;
+            var toolVersion = GetToolVersion();
 
-            var envValue = new StringBuilder();
-
-            // If there is an existing execution environment variable add this tool as a suffix.
-            if(!string.IsNullOrEmpty(Environment.GetEnvironmentVariable(envName)))
-            {
-                envValue.Append($"{Environment.GetEnvironmentVariable(envName)}_");
-            }
-
-            envValue.Append($"{awsDotnetDeployCLI}_{assemblyVersion?.InformationalVersion}");
-
+            // The leading and trailing whitespaces are intentional
+            var userAgent = $" lib/aws-dotnet-deploy-cli#{toolVersion} ";
             if (args?.Length > 0)
             {
-                envValue.Append($"_{args[0]}");
+                // The trailing whitespace is intentional
+                userAgent = $"{userAgent}md/cli-args#{args[0]} ";
             }
 
+
+            var envValue = new StringBuilder();
+            var existingValue = Environment.GetEnvironmentVariable(envName);
+
+            // If there is an existing execution environment variable add this tool as a suffix.
+            if (!string.IsNullOrEmpty(existingValue))
+            {
+                envValue.Append(existingValue);
+            }
+
+            envValue.Append(userAgent);
+
             Environment.SetEnvironmentVariable(envName, envValue.ToString());
+        }
+
+        private static string GetToolVersion()
+        {
+            const string resourceName = "version.json";
+
+            using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
+            {
+                if (stream == null)
+                    return "Unkown";
+
+                try
+                {
+                    using (var reader = new StreamReader(stream))
+                    {
+                        var jsonString = reader.ReadToEnd();
+                        var versionProps = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonString);
+                        return versionProps?["version"].ToString() ?? "Unknown";
+                    }
+                }
+                catch (Exception)
+                {
+                    return "Unknown";
+                }
+            }
         }
     }
 }
