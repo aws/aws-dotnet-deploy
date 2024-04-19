@@ -47,6 +47,13 @@
     <None Include="..\..\README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\version.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <LogicalName>version.json</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
   <Import Project="..\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems" Label="Shared" />
 
 </Project>
