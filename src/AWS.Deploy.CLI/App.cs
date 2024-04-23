@@ -78,27 +78,20 @@ namespace AWS.Deploy.CLI
 
         private static string GetToolVersion()
         {
-            const string resourceName = "version.json";
-
-            using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
+            var assembly = typeof(App).GetTypeInfo().Assembly;
+            var version = assembly.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version;
+            if (version is null)
             {
-                if (stream == null)
-                    return "Unkown";
-
-                try
-                {
-                    using (var reader = new StreamReader(stream))
-                    {
-                        var jsonString = reader.ReadToEnd();
-                        var versionProps = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonString);
-                        return versionProps?["version"].ToString() ?? "Unknown";
-                    }
-                }
-                catch (Exception)
-                {
-                    return "Unknown";
-                }
+                return string.Empty;
             }
+
+            var versionParts = version.Split('.');
+            if (versionParts.Length == 4)
+            {
+                versionParts[3] = "0";
+            }
+
+            return string.Join(".", versionParts);
         }
     }
 }
