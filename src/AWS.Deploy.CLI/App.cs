@@ -88,6 +88,8 @@ namespace AWS.Deploy.CLI
             var versionParts = version.Split('.');
             if (versionParts.Length == 4)
             {
+                // The revision part of the version number is intentionally set to 0 since package versioning on
+                // NuGet follows semantic versioning consisting only of Major.Minor.Patch versions.
                 versionParts[3] = "0";
             }
 
