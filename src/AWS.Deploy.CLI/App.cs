@@ -2,12 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
-using System.Collections.Generic;
 using System.CommandLine;
-using System.IO;
 using System.Reflection;
 using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 using AWS.Deploy.CLI.Commands;
 
