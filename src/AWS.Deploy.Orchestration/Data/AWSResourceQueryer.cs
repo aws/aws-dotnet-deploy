@@ -714,7 +714,7 @@ namespace AWS.Deploy.Orchestration.Data
             "Error attempting to list available ECR repositories");
         }
 
-        public async Task<Repository> CreateECRRepository(string repositoryName)
+        public async Task<Repository> CreateECRRepository(string repositoryName, string recipeId)
         {
             var ecrClient = _awsClientFactory.GetAWSClient<IAmazonECR>();
 
@@ -722,6 +722,22 @@ namespace AWS.Deploy.Orchestration.Data
             {
                 RepositoryName = repositoryName
             };
+
+            // If a recipe ID was provided, set it as the tag value like we do for the CloudFormation stack
+            if (!string.IsNullOrEmpty(recipeId))
+            {
+                // Ensure it fits in the maximum length for ECR
+                var tagValue = recipeId.Length > 256 ? recipeId.Substring(0,256) : recipeId;
+
+                request.Tags = new List<Amazon.ECR.Model.Tag>
+                {
+                    new Amazon.ECR.Model.Tag
+                    {
+                        Key = Constants.CloudFormationIdentifier.STACK_TAG,
+                        Value = tagValue
+                   }
+                };
+            }
 
             var response = await HandleException(async () => await ecrClient.CreateRepositoryAsync(request),
             "Error attempting to create an ECR repository");

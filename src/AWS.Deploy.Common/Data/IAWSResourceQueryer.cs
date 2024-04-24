@@ -73,7 +73,15 @@ namespace AWS.Deploy.Common.Data
         Task<PlatformSummary> GetLatestElasticBeanstalkPlatformArn(BeanstalkPlatformType platformType);
         Task<List<AuthorizationData>> GetECRAuthorizationToken();
         Task<List<Repository>> GetECRRepositories(List<string>? repositoryNames = null);
-        Task<Repository> CreateECRRepository(string repositoryName);
+
+        /// <summary>
+        /// Creates a new ECR repository
+        /// </summary>
+        /// <param name="repositoryName">The name to use for the repository</param>
+        /// <param name="recipeId">The id of the recipe that's being deployd, set as the value of the "aws-dotnet-deploy" tag</param>
+        /// <returns>The repository that was created</returns>
+        Task<Repository> CreateECRRepository(string repositoryName, string recipeId);
+
         Task<List<Stack>> GetCloudFormationStacks();
         Task<Stack?> GetCloudFormationStack(string stackName);
         Task<GetCallerIdentityResponse> GetCallerIdentity(string awsRegion);
