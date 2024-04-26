@@ -3,8 +3,8 @@
         <RootPath Condition="'$(RootPath)'==''">$(MSBuildProjectDirectory)</RootPath>
 
         <!-- We need to skip recipes that use Docker when running on Windows CodeBuild -->
-        <ShouldRunDockerTests>true</ShouldRunDockerTests>
-        <ShouldRunDockerTests Condition="'$(OS)' == 'Windows_NT' AND '$(CODEBUILD_BUILD_ID)' != ''">false</ShouldRunDockerTests>
+        <ShouldRunDockerTests>false</ShouldRunDockerTests>
+        <ShouldRunDockerTests Condition="'$(OS)' != 'Windows_NT' OR '$(CODEBUILD_BUILD_ID)' == ''">true</ShouldRunDockerTests>
 
         <!-- Generate a suffix for CloudFormation stack names, in case multiple smoke tests are running at once -->
         <SafeOperatingSystem>$(OS)</SafeOperatingSystem>
