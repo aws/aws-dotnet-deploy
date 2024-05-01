@@ -1,0 +1,8 @@
+{
+    "RecipeId": "PushContainerImageEcr",
+    "settings": {
+        "ImageTag": "latest",
+        "ECRRepositoryName": "deploytool-canary",
+        "DockerExecutionDirectory": "."
+    }
+}
