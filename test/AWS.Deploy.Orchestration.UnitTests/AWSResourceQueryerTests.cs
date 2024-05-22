@@ -7,6 +7,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Amazon.EC2;
 using Amazon.EC2.Model;
+using Amazon.ECR;
+using Amazon.ECR.Model;
 using Amazon.ElasticBeanstalk.Model;
 using Amazon.Runtime;
 using Amazon.SecurityToken;
@@ -24,6 +26,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
         private readonly Mock<IAmazonSecurityTokenService> _mockSTSClient;
         private readonly Mock<IAmazonSecurityTokenService> _mockSTSClientDefaultRegion;
         private readonly Mock<IAmazonEC2> _mockEC2Client;
+        private readonly Mock<IAmazonECR> _mockECRClient;
 
         public AWSResourceQueryerTests()
         {
@@ -31,6 +34,12 @@ namespace AWS.Deploy.Orchestration.UnitTests
             _mockSTSClient = new Mock<IAmazonSecurityTokenService>();
             _mockSTSClientDefaultRegion = new Mock<IAmazonSecurityTokenService>();
             _mockEC2Client = new Mock<IAmazonEC2>();
+            _mockECRClient = new Mock<IAmazonECR>();
+
+            _mockECRClient.Setup(x => x.CreateRepositoryAsync(
+                It.IsAny<CreateRepositoryRequest>(),
+                It.IsAny<CancellationToken>()))
+            .Returns(Task.FromResult(new CreateRepositoryResponse()));
         }
 
         [Fact]
@@ -160,10 +169,68 @@ namespace AWS.Deploy.Orchestration.UnitTests
 
             AWSResourceQueryer.SortElasticBeanstalkWindowsPlatforms(platforms);
 
-            for(var i = 0; i < platforms.Count; i++)
+            for (var i = 0; i < platforms.Count; i++)
             {
                 Assert.Equal(i.ToString(), platforms[i].PlatformOwner);
             }
+        }
+
+        [Fact]
+        public async Task CreateRepository_TagsWithRecipeName_Success()
+        {
+            var awsResourceQueryer = new AWSResourceQueryer(_mockAWSClientFactory.Object);
+            _mockAWSClientFactory.Setup(x => x.GetAWSClient<IAmazonECR>(It.IsAny<string>())).Returns(_mockECRClient.Object);
+
+            await awsResourceQueryer.CreateECRRepository("myRepository", "myRecipe");
+
+            // Assert that it creates the repository with the expected name and deploy tool tag
+            _mockECRClient.Verify(x => x.CreateRepositoryAsync(
+                It.Is<CreateRepositoryRequest>(request =>
+                    request.RepositoryName == "myRepository" &&
+                    request.Tags.Count == 1 &&
+                    request.Tags[0].Key == "aws-dotnet-deploy" &&
+                    request.Tags[0].Value == "myRecipe"),
+                It.IsAny<CancellationToken>()), Times.Once());
+            _mockECRClient.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async Task CreateRepository_NoTag_Success()
+        {
+            var awsResourceQueryer = new AWSResourceQueryer(_mockAWSClientFactory.Object);
+            _mockAWSClientFactory.Setup(x => x.GetAWSClient<IAmazonECR>(It.IsAny<string>())).Returns(_mockECRClient.Object);
+
+            await awsResourceQueryer.CreateECRRepository("myRepository", "");
+
+            // If for some reason there is no recipe ID, verify that the tag was skipped
+            _mockECRClient.Verify(x => x.CreateRepositoryAsync(
+                It.Is<CreateRepositoryRequest>(request =>
+                    request.RepositoryName == "myRepository" &&
+                    request.Tags.Count == 0),
+                It.IsAny<CancellationToken>()), Times.Once());
+            _mockECRClient.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async Task CreateRepository_TruncatedTag_Success()
+        {
+            var awsResourceQueryer = new AWSResourceQueryer(_mockAWSClientFactory.Object);
+            _mockAWSClientFactory.Setup(x => x.GetAWSClient<IAmazonECR>(It.IsAny<string>())).Returns(_mockECRClient.Object);
+
+            // This is longer than ECR supports for a tag value
+            var recipeName = new string('a', 500);
+
+            await awsResourceQueryer.CreateECRRepository("myRepository", recipeName);
+
+            // Verify that the recipe name was truncated as expected for the tag value
+            _mockECRClient.Verify(x => x.CreateRepositoryAsync(
+                It.Is<CreateRepositoryRequest>(request =>
+                    request.RepositoryName == "myRepository" &&
+                    request.Tags.Count == 1 &&
+                    request.Tags[0].Key == "aws-dotnet-deploy" &&
+                    request.Tags[0].Value == recipeName.Substring(0, 256)),
+                It.IsAny<CancellationToken>()), Times.Once());
+            _mockECRClient.VerifyNoOtherCalls();
         }
     }
 }
