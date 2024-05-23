@@ -74,16 +74,17 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             Guid.NewGuid().ToString()
             );
 
-            var serviceProvider = CreateSessionServiceProvider(output.SessionId, input.AWSRegion);
-            var awsResourceQueryer = serviceProvider.GetRequiredService<IAWSResourceQueryer>();
-
             var state = new SessionState(
                 output.SessionId,
                 input.ProjectPath,
                 input.AWSRegion,
-                (await awsResourceQueryer.GetCallerIdentity(input.AWSRegion)).Account,
                 await _projectParserUtility.Parse(input.ProjectPath)
                 );
+
+            var serviceProvider = CreateSessionServiceProvider(state);
+            var awsResourceQueryer = serviceProvider.GetRequiredService<IAWSResourceQueryer>();
+
+            state.AWSAccountId = (await awsResourceQueryer.GetCallerIdentity(input.AWSRegion)).Account;
 
             _stateServer.Save(output.SessionId, state);
 
@@ -669,26 +670,30 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
         private IServiceProvider CreateSessionServiceProvider(SessionState state)
         {
-            return CreateSessionServiceProvider(state.SessionId, state.AWSRegion);
-        }
-
-        private IServiceProvider CreateSessionServiceProvider(string sessionId, string awsRegion)
-        {
             var awsCredentials = HttpContext.User.ToAWSCredentials();
             if(awsCredentials == null)
             {
                 throw new FailedToRetrieveAWSCredentialsException("AWS credentials are missing for the current session.");
             }
 
-            var interactiveServices = new SessionOrchestratorInteractiveService(sessionId, _hubContext);
+            var interactiveServices = new SessionOrchestratorInteractiveService(state.SessionId, _hubContext);
             var services = new ServiceCollection();
             services.AddSingleton<IOrchestratorInteractiveService>(interactiveServices);
             services.AddSingleton<ICommandLineWrapper>(services =>
             {
                 var wrapper = new CommandLineWrapper(interactiveServices, true);
-                wrapper.RegisterAWSContext(awsCredentials, awsRegion);
+                wrapper.RegisterAWSContext(awsCredentials, state.AWSRegion);
                 return wrapper;
             });
+
+            if (state.AWSResourceQueryService == null)
+            {
+                services.AddSingleton<IAWSResourceQueryer, SessionAWSResourceQuery>();
+            }
+            else
+            {
+                services.AddSingleton<IAWSResourceQueryer>(state.AWSResourceQueryService);
+            }
 
             services.AddCustomServices();
             var serviceProvider = services.BuildServiceProvider();
@@ -698,8 +703,12 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             awsClientFactory.ConfigureAWSOptions(awsOptions =>
             {
                 awsOptions.Credentials = awsCredentials;
-                awsOptions.Region = RegionEndpoint.GetBySystemName(awsRegion);
+                awsOptions.Region = RegionEndpoint.GetBySystemName(state.AWSRegion);
             });
+
+            // Cache the SessionAWSResourceQuery with the session state so it can be reused in future
+            // ServerMode API calls with the same session id.
+            state.AWSResourceQueryService = serviceProvider.GetRequiredService<IAWSResourceQueryer>() as SessionAWSResourceQuery;
 
             return serviceProvider;
         }
