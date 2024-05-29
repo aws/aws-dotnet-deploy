@@ -1,0 +1,6 @@
+{
+    "RecipeId": "AspNetAppEcsFargate",
+    "Settings":{
+        "DockerExecutionDirectory": "."
+    }
+  }

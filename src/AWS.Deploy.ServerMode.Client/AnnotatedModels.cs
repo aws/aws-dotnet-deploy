@@ -19,4 +19,14 @@ namespace AWS.Deploy.ServerMode.Client
     public partial class RecommendationSummary
     {
     }
+
+    [DebuggerDisplay(value: "{DisplayName}")]
+    public partial class TypeHintResourceColumn
+    {
+    }
+
+    [DebuggerDisplay(value: "SystemName: {SystemName}, DisplayName: {DisplayName}")]
+    public partial class TypeHintResourceSummary
+    {
+    }
 }

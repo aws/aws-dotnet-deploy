@@ -1,0 +1,6 @@
+{
+    "RecipeId": "ConsoleAppEcsFargateService",
+    "settings": {
+        "DockerExecutionDirectory": "."
+    }
+}

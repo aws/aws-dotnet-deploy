@@ -7,12 +7,16 @@ namespace BlazorWasm
 {
     sealed class Program
     {
-        public static void Main(string[] args)
+        public static void Main()
         {
             var app = new App();
 
             var builder = new ConfigurationBuilder().AddAWSDeployToolConfiguration(app);
             var recipeProps = builder.Build().Get<RecipeProps<Configuration>>();
+            if (recipeProps is null)
+            {
+                throw new InvalidOrMissingConfigurationException("The configuration is missing for the selected recipe.");
+            }
             var appStackProps = new DeployToolStackProps<Configuration>(recipeProps)
             {
                 Env = new Environment

@@ -3,10 +3,8 @@ name: Detect CDK Bootstrap Version Changes
 on: [pull_request]
 
 jobs:
-  build:
-
+  detect-cdk-bootstrap-changes:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
       with:
@@ -14,17 +12,35 @@ jobs:
     - name: Install AWS CDK
       run: |
         npm install -g aws-cdk
+    - name: Get Staging Bucket Update/Replace Policy
+      id: stagingBucketUpdateReplacePolicy
+      run: |
+        echo "update-replace-policy=$(yq '.Resources.StagingBucket.UpdateReplacePolicy' 'src/AWS.Deploy.Orchestration/CDK/CDKBootstrapTemplate.yaml')" >> $GITHUB_OUTPUT
+    - name: Get Staging Bucket Deletion Policy
+      id: stagingBucketDeletionPolicy
+      run: |
+        echo "deletion-policy=$(yq '.Resources.StagingBucket.DeletionPolicy' 'src/AWS.Deploy.Orchestration/CDK/CDKBootstrapTemplate.yaml')" >> $GITHUB_OUTPUT
+    - name: Fail If Update/Replace Policy Not 'Delete'
+      if: steps.stagingBucketUpdateReplacePolicy.outputs.update-replace-policy != 'Delete'
+      run: |
+        echo "The 'UpdateReplacePolicy' of the 'StaginBucket' in the CDK bootstrap template should be 'Delete'."
+        exit 1
+    - name: Fail If Deletion Policy Not 'Delete'
+      if: steps.stagingBucketDeletionPolicy.outputs.deletion-policy != 'Delete'
+      run: |
+        echo "The 'DeletionPolicy' of the 'StaginBucket' in the CDK bootstrap template should be 'Delete'."
+        exit 1
     - name: Save New CDK Bootstrap Template
       run: |
         cdk bootstrap --show-template > newTemplate.yml
     - name: Get Latest CDK Bootstrap Version
       id: latestBootstrapVersion
       run: |
-        echo "::set-output name=latest-version::$(yq '.Resources.CdkBootstrapVersion.Properties.Value' 'newTemplate.yml')"
+        echo "latest-version=$(yq '.Resources.CdkBootstrapVersion.Properties.Value' 'newTemplate.yml')" >> $GITHUB_OUTPUT
     - name: Get Current CDK Bootstrap Version
       id: currentBootstrapVersion
       run: |
-        echo "::set-output name=current-version::$(yq '.Resources.CdkBootstrapVersion.Properties.Value' 'src/AWS.Deploy.Orchestration/CDK/CDKBootstrapTemplate.yaml')"
+        echo "current-version=$(yq '.Resources.CdkBootstrapVersion.Properties.Value' 'src/AWS.Deploy.Orchestration/CDK/CDKBootstrapTemplate.yaml')" >> $GITHUB_OUTPUT
     - name: Fail If CDK Bootstrap Template Changes Detected
       if: steps.currentBootstrapVersion.outputs.current-version != steps.latestBootstrapVersion.outputs.latest-version
       run: |

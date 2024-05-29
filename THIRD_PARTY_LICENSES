@@ -1,29 +1,27 @@
-** AWSSDK.EC2; version 3.7.19.1 -- https://www.nuget.org/packages/AWSSDK.EC2
-** Constructs; version 10.0.0 -- https://www.nuget.org/packages/Constructs
-** Amazon.JSII.Runtime; version 1.54.0 -- https://www.nuget.org/packages/Amazon.JSII.Runtime
-** AWSSDK.IdentityManagement; version 3.7.100.15 -- https://www.nuget.org/packages/AWSSDK.IdentityManagement
-** AWSSDK.CloudFormation; version 3.7.101.9 -- https://www.nuget.org/packages/AWSSDK.CloudFormation
-** AWSSDK.SecurityToken; version 3.7.100.14 -- https://www.nuget.org/packages/AWSSDK.SecurityToken
-** AWSSDK.SSO; version 3.7.100.14 -- https://www.nuget.org/packages/AWSSDK.SSO
-** AWSSDK.SSOOIDC; version 3.7.100.14 -- https://www.nuget.org/packages/AWSSDK.SSOOIDC
-** AWSSDK.CloudControlApi; version 3.7.100.14 -- https://www.nuget.org/packages/AWSSDK.CloudControlApi/
-** AWSSDK.CloudWatchEvents; version 3.7.100.14 -- https://www.nuget.org/packages/AWSSDK.CloudWatchEvents/
-** AWSSDK.EC2; version 3.7.105.3 -- https://www.nuget.org/packages/AWSSDK.EC2/
-** AWSSDK.Extensions.NETCore.Setup; version 3.7.2 -- https://www.nuget.org/packages/AWSSDK.Extensions.NETCore.Setup
-** AWSSDK.AppRunner; version 3.7.102.7 -- https://www.nuget.org/packages/AWSSDK.AppRunner/
-** AWSSDK.CloudFront; version 3.7.100.14 -- https://www.nuget.org/packages/AWSSDK.CloudFront/
-** AWSSDK.DynamoDBv2; version 3.7.100.14 -- https://www.nuget.org/packages/AWSSDK.DynamoDBv2/
-** AWSSDK.ECR; version 3.7.100.14 -- https://www.nuget.org/packages/AWSSDK.ECR
-** AWSSDK.ECS; version 3.7.100.14 -- https://www.nuget.org/packages/AWSSDK.ECS
-** AWSSDK.S3; version 3.7.101.14 -- https://www.nuget.org/packages/AWSSDK.S3/
-** AWSSDK.SimpleSystemsManagement; version 3.7.101.4 -- https://www.nuget.org/packages/AWSSDK.SimpleSystemsManagement/
-** AWSSDK.SimpleNotificationService; version 3.7.100.14 -- https://www.nuget.org/packages/AWSSDK.SimpleNotificationService/
-** AWSSDK.SQS; version 3.7.100.14 -- https://www.nuget.org/packages/AWSSDK.SQS/
-** AWSSDK.ElasticBeanstalk; version 3.7.100.14 -- https://www.nuget.org/packages/AWSSDK.ElasticBeanstalk
-** AWSSDK.ElasticLoadBalancingV2; version 3.7.100.14 -- https://www.nuget.org/packages/AWSSDK.ElasticLoadBalancingV2/
-** AWSSDK.Core; version 3.7.100.14 -- https://www.nuget.org/packages/AWSSDK.Core
-** AWSSDK.CloudWatchLogs; version 3.7.101.7 -- https://www.nuget.org/packages/AWSSDK.CloudWatchLogs
-** Amazon.CDK.Lib; version 2.43.1 -- https://www.nuget.org/packages/Amazon.CDK.Lib/
+** AWSSDK.EC2; version 3.7.323.1 -- https://www.nuget.org/packages/AWSSDK.EC2
+** AWSSDK.IdentityManagement; version 3.7.301.3 -- https://www.nuget.org/packages/AWSSDK.IdentityManagement
+** AWSSDK.CloudFormation; version 3.7.307.3 -- https://www.nuget.org/packages/AWSSDK.CloudFormation
+** AWSSDK.SecurityToken; version 3.7.300.78 -- https://www.nuget.org/packages/AWSSDK.SecurityToken
+** AWSSDK.SSO; version 3.7.300.77 -- https://www.nuget.org/packages/AWSSDK.SSO
+** AWSSDK.SSOOIDC; version 3.7.301.72 -- https://www.nuget.org/packages/AWSSDK.SSOOIDC
+** AWSSDK.CloudControlApi; version 3.7.300.77 -- https://www.nuget.org/packages/AWSSDK.CloudControlApi/
+** AWSSDK.CloudWatchEvents; version 3.7.300.77 -- https://www.nuget.org/packages/AWSSDK.CloudWatchEvents/
+** AWSSDK.EC2; version 3.7.323.1 -- https://www.nuget.org/packages/AWSSDK.EC2/
+** AWSSDK.Extensions.NETCore.Setup; version 3.7.300 -- https://www.nuget.org/packages/AWSSDK.Extensions.NETCore.Setup
+** AWSSDK.AppRunner; version 3.7.301.49 -- https://www.nuget.org/packages/AWSSDK.AppRunner/
+** AWSSDK.CloudFront; version 3.7.302.3 -- https://www.nuget.org/packages/AWSSDK.CloudFront/
+** AWSSDK.DynamoDBv2; version 3.7.302.18 -- https://www.nuget.org/packages/AWSSDK.DynamoDBv2/
+** AWSSDK.ECR; version 3.7.301.72 -- https://www.nuget.org/packages/AWSSDK.ECR
+** AWSSDK.ECS; version 3.7.305.39 -- https://www.nuget.org/packages/AWSSDK.ECS
+** AWSSDK.S3; version 3.7.307.18 -- https://www.nuget.org/packages/AWSSDK.S3/
+** AWSSDK.SimpleSystemsManagement; version 3.7.303.26 -- https://www.nuget.org/packages/AWSSDK.SimpleSystemsManagement/
+** AWSSDK.SimpleNotificationService; version 3.7.301.25 -- https://www.nuget.org/packages/AWSSDK.SimpleNotificationService/
+** AWSSDK.SQS; version 3.7.300.77 -- https://www.nuget.org/packages/AWSSDK.SQS/
+** AWSSDK.ElasticBeanstalk; version 3.7.300.77 -- https://www.nuget.org/packages/AWSSDK.ElasticBeanstalk
+** AWSSDK.ElasticLoadBalancingV2; version 3.7.302.33 -- https://www.nuget.org/packages/AWSSDK.ElasticLoadBalancingV2/
+** AWSSDK.Core; version 3.7.303.20 -- https://www.nuget.org/packages/AWSSDK.Core
+** AWSSDK.CloudWatchLogs; version 3.7.305.18 -- https://www.nuget.org/packages/AWSSDK.CloudWatchLogs
+** Amazon.CDK.Lib; version 2.131.0 -- https://www.nuget.org/packages/Amazon.CDK.Lib/
  
 Apache License
 Version 2.0, January 2004
@@ -210,11 +208,6 @@ limitations under the License.
 
 * For AWSSDK.EC2 see also this required NOTICE:
     Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-* For Constructs see also this required NOTICE:
-    Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
-* For Amazon.JSII.Runtime see also this required NOTICE:
-    AWS Cloud Development Kit (AWS CDK)
-    Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 * For AWSSDK.IdentityManagement see also this required NOTICE:
     Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 * For AWSSDK.CloudFormation see also this required NOTICE:
@@ -291,119 +284,65 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ------
 
-** Microsoft.Bcl.AsyncInterfaces; version 5.0.0 -- https://www.nuget.org/packages/Microsoft.Bcl.AsyncInterfaces/
-Copyright (c) .NET Foundation and Contributors
 ** System.CommandLine; version 2.0.0-beta1.20574.7 -- https://www.nuget.org/packages/System.CommandLine/
 Copyright © .NET Foundation and Contributors
-** System.Linq.Async; version 4.0.0 -- https://www.nuget.org/packages/System.Linq.Async
-Copyright (c) .NET Foundation and Contributors
-** Microsoft.Extensions.Configuration.Abstractions; version 5.0.0 -- https://www.nuget.org/packages/Microsoft.Extensions.Configuration.Abstractions
-Copyright (c) .NET Foundation and Contributors
-** Microsoft.Extensions.Configuration.Binder; version 5.0.0 -- https://www.nuget.org/packages/Microsoft.Extensions.Configuration.Binder
-Copyright (c) .NET Foundation and Contributors
-** Microsoft.Extensions.Configuration; version 5.0.0 -- https://www.nuget.org/packages/Microsoft.Extensions.Configuration
-Copyright (c) .NET Foundation and Contributors
-** Microsoft.Extensions.Configuration.FileExtensions; version 3.1.7 -- https://www.nuget.org/packages/Microsoft.Extensions.Configuration.FileExtensions
-Copyright (c) .NET Foundation and Contributors
-** Microsoft.Extensions.FileProviders.Abstractions; version 3.1.7 -- https://www.nuget.org/packages/Microsoft.Extensions.FileProviders.Abstractions
-Copyright (c) .NET Foundation and Contributors
-** Microsoft.Extensions.FileProviders.Physical; version 3.1.7 -- https://www.nuget.org/packages/Microsoft.Extensions.FileProviders.Physical
-Copyright (c) .NET Foundation and Contributors
-** Microsoft.Extensions.FileSystemGlobbing; version 3.1.7 -- https://www.nuget.org/packages/Microsoft.Extensions.FileSystemGlobbing
-Copyright (c) .NET Foundation and Contributors
-** Microsoft.Extensions.Logging.Abstractions; version 5.0.0 -- https://www.nuget.org/packages/Microsoft.Extensions.Logging.Abstractions
-Copyright (c) .NET Foundation and Contributors
-** Microsoft.Extensions.Logging.Configuration; version 5.0.0 -- https://www.nuget.org/packages/Microsoft.Extensions.Logging.Configuration
-Copyright (c) .NET Foundation and Contributors
-** Microsoft.Extensions.Logging.Console; version 5.0.0 -- https://www.nuget.org/packages/Microsoft.Extensions.Logging.Console
-Copyright (c) .NET Foundation and Contributors
-** Microsoft.Extensions.Logging; version 5.0.0 -- https://www.nuget.org/packages/Microsoft.Extensions.Logging.
-Copyright (c) .NET Foundation and Contributors
-** Microsoft.Extensions.Options.ConfigurationExtensions; version 5.0.0 -- https://www.nuget.org/packages/Microsoft.Extensions.Options.ConfigurationExtensions
-Copyright (c) .NET Foundation and Contributors
-** Microsoft.Extensions.Options; version 5.0.0 -- https://www.nuget.org/packages/Microsoft.Extensions.Options
-Copyright (c) .NET Foundation and Contributors
-** Microsoft.Extensions.Primitives; version 5.0.0 -- https://www.nuget.org/packages/Microsoft.Extensions.Primitives
-Copyright (c) .NET Foundation and Contributors
-** Microsoft.TemplateEngine.Abstractions; version 5.0.1 -- https://www.nuget.org/packages/Microsoft.TemplateEngine.Abstractions
-Copyright (c) 2016 .NET Foundation
-** Microsoft.TemplateEngine.Core.Contracts; version 5.0.1 -- https://www.nuget.org/packages/Microsoft.TemplateEngine.Core.Contracts
-Copyright (c) 2016 .NET Foundation
-** Microsoft.TemplateEngine.Core; version 5.0.1 -- https://www.nuget.org/packages/Microsoft.TemplateEngine.Core
-Copyright (c) 2016 .NET Foundation
-** Microsoft.TemplateEngine.Edge; version 5.0.1 -- https://www.nuget.org/packages/Microsoft.TemplateEngine.Edge
-Copyright (c) 2016 .NET Foundation
 ** Microsoft.TemplateEngine.IDE; version 5.0.1 -- https://www.nuget.org/packages/Microsoft.TemplateEngine.IDE
-Copyright (c) 2016 .NET Foundation
-** Microsoft.TemplateEngine.Utils; version 5.0.1 -- https://www.nuget.org/packages/Microsoft.TemplateEngine.Utils
-Copyright (c) 2016 .NET Foundation
-** System.Diagnostics.DiagnosticSource; version 5.0.0 -- https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource
 Copyright (c) 2016 .NET Foundation
 ** Microsoft.TemplateEngine.Orchestrator.RunnableProjects; version 5.0.1 -- https://www.nuget.org/packages/Microsoft.TemplateEngine.Orchestrator.RunnableProjects
 Copyright (c) 2016 .NET Foundation
-** Microsoft.Extensions.DependencyInjection; version 6.0.0 -- https://www.nuget.org/packages/Microsoft.Extensions.DependencyInjection
-Copyright (c) .NET Foundation and Contributors
-**  Microsoft.Extensions.DependencyInjection.Abstractions; version 6.0.0 -- https://www.nuget.org/packages/Microsoft.Extensions.DependencyInjection.Abstractions
-Copyright (c) .NET Foundation and Contributors
-** System.Runtime.CompilerServices.Unsafe; version 6.0.0 -- https://www.nuget.org/packages/System.Runtime.CompilerServices.Unsafe/
-Copyright (c) .NET Foundation and Contributors
-** Microsoft.OpenApi; version 1.2.3 -- https://www.nuget.org/packages/Microsoft.OpenApi/
-Copyright (c) Microsoft Corporation.
-** System.Text.Json; version 6.0.4 -- https://www.nuget.org/packages/System.Text.Json
-Copyright (c) .NET Foundation and Contributors
 ** Microsoft.Extensions.Configuration.Json; version 6.0.0 -- https://www.nuget.org/packages/Microsoft.Bcl.AsyncInterhttps://www.nuget.org/packages/Microsoft.Extensions.Configuration.Jsonfaces
+Copyright (c) .NET Foundation and Contributors
+** Microsoft.Bcl.AsyncInterfaces; version 6.0.0 -- https://www.nuget.org/packages/Microsoft.Bcl.AsyncInterfaces/
+Copyright (c) .NET Foundation and Contributors
+** System.Linq.Async; version 6.0.1 -- https://www.nuget.org/packages/System.Linq.Async
+Copyright (c) .NET Foundation and Contributors
+** System.Text.Json; version 6.0.8 -- https://www.nuget.org/packages/System.Text.Json
 Copyright (c) .NET Foundation and Contributors
  
 All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ------
 
-** libyaml; version 0.1.7 -- https://github.com/yaml/libyaml
-Copyright (c) 2006 Kirill Simonov
 ** Newtonsoft.Json; version 13.0.1 -- https://www.nuget.org/packages/Newtonsoft.Json/
 Copyright (c) 2007 James Newton-King
-** YamlDotNet; version 9.1.4 -- https://www.nuget.org/packages/YamlDotNet
+** YamlDotNet; version 13.4.0 -- https://www.nuget.org/packages/YamlDotNet
 Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013, 2014 Antoine Aubry and
 contributors
-** Swashbuckle.AspNetCore.Annotations; version 6.1.2 -- https://www.nuget.org/packages/Swashbuckle.AspNetCore.Annotations/
+** Swashbuckle.AspNetCore.Annotations; version 6.5.0 -- https://www.nuget.org/packages/Swashbuckle.AspNetCore.Annotations/
 Copyright (c) 2016 Richard Morris
-** Swashbuckle.AspNetCore.Swagger; version 6.1.2 -- https://www.nuget.org/packages/Swashbuckle.AspNetCore.Swagger/
-Copyright (c) 2016 Richard Morris
-** Swashbuckle.AspNetCore.SwaggerGen ; version 6.1.2 -- https://www.nuget.org/packages/Swashbuckle.AspNetCore.SwaggerGen/
+** Swashbuckle.AspNetCore.Swagger; version 6.5.0 -- https://www.nuget.org/packages/Swashbuckle.AspNetCore.Swagger/
 Copyright (c) 2016 Richard Morris
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

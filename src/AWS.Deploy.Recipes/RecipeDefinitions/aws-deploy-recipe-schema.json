@@ -553,7 +553,8 @@
                         "SQSQueueUrl",
                         "SNSTopicArn",
                         "FilePath",
-                        "ElasticBeanstalkVpc"
+                        "ElasticBeanstalkVpc",
+                        "DockerHttpPort"
                     ]
                 },
                 "DefaultValue": {

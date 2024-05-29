@@ -1,0 +1,8 @@
+{
+    "RecipeId": "AspNetAppAppRunner",
+    "Settings": {
+        "ServiceName": "apprunner-canary-service",
+        "DockerExecutionDirectory": "."
+    }
+}
+

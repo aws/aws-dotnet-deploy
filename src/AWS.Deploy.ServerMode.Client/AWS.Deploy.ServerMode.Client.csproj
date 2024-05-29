@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <!-- The target framework is used by the toolkit and can only use netstandard2.0 -->
@@ -15,8 +15,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.Core" Version="3.7.100.14" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="5.0.5" />
+    <PackageReference Include="AWSSDK.Core" Version="3.7.303.20" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="6.0.22" />
+    <!-- We are pining Newtonsoft.Json to 13.0.1 to maintain compatibility with the VS Toolkit. 
+    https://devblogs.microsoft.com/visualstudio/using-newtonsoft-json-in-a-visual-studio-extension/-->
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 

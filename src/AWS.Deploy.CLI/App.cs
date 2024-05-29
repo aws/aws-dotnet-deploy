@@ -3,7 +3,6 @@
 
 using System;
 using System.CommandLine;
-using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -48,29 +47,50 @@ namespace AWS.Deploy.CLI
         private static void SetExecutionEnvironment(string[] args)
         {
             const string envName = "AWS_EXECUTION_ENV";
-            const string awsDotnetDeployCLI = "aws-dotnet-deploy-cli";
 
-            var assemblyVersion = typeof(Program).Assembly
-                .GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute), false)
-                .FirstOrDefault()
-                as AssemblyInformationalVersionAttribute;
+            var toolVersion = GetToolVersion();
 
-            var envValue = new StringBuilder();
-
-            // If there is an existing execution environment variable add this tool as a suffix.
-            if(!string.IsNullOrEmpty(Environment.GetEnvironmentVariable(envName)))
-            {
-                envValue.Append($"{Environment.GetEnvironmentVariable(envName)}_");
-            }
-
-            envValue.Append($"{awsDotnetDeployCLI}_{assemblyVersion?.InformationalVersion}");
-
+            // The leading and trailing whitespaces are intentional
+            var userAgent = $" lib/aws-dotnet-deploy-cli#{toolVersion} ";
             if (args?.Length > 0)
             {
-                envValue.Append($"_{args[0]}");
+                // The trailing whitespace is intentional
+                userAgent = $"{userAgent}md/cli-args#{args[0]} ";
             }
 
+
+            var envValue = new StringBuilder();
+            var existingValue = Environment.GetEnvironmentVariable(envName);
+
+            // If there is an existing execution environment variable add this tool as a suffix.
+            if (!string.IsNullOrEmpty(existingValue))
+            {
+                envValue.Append(existingValue);
+            }
+
+            envValue.Append(userAgent);
+
             Environment.SetEnvironmentVariable(envName, envValue.ToString());
+        }
+
+        private static string GetToolVersion()
+        {
+            var assembly = typeof(App).GetTypeInfo().Assembly;
+            var version = assembly.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version;
+            if (version is null)
+            {
+                return string.Empty;
+            }
+
+            var versionParts = version.Split('.');
+            if (versionParts.Length == 4)
+            {
+                // The revision part of the version number is intentionally set to 0 since package versioning on
+                // NuGet follows semantic versioning consisting only of Major.Minor.Patch versions.
+                versionParts[3] = "0";
+            }
+
+            return string.Join(".", versionParts);
         }
     }
 }

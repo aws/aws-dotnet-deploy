@@ -193,7 +193,7 @@ namespace AspNetAppElasticBeanstalkWindows
                     ApplicationName = beanstalkApplicationName
                 }));
 
-                ApplicationVersion.AddDependsOn(BeanstalkApplication);
+                ApplicationVersion.AddDependency(BeanstalkApplication);
             }
 
             return beanstalkApplicationName;

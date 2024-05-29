@@ -157,7 +157,7 @@ namespace AspNetAppEcsFargate
 
             AppContainerDefinition.AddPortMappings(new PortMapping
             {
-                ContainerPort = 80,
+                ContainerPort = settings.Port,
                 Protocol = Amazon.CDK.AWS.ECS.Protocol.TCP
             });
 

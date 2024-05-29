@@ -39,6 +39,7 @@ namespace AWS.Deploy.Common.Recipes
         ExistingSecurityGroups,
         VPCConnector,
         FilePath,
-        ElasticBeanstalkVpc
+        ElasticBeanstalkVpc,
+        DockerHttpPort
     };
 }
