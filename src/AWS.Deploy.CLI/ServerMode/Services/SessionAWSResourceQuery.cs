@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Amazon.AppRunner.Model;
 using Amazon.CloudControlApi.Model;
@@ -35,6 +36,8 @@ namespace AWS.Deploy.CLI.ServerMode.Services
     /// </summary>
     public class SessionAWSResourceQuery : IAWSResourceQueryer
     {
+        private readonly static JsonSerializerOptions _cacheKeyJsonOptions = new JsonSerializerOptions { WriteIndented = false };
+
         private readonly IAWSResourceQueryer _awsResourceQueryer;
         private readonly ConcurrentDictionary<string, object?> _cachedResponse = new();
 
@@ -72,7 +75,7 @@ namespace AWS.Deploy.CLI.ServerMode.Services
             return new SessionAWSResourceQuery(awsResourceQueryer);
         }
 
-        private string CreateCacheKey(IEnumerable<object?>? args = null, [CallerMemberName] string caller = "")
+        public static string CreateCacheKey(IEnumerable<object?>? args = null, [CallerMemberName] string caller = "")
         {
             var values = new List<object>
             {
@@ -80,25 +83,10 @@ namespace AWS.Deploy.CLI.ServerMode.Services
             };
             if (args != null)
             {
-                foreach (var item in args)
-                {
-                    if (item is null)
-                    {
-                        values.Add("null");
-                    }
-                    if (item is System.Collections.IEnumerable itemEnumerable)
-                    {
-                        values.Add("IEnumerable");
-                        foreach (var subItem in itemEnumerable)
-                        {
-                            if (subItem is null)
-                                values.Add("null");
-                            else
-                                values.Add(subItem.ToString() ?? "null");
-                        }
-                    }
-                }
+                var argString = JsonSerializer.Serialize(args, typeof(IEnumerable<object?>), _cacheKeyJsonOptions);
+                values.Add(argString);
             }
+
             var cacheKey = string.Join(",", values);
             return cacheKey;
         }
