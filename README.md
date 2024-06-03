@@ -8,7 +8,7 @@ This repository contains the AWS Deploy Tool for .NET CLI - the opinionated tool
 
 The tool assumes minimal knowledge of AWS. It is designed to guide you through the deployment process and provides suggested defaults. The tool will show you all compute service options available to deploy your application, and will recommend a default with information about why it was chosen. The other compute service options will be shown with an explanation of their differences. If the selected compute option does not match your needs, you can select a different compute service.
 
-The goal of the deployment tool is to deploy cloud-native .NET applications that are built with .NET Core 3.1 and above. A cloud-native .NET application is written in .NET with the intent to deploy to Linux. It is not tied to any Windows specific technology such as Windows registry, IIS or MSMQ, and can be deployed on virtualized compute. The tool **cannot** be used to deploy .NET Framework, Desktop, Xamarin, or other applications that do not fit the "cloud-native" criteria.
+The goal of the deployment tool is to deploy cloud-native .NET applications that are built with .NET Core 6 and above. A cloud-native .NET application is written in .NET with the intent to deploy to Linux. It is not tied to any Windows specific technology such as Windows registry, IIS or MSMQ, and can be deployed on virtualized compute. The tool **cannot** be used to deploy .NET Framework, Desktop, Xamarin, or other applications that do not fit the "cloud-native" criteria.
 
 We welcome your feedback! Please let us know what you think by opening an [issue](https://github.com/aws/aws-dotnet-deploy/issues).
 
