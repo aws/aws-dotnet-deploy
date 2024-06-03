@@ -2,13 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
-using System.Collections;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
 using Amazon;
 using AWS.Deploy.CLI.Commands.TypeHints;
 using AWS.Deploy.CLI.Utilities;
@@ -16,7 +12,6 @@ using AWS.Deploy.Common;
 using AWS.Deploy.Common.Extensions;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.CDK;
-using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.Utilities;
 using AWS.Deploy.CLI.Commands.CommandHandlerInput;
 using AWS.Deploy.Common.IO;
@@ -37,6 +32,7 @@ namespace AWS.Deploy.CLI.Commands
 
     public class CommandFactory : ICommandFactory
     {
+        private static readonly Option<bool> _optionVersion = new(new[] { "-v", "--version" }, "Show version information");
         private static readonly Option<string> _optionProfile = new("--profile", "AWS credential profile used to make calls to AWS.");
         private static readonly Option<string> _optionRegion = new("--region", "AWS region to deploy the application to. For example, us-west-2.");
         private static readonly Option<string> _optionProjectPath = new("--project-path", () => Directory.GetCurrentDirectory(), "Path to the project to deploy.");
@@ -156,12 +152,22 @@ namespace AWS.Deploy.CLI.Commands
 
             lock(s_root_command_lock)
             {
+                rootCommand.AddOption(_optionVersion);
                 rootCommand.Add(BuildDeployCommand());
                 rootCommand.Add(BuildListCommand());
                 rootCommand.Add(BuildDeleteCommand());
                 rootCommand.Add(BuildDeploymentProjectCommand());
                 rootCommand.Add(BuildServerModeCommand());
             }
+
+            rootCommand.Handler = CommandHandler.Create((bool version) =>
+            {
+                if (version)
+                {
+                    var toolVersion = App.GetToolVersion();
+                    _toolInteractiveService.WriteLine($"Version: {toolVersion}");
+                }
+            });
 
             return rootCommand;
         }
