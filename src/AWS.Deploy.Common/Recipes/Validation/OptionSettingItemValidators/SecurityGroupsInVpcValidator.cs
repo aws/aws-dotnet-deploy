@@ -55,7 +55,11 @@ namespace AWS.Deploy.Common.Recipes.Validation
 
                 if (shouldUseDefaultVpc)
                 {
-                    vpcId = (await _awsResourceQueryer.GetDefaultVpc())?.VpcId;
+                    var vpc = await _awsResourceQueryer.GetDefaultVpc();
+                    if (vpc != null)
+                    {
+                        vpcId = vpc.VpcId;
+                    }
                 }
             }
 
