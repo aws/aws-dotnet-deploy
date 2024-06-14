@@ -21,7 +21,7 @@
 ** AWSSDK.ElasticLoadBalancingV2; version 3.7.302.33 -- https://www.nuget.org/packages/AWSSDK.ElasticLoadBalancingV2/
 ** AWSSDK.Core; version 3.7.303.20 -- https://www.nuget.org/packages/AWSSDK.Core
 ** AWSSDK.CloudWatchLogs; version 3.7.305.18 -- https://www.nuget.org/packages/AWSSDK.CloudWatchLogs
-** Amazon.CDK.Lib; version 2.131.0 -- https://www.nuget.org/packages/Amazon.CDK.Lib/
+** Amazon.CDK.Lib; version 2.146.0 -- https://www.nuget.org/packages/Amazon.CDK.Lib/
  
 Apache License
 Version 2.0, January 2004
