@@ -13,7 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Amazon.CDK.Lib" Version="2.131.0" />
+    <PackageReference Include="Amazon.CDK.Lib" Version="2.146.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
   </ItemGroup>
 
