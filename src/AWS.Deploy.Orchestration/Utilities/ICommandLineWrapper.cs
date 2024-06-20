@@ -34,17 +34,19 @@ namespace AWS.Deploy.Orchestration.Utilities
         /// By default, <see cref="Process.StandardInput"/>, <see cref="Process.StandardOutput"/> and <see cref="Process.StandardError"/> will be redirected.
         /// Set this to false to avoid redirection.
         /// </param>
+        /// <param name="stdin">
+        /// Text to pass into the process through standard input.
+        /// </param>
         /// <param name="environmentVariables">
-        /// <see cref="command"/> is executed as a child process of running process which inherits the parent process's environment variables.
-        /// <see cref="environmentVariables"/> allows to add (replace if exists) extra environment variables to the child process.
+        /// <paramref name="command"/> is executed as a child process of running process which inherits the parent process's environment variables.
+        /// <paramref name="environmentVariables"/> allows to add (replace if exists) extra environment variables to the child process.
         /// <remarks>
         /// AWS Execution Environment string to append in AWS_EXECUTION_ENV env var.
-        /// AWS SDK calls made while executing <see cref="command"/> will have User-Agent string containing
+        /// AWS SDK calls made while executing <paramref name="command"/> will have User-Agent string containing
         /// </remarks>
         /// </param>
-        /// <param name="cancelToken">
-        /// <see cref="CancellationToken"/>
-        /// </param>
+        /// <param name="needAwsCredentials">Whether the command requires AWS credentials, which will be set as environment variables</param>
+        /// <param name="cancellationToken">Token which can be used to cancel the task</param>
         public Task Run(
             string command,
             string workingDirectory = "",
@@ -53,8 +55,9 @@ namespace AWS.Deploy.Orchestration.Utilities
             bool redirectIO = true,
             string? stdin = null,
             IDictionary<string, string>? environmentVariables = null,
-            CancellationToken cancelToken = default,
-            bool needAwsCredentials = false);
+            bool needAwsCredentials = false,
+            CancellationToken cancellationToken = default
+            );
 
         /// <summary>
         /// Configure the child process that executes the command passed as parameter in <see cref="Run"/> method.
@@ -92,16 +95,15 @@ namespace AWS.Deploy.Orchestration.Utilities
         /// Text to pass into the process through standard input.
         /// </param>
         /// <param name="environmentVariables">
-        /// <see cref="command"/> is executed as a child process of running process which inherits the parent process's environment variables.
-        /// <see cref="environmentVariables"/> allows to add (replace if exists) extra environment variables to the child process.
+        /// <paramref name="command"/> is executed as a child process of running process which inherits the parent process's environment variables.
+        /// <paramref name="environmentVariables"/> allows to add (replace if exists) extra environment variables to the child process.
         /// <remarks>
         /// AWS Execution Environment string to append in AWS_EXECUTION_ENV env var.
-        /// AWS SDK calls made while executing <see cref="command"/> will have User-Agent string containing
+        /// AWS SDK calls made while executing <paramref name="command"/> will have User-Agent string containing
         /// </remarks>
         /// </param>
-        /// <param name="cancelToken">
-        /// <see cref="CancellationToken"/>
-        /// </param>
+        /// <param name="needAwsCredentials">Whether the command requires AWS credentials, which will be set as environment variables</param>
+        /// <param name="cancellationToken">Token which can be used to cancel the task</param>
         public static async Task<TryRunResult> TryRunWithResult(
             this ICommandLineWrapper commandLineWrapper,
             string command,
@@ -110,8 +112,8 @@ namespace AWS.Deploy.Orchestration.Utilities
             bool redirectIO = true,
             string? stdin = null,
             IDictionary<string, string>? environmentVariables = null,
-            CancellationToken cancelToken = default,
-            bool needAwsCredentials = false)
+            bool needAwsCredentials = false,
+            CancellationToken cancellationToken = default)
         {
             var result = new TryRunResult();
 
@@ -123,8 +125,8 @@ namespace AWS.Deploy.Orchestration.Utilities
                 redirectIO: redirectIO,
                 stdin: stdin,
                 environmentVariables: environmentVariables,
-                cancelToken: cancelToken,
-                needAwsCredentials: needAwsCredentials);
+                needAwsCredentials: needAwsCredentials,
+                cancellationToken: cancellationToken);
 
             return result;
         }

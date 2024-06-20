@@ -8,10 +8,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using AWS.Deploy.Orchestration.Utilities;
 
-namespace AWS.Deploy.CLI.UnitTests.Utilities
+namespace AWS.Deploy.CLI.Common.UnitTests.Utilities
 {
     /// <summary>
-    /// The container that represents a command to be executed by <see cref="TestToolCommandLineWrapper.Run(string, string, bool, Action{TryRunResult}, CancellationToken)"/>
+    /// The container that represents a command to be executed by <see cref="TestCommandLineWrapper.Run(string, string, bool, Action{TryRunResult}, CancellationToken)"/>
     /// </summary>
     public class CommandLineRunObject
     {
@@ -48,12 +48,14 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
         /// <summary>
         /// The cancellation token for the async task.
         /// </summary>
-        public CancellationToken CancelToken { get; set; }
+        public CancellationToken CancellationToken { get; set; }
     }
 
-    public class TestToolCommandLineWrapper : ICommandLineWrapper
+    public class TestCommandLineWrapper : ICommandLineWrapper
     {
-        public List<CommandLineRunObject> CommandsToExecute = new List<CommandLineRunObject>();
+        public List<CommandLineRunObject> CommandsToExecute = new();
+
+        public Dictionary<string, TryRunResult> MockedResults = new();
 
         public Task Run(
             string command,
@@ -63,8 +65,8 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
             bool redirectIO = true,
             string stdin = null,
             IDictionary<string, string> environmentVariables = null,
-            CancellationToken cancelToken = default,
-            bool needAwsCredentials = false)
+            bool needAwsCredentials = false,
+            CancellationToken cancellationToken = default)
         {
             CommandsToExecute.Add(new CommandLineRunObject
             {
@@ -74,8 +76,14 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
                 OnCompleteAction = onComplete,
                 RedirectIO = redirectIO,
                 Stdin = stdin,
-                CancelToken = cancelToken
+                CancellationToken = cancellationToken
             });
+
+
+            if (onComplete != null && MockedResults.ContainsKey(command))
+            {
+                onComplete(MockedResults[command]);
+            }
 
             return Task.CompletedTask;
         }
