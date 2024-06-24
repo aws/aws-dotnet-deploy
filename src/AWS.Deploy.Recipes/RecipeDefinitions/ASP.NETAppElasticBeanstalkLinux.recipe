@@ -306,7 +306,7 @@
             "Id": "LoadBalancerScheme",
             "Name": "Load Balancer Scheme",
             "Category": "LoadBalancer",
-            "Description": "Specify \"Internal\" if your application serves requests only from connected VPCs. Public load balancers serve requests from the Internet.",
+            "Description": "Specify \"Internal\" if your application serves requests only from connected VPCs. \"Public\" load balancers serve requests from the Internet.",
             "Type": "String",
             "DefaultValue": "public",
             "AllowedValues": [
