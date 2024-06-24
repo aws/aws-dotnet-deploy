@@ -37,6 +37,10 @@
     * ID: LoadBalancerType
     * Description: The type of load balancer for your environment.
     * Type: String
+* **Load Balancer Scheme**
+    * ID: LoadBalancerScheme
+    * Description: Specify "Internal" if your application serves requests only from connected VPCs. "Public" load balancers serve requests from the Internet.
+    * Type: String
 * **Application IAM Role**
     * ID: ApplicationIAMRole
     * Description: The Identity and Access Management (IAM) role that provides AWS credentials to the application to access AWS services.
