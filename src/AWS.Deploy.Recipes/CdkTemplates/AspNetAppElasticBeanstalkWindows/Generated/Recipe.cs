@@ -31,6 +31,7 @@ namespace AspNetAppElasticBeanstalkWindows
         public const string ENVIRONMENTTYPE_LOADBALANCED = "LoadBalanced";
 
         public const string LOADBALANCERTYPE_APPLICATION = "application";
+        public const string LOADBALANCERSCHEME_PUBLIC = "public";
 
         public const string REVERSEPROXY_NGINX = "nginx";
         
@@ -257,6 +258,13 @@ namespace AspNetAppElasticBeanstalkWindows
                         Value = settings.LoadBalancerType
                     }
                 );
+
+                optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
+                {
+                    Namespace = "aws:ec2:vpc",
+                    OptionName = "ELBScheme",
+                    Value = settings.LoadBalancerScheme
+                });
 
                 if (!string.IsNullOrEmpty(settings.HealthCheckURL))
                 {
