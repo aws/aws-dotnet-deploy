@@ -54,6 +54,11 @@ namespace AspNetAppElasticBeanstalkWindows.Configurations
         public string LoadBalancerType { get; set; } = Recipe.LOADBALANCERTYPE_APPLICATION;
 
         /// <summary>
+        /// Whether the load balancer is visibile to the public internet ("public") or only to the connected VPC ("internal").
+        /// </summary>
+        public string LoadBalancerScheme { get; set; } = Recipe.LOADBALANCERSCHEME_PUBLIC;
+
+        /// <summary>
         /// The EC2 Key Pair used for the Beanstalk Application.
         /// </summary>
         public string EC2KeyPair { get; set; }
@@ -135,7 +140,8 @@ namespace AspNetAppElasticBeanstalkWindows.Configurations
             string environmentType = Recipe.ENVIRONMENTTYPE_SINGLEINSTANCE,
             string loadBalancerType = Recipe.LOADBALANCERTYPE_APPLICATION,
             bool xrayTracingSupportEnabled = false,
-            string enhancedHealthReporting = Recipe.ENHANCED_HEALTH_REPORTING)
+            string enhancedHealthReporting = Recipe.ENHANCED_HEALTH_REPORTING,
+            string loadBalancerScheme = Recipe.LOADBALANCERSCHEME_PUBLIC)
         {
             ApplicationIAMRole = applicationIAMRole;
             ServiceIAMRole = serviceIAMRole;
@@ -150,6 +156,7 @@ namespace AspNetAppElasticBeanstalkWindows.Configurations
             VPC = vpc;
             EnvironmentType = environmentType;
             LoadBalancerType = loadBalancerType;
+            LoadBalancerScheme = loadBalancerScheme;
             XRayTracingSupportEnabled = xrayTracingSupportEnabled;
             EnhancedHealthReporting = enhancedHealthReporting;
             HealthCheckURL = healthCheckURL;
