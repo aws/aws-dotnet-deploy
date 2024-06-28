@@ -14,6 +14,13 @@ namespace AWS.Deploy.Orchestration
 {
     public interface ISystemCapabilityEvaluator
     {
+        /// <summary>
+        /// Clears the cache of successful capability checks, to ensure
+        /// that next time <see cref="EvaluateSystemCapabilities(Recommendation)"/>
+        /// is called they will be evaluated again.
+        /// </summary>
+        void ClearCachedCapabilityChecks();
+
         Task<List<SystemCapability>> EvaluateSystemCapabilities(Recommendation selectedRecommendation);
     }
 
@@ -42,19 +49,22 @@ namespace AWS.Deploy.Orchestration
         /// If we ran a successful Node evaluation, this is the timestamp until which that result
         /// is valid and we will skip subsequent evaluations
         /// </summary>
-        private DateTime? _nodeDependencyValidUntilUtc = null;
+        private DateTime _nodeDependencyValidUntilUtc = DateTime.MinValue;
 
         /// <summary>
         /// If we ran a successful Docker evaluation, this is the timestamp until which that result
         /// is valid and we will skip subsequent evaluations
         /// </summary>
-        private DateTime? _dockerDependencyValidUntilUtc = null;
+        private DateTime _dockerDependencyValidUntilUtc = DateTime.MinValue;
 
         public SystemCapabilityEvaluator(ICommandLineWrapper commandLineWrapper)
         {
             _commandLineWrapper = commandLineWrapper;
         }
 
+        /// <summary>
+        /// Attempt to determine whether Docker is running and its current OS type
+        /// </summary>
         private async Task<DockerInfo> HasDockerInstalledAndRunningAsync()
         {
             var processExitCode = -1;
@@ -92,8 +102,7 @@ namespace AWS.Deploy.Orchestration
         }
 
         /// <summary>
-        /// From https://docs.aws.amazon.com/cdk/latest/guide/work-with.html#work-with-prerequisites,
-        /// min version is 10.3
+        /// Attempt to determine the installed Node.js version
         /// </summary>
         private async Task<NodeInfo> GetNodeJsVersionAsync()
         {
@@ -135,7 +144,7 @@ namespace AWS.Deploy.Orchestration
             if (selectedRecommendation.Recipe.DeploymentType == DeploymentTypes.CdkProject)
             {
                 // If we haven't cached that NodeJS installation is valid, or the cache is expired
-                if (_nodeDependencyValidUntilUtc == null || DateTime.UtcNow >= _nodeDependencyValidUntilUtc)
+                if (DateTime.UtcNow >= _nodeDependencyValidUntilUtc)
                 {
                     var nodeInfo = await GetNodeJsVersionAsync();
 
@@ -161,7 +170,7 @@ namespace AWS.Deploy.Orchestration
             // We only need to check that Docker is installed if the user is deploying a recipe that uses Docker
             if (selectedRecommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.Container)
             {
-                if (_dockerDependencyValidUntilUtc == null || DateTime.UtcNow >= _dockerDependencyValidUntilUtc)
+                if (DateTime.UtcNow >= _dockerDependencyValidUntilUtc)
                 {
                     var dockerInfo = await HasDockerInstalledAndRunningAsync();
 
@@ -183,6 +192,12 @@ namespace AWS.Deploy.Orchestration
             }
 
             return missingCapabilitiesForRecipe;
+        }
+
+        public void ClearCachedCapabilityChecks()
+        {
+            _nodeDependencyValidUntilUtc = DateTime.MinValue;
+            _dockerDependencyValidUntilUtc = DateTime.MinValue;
         }
     }
 }
