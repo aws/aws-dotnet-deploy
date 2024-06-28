@@ -582,6 +582,10 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             if (capabilities.Any())
                 return Problem($"Unable to start deployment due to missing system capabilities.{Environment.NewLine}{missingCapabilitiesMessage}", statusCode: Microsoft.AspNetCore.Http.StatusCodes.Status424FailedDependency);
 
+            // Because we're starting a deployment, clear the cached system capabilities checks
+            // in case the deployment fails and the user reruns it after modifying Docker or Node 
+            systemCapabilityEvaluator.ClearCachedCapabilityChecks();
+
             var task = new DeployRecommendationTask(orchestratorSession, orchestrator, state.ApplicationDetails, state.SelectedRecommendation);
             state.DeploymentTask = task.Execute();
 
