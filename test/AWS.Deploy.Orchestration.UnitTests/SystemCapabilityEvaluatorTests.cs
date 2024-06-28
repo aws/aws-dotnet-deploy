@@ -137,6 +137,13 @@ namespace AWS.Deploy.Orchestration.UnitTests
         [Fact]
         public async Task ContainerOnlyRecipe_DockerInWindowsMode_NoCache()
         {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // Docker only supports Windows vs. Linux mode when running on Windows, so
+                // this test isn't valid on other OSes since we always assume "linux"
+                return;
+            }
+
             var commandLineWrapper = new TestCommandLineWrapper();
             commandLineWrapper.MockedResults.Add(_expectedNodeCommand, new TryRunResult { ExitCode = 0, StandardOut = "v18.16.1" });
             commandLineWrapper.MockedResults.Add(_expectedDockerCommand, new TryRunResult { ExitCode = 0, StandardOut = "windows" });
