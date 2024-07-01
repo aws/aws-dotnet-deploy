@@ -587,6 +587,12 @@
                     "description": "If the setting is false the setting can not be changed during redeployment.",
                     "minLength": 1
                 },
+                "VisibleOnRedeployment": {
+                    "type": "boolean",
+                    "title": "VisibleOnRedeployment",
+                    "description": "If the value is true, the setting will be displayed during a redeployment. This only applies to server-mode clients.",
+                    "minLength": 1
+                },
                 "DependsOn": {
                     "type": "array",
                     "title": "",

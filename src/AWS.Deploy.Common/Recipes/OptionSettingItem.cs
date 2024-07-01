@@ -125,6 +125,11 @@ namespace AWS.Deploy.Common.Recipes
         public bool Updatable { get; set; }
 
         /// <summary>
+        /// If the value is true, the setting will be displayed during a redeployment. This only applies to server-mode clients.
+        /// </summary>
+        public bool VisibleOnRedeployment { get; set; }
+
+        /// <summary>
         /// List of all validators that should be run when configuring this OptionSettingItem.
         /// </summary>
         public List<OptionSettingItemValidatorConfig> Validators { get; set; } = new ();
