@@ -191,6 +191,88 @@ namespace AWS.Deploy.CLI.IntegrationTests
         }
 
         [Fact]
+        public async Task AppRunnerRedeployment_VisibleOnRedeploymentSettings()
+        {
+            _stackName = $"ServerModeAppRunner{Guid.NewGuid().ToString().Split('-').Last()}";
+
+            var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
+            var portNumber = 4950;
+            using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ServerModeUtilities.ResolveDefaultCredentials);
+
+            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
+            var cancelSource = new CancellationTokenSource();
+
+            var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
+            try
+            {
+                var baseUrl = $"http://localhost:{portNumber}/";
+                var restClient = new RestAPIClient(baseUrl, httpClient);
+
+                await restClient.WaitUntilServerModeReady();
+
+                var startSessionOutput = await restClient.StartDeploymentSessionAsync(new StartDeploymentSessionInput
+                {
+                    AwsRegion = _awsRegion,
+                    ProjectPath = projectPath
+                });
+
+                var sessionId = startSessionOutput.SessionId;
+                Assert.NotNull(sessionId);
+
+                var signalRClient = new DeploymentCommunicationClient(baseUrl);
+                await signalRClient.JoinSession(sessionId);
+
+                var logOutput = new StringBuilder();
+                RegisterSignalRMessageCallbacks(signalRClient, logOutput);
+
+                var getRecommendationOutput = await restClient.GetRecommendationsAsync(sessionId);
+                Assert.NotEmpty(getRecommendationOutput.Recommendations);
+
+                var appRunnerRecommendation = getRecommendationOutput.Recommendations.FirstOrDefault(x => string.Equals(x.RecipeId, "AspNetAppAppRunner"));
+                Assert.NotNull(appRunnerRecommendation);
+
+                await restClient.SetDeploymentTargetAsync(sessionId, new SetDeploymentTargetInput
+                {
+                    NewDeploymentName = _stackName,
+                    NewDeploymentRecipeId = appRunnerRecommendation.RecipeId
+                });
+
+                await restClient.StartDeploymentAsync(sessionId);
+
+                await restClient.WaitForDeployment(sessionId);
+
+                var stackStatus = await _cloudFormationHelper.GetStackStatus(_stackName);
+                Assert.Equal(StackStatus.CREATE_COMPLETE, stackStatus);
+
+                Assert.True(logOutput.Length > 0);
+
+                var redeploymentSessionOutput = await restClient.StartDeploymentSessionAsync(new StartDeploymentSessionInput
+                {
+                    AwsRegion = _awsRegion,
+                    ProjectPath = projectPath
+                });
+
+                var redeploymentSessionId = redeploymentSessionOutput.SessionId;
+
+                await restClient.SetDeploymentTargetAsync(redeploymentSessionId, new SetDeploymentTargetInput
+                {
+                    ExistingDeploymentId = await _cloudFormationHelper.GetStackArn(_stackName)
+                });
+
+                var settings = await restClient.GetConfigSettingsAsync(redeploymentSessionId);
+
+                Assert.True(settings.OptionSettings.First(x => x.Id.Equals("ServiceName")).Visible);
+                Assert.False(settings.OptionSettings.First(x => x.Id.Equals("EncryptionKmsKey")).Visible);
+            }
+            finally
+            {
+                cancelSource.Cancel();
+                await _cloudFormationHelper.DeleteStack(_stackName);
+                _stackName = null;
+            }
+        }
+
+        [Fact]
         public async Task WebFargateDeploymentNoConfigChanges()
         {
             _stackName = $"ServerModeWebFargate{Guid.NewGuid().ToString().Split('-').Last()}";

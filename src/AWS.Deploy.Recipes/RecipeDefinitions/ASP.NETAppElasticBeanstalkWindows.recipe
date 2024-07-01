@@ -137,6 +137,7 @@
             "TypeHint": "BeanstalkApplication",
             "AdvancedSetting": false,
             "Updatable": false,
+            "VisibleOnRedeployment": true,
             "ChildOptionSettings": [
                 {
                     "Id": "CreateNew",
@@ -155,6 +156,7 @@
                     "DefaultValue": "{StackName}",
                     "AdvancedSetting": false,
                     "Updatable": false,
+                    "VisibleOnRedeployment": true,
                     "DependsOn": [
                         {
                             "Id": "BeanstalkApplication.CreateNew",
@@ -187,6 +189,7 @@
                     "DefaultValue": "{StackName}",
                     "AdvancedSetting": false,
                     "Updatable": false,
+                    "VisibleOnRedeployment": true,
                     "DependsOn": [
                         {
                             "Id": "BeanstalkApplication.CreateNew",
@@ -216,6 +219,7 @@
             "DefaultValue": "{StackName}-dev",
             "AdvancedSetting": false,
             "Updatable": false,
+            "VisibleOnRedeployment": true,
             "Validators": [
                 {
                     "ValidatorType": "Regex",
