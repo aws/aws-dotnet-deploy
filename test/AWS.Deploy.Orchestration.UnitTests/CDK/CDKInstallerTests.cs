@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
+using AWS.Deploy.CLI.Common.UnitTests.Utilities;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Orchestration.CDK;
 using AWS.Deploy.Orchestration.Utilities;
@@ -28,7 +29,7 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
         public async Task GetVersion_OutputContainsVersionOnly()
         {
             // Arrange: add empty version information to return
-            _commandLineWrapper.Results.Add(new TryRunResult
+            _commandLineWrapper.MockedResults.Add("npx --no-install cdk --version", new TryRunResult
             {
                 StandardOut = @"1.127.0 (build 0ea309a)"
             });
@@ -39,14 +40,17 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
             // Assert
             Assert.True(version.Success);
             Assert.Equal(0, Version.Parse("1.127.0").CompareTo(version.Result));
-            Assert.Contains(("npx --no-install cdk --version", _workingDirectory, false), _commandLineWrapper.Commands);
+            Assert.Contains(_commandLineWrapper.CommandsToExecute, command =>
+                command.Command == "npx --no-install cdk --version" &&
+                command.WorkingDirectory == _workingDirectory &&
+                command.StreamOutputToInteractiveService == false);
         }
 
         [Fact]
         public async Task GetVersion_OutputContainsMessage()
         {
             // Arrange: add fake version information to return
-            _commandLineWrapper.Results.Add(new TryRunResult
+            _commandLineWrapper.MockedResults.Add("npx --no-install cdk --version", new TryRunResult
             {
                 StandardOut =
 @"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -69,7 +73,10 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
             // Assert
             Assert.True(version.Success);
             Assert.Equal(0, Version.Parse("1.127.0").CompareTo(version.Result));
-            Assert.Contains(("npx --no-install cdk --version", _workingDirectory, false), _commandLineWrapper.Commands);
+            Assert.Contains(_commandLineWrapper.CommandsToExecute, command =>
+                command.Command == "npx --no-install cdk --version" &&
+                command.WorkingDirectory == _workingDirectory &&
+                command.StreamOutputToInteractiveService == false);
         }
 
         [Fact]
@@ -79,7 +86,10 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
             await _cdkInstaller.Install(_workingDirectory, Version.Parse("1.0.2"));
 
             // Assert
-            Assert.Contains(("npm install aws-cdk@1.0.2", _workingDirectory, false), _commandLineWrapper.Commands);
+            Assert.Contains(_commandLineWrapper.CommandsToExecute, command =>
+                command.Command == "npm install aws-cdk@1.0.2" &&
+                command.WorkingDirectory == _workingDirectory &&
+                command.StreamOutputToInteractiveService == false);
         }
     }
 }

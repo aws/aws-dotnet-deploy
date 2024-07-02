@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Amazon.Runtime;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
+using AWS.Deploy.CLI.Common.UnitTests.Utilities;
 using AWS.Deploy.CLI.UnitTests.Utilities;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.DeploymentManifest;
@@ -27,7 +28,7 @@ namespace AWS.Deploy.CLI.UnitTests
     public class DeploymentBundleHandlerTests
     {
         private readonly DeploymentBundleHandler _deploymentBundleHandler;
-        private readonly TestToolCommandLineWrapper _commandLineWrapper;
+        private readonly TestCommandLineWrapper _commandLineWrapper;
         private readonly TestDirectoryManager _directoryManager;
         private readonly ProjectDefinitionParser _projectDefinitionParser;
         private readonly RecipeDefinition _recipeDefinition;
@@ -43,7 +44,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var zipFileManager = new TestZipFileManager();
             var serviceProvider = new Mock<IServiceProvider>().Object;
 
-            _commandLineWrapper = new TestToolCommandLineWrapper();
+            _commandLineWrapper = new TestCommandLineWrapper();
             _fileManager = new TestFileManager();
             _directoryManager = new TestDirectoryManager();
             var recipeFiles = Directory.GetFiles(RecipeLocator.FindRecipeDefinitionsPath(), "*.recipe", SearchOption.TopDirectoryOnly);

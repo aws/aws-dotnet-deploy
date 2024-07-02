@@ -2,23 +2,19 @@ using System;
 
 namespace AWS.Deploy.Orchestration
 {
-    public class SystemCapabilities
-    {
-        public Version? NodeJsVersion { get; set; }
-        public DockerInfo DockerInfo { get; set; }
-
-        public SystemCapabilities(
-            Version? nodeJsVersion,
-            DockerInfo dockerInfo)
-        {
-            NodeJsVersion = nodeJsVersion;
-            DockerInfo = dockerInfo;
-        }
-    }
-
+    /// <summary>
+    /// Information about the user's Docker installation
+    /// </summary>
     public class DockerInfo
     {
+        /// <summary>
+        /// Whether or not Docker is installed
+        /// </summary>
         public bool DockerInstalled { get; set; }
+
+        /// <summary>
+        /// Docker's current OSType, expected to be "windows" or "linux"
+        /// </summary>
         public string DockerContainerType { get; set; }
 
         public DockerInfo(
@@ -28,6 +24,19 @@ namespace AWS.Deploy.Orchestration
             DockerInstalled = dockerInstalled;
             DockerContainerType = dockerContainerType.Trim();
         }
+    }
+
+    /// <summary>
+    /// Information about the user's NodeJS installation
+    /// </summary>
+    public class NodeInfo
+    {
+        /// <summary>
+        /// Version of Node if it's installed, else null if not detected
+        /// </summary>
+        public Version? NodeJsVersion { get; set; }
+
+        public NodeInfo(Version? version) => NodeJsVersion = version;
     }
 
     public class SystemCapability

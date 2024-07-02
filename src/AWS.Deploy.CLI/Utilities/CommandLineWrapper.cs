@@ -45,8 +45,8 @@ namespace AWS.Deploy.CLI.Utilities
             bool redirectIO = true,
             string? stdin = null,
             IDictionary<string, string>? environmentVariables = null,
-            CancellationToken cancelToken = default,
-            bool needAwsCredentials = false)
+            bool needAwsCredentials = false,
+            CancellationToken cancellationToken = default)
         {
             StringBuilder strOutput = new StringBuilder();
             StringBuilder strError = new StringBuilder();
@@ -116,7 +116,7 @@ namespace AWS.Deploy.CLI.Utilities
                 process.StandardInput.Close();
             }
 
-            await process.WaitForExitAsync();
+            await process.WaitForExitAsync(cancellationToken);
 
             if (onComplete != null)
             {
