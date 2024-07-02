@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AWS.Deploy.CLI.ServerMode.Services;
 using AWS.Deploy.Common;
+using AWS.Deploy.Orchestration;
 
 namespace AWS.Deploy.CLI.ServerMode
 {
@@ -29,6 +30,8 @@ namespace AWS.Deploy.CLI.ServerMode
         public CloudApplication ApplicationDetails { get; } = new CloudApplication(string.Empty, string.Empty, CloudApplicationResourceType.None, string.Empty);
 
         public SessionAWSResourceQuery? AWSResourceQueryService { get; set; }
+
+        public SystemCapabilityEvaluator? SystemCapabilityEvaluator { get; set; }
 
         public Task? DeploymentTask { get; set; }
 
