@@ -699,6 +699,15 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 services.AddSingleton<IAWSResourceQueryer>(state.AWSResourceQueryService);
             }
 
+            if (state.SystemCapabilityEvaluator == null)
+            {
+                services.AddSingleton<ISystemCapabilityEvaluator, SystemCapabilityEvaluator>();
+            }
+            else
+            {
+                services.AddSingleton<ISystemCapabilityEvaluator>(state.SystemCapabilityEvaluator);
+            }
+
             services.AddCustomServices();
             var serviceProvider = services.BuildServiceProvider();
 
@@ -710,9 +719,11 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 awsOptions.Region = RegionEndpoint.GetBySystemName(state.AWSRegion);
             });
 
-            // Cache the SessionAWSResourceQuery with the session state so it can be reused in future
-            // ServerMode API calls with the same session id.
+            // Cache the SessionAWSResourceQuery and SystemCapabilityEvaluator with the session state
+            // so they can be reused in future ServerMode API calls with the same session id. This avoids reloading
+            // existing resources from AWS and running the Docker/Node checks when they're not expected to change.
             state.AWSResourceQueryService = serviceProvider.GetRequiredService<IAWSResourceQueryer>() as SessionAWSResourceQuery;
+            state.SystemCapabilityEvaluator = serviceProvider.GetRequiredService<ISystemCapabilityEvaluator>() as SystemCapabilityEvaluator;
 
             return serviceProvider;
         }
