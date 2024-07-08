@@ -73,7 +73,7 @@ namespace AWS.Deploy.CLI
             Environment.SetEnvironmentVariable(envName, envValue.ToString());
         }
 
-        private static string GetToolVersion()
+        internal static string GetToolVersion()
         {
             var assembly = typeof(App).GetTypeInfo().Assembly;
             var version = assembly.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version;

@@ -74,16 +74,17 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             Guid.NewGuid().ToString()
             );
 
-            var serviceProvider = CreateSessionServiceProvider(output.SessionId, input.AWSRegion);
-            var awsResourceQueryer = serviceProvider.GetRequiredService<IAWSResourceQueryer>();
-
             var state = new SessionState(
                 output.SessionId,
                 input.ProjectPath,
                 input.AWSRegion,
-                (await awsResourceQueryer.GetCallerIdentity(input.AWSRegion)).Account,
                 await _projectParserUtility.Parse(input.ProjectPath)
                 );
+
+            var serviceProvider = CreateSessionServiceProvider(state);
+            var awsResourceQueryer = serviceProvider.GetRequiredService<IAWSResourceQueryer>();
+
+            state.AWSAccountId = (await awsResourceQueryer.GetCallerIdentity(input.AWSRegion)).Account;
 
             _stateServer.Save(output.SessionId, state);
 
@@ -581,6 +582,10 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             if (capabilities.Any())
                 return Problem($"Unable to start deployment due to missing system capabilities.{Environment.NewLine}{missingCapabilitiesMessage}", statusCode: Microsoft.AspNetCore.Http.StatusCodes.Status424FailedDependency);
 
+            // Because we're starting a deployment, clear the cached system capabilities checks
+            // in case the deployment fails and the user reruns it after modifying Docker or Node 
+            systemCapabilityEvaluator.ClearCachedCapabilityChecks();
+
             var task = new DeployRecommendationTask(orchestratorSession, orchestrator, state.ApplicationDetails, state.SelectedRecommendation);
             state.DeploymentTask = task.Execute();
 
@@ -669,26 +674,39 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
         private IServiceProvider CreateSessionServiceProvider(SessionState state)
         {
-            return CreateSessionServiceProvider(state.SessionId, state.AWSRegion);
-        }
-
-        private IServiceProvider CreateSessionServiceProvider(string sessionId, string awsRegion)
-        {
             var awsCredentials = HttpContext.User.ToAWSCredentials();
             if(awsCredentials == null)
             {
                 throw new FailedToRetrieveAWSCredentialsException("AWS credentials are missing for the current session.");
             }
 
-            var interactiveServices = new SessionOrchestratorInteractiveService(sessionId, _hubContext);
+            var interactiveServices = new SessionOrchestratorInteractiveService(state.SessionId, _hubContext);
             var services = new ServiceCollection();
             services.AddSingleton<IOrchestratorInteractiveService>(interactiveServices);
             services.AddSingleton<ICommandLineWrapper>(services =>
             {
                 var wrapper = new CommandLineWrapper(interactiveServices, true);
-                wrapper.RegisterAWSContext(awsCredentials, awsRegion);
+                wrapper.RegisterAWSContext(awsCredentials, state.AWSRegion);
                 return wrapper;
             });
+
+            if (state.AWSResourceQueryService == null)
+            {
+                services.AddSingleton<IAWSResourceQueryer, SessionAWSResourceQuery>();
+            }
+            else
+            {
+                services.AddSingleton<IAWSResourceQueryer>(state.AWSResourceQueryService);
+            }
+
+            if (state.SystemCapabilityEvaluator == null)
+            {
+                services.AddSingleton<ISystemCapabilityEvaluator, SystemCapabilityEvaluator>();
+            }
+            else
+            {
+                services.AddSingleton<ISystemCapabilityEvaluator>(state.SystemCapabilityEvaluator);
+            }
 
             services.AddCustomServices();
             var serviceProvider = services.BuildServiceProvider();
@@ -698,8 +716,14 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
             awsClientFactory.ConfigureAWSOptions(awsOptions =>
             {
                 awsOptions.Credentials = awsCredentials;
-                awsOptions.Region = RegionEndpoint.GetBySystemName(awsRegion);
+                awsOptions.Region = RegionEndpoint.GetBySystemName(state.AWSRegion);
             });
+
+            // Cache the SessionAWSResourceQuery and SystemCapabilityEvaluator with the session state
+            // so they can be reused in future ServerMode API calls with the same session id. This avoids reloading
+            // existing resources from AWS and running the Docker/Node checks when they're not expected to change.
+            state.AWSResourceQueryService = serviceProvider.GetRequiredService<IAWSResourceQueryer>() as SessionAWSResourceQuery;
+            state.SystemCapabilityEvaluator = serviceProvider.GetRequiredService<ISystemCapabilityEvaluator>() as SystemCapabilityEvaluator;
 
             return serviceProvider;
         }

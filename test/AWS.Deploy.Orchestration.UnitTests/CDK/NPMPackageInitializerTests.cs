@@ -4,8 +4,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using AWS.Deploy.CLI;
-using AWS.Deploy.CLI.Common.UnitTests.IO;
+using AWS.Deploy.CLI.Common.UnitTests.Utilities;
 using AWS.Deploy.Orchestration.CDK;
 using Moq;
 using Xunit;
@@ -86,7 +85,10 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
             // Assert: verify initialized package.json
             var actualPackageJsonContent = await _fileManager.ReadAllTextAsync(Path.Combine(_workingDirectory, _packageJsonFileName));
             Assert.Equal(_packageJsonContent, actualPackageJsonContent);
-            Assert.Contains(("npm install", _workingDirectory, false), _testCommandLineWrapper.Commands);
+            Assert.Contains(_testCommandLineWrapper.CommandsToExecute, command =>
+                command.Command == "npm install" &&
+                command.WorkingDirectory == _workingDirectory &&
+                command.StreamOutputToInteractiveService == false);
             Assert.True(_directoryManager.Exists(_workingDirectory));
         }
     }

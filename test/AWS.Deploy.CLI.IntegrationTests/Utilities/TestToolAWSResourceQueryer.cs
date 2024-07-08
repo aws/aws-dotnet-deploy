@@ -31,7 +31,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.Utilities
         }
 
         public Task<string> CreateEC2KeyPair(string keyName, string saveLocation) => throw new NotImplementedException();
-        public Task<Repository> CreateECRRepository(string repositoryName) => throw new NotImplementedException();
+        public Task<Repository> CreateECRRepository(string repositoryName, string recipeId) => throw new NotImplementedException();
         public Task<List<StackResource>> DescribeCloudFormationResources(string stackName) => throw new NotImplementedException();
         public Task<DescribeRuleResponse> DescribeCloudWatchRule(string ruleName) => throw new NotImplementedException();
         public Task<EnvironmentDescription> DescribeElasticBeanstalkEnvironment(string environmentId) => throw new NotImplementedException();

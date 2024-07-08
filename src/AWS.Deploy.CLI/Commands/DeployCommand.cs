@@ -128,6 +128,10 @@ namespace AWS.Deploy.CLI.Commands
                 return;
             }
 
+            // Because we're starting a deployment, clear the cached system capabilities checks
+            // in case the deployment fails and the user reruns it after modifying Docker or Node 
+            _systemCapabilityEvaluator.ClearCachedCapabilityChecks();
+
             await CreateDeploymentBundle(orchestrator, selectedRecommendation, cloudApplication);
 
             if (saveSettingsConfig.SettingsType != SaveSettingsType.None)
@@ -282,14 +286,14 @@ namespace AWS.Deploy.CLI.Commands
         /// <param name="selectedRecommendation">The selected recommendation settings used for deployment.<see cref="Recommendation"/></param>
         public async Task EvaluateSystemCapabilities(Recommendation selectedRecommendation)
         {
-            var systemCapabilities = await _systemCapabilityEvaluator.EvaluateSystemCapabilities(selectedRecommendation);
+            var missingSystemCapabilities = await _systemCapabilityEvaluator.EvaluateSystemCapabilities(selectedRecommendation);
             var missingCapabilitiesMessage = "";
-            foreach (var capability in systemCapabilities)
+            foreach (var capability in missingSystemCapabilities)
             {
                 missingCapabilitiesMessage = $"{missingCapabilitiesMessage}{Environment.NewLine}{capability.GetMessage()}{Environment.NewLine}";
             }
 
-            if (systemCapabilities.Any())
+            if (missingSystemCapabilities.Any())
                 throw new MissingSystemCapabilityException(DeployToolErrorCode.MissingSystemCapabilities, missingCapabilitiesMessage);
         }
 

@@ -107,7 +107,7 @@
         },
         {
             "Id": "LoadBalancer",
-            "DisplayName": "LoadBalancer",
+            "DisplayName": "Load Balancer",
             "Order": 70
         },
         {
@@ -286,6 +286,34 @@
                 {
                     "Id": "EnvironmentType",
                     "Value": "LoadBalanced"
+                }
+            ],
+            "AdvancedSetting": true,
+            "Updatable": true
+        },
+        {
+            "Id": "LoadBalancerScheme",
+            "Name": "Load Balancer Scheme",
+            "Category": "LoadBalancer",
+            "Description": "Specify \"Internal\" if your application serves requests only from connected VPCs. \"Public\" load balancers serve requests from the Internet.",
+            "Type": "String",
+            "DefaultValue": "public",
+            "AllowedValues": [
+                "public",
+                "internal"
+            ],
+            "ValueMapping": {
+                "public": "Public",
+                "internal": "Internal"
+            },
+            "DependsOn": [
+                {
+                    "Id": "EnvironmentType",
+                    "Value": "LoadBalanced"
+                },
+                {
+                    "Id": "VPC.UseVPC",
+                    "Value": true
                 }
             ],
             "AdvancedSetting": true,
