@@ -262,7 +262,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
                 var settings = await restClient.GetConfigSettingsAsync(redeploymentSessionId);
 
                 Assert.True(settings.OptionSettings.First(x => x.Id.Equals("ServiceName")).Visible);
-                Assert.False(settings.OptionSettings.First(x => x.Id.Equals("EncryptionKmsKey")).Visible);
+                Assert.True(settings.OptionSettings.First(x => x.Id.Equals("EncryptionKmsKey")).Visible);
             }
             finally
             {
