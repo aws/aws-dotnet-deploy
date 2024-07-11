@@ -326,6 +326,7 @@
                     "DefaultValue": "{DefaultVpcId}",
                     "AdvancedSetting": false,
                     "Updatable": false,
+                    "VisibleOnRedeployment": true,
                     "Validators": [
                         {
                             "ValidatorType": "Regex",

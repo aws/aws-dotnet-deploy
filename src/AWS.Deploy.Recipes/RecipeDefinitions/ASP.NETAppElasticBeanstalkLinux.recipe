@@ -347,6 +347,7 @@
             },
             "AdvancedSetting": false,
             "Updatable": false,
+            "VisibleOnRedeployment": true,
             "ChildOptionSettings": [
                 {
                     "Id": "CreateNew",
@@ -368,6 +369,7 @@
                     },
                     "AdvancedSetting": false,
                     "Updatable": false,
+                    "VisibleOnRedeployment": true,
                     "DependsOn": [
                         {
                             "Id": "ApplicationIAMRole.CreateNew",
@@ -398,6 +400,7 @@
             },
             "AdvancedSetting": false,
             "Updatable": false,
+            "VisibleOnRedeployment": true,
             "ChildOptionSettings": [
                 {
                     "Id": "CreateNew",
@@ -419,6 +422,7 @@
                     },
                     "AdvancedSetting": false,
                     "Updatable": false,
+                    "VisibleOnRedeployment": true,
                     "DependsOn": [
                         {
                             "Id": "ServiceIAMRole.CreateNew",
@@ -447,6 +451,7 @@
             "DefaultValue": "",
             "AdvancedSetting": true,
             "Updatable": false,
+            "VisibleOnRedeployment": true,
             "Validators": [
                 {
                     "ValidatorType": "Regex",
@@ -826,6 +831,7 @@
                     "DefaultValue": "{DefaultVpcId}",
                     "AdvancedSetting": true,
                     "Updatable": false,
+                    "VisibleOnRedeployment": true,
                     "Validators": [
                         {
                             "ValidatorType": "Regex",
