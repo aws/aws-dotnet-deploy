@@ -340,6 +340,7 @@
             "TypeHint": "Vpc",
             "AdvancedSetting": false,
             "Updatable": false,
+            "VisibleOnRedeployment": true,
             "ChildOptionSettings": [
                 {
                     "Id": "IsDefault",
@@ -396,6 +397,7 @@
                     "DefaultValue": "{DefaultVpcId}",
                     "AdvancedSetting": false,
                     "Updatable": false,
+                    "VisibleOnRedeployment": true,
                     "Validators": [
                         {
                             "ValidatorType": "Regex",

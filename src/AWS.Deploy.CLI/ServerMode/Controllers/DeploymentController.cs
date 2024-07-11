@@ -200,7 +200,12 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
 
             foreach (var setting in configurableOptionSettings)
             {
-                var settingSummary = new OptionSettingItemSummary(setting.Id, setting.FullyQualifiedId, setting.Name, setting.Description, setting.Type.ToString())
+                var settingSummary = new OptionSettingItemSummary(
+                    setting.Id,
+                    setting.FullyQualifiedId,
+                    setting.Name,
+                    setting.Description,
+                    setting.Type.ToString())
                 {
                     Category = setting.Category,
                     TypeHint = setting.TypeHint?.ToString(),
@@ -210,6 +215,8 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                     ReadOnly = recommendation.IsExistingCloudApplication && !setting.Updatable,
                     Visible =
                         optionSettingHandler.IsOptionSettingDisplayable(recommendation, setting) &&
+                        // Updating visibility of settings in server-mode to be determined by 'VisibleOnRedeployment'
+                        // when performing a redeployment and 'Updatable' is set to false.
                         !(recommendation.IsExistingCloudApplication && !setting.Updatable && !setting.VisibleOnRedeployment),
                     SummaryDisplayable = optionSettingHandler.IsSummaryDisplayable(recommendation, setting),
                     AllowedValues = setting.AllowedValues,
