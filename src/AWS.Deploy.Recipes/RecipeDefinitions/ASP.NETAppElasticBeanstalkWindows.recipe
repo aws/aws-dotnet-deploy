@@ -137,6 +137,7 @@
             "TypeHint": "BeanstalkApplication",
             "AdvancedSetting": false,
             "Updatable": false,
+            "VisibleOnRedeployment": true,
             "ChildOptionSettings": [
                 {
                     "Id": "CreateNew",
@@ -155,6 +156,7 @@
                     "DefaultValue": "{StackName}",
                     "AdvancedSetting": false,
                     "Updatable": false,
+                    "VisibleOnRedeployment": true,
                     "DependsOn": [
                         {
                             "Id": "BeanstalkApplication.CreateNew",
@@ -187,6 +189,7 @@
                     "DefaultValue": "{StackName}",
                     "AdvancedSetting": false,
                     "Updatable": false,
+                    "VisibleOnRedeployment": true,
                     "DependsOn": [
                         {
                             "Id": "BeanstalkApplication.CreateNew",
@@ -216,6 +219,7 @@
             "DefaultValue": "{StackName}-dev",
             "AdvancedSetting": false,
             "Updatable": false,
+            "VisibleOnRedeployment": true,
             "Validators": [
                 {
                     "ValidatorType": "Regex",
@@ -331,6 +335,7 @@
             },
             "AdvancedSetting": false,
             "Updatable": false,
+            "VisibleOnRedeployment": true,
             "ChildOptionSettings": [
                 {
                     "Id": "CreateNew",
@@ -352,6 +357,7 @@
                     },
                     "AdvancedSetting": false,
                     "Updatable": false,
+                    "VisibleOnRedeployment": true,
                     "DependsOn": [
                         {
                             "Id": "ApplicationIAMRole.CreateNew",
@@ -382,6 +388,7 @@
             },
             "AdvancedSetting": false,
             "Updatable": false,
+            "VisibleOnRedeployment": true,
             "ChildOptionSettings": [
                 {
                     "Id": "CreateNew",
@@ -403,6 +410,7 @@
                     },
                     "AdvancedSetting": false,
                     "Updatable": false,
+                    "VisibleOnRedeployment": true,
                     "DependsOn": [
                         {
                             "Id": "ServiceIAMRole.CreateNew",
@@ -431,6 +439,7 @@
             "DefaultValue": "",
             "AdvancedSetting": true,
             "Updatable": false,
+            "VisibleOnRedeployment": true,
             "Validators": [
                 {
                     "ValidatorType": "Regex",
@@ -816,6 +825,7 @@
                     "DefaultValue": "{DefaultVpcId}",
                     "AdvancedSetting": true,
                     "Updatable": false,
+                    "VisibleOnRedeployment": true,
                     "Validators": [
                         {
                             "ValidatorType": "Regex",

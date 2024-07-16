@@ -118,6 +118,7 @@
             "TypeHint": "ECSCluster",
             "AdvancedSetting": false,
             "Updatable": false,
+            "VisibleOnRedeployment": true,
             "ChildOptionSettings": [
                 {
                     "Id": "CreateNew",
@@ -136,6 +137,7 @@
                     "TypeHint": "ExistingECSCluster",
                     "AdvancedSetting": false,
                     "Updatable": false,
+                    "VisibleOnRedeployment": true,
                     "Validators": [
                         {
                             "ValidatorType": "Regex",
@@ -160,6 +162,7 @@
                     "DefaultValue": "{StackName}",
                     "AdvancedSetting": false,
                     "Updatable": false,
+                    "VisibleOnRedeployment": true,
                     "Validators": [
                         {
                             "ValidatorType": "Regex",
@@ -195,6 +198,7 @@
             "DefaultValue": "{StackName}-service",
             "AdvancedSetting": false,
             "Updatable": false,
+            "VisibleOnRedeployment": true,
             "Validators": [
                 {
                     "ValidatorType": "Regex",
@@ -304,6 +308,7 @@
             "TypeHint": "Vpc",
             "AdvancedSetting": false,
             "Updatable": false,
+            "VisibleOnRedeployment": true,
             "ChildOptionSettings": [
                 {
                     "Id": "IsDefault",
@@ -360,6 +365,7 @@
                     "DefaultValue": "{DefaultVpcId}",
                     "AdvancedSetting": false,
                     "Updatable": false,
+                    "VisibleOnRedeployment": true,
                     "Validators": [
                         {
                             "ValidatorType": "Regex",
@@ -533,6 +539,7 @@
                     "DefaultValue": null,
                     "AdvancedSetting": false,
                     "Updatable": false,
+                    "VisibleOnRedeployment": true,
                     "Validators": [
                         {
                             "ValidatorType": "Regex",
@@ -738,7 +745,8 @@
                     "Type": "Bool",
                     "DefaultValue": true,
                     "AdvancedSetting": false,
-                    "Updatable": false
+                    "Updatable": false,
+                    "VisibleOnRedeployment": true
                 }
             ]
         },
