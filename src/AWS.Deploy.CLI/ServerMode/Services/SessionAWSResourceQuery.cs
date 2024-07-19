@@ -256,15 +256,15 @@ namespace AWS.Deploy.CLI.ServerMode.Services
         }
 
         /// <inheritdoc/>
-        public async Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns(params BeanstalkPlatformType[]? platformTypes)
+        public async Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns(string? targetFramework, params BeanstalkPlatformType[]? platformTypes)
         {
-            return (await GetAndCache(async () => await _awsResourceQueryer.GetElasticBeanstalkPlatformArns(platformTypes), new object?[] { platformTypes }))!;
+            return (await GetAndCache(async () => await _awsResourceQueryer.GetElasticBeanstalkPlatformArns(targetFramework, platformTypes), new object?[] { platformTypes }))!;
         }
 
         /// <inheritdoc/>
-        public async Task<PlatformSummary> GetLatestElasticBeanstalkPlatformArn(BeanstalkPlatformType platformType)
+        public async Task<PlatformSummary> GetLatestElasticBeanstalkPlatformArn(string? targetFramework, BeanstalkPlatformType platformType)
         {
-            return (await GetAndCache(async () => await _awsResourceQueryer.GetLatestElasticBeanstalkPlatformArn(platformType), new object[] { platformType }))!;
+            return (await GetAndCache(async () => await _awsResourceQueryer.GetLatestElasticBeanstalkPlatformArn(targetFramework, platformType), new object[] { platformType }))!;
         }
 
         /// <inheritdoc/>

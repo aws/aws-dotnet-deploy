@@ -516,7 +516,7 @@ namespace AWS.Deploy.Orchestration.Data
                 "Error attempting to retrieve the default VPC");
         }
 
-        public async Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns(params BeanstalkPlatformType[]? platformTypes)
+        public async Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns(string? targetFramework, params BeanstalkPlatformType[]? platformTypes)
         {
             if(platformTypes == null || platformTypes.Length == 0)
             {
@@ -557,7 +557,9 @@ namespace AWS.Deploy.Orchestration.Data
             var allPlatformSummaries = new List<PlatformSummary>();
             if (platformTypes.Contains(BeanstalkPlatformType.Linux))
             {
-                allPlatformSummaries.AddRange(await fetchPlatforms(Constants.ElasticBeanstalk.LinuxPlatformType));
+                var linuxPlatforms = await fetchPlatforms(Constants.ElasticBeanstalk.LinuxPlatformType);
+                linuxPlatforms = SortElasticBeanstalkLinuxPlatforms(targetFramework, linuxPlatforms);
+                allPlatformSummaries.AddRange(linuxPlatforms);
             }
             if (platformTypes.Contains(BeanstalkPlatformType.Windows))
             {
@@ -581,9 +583,9 @@ namespace AWS.Deploy.Orchestration.Data
             return platformVersions;
         }
 
-        public async Task<PlatformSummary> GetLatestElasticBeanstalkPlatformArn(BeanstalkPlatformType platformType)
+        public async Task<PlatformSummary> GetLatestElasticBeanstalkPlatformArn(string? targetFramework, BeanstalkPlatformType platformType)
         {
-            var platforms = await GetElasticBeanstalkPlatformArns(platformType);
+            var platforms = await GetElasticBeanstalkPlatformArns(targetFramework, platformType);
 
             if (!platforms.Any())
             {
@@ -596,12 +598,90 @@ namespace AWS.Deploy.Orchestration.Data
             return platforms.First();
         }
 
+        /// <summary>
+        /// For Linux beanstalk platforms the describe calls return a collection of .NET x and .NET Core based platforms.
+        /// The order returned will be sorted by .NET version in increasing order then by platform versions. So for example we could get a result like the following
+        ///
+        /// .NET 6 running on 64bit Amazon Linux 2023 v3.1.3
+        /// .NET 6 running on 64bit Amazon Linux 2023 v3.1.2
+        /// .NET 6 running on 64bit Amazon Linux 2023 v3.0.6
+        /// .NET 6 running on 64bit Amazon Linux 2023 v3.0.5
+        /// .NET 8 running on 64bit Amazon Linux 2023 v3.1.3
+        /// .NET Core running on 64bit Amazon Linux 2 v2.8.0
+        /// .NET Core running on 64bit Amazon Linux 2 v2.7.3
+        /// .NET Core running on 64bit Amazon Linux 2 v2.6.0
+        ///
+        /// We want the user to see the .NET version corresponding to their application on the latest Beanstalk platform first.
+        /// If the user is trying to deploy a .NET 6 application, the above example will be sorted into the following.
+        ///
+        /// .NET 6 running on 64bit Amazon Linux 2023 v3.1.3
+        /// .NET 8 running on 64bit Amazon Linux 2023 v3.1.3
+        /// .NET 6 running on 64bit Amazon Linux 2023 v3.1.2
+        /// .NET 6 running on 64bit Amazon Linux 2023 v3.0.6
+        /// .NET 6 running on 64bit Amazon Linux 2023 v3.0.5
+        /// .NET Core running on 64bit Amazon Linux 2 v2.8.0
+        /// .NET Core running on 64bit Amazon Linux 2 v2.7.3
+        /// .NET Core running on 64bit Amazon Linux 2 v2.6.0
+        ///
+        /// In case the target framework is not known in advance, the platforms will be sorted by Beanstalk Platform followed by the .NET version, with .NET Core coming in last.
+        /// The above example will be sorted into the following.
+        ///
+        /// .NET 8 running on 64bit Amazon Linux 2023 v3.1.3
+        /// .NET 6 running on 64bit Amazon Linux 2023 v3.1.3
+        /// .NET 6 running on 64bit Amazon Linux 2023 v3.1.2
+        /// .NET 6 running on 64bit Amazon Linux 2023 v3.0.6
+        /// .NET 6 running on 64bit Amazon Linux 2023 v3.0.5
+        /// .NET Core running on 64bit Amazon Linux 2 v2.8.0
+        /// .NET Core running on 64bit Amazon Linux 2 v2.7.3
+        /// .NET Core running on 64bit Amazon Linux 2 v2.6.0
+        /// </summary>
+        /// <param name="platforms"></param>
+        /// <param name="targetFramework"></param>
+        public static List<PlatformSummary> SortElasticBeanstalkLinuxPlatforms(string? targetFramework, List<PlatformSummary> platforms)
+        {
+            var dotnetVersionMap = new System.Collections.Generic.Dictionary<string, decimal>();
+            foreach (var platform in platforms)
+            {
+                var runningIndexOf = platform.PlatformBranchName.IndexOf("running", StringComparison.InvariantCultureIgnoreCase);
+                if (runningIndexOf == -1)
+                {
+                    dotnetVersionMap[platform.PlatformArn] = 0;
+                    continue;
+                }
 
+                var framework = platform.PlatformBranchName.Substring(0, runningIndexOf).Trim();
+                var frameworkSplit = framework.Split(" ");
+                if (frameworkSplit.Length != 2)
+                {
+                    dotnetVersionMap[platform.PlatformArn] = 0;
+                    continue;
+                }
+
+                if (!decimal.TryParse(frameworkSplit[1], out var dotnetVersion))
+                {
+                    dotnetVersionMap[platform.PlatformArn] = 0;
+                    continue;
+                }
+
+                if (decimal.TryParse(targetFramework?.Replace("net", ""), out var currentTargetFramework))
+                {
+                    if (currentTargetFramework.Equals(dotnetVersion))
+                    {
+                        dotnetVersionMap[platform.PlatformArn] = 1000;
+                        continue;
+                    }
+                }
+
+                dotnetVersionMap[platform.PlatformArn] = dotnetVersion;
+            }
+
+            return platforms.OrderByDescending(x => new Version(x.PlatformVersion)).ThenByDescending(x => dotnetVersionMap[x.PlatformArn]).ToList();
+        }
 
         /// <summary>
         /// For Windows beanstalk platforms the describe calls return a collection of Windows Server Code and Windows Server based platforms.
         /// The order return will be sorted by platform versions but not OS. So for example we could get a result like the following
-        /// 
+        ///
         /// IIS 10.0 running on 64bit Windows Server 2016 (1.1.0)
         /// IIS 10.0 running on 64bit Windows Server 2016 (1.0.0)
         /// IIS 10.0 running on 64bit Windows Server Core 2016 (1.1.0)
@@ -613,7 +693,7 @@ namespace AWS.Deploy.Orchestration.Data
         ///
         /// We want the user to use the latest version of each OS first as well as the latest version of Windows first. Also Windows Server should come before Windows Server Core.
         /// This matches the behavior of the existing VS toolkit picker. The above example will be sorted into the following.
-        /// 
+        ///
         /// IIS 10.0 running on 64bit Windows Server 2019 (1.1.0)
         /// IIS 10.0 running on 64bit Windows Server Core 2019 (1.1.0)
         /// IIS 10.0 running on 64bit Windows Server 2016 (1.1.0)

@@ -129,6 +129,7 @@ namespace AWS.Deploy.Common
         InvalidWindowsManifestFile = 10010700,
         UserDeploymentFileNotFound = 10010800,
         DockerInspectFailed = 10004200,
+        InvalidElasticBeanstalkPlatform = 10010900
     }
 
     public class ProjectFileNotFoundException : DeployToolException
