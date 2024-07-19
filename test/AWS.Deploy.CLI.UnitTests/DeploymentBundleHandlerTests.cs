@@ -58,7 +58,7 @@ namespace AWS.Deploy.CLI.UnitTests
             _recipeHandler = new RecipeHandler(_deploymentManifestEngine, _orchestratorInteractiveService, _directoryManager, _fileManager, optionSettingHandler, validatorFactory);
             _projectDefinitionParser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
 
-            _deploymentBundleHandler = new DeploymentBundleHandler(_commandLineWrapper, awsResourceQueryer, interactiveService, _directoryManager, zipFileManager, new FileManager());
+            _deploymentBundleHandler = new DeploymentBundleHandler(_commandLineWrapper, awsResourceQueryer, interactiveService, _directoryManager, zipFileManager, new FileManager(), optionSettingHandler);
 
             _recipeDefinition = new Mock<RecipeDefinition>(
                 It.IsAny<string>(),
@@ -192,6 +192,12 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var projectPath = SystemIOUtilities.ResolvePath("ConsoleAppTask");
             var project = await _projectDefinitionParser.Parse(projectPath);
+            _recipeDefinition.OptionSettings.Add(
+                new OptionSettingItem(
+                    "ElasticBeanstalkPlatformArn",
+                    "ElasticBeanstalkPlatformArn",
+                    "Beanstalk Platform",
+                    "The name of the Elastic Beanstalk platform to use with the environment.") { DefaultValue = "arn:aws:elasticbeanstalk:us-west-2::platform/.NET 8 running on 64bit Amazon Linux 2023/3.1.3" });
             var recommendation = new Recommendation(_recipeDefinition, project, 100, new Dictionary<string, object>());
 
             recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild = false;
@@ -215,6 +221,12 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var projectPath = SystemIOUtilities.ResolvePath("ConsoleAppTask");
             var project = await _projectDefinitionParser.Parse(projectPath);
+            _recipeDefinition.OptionSettings.Add(
+                new OptionSettingItem(
+                    "ElasticBeanstalkPlatformArn",
+                    "ElasticBeanstalkPlatformArn",
+                    "Beanstalk Platform",
+                    "The name of the Elastic Beanstalk platform to use with the environment.") { DefaultValue = "arn:aws:elasticbeanstalk:us-west-2::platform/.NET 8 running on 64bit Amazon Linux 2023/3.1.3" });
             var recommendation = new Recommendation(_recipeDefinition, project, 100, new Dictionary<string, object>());
 
             recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild = true;
@@ -235,17 +247,86 @@ namespace AWS.Deploy.CLI.UnitTests
         }
 
         /// <summary>
-        /// Since Beanstalk doesn't currently have .NET 7 and .NET 8 preinstalled we need to make sure we are doing a self-contained publish when creating the deployment bundle.
-        /// This test checks when the target framework is net7.0 or net8.0, then we are performing a self-contained build.
+        /// Since Beanstalk doesn't currently have .NET 7 preinstalled we need to make sure we are doing a self-contained publish when creating the deployment bundle.
+        /// This test checks when the target framework is net7.0, then we are performing a self-contained build.
         /// </summary>
         [Fact]
-        public async Task CreateDotnetPublishZip_SelfContained_Net7_Net8()
+        public async Task CreateDotnetPublishZip_SelfContained_Net7()
+        {
+            var projectPath = SystemIOUtilities.ResolvePath(Path.Combine("docker", "WebAppNet7"));
+            var project = await _projectDefinitionParser.Parse(projectPath);
+            _recipeDefinition.TargetService = RecipeIdentifier.TARGET_SERVICE_ELASTIC_BEANSTALK;
+            _recipeDefinition.OptionSettings.Add(
+                new OptionSettingItem(
+                    "ElasticBeanstalkPlatformArn",
+                    "ElasticBeanstalkPlatformArn",
+                    "Beanstalk Platform",
+                    "The name of the Elastic Beanstalk platform to use with the environment.") { DefaultValue = "arn:aws:elasticbeanstalk:us-west-2::platform/.NET 8 running on 64bit Amazon Linux 2023/3.1.3" });
+            var recommendation = new Recommendation(_recipeDefinition, project, 100, new Dictionary<string, object>());
+
+            recommendation.DeploymentBundle.DotnetPublishBuildConfiguration = "Release";
+            recommendation.DeploymentBundle.DotnetPublishAdditionalBuildArguments = "--nologo";
+
+            Assert.False(recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild);
+
+            await _deploymentBundleHandler.CreateDotnetPublishZip(recommendation);
+
+            Assert.True(recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild);
+
+            var expectedCommand =
+                $"dotnet publish \"{project.ProjectPath}\"" +
+                $" -o \"{_directoryManager.CreatedDirectories.First()}\"" +
+                " -c Release" +
+                " --runtime linux-x64" +
+                " --nologo" +
+                " --self-contained true";
+
+            Assert.Equal(expectedCommand, _commandLineWrapper.CommandsToExecute.First().Command);
+        }
+
+        [Theory]
+        [InlineData("arn:aws:elasticbeanstalk:us-west-2::platform/.NET 8 running on 64bit Amazon Linux 2023")]
+        [InlineData("arn:aws:elasticbeanstalk:us-west-2::platform/.NET 8 running on 64bit Amazon Linux 2023/invalidversion")]
+        public async Task CreateDotnetPublishZip_InvalidPlatformArn(string platformArn)
+        {
+            var projectPath = SystemIOUtilities.ResolvePath(Path.Combine("ConsoleAppTask"));
+            var project = await _projectDefinitionParser.Parse(projectPath);
+            _recipeDefinition.TargetService = RecipeIdentifier.TARGET_SERVICE_ELASTIC_BEANSTALK;
+            _recipeDefinition.OptionSettings.Add(
+                new OptionSettingItem(
+                    "ElasticBeanstalkPlatformArn",
+                    "ElasticBeanstalkPlatformArn",
+                    "Beanstalk Platform",
+                    "The name of the Elastic Beanstalk platform to use with the environment.")
+                {
+                    DefaultValue = platformArn
+                });
+            var recommendation = new Recommendation(_recipeDefinition, project, 100, new Dictionary<string, object>());
+
+            var exception = await Assert.ThrowsAsync<InvalidElasticBeanstalkPlatformException>(async () => await _deploymentBundleHandler.CreateDotnetPublishZip(recommendation));
+
+            Assert.Equal(DeployToolErrorCode.InvalidElasticBeanstalkPlatform, exception.ErrorCode);
+            Assert.Equal($"The selected Elastic Beanstalk platform version '{platformArn}' is invalid.", exception.Message);
+        }
+
+        [Theory]
+        [InlineData("arn:aws:elasticbeanstalk:us-west-2::platform/.NET Core running on 64bit Amazon Linux 2/2.7.3")]
+        [InlineData("arn:aws:elasticbeanstalk:us-west-2::platform/.NET 6 running on 64bit Amazon Linux 2023/3.1.3")]
+        public async Task CreateDotnetPublishZip_PlatformDoesntSupportNet8(string platformArn)
         {
             var projectPath = SystemIOUtilities.ResolvePath(Path.Combine("docker", "WebAppNet8"));
             var project = await _projectDefinitionParser.Parse(projectPath);
             _recipeDefinition.TargetService = RecipeIdentifier.TARGET_SERVICE_ELASTIC_BEANSTALK;
+            _recipeDefinition.OptionSettings.Add(
+                new OptionSettingItem(
+                    "ElasticBeanstalkPlatformArn",
+                    "ElasticBeanstalkPlatformArn",
+                    "Beanstalk Platform",
+                    "The name of the Elastic Beanstalk platform to use with the environment.")
+                {
+                    DefaultValue = platformArn
+                });
             var recommendation = new Recommendation(_recipeDefinition, project, 100, new Dictionary<string, object>());
-
             recommendation.DeploymentBundle.DotnetPublishBuildConfiguration = "Release";
             recommendation.DeploymentBundle.DotnetPublishAdditionalBuildArguments = "--nologo";
 

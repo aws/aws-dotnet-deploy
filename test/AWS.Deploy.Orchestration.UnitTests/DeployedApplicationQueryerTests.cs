@@ -283,7 +283,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
                 .Returns(Task.FromResult(environments));
 
             _mockAWSResourceQueryer
-                .Setup(x => x.GetElasticBeanstalkPlatformArns())
+                .Setup(x => x.GetElasticBeanstalkPlatformArns(It.IsAny<string>()))
                 .Returns(Task.FromResult(platforms));
 
             _mockAWSResourceQueryer
@@ -337,7 +337,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
                 .Returns(Task.FromResult(environments));
 
             _mockAWSResourceQueryer
-                .Setup(x => x.GetElasticBeanstalkPlatformArns())
+                .Setup(x => x.GetElasticBeanstalkPlatformArns(It.IsAny<string>()))
                 .Returns(Task.FromResult(platforms));
 
             _mockAWSResourceQueryer
@@ -399,7 +399,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
                 .Returns(Task.FromResult(environments));
 
             _mockAWSResourceQueryer
-                .Setup(x => x.GetElasticBeanstalkPlatformArns())
+                .Setup(x => x.GetElasticBeanstalkPlatformArns(It.IsAny<string>()))
                 .Returns(Task.FromResult(platforms));
 
             _mockAWSResourceQueryer

@@ -69,8 +69,8 @@ namespace AWS.Deploy.Common.Data
         Task<string> CreateEC2KeyPair(string keyName, string saveLocation);
         Task<List<Role>> ListOfIAMRoles(string? servicePrincipal);
         Task<List<Vpc>> GetListOfVpcs();
-        Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns(params BeanstalkPlatformType[]? platformTypes);
-        Task<PlatformSummary> GetLatestElasticBeanstalkPlatformArn(BeanstalkPlatformType platformType);
+        Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns(string? targetFramework, params BeanstalkPlatformType[]? platformTypes);
+        Task<PlatformSummary> GetLatestElasticBeanstalkPlatformArn(string? targetFramework, BeanstalkPlatformType platformType);
         Task<List<AuthorizationData>> GetECRAuthorizationToken();
         Task<List<Repository>> GetECRRepositories(List<string>? repositoryNames = null);
 

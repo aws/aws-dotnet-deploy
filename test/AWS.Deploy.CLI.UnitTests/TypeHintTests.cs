@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
+using Amazon.ElasticBeanstalk.Model;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.SimpleNotificationService;
@@ -23,6 +24,7 @@ using AWS.Deploy.Orchestration.Data;
 using Moq;
 using Xunit;
 using AWS.Deploy.Common.Data;
+using AWS.Deploy.Common.IO;
 
 namespace AWS.Deploy.CLI.UnitTests
 {
@@ -152,6 +154,92 @@ namespace AWS.Deploy.CLI.UnitTests
             Assert.Equal("Bucket1", resources.Rows[0].SystemName);
             Assert.Equal("Bucket2", resources.Rows[1].DisplayName);
             Assert.Equal("Bucket2", resources.Rows[1].SystemName);
+        }
+
+        [Fact]
+        public async Task DotnetBeanstalkPlatformArnCommandTest()
+        {
+            var recipeDefinition = new Mock<RecipeDefinition>(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<DeploymentTypes>(),
+                It.IsAny<DeploymentBundleTypes>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>()).Object;
+            var projectDefinitionParser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
+            var projectPath = SystemIOUtilities.ResolvePath("ConsoleAppTask");
+            var project = await projectDefinitionParser.Parse(projectPath);
+            var recommendation = new Recommendation(recipeDefinition, project, 0, new Dictionary<string, object>());
+
+            var platformSummaries = new List<PlatformSummary>
+            {
+                new PlatformSummary
+                {
+                    PlatformArn = "arn:aws:elasticbeanstalk:us-west-2::platform/.NET 8 running on 64bit Amazon Linux 2023/3.1.3",
+                    PlatformBranchName = ".NET 8 running on 64bit Amazon Linux 2023",
+                    PlatformVersion = "3.1.3",
+                }
+            };
+            var awsResourceQueryer = new Mock<IAWSResourceQueryer>();
+            awsResourceQueryer
+                .Setup(x => x.GetElasticBeanstalkPlatformArns(It.IsAny<string>(), BeanstalkPlatformType.Linux))
+                .ReturnsAsync(platformSummaries);
+            var typeHintCommand = new DotnetBeanstalkPlatformArnCommand(awsResourceQueryer.Object, null, _optionSettingHandler);
+            var resources = await typeHintCommand.GetResources(recommendation, null);
+
+            var row = Assert.Single(resources.Rows);
+            Assert.Equal(".NET 8 running on 64bit Amazon Linux 2023 v3.1.3", row.DisplayName);
+            Assert.Equal("arn:aws:elasticbeanstalk:us-west-2::platform/.NET 8 running on 64bit Amazon Linux 2023/3.1.3", row.SystemName);
+            Assert.Equal(2, row.ColumnValues.Count);
+            Assert.Equal(".NET 8 running on 64bit Amazon Linux 2023", row.ColumnValues[0]);
+            Assert.Equal("3.1.3", row.ColumnValues[1]);
+        }
+
+        [Fact]
+        public async Task DotnetWindowsBeanstalkPlatformArnCommandTest()
+        {
+            var recipeDefinition = new Mock<RecipeDefinition>(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<DeploymentTypes>(),
+                It.IsAny<DeploymentBundleTypes>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>()).Object;
+            var projectDefinitionParser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
+            var projectPath = SystemIOUtilities.ResolvePath("ConsoleAppTask");
+            var project = await projectDefinitionParser.Parse(projectPath);
+            var recommendation = new Recommendation(recipeDefinition, project, 0, new Dictionary<string, object>());
+
+            var platformSummaries = new List<PlatformSummary>
+            {
+                new PlatformSummary
+                {
+                    PlatformArn = "arn:aws:elasticbeanstalk:us-west-2::platform/IIS 10.0 running on 64bit Windows Server 2016/2.0.0",
+                    PlatformBranchName = "IIS 10.0 running on 64bit Windows Server 2016",
+                    PlatformVersion = "2.0.0"
+                }
+            };
+            var awsResourceQueryer = new Mock<IAWSResourceQueryer>();
+            awsResourceQueryer
+                .Setup(x => x.GetElasticBeanstalkPlatformArns(It.IsAny<string>(), BeanstalkPlatformType.Windows))
+                .ReturnsAsync(platformSummaries);
+            var typeHintCommand = new DotnetWindowsBeanstalkPlatformArnCommand(awsResourceQueryer.Object, null, _optionSettingHandler);
+            var resources = await typeHintCommand.GetResources(recommendation, null);
+
+            var row = Assert.Single(resources.Rows);
+            Assert.Equal("IIS 10.0 running on 64bit Windows Server 2016 v2.0.0", row.DisplayName);
+            Assert.Equal("arn:aws:elasticbeanstalk:us-west-2::platform/IIS 10.0 running on 64bit Windows Server 2016/2.0.0", row.SystemName);
+            Assert.Equal(2, row.ColumnValues.Count);
+            Assert.Equal("IIS 10.0 running on 64bit Windows Server 2016", row.ColumnValues[0]);
+            Assert.Equal("2.0.0", row.ColumnValues[1]);
         }
     }
 }

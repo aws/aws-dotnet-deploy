@@ -28,14 +28,14 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             _optionSettingHandler = optionSettingHandler;
         }
 
-        private async Task<List<PlatformSummary>> GetData()
+        private async Task<List<PlatformSummary>> GetData(Recommendation recommendation)
         {
-            return await _awsResourceQueryer.GetElasticBeanstalkPlatformArns(BeanstalkPlatformType.Windows);
+            return await _awsResourceQueryer.GetElasticBeanstalkPlatformArns(recommendation.ProjectDefinition.TargetFramework, BeanstalkPlatformType.Windows);
         }
 
         public async Task<TypeHintResourceTable> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
         {
-            var platformArns = await GetData();
+            var platformArns = await GetData(recommendation);
 
             var resourceTable = new TypeHintResourceTable
             {

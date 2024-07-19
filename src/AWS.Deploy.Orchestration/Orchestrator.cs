@@ -94,7 +94,7 @@ namespace AWS.Deploy.Orchestration
                 throw new InvalidOperationException($"{nameof(_session)} is null as part of the orchestartor object");
             if (_recipeHandler == null)
                 throw new InvalidOperationException($"{nameof(_recipeHandler)} is null as part of the orchestartor object");
-            
+
             var engine = new RecommendationEngine.RecommendationEngine(_session, _recipeHandler);
             var recipePaths = new HashSet<string> { RecipeLocator.FindRecipeDefinitionsPath() };
             var customRecipePaths = await _recipeHandler.LocateCustomRecipePaths(_session.ProjectDefinition);
@@ -112,7 +112,7 @@ namespace AWS.Deploy.Orchestration
                 throw new InvalidOperationException($"{nameof(_session)} is null as part of the orchestartor object");
             if (_recipeHandler == null)
                 throw new InvalidOperationException($"{nameof(_recipeHandler)} is null as part of the orchestartor object");
-            
+
             var engine = new RecommendationEngine.RecommendationEngine(_session, _recipeHandler);
             var compatibleRecommendations = await engine.ComputeRecommendations();
             var cdkRecommendations = compatibleRecommendations.Where(x => x.Recipe.DeploymentType == DeploymentTypes.CdkProject).ToList();
@@ -180,7 +180,7 @@ namespace AWS.Deploy.Orchestration
                 if (_awsResourceQueryer == null)
                     throw new InvalidOperationException($"{nameof(_awsResourceQueryer)} is null as part of the Orchestrator object");
 
-                var latestPlatform = await _awsResourceQueryer.GetLatestElasticBeanstalkPlatformArn(BeanstalkPlatformType.Linux);
+                var latestPlatform = await _awsResourceQueryer.GetLatestElasticBeanstalkPlatformArn(recommendation.ProjectDefinition.TargetFramework, BeanstalkPlatformType.Linux);
                 recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_LATEST_DOTNET_BEANSTALK_PLATFORM_ARN, latestPlatform.PlatformArn);
             }
             if (recommendation.ReplacementTokens.ContainsKey(Constants.RecipeIdentifier.REPLACE_TOKEN_LATEST_DOTNET_WINDOWS_BEANSTALK_PLATFORM_ARN))
@@ -188,7 +188,7 @@ namespace AWS.Deploy.Orchestration
                 if (_awsResourceQueryer == null)
                     throw new InvalidOperationException($"{nameof(_awsResourceQueryer)} is null as part of the Orchestrator object");
 
-                var latestPlatform = await _awsResourceQueryer.GetLatestElasticBeanstalkPlatformArn(BeanstalkPlatformType.Windows);
+                var latestPlatform = await _awsResourceQueryer.GetLatestElasticBeanstalkPlatformArn(recommendation.ProjectDefinition.TargetFramework, BeanstalkPlatformType.Windows);
                 recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_LATEST_DOTNET_WINDOWS_BEANSTALK_PLATFORM_ARN, latestPlatform.PlatformArn);
             }
             if (recommendation.ReplacementTokens.ContainsKey(Constants.RecipeIdentifier.REPLACE_TOKEN_STACK_NAME))
@@ -315,7 +315,7 @@ namespace AWS.Deploy.Orchestration
             _dockerEngine.DetermineDockerExecutionDirectory(recommendation);
 
             // Read this from the OptionSetting instead of recommendation.DeploymentBundle.
-            // When its value comes from a replacement token, it wouldn't have been set back to the DeploymentBundle 
+            // When its value comes from a replacement token, it wouldn't have been set back to the DeploymentBundle
             var respositoryName = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, _optionSettingHandler.GetOptionSetting(recommendation, Constants.Docker.ECRRepositoryNameOptionId));
             if (respositoryName == null)
                 throw new InvalidECRRepositoryNameException(DeployToolErrorCode.ECRRepositoryNameIsNull, "The ECR Repository Name is null.");
