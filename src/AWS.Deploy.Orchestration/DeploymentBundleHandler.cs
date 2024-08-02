@@ -121,7 +121,12 @@ namespace AWS.Deploy.Orchestration
         {
             if (recommendation.Recipe.TargetService == RecipeIdentifier.TARGET_SERVICE_ELASTIC_BEANSTALK)
             {
+                if (recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild)
+                    return;
+
                 var targetFramework = recommendation.ProjectDefinition.TargetFramework ?? string.Empty;
+                if (string.IsNullOrEmpty(targetFramework))
+                    return;
 
                 // Elastic Beanstalk doesn't currently have .NET 7 preinstalled.
                 var unavailableFramework = new List<string> { "net7.0" };
@@ -139,10 +144,12 @@ namespace AWS.Deploy.Orchestration
                     var beanstalkPlatformSettingValue = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, beanstalkPlatformSetting);
                     var beanstalkPlatformSettingValueSplit = beanstalkPlatformSettingValue?.Split("/");
                     if (beanstalkPlatformSettingValueSplit?.Length != 3)
-                        throw new InvalidElasticBeanstalkPlatformException(DeployToolErrorCode.InvalidElasticBeanstalkPlatform, $"The selected Elastic Beanstalk platform version '{beanstalkPlatformSettingValue}' is invalid.");
+                        // If the platform is not in the expected format, we will proceed normally to allow users to manually set the self-contained build to true.
+                        return;
                     var beanstalkPlatformName = beanstalkPlatformSettingValueSplit[1];
                     if (!Version.TryParse(beanstalkPlatformSettingValueSplit[2], out var beanstalkPlatformVersion))
-                        throw new InvalidElasticBeanstalkPlatformException(DeployToolErrorCode.InvalidElasticBeanstalkPlatform, $"The selected Elastic Beanstalk platform version '{beanstalkPlatformSettingValue}' is invalid.");
+                        // If the platform is not in the expected format, we will proceed normally to allow users to manually set the self-contained build to true.
+                        return;
 
                     // Elastic Beanstalk recently added .NET8 support in
                     // platform '.NET 8 on AL2023 version 3.1.1' and '.NET Core on AL2 version 2.8.0'.
