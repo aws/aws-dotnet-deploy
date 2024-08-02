@@ -284,6 +284,40 @@ namespace AWS.Deploy.CLI.UnitTests
             Assert.Equal(expectedCommand, _commandLineWrapper.CommandsToExecute.First().Command);
         }
 
+        [Fact]
+        public async Task CreateDotnetPublishZip_UnsupportedFramework_AlreadySetAsSelfContained()
+        {
+            var projectPath = SystemIOUtilities.ResolvePath(Path.Combine("docker", "WebAppNet7"));
+            var project = await _projectDefinitionParser.Parse(projectPath);
+            _recipeDefinition.TargetService = RecipeIdentifier.TARGET_SERVICE_ELASTIC_BEANSTALK;
+            _recipeDefinition.OptionSettings.Add(
+                new OptionSettingItem(
+                    "ElasticBeanstalkPlatformArn",
+                    "ElasticBeanstalkPlatformArn",
+                    "Beanstalk Platform",
+                    "The name of the Elastic Beanstalk platform to use with the environment.")
+                { DefaultValue = "arn:aws:elasticbeanstalk:us-west-2::platform/.NET 8 running on 64bit Amazon Linux 2023/3.1.3" });
+            var recommendation = new Recommendation(_recipeDefinition, project, 100, new Dictionary<string, object>());
+
+            recommendation.DeploymentBundle.DotnetPublishBuildConfiguration = "Release";
+            recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild = true;
+
+            Assert.True(recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild);
+
+            await _deploymentBundleHandler.CreateDotnetPublishZip(recommendation);
+
+            Assert.True(recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild);
+
+            var expectedCommand =
+                $"dotnet publish \"{project.ProjectPath}\"" +
+                $" -o \"{_directoryManager.CreatedDirectories.First()}\"" +
+                " -c Release" +
+                " --runtime linux-x64 " +
+                " --self-contained true";
+
+            Assert.Equal(expectedCommand, _commandLineWrapper.CommandsToExecute.First().Command);
+        }
+
         [Theory]
         [InlineData("arn:aws:elasticbeanstalk:us-west-2::platform/.NET 8 running on 64bit Amazon Linux 2023")]
         [InlineData("arn:aws:elasticbeanstalk:us-west-2::platform/.NET 8 running on 64bit Amazon Linux 2023/invalidversion")]
@@ -303,10 +337,16 @@ namespace AWS.Deploy.CLI.UnitTests
                 });
             var recommendation = new Recommendation(_recipeDefinition, project, 100, new Dictionary<string, object>());
 
-            var exception = await Assert.ThrowsAsync<InvalidElasticBeanstalkPlatformException>(async () => await _deploymentBundleHandler.CreateDotnetPublishZip(recommendation));
+            await _deploymentBundleHandler.CreateDotnetPublishZip(recommendation);
 
-            Assert.Equal(DeployToolErrorCode.InvalidElasticBeanstalkPlatform, exception.ErrorCode);
-            Assert.Equal($"The selected Elastic Beanstalk platform version '{platformArn}' is invalid.", exception.Message);
+            Assert.False(recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild);
+
+            var expectedCommand =
+                $"dotnet publish \"{project.ProjectPath}\"" +
+                $" -o \"{_directoryManager.CreatedDirectories.First()}\"" +
+                " -c Release  ";
+
+            Assert.Equal(expectedCommand, _commandLineWrapper.CommandsToExecute.First().Command);
         }
 
         [Theory]

@@ -276,12 +276,4 @@ namespace AWS.Deploy.Orchestration
     {
         public InvalidWindowsManifestFileException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
     }
-
-    /// <summary>
-    /// Throw if the deploy tool encounters an invalid Elastic Beanstalk platform version.
-    /// </summary>
-    public class InvalidElasticBeanstalkPlatformException : DeployToolException
-    {
-        public InvalidElasticBeanstalkPlatformException(DeployToolErrorCode errorCode, string message, Exception? innerException = null) : base(errorCode, message, innerException) { }
-    }
 }
