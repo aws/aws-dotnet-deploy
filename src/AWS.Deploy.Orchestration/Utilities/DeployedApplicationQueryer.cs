@@ -218,7 +218,7 @@ namespace AWS.Deploy.Orchestration.Utilities
             if (!environments.Any())
                 return validEnvironments;
 
-            var dotnetPlatforms = await _awsResourceQueryer.GetElasticBeanstalkPlatformArns();
+            var dotnetPlatforms = await _awsResourceQueryer.GetElasticBeanstalkPlatformArns(string.Empty);
             var dotnetPlatformArns = dotnetPlatforms.Select(x => x.PlatformArn).ToList();
 
             // only select environments that have a dotnet specific platform ARN.

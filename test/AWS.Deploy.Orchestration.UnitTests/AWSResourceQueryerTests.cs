@@ -176,6 +176,173 @@ namespace AWS.Deploy.Orchestration.UnitTests
         }
 
         [Fact]
+        public void SortElasticBeanstalkLinuxPlatforms()
+        {
+            // Use PlatformOwner as a placeholder to store where the summary should be sorted to.
+            var platforms = new List<PlatformSummary>()
+            {
+                new PlatformSummary
+                {
+                    PlatformArn = "arn:aws:elasticbeanstalk:us-west-2::platform/.NET 6 running on 64bit Amazon Linux 2023/3.1.3",
+                    PlatformBranchName = ".NET 6 running on 64bit Amazon Linux 2023",
+                    PlatformVersion = "3.1.3",
+                    PlatformOwner = "1"
+                },
+                new PlatformSummary
+                {
+                    PlatformArn = "arn:aws:elasticbeanstalk:us-west-2::platform/.NET 6 running on 64bit Amazon Linux 2023/3.1.2",
+                    PlatformBranchName = ".NET 6 running on 64bit Amazon Linux 2023",
+                    PlatformVersion = "3.1.2",
+                    PlatformOwner = "2"
+                },
+                new PlatformSummary
+                {
+                    PlatformArn = "arn:aws:elasticbeanstalk:us-west-2::platform/.NET 6 running on 64bit Amazon Linux 2023/3.0.6",
+                    PlatformBranchName = ".NET 6 running on 64bit Amazon Linux 2023",
+                    PlatformVersion = "3.0.6",
+                    PlatformOwner = "3"
+                },
+                new PlatformSummary
+                {
+                    PlatformArn = "arn:aws:elasticbeanstalk:us-west-2::platform/.NET 6 running on 64bit Amazon Linux 2023/3.0.5",
+                    PlatformBranchName = ".NET 6 running on 64bit Amazon Linux 2023",
+                    PlatformVersion = "3.0.5",
+                    PlatformOwner = "4"
+                },
+                new PlatformSummary
+                {
+                    PlatformArn = "arn:aws:elasticbeanstalk:us-west-2::platform/.NET 8 running on 64bit Amazon Linux 2023/3.1.3",
+                    PlatformBranchName = ".NET 8 running on 64bit Amazon Linux 2023",
+                    PlatformVersion = "3.1.3",
+                    PlatformOwner = "0"
+                },
+                new PlatformSummary
+                {
+                    PlatformArn = "arn:aws:elasticbeanstalk:us-west-2::platform/.NET Core running on 64bit Amazon Linux 2/2.8.0",
+                    PlatformBranchName = ".NET Core running on 64bit Amazon Linux 2",
+                    PlatformVersion = "2.8.0",
+                    PlatformOwner = "5"
+                },
+                new PlatformSummary
+                {
+                    PlatformArn = "arn:aws:elasticbeanstalk:us-west-2::platform/.NET Core running on 64bit Amazon Linux 2/2.7.3",
+                    PlatformBranchName = ".NET Core running on 64bit Amazon Linux 2",
+                    PlatformVersion = "2.7.3",
+                    PlatformOwner = "6"
+                },
+                new PlatformSummary
+                {
+                    PlatformArn = "arn:aws:elasticbeanstalk:us-west-2::platform/.NET Core running on 64bit Amazon Linux 2/2.6.0",
+                    PlatformBranchName = ".NET Core running on 64bit Amazon Linux 2",
+                    PlatformVersion = "2.6.0",
+                    PlatformOwner = "7"
+                },
+                new PlatformSummary
+                {
+                    PlatformArn = "arn:aws:elasticbeanstalk:us-west-2::platform/.NET Core running on 64bit Amazon Linux 2/2.5.7",
+                    PlatformBranchName = ".NET Core running on 64bit Amazon Linux 2",
+                    PlatformVersion = "2.5.7",
+                    PlatformOwner = "8"
+                }
+            };
+
+            var sortedPlatforms = AWSResourceQueryer.SortElasticBeanstalkLinuxPlatforms(string.Empty, platforms);
+
+            for (var i = 0; i < sortedPlatforms.Count; i++)
+            {
+                Assert.Equal(i.ToString(), sortedPlatforms[i].PlatformOwner);
+            }
+        }
+
+        [Fact]
+        public void SortElasticBeanstalkLinuxPlatforms_InvalidPlatform_RunningStringNotFound()
+        {
+            // Use PlatformOwner as a placeholder to store where the summary should be sorted to.
+            var platforms = new List<PlatformSummary>()
+            {
+                new PlatformSummary
+                {
+                    PlatformArn = "arn:aws:elasticbeanstalk:us-west-2::platform/.NET 6 on 64bit Amazon Linux 2023/3.1.3",
+                    PlatformBranchName = ".NET 6 on 64bit Amazon Linux 2023",
+                    PlatformVersion = "3.1.3",
+                    PlatformOwner = "2"
+                },
+                new PlatformSummary
+                {
+                    PlatformArn = "arn:aws:elasticbeanstalk:us-west-2::platform/.NET 6 running on 64bit Amazon Linux 2023/3.1.3",
+                    PlatformBranchName = ".NET 6 running on 64bit Amazon Linux 2023",
+                    PlatformVersion = "3.1.3",
+                    PlatformOwner = "1"
+                },
+                new PlatformSummary
+                {
+                    PlatformArn = "arn:aws:elasticbeanstalk:us-west-2::platform/.NET 8 running on 64bit Amazon Linux 2023/3.1.3",
+                    PlatformBranchName = ".NET 8 running on 64bit Amazon Linux 2023",
+                    PlatformVersion = "3.1.3",
+                    PlatformOwner = "0"
+                },
+                new PlatformSummary
+                {
+                    PlatformArn = "arn:aws:elasticbeanstalk:us-west-2::platform/.NET Core running on 64bit Amazon Linux 2/3.1.3",
+                    PlatformBranchName = ".NET Core running on 64bit Amazon Linux 2",
+                    PlatformVersion = "3.1.3",
+                    PlatformOwner = "3"
+                }
+            };
+
+            var sortedPlatforms = AWSResourceQueryer.SortElasticBeanstalkLinuxPlatforms(string.Empty, platforms);
+
+            for (var i = 0; i < sortedPlatforms.Count; i++)
+            {
+                Assert.Equal(i.ToString(), sortedPlatforms[i].PlatformOwner);
+            }
+        }
+
+        [Fact]
+        public void SortElasticBeanstalkLinuxPlatforms_InvalidPlatform_InvalidBranchName()
+        {
+            // Use PlatformOwner as a placeholder to store where the summary should be sorted to.
+            var platforms = new List<PlatformSummary>()
+            {
+                new PlatformSummary
+                {
+                    PlatformArn = "arn:aws:elasticbeanstalk:us-west-2::platform/.NET6 running on 64bit Amazon Linux 2023/3.1.3",
+                    PlatformBranchName = ".NET6 running on 64bit Amazon Linux 2023",
+                    PlatformVersion = "3.1.3",
+                    PlatformOwner = "2"
+                },
+                new PlatformSummary
+                {
+                    PlatformArn = "arn:aws:elasticbeanstalk:us-west-2::platform/.NET 6 running on 64bit Amazon Linux 2023/3.1.3",
+                    PlatformBranchName = ".NET 6 running on 64bit Amazon Linux 2023",
+                    PlatformVersion = "3.1.3",
+                    PlatformOwner = "1"
+                },
+                new PlatformSummary
+                {
+                    PlatformArn = "arn:aws:elasticbeanstalk:us-west-2::platform/.NET 8 running on 64bit Amazon Linux 2023/3.1.3",
+                    PlatformBranchName = ".NET 8 running on 64bit Amazon Linux 2023",
+                    PlatformVersion = "3.1.3",
+                    PlatformOwner = "0"
+                },
+                new PlatformSummary
+                {
+                    PlatformArn = "arn:aws:elasticbeanstalk:us-west-2::platform/.NET Core running on 64bit Amazon Linux 2/3.1.3",
+                    PlatformBranchName = ".NET Core running on 64bit Amazon Linux 2",
+                    PlatformVersion = "3.1.3",
+                    PlatformOwner = "3"
+                }
+            };
+
+            var sortedPlatforms = AWSResourceQueryer.SortElasticBeanstalkLinuxPlatforms(string.Empty, platforms);
+
+            for (var i = 0; i < sortedPlatforms.Count; i++)
+            {
+                Assert.Equal(i.ToString(), sortedPlatforms[i].PlatformOwner);
+            }
+        }
+
+        [Fact]
         public async Task CreateRepository_TagsWithRecipeName_Success()
         {
             var awsResourceQueryer = new AWSResourceQueryer(_mockAWSClientFactory.Object);

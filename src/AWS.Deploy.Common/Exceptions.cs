@@ -128,7 +128,7 @@ namespace AWS.Deploy.Common
         FailedToSaveDeploymentSettings = 10010600,
         InvalidWindowsManifestFile = 10010700,
         UserDeploymentFileNotFound = 10010800,
-        DockerInspectFailed = 10004200,
+        DockerInspectFailed = 10004200
     }
 
     public class ProjectFileNotFoundException : DeployToolException

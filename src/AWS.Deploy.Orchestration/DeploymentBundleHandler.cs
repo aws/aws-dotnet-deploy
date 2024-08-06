@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -43,6 +44,7 @@ namespace AWS.Deploy.Orchestration
         private readonly IDirectoryManager _directoryManager;
         private readonly IZipFileManager _zipFileManager;
         private readonly IFileManager _fileManager;
+        private readonly IOptionSettingHandler _optionSettingHandler;
 
         public DeploymentBundleHandler(
             ICommandLineWrapper commandLineWrapper,
@@ -50,7 +52,8 @@ namespace AWS.Deploy.Orchestration
             IOrchestratorInteractiveService interactiveService,
             IDirectoryManager directoryManager,
             IZipFileManager zipFileManager,
-            IFileManager fileManager)
+            IFileManager fileManager,
+            IOptionSettingHandler optionSettingHandler)
         {
             _commandLineWrapper = commandLineWrapper;
             _awsResourceQueryer = awsResourceQueryer;
@@ -58,6 +61,7 @@ namespace AWS.Deploy.Orchestration
             _directoryManager = directoryManager;
             _zipFileManager = zipFileManager;
             _fileManager = fileManager;
+            _optionSettingHandler = optionSettingHandler;
         }
 
         public async Task BuildDockerImage(CloudApplication cloudApplication, Recommendation recommendation, string imageTag)
@@ -108,21 +112,77 @@ namespace AWS.Deploy.Orchestration
             recommendation.DeploymentBundle.ECRImageTag = tagSuffix;
         }
 
+        /// <summary>
+        /// The supported .NET versions on Elastic Beanstalk are dependent on the available platform versions.
+        /// These versions do not always have the required .NET runtimes installed so we need to perform extra checks
+        /// and perform a self-contained publish when creating the deployment bundle if needed.
+        /// </summary>
+        private void SwitchToSelfContainedBuildIfNeeded(Recommendation recommendation)
+        {
+            if (recommendation.Recipe.TargetService == RecipeIdentifier.TARGET_SERVICE_ELASTIC_BEANSTALK)
+            {
+                if (recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild)
+                    return;
+
+                var targetFramework = recommendation.ProjectDefinition.TargetFramework ?? string.Empty;
+                if (string.IsNullOrEmpty(targetFramework))
+                    return;
+
+                // Elastic Beanstalk doesn't currently have .NET 7 preinstalled.
+                var unavailableFramework = new List<string> { "net7.0" };
+                var frameworkNames = new Dictionary<string, string> { { "net7.0", ".NET 7" } };
+                if (unavailableFramework.Contains(targetFramework))
+                {
+                    _interactiveService.LogInfoMessage($"Using self-contained publish since AWS Elastic Beanstalk does not currently have {frameworkNames[targetFramework]} preinstalled");
+                    recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild = true;
+                    return;
+                }
+
+                var beanstalkPlatformSetting = recommendation.Recipe.OptionSettings.FirstOrDefault(x => x.Id.Equals("ElasticBeanstalkPlatformArn"));
+                if (beanstalkPlatformSetting != null)
+                {
+                    var beanstalkPlatformSettingValue = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, beanstalkPlatformSetting);
+                    var beanstalkPlatformSettingValueSplit = beanstalkPlatformSettingValue?.Split("/");
+                    if (beanstalkPlatformSettingValueSplit?.Length != 3)
+                        // If the platform is not in the expected format, we will proceed normally to allow users to manually set the self-contained build to true.
+                        return;
+                    var beanstalkPlatformName = beanstalkPlatformSettingValueSplit[1];
+                    if (!Version.TryParse(beanstalkPlatformSettingValueSplit[2], out var beanstalkPlatformVersion))
+                        // If the platform is not in the expected format, we will proceed normally to allow users to manually set the self-contained build to true.
+                        return;
+
+                    // Elastic Beanstalk recently added .NET8 support in
+                    // platform '.NET 8 on AL2023 version 3.1.1' and '.NET Core on AL2 version 2.8.0'.
+                    // If users are using platform versions other than the above or older than '2.8.0' for '.NET Core'
+                    // we need to perform a self-contained publish.
+                    if (targetFramework.Equals("net8.0"))
+                    {
+                        if (beanstalkPlatformName.Contains(".NET Core"))
+                        {
+                            if (beanstalkPlatformVersion < new Version(2, 8, 0))
+                            {
+                                _interactiveService.LogInfoMessage($"Using self-contained publish since AWS Elastic Beanstalk does not currently have .NET 8 preinstalled on {beanstalkPlatformName} ({beanstalkPlatformVersion.ToString()})");
+                                recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild = true;
+                                return;
+                            }
+                        }
+                        else if (!beanstalkPlatformName.Contains(".NET 8"))
+                        {
+                            _interactiveService.LogInfoMessage($"Using self-contained publish since AWS Elastic Beanstalk does not currently have .NET 8 preinstalled on {beanstalkPlatformName} ({beanstalkPlatformVersion.ToString()})");
+                            recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild = true;
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
         public async Task<string> CreateDotnetPublishZip(Recommendation recommendation)
         {
             _interactiveService.LogInfoMessage(string.Empty);
             _interactiveService.LogInfoMessage("Creating Dotnet Publish Zip file...");
 
-            // Since Beanstalk doesn't currently have .NET 7 and .NET 8 preinstalled we need to make sure we are doing a self-contained publish when creating the deployment bundle.
-            var targetFramework = recommendation.ProjectDefinition.TargetFramework ?? string.Empty;
-            var unavailableFramework = new List<string> { "net7.0", "net8.0" };
-            var frameworkNames = new Dictionary<string, string> { { "net7.0", ".NET 7" }, { "net8.0", ".NET 8" } };
-            if (recommendation.Recipe.TargetService == RecipeIdentifier.TARGET_SERVICE_ELASTIC_BEANSTALK &&
-                unavailableFramework.Contains(targetFramework))
-            {
-                _interactiveService.LogInfoMessage($"Using self-contained publish since AWS Elastic Beanstalk does not currently have {frameworkNames[targetFramework]} preinstalled");
-                recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild = true;
-            }
+            SwitchToSelfContainedBuildIfNeeded(recommendation);
 
             var publishDirectoryInfo = _directoryManager.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
             var additionalArguments = recommendation.DeploymentBundle.DotnetPublishAdditionalBuildArguments;
