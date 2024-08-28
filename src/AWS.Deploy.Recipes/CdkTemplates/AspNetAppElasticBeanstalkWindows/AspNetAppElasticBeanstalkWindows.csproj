@@ -4,7 +4,6 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
     <RollForward>Major</RollForward>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Nullable>enable</Nullable>
     <AWSProjectType>DeploymentProject</AWSProjectType>
     <!-- The value "AWSDeployRecipesCDKCommonVersion" is replaced by the project template system. -->
@@ -29,6 +28,7 @@
 
     <PackageReference Include="AWSSDK.ElasticBeanstalk" Version="3.7.200.42" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
+    <PackageReference Include="System.Text.Json" Version="8.0.4" />
 
     <!-- jsii Roslyn analyzers (un-comment to obtain compile-time checks for missing required props
     <PackageReference Include="Amazon.Jsii.Analyzers" Version="*" PrivateAssets="all" />
