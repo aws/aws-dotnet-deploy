@@ -40,6 +40,7 @@
     "VPC": {
       "UseVPC": false
     },
+    "EnvironmentArchitecture": "X86_64",
     "DotnetBuildConfiguration": "Release",
     "DotnetPublishArgs": "",
     "SelfContainedBuild": false

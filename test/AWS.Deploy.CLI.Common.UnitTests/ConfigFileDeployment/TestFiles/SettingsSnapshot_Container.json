@@ -26,6 +26,7 @@
       "UseVPCConnector": false
     },
     "AppRunnerEnvironmentVariables": "",
+    "EnvironmentArchitecture": "X86_64",
     "DockerBuildArgs": "",
     "DockerfilePath": "DockerAssets/Dockerfile",
     "DockerExecutionDirectory": "DockerAssets",

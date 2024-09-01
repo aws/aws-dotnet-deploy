@@ -1,7 +1,7 @@
 {
     "$schema": "./aws-deploy-recipe-schema.json",
     "Id": "AspNetAppExistingBeanstalkWindowsEnvironment",
-    "Version": "1.0.0",
+    "Version": "1.0.1",
     "Name": "ASP.NET Core App to Existing AWS Elastic Beanstalk Windows Environment",
     "DisableNewDeployments": true,
     "DeploymentType": "BeanstalkEnvironment",
@@ -10,6 +10,7 @@
     "Description": "This ASP.NET Core application will be built and deployed to an existing AWS Elastic Beanstalk Windows environment. Recommended if you want to deploy your application directly to EC2 hosts, not as a container image.",
     "TargetService": "AWS Elastic Beanstalk",
     "TargetPlatform": "Windows",
+    "SupportedArchitectures": [ "x86_64" ],
 
     "RecipePriority": 0,
     "RecommendationRules": [
