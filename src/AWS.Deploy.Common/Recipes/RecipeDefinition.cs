@@ -61,6 +61,11 @@ namespace AWS.Deploy.Common.Recipes
         public TargetPlatform? TargetPlatform { get; set; }
 
         /// <summary>
+        /// The CPU architecture that is supported by the recipe.
+        /// </summary>
+        public List<SupportedArchitecture>? SupportedArchitectures { get; set; }
+
+        /// <summary>
         /// The list of DisplayedResources that lists logical CloudFormation IDs with a description.
         /// </summary>
         public List<DisplayedResource>? DisplayedResources { get; set; }
