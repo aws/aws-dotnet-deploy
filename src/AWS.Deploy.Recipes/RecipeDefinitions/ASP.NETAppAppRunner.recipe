@@ -1,7 +1,7 @@
 {
     "$schema": "./aws-deploy-recipe-schema.json",
     "Id": "AspNetAppAppRunner",
-    "Version": "1.0.2",
+    "Version": "1.0.3",
     "Name": "ASP.NET Core App to AWS App Runner",
     "DeploymentType": "CdkProject",
     "DeploymentBundle": "Container",
@@ -11,6 +11,7 @@
     "Description": "This ASP.NET Core application will be built as a container image on Linux and deployed to AWS App Runner, a fully managed service for web applications and APIs. If your project does not contain a Dockerfile, it will be automatically generated, otherwise an existing Dockerfile will be used. Recommended if you want to deploy your web application as a Linux container image on a fully managed environment.",
     "TargetService": "AWS App Runner",
     "TargetPlatform": "Linux",
+    "SupportedArchitectures": [ "x86_64" ],
 
     "DisplayedResources": [
         {

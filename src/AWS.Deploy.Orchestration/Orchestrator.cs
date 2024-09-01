@@ -244,6 +244,13 @@ namespace AWS.Deploy.Orchestration
                 recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_DEFAULT_CONTAINER_PORT, defaultPort);
                 recommendation.DeploymentBundle.DockerfileHttpPort = defaultPort;
             }
+            if (recommendation.ReplacementTokens.ContainsKey(Constants.RecipeIdentifier.REPLACE_TOKEN_DEFAULT_ENVIRONMENT_ARCHITECTURE))
+            {
+                if (_dockerEngine == null)
+                    throw new InvalidOperationException($"{nameof(_dockerEngine)} is null as part of the Orchestrator object");
+
+                recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_DEFAULT_ENVIRONMENT_ARCHITECTURE, SupportedArchitecture.X86_64.ToString());
+            }
         }
 
         public async Task DeployRecommendation(CloudApplication cloudApplication, Recommendation recommendation)

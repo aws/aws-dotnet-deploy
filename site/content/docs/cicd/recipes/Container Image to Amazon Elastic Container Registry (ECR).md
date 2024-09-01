@@ -8,6 +8,10 @@
     * ID: ImageTag
     * Description: This tag will be associated to the container images which are pushed to Amazon Elastic Container Registry.
     * Type: String
+* **Environment Architecture**
+    * ID: EnvironmentArchitecture
+    * Description: The CPU architecture of the environment to create.
+    * Type: String
 * **Docker Build Args**
     * ID: DockerBuildArgs
     * Description: The list of additional options to append to the `docker build` command.

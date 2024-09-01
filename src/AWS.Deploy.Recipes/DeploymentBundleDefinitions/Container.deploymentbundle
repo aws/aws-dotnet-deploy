@@ -2,6 +2,16 @@
     "Type": "Container",
     "Parameters": [
         {
+            "Id": "EnvironmentArchitecture",
+            "Name": "Environment Architecture",
+            "Description": "The CPU architecture of the environment to create.",
+            "TypeHint": "EnvironmentArchitecture",
+            "Type": "String",
+            "DefaultValue": "{DefaultEnvironmentArchitecture}",
+            "AdvancedSetting": false,
+            "Updatable": true
+        },
+        {
             "Id": "DockerBuildArgs",
             "Name": "Docker Build Args",
             "Description": "The list of additional options to append to the `docker build` command.",

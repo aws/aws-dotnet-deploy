@@ -4,6 +4,7 @@
   "RecipeId": "PushContainerImageEcr",
   "Settings": {
     "ImageTag": 123456789,
+    "EnvironmentArchitecture": "X86_64",
     "DockerBuildArgs": "",
     "DockerfilePath": "DockerAssets/Dockerfile",
     "DockerExecutionDirectory": "DockerAssets",
