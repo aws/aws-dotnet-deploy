@@ -1,0 +1,19 @@
+{
+  "Projects": [
+    {
+      "Name": "AWS.Deploy.CLI",
+      "Path": "src/AWS.Deploy.CLI/AWS.Deploy.CLI.csproj"
+    },
+    {
+      "Name": "AWS.Deploy.Recipes.CDK.Common",
+      "Path": "src/AWS.Deploy.Recipes.CDK.Common/AWS.Deploy.Recipes.CDK.Common.csproj"
+    },
+    {
+      "Name": "AWS.Deploy.ServerMode.Client",
+      "Path": "src/AWS.Deploy.ServerMode.Client/AWS.Deploy.ServerMode.Client.csproj"
+    }
+  ],
+  "UseCommitsForChangelog": false,
+  "DefaultIncrementType": "Patch",
+  "ChangeFilesDetermineIncrementType": true
+}
