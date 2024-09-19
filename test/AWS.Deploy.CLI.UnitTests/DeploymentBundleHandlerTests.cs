@@ -91,8 +91,16 @@ namespace AWS.Deploy.CLI.UnitTests
             var expectedDockerFile = Path.GetFullPath(Path.Combine(".", "Dockerfile"), recommendation.GetProjectDirectory());
             var dockerExecutionDirectory = Directory.GetParent(Path.GetFullPath(recommendation.ProjectPath)).Parent.Parent;
 
-            Assert.Equal($"docker build -t {imageTag} -f \"{expectedDockerFile}\" .",
-                _commandLineWrapper.CommandsToExecute.First().Command);
+            if (RuntimeInformation.OSArchitecture.Equals(Architecture.X64))
+            {
+                Assert.Equal($"docker build -t {imageTag} -f \"{expectedDockerFile}\" .",
+                    _commandLineWrapper.CommandsToExecute.First().Command);
+            }
+            else
+            {
+                Assert.Equal($"docker buildx build --platform linux/amd64 -t {imageTag} -f \"{expectedDockerFile}\" .",
+                    _commandLineWrapper.CommandsToExecute.First().Command);
+            }
             Assert.Equal(dockerExecutionDirectory.FullName,
                 _commandLineWrapper.CommandsToExecute.First().WorkingDirectory);
         }
@@ -116,8 +124,16 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var expectedDockerFile = Path.GetFullPath(Path.Combine(".", "Dockerfile"), recommendation.GetProjectDirectory());
 
-            Assert.Equal($"docker build -t {imageTag} -f \"{expectedDockerFile}\" .",
-                _commandLineWrapper.CommandsToExecute.First().Command);
+            if (RuntimeInformation.OSArchitecture.Equals(Architecture.X64))
+            {
+                Assert.Equal($"docker build -t {imageTag} -f \"{expectedDockerFile}\" .",
+                    _commandLineWrapper.CommandsToExecute.First().Command);
+            }
+            else
+            {
+                Assert.Equal($"docker buildx build --platform linux/amd64 -t {imageTag} -f \"{expectedDockerFile}\" .",
+                    _commandLineWrapper.CommandsToExecute.First().Command);
+            }
             Assert.Equal(projectPath,
                 _commandLineWrapper.CommandsToExecute.First().WorkingDirectory);
         }
@@ -144,9 +160,16 @@ namespace AWS.Deploy.CLI.UnitTests
             var cloudApplication = new CloudApplication("ConsoleAppTask", string.Empty, CloudApplicationResourceType.CloudFormationStack, recommendation.Recipe.Id);
             var imageTag = "imageTag";
             await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation, imageTag);
-
-            Assert.Equal($"docker build -t {imageTag} -f \"{dockerfilePath}\" .",
-                _commandLineWrapper.CommandsToExecute.First().Command);
+            if (RuntimeInformation.OSArchitecture.Equals(Architecture.X64))
+            {
+                Assert.Equal($"docker build -t {imageTag} -f \"{dockerfilePath}\" .",
+                    _commandLineWrapper.CommandsToExecute.First().Command);
+            }
+            else
+            {
+                Assert.Equal($"docker buildx build --platform linux/amd64 -t {imageTag} -f \"{dockerfilePath}\" .",
+                    _commandLineWrapper.CommandsToExecute.First().Command);
+            }
             Assert.Equal(expectedDockerExecutionDirectory.FullName,
                 _commandLineWrapper.CommandsToExecute.First().WorkingDirectory);
         }
