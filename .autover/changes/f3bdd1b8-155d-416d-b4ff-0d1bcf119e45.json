@@ -1,0 +1,11 @@
+{
+  "Projects": [
+    {
+      "Name": "AWS.Deploy.CLI",
+      "Type": "Minor",
+      "ChangelogMessages": [
+        "Fix an issue causing container deployments to fail when run on an ARM-based system"
+      ]
+    }
+  ]
+}

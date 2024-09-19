@@ -48,9 +48,9 @@ namespace AWS.Deploy.DockerEngine
         /// <summary>
         /// Writes a docker file based on project information
         /// </summary>
-        public void WriteDockerFile(string projectDirectory, List<string>? projectList)
+        public void WriteDockerFile(string projectDirectory, List<string>? projectList, string? targetFramework)
         {
-            var dockerFileTemplate = ProjectUtilities.ReadTemplate();
+            var dockerFileTemplate = ProjectUtilities.ReadTemplate(targetFramework);
             var projects = "";
             var projectPath = "";
             var projectFolder = "";
@@ -99,7 +99,7 @@ namespace AWS.Deploy.DockerEngine
                 dockerFile = dockerFile
                     .Replace("{http-port-env-variable}", string.Empty);
             }
-            // For all other ports, it is up to the user to expose the HTTPS port in the dockerfile. 
+            // For all other ports, it is up to the user to expose the HTTPS port in the dockerfile.
             else
             {
                 dockerFile = dockerFile
@@ -119,7 +119,7 @@ namespace AWS.Deploy.DockerEngine
                     .Replace("{non-root-user}", "\r\nUSER app");
             }
 
-            // ProjectDefinitionParser will have transformed projectDirectory to an absolute path, 
+            // ProjectDefinitionParser will have transformed projectDirectory to an absolute path,
             // and DockerFileName is static so traversal should not be possible here.
             // nosemgrep: csharp.lang.security.filesystem.unsafe-path-combine.unsafe-path-combine
             File.WriteAllText(Path.Combine(projectDirectory, Constants.Docker.DefaultDockerfileName), dockerFile);

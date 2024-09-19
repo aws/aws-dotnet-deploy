@@ -1,7 +1,6 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-using System.IO;
 using System.Reflection;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Extensions;
@@ -12,6 +11,7 @@ namespace AWS.Deploy.DockerEngine
     {
         private const string DockerFileConfig = "AWS.Deploy.DockerEngine.Properties.DockerFileConfig.json";
         private const string DockerfileTemplate = "AWS.Deploy.DockerEngine.Templates.Dockerfile.template";
+        private const string DockerfileTemplate_Net6 = "AWS.Deploy.DockerEngine.Templates.Dockerfile.Net6.template";
 
         /// <summary>
         /// Retrieves the Docker File Config
@@ -31,9 +31,22 @@ namespace AWS.Deploy.DockerEngine
         /// <summary>
         /// Reads dockerfile template file
         /// </summary>
-        internal static string ReadTemplate()
+        internal static string ReadTemplate(string? targetFramework)
         {
-            var template = Assembly.GetExecutingAssembly().ReadEmbeddedFile(DockerfileTemplate);
+            string templateLocation;
+            switch (targetFramework)
+            {
+                case "net6.0":
+                case "net5.0":
+                case "netcoreapp3.1":
+                    templateLocation = DockerfileTemplate_Net6;
+                    break;
+
+                default:
+                    templateLocation = DockerfileTemplate;
+                    break;
+            }
+            var template = Assembly.GetExecutingAssembly().ReadEmbeddedFile(templateLocation);
 
             if (string.IsNullOrWhiteSpace(template))
             {

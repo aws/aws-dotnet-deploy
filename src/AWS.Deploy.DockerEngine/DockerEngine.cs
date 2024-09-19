@@ -81,7 +81,7 @@ namespace AWS.Deploy.DockerEngine
                 DetermineHTTPPortEnvironmentVariable(recommendation, recommendation.DeploymentBundle.DockerfileHttpPort));
             var projectDirectory = Path.GetDirectoryName(_projectPath) ?? "";
             var projectList = GetProjectList();
-            dockerFile.WriteDockerFile(projectDirectory, projectList);
+            dockerFile.WriteDockerFile(projectDirectory, projectList, recommendation.ProjectDefinition.TargetFramework);
         }
 
         /// <summary>
@@ -192,7 +192,7 @@ namespace AWS.Deploy.DockerEngine
             if (string.IsNullOrEmpty(recommendation.DeploymentBundle.DockerExecutionDirectory))
             {
                 var projectFilename = Path.GetFileName(recommendation.ProjectPath);
-                
+
                 if (DockerUtilities.TryGetAbsoluteDockerfile(recommendation, _fileManager, _directoryManager, out var dockerFilePath))
                 {
                     using (var stream = File.OpenRead(dockerFilePath))

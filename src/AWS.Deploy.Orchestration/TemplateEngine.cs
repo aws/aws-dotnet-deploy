@@ -41,7 +41,7 @@ namespace AWS.Deploy.Orchestration
             {
                 throw new InvalidOperationException($"{nameof(recommendation.Recipe.CdkProjectTemplateId)} cannot be null or an empty string");
             }
-                    
+
             //The location of the base template that will be installed into the templating engine
             var cdkProjectTemplateDirectory = Path.Combine(
                 Path.GetDirectoryName(recommendation.Recipe.RecipePath) ??
@@ -67,7 +67,7 @@ namespace AWS.Deploy.Orchestration
             var templateParameters = new Dictionary<string, string> {
                 // CDK Template projects can parameterize the version number of the AWS.Deploy.Recipes.CDK.Common package. This avoid
                 // projects having to be modified every time the package version is bumped.
-                { "AWSDeployRecipesCDKCommonVersion", FileVersionInfo.GetVersionInfo(typeof(Constants.CloudFormationIdentifier).Assembly.Location).ProductVersion
+                { "AWSDeployRecipesCDKCommonVersion", FileVersionInfo.GetVersionInfo(typeof(AWS.Deploy.Recipes.CDK.Common.CDKRecipeSetup).Assembly.Location).ProductVersion
                                                       ?? throw new InvalidAWSDeployRecipesCDKCommonVersionException(DeployToolErrorCode.InvalidAWSDeployRecipesCDKCommonVersion, "The version number of the AWS.Deploy.Recipes.CDK.Common package is invalid.") }
             };
 

@@ -74,6 +74,11 @@ namespace AWS.Deploy.Orchestration
             DockerUtilities.TryGetAbsoluteDockerfile(recommendation, _fileManager, _directoryManager, out var dockerFile);
 
             var dockerBuildCommand = $"docker build -t {imageTag} -f \"{dockerFile}\"{buildArgs} .";
+            if (RuntimeInformation.OSArchitecture != Architecture.X64)
+            {
+                dockerBuildCommand = $"docker buildx build --platform linux/amd64 -t {imageTag} -f \"{dockerFile}\"{buildArgs} .";
+            }
+
             _interactiveService.LogInfoMessage($"Docker Execution Directory: {Path.GetFullPath(dockerExecutionDirectory)}");
             _interactiveService.LogInfoMessage($"Docker Build Command: {dockerBuildCommand}");
 

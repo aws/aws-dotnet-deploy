@@ -76,7 +76,7 @@ namespace AWS.Deploy.CLI.ServerMode
                 return Task.FromResult(AuthenticateResult.Fail("Missing Authorization header"));
             }
 
-            return Task.FromResult(ProcessAuthorizationHeader(value, _encryptionProvider));
+            return Task.FromResult(ProcessAuthorizationHeader(value.ToString(), _encryptionProvider));
         }
 
         public static AuthenticateResult ProcessAuthorizationHeader(string authorizationHeaderValue, IEncryptionProvider encryptionProvider)

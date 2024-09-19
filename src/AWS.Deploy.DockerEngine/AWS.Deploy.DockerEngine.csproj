@@ -9,10 +9,12 @@
   <ItemGroup>
     <None Remove="Properties\DockerFileConfig.json" />
     <None Remove="Templates\Dockerfile.template" />
+    <None Remove="Templates\Dockerfile.Net6.template" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Properties\DockerFileConfig.json" />
+    <EmbeddedResource Include="Templates\Dockerfile.Net6.template" />
     <EmbeddedResource Include="Templates\Dockerfile.template" />
   </ItemGroup>
 
