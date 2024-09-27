@@ -1,17 +1,14 @@
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-USER app
+FROM {docker-base-image} AS base{non-root-user}
 WORKDIR /app
-EXPOSE 8080
-EXPOSE 8081
+{exposed-ports}
 
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-ARG TARGETARCH
+FROM {docker-build-image} AS build
 WORKDIR /src
-COPY ["WebAppNet8.csproj", ""]
-RUN dotnet restore "WebAppNet8.csproj" -a $TARGETARCH
+{project-path-list}
+RUN dotnet restore "{project-path}"
 COPY . .
-WORKDIR "/src/"
-RUN dotnet build "WebAppNet8.csproj" -c Release -o /app/build -a $TARGETARCH
+WORKDIR "/src/{project-folder}"
+RUN dotnet build "{project-name}" -c Release -o /app/build
 
 FROM build AS publish
 RUN apt-get update -yq \
@@ -21,9 +18,9 @@ RUN apt-get update -yq \
     && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_18.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list \
     && apt-get update -yq \
     && apt-get install nodejs -yq
-RUN dotnet publish "WebAppNet8.csproj" -c Release -o /app/publish -a $TARGETARCH
+RUN dotnet publish "{project-name}" -c Release -o /app/publish
 
-FROM base AS final
+FROM base AS final{http-port-env-variable}
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "WebAppNet8.dll"]
+ENTRYPOINT ["dotnet", "{assembly-name}.dll"]

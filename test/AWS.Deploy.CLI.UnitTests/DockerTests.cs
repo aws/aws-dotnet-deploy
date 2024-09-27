@@ -64,10 +64,15 @@ namespace AWS.Deploy.CLI.UnitTests
             Assert.False(string.IsNullOrWhiteSpace(dockerFileConfig));
         }
 
-        [Fact]
-        public void DockerfileTemplateExists()
+        [Theory]
+        [InlineData("net8.0")]
+        [InlineData("net7.0")]
+        [InlineData("net6.0")]
+        [InlineData("net5.0")]
+        [InlineData("netcoreapp3.1")]
+        public void DockerfileTemplateExists(string targetFramework)
         {
-            var dockerFileTemplate = ProjectUtilities.ReadTemplate();
+            var dockerFileTemplate = ProjectUtilities.ReadTemplate(targetFramework);
             Assert.False(string.IsNullOrWhiteSpace(dockerFileTemplate));
         }
 

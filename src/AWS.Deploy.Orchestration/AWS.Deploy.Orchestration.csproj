@@ -8,10 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\AWS.Deploy.Recipes.CDK.Common\RecipeProps.cs" Link="RecipeProps.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="AWSSDK.CloudControlApi" Version="3.7.300.77" />
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.302.18" />
     <PackageReference Include="AWSSDK.SQS" Version="3.7.300.77" />
@@ -31,7 +27,7 @@
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0.0" />
     <PackageReference Include="Microsoft.TemplateEngine.IDE" Version="5.0.1" />
     <PackageReference Include="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="5.0.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.Linq.Async" Version="6.0.1" />
     <PackageReference Include="YamlDotNet" Version="13.4.0" />
   </ItemGroup>
@@ -39,6 +35,7 @@
   <ItemGroup>
     <ProjectReference Include="..\AWS.Deploy.Recipes\AWS.Deploy.Recipes.csproj" />
     <ProjectReference Include="..\AWS.Deploy.DockerEngine\AWS.Deploy.DockerEngine.csproj" />
+    <ProjectReference Include="..\AWS.Deploy.Recipes.CDK.Common\AWS.Deploy.Recipes.CDK.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>
