@@ -51,7 +51,7 @@ jobs:
           dotnet-version: 8.0.x
       # Install AutoVer which is needed to retrieve information about the current release.
       - name: Install AutoVer
-        run: dotnet tool install --global AutoVer --version 0.0.21
+        run: dotnet tool install --global AutoVer --version 0.0.22
       # Set up a git user to be able to run git commands later on
       - name: Setup Git User
         run: |
@@ -117,7 +117,7 @@ jobs:
           dotnet-version: 8.0.x
       # Install AutoVer which is needed to retrieve information about the current release.
       - name: Install AutoVer
-        run: dotnet tool install --global AutoVer --version 0.0.21
+        run: dotnet tool install --global AutoVer --version 0.0.22
       # Set up a git user to be able to run git commands later on
       - name: Setup Git User
         run: |
