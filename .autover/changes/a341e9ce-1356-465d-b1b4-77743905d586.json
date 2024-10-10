@@ -1,0 +1,26 @@
+{
+  "Projects": [
+    {
+      "Name": "AWS.Deploy.CLI",
+      "Type": "Patch",
+      "ChangelogMessages": [
+        "Revert the CDK Bootstrap template to version 22 due to CDK rollback",
+        "Bump System.Text.Json to 8.0.5 to address a known high severity vulnerability"
+      ]
+    },
+    {
+      "Name": "AWS.Deploy.Recipes.CDK.Common",
+      "Type": "Patch",
+      "ChangelogMessages": [
+        "Bump System.Text.Json to 8.0.5 to address a known high severity vulnerability"
+      ]
+    },
+    {
+      "Name": "AWS.Deploy.ServerMode.Client",
+      "Type": "Patch",
+      "ChangelogMessages": [
+        "Bump System.Text.Json to 8.0.5 to address a known high severity vulnerability"
+      ]
+    }
+  ]
+}
