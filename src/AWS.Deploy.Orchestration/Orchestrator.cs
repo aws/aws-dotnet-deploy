@@ -246,9 +246,6 @@ namespace AWS.Deploy.Orchestration
             }
             if (recommendation.ReplacementTokens.ContainsKey(Constants.RecipeIdentifier.REPLACE_TOKEN_DEFAULT_ENVIRONMENT_ARCHITECTURE))
             {
-                if (_dockerEngine == null)
-                    throw new InvalidOperationException($"{nameof(_dockerEngine)} is null as part of the Orchestrator object");
-
                 recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_DEFAULT_ENVIRONMENT_ARCHITECTURE, SupportedArchitecture.X86_64.ToString());
             }
         }
