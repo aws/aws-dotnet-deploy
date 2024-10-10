@@ -1,7 +1,7 @@
 {
     "$schema": "./aws-deploy-recipe-schema.json",
     "Id": "PushContainerImageEcr",
-    "Version": "1.0.1",
+    "Version": "1.0.2",
     "Name": "Container Image to Amazon Elastic Container Registry (ECR)",
     "DeploymentType": "ElasticContainerRegistryImage",
     "DeploymentBundle": "Container",
@@ -9,6 +9,7 @@
     "ShortDescription": "Pushes container image to a fully managed container registry.",
     "TargetService": "Amazon Elastic Container Service",
     "TargetPlatform": "Linux",
+    "SupportedArchitectures": [ "x86_64" ],
 
     "RecipePriority": 0,
     "RecommendationRules": [

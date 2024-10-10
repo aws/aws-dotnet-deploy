@@ -115,6 +115,10 @@
     * ID: AppRunnerEnvironmentVariables
     * Description: Configure environment properties for your application.
     * Type: KeyValue
+* **Environment Architecture**
+    * ID: EnvironmentArchitecture
+    * Description: The CPU architecture of the environment to create.
+    * Type: String
 * **Docker Build Args**
     * ID: DockerBuildArgs
     * Description: The list of additional options to append to the `docker build` command.

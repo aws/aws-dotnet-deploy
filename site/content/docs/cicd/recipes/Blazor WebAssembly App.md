@@ -74,6 +74,10 @@
     * ID: WebAclId
     * Description: The AWS WAF (web application firewall) ACL arn
     * Type: String
+* **Environment Architecture**
+    * ID: EnvironmentArchitecture
+    * Description: The CPU architecture of the environment to create.
+    * Type: String
 * **Dotnet Build Configuration**
     * ID: DotnetBuildConfiguration
     * Description: The build configuration to use for the dotnet build

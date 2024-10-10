@@ -144,6 +144,9 @@ namespace AWS.Deploy.Orchestration
                 case Constants.RecipeIdentifier.DotnetPublishSelfContainedBuildOptionId:
                     recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild = Convert.ToBoolean(value);
                     break;
+                case Constants.RecipeIdentifier.EnvironmentArchitectureOptionId:
+                    recommendation.DeploymentBundle.EnvironmentArchitecture = Enum.Parse<SupportedArchitecture>(value.ToString() ?? string.Empty);
+                    break;
                 default:
                     return;
             }

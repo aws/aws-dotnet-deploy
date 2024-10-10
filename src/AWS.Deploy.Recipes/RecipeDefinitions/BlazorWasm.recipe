@@ -1,7 +1,7 @@
 {
     "$schema": "./aws-deploy-recipe-schema.json",
     "Id": "BlazorWasm",
-    "Version": "1.0.1",
+    "Version": "1.0.2",
     "Name": "Blazor WebAssembly App",
     "DeploymentType": "CdkProject",
     "DeploymentBundle": "DotnetPublishZipFile",
@@ -11,6 +11,7 @@
     "Description": "This Blazor WebAssembly application will be built and hosted in a new Amazon Simple Storage Service (Amazon S3) bucket. The Blazor application will be exposed publicly through a CloudFront distribution using the Amazon S3 bucket as the origin.",
     "TargetService": "Amazon S3",
     "TargetPlatform": "Linux",
+    "SupportedArchitectures": [ "x86_64" ],
 
     "DisplayedResources": [
         {
