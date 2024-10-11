@@ -4,21 +4,21 @@
       "Name": "AWS.Deploy.CLI",
       "Type": "Patch",
       "ChangelogMessages": [
-        "Bump System.Text.Json to 8.0.5 to address a known high severity vulnerability"
+        "Removed the System.Text.Json dependency from the deployment project templates"
       ]
     },
     {
       "Name": "AWS.Deploy.Recipes.CDK.Common",
       "Type": "Patch",
       "ChangelogMessages": [
-        "Bump System.Text.Json to 8.0.5 to address a known high severity vulnerability"
+        "Removed the System.Text.Json dependency from the deployment project templates"
       ]
     },
     {
       "Name": "AWS.Deploy.ServerMode.Client",
       "Type": "Patch",
       "ChangelogMessages": [
-        "Bump System.Text.Json to 8.0.5 to address a known high severity vulnerability"
+        "Removed the System.Text.Json dependency from the deployment project templates"
       ]
     }
   ]
