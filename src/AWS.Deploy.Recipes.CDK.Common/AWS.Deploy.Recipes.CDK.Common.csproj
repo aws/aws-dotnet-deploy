@@ -10,13 +10,12 @@
     <PackageIcon>icon.png</PackageIcon>
     <PackageProjectUrl>https://github.com/aws/aws-dotnet-deploy</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <Version>1.25.3</Version>
+    <Version>1.26.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Amazon.CDK.Lib" Version="2.155.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
-    <PackageReference Include="System.Text.Json" Version="8.0.4" />
   </ItemGroup>
 
   <ItemGroup>
