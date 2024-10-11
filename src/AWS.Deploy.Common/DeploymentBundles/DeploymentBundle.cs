@@ -1,6 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using AWS.Deploy.Common.Recipes;
 
 namespace AWS.Deploy.Common
@@ -69,6 +70,6 @@ namespace AWS.Deploy.Common
         /// <summary>
         /// The CPU architecture of the environment to create.
         /// </summary>
-        public SupportedArchitecture EnvironmentArchitecture { get; set; } = SupportedArchitecture.X86_64;
+        public SupportedArchitecture EnvironmentArchitecture { get; set; } = Enum.Parse<SupportedArchitecture>(Constants.Recipe.DefaultSupportedArchitecture);
     }
 }

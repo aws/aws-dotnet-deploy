@@ -31,7 +31,8 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 }
             };
 
-            foreach (var value in recommendation.Recipe.SupportedArchitectures ?? new List<SupportedArchitecture> { SupportedArchitecture.X86_64 })
+            foreach (var value in recommendation.Recipe.SupportedArchitectures ??
+                                  new List<SupportedArchitecture> { Enum.Parse<SupportedArchitecture>(Constants.Recipe.DefaultSupportedArchitecture) })
             {
                 var stringValue = value.ToString();
                 var row = new TypeHintResource(stringValue, stringValue);

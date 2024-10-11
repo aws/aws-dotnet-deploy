@@ -66,6 +66,8 @@ public class OrchestratorTests
         recommendation.ReplacementTokens.Clear();
         recommendation.ReplacementTokens.Add(Constants.RecipeIdentifier.REPLACE_TOKEN_DEFAULT_ENVIRONMENT_ARCHITECTURE, true);
 
-        await Assert.ThrowsAsync<InvalidOperationException>(async () => await orchestrator.ApplyAllReplacementTokens(recommendation, "WebAppNoDockerFile"));
+        await orchestrator.ApplyAllReplacementTokens(recommendation, "WebAppNoDockerFile");
+
+        Assert.Equal(Constants.Recipe.DefaultSupportedArchitecture, recommendation.ReplacementTokens[Constants.RecipeIdentifier.REPLACE_TOKEN_DEFAULT_ENVIRONMENT_ARCHITECTURE]);
     }
 }
