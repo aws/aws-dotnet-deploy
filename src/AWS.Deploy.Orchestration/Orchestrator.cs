@@ -246,7 +246,7 @@ namespace AWS.Deploy.Orchestration
             }
             if (recommendation.ReplacementTokens.ContainsKey(Constants.RecipeIdentifier.REPLACE_TOKEN_DEFAULT_ENVIRONMENT_ARCHITECTURE))
             {
-                recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_DEFAULT_ENVIRONMENT_ARCHITECTURE, SupportedArchitecture.X86_64.ToString());
+                recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_DEFAULT_ENVIRONMENT_ARCHITECTURE, Constants.Recipe.DefaultSupportedArchitecture);
             }
         }
 
