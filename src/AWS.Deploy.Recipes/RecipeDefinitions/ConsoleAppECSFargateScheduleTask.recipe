@@ -1,7 +1,7 @@
 {
     "$schema": "./aws-deploy-recipe-schema.json",
     "Id": "ConsoleAppEcsFargateScheduleTask",
-    "Version": "1.0.3",
+    "Version": "1.1.0",
     "Name": "Scheduled Task on Amazon Elastic Container Service (ECS) using AWS Fargate",
     "DeploymentType": "CdkProject",
     "DeploymentBundle": "Container",
@@ -11,7 +11,7 @@
     "ShortDescription": "Deploys a scheduled task as a Linux container image to a fully managed container orchestration service. Dockerfile will be automatically generated if needed.",
     "TargetService": "Amazon Elastic Container Service",
     "TargetPlatform": "Linux",
-    "SupportedArchitectures": [ "x86_64" ],
+    "SupportedArchitectures": [ "x86_64", "arm64" ],
 
     "DisplayedResources": [
         {
