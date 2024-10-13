@@ -117,7 +117,11 @@ namespace ConsoleAppEcsFargateService
             {
                 TaskRole = AppIAMTaskRole,
                 Cpu = settings.TaskCpu,
-                MemoryLimitMiB = settings.TaskMemory
+                MemoryLimitMiB = settings.TaskMemory,
+                RuntimePlatform = new RuntimePlatform
+                {
+                    CpuArchitecture = CpuArchitecture.Of(props.EnvironmentArchitecture ?? string.Empty)
+                }
             }));
 
             AppLogging = new AwsLogDriver(InvokeCustomizeCDKPropsEvent(nameof(AppLogging), this, new AwsLogDriverProps
