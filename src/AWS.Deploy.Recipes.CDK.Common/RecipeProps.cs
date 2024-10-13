@@ -42,6 +42,11 @@ namespace AWS.Deploy.Recipes.CDK.Common
         string? DotnetPublishOutputDirectory { get; set; }
 
         /// <summary>
+        /// The CPU architecture of the environment to create.
+        /// </summary>
+        string? EnvironmentArchitecture { get; set; }
+
+        /// <summary>
         /// The ID of the recipe being used to deploy the application.
         /// </summary>
         string RecipeId { get; set; }
@@ -107,6 +112,11 @@ namespace AWS.Deploy.Recipes.CDK.Common
         /// The directory containing the assemblies produced by the dotnet publish command.
         /// </summary>
         public string? DotnetPublishOutputDirectory { get; set; }
+
+        /// <summary>
+        /// The CPU architecture of the environment to create.
+        /// </summary>
+        public string? EnvironmentArchitecture { get; set; }
 
         /// <summary>
         /// The ID of the recipe being used to deploy the application.
