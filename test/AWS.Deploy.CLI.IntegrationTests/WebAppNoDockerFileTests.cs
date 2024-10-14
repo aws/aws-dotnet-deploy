@@ -168,7 +168,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
             // Arrange input for delete
             // Use --silent flag to delete without user prompts
-            var deleteArgs = new[] { "delete-deployment", _stackName, "--diagnostics" };
+            var deleteArgs = new[] { "delete-deployment", _stackName, "--diagnostics", "--silent" };
 
             // Delete
             Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deleteArgs)); ;
