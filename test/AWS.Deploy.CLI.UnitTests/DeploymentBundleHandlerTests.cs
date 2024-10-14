@@ -74,6 +74,64 @@ namespace AWS.Deploy.CLI.UnitTests
         }
 
         [Fact]
+        public async Task BuildDockerImage_EnvironmentArchitectureNotSet()
+        {
+            var projectPath = SystemIOUtilities.ResolvePath("WebAppWithDockerFile");
+            var project = await _projectDefinitionParser.Parse(projectPath);
+            var recommendation = new Recommendation(_recipeDefinition, project, 100, new Dictionary<string, object>());
+
+            var cloudApplication = new CloudApplication("WebAppWithDockerFile", string.Empty, CloudApplicationResourceType.CloudFormationStack, recommendation.Recipe.Id);
+            var imageTag = "imageTag";
+            var dockerFilePath = Path.GetFullPath(Path.Combine(".", "Dockerfile"), recommendation.GetProjectDirectory());
+
+            await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation, imageTag);
+
+            // Explicitly checking for X64 because the default value for EnvironmentArchitecture is X86_64
+            // This test will help catch a change in the default value
+            if (RuntimeInformation.OSArchitecture.Equals(Architecture.X64))
+            {
+                Assert.Equal($"docker build -t {imageTag} -f \"{dockerFilePath}\" .",
+                    _commandLineWrapper.CommandsToExecute.First().Command);
+            }
+            else
+            {
+                Assert.Equal($"docker buildx build --platform linux/amd64 -t {imageTag} -f \"{dockerFilePath}\" .",
+                    _commandLineWrapper.CommandsToExecute.First().Command);
+            }
+        }
+
+        [Theory]
+        [InlineData(SupportedArchitecture.X86_64)]
+        [InlineData(SupportedArchitecture.Arm64)]
+        public async Task BuildDockerImage_EnvironmentArchitectureIsSet(SupportedArchitecture environmentArchitecture)
+        {
+            var projectPath = SystemIOUtilities.ResolvePath("WebAppWithDockerFile");
+            var project = await _projectDefinitionParser.Parse(projectPath);
+            var recommendation = new Recommendation(_recipeDefinition, project, 100, new Dictionary<string, object>());
+
+            var cloudApplication = new CloudApplication("WebAppWithDockerFile", string.Empty, CloudApplicationResourceType.CloudFormationStack, recommendation.Recipe.Id);
+            var imageTag = "imageTag";
+            var dockerFilePath = Path.GetFullPath(Path.Combine(".", "Dockerfile"), recommendation.GetProjectDirectory());
+
+            recommendation.DeploymentBundle.EnvironmentArchitecture = environmentArchitecture;
+
+            await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation, imageTag);
+
+            var currentArchitecture = RuntimeInformation.OSArchitecture == Architecture.Arm64 ? SupportedArchitecture.Arm64 : SupportedArchitecture.X86_64;
+            if (currentArchitecture.Equals(environmentArchitecture))
+            {
+                Assert.Equal($"docker build -t {imageTag} -f \"{dockerFilePath}\" .",
+                    _commandLineWrapper.CommandsToExecute.First().Command);
+            }
+            else
+            {
+                var dockerPlatform = recommendation.DeploymentBundle.EnvironmentArchitecture == SupportedArchitecture.Arm64 ? "linux/arm64" : "linux/amd64";
+                Assert.Equal($"docker buildx build --platform {dockerPlatform} -t {imageTag} -f \"{dockerFilePath}\" .",
+                    _commandLineWrapper.CommandsToExecute.First().Command);
+            }
+        }
+
+        [Fact]
         public async Task BuildDockerImage_DockerExecutionDirectoryNotSet()
         {
             var projectPath = SystemIOUtilities.ResolvePath("ConsoleAppTask");
@@ -198,15 +256,15 @@ namespace AWS.Deploy.CLI.UnitTests
 
             await _deploymentBundleHandler.InspectDockerImageEnvironmentVariables(recommendation, "imageTag");
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                Assert.Equal("docker inspect --format '{{ index (index .Config.Env) }}' imageTag",
-                _commandLineWrapper.CommandsToExecute.First().Command);
+                Assert.Equal("docker inspect --format \"{{ index (index .Config.Env) }}\" imageTag",
+                    _commandLineWrapper.CommandsToExecute.First().Command);
             }
             else
             {
-                Assert.Equal("docker inspect --format \"{{ index (index .Config.Env) }}\" imageTag",
-                _commandLineWrapper.CommandsToExecute.First().Command);
+                Assert.Equal("docker inspect --format '{{ index (index .Config.Env) }}' imageTag",
+                    _commandLineWrapper.CommandsToExecute.First().Command);
             }
         }
 
