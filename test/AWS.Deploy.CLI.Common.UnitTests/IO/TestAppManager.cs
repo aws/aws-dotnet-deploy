@@ -17,7 +17,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.IO
             var sourceTestAppsDir = new DirectoryInfo("testapps");
             var tempTestAppsPath = Path.Combine(tempDir, "testapps");
             Directory.CreateDirectory(tempTestAppsPath);
-            sourceTestAppsDir.CopyTo(tempTestAppsPath, true);
+            sourceTestAppsDir.CopyTo(tempTestAppsPath);
             return Path.Combine(tempDir, path);
         }
     }
