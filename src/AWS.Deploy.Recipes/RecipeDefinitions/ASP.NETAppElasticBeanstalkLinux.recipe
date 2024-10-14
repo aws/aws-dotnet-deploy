@@ -1,7 +1,7 @@
 {
     "$schema": "./aws-deploy-recipe-schema.json",
     "Id": "AspNetAppElasticBeanstalkLinux",
-    "Version": "1.0.3",
+    "Version": "1.1.0",
     "Name": "ASP.NET Core App to AWS Elastic Beanstalk on Linux",
     "DeploymentType": "CdkProject",
     "DeploymentBundle": "DotnetPublishZipFile",
@@ -11,7 +11,7 @@
     "Description": "This ASP.NET Core application will be built and deployed to AWS Elastic Beanstalk on Linux. Recommended if you want to deploy your application directly to EC2 hosts, not as a container image.",
     "TargetService": "AWS Elastic Beanstalk",
     "TargetPlatform": "Linux",
-    "SupportedArchitectures": [ "x86_64" ],
+    "SupportedArchitectures": [ "x86_64", "arm64" ],
 
     "DisplayedResources": [
         {

@@ -8,34 +8,28 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Extensions
     public static class DirectoryCopyExtension
     {
         /// <summary>
-        /// <see cref="https://docs.microsoft.com/en-us/dotnet/standard/io/how-to-copy-directories"/>
+        /// Copy the contents of a directory to another location including all subdirectories.
         /// </summary>
-        public static void CopyTo(this DirectoryInfo dir, string destDirName, bool copySubDirs)
+        public static void CopyTo(this DirectoryInfo dir, string destDirName)
         {
             if (!dir.Exists)
             {
                 throw new DirectoryNotFoundException($"Source directory does not exist or could not be found: {dir.FullName}");
             }
 
-            var dirs = dir.GetDirectories();
-
             Directory.CreateDirectory(destDirName);
 
-            var files = dir.GetFiles();
+            var files = dir.GetFiles("*", SearchOption.AllDirectories);
             foreach (var file in files)
             {
-                var tempPath = Path.Combine(destDirName, file.Name);
-                file.CopyTo(tempPath, false);
-            }
-
-            if (copySubDirs)
-            {
-                foreach (var subdir in dirs)
+                var relativePath = Path.GetRelativePath(dir.FullName, file.FullName);
+                var tempPath = Path.Combine(destDirName, relativePath);
+                var tempDir = Path.GetDirectoryName(tempPath);
+                if (!string.IsNullOrEmpty(tempDir) && !Directory.Exists(tempDir))
                 {
-                    var tempPath = Path.Combine(destDirName, subdir.Name);
-                    var subDir = new DirectoryInfo(subdir.FullName);
-                    subDir.CopyTo(tempPath, copySubDirs);
+                    Directory.CreateDirectory(tempDir);
                 }
+                file.CopyTo(tempPath, false);
             }
         }
     }
