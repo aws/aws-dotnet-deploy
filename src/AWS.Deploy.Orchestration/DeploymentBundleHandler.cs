@@ -193,11 +193,13 @@ namespace AWS.Deploy.Orchestration
 
             var publishDirectoryInfo = _directoryManager.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
             var additionalArguments = recommendation.DeploymentBundle.DotnetPublishAdditionalBuildArguments;
+            var windowsPlatform = recommendation.DeploymentBundle.EnvironmentArchitecture == SupportedArchitecture.Arm64 ? "win-arm64" : "win-x64";
+            var linuxPlatform = recommendation.DeploymentBundle.EnvironmentArchitecture == SupportedArchitecture.Arm64 ? "linux-arm64" : "linux-x64";
             var runtimeArg =
                recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild &&
                !additionalArguments.Contains("--runtime ") &&
                !additionalArguments.Contains("-r ")
-                     ? $"--runtime {(recommendation.Recipe.TargetPlatform == TargetPlatform.Windows ? "win-x64" : "linux-x64")}"
+                     ? $"--runtime {(recommendation.Recipe.TargetPlatform == TargetPlatform.Windows ? windowsPlatform : linuxPlatform)}"
                      : "";
             var publishCommand =
                 $"dotnet publish \"{recommendation.ProjectPath}\"" +
