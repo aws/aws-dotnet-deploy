@@ -1,0 +1,13 @@
+{
+  "Projects": [
+    {
+      "Name": "AWS.Deploy.CLI",
+      "Type": "Minor",
+      "ChangelogMessages": [
+        "Added support for .NET 9 in deployment recipes.",
+		"Added ability to configure EC2 IMDSv1 access for the Windows and Linux Elastic Beanstalk recipes.",
+		"Support Elastic Beanstalk's transition to using EC2 Launch Templates from the deprecated Launch Configuration."
+      ]
+    }
+  ]
+}
