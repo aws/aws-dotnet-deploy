@@ -9,6 +9,7 @@
       "EnvironmentName": "MyBeanstalkEnvironment"
     },
     "InstanceType": "",
+    "IMDSv1Access": "Disabled",
     "EnvironmentType": "LoadBalanced",
     "LoadBalancerType": "application",
     "LoadBalancerScheme": "public",

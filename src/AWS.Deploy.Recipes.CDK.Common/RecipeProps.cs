@@ -70,6 +70,11 @@ namespace AWS.Deploy.Recipes.CDK.Common
         /// The account ID used during deployment.
         /// </summary>
         string? AWSAccountId { get; set; }
+
+        /// <summary>
+        /// True if the recipe is doing a new deployment.
+        /// </summary>
+        bool NewDeployment { get; set; }
     }
 
     /// <summary>
@@ -137,6 +142,11 @@ namespace AWS.Deploy.Recipes.CDK.Common
         /// The account ID used during deployment.
         /// </summary>
         public string? AWSAccountId { get; set; }
+
+        /// <summary>
+        /// True if the recipe is doing a redeployment.
+        /// </summary>
+        public bool NewDeployment { get; set; } = false;
 
         /// A parameterless constructor is needed for <see cref="Microsoft.Extensions.Configuration.ConfigurationBuilder"/>
         /// or the classes will fail to initialize.
