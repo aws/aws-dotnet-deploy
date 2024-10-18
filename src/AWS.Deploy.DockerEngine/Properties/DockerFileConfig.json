@@ -3,10 +3,16 @@
         "SdkType": "Microsoft.NET.Sdk.Web",
         "ImageMapping": [
             {
+                "TargetFramework": "net9.0",
+                "BaseImage": "mcr.microsoft.com/dotnet/aspnet:9.0",
+                "BuildImage": "mcr.microsoft.com/dotnet/sdk:9.0"
+            },
+            {
                 "TargetFramework": "net8.0",
                 "BaseImage": "mcr.microsoft.com/dotnet/aspnet:8.0",
                 "BuildImage": "mcr.microsoft.com/dotnet/sdk:8.0"
-            },            {
+            },
+            {
                 "TargetFramework": "net7.0",
                 "BaseImage": "mcr.microsoft.com/dotnet/aspnet:7.0",
                 "BuildImage": "mcr.microsoft.com/dotnet/sdk:7.0"
@@ -32,10 +38,15 @@
         "SdkType": "Microsoft.NET.Sdk",
         "ImageMapping": [
             {
+                "TargetFramework": "net9.0",
+                "BaseImage": "mcr.microsoft.com/dotnet/runtime:9.0",
+                "BuildImage": "mcr.microsoft.com/dotnet/sdk:9.0"
+            },
+            {
                 "TargetFramework": "net8.0",
                 "BaseImage": "mcr.microsoft.com/dotnet/runtime:8.0",
                 "BuildImage": "mcr.microsoft.com/dotnet/sdk:8.0"
-            },            
+            },
             {
                 "TargetFramework": "net7.0",
                 "BaseImage": "mcr.microsoft.com/dotnet/runtime:7.0",

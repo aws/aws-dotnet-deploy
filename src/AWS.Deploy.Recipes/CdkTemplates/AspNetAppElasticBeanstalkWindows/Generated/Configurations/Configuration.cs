@@ -44,6 +44,11 @@ namespace AspNetAppElasticBeanstalkWindows.Configurations
         public BeanstalkApplicationConfiguration BeanstalkApplication { get; set; }
 
         /// <summary>
+        /// Control of IMDS v1 accessibility.
+        /// </summary>
+        public string IMDSv1Access { get; set; } = Recipe.IMDS_V1_DEFAULT;
+
+        /// <summary>
         /// The name of an Elastic Beanstalk solution stack (platform version) to use with the environment.
         /// </summary>
         public string ElasticBeanstalkPlatformArn { get; set; }
