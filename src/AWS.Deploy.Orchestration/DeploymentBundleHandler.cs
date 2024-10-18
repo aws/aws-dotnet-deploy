@@ -133,7 +133,7 @@ namespace AWS.Deploy.Orchestration
                 if (string.IsNullOrEmpty(targetFramework))
                     return;
 
-                // Elastic Beanstalk doesn't currently have .NET 7 preinstalled.
+                // Elastic Beanstalk doesn't currently have .NET 7 and 9 preinstalled.
                 var unavailableFramework = new List<string> { "net7.0", "net9.0" };
                 var frameworkNames = new Dictionary<string, string> { { "net7.0", ".NET 7" }, { "net9.0", ".NET 9" } };
                 if (unavailableFramework.Contains(targetFramework))

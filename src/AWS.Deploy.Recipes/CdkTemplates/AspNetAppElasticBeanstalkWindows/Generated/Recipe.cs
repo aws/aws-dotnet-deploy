@@ -243,7 +243,7 @@ namespace AspNetAppElasticBeanstalkWindows
                 };
 
             if (newDeployment ||
-                (newDeployment && !string.Equals(settings.IMDSv1Access, IMDS_V1_DEFAULT, StringComparison.InvariantCultureIgnoreCase)))
+                (!newDeployment && !string.Equals(settings.IMDSv1Access, IMDS_V1_DEFAULT, StringComparison.InvariantCultureIgnoreCase)))
             {
                 var computedDisableIMDSv1 = string.Equals(settings.IMDSv1Access, IMDS_V1_ENABLED, StringComparison.InvariantCultureIgnoreCase) ? "false" : "true";
                 optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
