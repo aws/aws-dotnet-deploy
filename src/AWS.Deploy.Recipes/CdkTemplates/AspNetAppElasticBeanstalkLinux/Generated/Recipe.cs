@@ -33,6 +33,10 @@ namespace AspNetAppElasticBeanstalkLinux
         public const string LOADBALANCERTYPE_APPLICATION = "application";
         public const string LOADBALANCERSCHEME_PUBLIC = "public";
 
+        public const string IMDS_V1_DEFAULT = "Default";
+        public const string IMDS_V1_DISABLED = "Disabled";
+        public const string IMDS_V1_ENABLED = "Enabled";
+
         public const string REVERSEPROXY_NGINX = "nginx";
         
         public const string ENHANCED_HEALTH_REPORTING = "enhanced";
@@ -74,7 +78,7 @@ namespace AspNetAppElasticBeanstalkLinux
             ConfigureVpc(settings);
             ConfigureIAM(settings);
             var beanstalkApplicationName = ConfigureApplication(settings);
-            ConfigureBeanstalkEnvironment(settings, beanstalkApplicationName);
+            ConfigureBeanstalkEnvironment(props.NewDeployment, settings, beanstalkApplicationName);
         }
 
         private void ConfigureVpc(Configuration settings)
@@ -200,7 +204,7 @@ namespace AspNetAppElasticBeanstalkLinux
             return beanstalkApplicationName;
         }
 
-        private void ConfigureBeanstalkEnvironment(Configuration settings, string beanstalkApplicationName)
+        private void ConfigureBeanstalkEnvironment(bool newDeployment, Configuration settings, string beanstalkApplicationName)
         {
             if (Ec2InstanceProfile == null)
                 throw new InvalidOperationException($"{nameof(Ec2InstanceProfile)} has not been set. The {nameof(ConfigureIAM)} method should be called before {nameof(ConfigureBeanstalkEnvironment)}");
@@ -237,6 +241,18 @@ namespace AspNetAppElasticBeanstalkLinux
                         Value = settings.EnhancedHealthReporting
                    }
                 };
+
+            if (newDeployment ||
+                (!newDeployment && !string.Equals(settings.IMDSv1Access, IMDS_V1_DEFAULT, StringComparison.InvariantCultureIgnoreCase)))
+            {
+                var computedDisableIMDSv1 = string.Equals(settings.IMDSv1Access, IMDS_V1_ENABLED, StringComparison.InvariantCultureIgnoreCase) ? "false" : "true";
+                optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
+                {
+                    Namespace = "aws:autoscaling:launchconfiguration",
+                    OptionName = "DisableIMDSv1",
+                    Value = computedDisableIMDSv1
+                });
+            }
 
             if (!string.IsNullOrEmpty(settings.InstanceType))
             {
