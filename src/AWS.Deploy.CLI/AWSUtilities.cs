@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Amazon.Runtime;
-using Amazon.Runtime.CredentialManagement;
 using AWS.Deploy.CLI.Utilities;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
@@ -17,7 +16,7 @@ namespace AWS.Deploy.CLI
 {
     public interface IAWSUtilities
     {
-        Task<AWSCredentials> ResolveAWSCredentials(string? profileName);
+        Task<Tuple<AWSCredentials, string?>> ResolveAWSCredentials(string? profileName);
         string ResolveAWSRegion(string? region, string? lastRegionUsed = null);
     }
 
@@ -28,27 +27,43 @@ namespace AWS.Deploy.CLI
         private readonly IDirectoryManager _directoryManager;
         private readonly IOptionSettingHandler _optionSettingHandler;
         private readonly IServiceProvider _serviceProvider;
+        private readonly ICredentialProfileStoreChainFactory _credentialChainFactory;
+        private readonly ISharedCredentialsFileFactory _sharedCredentialsFileFactory;
+        private readonly IAWSCredentialsFactory _awsCredentialsFactory;
 
         public AWSUtilities(
             IServiceProvider serviceProvider,
             IToolInteractiveService toolInteractiveService,
             IConsoleUtilities consoleUtilities,
             IDirectoryManager directoryManager,
-            IOptionSettingHandler optionSettingHandler)
+            IOptionSettingHandler optionSettingHandler,
+            ICredentialProfileStoreChainFactory credentialChainFactory,
+            ISharedCredentialsFileFactory sharedCredentialsFileFactory,
+            IAWSCredentialsFactory awsCredentialsFactory)
         {
             _serviceProvider = serviceProvider;
             _toolInteractiveService = toolInteractiveService;
             _consoleUtilities = consoleUtilities;
             _directoryManager = directoryManager;
             _optionSettingHandler = optionSettingHandler;
+            _credentialChainFactory = credentialChainFactory;
+            _sharedCredentialsFileFactory = sharedCredentialsFileFactory;
+            _awsCredentialsFactory = awsCredentialsFactory;
         }
 
-        public async Task<AWSCredentials> ResolveAWSCredentials(string? profileName)
-        {
-            async Task<AWSCredentials> Resolve()
-            {
-                var chain = new CredentialProfileStoreChain();
 
+        /// <summary>
+        /// At a high level there are 2 possible return values for this function:
+        /// 1. <Credentials, regionName> In this case, both the credentials and region were able to be read from the profile.
+        /// 2. <Credentials, null>: In this case, the region was not able to be read from the profile, so we return null for it. The null case will be handled later on by <see cref="ResolveAWSRegion">.
+        /// </summary>
+        public async Task<Tuple<AWSCredentials, string?>> ResolveAWSCredentials(string? profileName)
+        {
+            async Task<Tuple<AWSCredentials, string?>> Resolve()
+            {
+                var chain = _credentialChainFactory.Create();
+
+                // Use provided profile to read credentials
                 if (!string.IsNullOrEmpty(profileName))
                 {
                     if (chain.TryGetAWSCredentials(profileName, out var profileCredentials) &&
@@ -56,7 +71,10 @@ namespace AWS.Deploy.CLI
                     (profileCredentials is AssumeRoleAWSCredentials || await CanLoadCredentials(profileCredentials)))
                     {
                         _toolInteractiveService.WriteLine($"Configuring AWS Credentials from Profile {profileName}.");
-                        return profileCredentials;
+                        chain.TryGetProfile(profileName, out var profile);
+                        // Return the credentials since they must be found at this point.
+                        // For region, we try to read it from the profile. If it's not found in the profile, then return null and region selection will be handled later on by ResolveAWSRegion.
+                        return Tuple.Create<AWSCredentials, string?>(profileCredentials, profile.Region?.SystemName);
                     }
                     else
                     {
@@ -65,14 +83,17 @@ namespace AWS.Deploy.CLI
                     }
                 }
 
+                // Use default credentials
                 try
                 {
-                    var fallbackCredentials = FallbackCredentialsFactory.GetCredentials();
+                    var fallbackCredentials = _awsCredentialsFactory.Create();
 
                     if (await CanLoadCredentials(fallbackCredentials))
                     {
+                        // Always return the credentials since they must be found at this point.
+                        // For region, we return null here, since it will read from default region in ResolveAWSRegion
                         _toolInteractiveService.WriteLine("Configuring AWS Credentials using AWS SDK credential search.");
-                        return fallbackCredentials;
+                        return Tuple.Create<AWSCredentials, string?>(fallbackCredentials, null);
                     }
                 }
                 catch (AmazonServiceException ex)
@@ -82,7 +103,8 @@ namespace AWS.Deploy.CLI
                     _toolInteractiveService.WriteDebugLine(ex.PrettyPrint());
                 }
 
-                var sharedCredentials = new SharedCredentialsFile();
+                // Use Shared Credentials
+                var sharedCredentials = _sharedCredentialsFileFactory.Create();
                 if (sharedCredentials.ListProfileNames().Count == 0)
                 {
                     throw new NoAWSCredentialsFoundException(DeployToolErrorCode.UnableToResolveAWSCredentials, "Unable to resolve AWS credentials to access AWS.");
@@ -93,21 +115,24 @@ namespace AWS.Deploy.CLI
                 if (chain.TryGetAWSCredentials(selectedProfileName, out var selectedProfileCredentials) &&
                     (await CanLoadCredentials(selectedProfileCredentials)))
                 {
-                    return selectedProfileCredentials;
+                    // Return the credentials since they must be found at this point.
+                    // For region, we try to read it from the profile. If it's not found in the profile, then return null and region selection will be handled later on by ResolveAWSRegion.
+                    chain.TryGetProfile(selectedProfileName, out var profile);
+                    return Tuple.Create<AWSCredentials, string?>(selectedProfileCredentials, profile.Region?.SystemName);
                 }
 
                 throw new NoAWSCredentialsFoundException(DeployToolErrorCode.UnableToCreateAWSCredentials, $"Unable to create AWS credentials for profile {selectedProfileName}.");
             }
 
-            var credentials = await Resolve();
+            var credentialsAndRegion = await Resolve();
 
-            if (credentials is AssumeRoleAWSCredentials assumeRoleAWSCredentials)
+            if (credentialsAndRegion.Item1 is AssumeRoleAWSCredentials assumeRoleAWSCredentials)
             {
                 var assumeOptions = assumeRoleAWSCredentials.Options;
                 assumeOptions.MfaTokenCodeCallback = ActivatorUtilities.CreateInstance<AssumeRoleMfaTokenCodeCallback>(_serviceProvider, assumeOptions).Execute;
             }
 
-            return credentials;
+            return credentialsAndRegion;
         }
 
         private async Task<bool> CanLoadCredentials(AWSCredentials credentials)
