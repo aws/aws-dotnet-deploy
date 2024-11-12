@@ -203,7 +203,11 @@ Resources:
           - Id: CleanupOldVersions
             Status: Enabled
             NoncurrentVersionExpiration:
-              NoncurrentDays: 365
+              NoncurrentDays: 30
+          - Id: AbortIncompleteMultipartUploads
+            Status: Enabled
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 1
     UpdateReplacePolicy: Delete
     DeletionPolicy: Delete
   StagingBucketPolicy:
@@ -611,7 +615,7 @@ Resources:
       Type: String
       Name:
         Fn::Sub: /cdk-bootstrap/${Qualifier}/version
-      Value: "23"
+      Value: "25"
 Outputs:
   BucketName:
     Description: The name of the S3 bucket owned by the CDK toolkit stack
