@@ -1,0 +1,11 @@
+{
+  "Projects": [
+    {
+      "Name": "AWS.Deploy.CLI",
+      "Type": "Minor",
+      "ChangelogMessages": [
+        "Read region value for non default profiles"
+      ]
+    }
+  ]
+}

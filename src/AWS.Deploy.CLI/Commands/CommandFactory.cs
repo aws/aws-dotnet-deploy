@@ -209,8 +209,8 @@ namespace AWS.Deploy.CLI.Commands
                         deploymentSettings = await _deploymentSettingsHandler.ReadSettings(applyPath);
                     }
 
-                    var awsCredentials = await _awsUtilities.ResolveAWSCredentials(input.Profile ?? deploymentSettings?.AWSProfile);
-                    var awsRegion = _awsUtilities.ResolveAWSRegion(input.Region ?? deploymentSettings?.AWSRegion);
+                    var (awsCredentials, regionFromProfile) = await _awsUtilities.ResolveAWSCredentials(input.Profile ?? deploymentSettings?.AWSProfile);
+                    var awsRegion = _awsUtilities.ResolveAWSRegion(input.Region ?? deploymentSettings?.AWSRegion ?? regionFromProfile);
 
                     _commandLineWrapper.RegisterAWSContext(awsCredentials, awsRegion);
                     _awsClientFactory.RegisterAWSContext(awsCredentials, awsRegion);
@@ -318,8 +318,8 @@ namespace AWS.Deploy.CLI.Commands
                     _toolInteractiveService.Diagnostics = input.Diagnostics;
                     _toolInteractiveService.DisableInteractive = input.Silent;
 
-                    var awsCredentials = await _awsUtilities.ResolveAWSCredentials(input.Profile);
-                    var awsRegion = _awsUtilities.ResolveAWSRegion(input.Region);
+                    var (awsCredentials, regionFromProfile) = await _awsUtilities.ResolveAWSCredentials(input.Profile);
+                    var awsRegion = _awsUtilities.ResolveAWSRegion(input.Region ?? regionFromProfile);
 
                     _awsClientFactory.ConfigureAWSOptions(awsOption =>
                     {
@@ -401,8 +401,8 @@ namespace AWS.Deploy.CLI.Commands
                 {
                     _toolInteractiveService.Diagnostics = input.Diagnostics;
 
-                    var awsCredentials = await _awsUtilities.ResolveAWSCredentials(input.Profile);
-                    var awsRegion = _awsUtilities.ResolveAWSRegion(input.Region);
+                    var (awsCredentials, regionFromProfile) = await _awsUtilities.ResolveAWSCredentials(input.Profile);
+                    var awsRegion = _awsUtilities.ResolveAWSRegion(input.Region ?? regionFromProfile);
 
                     _awsClientFactory.ConfigureAWSOptions(awsOptions =>
                     {
