@@ -4,7 +4,7 @@
       "Name": "AWS.Deploy.CLI",
       "Type": "Patch",
       "ChangelogMessages": [
-        "Update beanstalk platform resolution logic"
+        "Update beanstalk platform resolution logic to additionally use 'Deprecated' versions in order to continue supporting .NET 6."
       ]
     }
   ]
