@@ -1,0 +1,11 @@
+{
+  "Projects": [
+    {
+      "Name": "AWS.Deploy.ServerMode.Client",
+      "Type": "Patch",
+      "ChangelogMessages": [
+        "Update Microsoft.AspNetCore.SignalR.Client version to fix System.Text.Json vulnerability"
+      ]
+    }
+  ]
+}
