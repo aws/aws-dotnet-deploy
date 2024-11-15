@@ -18,7 +18,7 @@
     <NoWarn>$(NoWarn);1570;1591;ASP0000</NoWarn>
     <RollForward>Major</RollForward>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <Version>1.27.0</Version>
+    <Version>1.28.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
