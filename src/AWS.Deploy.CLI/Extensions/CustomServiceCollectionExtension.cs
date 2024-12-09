@@ -71,6 +71,9 @@ namespace AWS.Deploy.CLI.Extensions
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IEnvironmentVariableManager), typeof(EnvironmentVariableManager), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IDeployToolWorkspaceMetadata), typeof(DeployToolWorkspaceMetadata), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IDeploymentSettingsHandler), typeof(DeploymentSettingsHandler), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICredentialProfileStoreChainFactory), typeof(CredentialProfileStoreChainFactory), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(ISharedCredentialsFileFactory), typeof(SharedCredentialsFileFactory), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(IAWSCredentialsFactory), typeof(AWSCredentialsFactory), lifetime));
 
             var packageJsonTemplate = typeof(PackageJsonGenerator).Assembly.ReadEmbeddedFile(PackageJsonGenerator.TemplateIdentifier);
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IPackageJsonGenerator), (serviceProvider) => new PackageJsonGenerator(packageJsonTemplate), lifetime));

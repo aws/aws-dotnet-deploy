@@ -574,7 +574,7 @@ namespace AWS.Deploy.Orchestration.Data
                 if (string.IsNullOrEmpty(version.PlatformCategory) || string.IsNullOrEmpty(version.PlatformBranchLifecycleState))
                     continue;
 
-                if (!version.PlatformBranchLifecycleState.Equals("Supported"))
+                if (!(version.PlatformBranchLifecycleState.Equals("Supported") || version.PlatformBranchLifecycleState.Equals("Deprecated")))
                     continue;
 
                 platformVersions.Add(version);

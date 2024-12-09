@@ -12,12 +12,12 @@
     <PackageProjectUrl>https://github.com/aws/aws-dotnet-deploy</PackageProjectUrl>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\public.snk</AssemblyOriginatorKeyFile>
-    <Version>1.27.0</Version>
+    <Version>1.28.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="AWSSDK.Core" Version="3.7.303.20" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="6.0.22" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="6.0.36" />
     <!-- We are pining Newtonsoft.Json to 13.0.1 to maintain compatibility with the VS Toolkit.
     https://devblogs.microsoft.com/visualstudio/using-newtonsoft-json-in-a-visual-studio-extension/-->
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
