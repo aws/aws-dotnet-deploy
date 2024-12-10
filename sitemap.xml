@@ -2,142 +2,142 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/contributing/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/faq/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/docs/support/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/docs/cicd/cicd/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/docs/cicd/deployment-settings-file/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/docs/cicd/recipes/ASP.NET%20Core%20App%20to%20AWS%20App%20Runner/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/docs/cicd/recipes/ASP.NET%20Core%20App%20to%20AWS%20Elastic%20Beanstalk%20on%20Linux/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/docs/cicd/recipes/ASP.NET%20Core%20App%20to%20AWS%20Elastic%20Beanstalk%20on%20Windows/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/docs/cicd/recipes/ASP.NET%20Core%20App%20to%20Amazon%20ECS%20using%20AWS%20Fargate/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/docs/cicd/recipes/ASP.NET%20Core%20App%20to%20Existing%20AWS%20Elastic%20Beanstalk%20Environment/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/docs/cicd/recipes/ASP.NET%20Core%20App%20to%20Existing%20AWS%20Elastic%20Beanstalk%20Windows%20Environment/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/docs/cicd/recipes/Blazor%20WebAssembly%20App/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/docs/cicd/recipes/Container%20Image%20to%20Amazon%20Elastic%20Container%20Registry%20%28ECR%29/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/docs/cicd/recipes/Scheduled%20Task%20on%20Amazon%20Elastic%20Container%20Service%20%28ECS%29%20using%20AWS%20Fargate/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/docs/cicd/recipes/Service%20on%20Amazon%20Elastic%20Container%20Service%20%28ECS%29%20using%20AWS%20Fargate/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/docs/commands/delete/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/docs/commands/deploy/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/docs/commands/list/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/docs/commands/project/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/docs/commands/server-mode/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/docs/deployment-projects/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/docs/deployment-projects/cdk-project/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/docs/deployment-projects/recipe-file/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/docs/docker/docker-generation/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/docs/docker/publish-image/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/docs/getting-started/custom-workspace/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/docs/getting-started/installation/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/docs/getting-started/pre-requisites/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/docs/getting-started/run-tool/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/docs/getting-started/setup-creds/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/troubleshooting-guide/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/troubleshooting-guide/docker-issues/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/troubleshooting-guide/missing-dependencies/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
     <url>
          <loc>https://aws.github.io/aws-dotnet-deploy/tutorials/custom-project/</loc>
-         <lastmod>2024-11-18</lastmod>
+         <lastmod>2024-12-10</lastmod>
     </url>
 </urlset>
