@@ -32,6 +32,19 @@ namespace AWS.Deploy.CLI.IntegrationTests.Helpers
             var role = existingRoles.FirstOrDefault(x => string.Equals(roleName, x.RoleName));
             if (role != null)
             {
+                var polices = (await _client.ListAttachedRolePoliciesAsync(new ListAttachedRolePoliciesRequest { RoleName = roleName })).AttachedPolicies;
+                if (polices != null)
+                {
+                    foreach(var policy in polices)
+                    {
+                        await _client.DetachRolePolicyAsync(new DetachRolePolicyRequest
+                        {
+                            RoleName = roleName,
+                            PolicyArn = policy.PolicyArn
+                        });
+                    }
+                }
+
                 await _client.RemoveRoleFromInstanceProfileAsync(new RemoveRoleFromInstanceProfileRequest
                 {
                     RoleName = roleName,
@@ -77,6 +90,12 @@ namespace AWS.Deploy.CLI.IntegrationTests.Helpers
                     RoleName = roleName,
                     AssumeRolePolicyDocument = assumeRolepolicyDocument.Replace("'", "\""),
                     MaxSessionDuration = 7200
+                });
+
+                await _client.AttachRolePolicyAsync(new AttachRolePolicyRequest
+                {
+                    RoleName = roleName,
+                    PolicyArn = "arn:aws:iam::aws:policy/AWSElasticBeanstalkWebTier"
                 });
             }
 
