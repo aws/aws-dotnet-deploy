@@ -36,6 +36,7 @@ jobs:
     - name: Get Latest CDK Bootstrap Version
       id: latestBootstrapVersion
       run: |
+        cat ./newTemplate.yml
         yq '.Resources.CdkBootstrapVersion.Properties.Value' 'newTemplate.yml'
         echo "latest-version=$(yq '.Resources.CdkBootstrapVersion.Properties.Value' 'newTemplate.yml')" >> $GITHUB_OUTPUT
     - name: Get Current CDK Bootstrap Version
