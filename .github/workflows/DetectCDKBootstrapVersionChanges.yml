@@ -12,6 +12,7 @@ jobs:
     - name: Install AWS CDK
       run: |
         npm install -g aws-cdk
+        cdk acknowledge 32775
     - name: Get Staging Bucket Update/Replace Policy
       id: stagingBucketUpdateReplacePolicy
       run: |
