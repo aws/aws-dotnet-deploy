@@ -159,6 +159,8 @@ Resources:
                 Fn::Sub: ${FilePublishingRole.Arn}
             Resource: "*"
     Condition: CreateNewKey
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
   FileAssetsBucketEncryptionKeyAlias:
     Condition: CreateNewKey
     Type: AWS::KMS::Alias
