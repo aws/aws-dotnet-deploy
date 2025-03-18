@@ -4,7 +4,7 @@
       "Name": "AWS.Deploy.CLI",
       "Type": "Patch",
       "ChangelogMessages": [
-        "Update node version from 18 to 22"
+        "Update the default docker image node version from version 18 to 22"
       ]
     }
   ]
