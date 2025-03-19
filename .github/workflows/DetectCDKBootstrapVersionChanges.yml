@@ -1,49 +1,109 @@
 name: Detect CDK Bootstrap Version Changes
 
-on: [pull_request]
+on:
+  schedule:
+    # Runs at 00:00 UTC every Monday
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write 
 
 jobs:
   detect-cdk-bootstrap-changes:
     runs-on: ubuntu-latest
     steps:
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ secrets.RELEASE_WORKFLOW_ACCESS_TOKEN_ROLE_ARN }}
+        aws-region: us-west-2
+
+    - name: Retrieve secret from AWS Secrets Manager
+      uses: aws-actions/aws-secretsmanager-get-secrets@v2
+      with:
+        secret-ids: |
+          AWS_SECRET, ${{ secrets.RELEASE_WORKFLOW_ACCESS_TOKEN_NAME }}
+        parse-json-secrets: true
+
     - uses: actions/checkout@v3
       with:
         fetch-depth: '0'
+        ref: dev
+        token: ${{ env.AWS_SECRET_TOKEN }}
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'
+
     - name: Install AWS CDK
       run: |
         npm install -g aws-cdk
-        cdk acknowledge 32775
-    - name: Get Staging Bucket Update/Replace Policy
-      id: stagingBucketUpdateReplacePolicy
-      run: |
-        echo "update-replace-policy=$(yq '.Resources.StagingBucket.UpdateReplacePolicy' 'src/AWS.Deploy.Orchestration/CDK/CDKBootstrapTemplate.yaml')" >> $GITHUB_OUTPUT
-    - name: Get Staging Bucket Deletion Policy
-      id: stagingBucketDeletionPolicy
-      run: |
-        echo "deletion-policy=$(yq '.Resources.StagingBucket.DeletionPolicy' 'src/AWS.Deploy.Orchestration/CDK/CDKBootstrapTemplate.yaml')" >> $GITHUB_OUTPUT
-    - name: Fail If Update/Replace Policy Not 'Delete'
-      if: steps.stagingBucketUpdateReplacePolicy.outputs.update-replace-policy != 'Delete'
-      run: |
-        echo "The 'UpdateReplacePolicy' of the 'StaginBucket' in the CDK bootstrap template should be 'Delete'."
-        exit 1
-    - name: Fail If Deletion Policy Not 'Delete'
-      if: steps.stagingBucketDeletionPolicy.outputs.deletion-policy != 'Delete'
-      run: |
-        echo "The 'DeletionPolicy' of the 'StaginBucket' in the CDK bootstrap template should be 'Delete'."
-        exit 1
+
+    - name: Create temporary directory
+      run: mkdir -p temp_cdk
+
     - name: Save New CDK Bootstrap Template
+      working-directory: temp_cdk
       run: |
+        cdk acknowledge 32775
         cdk bootstrap --show-template > newTemplate.yml
-    - name: Get Latest CDK Bootstrap Version
-      id: latestBootstrapVersion
+
+    - name: Update Template with Required Policies
+      working-directory: temp_cdk
       run: |
-        echo "latest-version=$(yq '.Resources.CdkBootstrapVersion.Properties.Value' 'newTemplate.yml')" >> $GITHUB_OUTPUT
-    - name: Get Current CDK Bootstrap Version
-      id: currentBootstrapVersion
+        sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+        sudo chmod +x /usr/local/bin/yq
+
+        yq eval '.Resources.StagingBucket.UpdateReplacePolicy = "Delete"' -i newTemplate.yml
+        yq eval '.Resources.StagingBucket.DeletionPolicy = "Delete"' -i newTemplate.yml
+
+        cp newTemplate.yml ../src/AWS.Deploy.Orchestration/CDK/CDKBootstrapTemplate.yaml
+
+    - name: Generate change file
+      if: success()
       run: |
-        echo "current-version=$(yq '.Resources.CdkBootstrapVersion.Properties.Value' 'src/AWS.Deploy.Orchestration/CDK/CDKBootstrapTemplate.yaml')" >> $GITHUB_OUTPUT
-    - name: Fail If CDK Bootstrap Template Changes Detected
-      if: steps.currentBootstrapVersion.outputs.current-version != steps.latestBootstrapVersion.outputs.latest-version
+        dotnet tool install -g autover
+        autover change --project-name "AWS.Deploy.CLI" -m "Update CDK Bootstrap template to latest version"
+
+    - name: Check for changes
+      id: check_changes
       run: |
-        echo "A new version of the AWS CDK Bootstrap Template is available. The current template that is being used by the Deploy tool needs to be updated."
-        exit 1
+        git config --global core.excludesfile ~/.gitignore
+        echo "temp_cdk/" >> ~/.gitignore
+        echo "cdk.context.json" >> ~/.gitignore
+        echo "newTemplate.yml" >> ~/.gitignore
+        
+        if [[ -n "$(git status --porcelain src/AWS.Deploy.Orchestration/CDK/CDKBootstrapTemplate.yaml)" ]] || [[ -n "$(git status --porcelain changes/)" ]]; then
+          echo "changes=true" >> $GITHUB_OUTPUT
+        else
+          echo "changes=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Create Pull Request
+      if: steps.check_changes.outputs.changes == 'true'
+      uses: peter-evans/create-pull-request@v5
+      with:
+        commit-message: 'chore: update CDK bootstrap template to latest version'
+        title: 'Update CDK Bootstrap Template to Latest Version'
+        body: |
+          This PR automatically updates the CDK bootstrap template to the latest version.
+          - Updates template to latest version
+          - Maintains DeletePolicy and UpdateReplacePolicy as "Delete" for StagingBucket
+          - Adds change file for version tracking
+        branch: update-cdk-bootstrap-template
+        base: dev
+        delete-branch: true
+        token: ${{ env.AWS_SECRET_TOKEN }}
+        add-paths: |
+          src/AWS.Deploy.Orchestration/CDK/CDKBootstrapTemplate.yaml
+          .autover/
+
+    - name: Cleanup
+      if: always()
+      run: |
+        rm -rf temp_cdk
+        rm -f cdk.context.json
