@@ -1,0 +1,11 @@
+{
+  "Projects": [
+    {
+      "Name": "AWS.Deploy.CLI",
+      "Type": "Patch",
+      "ChangelogMessages": [
+        "Update CDK dependency to version 2.181.1"
+      ]
+    }
+  ]
+}
