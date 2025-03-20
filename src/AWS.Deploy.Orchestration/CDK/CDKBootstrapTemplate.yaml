@@ -159,6 +159,8 @@ Resources:
                 Fn::Sub: ${FilePublishingRole.Arn}
             Resource: "*"
     Condition: CreateNewKey
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
   FileAssetsBucketEncryptionKeyAlias:
     Condition: CreateNewKey
     Type: AWS::KMS::Alias
@@ -269,6 +271,18 @@ Resources:
               StringLike:
                 aws:sourceArn:
                   Fn::Sub: arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:*
+          - Sid: EmrServerlessImageRetrievalPolicy
+            Effect: Allow
+            Principal:
+              Service: emr-serverless.amazonaws.com
+            Action:
+              - ecr:BatchGetImage
+              - ecr:GetDownloadUrlForLayer
+              - ecr:DescribeImages
+            Condition:
+              StringLike:
+                aws:sourceArn:
+                  Fn::Sub: arn:${AWS::Partition}:emr-serverless:${AWS::Region}:${AWS::AccountId}:/applications/*
   FilePublishingRole:
     Type: AWS::IAM::Role
     Properties:
@@ -615,7 +629,7 @@ Resources:
       Type: String
       Name:
         Fn::Sub: /cdk-bootstrap/${Qualifier}/version
-      Value: "25"
+      Value: "27"
 Outputs:
   BucketName:
     Description: The name of the S3 bucket owned by the CDK toolkit stack
