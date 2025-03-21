@@ -34,7 +34,7 @@
                     "Type": "MSProperty",
                     "Condition": {
                         "PropertyName": "TargetFramework",
-                        "AllowedValues": [ "netcoreapp3.1", "net5.0", "net6.0", "net7.0", "net8.0" ]
+                        "AllowedValues": [ "netcoreapp3.1", "net5.0", "net6.0", "net7.0", "net8.0", "net9.0" ]
                     }
                 }
             ],
@@ -251,6 +251,21 @@
                     "ValidatorType": "WindowsInstanceType"
                 }
             ]
+        },
+        {
+            "Id": "IMDSv1Access",
+            "Name": "Access to IMDS v1",
+            "Category": "Compute",
+            "Description": "Access to IMDS v1; Default means new deployments will disable IMDSv1, redeployments leave the setting at its current value.",
+            "Type": "String",
+            "DefaultValue": "Default",
+            "AllowedValues": [
+                "Default",
+                "Disabled",
+                "Enabled"
+            ],
+            "AdvancedSetting": false,
+            "Updatable": true
         },
         {
             "Id": "EnvironmentType",

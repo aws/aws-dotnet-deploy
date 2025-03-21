@@ -34,6 +34,10 @@
     * ID: InstanceType
     * Description: The EC2 instance type of the EC2 instances created for the environment.
     * Type: String
+* **Access to IMDS v1**
+    * ID: IMDSv1Access
+    * Description: Access to IMDS v1; Default means new deployments will disable IMDSv1, redeployments leave the setting at its current value.
+    * Type: String
 * **Environment Type**
     * ID: EnvironmentType
     * Description: The type of environment to create; for example, a single instance for development work or load balanced for production.

@@ -176,6 +176,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.ConfigFileDeployment
                 { "key1", "value1" },
                 { "key2", "value2" }
             });
+            await _optionSettingHandler.SetOptionSettingValue(selectedRecommendation, "IMDSv1Access", "Disabled");
 
             // ACT
             await _deploymentSettingsHandler.SaveSettings(new SaveSettingsConfiguration(saveSettingsType, actualSnapshotFilePath), selectedRecommendation, cloudApplication, _orchestratorSession);

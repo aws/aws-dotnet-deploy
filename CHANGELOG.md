@@ -1,3 +1,29 @@
+## Release 2024-12-30
+
+### AWS.Deploy.CLI (1.28.1)
+* Update the version of Amazon.CDK.Lib to 2.171.1
+### AWS.Deploy.Recipes.CDK.Common (1.28.1)
+* Update the version of Amazon.CDK.Lib to 2.171.1
+### AWS.Deploy.ServerMode.Client (1.28.1)
+
+## Release 2024-11-15
+
+### AWS.Deploy.ServerMode.Client (1.28.0)
+* Update Microsoft.AspNetCore.SignalR.Client version to fix System.Text.Json vulnerability
+### AWS.Deploy.CLI (1.28.0)
+* Update beanstalk platform resolution logic to additionally use 'Deprecated' versions in order to continue supporting .NET 6.
+* Read region value for non default profiles
+### AWS.Deploy.Recipes.CDK.Common (1.28.0)
+
+## Release 2024-10-24
+
+### AWS.Deploy.CLI (1.27.0)
+* Added support for .NET 9 in deployment recipes.
+* Added ability to configure EC2 IMDSv1 access for the Windows and Linux Elastic Beanstalk recipes.
+* Support Elastic Beanstalk's transition to using EC2 Launch Templates from the deprecated Launch Configuration.
+### AWS.Deploy.Recipes.CDK.Common (1.27.0)
+### AWS.Deploy.ServerMode.Client (1.27.0)
+
 ## Release 2024-10-11
 
 ### AWS.Deploy.CLI (1.26.1)
