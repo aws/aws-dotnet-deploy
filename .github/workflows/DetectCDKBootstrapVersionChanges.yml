@@ -16,13 +16,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v4
+      uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722
       with:
         role-to-assume: ${{ secrets.RELEASE_WORKFLOW_ACCESS_TOKEN_ROLE_ARN }}
         aws-region: us-west-2
 
     - name: Retrieve secret from AWS Secrets Manager
-      uses: aws-actions/aws-secretsmanager-get-secrets@v2
+      uses: aws-actions/aws-secretsmanager-get-secrets@fbd65ea98e018858715f591f03b251f02b2316cb
       with:
         secret-ids: |
           AWS_SECRET, ${{ secrets.RELEASE_WORKFLOW_ACCESS_TOKEN_NAME }}
