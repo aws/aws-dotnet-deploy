@@ -253,6 +253,55 @@ namespace AWS.Deploy.CLI.IntegrationTests
             Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName));
         }
 
+        [Fact]
+        public async Task FargateArmDeployment()
+        {
+            _stackName = $"FargateArmDeployment{Guid.NewGuid().ToString().Split('-').Last()}";
+
+            // Arrange input for deploy
+            await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Select default recommendation
+            await _interactiveService.StdInWriter.WriteLineAsync("8"); // Select "Environment Architecture"
+            await _interactiveService.StdInWriter.WriteLineAsync("2"); // Select "Arm64"
+            await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Confirm selection and deploy
+            await _interactiveService.StdInWriter.FlushAsync();
+
+            // Deploy
+            var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppArmWithDocker", "WebAppArmWithDocker.csproj"));
+            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--application-name", _stackName, "--diagnostics" };
+            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
+
+            // Verify application is deployed and running
+            Assert.Equal(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
+
+            var deployStdOut = _interactiveService.StdOutReader.ReadAllLines();
+
+            var applicationUrl = deployStdOut.First(line => line.Trim().StartsWith("Endpoint:"))
+                .Split(" ")[1]
+                .Trim();
+
+            // URL could take few more minutes to come live, therefore, we want to wait and keep trying for a specified timeout
+            await _httpHelper.WaitUntilSuccessStatusCode(applicationUrl, TimeSpan.FromSeconds(5), TimeSpan.FromMinutes(5));
+
+            // list
+            var listArgs = new[] { "list-deployments", "--diagnostics" };
+            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(listArgs));;
+
+            // Verify stack exists in list of deployments
+            var listDeployStdOut = _interactiveService.StdOutReader.ReadAllLines().Select(x => x.Split()[0]).ToList();
+            Assert.Contains(listDeployStdOut, (deployment) => _stackName.Equals(deployment));
+
+            // Arrange input for delete
+            await _interactiveService.StdInWriter.WriteAsync("y"); // Confirm delete
+            await _interactiveService.StdInWriter.FlushAsync();
+            var deleteArgs = new[] { "delete-deployment", _stackName, "--diagnostics" };
+
+            // Delete
+            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deleteArgs));;
+
+            // Verify application is deleted
+            Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName));
+        }
+
         public void Dispose()
         {
             Dispose(true);

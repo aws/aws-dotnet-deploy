@@ -54,7 +54,8 @@ namespace AWS.Deploy.Orchestration
                 ECRImageTag = recommendation.DeploymentBundle.ECRImageTag ?? "",
                 DotnetPublishZipPath = recommendation.DeploymentBundle.DotnetPublishZipPath ?? "",
                 DotnetPublishOutputDirectory = recommendation.DeploymentBundle.DotnetPublishOutputDirectory ?? "",
-                NewDeployment = !recommendation.IsExistingCloudApplication
+                NewDeployment = !recommendation.IsExistingCloudApplication,
+                EnvironmentArchitecture = recommendation.DeploymentBundle.EnvironmentArchitecture.ToString()
             };
 
             // Persist deployment bundle settings
