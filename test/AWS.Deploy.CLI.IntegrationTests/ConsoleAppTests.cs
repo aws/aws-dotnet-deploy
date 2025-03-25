@@ -118,6 +118,70 @@ namespace AWS.Deploy.CLI.IntegrationTests
             Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName), $"{_stackName} still exists.");
         }
 
+        [Theory]
+        [InlineData("testapps", "ConsoleAppService", "ConsoleAppService.csproj")]
+        [InlineData("testapps", "ConsoleAppTask", "ConsoleAppTask.csproj")]
+        public async Task FargateArmDeployment(params string[] components)
+        {
+            _stackName = $"{components[1]}Arm{Guid.NewGuid().ToString().Split('-').Last()}";
+
+            // Arrange input for deploy
+            await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Select default recommendation
+            await _interactiveService.StdInWriter.WriteLineAsync("8"); // Select "Environment Architecture"
+            await _interactiveService.StdInWriter.WriteLineAsync("2"); // Select "Arm64"
+            await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Confirm selection and deploy
+            await _interactiveService.StdInWriter.FlushAsync();
+
+            // Deploy
+            var deployArgs = new[] { "deploy", "--project-path", _testAppManager.GetProjectPath(Path.Combine(components)), "--application-name", _stackName, "--diagnostics" };
+            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
+
+            // Verify application is deployed and running
+            Assert.Equal(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
+
+            var cluster = await _ecsHelper.GetCluster(_stackName);
+            Assert.Equal("ACTIVE", cluster.Status);
+
+            // Verify CloudWatch logs
+            var logGroup = await _ecsHelper.GetLogGroup(_stackName);
+            var logMessages = await _cloudWatchLogsHelper.GetLogMessages(logGroup);
+            Assert.Contains("Hello World!", logMessages);
+
+            var deployStdOut = _interactiveService.StdOutReader.ReadAllLines();
+
+            var tempCdkProjectLine = deployStdOut.First(line => line.StartsWith("Saving AWS CDK deployment project to: "));
+            var tempCdkProject = tempCdkProjectLine.Split(": ")[1].Trim();
+            Assert.False(Directory.Exists(tempCdkProject), $"{tempCdkProject} must not exist.");
+
+            // list
+            var listArgs = new[] { "list-deployments", "--diagnostics" };
+            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(listArgs));;
+
+            // Verify stack exists in list of deployments
+            var listStdOut = _interactiveService.StdOutReader.ReadAllLines().Select(x => x.Split()[0]).ToList();
+            Assert.Contains(listStdOut, (deployment) => _stackName.Equals(deployment));
+
+            // Arrange input for re-deployment
+            await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Select default option settings
+            await _interactiveService.StdInWriter.FlushAsync();
+
+            // Perform re-deployment
+            deployArgs = new[] { "deploy", "--project-path", _testAppManager.GetProjectPath(Path.Combine(components)), "--application-name", _stackName, "--diagnostics" };
+            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
+            Assert.Equal(StackStatus.UPDATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
+
+            // Arrange input for delete
+            await _interactiveService.StdInWriter.WriteAsync("y"); // Confirm delete
+            await _interactiveService.StdInWriter.FlushAsync();
+            var deleteArgs = new[] { "delete-deployment", _stackName, "--diagnostics" };
+
+            // Delete
+            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deleteArgs));;
+
+            // Verify application is deleted
+            Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName), $"{_stackName} still exists.");
+        }
+
         public void Dispose()
         {
             Dispose(true);
