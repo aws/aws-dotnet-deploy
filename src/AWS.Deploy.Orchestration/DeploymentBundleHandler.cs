@@ -75,9 +75,9 @@ namespace AWS.Deploy.Orchestration
 
             var dockerBuildCommand = $"docker build -t {imageTag} -f \"{dockerFile}\"{buildArgs} .";
             var currentArchitecture = RuntimeInformation.OSArchitecture == Architecture.Arm64 ? SupportedArchitecture.Arm64 : SupportedArchitecture.X86_64;
-            var dockerPlatform = recommendation.DeploymentBundle.EnvironmentArchitecture == SupportedArchitecture.Arm64 ? "linux/arm64" : "linux/amd64";
             if (currentArchitecture != recommendation.DeploymentBundle.EnvironmentArchitecture)
             {
+                var dockerPlatform = recommendation.DeploymentBundle.EnvironmentArchitecture == SupportedArchitecture.Arm64 ? "linux/arm64" : "linux/amd64";
                 dockerBuildCommand = $"docker buildx build --platform {dockerPlatform} -t {imageTag} -f \"{dockerFile}\"{buildArgs} .";
             }
 
