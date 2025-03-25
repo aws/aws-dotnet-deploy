@@ -38,7 +38,7 @@ namespace AspNetAppElasticBeanstalkLinux
         public const string IMDS_V1_ENABLED = "Enabled";
 
         public const string REVERSEPROXY_NGINX = "nginx";
-        
+
         public const string ENHANCED_HEALTH_REPORTING = "enhanced";
 
         public Vpc? AppVpc { get; private set; }
@@ -78,7 +78,7 @@ namespace AspNetAppElasticBeanstalkLinux
             ConfigureVpc(settings);
             ConfigureIAM(settings);
             var beanstalkApplicationName = ConfigureApplication(settings);
-            ConfigureBeanstalkEnvironment(props.NewDeployment, settings, beanstalkApplicationName);
+            ConfigureBeanstalkEnvironment(props.NewDeployment, settings, beanstalkApplicationName, props.EnvironmentArchitecture);
         }
 
         private void ConfigureVpc(Configuration settings)
@@ -204,7 +204,7 @@ namespace AspNetAppElasticBeanstalkLinux
             return beanstalkApplicationName;
         }
 
-        private void ConfigureBeanstalkEnvironment(bool newDeployment, Configuration settings, string beanstalkApplicationName)
+        private void ConfigureBeanstalkEnvironment(bool newDeployment, Configuration settings, string beanstalkApplicationName, string? environmentArchitecture)
         {
             if (Ec2InstanceProfile == null)
                 throw new InvalidOperationException($"{nameof(Ec2InstanceProfile)} has not been set. The {nameof(ConfigureIAM)} method should be called before {nameof(ConfigureBeanstalkEnvironment)}");
@@ -258,9 +258,19 @@ namespace AspNetAppElasticBeanstalkLinux
             {
                 optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
                 {
-                    Namespace = "aws:autoscaling:launchconfiguration",
-                    OptionName = "InstanceType",
+                    Namespace = "aws:ec2:instances",
+                    OptionName = "InstanceTypes",
                     Value = settings.InstanceType
+                });
+            }
+
+            if (!string.IsNullOrEmpty(environmentArchitecture))
+            {
+                optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
+                {
+                    Namespace = "aws:ec2:instances",
+                    OptionName = "SupportedArchitectures",
+                    Value = environmentArchitecture.ToLower()
                 });
             }
 
@@ -352,7 +362,7 @@ namespace AspNetAppElasticBeanstalkLinux
                     }
                 );
             }
-            
+
             if (settings.ElasticBeanstalkRollingUpdates.RollingUpdatesEnabled)
             {
                 optionSettingProperties.Add(new CfnEnvironment.OptionSettingProperty
