@@ -1,3 +1,10 @@
+## Release 2025-03-28
+
+### AWS.Deploy.CLI (1.28.2)
+* Update the default docker image node version from version 18 to 22
+### AWS.Deploy.Recipes.CDK.Common (1.28.2)
+### AWS.Deploy.ServerMode.Client (1.28.2)
+
 ## Release 2024-12-30
 
 ### AWS.Deploy.CLI (1.28.1)
