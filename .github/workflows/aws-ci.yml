@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@8c3f20df09ac63af7b3ae3d7c91f105f857d8497 #v4
+        uses: aws-actions/configure-aws-credentials@8c3f20df09ac63af7b3ae3d7c91f105f857d8497 #v4.0.0
         with:
           role-to-assume: ${{ secrets.CI_MAIN_TESTING_ACCOUNT_ROLE_ARN }}
           role-duration-seconds: 7200
@@ -30,14 +30,14 @@ jobs:
           $roleArn=$(cat ./response.json)
           "roleArn=$($roleArn -replace '"', '')" >> $env:GITHUB_OUTPUT
       - name: Configure Test Runner Credentials
-        uses: aws-actions/configure-aws-credentials@8c3f20df09ac63af7b3ae3d7c91f105f857d8497 #v4
+        uses: aws-actions/configure-aws-credentials@8c3f20df09ac63af7b3ae3d7c91f105f857d8497 #v4.0.0
         with:
           role-to-assume: ${{ steps.lambda.outputs.roleArn }}
           role-duration-seconds: 7200
           aws-region: us-west-2
       - name: Run Tests on AWS
         id: codebuild
-        uses: aws-actions/aws-codebuild-run-build@v1
+        uses: aws-actions/aws-codebuild-run-build@4d15a47425739ac2296ba5e7eee3bdd4bfbdd767 #v1.0.18
         with:
           project-name: ${{ secrets.CI_TESTING_CODE_BUILD_PROJECT_NAME }}
           env-vars-for-codebuild: CODECOV_TOKEN
