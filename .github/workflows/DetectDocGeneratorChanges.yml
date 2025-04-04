@@ -15,11 +15,11 @@ jobs:
         role-to-assume: ${{ secrets.CI_MAIN_TESTING_ACCOUNT_ROLE_ARN }}
         role-duration-seconds: 7200
         aws-region: us-west-2
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 #v3.6.0
       with:
         fetch-depth: '0'
     - name: Setup .NET Core 6.0
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@b2ace4b12f4cec1b96b6361ff2694ba9e931ceb4 #v3.3.1
       with:
         dotnet-version: 6.0.x
     - name: Restore dependencies
