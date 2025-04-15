@@ -10,4 +10,4 @@ updates:
       interval: "weekly"
     labels:
       - "Release Not Needed"
-    target-branch: "development"
+    target-branch: "dev"
