@@ -56,6 +56,7 @@ namespace AWS.Deploy.Common.Data
         Task<Amazon.AppRunner.Model.Service> DescribeAppRunnerService(string serviceArn);
         Task<List<StackResource>> DescribeCloudFormationResources(string stackName);
         Task<EnvironmentDescription> DescribeElasticBeanstalkEnvironment(string environmentName);
+        Task<List<ConfigurationSettingsDescription>> DescribeElasticBeanstalkConfigurationSettings(string applicationName, string environmentName);
         Task<LoadBalancer> DescribeElasticLoadBalancer(string loadBalancerArn);
         Task<List<Listener>> DescribeElasticLoadBalancerListeners(string loadBalancerArn);
         Task<DescribeRuleResponse> DescribeCloudWatchRule(string ruleName);

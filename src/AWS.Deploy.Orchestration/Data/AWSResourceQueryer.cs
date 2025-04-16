@@ -238,7 +238,8 @@ namespace AWS.Deploy.Orchestration.Data
             var beanstalkClient = _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>();
             return await HandleException(async () =>
             {
-                var environment = await beanstalkClient.DescribeEnvironmentsAsync(new DescribeEnvironmentsRequest {
+                var environment = await beanstalkClient.DescribeEnvironmentsAsync(new DescribeEnvironmentsRequest
+                {
                     EnvironmentNames = new List<string> { environmentName }
                 });
 
@@ -248,6 +249,22 @@ namespace AWS.Deploy.Orchestration.Data
                 }
 
                 return environment.Environments.First();
+            },
+            $"Error attempting to describe Elastic Beanstalk environment '{environmentName}'");
+        }
+
+        public async Task<List<ConfigurationSettingsDescription>> DescribeElasticBeanstalkConfigurationSettings(string applicationName, string environmentName)
+        {
+            var beanstalkClient = _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>();
+            return await HandleException(async () =>
+            {
+                var environment = await beanstalkClient.DescribeConfigurationSettingsAsync(new DescribeConfigurationSettingsRequest
+                {
+                    ApplicationName = applicationName,
+                    EnvironmentName = environmentName
+                });
+
+                return environment.ConfigurationSettings;
             },
             $"Error attempting to describe Elastic Beanstalk environment '{environmentName}'");
         }

@@ -13,6 +13,11 @@ namespace AWS.Deploy.Common.Recipes.Validation
         /// <summary>
         /// Must be paired with <see cref="DockerfilePathValidator"/>
         /// </summary>
-        ValidDockerfilePath
+        ValidDockerfilePath,
+
+        /// <summary>
+        /// Must be paired with <see cref="BeanstalkInstanceTypeValidator"/>
+        /// </summary>
+        BeanstalkInstanceType
     }
 }

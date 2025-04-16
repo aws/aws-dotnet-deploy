@@ -166,6 +166,12 @@ namespace AWS.Deploy.CLI.ServerMode.Services
         }
 
         /// <inheritdoc/>
+        public async Task<List<ConfigurationSettingsDescription>> DescribeElasticBeanstalkConfigurationSettings(string applicationName, string environmentName)
+        {
+            return (await GetAndCache(async () => await _awsResourceQueryer.DescribeElasticBeanstalkConfigurationSettings(applicationName, environmentName), new object[] { applicationName, environmentName }))!;
+        }
+
+        /// <inheritdoc/>
         public async Task<Amazon.ElasticLoadBalancingV2.Model.LoadBalancer> DescribeElasticLoadBalancer(string loadBalancerArn)
         {
             return (await GetAndCache(async () => await _awsResourceQueryer.DescribeElasticLoadBalancer(loadBalancerArn), new object[] { loadBalancerArn }))!;
