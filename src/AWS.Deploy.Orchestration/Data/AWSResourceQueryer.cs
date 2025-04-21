@@ -233,6 +233,7 @@ namespace AWS.Deploy.Orchestration.Data
             $"Error attempting to describe CloudFormation resources of '{stackName}'");
         }
 
+        /// <inheritdoc />
         public async Task<EnvironmentDescription> DescribeElasticBeanstalkEnvironment(string environmentName)
         {
             var beanstalkClient = _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>();
@@ -253,6 +254,7 @@ namespace AWS.Deploy.Orchestration.Data
             $"Error attempting to describe Elastic Beanstalk environment '{environmentName}'");
         }
 
+        /// <inheritdoc />
         public async Task<List<ConfigurationSettingsDescription>> DescribeElasticBeanstalkConfigurationSettings(string applicationName, string environmentName)
         {
             var beanstalkClient = _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>();
