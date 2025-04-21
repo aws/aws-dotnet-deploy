@@ -166,6 +166,28 @@ namespace AWS.Deploy.CLI.IntegrationTests
             var listStdOut = _interactiveService.StdOutReader.ReadAllLines().Select(x => x.Split()[0]).ToList();
             Assert.Contains(listStdOut, (deployment) => _stackName.Equals(deployment));
 
+            // Try switching from ARM to X86_64 on redeployment
+            await _interactiveService.StdInWriter.WriteLineAsync("3"); // Select "Environment Architecture"
+            await _interactiveService.StdInWriter.WriteLineAsync("1"); // Select "X86_64"
+            await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Confirm selection and deploy
+            await _interactiveService.StdInWriter.WriteLineAsync("more"); // Select "Environment Architecture"
+            await _interactiveService.StdInWriter.WriteLineAsync("1"); // Select "EC2 Instance Type"
+            await _interactiveService.StdInWriter.WriteLineAsync("y"); // Select "Free tier"
+            await _interactiveService.StdInWriter.WriteLineAsync("1"); // Select "x86_64"
+            await _interactiveService.StdInWriter.WriteLineAsync("1"); // Select "CPU Cores"
+            await _interactiveService.StdInWriter.WriteLineAsync("1"); // Select "Instance Memory"
+            await _interactiveService.StdInWriter.WriteLineAsync("1"); // Select "Instance Type"
+            await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Confirm selection and deploy
+            await _interactiveService.StdInWriter.FlushAsync();
+
+            // Perform re-deployment
+            deployArgs = new[] { "deploy", "--project-path", projectPath, "--application-name", _stackName, "--diagnostics" };
+            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
+            Assert.Equal(StackStatus.UPDATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
+
+            deployStdOut = _interactiveService.StdOutReader.ReadAllLines();
+            Assert.Contains(deployStdOut, x => x.Contains("Please select an Instance Type that supports the currently selected Environment Architecture."));
+
             // Arrange input for delete
             // Use --silent flag to delete without user prompts
             var deleteArgs = new[] { "delete-deployment", _stackName, "--diagnostics", "--silent" };

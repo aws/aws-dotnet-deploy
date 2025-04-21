@@ -393,7 +393,8 @@
                         "type": "string",
                         "enum": [
                             "FargateTaskSizeCpuMemoryLimits",
-                            "ValidDockerfilePath"
+                            "ValidDockerfilePath",
+                            "BeanstalkInstanceType"
                         ]
                     }
                 },
