@@ -1,3 +1,12 @@
+## Release 2025-04-24
+
+### AWS.Deploy.CLI (1.29.0)
+* Add support for deploying ARM web apps to ECS Fargate
+* Add support for deploying ARM console apps to ECS Fargate
+* Add support for deploying ARM web apps to Elastic Beanstalk on Linux
+### AWS.Deploy.Recipes.CDK.Common (1.29.0)
+### AWS.Deploy.ServerMode.Client (1.29.0)
+
 ## Release 2025-03-28
 
 ### AWS.Deploy.CLI (1.28.2)
