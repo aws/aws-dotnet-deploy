@@ -17,6 +17,7 @@
         "ShortDescription",
         "TargetService",
         "TargetPlatform",
+        "SupportedArchitectures",
         "RecipePriority",
         "RecommendationRules",
         "OptionSettings"
@@ -102,6 +103,15 @@
             "description": "The environment platform the recipe deploys to. This is used to publish a self-contained .NET application for that platform.",
             "minLength": 1,
             "enum": [ "Linux", "Windows" ]
+        },
+        "SupportedArchitectures": {
+            "type": "array",
+            "title": "Supported Architectures",
+            "description": "The CPU architecture that is supported by the recipe.",
+            "items": {
+                "type": "string",
+                "enum": [ "x86_64", "arm64" ]
+            }
         },
         "DeploymentConfirmation": {
             "$ref": "#/definitions/DeploymentConfirmation"
@@ -383,7 +393,8 @@
                         "type": "string",
                         "enum": [
                             "FargateTaskSizeCpuMemoryLimits",
-                            "ValidDockerfilePath"
+                            "ValidDockerfilePath",
+                            "BeanstalkInstanceType"
                         ]
                     }
                 },

@@ -10,7 +10,7 @@
     <PackageIcon>icon.png</PackageIcon>
     <PackageProjectUrl>https://github.com/aws/aws-dotnet-deploy</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <Version>1.28.2</Version>
+    <Version>1.29.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

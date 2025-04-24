@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
@@ -25,6 +27,7 @@ using Moq;
 using Xunit;
 using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.IO;
+using Should;
 
 namespace AWS.Deploy.CLI.UnitTests
 {
@@ -154,6 +157,53 @@ namespace AWS.Deploy.CLI.UnitTests
             Assert.Equal("Bucket1", resources.Rows[0].SystemName);
             Assert.Equal("Bucket2", resources.Rows[1].DisplayName);
             Assert.Equal("Bucket2", resources.Rows[1].SystemName);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData(new [] { SupportedArchitecture.X86_64 })]
+        [InlineData(new [] { SupportedArchitecture.Arm64 })]
+        [InlineData(new [] { SupportedArchitecture.X86_64, SupportedArchitecture.Arm64 })]
+        public async Task TestEnvironmentArchitectureTypeHint_NoArchitectureDefined(SupportedArchitecture[] architectures)
+        {
+            var archList = architectures?.ToList();
+            var recipeDefinition = new Mock<RecipeDefinition>(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<DeploymentTypes>(),
+                It.IsAny<DeploymentBundleTypes>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>()).Object;
+            var projectDefinitionParser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
+            var projectPath = SystemIOUtilities.ResolvePath("ConsoleAppTask");
+            var project = await projectDefinitionParser.Parse(projectPath);
+            recipeDefinition.SupportedArchitectures = archList;
+            var recommendation = new Recommendation(recipeDefinition, project, 0, new Dictionary<string, object>());
+
+            var typeHintCommand = new EnvironmentArchitectureCommand(null, _optionSettingHandler);
+
+            var resources = await typeHintCommand.GetResources(recommendation, null);
+
+            if (archList is null)
+            {
+                var expectedArchitecture = SupportedArchitecture.X86_64.ToString();
+                var row = Assert.Single(resources.Rows);
+                Assert.Equal(expectedArchitecture, row.SystemName);
+                Assert.Equal(expectedArchitecture, row.DisplayName);
+            }
+            else
+            {
+                Assert.Equal(architectures.Length, resources.Rows.Count);
+                foreach (var row in resources.Rows)
+                {
+                    Assert.Contains(archList, x => x.ToString().Equals(row.DisplayName));
+                    Assert.Contains(archList, x => x.ToString().Equals(row.SystemName));
+                }
+            }
         }
 
         [Fact]

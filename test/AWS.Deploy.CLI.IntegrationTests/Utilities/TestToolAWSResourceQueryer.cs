@@ -70,5 +70,6 @@ namespace AWS.Deploy.CLI.IntegrationTests.Utilities
         public Task<string> GetParameterStoreTextValue(string parameterName) => throw new NotImplementedException();
         public Task<ResourceDescription> GetCloudControlApiResource(string type, string identifier) => throw new NotImplementedException();
         public Task<Vpc> GetDefaultVpc() => throw new NotImplementedException();
+        public Task<List<ConfigurationSettingsDescription>> DescribeElasticBeanstalkConfigurationSettings(string applicationName, string environmentName) => throw new NotImplementedException();
     }
 }

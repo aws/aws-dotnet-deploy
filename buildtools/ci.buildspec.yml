@@ -4,10 +4,7 @@ phases:
   install:
     runtime-versions:
       nodejs: 22
-    commands:
-      # install .NET SDK
-      - curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --channel 6.0
-      - export PATH="$PATH:$HOME/.dotnet"
+      dotnet: 8.x
   pre_build:
     commands:
       - export DOTNET_CLI_TELEMETRY_OPTOUT=1

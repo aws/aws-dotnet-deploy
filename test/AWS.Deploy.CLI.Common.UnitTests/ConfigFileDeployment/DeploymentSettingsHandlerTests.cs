@@ -34,6 +34,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.ConfigFileDeployment
         private const string STACK_NAME_TOKEN = "{StackName}";
         private const string DEFAULT_VPC_ID_TOKEN = "{DefaultVpcId}";
         private const string DEFAULT_CONTAINER_PORT_TOKEN = "{DefaultContainerPort}";
+        private const string DEFAULT_ENVIRONMENT_ARCHITECTURE = "{DefaultEnvironmentArchitecture}";
 
         public DeploymentSettingsHandlerTests()
         {
@@ -163,6 +164,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.ConfigFileDeployment
             selectedRecommendation.AddReplacementToken(BEANSTALK_PLATFORM_ARN_TOKEN, "Latest-ARN");
             selectedRecommendation.AddReplacementToken(STACK_NAME_TOKEN, "MyAppStack");
             selectedRecommendation.AddReplacementToken(DEFAULT_VPC_ID_TOKEN, "vpc-12345678");
+            selectedRecommendation.AddReplacementToken(DEFAULT_ENVIRONMENT_ARCHITECTURE, "X86_64");
 
             // ARRANGE - Modify option setting items
             await _optionSettingHandler.SetOptionSettingValue(selectedRecommendation, "BeanstalkApplication", "MyBeanstalkApplication");
@@ -203,6 +205,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.ConfigFileDeployment
             selectedRecommendation.AddReplacementToken(STACK_NAME_TOKEN, "MyAppStack");
             selectedRecommendation.AddReplacementToken(DEFAULT_VPC_ID_TOKEN, "vpc-12345678");
             selectedRecommendation.AddReplacementToken(DEFAULT_CONTAINER_PORT_TOKEN, 80);
+            selectedRecommendation.AddReplacementToken(DEFAULT_ENVIRONMENT_ARCHITECTURE, "X86_64");
 
             // ARRANGE - Modify option setting items
             await _optionSettingHandler.SetOptionSettingValue(selectedRecommendation, "ServiceName", "MyAppRunnerService");
@@ -235,6 +238,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.ConfigFileDeployment
             // ARRANGE - Modify option setting items
             await _optionSettingHandler.SetOptionSettingValue(selectedRecommendation, "ImageTag", "123456789");
             await _optionSettingHandler.SetOptionSettingValue(selectedRecommendation, "ECRRepositoryName", "my-ecr-repository");
+            await _optionSettingHandler.SetOptionSettingValue(selectedRecommendation, "EnvironmentArchitecture", "X86_64");
             await _optionSettingHandler.SetOptionSettingValue(selectedRecommendation, "DockerfilePath", Path.Combine("DockerAssets", "Dockerfile")); // relative path
             await _optionSettingHandler.SetOptionSettingValue(selectedRecommendation, "DockerExecutionDirectory", Path.Combine(_projectPath, "DockerAssets")); // absolute path
 
