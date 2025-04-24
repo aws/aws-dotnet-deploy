@@ -244,6 +244,10 @@ namespace AWS.Deploy.Orchestration
                 recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_DEFAULT_CONTAINER_PORT, defaultPort);
                 recommendation.DeploymentBundle.DockerfileHttpPort = defaultPort;
             }
+            if (recommendation.ReplacementTokens.ContainsKey(Constants.RecipeIdentifier.REPLACE_TOKEN_DEFAULT_ENVIRONMENT_ARCHITECTURE))
+            {
+                recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_DEFAULT_ENVIRONMENT_ARCHITECTURE, Constants.Recipe.DefaultSupportedArchitecture);
+            }
         }
 
         public async Task DeployRecommendation(CloudApplication cloudApplication, Recommendation recommendation)

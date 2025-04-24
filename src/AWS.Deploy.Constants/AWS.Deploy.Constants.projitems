@@ -15,6 +15,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Docker.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EC2.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ElasticBeanstalk.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Recipe.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RecipeIdentifier.cs" />
   </ItemGroup>
 </Project>

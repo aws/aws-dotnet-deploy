@@ -114,7 +114,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests
 
             await EBHelper.CreateApplicationAsync(ApplicationName);
             await EBHelper.CreateApplicationVersionAsync(ApplicationName, VersionLabel, zipFilePath);
-            var success = await EBHelper.CreateEnvironmentAsync(ApplicationName, EnvironmentName, "net6.0", VersionLabel, BeanstalkPlatformType.Linux, RoleName);
+            var success = await EBHelper.CreateEnvironmentAsync(ApplicationName, EnvironmentName, "net8.0", VersionLabel, BeanstalkPlatformType.Linux, RoleName);
             Assert.True(success);
 
             var environmentDescription = await AWSResourceQueryer.DescribeElasticBeanstalkEnvironment(EnvironmentName);

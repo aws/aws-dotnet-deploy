@@ -55,7 +55,22 @@ namespace AWS.Deploy.Common.Data
 
         Task<Amazon.AppRunner.Model.Service> DescribeAppRunnerService(string serviceArn);
         Task<List<StackResource>> DescribeCloudFormationResources(string stackName);
+
+        /// <summary>
+        /// Describes the compute environment of an Elastic Beanstalk application
+        /// </summary>
+        /// <param name="environmentName">Environment name</param>
+        /// <returns>The Elastic Beanstalk environment</returns>
         Task<EnvironmentDescription> DescribeElasticBeanstalkEnvironment(string environmentName);
+
+        /// <summary>
+        /// Describes the configuration settings of an Elastic Beanstalk environment
+        /// </summary>
+        /// <param name="applicationName">Application name</param>
+        /// <param name="environmentName">Environment name</param>
+        /// <returns>The configuration settings of an Elastic Beanstalk environment</returns>
+        Task<List<ConfigurationSettingsDescription>> DescribeElasticBeanstalkConfigurationSettings(string applicationName, string environmentName);
+
         Task<LoadBalancer> DescribeElasticLoadBalancer(string loadBalancerArn);
         Task<List<Listener>> DescribeElasticLoadBalancerListeners(string loadBalancerArn);
         Task<DescribeRuleResponse> DescribeCloudWatchRule(string ruleName);

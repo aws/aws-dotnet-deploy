@@ -58,6 +58,45 @@ namespace AWS.Deploy.CLI.IntegrationTests
         }
 
         [Fact]
+        public async Task ApplySettingsWithoutDeploying()
+        {
+            _stackName = $"WebAppWithDockerFile{Guid.NewGuid().ToString().Split('-').Last()}";
+
+            // Arrange input for deploy
+            await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Select default recommendation
+            await _interactiveService.StdInWriter.WriteLineAsync("more"); // Select 'more'
+            await _interactiveService.StdInWriter.WriteLineAsync("13"); // Select 'Environment Architecture'
+            await _interactiveService.StdInWriter.WriteLineAsync("1"); // Select 'X86_64'
+            await _interactiveService.StdInWriter.WriteLineAsync("13"); // Select 'Environment Architecture' again for Code Coverage
+            await _interactiveService.StdInWriter.WriteLineAsync("1"); // Select 'X86_64'
+            await _interactiveService.StdInWriter.WriteLineAsync("8"); // Select 'Task CPU'
+            await _interactiveService.StdInWriter.WriteLineAsync("2"); // Select '512 (.5 vCPU)'
+            await _interactiveService.StdInWriter.FlushAsync();
+
+            // Deploy
+            var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
+            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--application-name", _stackName, "--diagnostics" };
+
+            await _app.Run(deployArgs);
+
+            var consoleOutput = _interactiveService.StdOutReader.ReadAllLines();
+
+            // Assert 'Environment Architecture' is set to 'X86_64'
+            var environmentArchitecture = consoleOutput.LastOrDefault(x => x.StartsWith("13. Environment Architecture:"));
+            Assert.NotNull(environmentArchitecture);
+            var environmentArchitectureSplit = environmentArchitecture.Split(':').ToList().Select(x => x.Trim()).ToList();
+            Assert.Equal(2, environmentArchitectureSplit.Count);
+            Assert.Equal("X86_64", environmentArchitectureSplit[1]);
+
+            // Assert 'Task CPU' is set to '512'
+            var taskCpu = consoleOutput.LastOrDefault(x => x.StartsWith("8 . Task CPU:"));
+            Assert.NotNull(taskCpu);
+            var taskCpuSplit = taskCpu.Split(':').ToList().Select(x => x.Trim()).ToList();
+            Assert.Equal(2, taskCpuSplit.Count);
+            Assert.Equal("512", taskCpuSplit[1]);
+        }
+
+        [Fact]
         public async Task DefaultConfigurations()
         {
             _stackName = $"WebAppWithDockerFile{Guid.NewGuid().ToString().Split('-').Last()}";
@@ -188,11 +227,60 @@ namespace AWS.Deploy.CLI.IntegrationTests
             // URL could take few more minutes to come live, therefore, we want to wait and keep trying for a specified timeout
             await _httpHelper.WaitUntilSuccessStatusCode(applicationUrl, TimeSpan.FromSeconds(5), TimeSpan.FromMinutes(5));
 
-            // Ensure environemnt variables specified in AppRunnerConfigFile.json are set for the service. 
+            // Ensure environemnt variables specified in AppRunnerConfigFile.json are set for the service.
             var checkEnvironmentVariableUrl = applicationUrl + "envvar/TEST_Key1";
             using var httpClient = new HttpClient();
             var envVarValue = await httpClient.GetStringAsync(checkEnvironmentVariableUrl);
             Assert.Equal("Value1", envVarValue);
+
+            // list
+            var listArgs = new[] { "list-deployments", "--diagnostics" };
+            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(listArgs));;
+
+            // Verify stack exists in list of deployments
+            var listDeployStdOut = _interactiveService.StdOutReader.ReadAllLines().Select(x => x.Split()[0]).ToList();
+            Assert.Contains(listDeployStdOut, (deployment) => _stackName.Equals(deployment));
+
+            // Arrange input for delete
+            await _interactiveService.StdInWriter.WriteAsync("y"); // Confirm delete
+            await _interactiveService.StdInWriter.FlushAsync();
+            var deleteArgs = new[] { "delete-deployment", _stackName, "--diagnostics" };
+
+            // Delete
+            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deleteArgs));;
+
+            // Verify application is deleted
+            Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName));
+        }
+
+        [Fact]
+        public async Task FargateArmDeployment()
+        {
+            _stackName = $"FargateArmDeployment{Guid.NewGuid().ToString().Split('-').Last()}";
+
+            // Arrange input for deploy
+            await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Select default recommendation
+            await _interactiveService.StdInWriter.WriteLineAsync("8"); // Select "Environment Architecture"
+            await _interactiveService.StdInWriter.WriteLineAsync("2"); // Select "Arm64"
+            await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Confirm selection and deploy
+            await _interactiveService.StdInWriter.FlushAsync();
+
+            // Deploy
+            var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppArmWithDocker", "WebAppArmWithDocker.csproj"));
+            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--application-name", _stackName, "--diagnostics" };
+            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
+
+            // Verify application is deployed and running
+            Assert.Equal(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
+
+            var deployStdOut = _interactiveService.StdOutReader.ReadAllLines();
+
+            var applicationUrl = deployStdOut.First(line => line.Trim().StartsWith("Endpoint:"))
+                .Split(" ")[1]
+                .Trim();
+
+            // URL could take few more minutes to come live, therefore, we want to wait and keep trying for a specified timeout
+            await _httpHelper.WaitUntilSuccessStatusCode(applicationUrl, TimeSpan.FromSeconds(5), TimeSpan.FromMinutes(5));
 
             // list
             var listArgs = new[] { "list-deployments", "--diagnostics" };

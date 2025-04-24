@@ -1,0 +1,11 @@
+{
+  "Projects": [
+    {
+      "Name": "AWS.Deploy.CLI",
+      "Type": "Minor",
+      "ChangelogMessages": [
+        "Add support for deploying ARM console apps to ECS Fargate"
+      ]
+    }
+  ]
+}

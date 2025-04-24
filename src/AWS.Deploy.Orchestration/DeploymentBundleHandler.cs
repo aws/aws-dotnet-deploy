@@ -74,9 +74,11 @@ namespace AWS.Deploy.Orchestration
             DockerUtilities.TryGetAbsoluteDockerfile(recommendation, _fileManager, _directoryManager, out var dockerFile);
 
             var dockerBuildCommand = $"docker build -t {imageTag} -f \"{dockerFile}\"{buildArgs} .";
-            if (RuntimeInformation.OSArchitecture != Architecture.X64)
+            var currentArchitecture = RuntimeInformation.OSArchitecture == Architecture.Arm64 ? SupportedArchitecture.Arm64 : SupportedArchitecture.X86_64;
+            if (currentArchitecture != recommendation.DeploymentBundle.EnvironmentArchitecture)
             {
-                dockerBuildCommand = $"docker buildx build --platform linux/amd64 -t {imageTag} -f \"{dockerFile}\"{buildArgs} .";
+                var dockerPlatform = recommendation.DeploymentBundle.EnvironmentArchitecture == SupportedArchitecture.Arm64 ? "linux/arm64" : "linux/amd64";
+                dockerBuildCommand = $"docker buildx build --platform {dockerPlatform} -t {imageTag} -f \"{dockerFile}\"{buildArgs} .";
             }
 
             _interactiveService.LogInfoMessage($"Docker Execution Directory: {Path.GetFullPath(dockerExecutionDirectory)}");
@@ -191,11 +193,13 @@ namespace AWS.Deploy.Orchestration
 
             var publishDirectoryInfo = _directoryManager.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
             var additionalArguments = recommendation.DeploymentBundle.DotnetPublishAdditionalBuildArguments;
+            var windowsPlatform = recommendation.DeploymentBundle.EnvironmentArchitecture == SupportedArchitecture.Arm64 ? "win-arm64" : "win-x64";
+            var linuxPlatform = recommendation.DeploymentBundle.EnvironmentArchitecture == SupportedArchitecture.Arm64 ? "linux-arm64" : "linux-x64";
             var runtimeArg =
                recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild &&
                !additionalArguments.Contains("--runtime ") &&
                !additionalArguments.Contains("-r ")
-                     ? $"--runtime {(recommendation.Recipe.TargetPlatform == TargetPlatform.Windows ? "win-x64" : "linux-x64")}"
+                     ? $"--runtime {(recommendation.Recipe.TargetPlatform == TargetPlatform.Windows ? windowsPlatform : linuxPlatform)}"
                      : "";
             var publishCommand =
                 $"dotnet publish \"{recommendation.ProjectPath}\"" +

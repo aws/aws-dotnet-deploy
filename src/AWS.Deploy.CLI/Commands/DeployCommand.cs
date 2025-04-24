@@ -726,28 +726,29 @@ namespace AWS.Deploy.CLI.Commands
 
             object currentValue = _optionSettingHandler.GetOptionSettingValue(recommendation, setting);
             object? settingValue = null;
-            if (setting.AllowedValues?.Count > 0)
+
+            if (setting.TypeHint.HasValue && _typeHintCommandFactory.GetCommand(setting.TypeHint.Value) is var typeHintCommand && typeHintCommand != null)
             {
-                var userInputConfig = new UserInputConfiguration<string>(
-                    idSelector: x => x,
-                    displaySelector: x => setting.ValueMapping.ContainsKey(x) ? setting.ValueMapping[x] : x,
-                    defaultSelector: x => x.Equals(currentValue))
-                {
-                    CreateNew = false
-                };
-
-                var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(setting.AllowedValues, string.Empty, userInputConfig);
-                settingValue = userResponse.SelectedOption;
-
-                // If they didn't change the value then don't store so we can rely on using the default in the recipe.
-                if (Equals(settingValue, currentValue))
-                    return;
+                settingValue = await typeHintCommand.Execute(recommendation, setting);
             }
             else
             {
-                if (setting.TypeHint.HasValue && _typeHintCommandFactory.GetCommand(setting.TypeHint.Value) is var typeHintCommand && typeHintCommand != null)
+                if (setting.AllowedValues?.Count > 0)
                 {
-                    settingValue = await typeHintCommand.Execute(recommendation, setting);
+                    var userInputConfig = new UserInputConfiguration<string>(
+                        idSelector: x => x,
+                        displaySelector: x => setting.ValueMapping.ContainsKey(x) ? setting.ValueMapping[x] : x,
+                        defaultSelector: x => x.Equals(currentValue))
+                    {
+                        CreateNew = false
+                    };
+
+                    var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(setting.AllowedValues, string.Empty, userInputConfig);
+                    settingValue = userResponse.SelectedOption;
+
+                    // If they didn't change the value then don't store so we can rely on using the default in the recipe.
+                    if (Equals(settingValue, currentValue))
+                        return;
                 }
                 else
                 {

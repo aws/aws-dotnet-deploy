@@ -68,7 +68,8 @@ namespace AWS.Deploy.Common.Recipes.Validation
         private static readonly Dictionary<RecipeValidatorList, Type> _recipeValidatorTypeMapping = new()
         {
             { RecipeValidatorList.FargateTaskSizeCpuMemoryLimits, typeof(FargateTaskCpuMemorySizeValidator) },
-            { RecipeValidatorList.ValidDockerfilePath, typeof(DockerfilePathValidator) }
+            { RecipeValidatorList.ValidDockerfilePath, typeof(DockerfilePathValidator) },
+            { RecipeValidatorList.BeanstalkInstanceType, typeof(BeanstalkInstanceTypeValidator) }
         };
 
         public IOptionSettingItemValidator[] BuildValidators(OptionSettingItem optionSettingItem, Func<OptionSettingItemValidatorConfig, bool>? filter = null)

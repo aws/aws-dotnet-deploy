@@ -22,6 +22,7 @@ namespace AWS.Deploy.Constants
         public const string REPLACE_TOKEN_HAS_DEFAULT_VPC = "{HasDefaultVpc}";
         public const string REPLACE_TOKEN_HAS_NOT_VPCS = "{HasNotVpcs}";
         public const string REPLACE_TOKEN_DEFAULT_CONTAINER_PORT = "{DefaultContainerPort}";
+        public const string REPLACE_TOKEN_DEFAULT_ENVIRONMENT_ARCHITECTURE = "{DefaultEnvironmentArchitecture}";
 
         /// <summary>
         /// Id for the 'dotnet publish --configuration' recipe option
@@ -37,6 +38,11 @@ namespace AWS.Deploy.Constants
         /// Id for the 'dotnet build --self-contained' recipe option
         /// </summary>
         public const string DotnetPublishSelfContainedBuildOptionId = "SelfContainedBuild";
+
+        /// <summary>
+        /// Id for the environment architecture recipe option
+        /// </summary>
+        public const string EnvironmentArchitectureOptionId = "EnvironmentArchitecture";
 
         public const string TARGET_SERVICE_ELASTIC_BEANSTALK = "AWS Elastic Beanstalk";
     }

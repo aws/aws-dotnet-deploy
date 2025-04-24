@@ -1,6 +1,9 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
+using AWS.Deploy.Common.Recipes;
+
 namespace AWS.Deploy.Common
 {
     /// <summary>
@@ -63,5 +66,10 @@ namespace AWS.Deploy.Common
         /// The list of additional dotnet publish args passed to the target application.
         /// </summary>
         public string DotnetPublishAdditionalBuildArguments { get; set; } = "";
+
+        /// <summary>
+        /// The CPU architecture of the environment to create.
+        /// </summary>
+        public SupportedArchitecture EnvironmentArchitecture { get; set; } = Enum.Parse<SupportedArchitecture>(Constants.Recipe.DefaultSupportedArchitecture);
     }
 }

@@ -2,6 +2,16 @@
     "Type": "DotnetPublishZipFile",
     "Parameters": [
         {
+            "Id": "EnvironmentArchitecture",
+            "Name": "Environment Architecture",
+            "Description": "The CPU architecture of the environment to create.",
+            "TypeHint": "EnvironmentArchitecture",
+            "Type": "String",
+            "DefaultValue": "{DefaultEnvironmentArchitecture}",
+            "AdvancedSetting": false,
+            "Updatable": true
+        },
+        {
             "Id": "DotnetBuildConfiguration",
             "Name": "Dotnet Build Configuration",
             "Description": "The build configuration to use for the dotnet build",

@@ -40,6 +40,7 @@ namespace AWS.Deploy.Common.Recipes
         VPCConnector,
         FilePath,
         ElasticBeanstalkVpc,
-        DockerHttpPort
+        DockerHttpPort,
+        EnvironmentArchitecture
     };
 }

@@ -73,6 +73,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 { OptionSettingTypeHint.FilePath, ActivatorUtilities.CreateInstance<FilePathCommand>(serviceProvider) },
                 { OptionSettingTypeHint.ElasticBeanstalkVpc, ActivatorUtilities.CreateInstance<ElasticBeanstalkVpcCommand>(serviceProvider) },
                 { OptionSettingTypeHint.DockerHttpPort, ActivatorUtilities.CreateInstance<DockerHttpPortCommand>(serviceProvider) },
+                { OptionSettingTypeHint.EnvironmentArchitecture, ActivatorUtilities.CreateInstance<EnvironmentArchitectureCommand>(serviceProvider) },
             };
         }
 
