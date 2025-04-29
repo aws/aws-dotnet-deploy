@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace AWS.Deploy.DockerEngine
+namespace AWS.Deploy.Orchestration.Docker
 {
     /// <summary>
     /// Encapsulates a DockerFile object

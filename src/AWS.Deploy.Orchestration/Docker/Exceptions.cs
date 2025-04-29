@@ -4,7 +4,7 @@
 using System;
 using AWS.Deploy.Common;
 
-namespace AWS.Deploy.DockerEngine
+namespace AWS.Deploy.Orchestration.Docker
 {
     public class DockerFileTemplateException : DockerEngineExceptionBase
     {

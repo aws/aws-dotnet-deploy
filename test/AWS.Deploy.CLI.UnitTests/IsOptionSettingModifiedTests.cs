@@ -9,8 +9,8 @@ using AWS.Deploy.CLI.UnitTests.Utilities;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Recipes.Validation;
-using AWS.Deploy.Orchestration;
 using AWS.Deploy.Constants;
+using AWS.Deploy.Orchestration;
 using Moq;
 using Xunit;
 

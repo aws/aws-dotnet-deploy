@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace AWS.Deploy.DockerEngine
+namespace AWS.Deploy.Orchestration.Docker
 {
     public class ImageDefinition
     {

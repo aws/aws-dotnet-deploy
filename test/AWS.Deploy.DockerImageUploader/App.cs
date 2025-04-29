@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestration;
+using AWS.Deploy.Orchestration.Docker;
 using AWS.Deploy.Orchestration.RecommendationEngine;
 
 namespace AWS.Deploy.DockerImageUploader
@@ -58,7 +59,7 @@ namespace AWS.Deploy.DockerImageUploader
             var orchestratorSession = new OrchestratorSession(projectDefinition);
             var recommendationEngine = new RecommendationEngine(orchestratorSession, _recipeHandler);
             var recommendations = await recommendationEngine.ComputeRecommendations();
-            var dockerEngine = new DockerEngine.DockerEngine(projectDefinition, _fileManager, _directoryManager);
+            var dockerEngine = new DockerEngine(projectDefinition, _fileManager, _directoryManager);
             dockerEngine.GenerateDockerFile(recommendations.First());
 
             var configFilePath = Path.Combine(projectPath, "DockerImageUploaderConfigFile.json");

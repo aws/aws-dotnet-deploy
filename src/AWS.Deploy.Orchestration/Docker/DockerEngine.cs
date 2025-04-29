@@ -10,7 +10,7 @@ using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Utilities;
 using Newtonsoft.Json;
 
-namespace AWS.Deploy.DockerEngine
+namespace AWS.Deploy.Orchestration.Docker
 {
     public interface IDockerEngine
     {

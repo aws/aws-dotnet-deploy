@@ -30,19 +30,26 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.Linq.Async" Version="6.0.1" />
     <PackageReference Include="YamlDotNet" Version="13.4.0" />
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AWS.Deploy.Common\AWS.Deploy.Common.csproj" />
     <ProjectReference Include="..\AWS.Deploy.Recipes\AWS.Deploy.Recipes.csproj" />
-    <ProjectReference Include="..\AWS.Deploy.DockerEngine\AWS.Deploy.DockerEngine.csproj" />
-    <ProjectReference Include="..\AWS.Deploy.Recipes.CDK.Common\AWS.Deploy.Recipes.CDK.Common.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Remove="Properties\DockerFileConfig.json" />
+    <None Remove="Templates\Dockerfile.template" />
+    <None Remove="Templates\Dockerfile.Net6.template" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="CDK\package.json.template" />
     <EmbeddedResource Include="CDK\CDKBootstrapTemplate.yaml" />
+    <EmbeddedResource Include="Docker\Templates\Dockerfile.Net6.template" />
+    <EmbeddedResource Include="Docker\Templates\Dockerfile.template" />
+    <EmbeddedResource Include="Properties\DockerFileConfig.json" />
   </ItemGroup>
-
-  <Import Project="..\AWS.Deploy.Constants\AWS.Deploy.Constants.projitems" Label="Shared" />
 
 </Project>
