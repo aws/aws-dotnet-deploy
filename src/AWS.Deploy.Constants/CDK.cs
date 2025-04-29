@@ -2,11 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
-using System.IO;
 
 namespace AWS.Deploy.Constants
 {
-    internal static class CDK
+    public static class CDK
     {
         /// <summary>
         /// Default version of CDK CLI

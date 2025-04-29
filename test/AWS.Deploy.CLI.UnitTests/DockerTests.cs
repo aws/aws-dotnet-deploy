@@ -1,8 +1,6 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-extern alias DockerEngine;
-
 using System;
 using System.IO;
 using System.Reflection;
@@ -10,11 +8,11 @@ using System.Threading.Tasks;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
-using DockerEngine.AWS.Deploy.DockerEngine;
 using Should;
 using Xunit;
 using AWS.Deploy.CLI.UnitTests.Utilities;
 using System.Linq;
+using AWS.Deploy.Orchestration.Docker;
 
 namespace AWS.Deploy.CLI.UnitTests
 {
@@ -102,7 +100,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var projectDefinition = await new ProjectDefinitionParser(fileManager, new DirectoryManager()).Parse(projectPath);
 
-            var engine = new DockerEngine.AWS.Deploy.DockerEngine.DockerEngine(projectDefinition, fileManager, new TestDirectoryManager());
+            var engine = new DockerEngine(projectDefinition, fileManager, new TestDirectoryManager());
 
             selectedRecommendation.DeploymentBundle.DockerfileHttpPort = engine.DetermineDefaultDockerPort(selectedRecommendation);
 

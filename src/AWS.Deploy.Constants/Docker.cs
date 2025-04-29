@@ -3,7 +3,7 @@
 
 namespace AWS.Deploy.Constants
 {
-    internal class Docker
+    public class Docker
     {
         /// <summary>
         /// Name of the default Dockerfile that the deployment tool attempts to detect in the project directory
