@@ -143,7 +143,7 @@ namespace AWS.Deploy.Orchestration
                     if (retiredFrameworks.Contains(targetFramework))
                     {
                         _interactiveService.LogErrorMessage($"The version of .NET that you are targeting has reached its end-of-support and has been retired by Elastic Beanstalk");
-                        _interactiveService.LogInfoMessage($"Using self-contained publish to deploy your application on a newer Elastic Beanstalk platform with a supported version of .NET");
+                        _interactiveService.LogInfoMessage($"Using self-contained publish to include the out of support version of .NET used by this application with the deployment bundle");
                     }
                     else
                     {
