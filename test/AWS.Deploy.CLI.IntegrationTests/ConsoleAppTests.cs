@@ -119,7 +119,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
         }
 
         [Theory]
-        [InlineData("testapps", "ConsoleAppService", "ConsoleAppService.csproj")]
+        [InlineData("testapps", "ConsoleAppArmDeployment", "ConsoleAppArmDeployment.csproj")]
         public async Task FargateArmDeployment(params string[] components)
         {
             _stackName = $"{components[1]}Arm{Guid.NewGuid().ToString().Split('-').Last()}";
