@@ -12,7 +12,6 @@ using AWS.Deploy.Common;
 using AWS.Deploy.Common.Extensions;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Recipes.Validation;
-using AWS.Deploy.DockerEngine;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.CDK;
 using AWS.Deploy.Recipes;
@@ -25,6 +24,7 @@ using Newtonsoft.Json;
 using AWS.Deploy.Orchestration.ServiceHandlers;
 using Microsoft.Extensions.DependencyInjection;
 using AWS.Deploy.Common.Data;
+using AWS.Deploy.Orchestration.Docker;
 
 namespace AWS.Deploy.CLI.Commands
 {
@@ -129,7 +129,7 @@ namespace AWS.Deploy.CLI.Commands
             }
 
             // Because we're starting a deployment, clear the cached system capabilities checks
-            // in case the deployment fails and the user reruns it after modifying Docker or Node 
+            // in case the deployment fails and the user reruns it after modifying Docker or Node
             _systemCapabilityEvaluator.ClearCachedCapabilityChecks();
 
             await CreateDeploymentBundle(orchestrator, selectedRecommendation, cloudApplication);

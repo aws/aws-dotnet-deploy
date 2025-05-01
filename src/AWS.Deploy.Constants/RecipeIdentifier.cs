@@ -1,10 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 
 namespace AWS.Deploy.Constants
 {
-    internal static class RecipeIdentifier
+    public static class RecipeIdentifier
     {
         // Recipe IDs
         public const string EXISTING_BEANSTALK_ENVIRONMENT_RECIPE_ID = "AspNetAppExistingBeanstalkEnvironment";

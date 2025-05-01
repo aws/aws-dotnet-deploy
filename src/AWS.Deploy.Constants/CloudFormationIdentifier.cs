@@ -1,10 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 
 namespace AWS.Deploy.Constants
 {
-    internal static class CloudFormationIdentifier
+    public static class CloudFormationIdentifier
     {
         /// <summary>
         /// The CDK context parameter name used to pass in the location of the AWS .NET deployment tool's settings file.

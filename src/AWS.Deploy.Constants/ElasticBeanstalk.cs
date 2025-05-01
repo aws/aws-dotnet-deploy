@@ -1,10 +1,11 @@
-using System;
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 using System.Collections.Generic;
-using System.Text;
 
 namespace AWS.Deploy.Constants
 {
-    internal static class ElasticBeanstalk
+    public static class ElasticBeanstalk
     {
         public const string EnhancedHealthReportingOptionId = "EnhancedHealthReporting";
         public const string EnhancedHealthReportingOptionNameSpace = "aws:elasticbeanstalk:healthreporting:system";

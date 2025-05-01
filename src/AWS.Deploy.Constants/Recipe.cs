@@ -3,7 +3,7 @@
 
 namespace AWS.Deploy.Constants
 {
-    internal class Recipe
+    public class Recipe
     {
         /// <summary>
         /// The default supported architecture

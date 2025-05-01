@@ -15,7 +15,7 @@ namespace WebAppWithDockerFile.Controllers
 
         public EnvVarController(ILogger<EnvVarController> logger)
         {
-            this._logger = logger;
+            _logger = logger;
         }
 
         [HttpGet()]

@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@8c3f20df09ac63af7b3ae3d7c91f105f857d8497 #v4.0.0
+      uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722 #v4.1.0
       with:
         aws-region: us-west-2
         role-to-assume: ${{ secrets.DOCKER_IMAGE_UPLOADER_ROLE }}
@@ -28,7 +28,7 @@ jobs:
         fetch-depth: 0
      
     - name: Setup .NET Core 6.0
-      uses: actions/setup-dotnet@b2ace4b12f4cec1b96b6361ff2694ba9e931ceb4 #v3.3.1
+      uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 #v4.3.1
       with:
         dotnet-version: 6.0.x
 

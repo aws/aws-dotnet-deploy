@@ -35,6 +35,7 @@ using AWS.Deploy.Common.TypeHintData;
 using AWS.Deploy.Orchestration.ServiceHandlers;
 using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.Recipes.Validation;
+using AWS.Deploy.Orchestration.Docker;
 
 namespace AWS.Deploy.CLI.ServerMode.Controllers
 {
@@ -592,7 +593,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                 return Problem($"Unable to start deployment due to missing system capabilities.{Environment.NewLine}{missingCapabilitiesMessage}", statusCode: Microsoft.AspNetCore.Http.StatusCodes.Status424FailedDependency);
 
             // Because we're starting a deployment, clear the cached system capabilities checks
-            // in case the deployment fails and the user reruns it after modifying Docker or Node 
+            // in case the deployment fails and the user reruns it after modifying Docker or Node
             systemCapabilityEvaluator.ClearCachedCapabilityChecks();
 
             var task = new DeployRecommendationTask(orchestratorSession, orchestrator, state.ApplicationDetails, state.SelectedRecommendation);
@@ -785,7 +786,7 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                                     serviceProvider.GetRequiredService<IAWSResourceQueryer>(),
                                     serviceProvider.GetRequiredService<IDeploymentBundleHandler>(),
                                     serviceProvider.GetRequiredService<ILocalUserSettingsEngine>(),
-                                    new DockerEngine.DockerEngine(
+                                    new DockerEngine(
                                         session.ProjectDefinition,
                                         serviceProvider.GetRequiredService<IFileManager>(),
                                         serviceProvider.GetRequiredService<IDirectoryManager>()),

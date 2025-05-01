@@ -12,7 +12,6 @@ using AWS.Deploy.CLI.IntegrationTests.Utilities;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.DeploymentManifest;
 using AWS.Deploy.Common.IO;
-using AWS.Deploy.DockerEngine;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.CDK;
 using AWS.Deploy.Recipes;
@@ -27,6 +26,7 @@ using AWS.Deploy.Orchestration.LocalUserSettings;
 using AWS.Deploy.Orchestration.Utilities;
 using AWS.Deploy.Orchestration.ServiceHandlers;
 using AWS.Deploy.Common.Recipes.Validation;
+using AWS.Deploy.Orchestration.Docker;
 
 namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 {

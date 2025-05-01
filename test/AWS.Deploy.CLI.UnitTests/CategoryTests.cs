@@ -19,7 +19,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
         public CategoryTests(ITestOutputHelper output)
         {
-            this._output = output;
+            _output = output;
         }
 
         [Fact]

@@ -135,12 +135,20 @@ namespace AWS.Deploy.Orchestration
                 if (string.IsNullOrEmpty(targetFramework))
                     return;
 
-                // Elastic Beanstalk doesn't currently have .NET 7 and 9 preinstalled.
-                var unavailableFramework = new List<string> { "net7.0", "net9.0" };
-                var frameworkNames = new Dictionary<string, string> { { "net7.0", ".NET 7" }, { "net9.0", ".NET 9" } };
-                if (unavailableFramework.Contains(targetFramework))
+                // Elastic Beanstalk currently has .NET 8 and 9 supported on their platforms.
+                var supportedFrameworks = new List<string> { "net8.0", "net9.0" };
+                var retiredFrameworks = new List<string> { "netcoreapp3.1", "net5.0", "net6.0", "net7.0" };
+                if (!supportedFrameworks.Contains(targetFramework))
                 {
-                    _interactiveService.LogInfoMessage($"Using self-contained publish since AWS Elastic Beanstalk does not currently have {frameworkNames[targetFramework]} preinstalled");
+                    if (retiredFrameworks.Contains(targetFramework))
+                    {
+                        _interactiveService.LogErrorMessage($"The version of .NET that you are targeting has reached its end-of-support and has been retired by Elastic Beanstalk");
+                        _interactiveService.LogInfoMessage($"Using self-contained publish to include the out of support version of .NET used by this application with the deployment bundle");
+                    }
+                    else
+                    {
+                        _interactiveService.LogInfoMessage($"Using self-contained publish since AWS Elastic Beanstalk does not currently have {targetFramework} preinstalled");
+                    }
                     recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild = true;
                     return;
                 }

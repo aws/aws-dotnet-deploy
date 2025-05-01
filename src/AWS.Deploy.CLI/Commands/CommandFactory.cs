@@ -22,6 +22,7 @@ using AWS.Deploy.Orchestration.ServiceHandlers;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Recipes.Validation;
 using AWS.Deploy.Common.Data;
+using AWS.Deploy.Orchestration.Docker;
 
 namespace AWS.Deploy.CLI.Commands
 {
@@ -226,7 +227,7 @@ namespace AWS.Deploy.CLI.Commands
                         AWSProfileName = input.Profile ?? deploymentSettings?.AWSProfile ?? null
                     };
 
-                    var dockerEngine = new DockerEngine.DockerEngine(projectDefinition, _fileManager, _directoryManager);
+                    var dockerEngine = new DockerEngine(projectDefinition, _fileManager, _directoryManager);
 
                     var deploy = new DeployCommand(
                         _serviceProvider,

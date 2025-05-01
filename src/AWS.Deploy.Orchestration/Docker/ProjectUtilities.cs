@@ -5,13 +5,13 @@ using System.Reflection;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Extensions;
 
-namespace AWS.Deploy.DockerEngine
+namespace AWS.Deploy.Orchestration.Docker
 {
     public class ProjectUtilities
     {
-        private const string DockerFileConfig = "AWS.Deploy.DockerEngine.Properties.DockerFileConfig.json";
-        private const string DockerfileTemplate = "AWS.Deploy.DockerEngine.Templates.Dockerfile.template";
-        private const string DockerfileTemplate_Net6 = "AWS.Deploy.DockerEngine.Templates.Dockerfile.Net6.template";
+        private const string DockerFileConfig = "AWS.Deploy.Orchestration.Properties.DockerFileConfig.json";
+        private const string DockerfileTemplate = "AWS.Deploy.Orchestration.Docker.Templates.Dockerfile.template";
+        private const string DockerfileTemplate_Net6 = "AWS.Deploy.Orchestration.Docker.Templates.Dockerfile.Net6.template";
 
         /// <summary>
         /// Retrieves the Docker File Config

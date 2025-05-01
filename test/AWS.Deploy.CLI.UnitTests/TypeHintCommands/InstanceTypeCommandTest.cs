@@ -256,7 +256,7 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
                 var interactiveServices = new TestToolInteractiveServiceImpl(new List<string>
                 {
                     "y", // Free tier
-                    "1", // CPU 
+                    "1", // CPU
                     "1", // Memory
                     "1"  // Instance type
                 });
@@ -273,7 +273,7 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
                 var interactiveServices = new TestToolInteractiveServiceImpl(new List<string>
                 {
                     "y", // Free tier
-                    "2", // CPU 
+                    "2", // CPU
                     "2", // Memory
                     "1"  // Instance type
                 });
@@ -385,7 +385,7 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
                 {
                     "y", // Free tier
                     "1", // Architecture x86_64
-                    "1", // CPU 
+                    "1", // CPU
                     "1", // Memory
                     "1"  // Instance type
                 });
@@ -403,7 +403,7 @@ namespace AWS.Deploy.CLI.UnitTests.TypeHintCommands
                 {
                     "y", // Free tier
                     "2", // Architecture arm64
-                    "2", // CPU 
+                    "2", // CPU
                     "1", // Memory
                     "1"  // Instance type
                 });

@@ -1,10 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 
 namespace AWS.Deploy.Constants
 {
-    internal static class CLI
+    public static class CLI
     {
         // Represents the default STS AWS region that is used for the purposes of
         // retrieving the caller identity and determining if a user is in an opt-in region.

@@ -119,15 +119,14 @@ namespace AWS.Deploy.CLI.IntegrationTests
         }
 
         [Theory]
-        [InlineData("testapps", "ConsoleAppService", "ConsoleAppService.csproj")]
-        [InlineData("testapps", "ConsoleAppTask", "ConsoleAppTask.csproj")]
+        [InlineData("testapps", "ConsoleAppArmDeployment", "ConsoleAppArmDeployment.csproj")]
         public async Task FargateArmDeployment(params string[] components)
         {
             _stackName = $"{components[1]}Arm{Guid.NewGuid().ToString().Split('-').Last()}";
 
             // Arrange input for deploy
             await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Select default recommendation
-            await _interactiveService.StdInWriter.WriteLineAsync("8"); // Select "Environment Architecture"
+            await _interactiveService.StdInWriter.WriteLineAsync("7"); // Select "Environment Architecture"
             await _interactiveService.StdInWriter.WriteLineAsync("2"); // Select "Arm64"
             await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Confirm selection and deploy
             await _interactiveService.StdInWriter.FlushAsync();
