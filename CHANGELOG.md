@@ -1,3 +1,10 @@
+## Release 2025-05-01
+
+### AWS.Deploy.CLI (1.30.0)
+* Automatically deploy unsupported .NET versions using a self-contained build to Elastic Beanstalk
+### AWS.Deploy.Recipes.CDK.Common (1.30.0)
+### AWS.Deploy.ServerMode.Client (1.30.0)
+
 ## Release 2025-04-24
 
 ### AWS.Deploy.CLI (1.29.0)
