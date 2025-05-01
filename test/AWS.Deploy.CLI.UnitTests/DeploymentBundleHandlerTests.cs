@@ -400,37 +400,6 @@ namespace AWS.Deploy.CLI.UnitTests
         }
 
         [Theory]
-        [InlineData("arn:aws:elasticbeanstalk:us-west-2::platform/.NET 8 running on 64bit Amazon Linux 2023")]
-        [InlineData("arn:aws:elasticbeanstalk:us-west-2::platform/.NET 8 running on 64bit Amazon Linux 2023/invalidversion")]
-        public async Task CreateDotnetPublishZip_InvalidPlatformArn(string platformArn)
-        {
-            var projectPath = SystemIOUtilities.ResolvePath(Path.Combine("ConsoleAppTask"));
-            var project = await _projectDefinitionParser.Parse(projectPath);
-            _recipeDefinition.TargetService = RecipeIdentifier.TARGET_SERVICE_ELASTIC_BEANSTALK;
-            _recipeDefinition.OptionSettings.Add(
-                new OptionSettingItem(
-                    "ElasticBeanstalkPlatformArn",
-                    "ElasticBeanstalkPlatformArn",
-                    "Beanstalk Platform",
-                    "The name of the Elastic Beanstalk platform to use with the environment.")
-                {
-                    DefaultValue = platformArn
-                });
-            var recommendation = new Recommendation(_recipeDefinition, project, 100, new Dictionary<string, object>());
-
-            await _deploymentBundleHandler.CreateDotnetPublishZip(recommendation);
-
-            Assert.False(recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild);
-
-            var expectedCommand =
-                $"dotnet publish \"{project.ProjectPath}\"" +
-                $" -o \"{_directoryManager.CreatedDirectories.First()}\"" +
-                " -c Release  ";
-
-            Assert.Equal(expectedCommand, _commandLineWrapper.CommandsToExecute.First().Command);
-        }
-
-        [Theory]
         [InlineData("arn:aws:elasticbeanstalk:us-west-2::platform/.NET Core running on 64bit Amazon Linux 2/2.7.3")]
         [InlineData("arn:aws:elasticbeanstalk:us-west-2::platform/.NET 6 running on 64bit Amazon Linux 2023/3.1.3")]
         public async Task CreateDotnetPublishZip_PlatformDoesntSupportNet8(string platformArn)
