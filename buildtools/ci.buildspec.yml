@@ -12,7 +12,7 @@ phases:
   build:
     commands:
       - dotnet build AWS.Deploy.sln -c Release
-      - dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover AWS.Deploy.sln -c Release --no-build --logger trx --results-directory ./testresults
+      - dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover AWS.Deploy.sln -c Release --no-build --logger trx --logger "console;verbosity=detailed" --results-directory ./testresults
 
   post_build:
     steps:
