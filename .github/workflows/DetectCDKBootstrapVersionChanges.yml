@@ -16,26 +16,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722
+      uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722 #v4.1.0
       with:
         role-to-assume: ${{ secrets.RELEASE_WORKFLOW_ACCESS_TOKEN_ROLE_ARN }}
         aws-region: us-west-2
 
     - name: Retrieve secret from AWS Secrets Manager
-      uses: aws-actions/aws-secretsmanager-get-secrets@fbd65ea98e018858715f591f03b251f02b2316cb
+      uses: aws-actions/aws-secretsmanager-get-secrets@fbd65ea98e018858715f591f03b251f02b2316cb #v2.0.8
       with:
         secret-ids: |
           AWS_SECRET, ${{ secrets.RELEASE_WORKFLOW_ACCESS_TOKEN_NAME }}
         parse-json-secrets: true
 
-    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
       with:
         fetch-depth: '0'
         ref: dev
         token: ${{ env.AWS_SECRET_TOKEN }}
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9
+      uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 #v4.3.1
       with:
         dotnet-version: '8.0.x'
 
@@ -83,7 +83,7 @@ jobs:
       env:
         NEW_VERSION: ${{ steps.check_version.outputs.new_version }}
       run: |
-        dotnet tool install -g autover --version 0.0.22
+        dotnet tool install -g autover --version 0.0.25
         autover change --project-name "AWS.Deploy.CLI" -m "Update CDK Bootstrap template to version $NEW_VERSION"
 
     - name: Setup Git User
