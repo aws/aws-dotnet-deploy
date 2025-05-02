@@ -76,7 +76,7 @@ namespace BlazorWasm
             {
                 DefaultBehavior = new BehaviorOptions
                 {
-                    Origin = new S3Origin(ContentS3Bucket, new S3OriginProps())
+                    Origin = S3BucketOrigin.WithOriginAccessControl(ContentS3Bucket)
                 },
                 DefaultRootObject = settings.IndexDocument,
                 EnableIpv6 = settings.EnableIpv6,

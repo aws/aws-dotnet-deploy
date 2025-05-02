@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <AssemblyName>AWS.Deploy.CLI.UnitTests</AssemblyName>
     <RootNamespace>AWS.Deploy.CLI.UnitTests</RootNamespace>
@@ -16,7 +16,7 @@
     <Content Include="TestFiles\**">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>  
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
@@ -34,7 +34,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    
+
   </ItemGroup>
 
   <ItemGroup>
@@ -43,5 +43,5 @@
     <ProjectReference Include="..\..\src\AWS.Deploy.ServerMode.Client\AWS.Deploy.ServerMode.Client.csproj" />
     <ProjectReference Include="..\AWS.Deploy.CLI.Common.UnitTests\AWS.Deploy.CLI.Common.UnitTests.csproj" />
   </ItemGroup>
-  
+
 </Project>

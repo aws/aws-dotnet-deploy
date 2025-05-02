@@ -60,8 +60,8 @@ The deploy tool supports a collection of tests that can be run against the .NET 
     "Condition": {
         "PropertyName": "TargetFramework",
         "AllowedValues": [
-            "netcoreapp3.1",
-            "net6.0"
+            "net8.0",
+            "net9.0"
         ]
     }
 }
@@ -103,8 +103,8 @@ Here is an example of a rule that checks if the project is a web project and tar
         "Condition": {
           "PropertyName": "TargetFramework",
           "AllowedValues": [
-            "netcoreapp3.1",
-            "net6.0"
+            "net8.0",
+            "net9.0"
           ]
         }
       }

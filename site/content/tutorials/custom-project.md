@@ -20,7 +20,7 @@ Tasks we will accomplish:
 In your command prompt, run the following command to create your app:
 
 ```
-dotnet new webapp -o Acme.WebApp -f net6.0
+dotnet new webapp -o Acme.WebApp -f net8.0
 ```
 
 ### Step 2: Generate a deployment project
