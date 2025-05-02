@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <AssemblyName>AWS.Deploy.Recipes</AssemblyName>
     <RootNamespace>AWS.Deploy.Recipes</RootNamespace>
   </PropertyGroup>

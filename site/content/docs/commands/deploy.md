@@ -19,7 +19,7 @@ Inspects the project and recommends AWS compute that is most suited to the type 
 Deploying HelloWorld
 
 ```
-dotnet new web -n HelloWorld -f net6.0
+dotnet new web -n HelloWorld -f net8.0
 cd HelloWorld
 dotnet aws deploy
 ```

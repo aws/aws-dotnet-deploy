@@ -62,9 +62,8 @@ namespace AWS.Deploy.CLI.ServerMode
             IOptionsMonitor<AwsCredentialsAuthenticationSchemeOptions> options,
             ILoggerFactory logger,
             UrlEncoder encoder,
-            ISystemClock clock,
             IEncryptionProvider encryptionProvider)
-            : base(options, logger, encoder, clock)
+            : base(options, logger, encoder)
         {
             _encryptionProvider = encryptionProvider;
         }
