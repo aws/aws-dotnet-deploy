@@ -23,6 +23,7 @@ using System.IO;
 using AWS.Deploy.Common.Recipes;
 using DeploymentTypes = AWS.Deploy.CLI.ServerMode.Models.DeploymentTypes;
 using System;
+using AWS.Deploy.CLI.Commands.Settings;
 using AWS.Deploy.Common.Recipes.Validation;
 using AWS.Deploy.Recipes;
 
@@ -47,11 +48,23 @@ namespace AWS.Deploy.CLI.UnitTests
         [Fact]
         public async Task TcpPortIsInUseTest()
         {
-            var serverModeCommand1 = new ServerModeCommand(new TestToolInteractiveServiceImpl(), 1234, null, true);
-            var serverModeCommand2 = new ServerModeCommand(new TestToolInteractiveServiceImpl(), 1234, null, true);
+            var serverCommandSettings1 = new ServerModeCommandSettings
+            {
+                Port = 1234,
+                ParentPid = null,
+                UnsecureMode = true
+            };
+            var serverModeCommand1 = new ServerModeCommand(new TestToolInteractiveServiceImpl());
+            var serverCommandSettings2 = new ServerModeCommandSettings
+            {
+                Port = 1234,
+                ParentPid = null,
+                UnsecureMode = true
+            };
+            var serverModeCommand2 = new ServerModeCommand(new TestToolInteractiveServiceImpl());
 
-            var serverModeTask1 = serverModeCommand1.ExecuteAsync();
-            var serverModeTask2 = serverModeCommand2.ExecuteAsync();
+            var serverModeTask1 = serverModeCommand1.ExecuteAsync(null!, serverCommandSettings1);
+            var serverModeTask2 = serverModeCommand2.ExecuteAsync(null!, serverCommandSettings2);
 
             await Task.WhenAny(serverModeTask1, serverModeTask2);
 

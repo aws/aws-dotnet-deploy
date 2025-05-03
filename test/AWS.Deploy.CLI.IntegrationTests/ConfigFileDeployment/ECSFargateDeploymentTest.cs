@@ -7,7 +7,6 @@ using System.Linq;
 using System.Collections.Generic;
 using Amazon.CloudFormation;
 using Amazon.ECS;
-using Amazon.ECS.Model;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.CLI.Extensions;
 using AWS.Deploy.CLI.IntegrationTests.Extensions;
@@ -21,11 +20,9 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
 {
     public class ECSFargateDeploymentTest : IDisposable
     {
-        private readonly HttpHelper _httpHelper;
+        private readonly IServiceCollection _serviceCollection;
         private readonly CloudFormationHelper _cloudFormationHelper;
         private readonly ECSHelper _ecsHelper;
-        private readonly App _app;
-        private readonly InMemoryInteractiveService _interactiveService;
         private bool _isDisposed;
         private string _stackName;
         private string _clusterName;
@@ -36,23 +33,13 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
             var ecsClient = new AmazonECSClient();
             _ecsHelper = new ECSHelper(ecsClient);
 
-            var serviceCollection = new ServiceCollection();
+            _serviceCollection = new ServiceCollection();
 
-            serviceCollection.AddCustomServices();
-            serviceCollection.AddTestServices();
-
-            var serviceProvider = serviceCollection.BuildServiceProvider();
-
-            _app = serviceProvider.GetService<App>();
-            Assert.NotNull(_app);
-
-            _interactiveService = serviceProvider.GetService<InMemoryInteractiveService>();
-            Assert.NotNull(_interactiveService);
+            _serviceCollection.AddCustomServices();
+            _serviceCollection.AddTestServices();
 
             var cloudFormationClient = new AmazonCloudFormationClient();
             _cloudFormationHelper = new CloudFormationHelper(cloudFormationClient);
-
-            _httpHelper = new HttpHelper(_interactiveService);
 
             _testAppManager = new TestAppManager();
         }
@@ -60,51 +47,85 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
         [Fact]
         public async Task PerformDeployment()
         {
-            var stackNamePlaceholder = "{StackName}";
-            _stackName = $"WebAppWithDockerFile{Guid.NewGuid().ToString().Split('-').Last()}";
-            _clusterName = $"{_stackName}-cluster";
-            var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
-            var configFilePath = Path.Combine(Directory.GetParent(projectPath).FullName, "ECSFargateConfigFile.json");
-            ConfigFileHelper.ApplyReplacementTokens(new Dictionary<string, string> { { stackNamePlaceholder, _stackName } }, configFilePath);
+            InMemoryInteractiveService interactiveService = null;
+            try
+            {
+                var stackNamePlaceholder = "{StackName}";
+                _stackName = $"WebAppWithDockerFile{Guid.NewGuid().ToString().Split('-').Last()}";
+                _clusterName = $"{_stackName}-cluster";
+                var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
+                var configFilePath = Path.Combine(Directory.GetParent(projectPath).FullName, "ECSFargateConfigFile.json");
+                ConfigFileHelper.ApplyReplacementTokens(new Dictionary<string, string> { { stackNamePlaceholder, _stackName } }, configFilePath);
 
-            // Deploy
-            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--apply", configFilePath, "--silent", "--diagnostics" };
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
+                // Deploy
+                var deployArgs = new[] { "deploy", "--project-path", projectPath, "--apply", configFilePath, "--silent", "--diagnostics" };
+                Assert.Equal(CommandReturnCodes.SUCCESS, await _serviceCollection.RunDeployToolAsync(deployArgs,
+                    provider =>
+                    {
+                        interactiveService = provider.GetRequiredService<InMemoryInteractiveService>();
+                    }));
 
-            // Verify application is deployed and running
-            Assert.Equal(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
+                // Verify application is deployed and running
+                Assert.Equal(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
 
-            var cluster = await _ecsHelper.GetCluster(_clusterName);
-            Assert.Equal("ACTIVE", cluster.Status);
-            Assert.Equal(cluster.ClusterName, _clusterName);
+                var cluster = await _ecsHelper.GetCluster(_clusterName);
+                Assert.Equal("ACTIVE", cluster.Status);
+                Assert.Equal(cluster.ClusterName, _clusterName);
 
-            var deployStdOut = _interactiveService.StdOutReader.ReadAllLines();
+                var deployStdOut = interactiveService.StdOutReader.ReadAllLines();
 
-            var applicationUrl = deployStdOut.First(line => line.Trim().StartsWith("Endpoint:"))
-                .Split(" ")[1]
-                .Trim();
+                var applicationUrl = deployStdOut.First(line => line.Trim().StartsWith("Endpoint:"))
+                    .Split(" ")[1]
+                    .Trim();
 
-            // URL could take few more minutes to come live, therefore, we want to wait and keep trying for a specified timeout
-            await _httpHelper.WaitUntilSuccessStatusCode(applicationUrl, TimeSpan.FromSeconds(5), TimeSpan.FromMinutes(5));
+                // URL could take few more minutes to come live, therefore, we want to wait and keep trying for a specified timeout
+                var httpHelper = new HttpHelper(interactiveService);
+                await httpHelper.WaitUntilSuccessStatusCode(applicationUrl, TimeSpan.FromSeconds(5), TimeSpan.FromMinutes(5));
+            }
+            finally
+            {
+                interactiveService?.ReadStdOutStartToEnd();
+            }
 
-            // list
-            var listArgs = new[] { "list-deployments", "--diagnostics" };
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(listArgs));;
+            try
+            {
+                // list
+                var listArgs = new[] { "list-deployments", "--diagnostics" };
+                Assert.Equal(CommandReturnCodes.SUCCESS, await _serviceCollection.RunDeployToolAsync(listArgs,
+                    provider =>
+                    {
+                        interactiveService = provider.GetRequiredService<InMemoryInteractiveService>();
+                    }));
 
-            // Verify stack exists in list of deployments
-            var listDeployStdOut = _interactiveService.StdOutReader.ReadAllLines().Select(x => x.Split()[0]).ToList();
-            Assert.Contains(listDeployStdOut, (deployment) => _stackName.Equals(deployment));
+                // Verify stack exists in list of deployments
+                var listDeployStdOut = interactiveService.StdOutReader.ReadAllLines().Select(x => x.Split()[0]).ToList();
+                Assert.Contains(listDeployStdOut, (deployment) => _stackName.Equals(deployment));
+            }
+            finally
+            {
+                interactiveService?.ReadStdOutStartToEnd();
+            }
 
-            // Arrange input for delete
-            await _interactiveService.StdInWriter.WriteAsync("y"); // Confirm delete
-            await _interactiveService.StdInWriter.FlushAsync();
-            var deleteArgs = new[] { "delete-deployment", _stackName, "--diagnostics" };
+            try
+            {
+                // Delete
+                var deleteArgs = new[] { "delete-deployment", _stackName, "--diagnostics" };
+                Assert.Equal(CommandReturnCodes.SUCCESS, await _serviceCollection.RunDeployToolAsync(deleteArgs,
+                    provider =>
+                    {
+                        interactiveService = provider.GetRequiredService<InMemoryInteractiveService>();
 
-            // Delete
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deleteArgs));;
+                        interactiveService.StdInWriter.Write("y"); // Confirm delete
+                        interactiveService.StdInWriter.Flush();
+                    }));
 
-            // Verify application is deleted
-            Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName), $"{_stackName} still exists.");
+                // Verify application is deleted
+                Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName), $"{_stackName} still exists.");
+            }
+            finally
+            {
+                interactiveService?.ReadStdOutStartToEnd();
+            }
         }
 
         public void Dispose()
@@ -124,8 +145,6 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
                 {
                     _cloudFormationHelper.DeleteStack(_stackName).GetAwaiter().GetResult();
                 }
-
-                _interactiveService.ReadStdOutStartToEnd();
             }
 
             _isDisposed = true;

@@ -20,31 +20,18 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
 {
     public class ElasticBeanStalkDeploymentTest : IDisposable
     {
-        private readonly HttpHelper _httpHelper;
+        private readonly IServiceCollection _serviceCollection;
         private readonly CloudFormationHelper _cloudFormationHelper;
-        private readonly App _app;
-        private readonly InMemoryInteractiveService _interactiveService;
         private bool _isDisposed;
         private string _stackName;
         private readonly TestAppManager _testAppManager;
-        private readonly IServiceProvider _serviceProvider;
 
         public ElasticBeanStalkDeploymentTest()
         {
-            var serviceCollection = new ServiceCollection();
+            _serviceCollection = new ServiceCollection();
 
-            serviceCollection.AddCustomServices();
-            serviceCollection.AddTestServices();
-
-            _serviceProvider = serviceCollection.BuildServiceProvider();
-
-            _app = _serviceProvider.GetService<App>();
-            Assert.NotNull(_app);
-
-            _interactiveService = _serviceProvider.GetService<InMemoryInteractiveService>();
-            Assert.NotNull(_interactiveService);
-
-            _httpHelper = new HttpHelper(_interactiveService);
+            _serviceCollection.AddCustomServices();
+            _serviceCollection.AddTestServices();
 
             var cloudFormationClient = new AmazonCloudFormationClient();
             _cloudFormationHelper = new CloudFormationHelper(cloudFormationClient);
@@ -70,49 +57,89 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
                 {"ApplicationIAMRole.CreateNew", true },
                 {"XRayTracingSupportEnabled", true }
             };
-            await ConfigFileHelper.CreateConfigFile(_serviceProvider, stackNamePlaceholder, "AspNetAppElasticBeanstalkLinux", optionSettings, projectPath, configFilePath, SaveSettingsType.Modified);
+            await ConfigFileHelper.CreateConfigFile(_serviceCollection.BuildServiceProvider(), stackNamePlaceholder, "AspNetAppElasticBeanstalkLinux", optionSettings, projectPath, configFilePath, SaveSettingsType.Modified);
             Assert.True(await ConfigFileHelper.VerifyConfigFileContents(expectedConfigFilePath, configFilePath));
 
             // Deploy
             _stackName = $"WebAppNoDockerFile{Guid.NewGuid().ToString().Split('-').Last()}";
             ConfigFileHelper.ApplyReplacementTokens(new Dictionary<string, string> { {stackNamePlaceholder, _stackName } }, configFilePath);
 
-            var deployArgs = new[] { "deploy", "--project-path", projectPath, "--apply", configFilePath, "--silent", "--diagnostics" };
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
+            InMemoryInteractiveService interactiveService = null;
+            try
+            {
+                var deployArgs = new[] { "deploy", "--project-path", projectPath, "--apply", configFilePath, "--silent", "--diagnostics" };
+                Assert.Equal(CommandReturnCodes.SUCCESS, await _serviceCollection.RunDeployToolAsync(deployArgs,
+                    provider =>
+                    {
+                        interactiveService = provider.GetRequiredService<InMemoryInteractiveService>();
+                    }));
+                // Verify application is deployed and running
+                Assert.Equal(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
 
-            // Verify application is deployed and running
-            Assert.Equal(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
+                var deployStdOut = interactiveService.StdOutReader.ReadAllLines();
 
-            var deployStdOut = _interactiveService.StdOutReader.ReadAllLines();
+                // Example:     Endpoint: http://52.36.216.238/
+                var applicationUrl = deployStdOut.First(line => line.Trim().StartsWith("Endpoint:"))
+                    .Split(" ")[1]
+                    .Trim();
 
-            // Example:     Endpoint: http://52.36.216.238/
-            var applicationUrl = deployStdOut.First(line => line.Trim().StartsWith("Endpoint:"))
-                .Split(" ")[1]
-                .Trim();
+                // URL could take few more minutes to come live, therefore, we want to wait and keep trying for a specified timeout
+                var httpHelper = new HttpHelper(interactiveService);
+                await httpHelper.WaitUntilSuccessStatusCode(applicationUrl, TimeSpan.FromSeconds(5), TimeSpan.FromMinutes(5));
+            }
+            finally
+            {
+                interactiveService?.ReadStdOutStartToEnd();
+            }
 
-            // URL could take few more minutes to come live, therefore, we want to wait and keep trying for a specified timeout
-            await _httpHelper.WaitUntilSuccessStatusCode(applicationUrl, TimeSpan.FromSeconds(5), TimeSpan.FromMinutes(5));
+            try
+            {
+                // list
+                var listArgs = new[] { "list-deployments", "--diagnostics" };
+                Assert.Equal(CommandReturnCodes.SUCCESS, await _serviceCollection.RunDeployToolAsync(listArgs,
+                    provider =>
+                    {
+                        interactiveService = provider.GetRequiredService<InMemoryInteractiveService>();
+                    }));
 
-            // list
-            var listArgs = new[] { "list-deployments", "--diagnostics" };
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(listArgs));;
+                // Verify stack exists in list of deployments
+                var listDeployStdOut = interactiveService.StdOutReader.ReadAllLines().Select(x => x.Split()[0]).ToList();
+                Assert.Contains(listDeployStdOut, (deployment) => _stackName.Equals(deployment));
+            }
+            finally
+            {
+                interactiveService?.ReadStdOutStartToEnd();
+            }
 
-            // Verify stack exists in list of deployments
-            var listDeployStdOut = _interactiveService.StdOutReader.ReadAllLines().Select(x => x.Split()[0]).ToList();
-            Assert.Contains(listDeployStdOut, (deployment) => _stackName.Equals(deployment));
+            try
+            {
 
-            // Arrange input for delete
-            await _interactiveService.StdInWriter.WriteAsync("y"); // Confirm delete
-            await _interactiveService.StdInWriter.FlushAsync();
-            var deleteArgs = new[] { "delete-deployment", _stackName, "--diagnostics" };
+            }
+            finally
+            {
+                interactiveService?.ReadStdOutStartToEnd();
+            }
 
-            // Delete
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deleteArgs));;
+            try
+            {
+                // Delete
+                var deleteArgs = new[] { "delete-deployment", _stackName, "--diagnostics" };
+                Assert.Equal(CommandReturnCodes.SUCCESS, await _serviceCollection.RunDeployToolAsync(deleteArgs,
+                    provider =>
+                    {
+                        interactiveService = provider.GetRequiredService<InMemoryInteractiveService>();
 
-            // Verify application is deleted
-            Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName), $"{_stackName} still exists.");
+                        interactiveService.StdInWriter.Write("y"); // Confirm delete
+                        interactiveService.StdInWriter.Flush();
+                    }));
 
-            _interactiveService.ReadStdOutStartToEnd();
+                // Verify application is deleted
+                Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName), $"{_stackName} still exists.");
+            }
+            finally
+            {
+                interactiveService?.ReadStdOutStartToEnd();
+            }
         }
 
         public void Dispose()
@@ -132,8 +159,6 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
                 {
                     _cloudFormationHelper.DeleteStack(_stackName).GetAwaiter().GetResult();
                 }
-
-                _interactiveService.ReadStdOutStartToEnd();
             }
 
             _isDisposed = true;
