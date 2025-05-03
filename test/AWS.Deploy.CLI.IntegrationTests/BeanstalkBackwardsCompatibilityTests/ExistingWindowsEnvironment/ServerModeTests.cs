@@ -7,8 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Amazon.Runtime;
 using AWS.Deploy.CLI.Commands;
+using AWS.Deploy.CLI.Commands.Settings;
 using AWS.Deploy.CLI.IntegrationTests.Utilities;
 using AWS.Deploy.ServerMode.Client;
 using AWS.Deploy.ServerMode.Client.Utilities;
@@ -17,27 +17,27 @@ using Xunit;
 namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests.ExistingWindowsEnvironment
 {
     [Collection(nameof(WindowsTestContextFixture))]
-    public class ServerModeTests
+    public class ServerModeTests(WindowsTestContextFixture fixture)
     {
-        private readonly WindowsTestContextFixture _fixture;
         private const string BEANSTALK_ENVIRONMENT_RECIPE_ID = "AspNetAppExistingBeanstalkWindowsEnvironment";
-
-        public ServerModeTests(WindowsTestContextFixture fixture)
-        {
-            _fixture = fixture;
-        }
 
         [Fact]
         public async Task DeployToExistingWindowsBeanstalkEnvironment()
         {
-            var projectPath = _fixture.TestAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
+            var projectPath = fixture.TestAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
             var portNumber = 4031;
             using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ServerModeUtilities.ResolveDefaultCredentials);
 
-            var serverCommand = new ServerModeCommand(_fixture.ToolInteractiveService, portNumber, null, true);
+            var serverCommandSettings = new ServerModeCommandSettings
+            {
+                Port = portNumber,
+                ParentPid = null,
+                UnsecureMode = true
+            };
+            var serverCommand = new ServerModeCommand(fixture.ToolInteractiveService);
             var cancelSource = new CancellationTokenSource();
 
-            var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
+            var serverTask = serverCommand.ExecuteAsync(null!, serverCommandSettings, cancelSource);
             try
             {
                 var baseUrl = $"http://localhost:{portNumber}/";
@@ -55,13 +55,13 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests.E
                 Assert.NotNull(sessionId);
 
                 var existingDeployments = await restClient.GetExistingDeploymentsAsync(sessionId);
-                var existingDeployment = existingDeployments.ExistingDeployments.First(x => string.Equals(_fixture.EnvironmentName, x.Name));
+                var existingDeployment = existingDeployments.ExistingDeployments.First(x => string.Equals(fixture.EnvironmentName, x.Name));
 
-                Assert.Equal(_fixture.EnvironmentName, existingDeployment.Name);
+                Assert.Equal(fixture.EnvironmentName, existingDeployment.Name);
                 Assert.Equal(BEANSTALK_ENVIRONMENT_RECIPE_ID, existingDeployment.RecipeId);
                 Assert.Null(existingDeployment.BaseRecipeId);
                 Assert.False(existingDeployment.IsPersistedDeploymentProject);
-                Assert.Equal(_fixture.EnvironmentId, existingDeployment.ExistingDeploymentId);
+                Assert.Equal(fixture.EnvironmentId, existingDeployment.ExistingDeploymentId);
                 Assert.Equal(DeploymentTypes.BeanstalkEnvironment, existingDeployment.DeploymentType);
 
                 var signalRClient = new DeploymentCommunicationClient(baseUrl);
@@ -72,7 +72,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests.E
 
                 await restClient.SetDeploymentTargetAsync(sessionId, new SetDeploymentTargetInput
                 {
-                    ExistingDeploymentId = _fixture.EnvironmentId
+                    ExistingDeploymentId = fixture.EnvironmentId
                 });
 
                 await restClient.StartDeploymentAsync(sessionId);
@@ -80,13 +80,13 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests.E
                 await restClient.WaitForDeployment(sessionId);
 
                 Assert.True(logOutput.Length > 0);
-                var successMessagePrefix = $"The Elastic Beanstalk Environment {_fixture.EnvironmentName} has been successfully updated";
+                var successMessagePrefix = $"The Elastic Beanstalk Environment {fixture.EnvironmentName} has been successfully updated";
                 var deployStdOutput = logOutput.ToString().Split(Environment.NewLine);
                 var successMessage = deployStdOutput.First(line => line.Trim().StartsWith(successMessagePrefix));
                 Assert.False(string.IsNullOrEmpty(successMessage));
 
                 var expectedVersionLabel = successMessage.Split(" ").Last();
-                Assert.True(await _fixture.EBHelper.VerifyEnvironmentVersionLabel(_fixture.EnvironmentName, expectedVersionLabel));
+                Assert.True(await fixture.EBHelper.VerifyEnvironmentVersionLabel(fixture.EnvironmentName, expectedVersionLabel));
             }
             finally
             {

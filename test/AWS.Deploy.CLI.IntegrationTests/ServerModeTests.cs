@@ -13,19 +13,16 @@ using System.Threading;
 using System.Threading.Tasks;
 using Amazon.CloudFormation;
 using Amazon.ECS;
-using Amazon.Runtime;
 using AWS.Deploy.CLI.Commands;
+using AWS.Deploy.CLI.Commands.Settings;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
-using AWS.Deploy.CLI.Extensions;
 using AWS.Deploy.CLI.IntegrationTests.Extensions;
 using AWS.Deploy.CLI.IntegrationTests.Helpers;
 using AWS.Deploy.CLI.IntegrationTests.Services;
 using AWS.Deploy.CLI.IntegrationTests.Utilities;
 using AWS.Deploy.CLI.ServerMode;
-using AWS.Deploy.Orchestration.Utilities;
 using AWS.Deploy.ServerMode.Client;
 using AWS.Deploy.ServerMode.Client.Utilities;
-using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Xunit;
 
@@ -35,7 +32,6 @@ namespace AWS.Deploy.CLI.IntegrationTests
     {
         private bool _isDisposed;
         private string _stackName;
-        private readonly IServiceProvider _serviceProvider;
         private readonly CloudFormationHelper _cloudFormationHelper;
 
         private readonly string _awsRegion;
@@ -48,13 +44,6 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
             var cloudFormationClient = new AmazonCloudFormationClient(Amazon.RegionEndpoint.USWest2);
             _cloudFormationHelper = new CloudFormationHelper(cloudFormationClient);
-
-            var serviceCollection = new ServiceCollection();
-
-            serviceCollection.AddCustomServices();
-            serviceCollection.AddTestServices();
-
-            _serviceProvider = serviceCollection.BuildServiceProvider();
 
             _awsRegion = "us-west-2";
 
@@ -70,10 +59,16 @@ namespace AWS.Deploy.CLI.IntegrationTests
         public async Task ConfirmLocalhostOnly()
         {
             var portNumber = 4900;
-            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
+            var serverCommandSettings = new ServerModeCommandSettings
+            {
+                Port = portNumber,
+                ParentPid = null,
+                UnsecureMode = true
+            };
+            var serverCommand = new ServerModeCommand(_interactiveService);
             var cancelSource = new CancellationTokenSource();
 
-            _ = serverCommand.ExecuteAsync(cancelSource.Token);
+            _ = serverCommand.ExecuteAsync(null!, serverCommandSettings, cancelSource);
             try
             {
                 var restClient = new RestAPIClient($"http://localhost:{portNumber}/", ServerModeHttpClientFactory.ConstructHttpClient(ServerModeUtilities.ResolveDefaultCredentials));
@@ -101,10 +96,16 @@ namespace AWS.Deploy.CLI.IntegrationTests
             var portNumber = 4000;
             using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ServerModeUtilities.ResolveDefaultCredentials);
 
-            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
+            var serverCommandSettings = new ServerModeCommandSettings
+            {
+                Port = portNumber,
+                ParentPid = null,
+                UnsecureMode = true
+            };
+            var serverCommand = new ServerModeCommand(_interactiveService);
             var cancelSource = new CancellationTokenSource();
 
-            var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
+            _ = serverCommand.ExecuteAsync(null!, serverCommandSettings, cancelSource);
             try
             {
                 var restClient = new RestAPIClient($"http://localhost:{portNumber}/", httpClient);
@@ -158,10 +159,16 @@ namespace AWS.Deploy.CLI.IntegrationTests
             await _interactiveService.StdInWriter.WriteAsync(keyInfoStdin);
             await _interactiveService.StdInWriter.FlushAsync();
 
-            var serverCommand = new ServerModeCommand(_interactiveService, portNumber, null, false);
+            var serverCommandSettings = new ServerModeCommandSettings
+            {
+                Port = portNumber,
+                ParentPid = null,
+                UnsecureMode = false
+            };
+            var serverCommand = new ServerModeCommand(_interactiveService);
             var cancelSource = new CancellationTokenSource();
 
-            var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
+            _ = serverCommand.ExecuteAsync(null!, serverCommandSettings, cancelSource);
             try
             {
                 var restClient = new RestAPIClient($"http://localhost:{portNumber}/", httpClient);
@@ -199,10 +206,16 @@ namespace AWS.Deploy.CLI.IntegrationTests
             var portNumber = 4950;
             using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ServerModeUtilities.ResolveDefaultCredentials);
 
-            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
+            var serverCommandSettings = new ServerModeCommandSettings
+            {
+                Port = portNumber,
+                ParentPid = null,
+                UnsecureMode = true
+            };
+            var serverCommand = new ServerModeCommand(_interactiveService);
             var cancelSource = new CancellationTokenSource();
 
-            var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
+            _ = serverCommand.ExecuteAsync(null!, serverCommandSettings, cancelSource);
             try
             {
                 var baseUrl = $"http://localhost:{portNumber}/";
@@ -281,10 +294,16 @@ namespace AWS.Deploy.CLI.IntegrationTests
             var portNumber = 4011;
             using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ServerModeUtilities.ResolveDefaultCredentials);
 
-            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
+            var serverCommandSettings = new ServerModeCommandSettings
+            {
+                Port = portNumber,
+                ParentPid = null,
+                UnsecureMode = true
+            };
+            var serverCommand = new ServerModeCommand(_interactiveService);
             var cancelSource = new CancellationTokenSource();
 
-            var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
+            _ = serverCommand.ExecuteAsync(null!, serverCommandSettings, cancelSource);
             try
             {
                 var baseUrl = $"http://localhost:{portNumber}/";
@@ -410,10 +429,16 @@ namespace AWS.Deploy.CLI.IntegrationTests
             var portNumber = 4002;
             using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ServerModeUtilities.ResolveDefaultCredentials);
 
-            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
+            var serverCommandSettings = new ServerModeCommandSettings
+            {
+                Port = portNumber,
+                ParentPid = null,
+                UnsecureMode = true
+            };
+            var serverCommand = new ServerModeCommand(_interactiveService);
             var cancelSource = new CancellationTokenSource();
 
-            var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
+            _ = serverCommand.ExecuteAsync(null!, serverCommandSettings, cancelSource);
 
             try
             {
@@ -447,11 +472,17 @@ namespace AWS.Deploy.CLI.IntegrationTests
         public async Task ShutdownViaRestClient()
         {
             var portNumber = 4003;
-            var cancelSource = new CancellationTokenSource();
             using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ServerModeUtilities.ResolveDefaultCredentials);
-            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
+            var serverCommandSettings = new ServerModeCommandSettings
+            {
+                Port = portNumber,
+                ParentPid = null,
+                UnsecureMode = true
+            };
+            var serverCommand = new ServerModeCommand(_interactiveService);
+            var cancelSource = new CancellationTokenSource();
 
-            var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
+            _ = serverCommand.ExecuteAsync(null!, serverCommandSettings, cancelSource);
 
             try
             {
@@ -483,10 +514,16 @@ namespace AWS.Deploy.CLI.IntegrationTests
             var portNumber = 4012;
             using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ServerModeUtilities.ResolveDefaultCredentials);
 
-            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
+            var serverCommandSettings = new ServerModeCommandSettings
+            {
+                Port = portNumber,
+                ParentPid = null,
+                UnsecureMode = true
+            };
+            var serverCommand = new ServerModeCommand(_interactiveService);
             var cancelSource = new CancellationTokenSource();
 
-            var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
+            _ = serverCommand.ExecuteAsync(null!, serverCommandSettings, cancelSource);
             try
             {
                 var baseUrl = $"http://localhost:{portNumber}/";
@@ -528,10 +565,16 @@ namespace AWS.Deploy.CLI.IntegrationTests
             var portNumber = 4200;
             using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ServerModeUtilities.ResolveDefaultCredentials);
 
-            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
+            var serverCommandSettings = new ServerModeCommandSettings
+            {
+                Port = portNumber,
+                ParentPid = null,
+                UnsecureMode = true
+            };
+            var serverCommand = new ServerModeCommand(_interactiveService);
             var cancelSource = new CancellationTokenSource();
 
-            var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
+            _ = serverCommand.ExecuteAsync(null!, serverCommandSettings, cancelSource);
             try
             {
                 var restClient = new RestAPIClient($"http://localhost:{portNumber}/", httpClient);

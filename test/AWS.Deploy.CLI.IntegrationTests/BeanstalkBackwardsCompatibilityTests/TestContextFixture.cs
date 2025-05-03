@@ -15,7 +15,6 @@ using AWS.Deploy.CLI.IntegrationTests.Services;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.IO;
-using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -28,7 +27,6 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests
     /// </summary>
     public class TestContextFixture : IAsyncLifetime
     {
-        public readonly App App;
         public readonly HttpHelper HttpHelper;
         public readonly IAWSResourceQueryer AWSResourceQueryer;
         public readonly TestAppManager TestAppManager;
@@ -39,6 +37,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests
         public readonly InMemoryInteractiveService InteractiveService;
         public readonly ElasticBeanstalkHelper EBHelper;
         public readonly IAMHelper IAMHelper;
+        public readonly IServiceCollection ServiceCollection;
 
         public readonly string ApplicationName;
         public readonly string EnvironmentName;
@@ -48,21 +47,17 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests
 
         public TestContextFixture()
         {
-            var serviceCollection = new ServiceCollection();
+            ServiceCollection = new ServiceCollection();
 
-            serviceCollection.AddCustomServices();
-            serviceCollection.AddTestServices();
+            ServiceCollection.AddCustomServices();
+            ServiceCollection.AddTestServices();
 
-            var serviceProvider = serviceCollection.BuildServiceProvider();
-
+            var serviceProvider = ServiceCollection.BuildServiceProvider();
             var awsClientFactory = serviceProvider.GetService<IAWSClientFactory>();
             awsClientFactory.ConfigureAWSOptions((options) =>
             {
                 options.Region = Amazon.RegionEndpoint.USWest2;
             });
-
-            App = serviceProvider.GetService<App>();
-            Assert.NotNull(App);
 
             InteractiveService = serviceProvider.GetService<InMemoryInteractiveService>();
             Assert.NotNull(InteractiveService);

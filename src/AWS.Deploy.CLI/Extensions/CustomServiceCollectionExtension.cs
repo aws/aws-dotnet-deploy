@@ -1,7 +1,6 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-using AWS.Deploy.CLI.Commands;
 using AWS.Deploy.CLI.Commands.TypeHints;
 using AWS.Deploy.CLI.Utilities;
 using AWS.Deploy.Common;
@@ -20,6 +19,7 @@ using AWS.Deploy.Orchestration.ServiceHandlers;
 using AWS.Deploy.Orchestration.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Spectre.Console.Cli;
 
 namespace AWS.Deploy.CLI.Extensions
 {
@@ -60,7 +60,6 @@ namespace AWS.Deploy.CLI.Extensions
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IZipFileManager), typeof(ZipFileManager), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IDeploymentManifestEngine), typeof(DeploymentManifestEngine), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(ILocalUserSettingsEngine), typeof(LocalUserSettingsEngine), lifetime));
-            serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICommandFactory), typeof(CommandFactory), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(ICDKVersionDetector), typeof(CDKVersionDetector), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IAWSServiceHandler), typeof(AWSServiceHandler), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IS3Handler), typeof(AWSS3Handler), lifetime));
@@ -77,9 +76,6 @@ namespace AWS.Deploy.CLI.Extensions
 
             var packageJsonTemplate = typeof(PackageJsonGenerator).Assembly.ReadEmbeddedFile(PackageJsonGenerator.TemplateIdentifier);
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IPackageJsonGenerator), (serviceProvider) => new PackageJsonGenerator(packageJsonTemplate), lifetime));
-
-            // required to run the application
-            serviceCollection.AddSingleton<App>();
         }
     }
 }

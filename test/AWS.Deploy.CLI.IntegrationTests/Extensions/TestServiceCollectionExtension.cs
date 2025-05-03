@@ -1,17 +1,11 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-using AWS.Deploy.CLI.Commands;
-using AWS.Deploy.CLI.Commands.TypeHints;
+using System;
+using System.Threading.Tasks;
 using AWS.Deploy.CLI.IntegrationTests.Services;
 using AWS.Deploy.CLI.Utilities;
-using AWS.Deploy.Common;
-using AWS.Deploy.Common.Extensions;
-using AWS.Deploy.Common.IO;
 using AWS.Deploy.Orchestration;
-using AWS.Deploy.Orchestration.CDK;
-using AWS.Deploy.Orchestration.Data;
-using AWS.Deploy.Orchestration.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AWS.Deploy.CLI.IntegrationTests.Extensions
@@ -28,5 +22,19 @@ namespace AWS.Deploy.CLI.IntegrationTests.Extensions
             serviceCollection.AddSingleton<IToolInteractiveService>(serviceProvider => serviceProvider.GetService<InMemoryInteractiveService>());
             serviceCollection.AddSingleton<IOrchestratorInteractiveService>(serviceProvider => serviceProvider.GetService<InMemoryInteractiveService>());
         }
+
+        public static async Task<int> RunDeployToolAsync(this IServiceCollection serviceCollection,
+            string[] args,
+            Action<IServiceProvider> onProviderBuilt = null)
+        {
+            var registrar = new TypeRegistrar(serviceCollection);
+
+            if (onProviderBuilt != null)
+                registrar.ServiceProviderBuilt += onProviderBuilt;
+
+            var app = App.ConfigureServices(registrar);
+            return await App.RunAsync(args, app, registrar);
+        }
+
     }
 }
