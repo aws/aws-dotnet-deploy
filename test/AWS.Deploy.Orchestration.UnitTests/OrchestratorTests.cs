@@ -19,7 +19,7 @@ namespace AWS.Deploy.Orchestration.UnitTests;
 public class OrchestratorTests
 {
     private readonly IRecipeHandler _recipeHandler;
-    private OrchestratorSession _session;
+    private OrchestratorSession? _session;
     private readonly IDeploymentManifestEngine _deploymentManifestEngine;
     private readonly Mock<IOrchestratorInteractiveService> _orchestratorInteractiveService;
     private readonly IDirectoryManager _directoryManager;
@@ -61,7 +61,7 @@ public class OrchestratorTests
         var engine = await BuildRecommendationEngine("WebAppNoDockerFile");
         var recommendations = await engine.ComputeRecommendations();
         var recommendation = recommendations.First(r => r.Recipe.Id.Equals("AspNetAppElasticBeanstalkLinux"));
-        var orchestrator = new Orchestrator(_session, _recipeHandler);
+        var orchestrator = new Orchestrator(_session!, _recipeHandler);
 
         recommendation.ReplacementTokens.Clear();
         recommendation.ReplacementTokens.Add(Constants.RecipeIdentifier.REPLACE_TOKEN_DEFAULT_ENVIRONMENT_ARCHITECTURE, true);

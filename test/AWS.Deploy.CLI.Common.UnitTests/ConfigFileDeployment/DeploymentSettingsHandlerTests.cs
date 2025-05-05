@@ -67,11 +67,11 @@ namespace AWS.Deploy.CLI.Common.UnitTests.ConfigFileDeployment
         {
             // ARRANGE
             var recommendations = await _recommendationEngine.ComputeRecommendations();
-            var selectedRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, "AspNetAppAppRunner"));
+            var selectedRecommendation = Assert.IsType<Recommendation>(recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, "AspNetAppAppRunner")));
             var filePath = Path.Combine("ConfigFileDeployment", "TestFiles", "AppRunnerConfigFile.json");
 
             // ACT
-            var deploymentSettings = await _deploymentSettingsHandler.ReadSettings(filePath);
+            var deploymentSettings = Assert.IsType<DeploymentSettings>(await _deploymentSettingsHandler.ReadSettings(filePath));
             await _deploymentSettingsHandler.ApplySettings(deploymentSettings, selectedRecommendation, new Mock<IDeployToolValidationContext>().Object);
 
             // ASSERT
@@ -90,11 +90,11 @@ namespace AWS.Deploy.CLI.Common.UnitTests.ConfigFileDeployment
         {
             // ARRANGE
             var recommendations = await _recommendationEngine.ComputeRecommendations();
-            var selectedRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, "AspNetAppEcsFargate"));
+            var selectedRecommendation = Assert.IsType<Recommendation>(recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, "AspNetAppEcsFargate")));
             var filePath = Path.Combine("ConfigFileDeployment", "TestFiles", "ECSFargateConfigFile.json");
 
             // ACT
-            var deploymentSettings = await _deploymentSettingsHandler.ReadSettings(filePath);
+            var deploymentSettings = Assert.IsType<DeploymentSettings>(await _deploymentSettingsHandler.ReadSettings(filePath));
             await _deploymentSettingsHandler.ApplySettings(deploymentSettings, selectedRecommendation, new Mock<IDeployToolValidationContext>().Object);
 
             // ASSERT
@@ -119,11 +119,11 @@ namespace AWS.Deploy.CLI.Common.UnitTests.ConfigFileDeployment
         {
             // ARRANGE
             var recommendations = await _recommendationEngine.ComputeRecommendations();
-            var selectedRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, "AspNetAppElasticBeanstalkLinux"));
+            var selectedRecommendation = Assert.IsType<Recommendation>(recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, "AspNetAppElasticBeanstalkLinux")));
             var filePath = Path.Combine("ConfigFileDeployment", "TestFiles", "ElasticBeanStalkConfigFile.json");
 
             // ACT
-            var deploymentSettings = await _deploymentSettingsHandler.ReadSettings(filePath);
+            var deploymentSettings = Assert.IsType<DeploymentSettings>(await _deploymentSettingsHandler.ReadSettings(filePath));
             await _deploymentSettingsHandler.ApplySettings(deploymentSettings, selectedRecommendation, new Mock<IDeployToolValidationContext>().Object);
 
             // ASSERT
@@ -145,7 +145,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.ConfigFileDeployment
             Assert.Equal("minor", GetOptionSettingValue(selectedRecommendation, "ElasticBeanstalkManagedPlatformUpdates.UpdateLevel"));
 
             var envVars = GetOptionSettingValue<Dictionary<string, string>>(selectedRecommendation, "ElasticBeanstalkEnvironmentVariables");
-            Assert.Equal("VarValue", envVars["VarName"]);
+            Assert.Equal("VarValue", envVars!["VarName"]);
         }
 
         [Theory]
@@ -155,7 +155,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.ConfigFileDeployment
         {
             // ARRANGE
             var recommendations = await _recommendationEngine.ComputeRecommendations();
-            var selectedRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, "AspNetAppElasticBeanstalkLinux"));
+            var selectedRecommendation = Assert.IsType<Recommendation>(recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, "AspNetAppElasticBeanstalkLinux")));
             var expectedSnapshotfilePath = Path.Combine(path1, path2, path3);
             var actualSnapshotFilePath = Path.Combine(Path.GetTempPath(), $"DeploymentSettings-{Guid.NewGuid().ToString().Split('-').Last()}.json");
             var cloudApplication = new CloudApplication("MyAppStack", "", CloudApplicationResourceType.CloudFormationStack, "AspNetAppElasticBeanstalkLinux");
@@ -196,7 +196,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.ConfigFileDeployment
         {
             // ARRANGE
             var recommendations = await _recommendationEngine.ComputeRecommendations();
-            var selectedRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, "AspNetAppAppRunner"));
+            var selectedRecommendation = Assert.IsType<Recommendation>(recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, "AspNetAppAppRunner")));
             var expectedSnapshotfilePath = Path.Combine(path1, path2, path3);
             var actualSnapshotFilePath = Path.Combine(Path.GetTempPath(), $"DeploymentSettings-{Guid.NewGuid().ToString().Split('-').Last()}.json");
             var cloudApplication = new CloudApplication("MyAppStack", "", CloudApplicationResourceType.CloudFormationStack, "AspNetAppAppRunner");
@@ -230,7 +230,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.ConfigFileDeployment
         {
             // ARRANGE
             var recommendations = await _recommendationEngine.ComputeRecommendations();
-            var selectedRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, "PushContainerImageEcr"));
+            var selectedRecommendation = Assert.IsType<Recommendation>(recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, "PushContainerImageEcr")));
             var expectedSnapshotfilePath = Path.Combine("ConfigFileDeployment", "TestFiles", "SettingsSnapshot_PushImageECR.json");
             var actualSnapshotFilePath = Path.Combine(Path.GetTempPath(), $"DeploymentSettings-{Guid.NewGuid().ToString().Split('-').Last()}.json");
             var cloudApplication = new CloudApplication("my-ecr-repository", "", CloudApplicationResourceType.ElasticContainerRegistryImage, "PushContainerImageEcr");
@@ -291,7 +291,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.ConfigFileDeployment
             return _optionSettingHandler.GetOptionSettingValue(recommendation, optionSetting);
         }
 
-        private T GetOptionSettingValue<T>(Recommendation recommendation, string fullyQualifiedId)
+        private T? GetOptionSettingValue<T>(Recommendation recommendation, string fullyQualifiedId)
         {
             var optionSetting = _optionSettingHandler.GetOptionSetting(recommendation, fullyQualifiedId);
             return _optionSettingHandler.GetOptionSettingValue<T>(recommendation, optionSetting);
@@ -308,7 +308,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.ConfigFileDeployment
 
     public class TestValidatorFactory : IValidatorFactory
     {
-        public IOptionSettingItemValidator[] BuildValidators(OptionSettingItem optionSettingItem, Func<OptionSettingItemValidatorConfig, bool> filter = null) => new IOptionSettingItemValidator[0];
+        public IOptionSettingItemValidator[] BuildValidators(OptionSettingItem optionSettingItem, Func<OptionSettingItemValidatorConfig, bool>? filter = null) => new IOptionSettingItemValidator[0];
         public IRecipeValidator[] BuildValidators(RecipeDefinition recipeDefinition) => new IRecipeValidator[0];
     }
 }

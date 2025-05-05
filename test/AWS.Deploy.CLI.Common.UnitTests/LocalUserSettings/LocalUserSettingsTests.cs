@@ -48,10 +48,9 @@ namespace AWS.Deploy.CLI.Common.UnitTests.LocalUserSettings
             var settingsFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".aws-dotnet-deploy", "local-user-settings.json");
 
             await _localUserSettingsEngine.UpdateLastDeployedStack(stackName, stackName, awsAccountId, awsRegion);
-            var userSettings = await _localUserSettingsEngine.GetLocalUserSettings();
+            var userSettings = Assert.IsType<Orchestration.LocalUserSettings.LocalUserSettings>(await _localUserSettingsEngine.GetLocalUserSettings());
 
             Assert.True(_fileManager.Exists(settingsFilePath));
-            Assert.NotNull(userSettings);
             Assert.NotNull(userSettings.LastDeployedStacks);
             Assert.Single(userSettings.LastDeployedStacks);
             Assert.Equal(awsAccountId, userSettings.LastDeployedStacks[0].AWSAccountId);
@@ -70,7 +69,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.LocalUserSettings
             await _fileManager.WriteAllTextAsync(settingsFilePath, "{\"LastDeployedStacks\": [{\"AWSAccountId\": \"1234567890\",\"AWSRegion\": \"us-west-2\",\"ProjectName\": \"WebApp1\",\"Stacks\": [\"WebApp1\"]}]}");
 
             await _localUserSettingsEngine.UpdateLastDeployedStack(stackName, stackName, awsAccountId, awsRegion);
-            var userSettings = await _localUserSettingsEngine.GetLocalUserSettings();
+            var userSettings = Assert.IsType<Orchestration.LocalUserSettings.LocalUserSettings>(await _localUserSettingsEngine.GetLocalUserSettings());
 
             Assert.True(_fileManager.Exists(settingsFilePath));
             Assert.NotNull(userSettings);
@@ -92,7 +91,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.LocalUserSettings
 
             await _localUserSettingsEngine.UpdateLastDeployedStack(stackName, stackName, awsAccountId, awsRegion);
             await _localUserSettingsEngine.DeleteLastDeployedStack(stackName, stackName, awsAccountId, awsRegion);
-            var userSettings = await _localUserSettingsEngine.GetLocalUserSettings();
+            var userSettings = Assert.IsType<Orchestration.LocalUserSettings.LocalUserSettings>(await _localUserSettingsEngine.GetLocalUserSettings());
 
             Assert.True(_fileManager.Exists(settingsFilePath));
             Assert.NotNull(userSettings);
@@ -112,7 +111,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.LocalUserSettings
 
             await _localUserSettingsEngine.UpdateLastDeployedStack(stackName, stackName, awsAccountId, awsRegion);
             await _localUserSettingsEngine.CleanOrphanStacks(new List<string> { "WebAppWithDockerFile1" }, stackName, awsAccountId, awsRegion);
-            var userSettings = await _localUserSettingsEngine.GetLocalUserSettings();
+            var userSettings = Assert.IsType<Orchestration.LocalUserSettings.LocalUserSettings>(await _localUserSettingsEngine.GetLocalUserSettings());
 
             Assert.True(_fileManager.Exists(settingsFilePath));
             Assert.NotNull(userSettings);
@@ -123,7 +122,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.LocalUserSettings
 
             // Attempt to clean orphans again. This is to make sure if the underlying stacks array collection is null we don't throw an exception.
             await _localUserSettingsEngine.CleanOrphanStacks(new List<string> { "WebAppWithDockerFile1" }, stackName, awsAccountId, awsRegion);
-            userSettings = await _localUserSettingsEngine.GetLocalUserSettings();
+            userSettings = Assert.IsType<Orchestration.LocalUserSettings.LocalUserSettings>(await _localUserSettingsEngine.GetLocalUserSettings());
 
             Assert.True(_fileManager.Exists(settingsFilePath));
             Assert.NotNull(userSettings);

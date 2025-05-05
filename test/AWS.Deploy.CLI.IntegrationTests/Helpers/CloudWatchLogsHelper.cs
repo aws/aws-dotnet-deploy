@@ -60,7 +60,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.Helpers
             };
 
             var response = await _client.DescribeLogStreamsAsync(request);
-            return response.LogStreams.FirstOrDefault()?.LogStreamName;
+            return response.LogStreams.First().LogStreamName;
         }
     }
 }

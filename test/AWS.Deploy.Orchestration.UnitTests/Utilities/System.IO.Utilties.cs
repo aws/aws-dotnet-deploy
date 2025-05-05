@@ -14,10 +14,10 @@ namespace AWS.Deploy.Orchestration.UnitTests.Utilities
             var testsPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             while (testsPath != null && !string.Equals(new DirectoryInfo(testsPath).Name, "test", StringComparison.OrdinalIgnoreCase))
             {
-                testsPath = Directory.GetParent(testsPath).FullName;
+                testsPath = Directory.GetParent(testsPath)!.FullName;
             }
 
-            return Path.Combine(testsPath, "..", "testapps", projectName);
+            return Path.Combine(testsPath!, "..", "testapps", projectName);
         }
 
     }

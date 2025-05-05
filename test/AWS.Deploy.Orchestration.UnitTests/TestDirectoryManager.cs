@@ -43,10 +43,10 @@ namespace AWS.Deploy.Orchestration.UnitTests
         public bool Exists(string path, string relativeTo) =>
             throw new NotImplementedException("If your test needs this method, you'll need to implement this.");
 
-        public string[] GetDirectories(string path, string searchPattern = null, SearchOption searchOption = SearchOption.TopDirectoryOnly) =>
+        public string[] GetDirectories(string path, string? searchPattern = null, SearchOption searchOption = SearchOption.TopDirectoryOnly) =>
             throw new NotImplementedException("If your test needs this method, you'll need to implement this.");
 
-        public string[] GetFiles(string path, string searchPattern = null, SearchOption searchOption = SearchOption.TopDirectoryOnly) =>
+        public string[] GetFiles(string path, string? searchPattern = null, SearchOption searchOption = SearchOption.TopDirectoryOnly) =>
             AddedFiles.ContainsKey(path) ? AddedFiles[path].ToArray() : new string[0];
 
         public bool IsEmpty(string path) =>

@@ -5,6 +5,7 @@ using Amazon.CDK;
 using AWS.Deploy.Recipes.CDK.Common;
 using ConsoleAppEcsFargateService.Configurations;
 using Microsoft.Extensions.Configuration;
+using Environment = Amazon.CDK.Environment;
 
 namespace ConsoleAppEcsFargateService
 {

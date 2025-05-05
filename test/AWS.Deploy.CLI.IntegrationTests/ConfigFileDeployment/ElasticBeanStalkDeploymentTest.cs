@@ -23,7 +23,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
         private readonly IServiceCollection _serviceCollection;
         private readonly CloudFormationHelper _cloudFormationHelper;
         private bool _isDisposed;
-        private string _stackName;
+        private string? _stackName;
         private readonly TestAppManager _testAppManager;
 
         public ElasticBeanStalkDeploymentTest()
@@ -46,7 +46,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
             var stackNamePlaceholder = "{StackName}";
             var configFilePath = Path.Combine(Path.GetTempPath(), $"DeploymentSettings-{Guid.NewGuid().ToString().Split('-').Last()}.json");
-            var expectedConfigFilePath = Path.Combine(Directory.GetParent(projectPath).FullName, "ElasticBeanStalkConfigFile.json");
+            var expectedConfigFilePath = Path.Combine(Directory.GetParent(projectPath)!.FullName, "ElasticBeanStalkConfigFile.json");
             var optionSettings = new Dictionary<string, object>
             {
                 {"BeanstalkApplication.CreateNew", true },
@@ -64,7 +64,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
             _stackName = $"WebAppNoDockerFile{Guid.NewGuid().ToString().Split('-').Last()}";
             ConfigFileHelper.ApplyReplacementTokens(new Dictionary<string, string> { {stackNamePlaceholder, _stackName } }, configFilePath);
 
-            InMemoryInteractiveService interactiveService = null;
+            InMemoryInteractiveService interactiveService = null!;
             try
             {
                 var deployArgs = new[] { "deploy", "--project-path", projectPath, "--apply", configFilePath, "--silent", "--diagnostics" };
@@ -152,7 +152,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
         {
             if (_isDisposed) return;
 
-            if (disposing)
+            if (disposing && !string.IsNullOrEmpty(_stackName))
             {
                 var isStackDeleted = _cloudFormationHelper.IsStackDeleted(_stackName).GetAwaiter().GetResult();
                 if (!isStackDeleted)

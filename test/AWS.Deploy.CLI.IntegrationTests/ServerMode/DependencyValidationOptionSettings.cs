@@ -25,7 +25,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
     public class DependencyValidationOptionSettings : IDisposable
     {
         private bool _isDisposed;
-        private string _stackName;
+        private string? _stackName;
         private readonly IServiceProvider _serviceProvider;
 
         private readonly string _awsRegion;

@@ -114,9 +114,9 @@ namespace AWS.Deploy.CLI.UnitTests
             });
             var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager, _optionSettingHandler);
             var userInputConfiguration = new UserInputConfiguration<OptionItem>(
-                option => option.DisplayName,
-                option => option.DisplayName,
-                option => option.Identifier.Equals("Identifier2"),
+                option => option.DisplayName!,
+                option => option.DisplayName!,
+                option => option.Identifier!.Equals("Identifier2"),
                 "NewIdentifier")
             {
                 AskNewName = true
@@ -146,9 +146,9 @@ namespace AWS.Deploy.CLI.UnitTests
             });
             var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager, _optionSettingHandler);
             var userInputConfiguration = new UserInputConfiguration<OptionItem>(
-                option => option.DisplayName,
-                option => option.DisplayName,
-                option => option.Identifier.Equals("Identifier2"),
+                option => option.DisplayName!,
+                option => option.DisplayName!,
+                option => option.Identifier!.Equals("Identifier2"),
                 "NewIdentifier")
             {
                 AskNewName = true
@@ -177,9 +177,9 @@ namespace AWS.Deploy.CLI.UnitTests
             });
             var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager, _optionSettingHandler);
             var userInputConfiguration = new UserInputConfiguration<OptionItem>(
-                option => option.DisplayName,
-                option => option.DisplayName,
-                option => option.Identifier.Equals("Identifier2"),
+                option => option.DisplayName!,
+                option => option.DisplayName!,
+                option => option.Identifier!.Equals("Identifier2"),
                 "NewIdentifier")
             {
                 AskNewName = false,
@@ -239,7 +239,7 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var interactiveServices = new TestToolInteractiveServiceImpl(new List<string> { "a", "10", "1" });
             var consoleUtilities = new ConsoleUtilities(interactiveServices, _directoryManager, _optionSettingHandler);
-            var selectedValue = consoleUtilities.AskUserToChoose(new List<string> { "Option1", "Option2" }, null, "Option2");
+            var selectedValue = consoleUtilities.AskUserToChoose(new List<string> { "Option1", "Option2" }, null!, "Option2");
             Assert.Equal("Option1", selectedValue);
 
             Assert.Equal("1: Option1", interactiveServices.OutputMessages[0]);
@@ -379,8 +379,8 @@ namespace AWS.Deploy.CLI.UnitTests
 
         private class OptionItem
         {
-            public string DisplayName { get; set; }
-            public string Identifier { get; set; }
+            public string? DisplayName { get; set; }
+            public string? Identifier { get; set; }
         }
     }
 }

@@ -66,12 +66,12 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
                 }
             };
 
-            ValidationFailedException exception = null;
+            ValidationFailedException? exception = null;
 
             // ACT
             try
             {
-                await _optionSettingHandler.SetOptionSettingValue(null, optionSettingItem, invalidValue);
+                await _optionSettingHandler.SetOptionSettingValue(null!, optionSettingItem, invalidValue);
             }
             catch (ValidationFailedException e)
             {
@@ -80,7 +80,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
 
             exception.ShouldNotBeNull();
 
-            _output.WriteLine(exception.Message);
+            _output.WriteLine(exception?.Message);
         }
 
         [Fact]
@@ -102,12 +102,12 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
                 }
             };
 
-            ValidationFailedException exception = null;
+            ValidationFailedException? exception = null;
 
             // ACT
             try
             {
-                await _optionSettingHandler.SetOptionSettingValue(null, optionSettingItem, invalidValue);
+                await _optionSettingHandler.SetOptionSettingValue(null!, optionSettingItem, invalidValue);
             }
             catch (ValidationFailedException e)
             {
@@ -115,7 +115,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             }
 
             exception.ShouldNotBeNull();
-            exception.Message.ShouldContain("[A-Z]*");
+            exception!.Message.ShouldContain("[A-Z]*");
 
         }
 
@@ -144,12 +144,12 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
                 }
             };
 
-            ValidationFailedException exception = null;
+            ValidationFailedException? exception = null;
 
             // ACT
             try
             {
-                await _optionSettingHandler.SetOptionSettingValue(null, optionSettingItem, validValue);
+                await _optionSettingHandler.SetOptionSettingValue(null!, optionSettingItem, validValue);
             }
             catch (ValidationFailedException e)
             {
@@ -159,7 +159,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             exception.ShouldBeNull();
         }
 
-        
+
         /// <remarks>
         /// This tests a decent amount of plumbing for a unit test, but
         /// helps tests several important concepts.
@@ -188,12 +188,12 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
                 }
             };
 
-            ValidationFailedException exception = null;
+            ValidationFailedException? exception = null;
 
             // ACT
             try
             {
-                await _optionSettingHandler.SetOptionSettingValue(null, optionSettingItem, invalidValue);
+                await _optionSettingHandler.SetOptionSettingValue(null!, optionSettingItem, invalidValue);
             }
             catch (ValidationFailedException e)
             {
@@ -201,7 +201,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             }
 
             exception.ShouldNotBeNull();
-            exception.Message.ShouldEqual(customValidationMessage);
+            exception!.Message.ShouldEqual(customValidationMessage);
         }
     }
 }

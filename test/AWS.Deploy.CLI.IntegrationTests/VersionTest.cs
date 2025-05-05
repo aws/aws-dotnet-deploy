@@ -29,7 +29,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
         [InlineData("-v")]
         public async Task VerifyVersionOutput(string arg)
         {
-            InMemoryInteractiveService interactiveService = null;
+            InMemoryInteractiveService interactiveService = null!;
             Assert.Equal(CommandReturnCodes.SUCCESS, await _serviceCollection.RunDeployToolAsync([arg],
                 provider =>
                 {

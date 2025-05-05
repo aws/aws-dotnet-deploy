@@ -56,7 +56,7 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
             var commandLineWrapper = new Mock<ICommandLineWrapper>();
 
             var awsResourceQuery = new Mock<IAWSResourceQueryer>();
-            awsResourceQuery.Setup(x => x.GetCloudFormationStack(It.IsAny<string>())).Returns(Task.FromResult<Stack>(null));
+            awsResourceQuery.Setup(x => x.GetCloudFormationStack(It.IsAny<string>())).Returns(Task.FromResult<Stack?>(null));
 
             var cdkProjectHandler = new CdkProjectHandler(interactiveService.Object, commandLineWrapper.Object, awsResourceQuery.Object, _cdkAppSettingsSerializer.Object, _fileManager.Object, _directoryManager.Object, _optionSettingHandler, _workspaceMetadata.Object, _cloudFormationTemplateReader.Object);
 
@@ -70,7 +70,7 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
             var commandLineWrapper = new Mock<ICommandLineWrapper>();
 
             var awsResourceQuery = new Mock<IAWSResourceQueryer>();
-            awsResourceQuery.Setup(x => x.GetCloudFormationStack(It.IsAny<string>())).Returns(Task.FromResult<Stack>(new Stack { Parameters = new List<Parameter>() }));
+            awsResourceQuery.Setup(x => x.GetCloudFormationStack(It.IsAny<string>())).Returns(Task.FromResult<Stack?>(new Stack { Parameters = new List<Parameter>() }));
 
             var cdkProjectHandler = new CdkProjectHandler(interactiveService.Object, commandLineWrapper.Object, awsResourceQuery.Object, _cdkAppSettingsSerializer.Object, _fileManager.Object, _directoryManager.Object, _optionSettingHandler, _workspaceMetadata.Object, _cloudFormationTemplateReader.Object);
 
@@ -84,7 +84,7 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
             var commandLineWrapper = new Mock<ICommandLineWrapper>();
 
             var awsResourceQuery = new Mock<IAWSResourceQueryer>();
-            awsResourceQuery.Setup(x => x.GetCloudFormationStack(It.IsAny<string>())).Returns(Task.FromResult<Stack>(
+            awsResourceQuery.Setup(x => x.GetCloudFormationStack(It.IsAny<string>())).Returns(Task.FromResult<Stack?>(
                 new Stack { Parameters = new List<Parameter>() { new Parameter { ParameterKey = "Qualifier", ParameterValue = "q1" } } }));
 
             var cdkProjectHandler = new CdkProjectHandler(interactiveService.Object, commandLineWrapper.Object, awsResourceQuery.Object, _cdkAppSettingsSerializer.Object, _fileManager.Object, _directoryManager.Object, _optionSettingHandler, _workspaceMetadata.Object, _cloudFormationTemplateReader.Object);
@@ -101,12 +101,12 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
             var awsClientFactory = new Mock<IAWSClientFactory>();
 
             var awsResourceQuery = new Mock<IAWSResourceQueryer>();
-            awsResourceQuery.Setup(x => x.GetCloudFormationStack(It.IsAny<string>())).Returns(Task.FromResult<Stack>(
+            awsResourceQuery.Setup(x => x.GetCloudFormationStack(It.IsAny<string>())).Returns(Task.FromResult<Stack?>(
                 new Stack { Parameters = new List<Parameter>() { new Parameter { ParameterKey = "Qualifier", ParameterValue = "q1" } } }));
 
             _fileManager.Setup(x => x.ReadAllTextAsync(It.IsAny<string>())).ReturnsAsync(_cdkBootstrapTemplate);
             var cloudFormationTemplateReader = new CloudFormationTemplateReader(awsClientFactory.Object, deployToolWorkspaceMetadata.Object, _fileManager.Object);
-            awsResourceQuery.Setup(x => x.GetParameterStoreTextValue(It.IsAny<string>())).Returns(Task.FromResult<string>("1"));
+            awsResourceQuery.Setup(x => x.GetParameterStoreTextValue(It.IsAny<string>())).Returns(Task.FromResult<string?>("1"));
 
             var cdkProjectHandler = new CdkProjectHandler(interactiveService.Object, commandLineWrapper.Object, awsResourceQuery.Object, _cdkAppSettingsSerializer.Object, _fileManager.Object, _directoryManager.Object, _optionSettingHandler, _workspaceMetadata.Object, cloudFormationTemplateReader);
 
@@ -122,12 +122,12 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
             var awsClientFactory = new Mock<IAWSClientFactory>();
 
             var awsResourceQuery = new Mock<IAWSResourceQueryer>();
-            awsResourceQuery.Setup(x => x.GetCloudFormationStack(It.IsAny<string>())).Returns(Task.FromResult<Stack>(
+            awsResourceQuery.Setup(x => x.GetCloudFormationStack(It.IsAny<string>())).Returns(Task.FromResult<Stack?>(
                 new Stack { Parameters = new List<Parameter>() { new Parameter { ParameterKey = "Qualifier", ParameterValue = "q1" } } }));
 
             _fileManager.Setup(x => x.ReadAllTextAsync(It.IsAny<string>())).ReturnsAsync(_cdkBootstrapTemplate);
             var cloudFormationTemplateReader = new CloudFormationTemplateReader(awsClientFactory.Object, deployToolWorkspaceMetadata.Object, _fileManager.Object);
-            awsResourceQuery.Setup(x => x.GetParameterStoreTextValue(It.IsAny<string>())).Returns(Task.FromResult<string>("100"));
+            awsResourceQuery.Setup(x => x.GetParameterStoreTextValue(It.IsAny<string>())).Returns(Task.FromResult<string?>("100"));
 
 
             var cdkProjectHandler = new CdkProjectHandler(interactiveService.Object, commandLineWrapper.Object, awsResourceQuery.Object, _cdkAppSettingsSerializer.Object, _fileManager.Object, _directoryManager.Object, _optionSettingHandler, _workspaceMetadata.Object, cloudFormationTemplateReader);
@@ -144,13 +144,13 @@ namespace AWS.Deploy.Orchestration.UnitTests.CDK
             var awsClientFactory = new Mock<IAWSClientFactory>();
 
             var awsResourceQuery = new Mock<IAWSResourceQueryer>();
-            awsResourceQuery.Setup(x => x.GetCloudFormationStack(It.IsAny<string>())).Returns(Task.FromResult<Stack>(
+            awsResourceQuery.Setup(x => x.GetCloudFormationStack(It.IsAny<string>())).Returns(Task.FromResult<Stack?>(
                 new Stack { Parameters = new List<Parameter>() { new Parameter { ParameterKey = "Qualifier", ParameterValue = "q1" } } }));
 
             _fileManager.Setup(x => x.ReadAllTextAsync(It.IsAny<string>())).ReturnsAsync(_cdkBootstrapTemplate);
             var cloudFormationTemplateReader = new CloudFormationTemplateReader(awsClientFactory.Object, deployToolWorkspaceMetadata.Object, _fileManager.Object);
             var templateVersion = await cloudFormationTemplateReader.ReadCDKTemplateVersion();
-            awsResourceQuery.Setup(x => x.GetParameterStoreTextValue(It.IsAny<string>())).Returns(Task.FromResult<string>(templateVersion.ToString()));
+            awsResourceQuery.Setup(x => x.GetParameterStoreTextValue(It.IsAny<string>())).Returns(Task.FromResult<string?>(templateVersion.ToString()));
 
             var cdkProjectHandler = new CdkProjectHandler(interactiveService.Object, commandLineWrapper.Object, awsResourceQuery.Object, _cdkAppSettingsSerializer.Object, _fileManager.Object, _directoryManager.Object, _optionSettingHandler, _workspaceMetadata.Object, cloudFormationTemplateReader);
 

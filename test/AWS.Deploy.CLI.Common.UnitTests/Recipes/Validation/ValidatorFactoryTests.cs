@@ -134,7 +134,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             var deserialized = JsonConvert.DeserializeObject<OptionSettingItem>(json);
 
             // ACT
-            var validators = _validatorFactory.BuildValidators(deserialized);
+            var validators = _validatorFactory.BuildValidators(deserialized!);
 
             // ASSERT
             validators.Length.ShouldEqual(1);
@@ -172,18 +172,18 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
                     }
                 }
             };
-            
+
             var json = JsonConvert.SerializeObject(optionSettingItem, Formatting.Indented);
 
             var deserialized = JsonConvert.DeserializeObject<OptionSettingItem>(json);
 
-            Exception exception = null;
-            IOptionSettingItemValidator[] validators = null;
+            Exception? exception = null;
+            IOptionSettingItemValidator[]? validators = null;
 
             // ACT
             try
             {
-                validators = _validatorFactory.BuildValidators(deserialized);
+                validators = _validatorFactory.BuildValidators(deserialized!);
             }
             catch (Exception e)
             {
@@ -195,7 +195,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
 
             // we have our built validator
             validators.ShouldNotBeNull();
-            validators.Length.ShouldEqual(1);
+            validators!.Length.ShouldEqual(1);
 
             // things get a little odd, the type is correct,
             // but the output messages is going to be from the RangeValidator.

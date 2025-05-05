@@ -5,6 +5,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <RollForward>Major</RollForward>
     <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>Latest</LangVersion>
     <AWSProjectType>DeploymentProject</AWSProjectType>
     <!-- The value "AWSDeployRecipesCDKCommonVersion" is replaced by the project template system. -->
     <RecipeCDKCommonVersion>AWSDeployRecipesCDKCommonVersion</RecipeCDKCommonVersion>

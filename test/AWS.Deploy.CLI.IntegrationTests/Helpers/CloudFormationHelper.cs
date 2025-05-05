@@ -19,16 +19,16 @@ namespace AWS.Deploy.CLI.IntegrationTests.Helpers
             _cloudFormationClient = cloudFormationClient;
         }
 
-        public async Task<StackStatus> GetStackStatus(string stackName)
+        public async Task<StackStatus?> GetStackStatus(string stackName)
         {
             var stack = await GetStackAsync(stackName);
-            return stack.StackStatus;
+            return stack?.StackStatus;
         }
 
-        public async Task<StackStatus> GetStackArn(string stackName)
+        public async Task<StackStatus?> GetStackArn(string stackName)
         {
             var stack = await GetStackAsync(stackName);
-            return stack.StackId;
+            return stack?.StackId;
         }
 
         public async Task<bool> IsStackDeleted(string stackName)
@@ -68,14 +68,14 @@ namespace AWS.Deploy.CLI.IntegrationTests.Helpers
         }
 
 
-        private async Task<Stack> GetStackAsync(string stackName)
+        private async Task<Stack?> GetStackAsync(string stackName)
         {
             var response = await _cloudFormationClient.DescribeStacksAsync(new DescribeStacksRequest
             {
                 StackName = stackName
             });
 
-            return response.Stacks.Count == 0 ? null : response.Stacks[0];
+            return response.Stacks.Count == 0 ? null : response.Stacks.First();
         }
     }
 }

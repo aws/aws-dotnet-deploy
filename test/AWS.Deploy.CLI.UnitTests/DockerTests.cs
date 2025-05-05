@@ -50,8 +50,8 @@ namespace AWS.Deploy.CLI.UnitTests
             catch (Exception ex)
             {
                 Assert.NotNull(ex);
-                Assert.IsType<DockerEngineException>(ex);
-                Assert.Equal(DeployToolErrorCode.FailedToGenerateDockerFile, (ex as DeployToolException).ErrorCode);
+                var dockerException = Assert.IsType<DockerEngineException>(ex);
+                Assert.Equal(DeployToolErrorCode.FailedToGenerateDockerFile, dockerException.ErrorCode);
             }
         }
 
@@ -114,10 +114,10 @@ namespace AWS.Deploy.CLI.UnitTests
             var testsPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             while (testsPath != null && !string.Equals(new DirectoryInfo(testsPath).Name, "test", StringComparison.OrdinalIgnoreCase))
             {
-                testsPath = Directory.GetParent(testsPath).FullName;
+                testsPath = Directory.GetParent(testsPath)!.FullName;
             }
 
-            return Path.Combine(testsPath, "..", "testapps", "docker", projectName);
+            return Path.Combine(testsPath!, "..", "testapps", "docker", projectName);
         }
 
         private void AssertDockerFilesAreEqual(string path, string generatedFile = "Dockerfile", string referenceFile = "ReferenceDockerfile")

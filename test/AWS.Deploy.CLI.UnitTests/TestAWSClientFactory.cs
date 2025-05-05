@@ -22,7 +22,7 @@ namespace AWS.Deploy.CLI.UnitTests
             _clients = clientMocks ?? new IAmazonService[0];
         }
 
-        public T GetAWSClient<T>(string awsRegion = null) where T : IAmazonService
+        public T GetAWSClient<T>(string? awsRegion = null) where T : IAmazonService
         {
             var match = _clients.OfType<T>().FirstOrDefault();
 

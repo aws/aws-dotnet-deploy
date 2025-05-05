@@ -40,7 +40,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public void EnsureMinimumSystemTextJsonVersion()
         {
             var assembly = typeof(ServerModeCommand).Assembly;
-            var jsonAssemblyName = assembly.GetReferencedAssemblies().FirstOrDefault(x => string.Equals("System.Text.Json", x.Name, StringComparison.OrdinalIgnoreCase));
+            var jsonAssemblyName = assembly.GetReferencedAssemblies().First(x => string.Equals("System.Text.Json", x.Name, StringComparison.OrdinalIgnoreCase));
             Assert.True(jsonAssemblyName.Version >= Version.Parse("5.0.0"));
         }
 
@@ -74,7 +74,7 @@ namespace AWS.Deploy.CLI.UnitTests
             Assert.True(serverModeTask2.IsFaulted);
 
             Assert.NotNull(serverModeTask2.Exception);
-            Assert.Single(serverModeTask2.Exception.InnerExceptions);
+            Assert.Single(serverModeTask2.Exception!.InnerExceptions);
 
             Assert.IsType<TcpPortInUseException>(serverModeTask2.Exception.InnerException);
         }
@@ -145,7 +145,7 @@ namespace AWS.Deploy.CLI.UnitTests
                 .Callback<string>((csProjectPath) =>
                 {
                     customLocatorCalls++;
-                    Assert.Equal(new DirectoryInfo(sourceProjectDirectory).FullName, Directory.GetParent(csProjectPath).FullName);
+                    Assert.Equal(new DirectoryInfo(sourceProjectDirectory).FullName, Directory.GetParent(csProjectPath)!.FullName);
                 })
                 .ReturnsAsync(new List<string>());
             var orchestratorInteractiveService = new TestToolOrchestratorInteractiveService();

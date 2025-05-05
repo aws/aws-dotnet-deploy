@@ -86,8 +86,8 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             Assert.Equal("OperationName,[]", SessionAWSResourceQuery.CreateCacheKey(new object[] { }, "OperationName"));
             Assert.Equal("OperationName,[\"param1\"]", SessionAWSResourceQuery.CreateCacheKey(new object[] { "param1" }, "OperationName"));
-            Assert.Equal("OperationName,[null]", SessionAWSResourceQuery.CreateCacheKey(new object[] { null }, "OperationName"));
-            Assert.Equal("OperationName,[[null]]", SessionAWSResourceQuery.CreateCacheKey(new object[] { new object[] { null } }, "OperationName"));
+            Assert.Equal("OperationName,[null]", SessionAWSResourceQuery.CreateCacheKey(new object[] { null! }, "OperationName"));
+            Assert.Equal("OperationName,[[null]]", SessionAWSResourceQuery.CreateCacheKey(new object[] { new object[] { null! } }, "OperationName"));
             Assert.Equal("OperationName,[[\"listValue1\"]]", SessionAWSResourceQuery.CreateCacheKey(new object[] { new object[] { "listValue1" } }, "OperationName"));
 
             Assert.Equal("OperationName,[\"filterValue\",10]", SessionAWSResourceQuery.CreateCacheKey(new object[] { "filterValue", 10 }, "OperationName"));

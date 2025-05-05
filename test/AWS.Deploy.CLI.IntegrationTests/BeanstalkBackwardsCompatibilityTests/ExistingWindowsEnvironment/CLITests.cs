@@ -20,7 +20,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests.E
         {
             var projectPath = fixture.TestAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
             var deployArgs = new[] { "deploy", "--project-path", projectPath, "--application-name", fixture.EnvironmentName, "--diagnostics", "--silent", "--region", "us-west-2" };
-            InMemoryInteractiveService interactiveService = null;
+            InMemoryInteractiveService interactiveService = null!;
             Assert.Equal(CommandReturnCodes.SUCCESS, await fixture.ServiceCollection.RunDeployToolAsync(deployArgs,
                 provider =>
                 {
