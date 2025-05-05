@@ -43,7 +43,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests
         public readonly string EnvironmentName;
         public readonly string VersionLabel;
         public readonly string RoleName;
-        public string EnvironmentId;
+        public string? EnvironmentId;
 
         public TestContextFixture()
         {
@@ -53,27 +53,27 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests
             ServiceCollection.AddTestServices();
 
             var serviceProvider = ServiceCollection.BuildServiceProvider();
-            var awsClientFactory = serviceProvider.GetService<IAWSClientFactory>();
+            var awsClientFactory = serviceProvider.GetRequiredService<IAWSClientFactory>();
             awsClientFactory.ConfigureAWSOptions((options) =>
             {
                 options.Region = Amazon.RegionEndpoint.USWest2;
             });
 
-            InteractiveService = serviceProvider.GetService<InMemoryInteractiveService>();
+            InteractiveService = serviceProvider.GetRequiredService<InMemoryInteractiveService>();
             Assert.NotNull(InteractiveService);
 
-            ToolInteractiveService = serviceProvider.GetService<IToolInteractiveService>();
+            ToolInteractiveService = serviceProvider.GetRequiredService<IToolInteractiveService>();
 
-            AWSResourceQueryer = serviceProvider.GetService<IAWSResourceQueryer>();
+            AWSResourceQueryer = serviceProvider.GetRequiredService<IAWSResourceQueryer>();
             Assert.NotNull(AWSResourceQueryer);
 
-            CommandLineWrapper = serviceProvider.GetService<ICommandLineWrapper>();
+            CommandLineWrapper = serviceProvider.GetRequiredService<ICommandLineWrapper>();
             Assert.NotNull(CommandLineWrapper);
 
-            ZipFileManager = serviceProvider.GetService<IZipFileManager>();
+            ZipFileManager = serviceProvider.GetRequiredService<IZipFileManager>();
             Assert.NotNull(ZipFileManager);
 
-            DirectoryManager = serviceProvider.GetService<IDirectoryManager>();
+            DirectoryManager = serviceProvider.GetRequiredService<IDirectoryManager>();
             Assert.NotNull(DirectoryManager);
 
             HttpHelper = new HttpHelper(InteractiveService);

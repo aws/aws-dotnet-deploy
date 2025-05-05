@@ -21,9 +21,9 @@ namespace AWS.Deploy.Orchestration.UnitTests
         private const string _expectedNodeCommand = "node --version";
         private readonly string _expectedDockerCommand = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "docker info -f \"{{.OSType}}\"" : "docker info";
 
-        private readonly Recommendation _cdkAndContainerRecommendation = new(new RecipeDefinition("", "", "", DeploymentTypes.CdkProject, DeploymentBundleTypes.Container, "", "", "", "", ""), null, 100, null);
-        private readonly Recommendation _cdkOnlyRecommendation = new(new RecipeDefinition("", "", "", DeploymentTypes.CdkProject, DeploymentBundleTypes.DotnetPublishZipFile, "", "", "", "", ""), null, 100, null);
-        private readonly Recommendation _containerOnlyRecommendation = new(new RecipeDefinition("", "", "", DeploymentTypes.ElasticContainerRegistryImage, DeploymentBundleTypes.Container, "", "", "", "", ""), null, 100, null);
+        private readonly Recommendation _cdkAndContainerRecommendation = new(new RecipeDefinition("", "", "", DeploymentTypes.CdkProject, DeploymentBundleTypes.Container, "", "", "", "", ""), null!, 100, null!);
+        private readonly Recommendation _cdkOnlyRecommendation = new(new RecipeDefinition("", "", "", DeploymentTypes.CdkProject, DeploymentBundleTypes.DotnetPublishZipFile, "", "", "", "", ""), null!, 100, null!);
+        private readonly Recommendation _containerOnlyRecommendation = new(new RecipeDefinition("", "", "", DeploymentTypes.ElasticContainerRegistryImage, DeploymentBundleTypes.Container, "", "", "", "", ""), null!, 100, null!);
 
         [Fact]
         public async Task CdkAndContainerRecipe_NoMissing_Cache()

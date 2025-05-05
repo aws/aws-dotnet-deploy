@@ -30,11 +30,11 @@ namespace AWS.Deploy.CLI.UnitTests
         public async Task ParseProjectDefinitionWithRelativeProjectPath(string projectName, string csprojName)
         {
             //Arrange
-            var currrentWorkingDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location); 
+            var currrentWorkingDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var projectDirectoryPath = SystemIOUtilities.ResolvePath(projectName);
             var absoluteProjectDirectoryPath = new DirectoryInfo(projectDirectoryPath).FullName;
             var absoluteProjectPath = Path.Combine(absoluteProjectDirectoryPath, csprojName);
-            var relativeProjectDirectoryPath = Path.GetRelativePath(currrentWorkingDirectory, absoluteProjectDirectoryPath);
+            var relativeProjectDirectoryPath = Path.GetRelativePath(currrentWorkingDirectory!, absoluteProjectDirectoryPath);
             var projectSolutionPath = SystemIOUtilities.ResolvePathToSolution();
             var projectDefinitionParser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
             var projectParserUtility = new ProjectParserUtility(projectDefinitionParser, new DirectoryManager());

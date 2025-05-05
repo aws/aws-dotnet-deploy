@@ -31,7 +31,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
     public class ServerModeTests : IDisposable
     {
         private bool _isDisposed;
-        private string _stackName;
+        private string? _stackName;
         private readonly CloudFormationHelper _cloudFormationHelper;
 
         private readonly string _awsRegion;
@@ -122,7 +122,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
                 var getRecommendationOutput = await restClient.GetRecommendationsAsync(sessionId);
                 Assert.NotEmpty(getRecommendationOutput.Recommendations);
-                var beanstalkRecommendation = getRecommendationOutput.Recommendations.FirstOrDefault();
+                var beanstalkRecommendation = getRecommendationOutput.Recommendations.First();
                 Assert.Equal("AspNetAppElasticBeanstalkLinux", beanstalkRecommendation.RecipeId);
                 Assert.Null(beanstalkRecommendation.BaseRecipeId);
                 Assert.False(beanstalkRecommendation.IsPersistedDeploymentProject);
@@ -185,7 +185,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
                 var getRecommendationOutput = await restClient.GetRecommendationsAsync(sessionId);
                 Assert.NotEmpty(getRecommendationOutput.Recommendations);
-                Assert.Equal("AspNetAppElasticBeanstalkLinux", getRecommendationOutput.Recommendations.FirstOrDefault().RecipeId);
+                Assert.Equal("AspNetAppElasticBeanstalkLinux", getRecommendationOutput.Recommendations.First().RecipeId);
 
                 var listDeployStdOut = _interactiveService.StdOutReader.ReadAllLines();
                 Assert.Contains("Waiting on symmetric key from stdin", listDeployStdOut);
@@ -241,7 +241,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
                 var getRecommendationOutput = await restClient.GetRecommendationsAsync(sessionId);
                 Assert.NotEmpty(getRecommendationOutput.Recommendations);
 
-                var appRunnerRecommendation = getRecommendationOutput.Recommendations.FirstOrDefault(x => string.Equals(x.RecipeId, "AspNetAppAppRunner"));
+                var appRunnerRecommendation = getRecommendationOutput.Recommendations.First(x => string.Equals(x.RecipeId, "AspNetAppAppRunner"));
                 Assert.NotNull(appRunnerRecommendation);
 
                 await restClient.SetDeploymentTargetAsync(sessionId, new SetDeploymentTargetInput
@@ -329,7 +329,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
                 var getRecommendationOutput = await restClient.GetRecommendationsAsync(sessionId);
                 Assert.NotEmpty(getRecommendationOutput.Recommendations);
 
-                var fargateRecommendation = getRecommendationOutput.Recommendations.FirstOrDefault(x => string.Equals(x.RecipeId, "AspNetAppEcsFargate"));
+                var fargateRecommendation = getRecommendationOutput.Recommendations.First(x => string.Equals(x.RecipeId, "AspNetAppEcsFargate"));
                 Assert.NotNull(fargateRecommendation);
 
                 await restClient.SetDeploymentTargetAsync(sessionId, new SetDeploymentTargetInput
@@ -539,7 +539,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
                 var sessionId = startSessionOutput.SessionId;
                 var getRecommendationOutput = await restClient.GetRecommendationsAsync(sessionId);
-                var fargateRecommendation = getRecommendationOutput.Recommendations.FirstOrDefault(x => string.Equals(x.RecipeId, "AspNetAppEcsFargate"));
+                var fargateRecommendation = getRecommendationOutput.Recommendations.First(x => string.Equals(x.RecipeId, "AspNetAppEcsFargate"));
 
                 var exception = await Assert.ThrowsAsync<ApiException<ProblemDetails>>(() => restClient.SetDeploymentTargetAsync(sessionId, new SetDeploymentTargetInput
                 {
@@ -612,7 +612,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
                 Assert.DoesNotContain(getConfigSettingsResponse.OptionSettings, x => string.IsNullOrEmpty(x.Category));
 
                 // Make sure build settings have been applied a category.
-                var buildSetting = getConfigSettingsResponse.OptionSettings.FirstOrDefault(x => string.Equals(x.Id, "DotnetBuildConfiguration"));
+                var buildSetting = getConfigSettingsResponse.OptionSettings.First(x => string.Equals(x.Id, "DotnetBuildConfiguration"));
                 Assert.NotNull(buildSetting);
                 Assert.Equal(AWS.Deploy.Common.Recipes.Category.DeploymentBundle.Id, buildSetting.Category);
             }

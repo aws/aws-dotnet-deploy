@@ -27,7 +27,7 @@ namespace AWS.Deploy.CLI.UnitTests
 {
     public class RecommendationTests
     {
-        private OrchestratorSession _session;
+        private OrchestratorSession? _session;
         private readonly TestDirectoryManager _directoryManager;
         private readonly Mock<IValidatorFactory> _validatorFactory;
         private readonly IOptionSettingHandler _optionSettingHandler;
@@ -245,7 +245,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             Assert.Equal("TestService", _optionSettingHandler.GetOptionSettingValue<string>(fargateRecommendation, ecsServiceNameOptionSetting));
 
-            await _optionSettingHandler.SetOptionSettingValue(fargateRecommendation, ecsServiceNameOptionSetting, consoleUtilities.AskUserForValue("Title", "TestService", true, originalDefaultValue));
+            await _optionSettingHandler.SetOptionSettingValue(fargateRecommendation, ecsServiceNameOptionSetting, consoleUtilities.AskUserForValue("Title", "TestService", true, originalDefaultValue!));
 
             Assert.Equal(originalDefaultValue, _optionSettingHandler.GetOptionSettingValue<string>(fargateRecommendation, ecsServiceNameOptionSetting));
         }
@@ -262,8 +262,8 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var iamRoleTypeHintResponse = _optionSettingHandler.GetOptionSettingValue<IAMRoleTypeHintResponse>(beanstalkRecommendation, applicationIAMRoleOptionSetting);
 
-            Assert.Null(iamRoleTypeHintResponse.RoleArn);
-            Assert.True(iamRoleTypeHintResponse.CreateNew);
+            Assert.Null(iamRoleTypeHintResponse?.RoleArn);
+            Assert.True(iamRoleTypeHintResponse?.CreateNew);
         }
 
         [Fact]
@@ -308,7 +308,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var iamRoleTypeHintResponse = _optionSettingHandler.GetOptionSettingValue<IAMRoleTypeHintResponse>(beanstalkRecommendation, applicationIAMRoleOptionSetting);
 
-            Assert.Equal("arn:aws:iam::123456789012:group/Developers", iamRoleTypeHintResponse.RoleArn);
+            Assert.Equal("arn:aws:iam::123456789012:group/Developers", iamRoleTypeHintResponse!.RoleArn);
             Assert.False(iamRoleTypeHintResponse.CreateNew);
         }
 
@@ -319,7 +319,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var recommendations = await engine.ComputeRecommendations();
 
-            var beanstalkRecommendation = recommendations.FirstOrDefault(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
 
             var beanstalEnvNameSetting = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, "BeanstalkEnvironment.EnvironmentName");
 
@@ -337,7 +337,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var recommendations = await engine.ComputeRecommendations();
 
-            var beanstalkRecommendation = recommendations.FirstOrDefault(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
 
             var envVarsSetting = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, "ElasticBeanstalkEnvironmentVariables");
 
@@ -351,7 +351,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var recommendations = await engine.ComputeRecommendations();
 
-            var beanstalkRecommendation = recommendations.FirstOrDefault(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
 
             var envVarsSetting = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, "ElasticBeanstalkEnvironmentVariables.Key");
 
@@ -364,7 +364,7 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var awsCredentials = new Mock<AWSCredentials>();
             var session =  new OrchestratorSession(
-                null,
+                null!,
                 awsCredentials.Object,
                 "us-west-2",
                 "123456789012")
@@ -507,7 +507,7 @@ namespace AWS.Deploy.CLI.UnitTests
                         NuGetPackageName = "AWSSDK.SQS"
                     }),
                 projectDefinition,
-                _session)));
+                _session!)));
 
             Assert.False(await test.Execute(new RecommendationTestInput(
                 new RuleTest(
@@ -517,7 +517,7 @@ namespace AWS.Deploy.CLI.UnitTests
                         NuGetPackageName = "AWSSDK.S3"
                     }),
                 projectDefinition,
-                _session)));
+                _session!)));
         }
     }
 }

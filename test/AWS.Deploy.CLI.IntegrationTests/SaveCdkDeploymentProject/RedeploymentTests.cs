@@ -23,7 +23,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
         private readonly ECSHelper _ecsHelper;
         private readonly IServiceCollection _serviceCollection;
         private bool _isDisposed;
-        private string _stackName;
+        private string? _stackName;
 
         public RedeploymentTests()
         {
@@ -42,7 +42,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
         [Fact]
         public async Task AttemptWorkFlow()
         {
-            InMemoryInteractiveService interactiveService = null;
+            InMemoryInteractiveService interactiveService = null!;
             try
             {
                 _stackName = $"WebAppWithDockerFile{Guid.NewGuid().ToString().Split('-').Last()}";
@@ -92,11 +92,14 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 
         private async Task PerformInitialDeployment(string projectPath)
         {
-            InMemoryInteractiveService interactiveService = null;
+            if (string.IsNullOrEmpty(_stackName))
+                throw new Exception("Stack name not set");
+
+            InMemoryInteractiveService interactiveService = null!;
             try
             {
                 // Deploy
-                var deployArgs = new[] { "deploy", "--project-path", projectPath, "--application-name", _stackName, "--diagnostics" };
+                string[] deployArgs = ["deploy", "--project-path", projectPath, "--application-name", _stackName, "--diagnostics"];
                 var returnCode = await _serviceCollection.RunDeployToolAsync(deployArgs, provider =>
                 {
                     interactiveService = provider.GetRequiredService<InMemoryInteractiveService>();
@@ -144,7 +147,10 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 
         private async Task DeleteStack()
         {
-            InMemoryInteractiveService interactiveService = null;
+            if (string.IsNullOrEmpty(_stackName))
+                throw new Exception("Stack name not set");
+
+            InMemoryInteractiveService interactiveService = null!;
             try
             {
                 // Delete
@@ -178,7 +184,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
         {
             if (_isDisposed) return;
 
-            if (disposing)
+            if (disposing && !string.IsNullOrEmpty(_stackName))
             {
                 var isStackDeleted = _cloudFormationHelper.IsStackDeleted(_stackName).GetAwaiter().GetResult();
                 if (!isStackDeleted)

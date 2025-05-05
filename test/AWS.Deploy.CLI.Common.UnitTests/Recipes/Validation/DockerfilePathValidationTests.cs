@@ -85,7 +85,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             {
                 new OptionSettingItem("DockerfilePath", "", "", "")
             };
-            var projectDefintion = new ProjectDefinition(null, projectPath, "", "");
+            var projectDefintion = new ProjectDefinition(null!, projectPath, "", "");
             var recommendation = new Recommendation(_recipeDefinition, projectDefintion, 100, new Dictionary<string, object>());
             var validator = new DockerfilePathValidator(_directoryManager, _fileManager);
 
@@ -98,7 +98,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             else
                 await _fileManager.WriteAllTextAsync(Path.Combine(recommendation.GetProjectDirectory(), dockerfilePath), "");
 
-            var validationResult = await validator.Validate(recommendation, null);
+            var validationResult = await validator.Validate(recommendation, null!);
 
             Assert.Equal(expectedToBeValid, validationResult.IsValid);
         }

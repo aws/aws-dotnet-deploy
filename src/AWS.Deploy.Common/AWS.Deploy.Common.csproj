@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>Latest</LangVersion>
     <AssemblyName>AWS.Deploy.Common</AssemblyName>
     <RootNamespace>AWS.Deploy.Common</RootNamespace>

@@ -24,8 +24,8 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
         private readonly CloudFormationHelper _cloudFormationHelper;
         private readonly ECSHelper _ecsHelper;
         private bool _isDisposed;
-        private string _stackName;
-        private string _clusterName;
+        private string? _stackName;
+        private string? _clusterName;
         private readonly TestAppManager _testAppManager;
 
         public ECSFargateDeploymentTest()
@@ -47,14 +47,14 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
         [Fact]
         public async Task PerformDeployment()
         {
-            InMemoryInteractiveService interactiveService = null;
+            InMemoryInteractiveService interactiveService = null!;
             try
             {
                 var stackNamePlaceholder = "{StackName}";
                 _stackName = $"WebAppWithDockerFile{Guid.NewGuid().ToString().Split('-').Last()}";
                 _clusterName = $"{_stackName}-cluster";
                 var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
-                var configFilePath = Path.Combine(Directory.GetParent(projectPath).FullName, "ECSFargateConfigFile.json");
+                var configFilePath = Path.Combine(Directory.GetParent(projectPath)!.FullName, "ECSFargateConfigFile.json");
                 ConfigFileHelper.ApplyReplacementTokens(new Dictionary<string, string> { { stackNamePlaceholder, _stackName } }, configFilePath);
 
                 // Deploy
@@ -138,7 +138,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
         {
             if (_isDisposed) return;
 
-            if (disposing)
+            if (disposing && !string.IsNullOrEmpty(_stackName))
             {
                 var isStackDeleted = _cloudFormationHelper.IsStackDeleted(_stackName).GetAwaiter().GetResult();
                 if (!isStackDeleted)

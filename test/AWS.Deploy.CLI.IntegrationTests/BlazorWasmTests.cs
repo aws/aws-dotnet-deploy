@@ -21,7 +21,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
         private readonly IServiceCollection _serviceCollection;
         private readonly CloudFormationHelper _cloudFormationHelper;
         private readonly CloudFrontHelper _cloudFrontHelper;
-        private string _stackName;
+        private string? _stackName;
         private bool _isDisposed;
         private readonly TestAppManager _testAppManager;
 
@@ -44,9 +44,9 @@ namespace AWS.Deploy.CLI.IntegrationTests
         public async Task DefaultConfigurations(params string[] components)
         {
             _stackName = $"{components[1]}{Guid.NewGuid().ToString().Split('-').Last()}";
-            string applicationUrl = null;
-            string distributionId = null;
-            InMemoryInteractiveService interactiveService = null;
+            string? applicationUrl = null;
+            string? distributionId = null;
+            InMemoryInteractiveService interactiveService = null!;
             try
             {
                 // Deploy
@@ -111,7 +111,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
 
             try
             {
-                var applyLoggingSettingsFile = Path.Combine(Directory.GetParent(_testAppManager.GetProjectPath(Path.Combine(components))).FullName, "apply-settings.json");
+                var applyLoggingSettingsFile = Path.Combine(Directory.GetParent(_testAppManager.GetProjectPath(Path.Combine(components)))!.FullName, "apply-settings.json");
                 var deployArgs = new[] { "deploy", "--project-path", _testAppManager.GetProjectPath(Path.Combine(components)), "--application-name", _stackName, "--diagnostics", "--apply", applyLoggingSettingsFile };
                 Assert.Equal(CommandReturnCodes.SUCCESS, await _serviceCollection.RunDeployToolAsync(deployArgs,
                     provider =>
@@ -168,7 +168,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
         {
             if (_isDisposed) return;
 
-            if (disposing)
+            if (disposing && !string.IsNullOrEmpty(_stackName))
             {
                 var isStackDeleted = _cloudFormationHelper.IsStackDeleted(_stackName).GetAwaiter().GetResult();
                 if (!isStackDeleted)

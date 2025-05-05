@@ -51,8 +51,8 @@ namespace AWS.Deploy.CLI.UnitTests
             Assert.Equal("SingleInstance", metadata.Settings["EnvironmentType"].ToString());
             Assert.Equal("application", metadata.Settings["LoadBalancerType"].ToString());
 
-            var applicationIAMRole = JsonConvert.DeserializeObject<IAMRoleTypeHintResponse>(metadata.Settings["ApplicationIAMRole"].ToString());
-            Assert.True(applicationIAMRole.CreateNew);
+            var applicationIAMRole = JsonConvert.DeserializeObject<IAMRoleTypeHintResponse>(metadata.Settings["ApplicationIAMRole"].ToString()!);
+            Assert.True(applicationIAMRole?.CreateNew);
 
             Assert.Equal("Dockerfile", metadata.DeploymentBundleSettings["DockerfilePath"]);
             Assert.Equal(".", metadata.DeploymentBundleSettings["DockerExecutionDirectory"]);

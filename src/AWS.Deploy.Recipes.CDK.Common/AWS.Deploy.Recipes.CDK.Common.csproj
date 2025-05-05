@@ -2,6 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>Latest</LangVersion>
     <Product>AWS .NET deployment tool CDK Utilities</Product>
     <Description>Utility code used in CDK recipes used by the AWS .NET deployment tool. This package is not intended for direct usage.</Description>
     <PackageId>AWS.Deploy.Recipes.CDK.Common</PackageId>

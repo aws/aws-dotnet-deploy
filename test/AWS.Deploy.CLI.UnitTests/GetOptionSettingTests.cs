@@ -118,7 +118,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var elasticBeanstalkManagedPlatformUpdates = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, optionSetting);
             var elasticBeanstalkManagedPlatformUpdatesValue = _optionSettingHandler.GetOptionSettingValue<Dictionary<string, object>>(beanstalkRecommendation, elasticBeanstalkManagedPlatformUpdates);
 
-            Assert.Equal(displayableCount, elasticBeanstalkManagedPlatformUpdatesValue.Count);
+            Assert.Equal(displayableCount, elasticBeanstalkManagedPlatformUpdatesValue?.Count);
         }
 
         [Fact]

@@ -270,7 +270,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
         {
             var recipeBody = await File.ReadAllTextAsync(recipeFilePath);
             var recipe = JsonConvert.DeserializeObject<RecipeDefinition>(recipeBody);
-            return recipe.Id;
+            return recipe!.Id;
         }
 
         protected virtual void Dispose(bool disposing)

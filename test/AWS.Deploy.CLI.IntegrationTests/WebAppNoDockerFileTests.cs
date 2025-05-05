@@ -24,7 +24,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
         private readonly IServiceCollection _serviceCollection;
         private readonly CloudFormationHelper _cloudFormationHelper;
         private bool _isDisposed;
-        private string _stackName;
+        private string? _stackName;
         private readonly TestAppManager _testAppManager;
         private readonly string _customWorkspace;
 
@@ -64,7 +64,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
         {
             _stackName = $"BeanstalkTest-{Guid.NewGuid().ToString().Split('-').Last()}";
 
-            InMemoryInteractiveService interactiveService = null;
+            InMemoryInteractiveService interactiveService = null!;
             try
             {
                 // Deploy
@@ -139,7 +139,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             _stackName = $"BeanstalkArm{Guid.NewGuid().ToString().Split('-').Last()}";
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppArmDeployment", "WebAppArmDeployment.csproj"));
 
-            InMemoryInteractiveService interactiveService = null;
+            InMemoryInteractiveService interactiveService = null!;
             try
             {
                 // Deploy
@@ -247,7 +247,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             _stackName = $"RetiredDotnetBeanstalk{Guid.NewGuid().ToString().Split('-').Last()}";
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebApiNET6", "WebApiNET6.csproj"));
 
-            InMemoryInteractiveService interactiveService = null;
+            InMemoryInteractiveService interactiveService = null!;
             try
             {
                 var deployArgs = new[] { "deploy", "--project-path", projectPath, "--application-name", _stackName, "--diagnostics", "--silent", "--apply", "ElasticBeanStalkConfigFile.json" };
@@ -318,7 +318,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
         {
             if (_isDisposed) return;
 
-            if (disposing)
+            if (disposing && !string.IsNullOrEmpty(_stackName))
             {
                 var isStackDeleted = _cloudFormationHelper.IsStackDeleted(_stackName).GetAwaiter().GetResult();
                 if (!isStackDeleted)

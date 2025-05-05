@@ -33,7 +33,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
         private readonly List<StackResource> _stackResources;
         private readonly EnvironmentDescription _environmentDescription;
         private readonly LoadBalancer _loadBalancer;
-        private OrchestratorSession _session;
+        private OrchestratorSession? _session;
         private readonly IDeploymentManifestEngine _deploymentManifestEngine;
         private readonly Mock<IOrchestratorInteractiveService> _orchestratorInteractiveService;
         private readonly IDirectoryManager _directoryManager;

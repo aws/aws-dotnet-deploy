@@ -21,7 +21,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 {
     public static class Utilities
     {
-        public static async Task CreateCDKDeploymentProject(string targetApplicationPath, string saveDirectoryPath = null, bool isValid = true)
+        public static async Task CreateCDKDeploymentProject(string targetApplicationPath, string? saveDirectoryPath = null, bool isValid = true)
         {
             var serviceCollection = GetAppServiceCollection();
 
@@ -37,7 +37,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
                 deployArgs = new[] { "deployment-project", "generate", "--project-path", targetApplicationPath, "--output", saveDirectoryPath, "--diagnostics" };
             }
 
-            InMemoryInteractiveService interactiveService = null;
+            InMemoryInteractiveService interactiveService = null!;
             var returnCode = await serviceCollection.RunDeployToolAsync(deployArgs,
                 provider =>
                 {
@@ -64,7 +64,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             VerifyCreatedArtifacts(targetApplicationPath, saveDirectoryPath);
         }
 
-        public static async Task CreateCDKDeploymentProjectWithRecipeName(string targetApplicationPath, string recipeName, string option, string saveDirectoryPath = null, bool isValid = true, bool underSourceControl = true)
+        public static async Task CreateCDKDeploymentProjectWithRecipeName(string targetApplicationPath, string recipeName, string option, string? saveDirectoryPath = null, bool isValid = true, bool underSourceControl = true)
         {
             var serviceCollection = GetAppServiceCollection();
 
@@ -80,7 +80,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
                 deployArgs = new[] { "deployment-project", "generate", "--project-path", targetApplicationPath, "--output", saveDirectoryPath, "--project-display-name", recipeName, "--diagnostics" };
             }
 
-            InMemoryInteractiveService interactiveService = null;
+            InMemoryInteractiveService interactiveService = null!;
             var returnCode = await serviceCollection.RunDeployToolAsync(deployArgs,
                 provider =>
                 {

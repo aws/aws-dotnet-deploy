@@ -147,7 +147,7 @@ namespace AWS.Deploy.CLI.UnitTests
             await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation, imageTag);
 
             var expectedDockerFile = Path.GetFullPath(Path.Combine(".", "Dockerfile"), recommendation.GetProjectDirectory());
-            var dockerExecutionDirectory = Directory.GetParent(Path.GetFullPath(recommendation.ProjectPath)).Parent.Parent;
+            var dockerExecutionDirectory = Directory.GetParent(Path.GetFullPath(recommendation.ProjectPath))!.Parent!.Parent!;
 
             if (RuntimeInformation.OSArchitecture.Equals(Architecture.X64))
             {
@@ -211,7 +211,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var recommendation = new Recommendation(_recipeDefinition, project, 100, new Dictionary<string, object>());
 
             var dockerfilePath = Path.Combine(projectPath, "Docker", "Dockerfile");
-            var expectedDockerExecutionDirectory = Directory.GetParent(Path.GetFullPath(recommendation.ProjectPath)).Parent.Parent;
+            var expectedDockerExecutionDirectory = Directory.GetParent(Path.GetFullPath(recommendation.ProjectPath))!.Parent!.Parent!;
 
             recommendation.DeploymentBundle.DockerfilePath = dockerfilePath;
 
@@ -462,13 +462,13 @@ namespace AWS.Deploy.CLI.UnitTests
             var engine = await BuildRecommendationEngine(projectPath);
 
             var recommendations = await engine.ComputeRecommendations();
-            var recommendation = recommendations.FirstOrDefault(x => x.Recipe.DeploymentBundle.Equals(DeploymentBundleTypes.Container));
+            var recommendation = recommendations.First(x => x.Recipe.DeploymentBundle.Equals(DeploymentBundleTypes.Container));
 
             var cloudApplication = new CloudApplication("WebAppWithSolutionParentLevel", string.Empty, CloudApplicationResourceType.CloudFormationStack, string.Empty);
             var imageTag = "imageTag";
             await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation, imageTag);
 
-            Assert.Equal(Directory.GetParent(SystemIOUtilities.ResolvePath(projectPath)).FullName, recommendation.DeploymentBundle.DockerExecutionDirectory);
+            Assert.Equal(Directory.GetParent(SystemIOUtilities.ResolvePath(projectPath))!.FullName, recommendation.DeploymentBundle.DockerExecutionDirectory);
         }
 
         [Fact]
@@ -478,7 +478,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var engine = await BuildRecommendationEngine(projectPath);
 
             var recommendations = await engine.ComputeRecommendations();
-            var recommendation = recommendations.FirstOrDefault(x => x.Recipe.DeploymentBundle.Equals(DeploymentBundleTypes.Container));
+            var recommendation = recommendations.First(x => x.Recipe.DeploymentBundle.Equals(DeploymentBundleTypes.Container));
 
             var cloudApplication = new CloudApplication("WebAppNoSolution", string.Empty, CloudApplicationResourceType.CloudFormationStack, string.Empty);
             var imageTag = "imageTag";

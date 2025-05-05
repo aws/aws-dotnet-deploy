@@ -55,7 +55,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var optionSettingHandler = new OptionSettingHandler(validatorFactory);
             _recipeHandler = new RecipeHandler(_deploymentManifestEngine, _orchestratorInteractiveService, _directoryManager, _fileManager, optionSettingHandler, validatorFactory);
             _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider.Object));
-            _orchestrator = new Orchestrator(null, _orchestratorInteractiveService, null, null, null, null, null, null, null, null, null, null, null, _optionSettingHandler, null);
+            _orchestrator = new Orchestrator(null!, _orchestratorInteractiveService, null!, null!, null!, null!, null!, null!, null!, null!, null!, null!, null!, _optionSettingHandler, null!);
         }
 
         private async Task<RecommendationEngine> BuildRecommendationEngine(string testProjectName)
@@ -93,7 +93,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var settings = JsonConvert.DeserializeObject<Dictionary<string, object>>(serializedSettings);
 
-            fargateRecommendation = await _orchestrator.ApplyRecommendationPreviousSettings(fargateRecommendation, settings);
+            fargateRecommendation = await _orchestrator.ApplyRecommendationPreviousSettings(fargateRecommendation, settings!);
 
             var additionalECSServiceSecurityGroupsOptionSetting = fargateRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("AdditionalECSServiceSecurityGroups"));
 
@@ -124,13 +124,13 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var settings = JsonConvert.DeserializeObject<Dictionary<string, object>>(serializedSettings);
 
-            beanstalkRecommendation = await _orchestrator.ApplyRecommendationPreviousSettings(beanstalkRecommendation, settings);
+            beanstalkRecommendation = await _orchestrator.ApplyRecommendationPreviousSettings(beanstalkRecommendation, settings!);
 
             var applicationIAMRoleOptionSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("ApplicationIAMRole"));
             var typeHintResponse = _optionSettingHandler.GetOptionSettingValue<IAMRoleTypeHintResponse>(beanstalkRecommendation, applicationIAMRoleOptionSetting);
 
-            Assert.Equal(roleArn, typeHintResponse.RoleArn);
-            Assert.Equal(createNew, typeHintResponse.CreateNew);
+            Assert.Equal(roleArn, typeHintResponse?.RoleArn);
+            Assert.Equal(createNew, typeHintResponse?.CreateNew);
         }
 
         [Theory]
@@ -158,7 +158,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var settings = JsonConvert.DeserializeObject<Dictionary<string, object>>(serializedSettings);
 
-            fargateRecommendation = await _orchestrator.ApplyRecommendationPreviousSettings(fargateRecommendation, settings);
+            fargateRecommendation = await _orchestrator.ApplyRecommendationPreviousSettings(fargateRecommendation, settings!);
 
             var vpcOptionSetting = fargateRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("Vpc"));
 
@@ -187,7 +187,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var settings = JsonConvert.DeserializeObject<Dictionary<string, object>>(serializedSettings);
 
-            fargateRecommendation = await _orchestrator.ApplyRecommendationPreviousSettings(fargateRecommendation, settings);
+            fargateRecommendation = await _orchestrator.ApplyRecommendationPreviousSettings(fargateRecommendation, settings!);
 
             var ecsClusterSetting = fargateRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("ECSCluster"));
 
@@ -215,7 +215,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var settings = JsonConvert.DeserializeObject<Dictionary<string, object>>(serializedSettings);
 
-            beanstalkRecommendation = await _orchestrator.ApplyRecommendationPreviousSettings(beanstalkRecommendation, settings);
+            beanstalkRecommendation = await _orchestrator.ApplyRecommendationPreviousSettings(beanstalkRecommendation, settings!);
 
             var applicationSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("BeanstalkApplication"));
 
@@ -242,7 +242,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var settings = JsonConvert.DeserializeObject<Dictionary<string, object>>(serializedSettings);
 
-            beanstalkRecommendation = await _orchestrator.ApplyRecommendationPreviousSettings(beanstalkRecommendation, settings);
+            beanstalkRecommendation = await _orchestrator.ApplyRecommendationPreviousSettings(beanstalkRecommendation, settings!);
 
             var environmentSetting = beanstalkRecommendation.Recipe.OptionSettings.First(optionSetting => optionSetting.Id.Equals("BeanstalkEnvironment"));
 

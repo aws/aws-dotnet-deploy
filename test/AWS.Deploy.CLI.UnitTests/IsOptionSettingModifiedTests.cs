@@ -40,7 +40,7 @@ namespace AWS.Deploy.CLI.UnitTests
                 "default"
             );
             var recommendations = await engine.ComputeRecommendations();
-            var selectedRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, "AspNetAppElasticBeanstalkLinux"));
+            var selectedRecommendation = recommendations.First(x => string.Equals(x.Recipe.Id, "AspNetAppElasticBeanstalkLinux"));
 
             // ARRANGE - add replacement tokens
             selectedRecommendation.AddReplacementToken(RecipeIdentifier.REPLACE_TOKEN_LATEST_DOTNET_BEANSTALK_PLATFORM_ARN, "Latest-ARN");
@@ -85,7 +85,7 @@ namespace AWS.Deploy.CLI.UnitTests
                 "default"
             );
             var recommendations = await engine.ComputeRecommendations();
-            var selectedRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, "AspNetAppEcsFargate"));
+            var selectedRecommendation = recommendations.First(x => string.Equals(x.Recipe.Id, "AspNetAppEcsFargate"));
 
             // ARRANGE - add replacement tokens
             selectedRecommendation.AddReplacementToken(RecipeIdentifier.REPLACE_TOKEN_STACK_NAME, "MyAppStack");

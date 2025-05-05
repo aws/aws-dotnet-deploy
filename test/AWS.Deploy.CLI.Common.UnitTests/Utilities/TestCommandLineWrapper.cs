@@ -18,12 +18,12 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Utilities
         /// <summary>
         /// The command to be executed via the command line wrapper.
         /// </summary>
-        public string Command { get; set; }
+        public string? Command { get; set; }
 
         /// <summary>
         /// The working directory from which the command will be executed.
         /// </summary>
-        public string WorkingDirectory { get; set; }
+        public string? WorkingDirectory { get; set; }
 
         /// <summary>
         /// Specifies whether to stream the output of the command execution to the interactive service.
@@ -33,7 +33,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Utilities
         /// <summary>
         /// The action to run upon the completion of the command execution.
         /// </summary>
-        public Action<TryRunResult> OnCompleteAction { get; set; }
+        public Action<TryRunResult>? OnCompleteAction { get; set; }
 
         /// <summary>
         /// Specifies whether to redirect standard input, output and error.
@@ -43,7 +43,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Utilities
         /// <summary>
         /// Specifies the input that should be piped into standard input for the process.
         /// </summary>
-        public string Stdin { get; set; }
+        public string? Stdin { get; set; }
 
         /// <summary>
         /// The cancellation token for the async task.
@@ -61,10 +61,10 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Utilities
             string command,
             string workingDirectory = "",
             bool streamOutputToInteractiveService = true,
-            Action<TryRunResult> onComplete = null,
+            Action<TryRunResult>? onComplete = null,
             bool redirectIO = true,
-            string stdin = null,
-            IDictionary<string, string> environmentVariables = null,
+            string? stdin = null,
+            IDictionary<string, string>? environmentVariables = null,
             bool needAwsCredentials = false,
             CancellationToken cancellationToken = default)
         {

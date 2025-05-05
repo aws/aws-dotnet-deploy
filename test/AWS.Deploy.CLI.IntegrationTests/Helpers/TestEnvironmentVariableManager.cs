@@ -10,14 +10,14 @@ namespace AWS.Deploy.CLI.IntegrationTests.Helpers
 {
     public class TestEnvironmentVariableManager : IEnvironmentVariableManager
     {
-        public readonly Dictionary<string, string> store = new Dictionary<string, string>();
+        public readonly Dictionary<string, string?> store = new ();
 
-        public string GetEnvironmentVariable(string variable)
+        public string? GetEnvironmentVariable(string variable)
         {
             return store.ContainsKey(variable) ? store[variable] : null;
         }
 
-        public void SetEnvironmentVariable(string variable, string value)
+        public void SetEnvironmentVariable(string variable, string? value)
         {
             if (string.Equals(variable, "AWS_DOTNET_DEPLOYTOOL_WORKSPACE"))
                 store[variable] = value;

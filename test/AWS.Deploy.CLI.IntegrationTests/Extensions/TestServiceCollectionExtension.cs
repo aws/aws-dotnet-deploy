@@ -19,13 +19,13 @@ namespace AWS.Deploy.CLI.IntegrationTests.Extensions
         public static void AddTestServices(this IServiceCollection serviceCollection)
         {
             serviceCollection.AddSingleton<InMemoryInteractiveService>();
-            serviceCollection.AddSingleton<IToolInteractiveService>(serviceProvider => serviceProvider.GetService<InMemoryInteractiveService>());
-            serviceCollection.AddSingleton<IOrchestratorInteractiveService>(serviceProvider => serviceProvider.GetService<InMemoryInteractiveService>());
+            serviceCollection.AddSingleton<IToolInteractiveService>(serviceProvider => serviceProvider.GetRequiredService<InMemoryInteractiveService>());
+            serviceCollection.AddSingleton<IOrchestratorInteractiveService>(serviceProvider => serviceProvider.GetRequiredService<InMemoryInteractiveService>());
         }
 
         public static async Task<int> RunDeployToolAsync(this IServiceCollection serviceCollection,
             string[] args,
-            Action<IServiceProvider> onProviderBuilt = null)
+            Action<IServiceProvider>? onProviderBuilt = null)
         {
             var registrar = new TypeRegistrar(serviceCollection);
 

@@ -33,7 +33,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
     public class GetApplyOptionSettings : IDisposable
     {
         private bool _isDisposed;
-        private string _stackName;
+        private string? _stackName;
         private readonly IServiceProvider _serviceProvider;
 
         private readonly string _awsRegion;
@@ -281,8 +281,8 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
                 var metadata = await ServerModeExtensions.GetAppSettingsFromCFTemplate(_mockAWSClientFactory, _mockCFClient, generateCloudFormationTemplateResponse.CloudFormationTemplate, _stackName, _deployToolWorkspaceMetadata, _fileManager);
 
                 Assert.True(metadata.Settings.ContainsKey("VPCConnector"));
-                var vpcConnector = JsonConvert.DeserializeObject<VPCConnectorTypeHintResponse>(metadata.Settings["VPCConnector"].ToString());
-                Assert.True(vpcConnector.UseVPCConnector);
+                var vpcConnector = JsonConvert.DeserializeObject<VPCConnectorTypeHintResponse>(metadata.Settings["VPCConnector"].ToString()!);
+                Assert.True(vpcConnector!.UseVPCConnector);
                 Assert.True(vpcConnector.CreateNew);
                 Assert.Equal(vpcId, vpcConnector.VpcId);
                 Assert.Contains<string>(subnet, vpcConnector.Subnets);

@@ -26,7 +26,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
         private readonly CloudFormationHelper _cloudFormationHelper;
         private readonly ECSHelper _ecsHelper;
         private bool _isDisposed;
-        private string _stackName;
+        private string? _stackName;
         private readonly TestAppManager _testAppManager;
 
         public WebAppWithDockerFileTests()
@@ -50,7 +50,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
         {
             _stackName = $"WebAppWithDockerFile{Guid.NewGuid().ToString().Split('-').Last()}";
 
-            InMemoryInteractiveService interactiveService = null;
+            InMemoryInteractiveService interactiveService = null!;
             try
             {
                 // Deploy
@@ -77,15 +77,13 @@ namespace AWS.Deploy.CLI.IntegrationTests
                 var consoleOutput = interactiveService.StdOutReader.ReadAllLines();
 
                 // Assert 'Environment Architecture' is set to 'X86_64'
-                var environmentArchitecture = consoleOutput.LastOrDefault(x => x.StartsWith("13. Environment Architecture:"));
-                Assert.NotNull(environmentArchitecture);
+                var environmentArchitecture = Assert.IsType<string>(consoleOutput.LastOrDefault(x => x.StartsWith("13. Environment Architecture:")));
                 var environmentArchitectureSplit = environmentArchitecture.Split(':').ToList().Select(x => x.Trim()).ToList();
                 Assert.Equal(2, environmentArchitectureSplit.Count);
                 Assert.Equal("X86_64", environmentArchitectureSplit[1]);
 
                 // Assert 'Task CPU' is set to '512'
-                var taskCpu = consoleOutput.LastOrDefault(x => x.StartsWith("8 . Task CPU:"));
-                Assert.NotNull(taskCpu);
+                var taskCpu = Assert.IsType<string>(consoleOutput.LastOrDefault(x => x.StartsWith("8 . Task CPU:")));
                 var taskCpuSplit = taskCpu.Split(':').ToList().Select(x => x.Trim()).ToList();
                 Assert.Equal(2, taskCpuSplit.Count);
                 Assert.Equal("512", taskCpuSplit[1]);
@@ -102,8 +100,8 @@ namespace AWS.Deploy.CLI.IntegrationTests
             _stackName = $"WebAppWithDockerFile{Guid.NewGuid().ToString().Split('-').Last()}";
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
 
-            Cluster cluster = null;
-            InMemoryInteractiveService interactiveService = null;
+            Cluster cluster;
+            InMemoryInteractiveService interactiveService = null!;
             try
             {
                 // Deploy
@@ -214,11 +212,11 @@ namespace AWS.Deploy.CLI.IntegrationTests
             _stackName = $"WebAppNoDockerFile{Guid.NewGuid().ToString().Split('-').Last()}";
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppNoDockerFile", "WebAppNoDockerFile.csproj"));
 
-            InMemoryInteractiveService interactiveService = null;
+            InMemoryInteractiveService interactiveService = null!;
             try
             {
                 // Deploy
-                var configFilePath = Path.Combine(Directory.GetParent(projectPath).FullName, "ECSFargateCustomPortConfigFile.json");
+                var configFilePath = Path.Combine(Directory.GetParent(projectPath)!.FullName, "ECSFargateCustomPortConfigFile.json");
                 ConfigFileHelper.ApplyReplacementTokens(new Dictionary<string, string> { { stackNamePlaceholder, _stackName } }, configFilePath);
 
                 // Deploy
@@ -266,10 +264,10 @@ namespace AWS.Deploy.CLI.IntegrationTests
             var stackNamePlaceholder = "{StackName}";
             _stackName = $"WebAppWithDockerFile{Guid.NewGuid().ToString().Split('-').Last()}";
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
-            var configFilePath = Path.Combine(Directory.GetParent(projectPath).FullName, "AppRunnerConfigFile.json");
+            var configFilePath = Path.Combine(Directory.GetParent(projectPath)!.FullName, "AppRunnerConfigFile.json");
             ConfigFileHelper.ApplyReplacementTokens(new Dictionary<string, string> { { stackNamePlaceholder, _stackName } }, configFilePath);
 
-            InMemoryInteractiveService interactiveService = null;
+            InMemoryInteractiveService interactiveService = null!;
             try
             {
                 // Deploy
@@ -353,7 +351,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
         {
             _stackName = $"FargateArmDeployment{Guid.NewGuid().ToString().Split('-').Last()}";
 
-            InMemoryInteractiveService interactiveService = null;
+            InMemoryInteractiveService interactiveService = null!;
             try
             {
                 // Deploy
@@ -442,7 +440,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
         {
             if (_isDisposed) return;
 
-            if (disposing)
+            if (disposing && !string.IsNullOrEmpty(_stackName))
             {
                 var isStackDeleted = _cloudFormationHelper.IsStackDeleted(_stackName).GetAwaiter().GetResult();
                 if (!isStackDeleted)

@@ -30,7 +30,7 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
         public Task<string> CreateEC2KeyPair(string keyName, string saveLocation) => throw new NotImplementedException();
         public Task<Repository> CreateECRRepository(string repositoryName, string recipeId) => throw new NotImplementedException();
         public Task<List<Stack>> GetCloudFormationStacks() => throw new NotImplementedException();
-        public Task<Stack> GetCloudFormationStack(string stackName) => throw new NotImplementedException();
+        public Task<Stack?> GetCloudFormationStack(string stackName) => throw new NotImplementedException();
 
         public Task<List<AuthorizationData>> GetECRAuthorizationToken()
         {
@@ -43,9 +43,9 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
             return Task.FromResult<List<AuthorizationData>>(new List<AuthorizationData>(){ authorizationData });
         }
 
-        public Task<List<Repository>> GetECRRepositories(List<string> repositoryNames)
+        public Task<List<Repository>> GetECRRepositories(List<string>? repositoryNames)
         {
-            if (repositoryNames.Count == 0)
+            if (repositoryNames == null || repositoryNames.Count == 0)
                 return Task.FromResult<List<Repository>>(new List<Repository>() { });
 
             var repository = new Repository
@@ -56,18 +56,18 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
             return Task.FromResult<List<Repository>>(new List<Repository>() { repository });
         }
 
-        public Task<PlatformSummary> GetLatestElasticBeanstalkPlatformArn(string targetFramework, BeanstalkPlatformType platformType)
+        public Task<PlatformSummary> GetLatestElasticBeanstalkPlatformArn(string? targetFramework, BeanstalkPlatformType platformType)
         {
             return Task.FromResult(new PlatformSummary() { PlatformArn = string.Empty });
         }
 
-        public Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns(string targetFramework, params BeanstalkPlatformType[] platformTypes) => throw new NotImplementedException();
+        public Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns(string? targetFramework, params BeanstalkPlatformType[]? platformTypes) => throw new NotImplementedException();
         public Task<List<Vpc>> GetListOfVpcs() => throw new NotImplementedException();
         public Task<List<KeyPairInfo>> ListOfEC2KeyPairs() => throw new NotImplementedException();
-        public Task<List<Amazon.ECS.Model.Cluster>> ListOfECSClusters(string ecsClusterName) => throw new NotImplementedException();
-        public Task<List<ApplicationDescription>> ListOfElasticBeanstalkApplications(string applicationName) => throw new NotImplementedException();
-        public Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(string applicationName, string environmentName) => throw new NotImplementedException();
-        public Task<List<Role>> ListOfIAMRoles(string servicePrincipal) => throw new NotImplementedException();
+        public Task<List<Amazon.ECS.Model.Cluster>> ListOfECSClusters(string? ecsClusterName) => throw new NotImplementedException();
+        public Task<List<ApplicationDescription>> ListOfElasticBeanstalkApplications(string? applicationName) => throw new NotImplementedException();
+        public Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(string? applicationName, string? environmentName) => throw new NotImplementedException();
+        public Task<List<Role>> ListOfIAMRoles(string? servicePrincipal) => throw new NotImplementedException();
         public Task<List<StackResource>> DescribeCloudFormationResources(string stackName) => throw new NotImplementedException();
         public Task<EnvironmentDescription> DescribeElasticBeanstalkEnvironment(string environmentId) => throw new NotImplementedException();
         public Task<Amazon.ElasticLoadBalancingV2.Model.LoadBalancer> DescribeElasticLoadBalancer(string loadBalancerArn) => throw new NotImplementedException();
@@ -83,18 +83,18 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
         public Task<List<string>> ListOfSNSTopicArns() => throw new NotImplementedException();
         public Task<List<Amazon.S3.Model.S3Bucket>> ListOfS3Buckets() => throw new NotImplementedException();
         public Task<List<InstanceTypeInfo>> ListOfAvailableInstanceTypes() => throw new NotImplementedException();
-        public Task<InstanceTypeInfo> DescribeInstanceType(string instanceType) => throw new NotImplementedException();
+        public Task<InstanceTypeInfo?> DescribeInstanceType(string instanceType) => throw new NotImplementedException();
         public Task<List<StackEvent>> GetCloudFormationStackEvents(string stackName) => throw new NotImplementedException();
         public Task<List<Amazon.ElasticBeanstalk.Model.Tag>> ListElasticBeanstalkResourceTags(string resourceArn) => throw new NotImplementedException();
         public Task<List<ConfigurationOptionSetting>> GetBeanstalkEnvironmentConfigurationSettings(string environmentId) => throw new NotImplementedException();
         public Task<GetCallerIdentityResponse> GetCallerIdentity(string awsRegion) => throw new NotImplementedException();
         public Task<Repository> DescribeECRRepository(string respositoryName) => throw new NotImplementedException();
         public Task<List<VpcConnector>> DescribeAppRunnerVpcConnectors() => throw new NotImplementedException();
-        public Task<List<Subnet>> DescribeSubnets(string vpcID = null) => throw new NotImplementedException();
-        public Task<List<SecurityGroup>> DescribeSecurityGroups(string vpcID = null) => throw new NotImplementedException();
-        public Task<string> GetParameterStoreTextValue(string parameterName) => throw new NotImplementedException();
+        public Task<List<Subnet>> DescribeSubnets(string? vpcID = null) => throw new NotImplementedException();
+        public Task<List<SecurityGroup>> DescribeSecurityGroups(string? vpcID = null) => throw new NotImplementedException();
+        public Task<string?> GetParameterStoreTextValue(string parameterName) => throw new NotImplementedException();
         public Task<ResourceDescription> GetCloudControlApiResource(string type, string identifier) => throw new NotImplementedException();
-        public Task<Vpc> GetDefaultVpc() => throw new NotImplementedException();
+        public Task<Vpc?> GetDefaultVpc() => throw new NotImplementedException();
         public Task<List<ConfigurationSettingsDescription>> DescribeElasticBeanstalkConfigurationSettings(string applicationName, string environmentName) => throw new NotImplementedException();
     }
 }
