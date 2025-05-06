@@ -33,7 +33,6 @@
     <PackageReference Include="AWSSDK.SSOOIDC" Version="3.7.301.72" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.5.0" />
-    <PackageReference Include="System.Text.Json" Version="8.0.5" />
     <PackageReference Include="Spectre.Console" Version="0.50.0" />
     <PackageReference Include="Spectre.Console.Cli" Version="0.50.0" />
   </ItemGroup>

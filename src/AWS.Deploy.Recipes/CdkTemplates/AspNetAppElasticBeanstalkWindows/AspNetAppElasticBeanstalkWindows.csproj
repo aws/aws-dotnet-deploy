@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -26,7 +26,7 @@
 
   <ItemGroup>
     <!-- CDK Construct Library dependencies -->
-    <PackageReference Include="Amazon.CDK.Lib" Version="2.171.1" />
+    <PackageReference Include="Amazon.CDK.Lib" Version="2.194.0" />
 
     <PackageReference Include="AWSSDK.ElasticBeanstalk" Version="3.7.200.42" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.1" />
