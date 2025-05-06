@@ -1,4 +1,4 @@
-name: Auto update Bootstrap Version Changes
+name: Auto Update Bootstrap Version Changes
 
 on:
   schedule:
