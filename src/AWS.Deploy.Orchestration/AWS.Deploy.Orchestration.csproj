@@ -26,9 +26,9 @@
     <PackageReference Include="AWSSDK.S3" Version="4.0.0.1" />
     <PackageReference Include="AWSSDK.AppRunner" Version="4.0.0.1" />
     <PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="4.0.1.1" />
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0.0" />
-    <PackageReference Include="Microsoft.TemplateEngine.IDE" Version="5.0.1" />
-    <PackageReference Include="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="5.0.1" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
+    <PackageReference Include="Microsoft.TemplateEngine.IDE" Version="8.0.408" />
+    <PackageReference Include="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="8.0.408" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.Linq.Async" Version="6.0.1" />
     <PackageReference Include="YamlDotNet" Version="13.4.0" />

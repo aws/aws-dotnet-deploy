@@ -1,37 +1,30 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
 using AWS.Deploy.Common;
 using Microsoft.TemplateEngine.Abstractions;
-using Microsoft.TemplateEngine.Edge;
-using Microsoft.TemplateEngine.Edge.Template;
+using Microsoft.TemplateEngine.Abstractions.Installer;
+using Microsoft.TemplateEngine.Edge.Installers.Folder;
 using Microsoft.TemplateEngine.IDE;
 using Microsoft.TemplateEngine.Orchestrator.RunnableProjects;
-using Microsoft.TemplateEngine.Utils;
+using DefaultTemplateEngineHost = Microsoft.TemplateEngine.Edge.DefaultTemplateEngineHost;
+using WellKnownSearchFilters = Microsoft.TemplateEngine.Utils.WellKnownSearchFilters;
 
 namespace AWS.Deploy.Orchestration
 {
     public class TemplateEngine
     {
-        private const string HostIdentifier = "aws-net-deploy-template-generator";
-        private const string HostVersion = "v1.0.0";
+        private const string HOST_IDENTIFIER = "aws-net-deploy-template-generator";
+        private const string HOST_VERSION = "v2.0.0";
         private readonly Bootstrapper _bootstrapper;
-        private static readonly object s_locker = new();
 
         public TemplateEngine()
         {
-            _bootstrapper = new Bootstrapper(CreateHost(), null, virtualizeConfiguration: true);
+            _bootstrapper = new Bootstrapper(CreateHost(), true);
         }
 
-        public void GenerateCDKProjectFromTemplate(Recommendation recommendation, OrchestratorSession session, string outputDirectory, string assemblyName)
+        public async Task GenerateCdkProjectFromTemplateAsync(Recommendation recommendation, OrchestratorSession session, string outputDirectory, string assemblyName)
         {
             if (string.IsNullOrEmpty(recommendation.Recipe.CdkProjectTemplate))
             {
@@ -49,23 +42,21 @@ namespace AWS.Deploy.Orchestration
                 recommendation.Recipe.CdkProjectTemplate);
 
             //Installing the base template into the templating engine to make it available for generation
-            InstallTemplates(cdkProjectTemplateDirectory);
+            await InstallTemplates(cdkProjectTemplateDirectory);
 
             //Looking up the installed template in the templating engine
-            var template =
+            var templates = await
                 _bootstrapper
-                    .ListTemplates(
-                        true,
-                        WellKnownSearchFilters.NameFilter(recommendation.Recipe.CdkProjectTemplateId))
-                    .FirstOrDefault()
-                    ?.Info;
+                    .GetTemplatesAsync(
+                        new[] { WellKnownSearchFilters.NameFilter(recommendation.Recipe.CdkProjectTemplateId) });
+            var template = templates.FirstOrDefault()?.Info;
 
             //If the template is not found, throw an exception
             if (template == null)
                 throw new Exception($"Failed to find a Template for [{recommendation.Recipe.CdkProjectTemplateId}]");
 
-            var templateParameters = new Dictionary<string, string> {
-                // CDK Template projects can parameterize the version number of the AWS.Deploy.Recipes.CDK.Common package. This avoid
+            var templateParameters = new Dictionary<string, string?> {
+                // CDK Template projects can parameterize the version number of the AWS.Deploy.Recipes.CDK.Common package. This avoids
                 // projects having to be modified every time the package version is bumped.
                 { "AWSDeployRecipesCDKCommonVersion", FileVersionInfo.GetVersionInfo(typeof(AWS.Deploy.Recipes.CDK.Common.CDKRecipeSetup).Assembly.Location).ProductVersion
                                                       ?? throw new InvalidAWSDeployRecipesCDKCommonVersionException(DeployToolErrorCode.InvalidAWSDeployRecipesCDKCommonVersion, "The version number of the AWS.Deploy.Recipes.CDK.Common package is invalid.") }
@@ -73,11 +64,8 @@ namespace AWS.Deploy.Orchestration
 
             try
             {
-                lock (s_locker)
-                {
-                    //Generate the CDK project using the installed template into the output directory
-                    _bootstrapper.CreateAsync(template, assemblyName, outputDirectory, templateParameters, false, "").GetAwaiter().GetResult();
-                }
+                //Generate the CDK project using the installed template into the output directory
+                await _bootstrapper.CreateAsync(template, assemblyName, outputDirectory, templateParameters);
             }
             catch
             {
@@ -85,14 +73,18 @@ namespace AWS.Deploy.Orchestration
             }
         }
 
-        private void InstallTemplates(string folderLocation)
+        private async Task InstallTemplates(string folderLocation)
         {
             try
             {
-                lock (s_locker)
+                var installRequests = new[]
                 {
-                    _bootstrapper.Install(folderLocation);
-                }
+                    new InstallRequest(folderLocation, folderLocation, force: true)
+                };
+
+                var result = await _bootstrapper.InstallTemplatePackagesAsync(installRequests);
+                if (result.Any(x => x.Success == false))
+                    throw new Exception("Failed to install the default template that is required to the generate the CDK project");
             }
             catch(Exception e)
             {
@@ -107,13 +99,13 @@ namespace AWS.Deploy.Orchestration
                 { "prefs:language", "C#" }
             };
 
-            var builtIns = new AssemblyComponentCatalog(new[]
+            var builtIns = new List<(Type, IIdentifiedComponent)>
             {
-                typeof(RunnableProjectGenerator).GetTypeInfo().Assembly,            // for assembly: Microsoft.TemplateEngine.Orchestrator.RunnableProjects
-                typeof(AssemblyComponentCatalog).GetTypeInfo().Assembly,            // for assembly: Microsoft.TemplateEngine.Edge
-            });
+                (typeof(IGenerator), new RunnableProjectGenerator()),
+                (typeof(IInstallerFactory), new FolderInstallerFactory())
+            };
 
-            ITemplateEngineHost host = new DefaultTemplateEngineHost(HostIdentifier, HostVersion, CultureInfo.CurrentCulture.Name, preferences, builtIns, null);
+            ITemplateEngineHost host = new DefaultTemplateEngineHost(HOST_IDENTIFIER, HOST_VERSION, preferences, builtIns);
 
             return host;
         }
