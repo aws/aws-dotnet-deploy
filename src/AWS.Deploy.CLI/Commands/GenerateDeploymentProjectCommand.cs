@@ -101,7 +101,7 @@ public class GenerateDeploymentProjectCommand(
             }
         }
 
-        cdkProjectHandler.CreateCdkProject(selectedRecommendation, session, saveDirectory);
+        await cdkProjectHandler.CreateCdkProject(selectedRecommendation, session, saveDirectory);
         await GenerateDeploymentRecipeSnapShot(selectedRecommendation, saveDirectory, projectDisplayName, targetApplicationFullPath);
 
         var saveCdkDirectoryFullPath = directoryManager.GetDirectoryInfo(saveDirectory).FullName;
