@@ -32,7 +32,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
         private async Task<List<LoadBalancer>> GetData()
         {
-            return await _awsResourceQueryer.ListOfLoadBalancers(LoadBalancerTypeEnum.Application);
+            return await _awsResourceQueryer.ListOfLoadBalancers(LoadBalancerTypeEnum.Application) ?? new List<LoadBalancer>();
         }
 
         public async Task<TypeHintResourceTable> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)

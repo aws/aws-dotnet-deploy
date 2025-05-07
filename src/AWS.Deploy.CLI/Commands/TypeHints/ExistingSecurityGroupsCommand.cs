@@ -33,7 +33,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 var vpcIdOptionSetting = _optionSettingHandler.GetOptionSetting(recommendation, optionSetting.ParentSettingId);
                 vpcId = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, vpcIdOptionSetting);
             }
-            return await _awsResourceQueryer.DescribeSecurityGroups(vpcId);
+            return await _awsResourceQueryer.DescribeSecurityGroups(vpcId) ?? new List<SecurityGroup>();
         }
 
         public async Task<TypeHintResourceTable> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)

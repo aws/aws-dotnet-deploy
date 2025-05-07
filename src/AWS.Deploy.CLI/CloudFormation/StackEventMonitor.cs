@@ -1,11 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
 using Amazon.CloudFormation;
 using Amazon.CloudFormation.Model;
 using AWS.Deploy.CLI.Extensions;
@@ -126,7 +122,7 @@ namespace AWS.Deploy.CLI.CloudFormation
             {
                 var row = new[]
                 {
-                    (stackEvent.Timestamp.ToString(CultureInfo.InvariantCulture), TIMESTAMP_WIDTH),
+                    (stackEvent.Timestamp != null ? stackEvent.Timestamp.Value.ToString(CultureInfo.InvariantCulture): string.Empty, TIMESTAMP_WIDTH),
                     (stackEvent.ResourceStatus.ToString(), RESOURCE_STATUS_WIDTH),
                     (stackEvent.ResourceType.Truncate(RESOURCE_TYPE_WIDTH, true), RESOURCE_TYPE_WIDTH),
                     (stackEvent.LogicalResourceId, LOGICAL_RESOURCE_WIDTH),

@@ -22,14 +22,13 @@ namespace AWS.Deploy.CLI.UnitTests
             _clients = clientMocks ?? new IAmazonService[0];
         }
 
-        public T GetAWSClient<T>(string? awsRegion = null) where T : IAmazonService
+        public T GetAWSClient<T>(string? awsRegion = null) where T : class, IAmazonService
         {
             var match = _clients.OfType<T>().FirstOrDefault();
 
             if (null == match)
                 throw new Exception(
-                    $"Test setup exception.  Somebody wanted a [{typeof(T)}] but I don't have it." +
-                    $"I have the following clients: {string.Join(",", _clients.Select(x => x.GetType().Name))}");
+                    $"Test setup exception.  Somebody wanted a [{typeof(T)}] but I don't have it.");
 
             return match;
         }

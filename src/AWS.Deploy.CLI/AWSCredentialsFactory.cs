@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using Amazon.Runtime;
+using Amazon.Runtime.Credentials;
 
 namespace AWS.Deploy.CLI
 {
@@ -11,7 +12,7 @@ namespace AWS.Deploy.CLI
         /// <inheritdoc />
         public AWSCredentials Create()
         {
-            return FallbackCredentialsFactory.GetCredentials();
+            return DefaultAWSCredentialsIdentityResolver.GetCredentials();
         }
     }
 }

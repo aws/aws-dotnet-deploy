@@ -3,6 +3,7 @@
 
 using System.Linq;
 using System.Threading.Tasks;
+using Amazon.EC2.Model;
 using AWS.Deploy.Common.Data;
 
 namespace AWS.Deploy.Common.Recipes.Validation
@@ -48,7 +49,7 @@ namespace AWS.Deploy.Common.Recipes.Validation
             }
             else
             {
-                var vpcs = await _awsResourceQueryer.GetListOfVpcs();
+                var vpcs = await _awsResourceQueryer.GetListOfVpcs() ?? new List<Vpc>();
                 if (vpcs.Any())
                     return ValidationResult.Valid();
             }

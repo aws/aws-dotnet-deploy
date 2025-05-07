@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Amazon.ElasticBeanstalk.Model;
 using AWS.Deploy.Common.Data;
 
 namespace AWS.Deploy.Common.Recipes.Validation;
@@ -81,7 +82,7 @@ public class BeanstalkInstanceTypeValidator : IRecipeValidator
 
             // In order to retrieve the Instance Type from Elastic Beanstalk, we need to list the Option Settings of the configuration settings and look for the option
             // with the namespace 'aws:autoscaling:launchconfiguration' and name 'InstanceType'.
-            var environmentSettings = await _awsResourceQueryer.DescribeElasticBeanstalkConfigurationSettings(applicationName, environmentName);
+            var environmentSettings = await _awsResourceQueryer.DescribeElasticBeanstalkConfigurationSettings(applicationName, environmentName) ?? new List<ConfigurationSettingsDescription>();
             var environmentInstanceTypes = new HashSet<string>();
             foreach (var environmentSetting in environmentSettings)
             {
@@ -100,7 +101,7 @@ public class BeanstalkInstanceTypeValidator : IRecipeValidator
             foreach (var environmentInstanceType in environmentInstanceTypes)
             {
                 var describeInstanceTypeResponse = await _awsResourceQueryer.DescribeInstanceType(environmentInstanceType);
-                describeInstanceTypeResponse?.ProcessorInfo.SupportedArchitectures.ForEach((x) => environmentArchitectures.Add(x));
+                describeInstanceTypeResponse?.ProcessorInfo.SupportedArchitectures?.ForEach((x) => environmentArchitectures.Add(x));
             }
 
             // We check if the selected instance types support the architecture we are trying to deploy to.

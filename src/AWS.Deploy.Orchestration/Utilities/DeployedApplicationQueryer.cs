@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Amazon.CloudFormation;
+using Amazon.CloudFormation.Model;
 using Amazon.ElasticBeanstalk;
 using Amazon.ElasticBeanstalk.Model;
 using AWS.Deploy.Common;
@@ -17,6 +18,7 @@ using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.LocalUserSettings;
 using AWS.Deploy.Orchestration.ServiceHandlers;
+using InvalidOperationException = System.InvalidOperationException;
 
 namespace AWS.Deploy.Orchestration.Utilities
 {
@@ -165,13 +167,13 @@ namespace AWS.Deploy.Orchestration.Utilities
         /// <returns>A list of <see cref="CloudApplication"/></returns>
         private async Task<List<CloudApplication>> GetExistingCloudFormationStacks()
         {
-            var stacks = await _awsResourceQueryer.GetCloudFormationStacks();
+            var stacks = await _awsResourceQueryer.GetCloudFormationStacks() ?? new List<Stack>();
             var apps = new List<CloudApplication>();
 
             foreach (var stack in stacks)
             {
                 // Check to see if stack has AWS .NET deployment tool tag and the stack is not deleted or in the process of being deleted.
-                var deployTag = stack.Tags.FirstOrDefault(tags => string.Equals(tags.Key, Constants.CloudFormationIdentifier.STACK_TAG));
+                var deployTag = stack.Tags?.FirstOrDefault(tags => string.Equals(tags.Key, Constants.CloudFormationIdentifier.STACK_TAG));
 
                 // Skip stacks that don't have AWS .NET deployment tool tag
                 if (deployTag == null ||
@@ -218,7 +220,7 @@ namespace AWS.Deploy.Orchestration.Utilities
             if (!environments.Any())
                 return validEnvironments;
 
-            var dotnetPlatforms = await _awsResourceQueryer.GetElasticBeanstalkPlatformArns(string.Empty);
+            var dotnetPlatforms = await _awsResourceQueryer.GetElasticBeanstalkPlatformArns(string.Empty) ?? new List<PlatformSummary>();
             var dotnetPlatformArns = dotnetPlatforms.Select(x => x.PlatformArn).ToList();
 
             // only select environments that have a dotnet specific platform ARN.

@@ -17,7 +17,7 @@ namespace AWS.Deploy.CLI.Extensions
                     : $" ({name}) ";
 
             var isDefaultPart =
-                vpc.IsDefault
+                vpc.IsDefault ?? false
                     ? " *** Account Default VPC ***"
                     : "";
 

@@ -17,7 +17,7 @@ namespace AWS.Deploy.Common
             _awsOptionsAction = awsOptionsAction;
         }
 
-        public T GetAWSClient<T>(string? awsRegion = null) where T : IAmazonService
+        public T GetAWSClient<T>(string? awsRegion = null) where T : class, IAmazonService
         {
             var awsOptions = new AWSOptions();
 
