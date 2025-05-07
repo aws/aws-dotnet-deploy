@@ -1,7 +1,7 @@
 {
     "$schema": "./aws-deploy-recipe-schema.json",
     "Id": "AspNetAppElasticBeanstalkWindows",
-    "Version": "1.0.3",
+    "Version": "1.1.0",
     "Name": "ASP.NET Core App to AWS Elastic Beanstalk on Windows",
     "DeploymentType": "CdkProject",
     "DeploymentBundle": "DotnetPublishZipFile",
@@ -34,7 +34,7 @@
                     "Type": "MSProperty",
                     "Condition": {
                         "PropertyName": "TargetFramework",
-                        "AllowedValues": [ "netcoreapp3.1", "net5.0", "net6.0", "net7.0", "net8.0", "net9.0" ]
+                        "AllowedValues": [ "netcoreapp3.1", "net5.0", "net6.0", "net7.0", "net8.0", "net9.0", "net10.0" ]
                     }
                 }
             ],
