@@ -6,7 +6,7 @@ This section of the troubleshooting guide explains how to determine, diagnose, a
 
 **Why is this happening**: AWS.Deploy.Tools relies on [AWS Cloud Development Kit](https://aws.amazon.com/cdk/) (CDK) to provision resources for your cloud application. AWS CDK requires Node.js to be installed in your machine. See the  [CDK's FAQs](https://aws.amazon.com/cdk/faqs/) for more information about how it uses Node.js.
 
-*Minimum required Node.js version >= 14.17.0*
+*Minimum required Node.js version >= 18.0.0*
 
 **Resolution**: See [here](https://nodejs.org/en/download/) to install Node.js on your system.
 
