@@ -33,7 +33,7 @@ namespace AWS.Deploy.Orchestration
         private const string PODMAN_DEPENDENCY_NAME = "Podman";
         private const string PODMAN_INSTALLATION_URL = "https://podman.io/docs/installation";
 
-        private static readonly Version MinimumNodeJSVersion = new Version(14,17,0);
+        private static readonly Version MinimumNodeJSVersion = new Version(18,0,0);
 
         /// <summary>
         /// How long to wait for the commands we run to determine if Node/Docker/etc. are installed to finish
