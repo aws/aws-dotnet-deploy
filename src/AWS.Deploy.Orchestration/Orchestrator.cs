@@ -336,7 +336,7 @@ namespace AWS.Deploy.Orchestration
                 imageTag = $"{respositoryName}:{DateTime.UtcNow.Ticks}";
             }
 
-            await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation, imageTag);
+            await _deploymentBundleHandler.BuildContainerImage(cloudApplication, recommendation, imageTag);
 
             // These option settings need to be persisted back as they are not always provided by the user and we have custom logic to determine their values
             await _optionSettingHandler.SetOptionSettingValue(recommendation, Constants.Docker.DockerExecutionDirectoryOptionId, recommendation.DeploymentBundle.DockerExecutionDirectory);
@@ -346,7 +346,7 @@ namespace AWS.Deploy.Orchestration
             // If we run into issues doing so, we can proceed without throwing a terminating exception.
             try
             {
-                var environmentVariables = await _deploymentBundleHandler.InspectDockerImageEnvironmentVariables(recommendation, imageTag);
+                var environmentVariables = await _deploymentBundleHandler.InspectContainerImageEnvironmentVariables(recommendation, imageTag);
 
                 if (environmentVariables.ContainsKey(Constants.Docker.DotnetHttpPortEnvironmentVariable))
                 {
@@ -365,13 +365,13 @@ namespace AWS.Deploy.Orchestration
                     }
                 }
             }
-            catch (DockerInspectFailedException ex)
+            catch (ContainerInspectFailedException ex)
             {
                 _interactiveService.LogDebugMessage($"Unable to inspect the docker container to retrieve the HTTP port used by .NET due to the following error: {ex.Message}");
             }
 
             _interactiveService.LogSectionStart("Pushing container image to Elastic Container Registry (ECR)", "Using the docker CLI to log on to ECR and push the local image to ECR.");
-            await _deploymentBundleHandler.PushDockerImageToECR(recommendation, respositoryName, imageTag);
+            await _deploymentBundleHandler.PushContainerImageToECR(recommendation, respositoryName, imageTag);
         }
 
         private async Task CreateDotnetPublishDeploymentBundle(Recommendation recommendation)

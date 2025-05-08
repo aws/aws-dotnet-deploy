@@ -59,7 +59,7 @@ namespace AWS.Deploy.CLI.UnitTests
             _recipeHandler = new RecipeHandler(_deploymentManifestEngine, _orchestratorInteractiveService, _directoryManager, _fileManager, optionSettingHandler, validatorFactory);
             _projectDefinitionParser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
             var systemCapabilityEvaluatorMock = new Mock<ISystemCapabilityEvaluator>();
-            systemCapabilityEvaluatorMock.Setup(x => x.GetInstalledContainerAppInfo()).Returns(new ContainerAppInfo("Docker", "", true, ""));
+            systemCapabilityEvaluatorMock.Setup(x => x.GetInstalledContainerAppInfo(It.IsAny<Recommendation>())).ReturnsAsync(new ContainerAppInfo("Docker", "", true, ""));
             _systemCapabilityEvaluator = systemCapabilityEvaluatorMock.Object;
             _deploymentBundleHandler = new DeploymentBundleHandler(_commandLineWrapper, awsResourceQueryer, interactiveService, _directoryManager, zipFileManager, new FileManager(), optionSettingHandler, _systemCapabilityEvaluator);
 
@@ -87,7 +87,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var imageTag = "imageTag";
             var dockerFilePath = Path.GetFullPath(Path.Combine(".", "Dockerfile"), recommendation.GetProjectDirectory());
 
-            await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation, imageTag);
+            await _deploymentBundleHandler.BuildContainerImage(cloudApplication, recommendation, imageTag);
 
             // Explicitly checking for X64 because the default value for EnvironmentArchitecture is X86_64
             // This test will help catch a change in the default value
@@ -118,7 +118,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             recommendation.DeploymentBundle.EnvironmentArchitecture = environmentArchitecture;
 
-            await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation, imageTag);
+            await _deploymentBundleHandler.BuildContainerImage(cloudApplication, recommendation, imageTag);
 
             var currentArchitecture = RuntimeInformation.OSArchitecture == Architecture.Arm64 ? SupportedArchitecture.Arm64 : SupportedArchitecture.X86_64;
             if (currentArchitecture.Equals(environmentArchitecture))
@@ -147,7 +147,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var cloudApplication = new CloudApplication("ConsoleAppTask", String.Empty, CloudApplicationResourceType.CloudFormationStack, string.Empty);
             var imageTag = "imageTag";
-            await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation, imageTag);
+            await _deploymentBundleHandler.BuildContainerImage(cloudApplication, recommendation, imageTag);
 
             var expectedDockerFile = Path.GetFullPath(Path.Combine(".", "Dockerfile"), recommendation.GetProjectDirectory());
             var dockerExecutionDirectory = Directory.GetParent(Path.GetFullPath(recommendation.ProjectPath))!.Parent!.Parent!;
@@ -181,7 +181,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var cloudApplication = new CloudApplication("ConsoleAppTask", string.Empty, CloudApplicationResourceType.CloudFormationStack, string.Empty);
             var imageTag = "imageTag";
-            await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation, imageTag);
+            await _deploymentBundleHandler.BuildContainerImage(cloudApplication, recommendation, imageTag);
 
             var expectedDockerFile = Path.GetFullPath(Path.Combine(".", "Dockerfile"), recommendation.GetProjectDirectory());
 
@@ -220,7 +220,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var cloudApplication = new CloudApplication("ConsoleAppTask", string.Empty, CloudApplicationResourceType.CloudFormationStack, recommendation.Recipe.Id);
             var imageTag = "imageTag";
-            await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation, imageTag);
+            await _deploymentBundleHandler.BuildContainerImage(cloudApplication, recommendation, imageTag);
             if (RuntimeInformation.OSArchitecture.Equals(Architecture.X64))
             {
                 Assert.Equal($"docker build -t {imageTag} -f \"{dockerfilePath}\" .",
@@ -243,7 +243,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var recommendation = new Recommendation(_recipeDefinition, project, 100, new Dictionary<string, object>());
             var repositoryName = "repository";
 
-            await _deploymentBundleHandler.PushDockerImageToECR(recommendation, repositoryName, "ConsoleAppTask:latest");
+            await _deploymentBundleHandler.PushContainerImageToECR(recommendation, repositoryName, "ConsoleAppTask:latest");
 
             Assert.Equal(repositoryName, recommendation.DeploymentBundle.ECRRepositoryName);
         }
@@ -257,7 +257,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             recommendation.DeploymentBundle.DockerExecutionDirectory = projectPath;
 
-            await _deploymentBundleHandler.InspectDockerImageEnvironmentVariables(recommendation, "imageTag");
+            await _deploymentBundleHandler.InspectContainerImageEnvironmentVariables(recommendation, "imageTag");
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -469,7 +469,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var cloudApplication = new CloudApplication("WebAppWithSolutionParentLevel", string.Empty, CloudApplicationResourceType.CloudFormationStack, string.Empty);
             var imageTag = "imageTag";
-            await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation, imageTag);
+            await _deploymentBundleHandler.BuildContainerImage(cloudApplication, recommendation, imageTag);
 
             Assert.Equal(Directory.GetParent(SystemIOUtilities.ResolvePath(projectPath))!.FullName, recommendation.DeploymentBundle.DockerExecutionDirectory);
         }
@@ -485,7 +485,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var cloudApplication = new CloudApplication("WebAppNoSolution", string.Empty, CloudApplicationResourceType.CloudFormationStack, string.Empty);
             var imageTag = "imageTag";
-            await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation, imageTag);
+            await _deploymentBundleHandler.BuildContainerImage(cloudApplication, recommendation, imageTag);
 
             Assert.Equal(Path.GetFullPath(SystemIOUtilities.ResolvePath(projectPath)), recommendation.DeploymentBundle.DockerExecutionDirectory);
         }

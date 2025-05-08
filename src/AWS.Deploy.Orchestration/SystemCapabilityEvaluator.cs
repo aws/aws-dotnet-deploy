@@ -19,7 +19,7 @@ namespace AWS.Deploy.Orchestration
 
         Task<List<SystemCapability>> EvaluateSystemCapabilities(Recommendation selectedRecommendation);
 
-        ContainerAppInfo? GetInstalledContainerAppInfo();
+        Task<ContainerAppInfo?> GetInstalledContainerAppInfo(Recommendation selectedRecommendation);
     }
 
     public class SystemCapabilityEvaluator(ICommandLineWrapper commandLineWrapper) : ISystemCapabilityEvaluator
@@ -238,7 +238,12 @@ namespace AWS.Deploy.Orchestration
             return missingCapabilitiesForRecipe;
         }
 
-        public ContainerAppInfo? GetInstalledContainerAppInfo() => _installedContainerAppInfo;
+        public async Task<ContainerAppInfo?> GetInstalledContainerAppInfo(Recommendation selectedRecommendation)
+        {
+            if (_installedContainerAppInfo is null)
+                await EvaluateSystemCapabilities(selectedRecommendation);
+            return _installedContainerAppInfo;
+        }
 
         public void ClearCachedCapabilityChecks()
         {

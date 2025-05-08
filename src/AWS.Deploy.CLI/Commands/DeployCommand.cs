@@ -587,7 +587,7 @@ public class DeployCommand(
         {
             await orchestrator.CreateDeploymentBundle(cloudApplication, selectedRecommendation);
         }
-        catch(FailedToCreateDeploymentBundleException ex) when (ex.ErrorCode == DeployToolErrorCode.DockerBuildFailed)
+        catch(FailedToCreateDeploymentBundleException ex) when (ex.ErrorCode == DeployToolErrorCode.ContainerBuildFailed)
         {
             if (toolInteractiveService.DisableInteractive)
             {
