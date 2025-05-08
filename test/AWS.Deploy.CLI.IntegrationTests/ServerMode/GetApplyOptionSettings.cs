@@ -217,7 +217,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
             var projectPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));
             var portNumber = 4021;
             using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ServerModeUtilities.ResolveDefaultCredentials);
-
+            
             var serverCommandSettings = new ServerModeCommandSettings
             {
                 Port = portNumber,
@@ -256,6 +256,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
                     {
                         {"VPCConnector.UseVPCConnector", "true"},
                         {"VPCConnector.CreateNew", "true"},
+                        {"VPCConnector.CreateNewVpc", "false"},
                         {"VPCConnector.VpcId", vpcId}
                     }
                 });
