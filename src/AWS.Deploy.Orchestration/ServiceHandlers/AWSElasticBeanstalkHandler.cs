@@ -388,10 +388,10 @@ namespace AWS.Deploy.Orchestration.ServiceHandlers
 
             var ebClient = _awsClientFactory.GetAWSClient<IAmazonElasticBeanstalk>();
             var response = await ebClient.DescribeEventsAsync(request);
-            if (response.Events.Count == 0)
+            if (response.Events == null || response.Events.Count == 0)
                 return DateTime.Now;
 
-            return response.Events.First().EventDate;
+            return response.Events.First().EventDate ?? DateTime.Now;
         }
 
         private async Task<bool> WaitForEnvironmentUpdateCompletion(string applicationName, string environmentName, DateTime startingEventDate)
@@ -415,32 +415,32 @@ namespace AWS.Deploy.Orchestration.ServiceHandlers
 
             do
             {
-                Thread.Sleep(5000);
+                await Task.Delay(TimeSpan.FromSeconds(5));
 
                 var responseEnvironments = await ebClient.DescribeEnvironmentsAsync(requestEnvironment);
-                if (responseEnvironments.Environments.Count == 0)
+                if (responseEnvironments.Environments == null || responseEnvironments.Environments.Count == 0)
                     throw new AWSResourceNotFoundException(DeployToolErrorCode.BeanstalkEnvironmentDoesNotExist, $"Failed to find environment {environmentName} belonging to application {applicationName}");
 
                 environment = responseEnvironments.Environments[0];
 
-                requestEvents.StartTimeUtc = lastPrintedEventDate;
+                requestEvents.StartTime = lastPrintedEventDate;
                 var responseEvents = await ebClient.DescribeEventsAsync(requestEvents);
-                if (responseEvents.Events.Any())
+                if (responseEvents.Events != null && responseEvents.Events.Any())
                 {
                     for (var i = responseEvents.Events.Count - 1; i >= 0; i--)
                     {
                         var evnt = responseEvents.Events[i];
-                        if (evnt.EventDate <= lastPrintedEventDate)
+                        if (evnt.EventDate == null || evnt.EventDate <= lastPrintedEventDate)
                             continue;
 
-                        _interactiveService.LogInfoMessage(evnt.EventDate.ToLocalTime() + "    " + evnt.Severity + "    " + evnt.Message);
+                        _interactiveService.LogInfoMessage(evnt.EventDate.Value.ToLocalTime() + "    " + evnt.Severity + "    " + evnt.Message);
                         if (evnt.Severity == EventSeverity.ERROR || evnt.Severity == EventSeverity.FATAL)
                         {
                             success = false;
                         }
                     }
 
-                    lastPrintedEventDate = responseEvents.Events[0].EventDate;
+                    lastPrintedEventDate = responseEvents.Events[0].EventDate ?? lastPrintedEventDate;
                 }
 
             } while (environment.Status == EnvironmentStatus.Launching || environment.Status == EnvironmentStatus.Updating);

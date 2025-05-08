@@ -313,7 +313,7 @@ namespace AWS.Deploy.Orchestration
 
         private async Task<Repository> SetupECRRepository(string ecrRepositoryName, string recipeId)
         {
-            var existingRepositories = await _awsResourceQueryer.GetECRRepositories(new List<string> { ecrRepositoryName });
+            var existingRepositories = await _awsResourceQueryer.GetECRRepositories(new List<string> { ecrRepositoryName }) ?? new List<Repository>();
 
             if (existingRepositories.Count == 1)
             {

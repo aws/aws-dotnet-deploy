@@ -5,6 +5,7 @@ using System;
 using Amazon.Runtime;
 using System.Threading.Tasks;
 using System.Threading;
+using Amazon.Runtime.Credentials;
 
 namespace AWS.Deploy.ServerMode.Client.Utilities
 {
@@ -32,13 +33,13 @@ namespace AWS.Deploy.ServerMode.Client.Utilities
         }
 
         /// <summary>
-        /// Uses AWS .NET SDK <see cref="FallbackCredentialsFactory"/> to resolve the default credentials from multiple fallback sources.
+        /// Uses AWS .NET SDK <see cref="DefaultAWSCredentialsIdentityResolver"/> to resolve the default credentials from multiple fallback sources.
         /// This includes AWS credentials file stored on the local machine, environment variables , etc...
         /// This method does not take into account the AWS Profile and Region defined on the CLI level for AWS Deploy Tool for .NET.
         /// </summary>
         public static Task<AWSCredentials> ResolveDefaultCredentials()
         {
-            var testCredentials = FallbackCredentialsFactory.GetCredentials();
+            var testCredentials = DefaultAWSCredentialsIdentityResolver.GetCredentials();
             return Task.FromResult(testCredentials);
         }
     }

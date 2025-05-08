@@ -3,9 +3,10 @@
 
 using System.Linq;
 using System.Threading.Tasks;
-using Amazon.CloudControlApi.Model;
 using AWS.Deploy.Common.Data;
 using Amazon.ElasticBeanstalk;
+using Amazon.ElasticBeanstalk.Model;
+using ResourceNotFoundException = Amazon.CloudControlApi.Model.ResourceNotFoundException;
 
 namespace AWS.Deploy.Common.Recipes.Validation
 {
@@ -34,13 +35,13 @@ namespace AWS.Deploy.Common.Recipes.Validation
             switch (ResourceType)
             {
                 case "AWS::ElasticBeanstalk::Application":
-                    var beanstalkApplications = await _awsResourceQueryer.ListOfElasticBeanstalkApplications(resourceName);
+                    var beanstalkApplications = await _awsResourceQueryer.ListOfElasticBeanstalkApplications(resourceName) ?? new List<ApplicationDescription>();
                     if (beanstalkApplications.Any(x => x.ApplicationName.Equals(resourceName)))
                         return ValidationResult.Failed($"An Elastic Beanstalk application already exists with the name '{resourceName}'. Check the AWS Console for more information on the existing resource.");
                     break;
 
                 case "AWS::ElasticBeanstalk::Environment":
-                    var beanstalkEnvironments = await _awsResourceQueryer.ListOfElasticBeanstalkEnvironments(environmentName: resourceName);
+                    var beanstalkEnvironments = await _awsResourceQueryer.ListOfElasticBeanstalkEnvironments(environmentName: resourceName) ?? new List<EnvironmentDescription>();
                     if (beanstalkEnvironments.Any(x => x.EnvironmentName.Equals(resourceName) && x.Status != EnvironmentStatus.Terminated))
                         return ValidationResult.Failed($"An Elastic Beanstalk environment already exists with the name '{resourceName}'. Check the AWS Console for more information on the existing resource.");
                     break;

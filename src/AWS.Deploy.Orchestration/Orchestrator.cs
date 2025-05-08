@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Amazon.EC2.Model;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.Extensions;
@@ -232,8 +233,8 @@ namespace AWS.Deploy.Orchestration
                 if (_awsResourceQueryer == null)
                     throw new InvalidOperationException($"{nameof(_awsResourceQueryer)} is null as part of the Orchestrator object");
 
-                var vpcs = await _awsResourceQueryer.GetListOfVpcs();
-                recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_HAS_NOT_VPCS, !vpcs.Any());
+                var vpcs = await _awsResourceQueryer.GetListOfVpcs() ?? new List<Vpc>();
+                recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_HAS_NOT_VPCS, vpcs.Any());
             }
             if (recommendation.ReplacementTokens.ContainsKey(Constants.RecipeIdentifier.REPLACE_TOKEN_DEFAULT_CONTAINER_PORT))
             {

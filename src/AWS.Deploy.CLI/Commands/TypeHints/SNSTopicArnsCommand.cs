@@ -28,7 +28,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
         public async Task<TypeHintResourceTable> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
         {
-            var topicArns = await _awsResourceQueryer.ListOfSNSTopicArns();
+            var topicArns = await _awsResourceQueryer.ListOfSNSTopicArns() ?? new List<string>();
 
             var resourceTable = new TypeHintResourceTable
             {

@@ -1,19 +1,14 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 using Amazon.CloudFormation;
+using Amazon.CloudFormation.Model;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Data;
-using AWS.Deploy.Common.Extensions;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
-using AWS.Deploy.Orchestration.CDK;
-using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.Utilities;
+using InvalidOperationException = System.InvalidOperationException;
 using Stack = Amazon.CloudFormation.Model.Stack;
 
 namespace AWS.Deploy.Orchestration
@@ -234,10 +229,10 @@ namespace AWS.Deploy.Orchestration
         {
             try
             {
-                var stackEvents = await _awsResourceQueryer.GetCloudFormationStackEvents(stackId);
+                var stackEvents = await _awsResourceQueryer.GetCloudFormationStackEvents(stackId) ?? new List<StackEvent>();
 
                 var failedEvents = stackEvents
-                    .Where(x => x.Timestamp.ToUniversalTime() >= deploymentStartDate)
+                    .Where(x => x.Timestamp != null && x.Timestamp.Value.ToUniversalTime() >= deploymentStartDate)
                     .Where(x =>
                         x.ResourceStatus.Equals(ResourceStatus.CREATE_FAILED) ||
                         x.ResourceStatus.Equals(ResourceStatus.DELETE_FAILED) ||

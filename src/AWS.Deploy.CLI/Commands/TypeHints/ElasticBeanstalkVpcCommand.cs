@@ -38,7 +38,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
         private async Task<List<Vpc>> GetData()
         {
-            return await _awsResourceQueryer.GetListOfVpcs();
+            return await _awsResourceQueryer.GetListOfVpcs() ?? new List<Vpc>();
         }
 
         public async Task<TypeHintResourceTable> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
@@ -94,7 +94,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 defaultSelector: vpc =>
                     !string.IsNullOrEmpty(currentVpcTypeHintResponse?.VpcId)
                         ? vpc.VpcId == currentVpcTypeHintResponse.VpcId
-                        : vpc.IsDefault)
+                        : vpc.IsDefault ?? false)
             {
                 CanBeEmpty = false,
                 CreateNew = true
@@ -117,7 +117,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 };
 
             // Retrieve available Subnets based on the selected VPC
-            var availableSubnets = (await _awsResourceQueryer.DescribeSubnets(vpc.SelectedOption.VpcId)).OrderBy(x => x.SubnetId).ToList();
+            var availableSubnets = (await _awsResourceQueryer.DescribeSubnets(vpc.SelectedOption.VpcId) ?? new List<Subnet>()).OrderBy(x => x.SubnetId).ToList();
 
             // If there are no subnets, don't use a VPC
             if (!availableSubnets.Any())
@@ -145,7 +145,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             var subnets = _consoleUtilities.AskUserForList<Subnet>(userInputConfigurationSubnets, availableSubnets, subnetsOptionSetting, recommendation);
 
             // Retrieve available security groups based on the selected VPC
-            var availableSecurityGroups = (await _awsResourceQueryer.DescribeSecurityGroups(vpc.SelectedOption.VpcId)).OrderBy(x => x.VpcId).ToList();
+            var availableSecurityGroups = (await _awsResourceQueryer.DescribeSecurityGroups(vpc.SelectedOption.VpcId) ?? new List<SecurityGroup>()).OrderBy(x => x.VpcId).ToList();
             if (!availableSecurityGroups.Any())
                 return new ElasticBeanstalkVpcTypeHintResponse
                 {

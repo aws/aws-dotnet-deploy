@@ -36,7 +36,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
         private async Task<List<Vpc>> GetData()
         {
-            return await _awsResourceQueryer.GetListOfVpcs();
+            return await _awsResourceQueryer.GetListOfVpcs() ?? new List<Vpc>();
         }
 
         public async Task<TypeHintResourceTable> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)
@@ -68,7 +68,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 defaultSelector: vpc =>
                     !string.IsNullOrEmpty(currentVpcTypeHintResponse?.VpcId)
                         ? vpc.VpcId == currentVpcTypeHintResponse.VpcId
-                        : vpc.IsDefault);
+                        : vpc.IsDefault ?? false);
 
             var userResponse = _consoleUtilities.AskUserToChooseOrCreateNew(
                 vpcs,

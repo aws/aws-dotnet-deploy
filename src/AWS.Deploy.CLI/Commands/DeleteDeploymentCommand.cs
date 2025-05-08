@@ -223,7 +223,7 @@ public class DeleteDeploymentCommand : CancellableAsyncCommand<DeleteDeploymentC
                     StackName = stackName
                 });
 
-                stack = response.Stacks.Count == 0 ? null : response.Stacks[0];
+                stack = response.Stacks == null || response.Stacks.Count == 0 ? null : response.Stacks[0];
                 shouldRetry = false;
             }
             catch (AmazonCloudFormationException exception) when (exception.ErrorCode.Equals("ValidationError") && exception.Message.Equals($"Stack with id {stackName} does not exist"))
