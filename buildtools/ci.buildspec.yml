@@ -5,6 +5,11 @@ phases:
     runtime-versions:
       nodejs: 22
       dotnet: 8.x
+    commands:
+      # Find and delete the global.json files that were added by CodeBuild. This causes issues when multiple SDKs are installed.
+      - find / -type f -name 'global.json' -delete
+      # The tests need .NET 6, 8 and 10. .NET6 is installed by default. .NET8 is added in the runtime-versions. .NET 10 is installed manually.
+      - curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --channel 10.0
   pre_build:
     commands:
       - export DOTNET_CLI_TELEMETRY_OPTOUT=1

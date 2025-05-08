@@ -61,7 +61,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             returnCode.ShouldEqual(CommandReturnCodes.SUCCESS);
             stdOut.ShouldContain(successMessage);
 
-            VerifyCreatedArtifacts(targetApplicationPath, saveDirectoryPath);
+            VerifyCreatedArtifacts(targetApplicationPath, saveDirectoryPath, interactiveService);
         }
 
         public static async Task CreateCDKDeploymentProjectWithRecipeName(string targetApplicationPath, string recipeName, string option, string? saveDirectoryPath = null, bool isValid = true, bool underSourceControl = true)
@@ -108,7 +108,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             returnCode.ShouldEqual(CommandReturnCodes.SUCCESS);
             stdOut.ShouldContain(successMessage);
 
-            VerifyCreatedArtifacts(targetApplicationPath, saveDirectoryPath);
+            VerifyCreatedArtifacts(targetApplicationPath, saveDirectoryPath, interactiveService);
         }
 
         private static IServiceCollection GetAppServiceCollection()
@@ -121,15 +121,26 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             return serviceCollection;
         }
 
-        private static void VerifyCreatedArtifacts(string targetApplicationPath, string saveDirectoryPath)
+        private static void VerifyCreatedArtifacts(string targetApplicationPath, string saveDirectoryPath, InMemoryInteractiveService interactiveService)
         {
-            var saveDirectoryName = new DirectoryInfo(saveDirectoryPath).Name;
+            var saveDirectory = new DirectoryInfo(saveDirectoryPath);
+            FileInfo[] files = saveDirectory.GetFiles();
+            if (files.Length == 0)
+            {
+                interactiveService.WriteLine($"No files found in '{saveDirectoryPath}'.");
+                return;
+            }
+            interactiveService.WriteLine($"Files in '{saveDirectoryPath}':");
+            foreach (FileInfo file in files)
+            {
+                interactiveService.WriteLine(file.Name);
+            }
 
             Assert.True(Directory.Exists(saveDirectoryPath));
             Assert.True(File.Exists(Path.Combine(saveDirectoryPath, "AppStack.cs")));
             Assert.True(File.Exists(Path.Combine(saveDirectoryPath, "Program.cs")));
             Assert.True(File.Exists(Path.Combine(saveDirectoryPath, "cdk.json")));
-            Assert.True(File.Exists(Path.Combine(saveDirectoryPath, $"{saveDirectoryName}.recipe")));
+            Assert.True(File.Exists(Path.Combine(saveDirectoryPath, $"{saveDirectory.Name}.recipe")));
             Assert.True(File.Exists(Path.Combine(targetApplicationPath, "aws-deployments.json")));
         }
     }

@@ -1,7 +1,7 @@
 {
     "$schema": "./aws-deploy-recipe-schema.json",
     "Id": "AspNetAppEcsFargate",
-    "Version": "1.2.0",
+    "Version": "1.3.0",
     "Name": "ASP.NET Core App to Amazon ECS using AWS Fargate",
     "DeploymentType": "CdkProject",
     "DeploymentBundle": "Container",
@@ -42,7 +42,7 @@
                     "Type": "MSProperty",
                     "Condition": {
                         "PropertyName": "TargetFramework",
-                        "AllowedValues": [ "netcoreapp3.1", "net5.0", "net6.0", "net7.0", "net8.0", "net9.0" ]
+                        "AllowedValues": [ "netcoreapp3.1", "net5.0", "net6.0", "net7.0", "net8.0", "net9.0", "net10.0" ]
                     }
                 }
             ]

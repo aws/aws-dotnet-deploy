@@ -26,10 +26,10 @@ jobs:
       - uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 #v4.7.1
         with:
           python-version: 3.x
-      - name: Setup .NET Core 6.0
+      - name: Setup .NET 8
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 #v4.3.1
         with:
-          dotnet-version: 6.0.x
+          dotnet-version: 8.0.x
       - run: pip install mkdocs-material==8.2.9
       - run: pip install mkdocs-awesome-pages-plugin==2.8.0
       - name: Restore dependencies
