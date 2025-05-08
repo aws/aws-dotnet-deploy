@@ -1,11 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestration.Utilities;
@@ -22,9 +18,11 @@ namespace AWS.Deploy.Orchestration
         void ClearCachedCapabilityChecks();
 
         Task<List<SystemCapability>> EvaluateSystemCapabilities(Recommendation selectedRecommendation);
+
+        ContainerAppInfo? GetInstalledContainerAppInfo();
     }
 
-    public class SystemCapabilityEvaluator : ISystemCapabilityEvaluator
+    public class SystemCapabilityEvaluator(ICommandLineWrapper commandLineWrapper) : ISystemCapabilityEvaluator
     {
         private const string NODEJS_DEPENDENCY_NAME = "Node.js";
         private const string NODEJS_INSTALLATION_URL = "https://nodejs.org/en/download/";
@@ -32,7 +30,9 @@ namespace AWS.Deploy.Orchestration
         private const string DOCKER_DEPENDENCY_NAME = "Docker";
         private const string DOCKER_INSTALLATION_URL = "https://docs.docker.com/engine/install/";
 
-        private readonly ICommandLineWrapper _commandLineWrapper;
+        private const string PODMAN_DEPENDENCY_NAME = "Podman";
+        private const string PODMAN_INSTALLATION_URL = "https://podman.io/docs/installation";
+
         private static readonly Version MinimumNodeJSVersion = new Version(14,17,0);
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace AWS.Deploy.Orchestration
         private const int CAPABILITY_EVALUATION_TIMEOUT_MS = 60000; // one minute
 
         /// <summary>
-        /// How long to cache the results of a VALID Node/Docker/etc. check 
+        /// How long to cache the results of a VALID Node/Docker/etc. check
         /// </summary>
         private static readonly TimeSpan DEPENDENCY_CACHE_INTERVAL = TimeSpan.FromHours(1);
 
@@ -57,15 +57,12 @@ namespace AWS.Deploy.Orchestration
         /// </summary>
         private DateTime _dockerDependencyValidUntilUtc = DateTime.MinValue;
 
-        public SystemCapabilityEvaluator(ICommandLineWrapper commandLineWrapper)
-        {
-            _commandLineWrapper = commandLineWrapper;
-        }
+        private ContainerAppInfo? _installedContainerAppInfo;
 
         /// <summary>
         /// Attempt to determine whether Docker is running and its current OS type
         /// </summary>
-        private async Task<DockerInfo> HasDockerInstalledAndRunningAsync()
+        private async Task<ContainerAppInfo> HasDockerInstalledAndRunningAsync()
         {
             var processExitCode = -1;
             var containerType = "";
@@ -76,7 +73,7 @@ namespace AWS.Deploy.Orchestration
 
             try
             {
-                await _commandLineWrapper.Run(
+                await commandLineWrapper.Run(
                     command,
                     streamOutputToInteractiveService: false,
                     onComplete: proc =>
@@ -90,14 +87,51 @@ namespace AWS.Deploy.Orchestration
                     cancellationToken: cancellationTokenSource.Token);
 
 
-                var dockerInfo = new DockerInfo(processExitCode == 0, containerType);
+                var dockerInfo = new ContainerAppInfo(DOCKER_DEPENDENCY_NAME, DOCKER_INSTALLATION_URL, processExitCode == 0, containerType);
 
                 return dockerInfo;
             }
             catch (TaskCanceledException)
             {
                 // If the check timed out, treat Docker as not installed
-                return new DockerInfo(false, "");
+                return new ContainerAppInfo(DOCKER_DEPENDENCY_NAME, DOCKER_INSTALLATION_URL, false, "");
+            }
+        }
+
+        /// <summary>
+        /// Attempt to determine whether Podman is running and its current OS type
+        /// </summary>
+        private async Task<ContainerAppInfo> HasPodmanInstalledAndRunningAsync()
+        {
+            var processExitCode = -1;
+            var containerType = "";
+            var command = "podman info --format=json | jq -r '.host.os'";
+
+            var cancellationTokenSource = new CancellationTokenSource();
+            cancellationTokenSource.CancelAfter(CAPABILITY_EVALUATION_TIMEOUT_MS);
+
+            try
+            {
+                await commandLineWrapper.Run(
+                    command,
+                    streamOutputToInteractiveService: false,
+                    onComplete: proc =>
+                    {
+                        processExitCode = proc.ExitCode;
+                        containerType = proc.StandardOut?.TrimEnd('\n') ??
+                                        throw new DockerInfoException(DeployToolErrorCode.FailedToCheckDockerInfo, $"Failed to check if {PODMAN_DEPENDENCY_NAME} is running in Windows or Linux container mode.");
+                    },
+                    cancellationToken: cancellationTokenSource.Token);
+
+
+                var dockerInfo = new ContainerAppInfo(PODMAN_DEPENDENCY_NAME, PODMAN_INSTALLATION_URL, processExitCode == 0, containerType);
+
+                return dockerInfo;
+            }
+            catch (TaskCanceledException)
+            {
+                // If the check timed out, treat Docker as not installed
+                return new ContainerAppInfo(PODMAN_DEPENDENCY_NAME, PODMAN_INSTALLATION_URL, false, "");
             }
         }
 
@@ -112,7 +146,7 @@ namespace AWS.Deploy.Orchestration
             try
             {
                 // run node --version to get the version
-                var result = await _commandLineWrapper.TryRunWithResult("node --version", cancellationToken: cancellationTokenSource.Token);
+                var result = await commandLineWrapper.TryRunWithResult("node --version", cancellationToken: cancellationTokenSource.Token);
 
                 var versionString = result.StandardOut ?? "";
 
@@ -172,27 +206,39 @@ namespace AWS.Deploy.Orchestration
             {
                 if (DateTime.UtcNow >= _dockerDependencyValidUntilUtc)
                 {
-                    var dockerInfo = await HasDockerInstalledAndRunningAsync();
+                    var dockerTask = HasDockerInstalledAndRunningAsync();
+                    var podmanTask = HasPodmanInstalledAndRunningAsync();
 
-                    if (!dockerInfo.DockerInstalled)
+                    await Task.WhenAll(dockerTask, podmanTask);
+
+                    var dockerInfo = await dockerTask;
+                    var podmanInfo = await podmanTask;
+
+                    if (!dockerInfo.IsInstalled && !podmanInfo.IsInstalled)
                     {
                         message = "Install and start Docker version appropriate for your OS. This deployment option requires Docker, which was not detected.";
                         missingCapabilitiesForRecipe.Add(new SystemCapability(DOCKER_DEPENDENCY_NAME, message, DOCKER_INSTALLATION_URL));
                     }
-                    else if (!dockerInfo.DockerContainerType.Equals("linux", StringComparison.OrdinalIgnoreCase))
+                    else if (dockerInfo.IsInstalled || podmanInfo.IsInstalled)
                     {
-                        message = "This is Linux-based deployment. Switch your Docker from Windows to Linux container mode.";
-                        missingCapabilitiesForRecipe.Add(new SystemCapability(DOCKER_DEPENDENCY_NAME, message));
-                    }
-                    else // It is valid, so update the cache interval
-                    {
-                        _dockerDependencyValidUntilUtc = DateTime.UtcNow.Add(DEPENDENCY_CACHE_INTERVAL);
+                        _installedContainerAppInfo = dockerInfo.IsInstalled ? dockerInfo : podmanInfo;
+                        if (!_installedContainerAppInfo.ContainerType.Equals("linux", StringComparison.OrdinalIgnoreCase))
+                        {
+                            message = $"This is Linux-based deployment. Switch your {_installedContainerAppInfo.AppName} from Windows to Linux container mode.";
+                            missingCapabilitiesForRecipe.Add(new SystemCapability(_installedContainerAppInfo.AppName, message));
+                        }
+                        else // It is valid, so update the cache interval
+                        {
+                            _dockerDependencyValidUntilUtc = DateTime.UtcNow.Add(DEPENDENCY_CACHE_INTERVAL);
+                        }
                     }
                 }
             }
 
             return missingCapabilitiesForRecipe;
         }
+
+        public ContainerAppInfo? GetInstalledContainerAppInfo() => _installedContainerAppInfo;
 
         public void ClearCachedCapabilityChecks()
         {

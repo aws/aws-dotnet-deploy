@@ -36,6 +36,7 @@ namespace AWS.Deploy.CLI.UnitTests
         private readonly IDeploymentManifestEngine _deploymentManifestEngine;
         private readonly IOrchestratorInteractiveService _orchestratorInteractiveService;
         private readonly IRecipeHandler _recipeHandler;
+        private readonly ISystemCapabilityEvaluator _systemCapabilityEvaluator;
 
         public DeploymentBundleHandlerTests()
         {
@@ -57,8 +58,10 @@ namespace AWS.Deploy.CLI.UnitTests
             var optionSettingHandler = new OptionSettingHandler(validatorFactory);
             _recipeHandler = new RecipeHandler(_deploymentManifestEngine, _orchestratorInteractiveService, _directoryManager, _fileManager, optionSettingHandler, validatorFactory);
             _projectDefinitionParser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
-
-            _deploymentBundleHandler = new DeploymentBundleHandler(_commandLineWrapper, awsResourceQueryer, interactiveService, _directoryManager, zipFileManager, new FileManager(), optionSettingHandler);
+            var systemCapabilityEvaluatorMock = new Mock<ISystemCapabilityEvaluator>();
+            systemCapabilityEvaluatorMock.Setup(x => x.GetInstalledContainerAppInfo()).Returns(new ContainerAppInfo("Docker", "", true, ""));
+            _systemCapabilityEvaluator = systemCapabilityEvaluatorMock.Object;
+            _deploymentBundleHandler = new DeploymentBundleHandler(_commandLineWrapper, awsResourceQueryer, interactiveService, _directoryManager, zipFileManager, new FileManager(), optionSettingHandler, _systemCapabilityEvaluator);
 
             _recipeDefinition = new Mock<RecipeDefinition>(
                 It.IsAny<string>(),

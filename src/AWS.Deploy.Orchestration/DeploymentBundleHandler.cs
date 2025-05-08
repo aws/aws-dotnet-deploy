@@ -36,58 +36,45 @@ namespace AWS.Deploy.Orchestration
         Task<Dictionary<string, string>> InspectDockerImageEnvironmentVariables(Recommendation recommendation, string sourceTag);
     }
 
-    public class DeploymentBundleHandler : IDeploymentBundleHandler
+    public class DeploymentBundleHandler(
+        ICommandLineWrapper commandLineWrapper,
+        IAWSResourceQueryer awsResourceQueryer,
+        IOrchestratorInteractiveService interactiveService,
+        IDirectoryManager directoryManager,
+        IZipFileManager zipFileManager,
+        IFileManager fileManager,
+        IOptionSettingHandler optionSettingHandler,
+        ISystemCapabilityEvaluator systemCapabilityEvaluator)
+        : IDeploymentBundleHandler
     {
-        private readonly ICommandLineWrapper _commandLineWrapper;
-        private readonly IAWSResourceQueryer _awsResourceQueryer;
-        private readonly IOrchestratorInteractiveService _interactiveService;
-        private readonly IDirectoryManager _directoryManager;
-        private readonly IZipFileManager _zipFileManager;
-        private readonly IFileManager _fileManager;
-        private readonly IOptionSettingHandler _optionSettingHandler;
-
-        public DeploymentBundleHandler(
-            ICommandLineWrapper commandLineWrapper,
-            IAWSResourceQueryer awsResourceQueryer,
-            IOrchestratorInteractiveService interactiveService,
-            IDirectoryManager directoryManager,
-            IZipFileManager zipFileManager,
-            IFileManager fileManager,
-            IOptionSettingHandler optionSettingHandler)
-        {
-            _commandLineWrapper = commandLineWrapper;
-            _awsResourceQueryer = awsResourceQueryer;
-            _interactiveService = interactiveService;
-            _directoryManager = directoryManager;
-            _zipFileManager = zipFileManager;
-            _fileManager = fileManager;
-            _optionSettingHandler = optionSettingHandler;
-        }
-
         public async Task BuildDockerImage(CloudApplication cloudApplication, Recommendation recommendation, string imageTag)
         {
-            _interactiveService.LogInfoMessage(string.Empty);
-            _interactiveService.LogInfoMessage("Building the docker image...");
+            interactiveService.LogInfoMessage(string.Empty);
+            interactiveService.LogInfoMessage("Building the docker image...");
+
+            var commandName = systemCapabilityEvaluator.GetInstalledContainerAppInfo()?.AppName?.ToLower();
+            if (string.IsNullOrEmpty(commandName))
+                throw new DockerBuildFailedException(DeployToolErrorCode.DockerBuildFailed, "No container app (Docker or Podman) is currently installed/running on your system.", -1);
 
             var dockerExecutionDirectory = GetDockerExecutionDirectory(recommendation);
             var buildArgs = GetDockerBuildArgs(recommendation);
-            DockerUtilities.TryGetAbsoluteDockerfile(recommendation, _fileManager, _directoryManager, out var dockerFile);
+            DockerUtilities.TryGetAbsoluteDockerfile(recommendation, fileManager, directoryManager, out var dockerFile);
 
-            var dockerBuildCommand = $"docker build -t {imageTag} -f \"{dockerFile}\"{buildArgs} .";
+            var dockerBuildCommand = $"{commandName} build -t {imageTag} -f \"{dockerFile}\"{buildArgs} .";
             var currentArchitecture = RuntimeInformation.OSArchitecture == Architecture.Arm64 ? SupportedArchitecture.Arm64 : SupportedArchitecture.X86_64;
             if (currentArchitecture != recommendation.DeploymentBundle.EnvironmentArchitecture)
             {
                 var dockerPlatform = recommendation.DeploymentBundle.EnvironmentArchitecture == SupportedArchitecture.Arm64 ? "linux/arm64" : "linux/amd64";
-                dockerBuildCommand = $"docker buildx build --platform {dockerPlatform} -t {imageTag} -f \"{dockerFile}\"{buildArgs} .";
+                dockerBuildCommand = $"{commandName} buildx build --platform {dockerPlatform} -t {imageTag} -f \"{dockerFile}\"{buildArgs} .";
             }
 
-            _interactiveService.LogInfoMessage($"Docker Execution Directory: {Path.GetFullPath(dockerExecutionDirectory)}");
-            _interactiveService.LogInfoMessage($"Docker Build Command: {dockerBuildCommand}");
+            interactiveService.LogInfoMessage($"Docker Execution Directory: {Path.GetFullPath(dockerExecutionDirectory)}");
+            interactiveService.LogInfoMessage($"Docker Build Command: {dockerBuildCommand}");
 
             recommendation.DeploymentBundle.DockerfilePath = dockerFile;
             recommendation.DeploymentBundle.DockerExecutionDirectory = dockerExecutionDirectory;
 
-            var result = await _commandLineWrapper.TryRunWithResult(dockerBuildCommand, dockerExecutionDirectory, streamOutputToInteractiveService: true);
+            var result = await commandLineWrapper.TryRunWithResult(dockerBuildCommand, dockerExecutionDirectory, streamOutputToInteractiveService: true);
             if (result.ExitCode != 0)
             {
                 var errorMessage = "We were unable to build the docker image.";
@@ -102,8 +89,8 @@ namespace AWS.Deploy.Orchestration
 
         public async Task PushDockerImageToECR(Recommendation recommendation, string repositoryName, string sourceTag)
         {
-            _interactiveService.LogInfoMessage(string.Empty);
-            _interactiveService.LogInfoMessage("Pushing the docker image to ECR repository...");
+            interactiveService.LogInfoMessage(string.Empty);
+            interactiveService.LogInfoMessage("Pushing the docker image to ECR repository...");
 
             await InitiateDockerLogin();
 
@@ -142,12 +129,12 @@ namespace AWS.Deploy.Orchestration
                 {
                     if (retiredFrameworks.Contains(targetFramework))
                     {
-                        _interactiveService.LogErrorMessage($"The version of .NET that you are targeting has reached its end-of-support and has been retired by Elastic Beanstalk");
-                        _interactiveService.LogInfoMessage($"Using self-contained publish to include the out of support version of .NET used by this application with the deployment bundle");
+                        interactiveService.LogErrorMessage($"The version of .NET that you are targeting has reached its end-of-support and has been retired by Elastic Beanstalk");
+                        interactiveService.LogInfoMessage($"Using self-contained publish to include the out of support version of .NET used by this application with the deployment bundle");
                     }
                     else
                     {
-                        _interactiveService.LogInfoMessage($"Using self-contained publish since AWS Elastic Beanstalk does not currently have {targetFramework} preinstalled");
+                        interactiveService.LogInfoMessage($"Using self-contained publish since AWS Elastic Beanstalk does not currently have {targetFramework} preinstalled");
                     }
                     recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild = true;
                     return;
@@ -156,7 +143,7 @@ namespace AWS.Deploy.Orchestration
                 var beanstalkPlatformSetting = recommendation.Recipe.OptionSettings.FirstOrDefault(x => x.Id.Equals("ElasticBeanstalkPlatformArn"));
                 if (beanstalkPlatformSetting != null)
                 {
-                    var beanstalkPlatformSettingValue = _optionSettingHandler.GetOptionSettingValue<string>(recommendation, beanstalkPlatformSetting);
+                    var beanstalkPlatformSettingValue = optionSettingHandler.GetOptionSettingValue<string>(recommendation, beanstalkPlatformSetting);
                     var beanstalkPlatformSettingValueSplit = beanstalkPlatformSettingValue?.Split("/");
                     if (beanstalkPlatformSettingValueSplit?.Length != 3)
                         // If the platform is not in the expected format, we will proceed normally to allow users to manually set the self-contained build to true.
@@ -176,14 +163,14 @@ namespace AWS.Deploy.Orchestration
                         {
                             if (beanstalkPlatformVersion < new Version(2, 8, 0))
                             {
-                                _interactiveService.LogInfoMessage($"Using self-contained publish since AWS Elastic Beanstalk does not currently have .NET 8 preinstalled on {beanstalkPlatformName} ({beanstalkPlatformVersion.ToString()})");
+                                interactiveService.LogInfoMessage($"Using self-contained publish since AWS Elastic Beanstalk does not currently have .NET 8 preinstalled on {beanstalkPlatformName} ({beanstalkPlatformVersion.ToString()})");
                                 recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild = true;
                                 return;
                             }
                         }
                         else if (!beanstalkPlatformName.Contains(".NET 8"))
                         {
-                            _interactiveService.LogInfoMessage($"Using self-contained publish since AWS Elastic Beanstalk does not currently have .NET 8 preinstalled on {beanstalkPlatformName} ({beanstalkPlatformVersion.ToString()})");
+                            interactiveService.LogInfoMessage($"Using self-contained publish since AWS Elastic Beanstalk does not currently have .NET 8 preinstalled on {beanstalkPlatformName} ({beanstalkPlatformVersion.ToString()})");
                             recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild = true;
                             return;
                         }
@@ -194,12 +181,12 @@ namespace AWS.Deploy.Orchestration
 
         public async Task<string> CreateDotnetPublishZip(Recommendation recommendation)
         {
-            _interactiveService.LogInfoMessage(string.Empty);
-            _interactiveService.LogInfoMessage("Creating Dotnet Publish Zip file...");
+            interactiveService.LogInfoMessage(string.Empty);
+            interactiveService.LogInfoMessage("Creating Dotnet Publish Zip file...");
 
             SwitchToSelfContainedBuildIfNeeded(recommendation);
 
-            var publishDirectoryInfo = _directoryManager.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
+            var publishDirectoryInfo = directoryManager.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
             var additionalArguments = recommendation.DeploymentBundle.DotnetPublishAdditionalBuildArguments;
             var windowsPlatform = recommendation.DeploymentBundle.EnvironmentArchitecture == SupportedArchitecture.Arm64 ? "win-arm64" : "win-x64";
             var linuxPlatform = recommendation.DeploymentBundle.EnvironmentArchitecture == SupportedArchitecture.Arm64 ? "linux-arm64" : "linux-x64";
@@ -223,7 +210,7 @@ namespace AWS.Deploy.Orchestration
                 publishCommand += " --self-contained true";
             }
 
-            var result = await _commandLineWrapper.TryRunWithResult(publishCommand, streamOutputToInteractiveService: true);
+            var result = await commandLineWrapper.TryRunWithResult(publishCommand, streamOutputToInteractiveService: true);
             if (result.ExitCode != 0)
             {
                 var errorMessage = "We were unable to package the application using 'dotnet publish'";
@@ -234,7 +221,7 @@ namespace AWS.Deploy.Orchestration
             }
 
             var zipFilePath = $"{publishDirectoryInfo.FullName}.zip";
-            await _zipFileManager.CreateFromDirectory(publishDirectoryInfo.FullName, zipFilePath);
+            await zipFileManager.CreateFromDirectory(publishDirectoryInfo.FullName, zipFilePath);
 
             recommendation.DeploymentBundle.DotnetPublishZipPath = zipFilePath;
             recommendation.DeploymentBundle.DotnetPublishOutputDirectory = publishDirectoryInfo.FullName;
@@ -270,7 +257,7 @@ namespace AWS.Deploy.Orchestration
             }
 
             // The docker build command will fail if a relative path is provided
-            dockerExecutionDirectory = _directoryManager.GetAbsolutePath(projectDirectory, dockerExecutionDirectory);
+            dockerExecutionDirectory = directoryManager.GetAbsolutePath(projectDirectory, dockerExecutionDirectory);
             return dockerExecutionDirectory;
         }
 
@@ -290,7 +277,11 @@ namespace AWS.Deploy.Orchestration
 
         private async Task InitiateDockerLogin()
         {
-            var authorizationTokens = await _awsResourceQueryer.GetECRAuthorizationToken();
+            var commandName = systemCapabilityEvaluator.GetInstalledContainerAppInfo()?.AppName?.ToLower();
+            if (string.IsNullOrEmpty(commandName))
+                throw new DockerBuildFailedException(DeployToolErrorCode.DockerBuildFailed, "No container app (Docker or Podman) is currently installed/running on your system.", -1);
+
+            var authorizationTokens = await awsResourceQueryer.GetECRAuthorizationToken();
 
             if (authorizationTokens.Count == 0)
                 throw new DockerLoginFailedException(DeployToolErrorCode.FailedToGetECRAuthorizationToken, "Failed to login to Docker", null);
@@ -299,8 +290,8 @@ namespace AWS.Deploy.Orchestration
             var authToken = Encoding.UTF8.GetString(authTokenBytes);
             var decodedTokens = authToken.Split(':');
 
-            var dockerLoginCommand = $"docker login --username {decodedTokens[0]} --password-stdin {authorizationTokens[0].ProxyEndpoint}";
-            var result = await _commandLineWrapper.TryRunWithResult(dockerLoginCommand, streamOutputToInteractiveService: true, stdin: decodedTokens[1]);
+            var dockerLoginCommand = $"{commandName} login --username {decodedTokens[0]} --password-stdin {authorizationTokens[0].ProxyEndpoint}";
+            var result = await commandLineWrapper.TryRunWithResult(dockerLoginCommand, streamOutputToInteractiveService: true, stdin: decodedTokens[1]);
 
             if (result.ExitCode != 0)
             {
@@ -313,7 +304,7 @@ namespace AWS.Deploy.Orchestration
 
         private async Task<Repository> SetupECRRepository(string ecrRepositoryName, string recipeId)
         {
-            var existingRepositories = await _awsResourceQueryer.GetECRRepositories(new List<string> { ecrRepositoryName }) ?? new List<Repository>();
+            var existingRepositories = await awsResourceQueryer.GetECRRepositories(new List<string> { ecrRepositoryName }) ?? new List<Repository>();
 
             if (existingRepositories.Count == 1)
             {
@@ -321,14 +312,18 @@ namespace AWS.Deploy.Orchestration
             }
             else
             {
-                return await _awsResourceQueryer.CreateECRRepository(ecrRepositoryName, recipeId);
+                return await awsResourceQueryer.CreateECRRepository(ecrRepositoryName, recipeId);
             }
         }
 
         private async Task TagDockerImage(string sourceTagName, string targetTagName)
         {
-            var dockerTagCommand = $"docker tag {sourceTagName} {targetTagName}";
-            var result = await _commandLineWrapper.TryRunWithResult(dockerTagCommand, streamOutputToInteractiveService: true);
+            var commandName = systemCapabilityEvaluator.GetInstalledContainerAppInfo()?.AppName?.ToLower();
+            if (string.IsNullOrEmpty(commandName))
+                throw new DockerBuildFailedException(DeployToolErrorCode.DockerBuildFailed, "No container app (Docker or Podman) is currently installed/running on your system.", -1);
+
+            var dockerTagCommand = $"{commandName} tag {sourceTagName} {targetTagName}";
+            var result = await commandLineWrapper.TryRunWithResult(dockerTagCommand, streamOutputToInteractiveService: true);
 
             if (result.ExitCode != 0)
             {
@@ -341,8 +336,12 @@ namespace AWS.Deploy.Orchestration
 
         private async Task PushDockerImage(string targetTagName)
         {
-            var dockerPushCommand = $"docker push {targetTagName}";
-            var result = await _commandLineWrapper.TryRunWithResult(dockerPushCommand, streamOutputToInteractiveService: true);
+            var commandName = systemCapabilityEvaluator.GetInstalledContainerAppInfo()?.AppName?.ToLower();
+            if (string.IsNullOrEmpty(commandName))
+                throw new DockerBuildFailedException(DeployToolErrorCode.DockerBuildFailed, "No container app (Docker or Podman) is currently installed/running on your system.", -1);
+
+            var dockerPushCommand = $"{commandName} push {targetTagName}";
+            var result = await commandLineWrapper.TryRunWithResult(dockerPushCommand, streamOutputToInteractiveService: true);
 
             if (result.ExitCode != 0)
             {
@@ -362,10 +361,14 @@ namespace AWS.Deploy.Orchestration
         /// <returns>A dictionary that represents the environment varibales from the container</returns>
         public async Task<Dictionary<string, string>> InspectDockerImageEnvironmentVariables(Recommendation recommendation, string sourceTag)
         {
-            var dockerInspectCommand = "docker inspect --format \"{{ index (index .Config.Env) }}\" " + sourceTag;
+            var commandName = systemCapabilityEvaluator.GetInstalledContainerAppInfo()?.AppName?.ToLower();
+            if (string.IsNullOrEmpty(commandName))
+                throw new DockerBuildFailedException(DeployToolErrorCode.DockerBuildFailed, "No container app (Docker or Podman) is currently installed/running on your system.", -1);
+
+            var dockerInspectCommand = $"{commandName} inspect --format \"{{{{ index (index .Config.Env) }}}}\" " + sourceTag;
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                dockerInspectCommand = "docker inspect --format '{{ index (index .Config.Env) }}' " + sourceTag;
-            var result = await _commandLineWrapper.TryRunWithResult(dockerInspectCommand, streamOutputToInteractiveService: false);
+                dockerInspectCommand = $"{commandName} inspect --format '{{{{ index (index .Config.Env) }}}}' " + sourceTag;
+            var result = await commandLineWrapper.TryRunWithResult(dockerInspectCommand, streamOutputToInteractiveService: false);
 
             if (result.ExitCode != 0)
             {
