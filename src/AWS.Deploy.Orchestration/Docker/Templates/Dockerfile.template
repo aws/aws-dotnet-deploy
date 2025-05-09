@@ -1,4 +1,4 @@
-FROM {docker-base-image} AS base{non-root-user}
+FROM --platform=$BUILDPLATFORM {docker-base-image} AS base{non-root-user}
 WORKDIR /app
 {exposed-ports}
 
@@ -12,6 +12,7 @@ WORKDIR "/src/{project-folder}"
 RUN dotnet build "{project-name}" -c Release -o /app/build -a $TARGETARCH
 
 FROM build AS publish
+ARG TARGETARCH
 RUN apt-get update -yq \
     && apt-get install -yq ca-certificates curl gnupg \
     && mkdir -p /etc/apt/keyrings \

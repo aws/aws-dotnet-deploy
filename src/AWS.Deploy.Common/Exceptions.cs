@@ -57,11 +57,11 @@ namespace AWS.Deploy.Common
         FailedToInstallProjectTemplates = 10003500,
         FailedToWritePackageJsonFile = 10003600,
         FailedToInstallNpmPackages = 10003700,
-        DockerBuildFailed = 10003800,
+        ContainerBuildFailed = 10003800,
         FailedToGetCDKVersion = 10003900,
         DockerLoginFailed = 10004000,
-        DockerTagFailed = 10004100,
-        DockerPushFailed = 10004200,
+        ContainerTagFailed = 10004100,
+        ContainerPushFailed = 10004200,
         FailedToFindRecipeDefinitions = 10004300,
         DotnetPublishFailed = 10004400,
         FailedToFindZipUtility = 10004500,
@@ -128,7 +128,7 @@ namespace AWS.Deploy.Common
         FailedToSaveDeploymentSettings = 10010600,
         InvalidWindowsManifestFile = 10010700,
         UserDeploymentFileNotFound = 10010800,
-        DockerInspectFailed = 10004200
+        ContainerInspectFailed = 10004200
     }
 
     public class ProjectFileNotFoundException : DeployToolException

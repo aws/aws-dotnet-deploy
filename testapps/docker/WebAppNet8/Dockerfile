@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER app
 WORKDIR /app
 EXPOSE 8080
@@ -14,6 +14,7 @@ WORKDIR "/src/"
 RUN dotnet build "WebAppNet8.csproj" -c Release -o /app/build -a $TARGETARCH
 
 FROM build AS publish
+ARG TARGETARCH
 RUN apt-get update -yq \
     && apt-get install -yq ca-certificates curl gnupg \
     && mkdir -p /etc/apt/keyrings \

@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
@@ -13,6 +13,7 @@ WORKDIR "/src/"
 RUN dotnet build "WebAppNet7.csproj" -c Release -o /app/build -a $TARGETARCH
 
 FROM build AS publish
+ARG TARGETARCH
 RUN apt-get update -yq \
     && apt-get install -yq ca-certificates curl gnupg \
     && mkdir -p /etc/apt/keyrings \
