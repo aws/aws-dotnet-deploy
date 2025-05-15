@@ -1,0 +1,107 @@
+name: Auto Update Bootstrap Version Changes
+
+on:
+  schedule:
+    # Runs at 00:00 UTC every Monday
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  detect-cdk-bootstrap-changes:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@f24d7193d98baebaeacc7e2227925dd47cc267f5 #v4.2.0
+      with:
+        role-to-assume: ${{ secrets.RELEASE_WORKFLOW_ACCESS_TOKEN_ROLE_ARN }}
+        aws-region: us-west-2
+
+    - name: Retrieve secret from AWS Secrets Manager
+      uses: aws-actions/aws-secretsmanager-get-secrets@5e19ff380d035695bdd56bbad320ca535c9063f2 #v2.0.9
+      with:
+        secret-ids: |
+          AWS_SECRET, ${{ secrets.RELEASE_WORKFLOW_ACCESS_TOKEN_NAME }}
+        parse-json-secrets: true
+
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
+      with:
+        fetch-depth: '0'
+        ref: dev
+        token: ${{ env.AWS_SECRET_TOKEN }}
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 #v4.3.1
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Install AWS CDK
+      run: |
+        npm install -g aws-cdk
+
+    - name: Create temporary directory
+      run: mkdir -p temp_cdk
+
+    - name: Save New CDK Bootstrap Template
+      working-directory: temp_cdk
+      run: |
+        cdk acknowledge 32775
+        cdk bootstrap --show-template > newTemplate.yml
+
+    - name: Update Template with Required Policies
+      working-directory: temp_cdk
+      run: |
+        yq eval '.Resources.StagingBucket.UpdateReplacePolicy = "Delete"' -i newTemplate.yml
+        yq eval '.Resources.StagingBucket.DeletionPolicy = "Delete"' -i newTemplate.yml
+
+    - name: Check for version changes
+      id: check_version
+      run: |
+        OLD_VERSION=$(yq eval '.Resources.CdkBootstrapVersion.Properties.Value' src/AWS.Deploy.Orchestration/CDK/CDKBootstrapTemplate.yaml)
+        NEW_VERSION=$(yq eval '.Resources.CdkBootstrapVersion.Properties.Value' temp_cdk/newTemplate.yml)
+        
+        if [ "$OLD_VERSION" != "$NEW_VERSION" ]; then
+          echo "Version changed from $OLD_VERSION to $NEW_VERSION"
+          echo "version_changed=true" >> $GITHUB_OUTPUT
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+        else
+          echo "No version change detected"
+          echo "version_changed=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Update CDK Bootstrap Template
+      if: steps.check_version.outputs.version_changed == 'true'
+      run: |
+        cp temp_cdk/newTemplate.yml src/AWS.Deploy.Orchestration/CDK/CDKBootstrapTemplate.yaml
+
+    - name: Generate change file
+      if: steps.check_version.outputs.version_changed == 'true'
+      env:
+        NEW_VERSION: ${{ steps.check_version.outputs.new_version }}
+      run: |
+        dotnet tool install -g autover --version 0.0.25
+        autover change --project-name "AWS.Deploy.CLI" -m "Update CDK Bootstrap template to version $NEW_VERSION"
+
+    - name: Setup Git User
+      run: |
+        git config --global user.email "github-aws-sdk-dotnet-automation@amazon.com"
+        git config --global user.name "aws-sdk-dotnet-automation"
+
+    - name: Create Pull Request
+      if: steps.check_version.outputs.version_changed == 'true'
+      env:
+        GITHUB_TOKEN: ${{ env.AWS_SECRET_TOKEN }}
+      run: |
+        git checkout -b update-cdk-bootstrap-template
+        git add src/AWS.Deploy.Orchestration/CDK/CDKBootstrapTemplate.yaml .autover/
+        git commit -m "chore: update CDK bootstrap template to version ${{ steps.check_version.outputs.new_version }}"
+        git push origin update-cdk-bootstrap-template
+        gh pr create \
+          --title "Update CDK Bootstrap Template to Version ${{ steps.check_version.outputs.new_version }}" \
+          --base dev \
+          --head update-cdk-bootstrap-template \
+          --delete-branch
