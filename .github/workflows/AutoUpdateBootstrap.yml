@@ -103,5 +103,4 @@ jobs:
         gh pr create \
           --title "Update CDK Bootstrap Template to Version ${{ steps.check_version.outputs.new_version }}" \
           --base dev \
-          --head update-cdk-bootstrap-template \
-          --delete-branch
+          --head update-cdk-bootstrap-template
