@@ -91,6 +91,16 @@ jobs:
         git config --global user.email "github-aws-sdk-dotnet-automation@amazon.com"
         git config --global user.name "aws-sdk-dotnet-automation"
 
+    - name: Delete existing branch if it exists
+      if: steps.check_version.outputs.version_changed == 'true'
+      env:
+        GITHUB_TOKEN: ${{ env.AWS_SECRET_TOKEN }}
+      run: |
+        # Check if branch exists and delete it if it does
+        if git ls-remote --heads origin update-cdk-bootstrap-template | grep -q update-cdk-bootstrap-template; then
+          git push origin --delete update-cdk-bootstrap-template || true
+        fi
+
     - name: Create Pull Request
       if: steps.check_version.outputs.version_changed == 'true'
       env:
@@ -104,4 +114,4 @@ jobs:
           --title "Update CDK Bootstrap Template to Version ${{ steps.check_version.outputs.new_version }}" \
           --base dev \
           --head update-cdk-bootstrap-template \
-          --delete-branch
+          --fill
