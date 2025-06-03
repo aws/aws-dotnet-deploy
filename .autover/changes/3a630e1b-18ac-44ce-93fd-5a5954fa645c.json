@@ -1,0 +1,11 @@
+{
+  "Projects": [
+    {
+      "Name": "AWS.Deploy.CLI",
+      "Type": "Patch",
+      "ChangelogMessages": [
+        "NodeJS has been removed from the generated Dockerfiles. If you have an application that requires NodeJS, you will need to add it to the generated Dockerfile and rerun the Deploy Tool."
+      ]
+    }
+  ]
+}
