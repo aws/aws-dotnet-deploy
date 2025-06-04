@@ -34,5 +34,9 @@ namespace AWS.Deploy.CLI
         /// using a TCP port that is already in use.
         /// </summary>
         public const int TCP_PORT_ERROR = -100;
+        /// <summary>
+        /// A command was canceled by a user.
+        /// </summary>
+        public const int USER_CANCEL = 130;
     }
 }
