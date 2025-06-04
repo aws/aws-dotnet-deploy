@@ -4,6 +4,7 @@
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using AWS.Deploy.CLI;
 
 namespace Spectre.Console.Cli;
 
@@ -36,6 +37,8 @@ public abstract class CancellableAsyncCommand<TSettings> : AsyncCommand<TSetting
         {
             context.Cancel = true;
             cancellationSource.Cancel();
+
+            Environment.Exit(CommandReturnCodes.USER_CANCEL);
         }
     }
 }
