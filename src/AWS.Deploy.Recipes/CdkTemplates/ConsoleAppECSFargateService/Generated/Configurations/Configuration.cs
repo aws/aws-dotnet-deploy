@@ -19,6 +19,12 @@ namespace ConsoleAppEcsFargateService.Configurations
         public double DesiredCount { get; set; }
 
         /// <summary>
+        /// The minimum number of tasks, specified as a percentage of the Amazon ECS service's <see cref="DesiredCount"/> value,
+        /// that must continue to run and remain healthy during a deployment.
+        /// </summary>
+        public double MinHealthyPercent { get; set; }
+
+        /// <summary>
         /// The Identity and Access Management Role that provides AWS credentials to the application to access AWS services.
         /// </summary>
         public IAMRoleConfiguration ApplicationIAMRole { get; set; }

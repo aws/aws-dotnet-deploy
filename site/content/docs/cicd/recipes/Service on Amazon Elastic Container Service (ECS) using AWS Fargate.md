@@ -29,6 +29,10 @@
     * ID: DesiredCount
     * Description: The desired number of ECS tasks to run for the service.
     * Type: Int
+* **Minimum Healthy Percent**
+    * ID: MinHealthyPercent
+    * Description: The minimum number of tasks, specified as a percentage of the Amazon ECS service's 'Desired Task Count' value, that must continue to run and remain healthy during a deployment.
+    * Type: Int
 * **Application IAM Role**
     * ID: ApplicationIAMRole
     * Description: The Identity and Access Management (IAM) role that provides AWS credentials to the application to access AWS services.
