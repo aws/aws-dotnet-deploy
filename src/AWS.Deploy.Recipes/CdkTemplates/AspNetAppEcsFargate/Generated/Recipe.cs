@@ -191,6 +191,7 @@ namespace AspNetAppEcsFargate
                 Cluster = EcsCluster,
                 TaskDefinition = AppTaskDefinition,
                 DesiredCount = settings.DesiredCount,
+                MinHealthyPercent = settings.MinHealthyPercent,
                 ServiceName = settings.ECSServiceName,
                 AssignPublicIp = settings.Vpc.IsDefault,
                 SecurityGroups = EcsServiceSecurityGroups.ToArray()
