@@ -230,6 +230,25 @@
             ]
         },
         {
+            "Id": "MinHealthyPercent",
+            "Name": "Minimum Healthy Percent",
+            "Category": "Compute",
+            "Description": "The minimum number of tasks, specified as a percentage of the Amazon ECS service's 'Desired Task Count' value, that must continue to run and remain healthy during a deployment.",
+            "Type": "Int",
+            "DefaultValue": 100,
+            "AdvancedSetting": true,
+            "Updatable": true,
+            "Validators": [
+                {
+                    "ValidatorType": "Range",
+                    "Configuration": {
+                        "Min": 0,
+                        "Max": 100
+                    }
+                }
+            ]
+        },
+        {
             "Id": "Port",
             "Name": "Container Port",
             "Category": "General",
