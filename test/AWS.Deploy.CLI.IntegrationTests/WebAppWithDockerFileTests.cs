@@ -65,11 +65,11 @@ namespace AWS.Deploy.CLI.IntegrationTests
                         // Arrange input for deploy
                         interactiveService.StdInWriter.Write(Environment.NewLine); // Select default recommendation
                         interactiveService.StdInWriter.WriteLine("more"); // Select 'more'
-                        interactiveService.StdInWriter.WriteLine("13"); // Select 'Environment Architecture'
+                        interactiveService.StdInWriter.WriteLine("14"); // Select 'Environment Architecture'
                         interactiveService.StdInWriter.WriteLine("1"); // Select 'X86_64'
-                        interactiveService.StdInWriter.WriteLine("13"); // Select 'Environment Architecture' again for Code Coverage
+                        interactiveService.StdInWriter.WriteLine("14"); // Select 'Environment Architecture' again for Code Coverage
                         interactiveService.StdInWriter.WriteLine("1"); // Select 'X86_64'
-                        interactiveService.StdInWriter.WriteLine("8"); // Select 'Task CPU'
+                        interactiveService.StdInWriter.WriteLine("9"); // Select 'Task CPU'
                         interactiveService.StdInWriter.WriteLine("2"); // Select '512 (.5 vCPU)'
                         interactiveService.StdInWriter.Flush();
                     });
@@ -77,13 +77,13 @@ namespace AWS.Deploy.CLI.IntegrationTests
                 var consoleOutput = interactiveService.StdOutReader.ReadAllLines();
 
                 // Assert 'Environment Architecture' is set to 'X86_64'
-                var environmentArchitecture = Assert.IsType<string>(consoleOutput.LastOrDefault(x => x.StartsWith("13. Environment Architecture:")));
+                var environmentArchitecture = Assert.IsType<string>(consoleOutput.LastOrDefault(x => x.StartsWith("14. Environment Architecture:")));
                 var environmentArchitectureSplit = environmentArchitecture.Split(':').ToList().Select(x => x.Trim()).ToList();
                 Assert.Equal(2, environmentArchitectureSplit.Count);
                 Assert.Equal("X86_64", environmentArchitectureSplit[1]);
 
                 // Assert 'Task CPU' is set to '512'
-                var taskCpu = Assert.IsType<string>(consoleOutput.LastOrDefault(x => x.StartsWith("8 . Task CPU:")));
+                var taskCpu = Assert.IsType<string>(consoleOutput.LastOrDefault(x => x.StartsWith("9 . Task CPU:")));
                 var taskCpuSplit = taskCpu.Split(':').ToList().Select(x => x.Trim()).ToList();
                 Assert.Equal(2, taskCpuSplit.Count);
                 Assert.Equal("512", taskCpuSplit[1]);
