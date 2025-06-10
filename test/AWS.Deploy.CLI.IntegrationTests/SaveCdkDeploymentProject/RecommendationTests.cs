@@ -263,7 +263,8 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
                 directoryManager,
                 new Mock<IAWSServiceHandler>().Object,
                 new OptionSettingHandler(new Mock<IValidatorFactory>().Object),
-                deployToolWorkspaceMetadata);
+                deployToolWorkspaceMetadata,
+                new Mock<ISystemCapabilityEvaluator>().Object);
         }
 
         private async Task<string> GetCustomRecipeId(string recipeFilePath)

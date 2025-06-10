@@ -105,7 +105,9 @@ namespace AWS.Deploy.Orchestration
         {
             var processExitCode = -1;
             var containerType = "";
-            var command = "podman info --format=json | jq -r '.host.os'";
+            var command = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ?
+                "powershell -NoProfile -Command \"(podman info --format=json | ConvertFrom-Json).host.os\"" :
+                "podman info --format=json | jq -r '.host.os'";
 
             var cancellationTokenSource = new CancellationTokenSource();
             cancellationTokenSource.CancelAfter(CAPABILITY_EVALUATION_TIMEOUT_MS);
