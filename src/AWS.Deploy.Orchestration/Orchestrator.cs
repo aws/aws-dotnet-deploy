@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Amazon.EC2.Model;
@@ -43,6 +44,7 @@ namespace AWS.Deploy.Orchestration
         internal readonly IAWSServiceHandler? _awsServiceHandler;
         private readonly IOptionSettingHandler? _optionSettingHandler;
         internal readonly IDeployToolWorkspaceMetadata? _workspaceMetadata;
+        internal readonly ISystemCapabilityEvaluator? _systemCapabilityEvaluator;
 
         public Orchestrator(
             OrchestratorSession session,
@@ -59,7 +61,8 @@ namespace AWS.Deploy.Orchestration
             IDirectoryManager directoryManager,
             IAWSServiceHandler awsServiceHandler,
             IOptionSettingHandler optionSettingHandler,
-            IDeployToolWorkspaceMetadata deployToolWorkspaceMetadata)
+            IDeployToolWorkspaceMetadata deployToolWorkspaceMetadata,
+            ISystemCapabilityEvaluator systemCapabilityEvaluator)
         {
             _session = session;
             _interactiveService = interactiveService;
@@ -76,6 +79,7 @@ namespace AWS.Deploy.Orchestration
             _awsServiceHandler = awsServiceHandler;
             _optionSettingHandler = optionSettingHandler;
             _workspaceMetadata = deployToolWorkspaceMetadata;
+            _systemCapabilityEvaluator = systemCapabilityEvaluator;
         }
 
         public Orchestrator(OrchestratorSession session, IRecipeHandler recipeHandler)
@@ -261,11 +265,18 @@ namespace AWS.Deploy.Orchestration
         {
             if (_interactiveService == null)
                 throw new InvalidOperationException($"{nameof(_interactiveService)} is null as part of the orchestrator object");
+            if (_systemCapabilityEvaluator == null)
+                throw new InvalidOperationException($"{nameof(_systemCapabilityEvaluator)} is null as part of the orchestrator object");
 
             if (recommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.Container)
             {
+                var installedContainerAppInfo = await _systemCapabilityEvaluator.GetInstalledContainerAppInfo(recommendation);
+                var commandName = installedContainerAppInfo?.AppName?.ToLower();
+                if (string.IsNullOrEmpty(commandName))
+                    throw new ContainerBuildFailedException(DeployToolErrorCode.ContainerBuildFailed, "No container app (Docker or Podman) is currently installed/running on your system.", -1);
+
                 _interactiveService.LogSectionStart("Creating deployment image",
-                    "Using the docker CLI to perform a docker build to create a container image.");
+                    $"Using the {CultureInfo.CurrentCulture.TextInfo.ToTitleCase(commandName)} CLI to create a container image.");
                 try
                 {
                     await CreateContainerDeploymentBundle(cloudApplication, recommendation);

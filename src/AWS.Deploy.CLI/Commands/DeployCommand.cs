@@ -189,7 +189,8 @@ public class DeployCommand(
                 directoryManager,
                 awsServiceHandler,
                 optionSettingHandler,
-                deployToolWorkspaceMetadata);
+                deployToolWorkspaceMetadata,
+                systemCapabilityEvaluator);
 
         // Determine what recommendations are possible for the project.
         var recommendations = await GenerateDeploymentRecommendations(orchestrator, deploymentProjectPath);
