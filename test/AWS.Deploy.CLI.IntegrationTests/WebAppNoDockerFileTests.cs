@@ -214,7 +214,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
                         interactiveService.StdInWriter.Write(Environment.NewLine); // Confirm selection and deploy
                         interactiveService.StdInWriter.WriteLine("more"); // Select "Environment Architecture"
                         interactiveService.StdInWriter.WriteLine("1"); // Select "EC2 Instance Type"
-                        interactiveService.StdInWriter.WriteLine("y"); // Select "Free tier"
+                        interactiveService.StdInWriter.WriteLine("n"); // Don't select free tier which forces t3.micro to be used instead of t2.micro
                         interactiveService.StdInWriter.WriteLine("1"); // Select "x86_64"
                         interactiveService.StdInWriter.WriteLine("1"); // Select "CPU Cores"
                         interactiveService.StdInWriter.WriteLine("1"); // Select "Instance Memory"
