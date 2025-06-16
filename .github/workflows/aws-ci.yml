@@ -5,8 +5,8 @@ on:
   workflow_dispatch: 
   pull_request:
     branches:
-      - main
-      - dev
+      - v3sdk-release
+      - v3sdk-development
       - 'feature/**'
 
 permissions:

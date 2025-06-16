@@ -5,7 +5,7 @@ on:
   pull_request:
 
   push:
-    branches: ["dev", "main"]
+    branches: ["v3sdk-development", "v3sdk-release"]
 
   schedule:
     - cron: '23 20 * * 1'
