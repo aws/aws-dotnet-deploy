@@ -1,3 +1,18 @@
+## Release 2025-06-16
+
+### AWS.Deploy.CLI (2.0.0)
+* NodeJS has been removed from the generated Dockerfiles. If you have an application that requires NodeJS, you will need to add it to the generated Dockerfile and rerun the Deploy Tool.
+* Upgrade the Deploy Tool from .NET 6 to .NET 8
+* Switch from System.CommandLine to Spectre.CLI for a better CLI experience
+* Update Amazon CDK library to 2.194.0 and CDK CLI to 2.1013.0
+* Update AWS .NET SDK to V4
+* Upgrade Microsoft Templating Engine from .NET 5 to .NET 8
+* Add support for deploying .NET 10 applications across different recipes
+* Add support for Podman in addition to the existing Docker support
+* Update the minimum NodeJS version from 14.x to 18.x
+### AWS.Deploy.Recipes.CDK.Common (2.0.0)
+### AWS.Deploy.ServerMode.Client (2.0.0)
+
 ## Release 2025-06-05
 
 ### AWS.Deploy.CLI (1.30.1)
