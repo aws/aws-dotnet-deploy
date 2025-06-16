@@ -97,8 +97,11 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
             var cpuCores = instanceTypes
                 .Where(x => x.FreeTierEligible.Equals(freeTierEligible))
+                .Where(x => x.ProcessorInfo.SupportedArchitectures is not null)
                 .Where(x => x.ProcessorInfo.SupportedArchitectures.Contains(architecture))
-                .Select(x => x.VCpuInfo.DefaultCores).Distinct().OrderBy(x => x).ToList();
+                .Select(x => x.VCpuInfo.DefaultCores)
+                .Where(x => x.HasValue)
+                .Select(x => x!.Value).Distinct().OrderBy(x => x).ToList();
 
             if (cpuCores.Count == 0)
                 return _consoleUtilities.AskUserForValue("Select EC2 Instance Type:", instanceTypeDefaultValue ?? string.Empty, true);
@@ -107,9 +110,12 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
             var memory = instanceTypes
                 .Where(x => x.FreeTierEligible.Equals(freeTierEligible))
+                .Where(x => x.ProcessorInfo.SupportedArchitectures is not null)
                 .Where(x => x.ProcessorInfo.SupportedArchitectures.Contains(architecture))
                 .Where(x => x.VCpuInfo.DefaultCores.Equals(cpuCoreCount))
-                .Select(x => x.MemoryInfo.SizeInMiB).Distinct().OrderBy(x => x).ToList();
+                .Select(x => x.MemoryInfo.SizeInMiB)
+                .Where(x => x.HasValue)
+                .Select(x => x!.Value).Distinct().OrderBy(x => x).ToList();
 
             if (memory.Count == 0)
                 return _consoleUtilities.AskUserForValue("Select EC2 Instance Type:", instanceTypeDefaultValue ?? string.Empty, true);
@@ -118,6 +124,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
             var availableInstanceTypes = instanceTypes
                 .Where(x => x.FreeTierEligible.Equals(freeTierEligible))
+                .Where(x => x.ProcessorInfo.SupportedArchitectures is not null)
                 .Where(x => x.ProcessorInfo.SupportedArchitectures.Contains(architecture))
                 .Where(x => x.VCpuInfo.DefaultCores.Equals(cpuCoreCount))
                 .Where(x => x.MemoryInfo.SizeInMiB.Equals(long.Parse(memoryCount)))

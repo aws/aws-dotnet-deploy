@@ -13,20 +13,17 @@ using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using Should;
 using System.Reflection;
+using AWS.Deploy.CLI.Commands;
+using AWS.Deploy.CLI.Utilities;
+using Spectre.Console.Cli;
 
 namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
 {
     public static class Utilities
     {
-        public static async Task CreateCDKDeploymentProject(string targetApplicationPath, string saveDirectoryPath = null, bool isValid = true)
+        public static async Task CreateCDKDeploymentProject(string targetApplicationPath, string? saveDirectoryPath = null, bool isValid = true)
         {
-            var (app, interactiveService) = GetAppServiceProvider();
-            Assert.NotNull(app);
-            Assert.NotNull(interactiveService);
-
-            // Arrange input for saving the CDK deployment project
-            await interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Select default recommendation
-            await interactiveService.StdInWriter.FlushAsync();
+            var serviceCollection = GetAppServiceCollection();
 
             string[] deployArgs;
             // default save directory
@@ -34,19 +31,27 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             {
                 saveDirectoryPath = targetApplicationPath + ".Deployment";
                 deployArgs = new[] { "deployment-project", "generate", "--project-path", targetApplicationPath, "--diagnostics" };
-            }  
+            }
             else
             {
                 deployArgs = new[] { "deployment-project", "generate", "--project-path", targetApplicationPath, "--output", saveDirectoryPath, "--diagnostics" };
             }
-                
 
-            var returnCode = await app.Run(deployArgs);
+            InMemoryInteractiveService interactiveService = null!;
+            var returnCode = await serviceCollection.RunDeployToolAsync(deployArgs,
+                provider =>
+                {
+                    interactiveService = provider.GetRequiredService<InMemoryInteractiveService>();
+
+                    // Arrange input for saving the CDK deployment project
+                    interactiveService.StdInWriter.WriteLine(Environment.NewLine); // Select default recommendation
+                    interactiveService.StdInWriter.Flush();
+                });
 
             // Verify project is saved
             var stdOut = interactiveService.StdOutReader.ReadAllLines();
             var successMessage = $"Saving AWS CDK deployment project to: {saveDirectoryPath}";
-            
+
             if (!isValid)
             {
                 returnCode.ShouldEqual(CommandReturnCodes.USER_ERROR);
@@ -56,23 +61,12 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             returnCode.ShouldEqual(CommandReturnCodes.SUCCESS);
             stdOut.ShouldContain(successMessage);
 
-            VerifyCreatedArtifacts(targetApplicationPath, saveDirectoryPath);
+            VerifyCreatedArtifacts(targetApplicationPath, saveDirectoryPath, interactiveService);
         }
 
-        public static async Task CreateCDKDeploymentProjectWithRecipeName(string targetApplicationPath, string recipeName, string option, string saveDirectoryPath = null, bool isValid = true, bool underSourceControl = true)
+        public static async Task CreateCDKDeploymentProjectWithRecipeName(string targetApplicationPath, string recipeName, string option, string? saveDirectoryPath = null, bool isValid = true, bool underSourceControl = true)
         {
-            var (app, interactiveService) = GetAppServiceProvider();
-            Assert.NotNull(app);
-            Assert.NotNull(interactiveService);
-
-            // Arrange input for saving the CDK deployment project
-            await interactiveService.StdInWriter.WriteLineAsync(option); // select recipe to save the CDK deployment project
-            if (!underSourceControl)
-            {
-                await interactiveService.StdInWriter.WriteAsync("y"); // proceed to save without source control.
-            }
-            await interactiveService.StdInWriter.FlushAsync();
-
+            var serviceCollection = GetAppServiceCollection();
 
             string[] deployArgs;
             // default save directory
@@ -86,8 +80,20 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
                 deployArgs = new[] { "deployment-project", "generate", "--project-path", targetApplicationPath, "--output", saveDirectoryPath, "--project-display-name", recipeName, "--diagnostics" };
             }
 
+            InMemoryInteractiveService interactiveService = null!;
+            var returnCode = await serviceCollection.RunDeployToolAsync(deployArgs,
+                provider =>
+                {
+                    interactiveService = provider.GetRequiredService<InMemoryInteractiveService>();
 
-            var returnCode = await app.Run(deployArgs);
+                    // Arrange input for saving the CDK deployment project
+                    interactiveService.StdInWriter.WriteLine(option); // select recipe to save the CDK deployment project
+                    if (!underSourceControl)
+                    {
+                        interactiveService.StdInWriter.Write("y"); // proceed to save without source control.
+                    }
+                    interactiveService.StdInWriter.Flush();
+                });
 
             // Verify project is saved
             var stdOut = interactiveService.StdOutReader.ReadAllLines();
@@ -102,32 +108,39 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             returnCode.ShouldEqual(CommandReturnCodes.SUCCESS);
             stdOut.ShouldContain(successMessage);
 
-            VerifyCreatedArtifacts(targetApplicationPath, saveDirectoryPath);
+            VerifyCreatedArtifacts(targetApplicationPath, saveDirectoryPath, interactiveService);
         }
 
-        private static (App app, InMemoryInteractiveService interactiveService) GetAppServiceProvider()
+        private static IServiceCollection GetAppServiceCollection()
         {
             var serviceCollection = new ServiceCollection();
 
             serviceCollection.AddCustomServices();
             serviceCollection.AddTestServices();
 
-            var serviceProvider = serviceCollection.BuildServiceProvider();
-
-            var app = serviceProvider.GetService<App>();
-            var interactiveService = serviceProvider.GetService<InMemoryInteractiveService>();
-            return (app, interactiveService);
+            return serviceCollection;
         }
 
-        private static void VerifyCreatedArtifacts(string targetApplicationPath, string saveDirectoryPath)
+        private static void VerifyCreatedArtifacts(string targetApplicationPath, string saveDirectoryPath, InMemoryInteractiveService interactiveService)
         {
-            var saveDirectoryName = new DirectoryInfo(saveDirectoryPath).Name;
+            var saveDirectory = new DirectoryInfo(saveDirectoryPath);
+            FileInfo[] files = saveDirectory.GetFiles();
+            if (files.Length == 0)
+            {
+                interactiveService.WriteLine($"No files found in '{saveDirectoryPath}'.");
+                return;
+            }
+            interactiveService.WriteLine($"Files in '{saveDirectoryPath}':");
+            foreach (FileInfo file in files)
+            {
+                interactiveService.WriteLine(file.Name);
+            }
 
             Assert.True(Directory.Exists(saveDirectoryPath));
             Assert.True(File.Exists(Path.Combine(saveDirectoryPath, "AppStack.cs")));
             Assert.True(File.Exists(Path.Combine(saveDirectoryPath, "Program.cs")));
             Assert.True(File.Exists(Path.Combine(saveDirectoryPath, "cdk.json")));
-            Assert.True(File.Exists(Path.Combine(saveDirectoryPath, $"{saveDirectoryName}.recipe")));
+            Assert.True(File.Exists(Path.Combine(saveDirectoryPath, $"{saveDirectory.Name}.recipe")));
             Assert.True(File.Exists(Path.Combine(targetApplicationPath, "aws-deployments.json")));
         }
     }

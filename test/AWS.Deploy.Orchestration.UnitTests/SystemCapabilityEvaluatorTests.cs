@@ -20,10 +20,11 @@ namespace AWS.Deploy.Orchestration.UnitTests
     {
         private const string _expectedNodeCommand = "node --version";
         private readonly string _expectedDockerCommand = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "docker info -f \"{{.OSType}}\"" : "docker info";
+        private readonly string _expectedPodmanCommand = "podman info --format=json | jq -r '.host.os'";
 
-        private readonly Recommendation _cdkAndContainerRecommendation = new(new RecipeDefinition("", "", "", DeploymentTypes.CdkProject, DeploymentBundleTypes.Container, "", "", "", "", ""), null, 100, null);
-        private readonly Recommendation _cdkOnlyRecommendation = new(new RecipeDefinition("", "", "", DeploymentTypes.CdkProject, DeploymentBundleTypes.DotnetPublishZipFile, "", "", "", "", ""), null, 100, null);
-        private readonly Recommendation _containerOnlyRecommendation = new(new RecipeDefinition("", "", "", DeploymentTypes.ElasticContainerRegistryImage, DeploymentBundleTypes.Container, "", "", "", "", ""), null, 100, null);
+        private readonly Recommendation _cdkAndContainerRecommendation = new(new RecipeDefinition("", "", "", DeploymentTypes.CdkProject, DeploymentBundleTypes.Container, "", "", "", "", ""), null!, 100, null!);
+        private readonly Recommendation _cdkOnlyRecommendation = new(new RecipeDefinition("", "", "", DeploymentTypes.CdkProject, DeploymentBundleTypes.DotnetPublishZipFile, "", "", "", "", ""), null!, 100, null!);
+        private readonly Recommendation _containerOnlyRecommendation = new(new RecipeDefinition("", "", "", DeploymentTypes.ElasticContainerRegistryImage, DeploymentBundleTypes.Container, "", "", "", "", ""), null!, 100, null!);
 
         [Fact]
         public async Task CdkAndContainerRecipe_NoMissing_Cache()
@@ -31,20 +32,22 @@ namespace AWS.Deploy.Orchestration.UnitTests
             var commandLineWrapper = new TestCommandLineWrapper();
             commandLineWrapper.MockedResults.Add(_expectedNodeCommand, new TryRunResult { ExitCode = 0, StandardOut = "v18.16.1" });
             commandLineWrapper.MockedResults.Add(_expectedDockerCommand, new TryRunResult { ExitCode = 0, StandardOut = "linux" });
+            commandLineWrapper.MockedResults.Add(_expectedPodmanCommand, new TryRunResult { ExitCode = 0, StandardOut = "linux" });
 
             var evaluator = new SystemCapabilityEvaluator(commandLineWrapper);
             var missingCapabilities = await evaluator.EvaluateSystemCapabilities(_cdkAndContainerRecommendation);
 
             Assert.Empty(missingCapabilities);
-            Assert.Equal(2, commandLineWrapper.CommandsToExecute.Count);
+            Assert.Equal(3, commandLineWrapper.CommandsToExecute.Count);
             Assert.Contains(commandLineWrapper.CommandsToExecute, command => command.Command == _expectedNodeCommand);
             Assert.Contains(commandLineWrapper.CommandsToExecute, command => command.Command == _expectedDockerCommand);
+            Assert.Contains(commandLineWrapper.CommandsToExecute, command => command.Command == _expectedPodmanCommand);
 
             // Evaluate again, to verify that the results were cached
             missingCapabilities = await evaluator.EvaluateSystemCapabilities(_cdkAndContainerRecommendation);
 
             Assert.Empty(missingCapabilities);
-            Assert.Equal(2, commandLineWrapper.CommandsToExecute.Count); // we still expect the first two commands, since the results should be cached
+            Assert.Equal(3, commandLineWrapper.CommandsToExecute.Count); // we still expect the first two commands, since the results should be cached
         }
 
         [Fact]
@@ -53,21 +56,23 @@ namespace AWS.Deploy.Orchestration.UnitTests
             var commandLineWrapper = new TestCommandLineWrapper();
             commandLineWrapper.MockedResults.Add(_expectedNodeCommand, new TryRunResult { ExitCode = 0, StandardOut = "v18.16.1" });
             commandLineWrapper.MockedResults.Add(_expectedDockerCommand, new TryRunResult { ExitCode = 0, StandardOut = "linux" });
+            commandLineWrapper.MockedResults.Add(_expectedPodmanCommand, new TryRunResult { ExitCode = 0, StandardOut = "linux" });
 
             var evaluator = new SystemCapabilityEvaluator(commandLineWrapper);
             var missingCapabilities = await evaluator.EvaluateSystemCapabilities(_cdkAndContainerRecommendation);
 
             Assert.Empty(missingCapabilities);
-            Assert.Equal(2, commandLineWrapper.CommandsToExecute.Count);
+            Assert.Equal(3, commandLineWrapper.CommandsToExecute.Count);
             Assert.Contains(commandLineWrapper.CommandsToExecute, command => command.Command == _expectedNodeCommand);
             Assert.Contains(commandLineWrapper.CommandsToExecute, command => command.Command == _expectedDockerCommand);
+            Assert.Contains(commandLineWrapper.CommandsToExecute, command => command.Command == _expectedPodmanCommand);
 
             // Evaluate again after clearing the cache to verify that the checks are run again
             evaluator.ClearCachedCapabilityChecks();
             missingCapabilities = await evaluator.EvaluateSystemCapabilities(_cdkAndContainerRecommendation);
 
             Assert.Empty(missingCapabilities);
-            Assert.Equal(4, commandLineWrapper.CommandsToExecute.Count);
+            Assert.Equal(6, commandLineWrapper.CommandsToExecute.Count);
         }
 
         [Fact]
@@ -76,20 +81,22 @@ namespace AWS.Deploy.Orchestration.UnitTests
             var commandLineWrapper = new TestCommandLineWrapper();
             commandLineWrapper.MockedResults.Add(_expectedNodeCommand, new TryRunResult { ExitCode = 0, StandardOut = "v18.16.1" });
             commandLineWrapper.MockedResults.Add(_expectedDockerCommand, new TryRunResult { ExitCode = -1, StandardOut = "" });
+            commandLineWrapper.MockedResults.Add(_expectedPodmanCommand, new TryRunResult { ExitCode = -1, StandardOut = "" });
 
             var evaluator = new SystemCapabilityEvaluator(commandLineWrapper);
             var missingCapabilities = await evaluator.EvaluateSystemCapabilities(_cdkAndContainerRecommendation);
 
             Assert.Single(missingCapabilities);
-            Assert.Equal(2, commandLineWrapper.CommandsToExecute.Count);
+            Assert.Equal(3, commandLineWrapper.CommandsToExecute.Count);
             Assert.Contains(commandLineWrapper.CommandsToExecute, command => command.Command == _expectedNodeCommand);
             Assert.Contains(commandLineWrapper.CommandsToExecute, command => command.Command == _expectedDockerCommand);
+            Assert.Contains(commandLineWrapper.CommandsToExecute, command => command.Command == _expectedPodmanCommand);
 
             // Evaluate again, to verify that it will check Docker again
             missingCapabilities = await evaluator.EvaluateSystemCapabilities(_cdkAndContainerRecommendation);
 
             Assert.Single(missingCapabilities);
-            Assert.Equal(3, commandLineWrapper.CommandsToExecute.Count);  // verify that this was incremented for the second check
+            Assert.Equal(5, commandLineWrapper.CommandsToExecute.Count);  // verify that this was incremented for the second check
         }
 
         [Fact]
@@ -98,19 +105,21 @@ namespace AWS.Deploy.Orchestration.UnitTests
             var commandLineWrapper = new TestCommandLineWrapper();
             commandLineWrapper.MockedResults.Add(_expectedNodeCommand, new TryRunResult { ExitCode = 0, StandardOut = "v18.16.1" });
             commandLineWrapper.MockedResults.Add(_expectedDockerCommand, new TryRunResult { ExitCode = 0, StandardOut = "linux" });
+            commandLineWrapper.MockedResults.Add(_expectedPodmanCommand, new TryRunResult { ExitCode = 0, StandardOut = "linux" });
 
             var evaluator = new SystemCapabilityEvaluator(commandLineWrapper);
             var missingCapabilities = await evaluator.EvaluateSystemCapabilities(_containerOnlyRecommendation);
 
             Assert.Empty(missingCapabilities);
-            Assert.Single(commandLineWrapper.CommandsToExecute);    // only expect Docker, since don't need CDK for the ECR recipe
+            Assert.Equal(2, commandLineWrapper.CommandsToExecute.Count);    // expect Docker and Podman, since don't need CDK for the ECR recipe
             Assert.Contains(commandLineWrapper.CommandsToExecute, command => command.Command == _expectedDockerCommand);
+            Assert.Contains(commandLineWrapper.CommandsToExecute, command => command.Command == _expectedPodmanCommand);
 
             // Evaluate again, to verify that the results were cached
             missingCapabilities = await evaluator.EvaluateSystemCapabilities(_containerOnlyRecommendation);
 
             Assert.Empty(missingCapabilities);
-            Assert.Single(commandLineWrapper.CommandsToExecute); // we only expect the first command, since the results should be cached
+            Assert.Equal(2, commandLineWrapper.CommandsToExecute.Count); // we expect the same 2 commands, since the results should be cached
         }
 
         [Fact]
@@ -119,19 +128,21 @@ namespace AWS.Deploy.Orchestration.UnitTests
             var commandLineWrapper = new TestCommandLineWrapper();
             commandLineWrapper.MockedResults.Add(_expectedNodeCommand, new TryRunResult { ExitCode = 0, StandardOut = "v18.16.1" });
             commandLineWrapper.MockedResults.Add(_expectedDockerCommand, new TryRunResult { ExitCode = -1, StandardOut = "windows" });
+            commandLineWrapper.MockedResults.Add(_expectedPodmanCommand, new TryRunResult { ExitCode = -1, StandardOut = "windows" });
 
             var evaluator = new SystemCapabilityEvaluator(commandLineWrapper);
             var missingCapabilities = await evaluator.EvaluateSystemCapabilities(_containerOnlyRecommendation);
 
             Assert.Single(missingCapabilities);
-            Assert.Single(commandLineWrapper.CommandsToExecute);    // only expect Docker, since don't need CDK for the ECR recipe
+            Assert.Equal(2, commandLineWrapper.CommandsToExecute.Count);    // expect Docker and Podman, since don't need CDK for the ECR recipe
             Assert.Contains(commandLineWrapper.CommandsToExecute, command => command.Command == _expectedDockerCommand);
+            Assert.Contains(commandLineWrapper.CommandsToExecute, command => command.Command == _expectedPodmanCommand);
 
             // Evaluate again, to verify that it checks Docker again
             missingCapabilities = await evaluator.EvaluateSystemCapabilities(_containerOnlyRecommendation);
 
             Assert.Single(missingCapabilities);
-            Assert.Equal(2, commandLineWrapper.CommandsToExecute.Count); // verify that this was incremented for the second check
+            Assert.Equal(4, commandLineWrapper.CommandsToExecute.Count); // verify that this was incremented for the second check
         }
 
         [Fact]
@@ -147,19 +158,21 @@ namespace AWS.Deploy.Orchestration.UnitTests
             var commandLineWrapper = new TestCommandLineWrapper();
             commandLineWrapper.MockedResults.Add(_expectedNodeCommand, new TryRunResult { ExitCode = 0, StandardOut = "v18.16.1" });
             commandLineWrapper.MockedResults.Add(_expectedDockerCommand, new TryRunResult { ExitCode = 0, StandardOut = "windows" });
+            commandLineWrapper.MockedResults.Add(_expectedPodmanCommand, new TryRunResult { ExitCode = 0, StandardOut = "windows" });
 
             var evaluator = new SystemCapabilityEvaluator(commandLineWrapper);
             var missingCapabilities = await evaluator.EvaluateSystemCapabilities(_containerOnlyRecommendation);
 
             Assert.Single(missingCapabilities);
-            Assert.Single(commandLineWrapper.CommandsToExecute);    // only expect Docker, since don't need CDK for the ECR recipe
+            Assert.Equal(2, commandLineWrapper.CommandsToExecute.Count);    // expect Docker and Podman, since don't need CDK for the ECR recipe
             Assert.Contains(commandLineWrapper.CommandsToExecute, command => command.Command == _expectedDockerCommand);
+            Assert.Contains(commandLineWrapper.CommandsToExecute, command => command.Command == _expectedPodmanCommand);
 
             // Evaluate again, to verify that it checks Docker again
             missingCapabilities = await evaluator.EvaluateSystemCapabilities(_containerOnlyRecommendation);
 
             Assert.Single(missingCapabilities);
-            Assert.Equal(2, commandLineWrapper.CommandsToExecute.Count); // verify that this was incremented for the second check
+            Assert.Equal(4, commandLineWrapper.CommandsToExecute.Count); // verify that this was incremented for the second check
         }
 
         [Fact]
@@ -168,6 +181,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
             var commandLineWrapper = new TestCommandLineWrapper();
             commandLineWrapper.MockedResults.Add(_expectedNodeCommand, new TryRunResult { ExitCode = 0, StandardOut = "v18.16.1" });
             commandLineWrapper.MockedResults.Add(_expectedDockerCommand, new TryRunResult { ExitCode = 0, StandardOut = "linux" });
+            commandLineWrapper.MockedResults.Add(_expectedPodmanCommand, new TryRunResult { ExitCode = 0, StandardOut = "linux" });
 
             var evaluator = new SystemCapabilityEvaluator(commandLineWrapper);
             var missingCapabilities = await evaluator.EvaluateSystemCapabilities(_cdkOnlyRecommendation);
@@ -189,6 +203,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
             var commandLineWrapper = new TestCommandLineWrapper();
             commandLineWrapper.MockedResults.Add(_expectedNodeCommand, new TryRunResult { ExitCode = 1, StandardOut = "" });
             commandLineWrapper.MockedResults.Add(_expectedDockerCommand, new TryRunResult { ExitCode = 0, StandardOut = "linux" });
+            commandLineWrapper.MockedResults.Add(_expectedPodmanCommand, new TryRunResult { ExitCode = 0, StandardOut = "linux" });
 
             var evaluator = new SystemCapabilityEvaluator(commandLineWrapper);
             var missingCapabilities = await evaluator.EvaluateSystemCapabilities(_cdkOnlyRecommendation);
@@ -210,6 +225,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
             var commandLineWrapper = new TestCommandLineWrapper();
             commandLineWrapper.MockedResults.Add(_expectedNodeCommand, new TryRunResult { ExitCode = 0, StandardOut = "v10.24.1" });
             commandLineWrapper.MockedResults.Add(_expectedDockerCommand, new TryRunResult { ExitCode = 0, StandardOut = "linux" });
+            commandLineWrapper.MockedResults.Add(_expectedPodmanCommand, new TryRunResult { ExitCode = 0, StandardOut = "linux" });
 
             var evaluator = new SystemCapabilityEvaluator(commandLineWrapper);
             var missingCapabilities = await evaluator.EvaluateSystemCapabilities(_cdkOnlyRecommendation);

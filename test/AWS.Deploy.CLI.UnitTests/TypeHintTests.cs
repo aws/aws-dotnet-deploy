@@ -67,9 +67,9 @@ namespace AWS.Deploy.CLI.UnitTests
                     .Returns(ddbClient.Object);
 
             var awsResourceQueryer = new AWSResourceQueryer(awsClientFactory.Object);
-            var typeHintCommand = new DynamoDBTableCommand(awsResourceQueryer, null, _optionSettingHandler);
+            var typeHintCommand = new DynamoDBTableCommand(awsResourceQueryer, null!, _optionSettingHandler);
 
-            var resources = await typeHintCommand.GetResources(null, null);
+            var resources = await typeHintCommand.GetResources(null!, null!);
             Assert.Equal(2, resources.Rows.Count);
             Assert.Equal("Table1", resources.Rows[0].DisplayName);
             Assert.Equal("Table1", resources.Rows[0].SystemName);
@@ -97,9 +97,9 @@ namespace AWS.Deploy.CLI.UnitTests
                     .Returns(sqsClient.Object);
 
             var awsResourceQueryer = new AWSResourceQueryer(awsClientFactory.Object);
-            var typeHintCommand = new SQSQueueUrlCommand(awsResourceQueryer, null, _optionSettingHandler);
+            var typeHintCommand = new SQSQueueUrlCommand(awsResourceQueryer, null!, _optionSettingHandler);
 
-            var resources = await typeHintCommand.GetResources(null, null);
+            var resources = await typeHintCommand.GetResources(null!, null!);
             Assert.Equal(2, resources.Rows.Count);
             Assert.Equal("queue1", resources.Rows[0].DisplayName);
             Assert.Equal("https://sqs.us-west-2.amazonaws.com/123412341234/queue1", resources.Rows[0].SystemName);
@@ -127,9 +127,9 @@ namespace AWS.Deploy.CLI.UnitTests
                     .Returns(snsClient.Object);
 
             var awsResourceQueryer = new AWSResourceQueryer(awsClientFactory.Object);
-            var typeHintCommand = new SNSTopicArnsCommand(awsResourceQueryer, null, _optionSettingHandler);
+            var typeHintCommand = new SNSTopicArnsCommand(awsResourceQueryer, null!, _optionSettingHandler);
 
-            var resources = await typeHintCommand.GetResources(null, null);
+            var resources = await typeHintCommand.GetResources(null!, null!);
             Assert.Equal(2, resources.Rows.Count);
             Assert.Equal("Topic1", resources.Rows[0].DisplayName);
             Assert.Equal("arn:aws:sns:us-west-2:123412341234:Topic1", resources.Rows[0].SystemName);
@@ -149,9 +149,9 @@ namespace AWS.Deploy.CLI.UnitTests
                     .Returns(s3Client.Object);
 
             var awsResourceQueryer = new AWSResourceQueryer(awsClientFactory.Object);
-            var typeHintCommand = new S3BucketNameCommand(awsResourceQueryer, null, _optionSettingHandler);
+            var typeHintCommand = new S3BucketNameCommand(awsResourceQueryer, null!, _optionSettingHandler);
 
-            var resources = await typeHintCommand.GetResources(null, null);
+            var resources = await typeHintCommand.GetResources(null!, null!);
             Assert.Equal(2, resources.Rows.Count);
             Assert.Equal("Bucket1", resources.Rows[0].DisplayName);
             Assert.Equal("Bucket1", resources.Rows[0].SystemName);
@@ -164,7 +164,7 @@ namespace AWS.Deploy.CLI.UnitTests
         [InlineData(new [] { SupportedArchitecture.X86_64 })]
         [InlineData(new [] { SupportedArchitecture.Arm64 })]
         [InlineData(new [] { SupportedArchitecture.X86_64, SupportedArchitecture.Arm64 })]
-        public async Task TestEnvironmentArchitectureTypeHint_NoArchitectureDefined(SupportedArchitecture[] architectures)
+        public async Task TestEnvironmentArchitectureTypeHint_NoArchitectureDefined(SupportedArchitecture[]? architectures)
         {
             var archList = architectures?.ToList();
             var recipeDefinition = new Mock<RecipeDefinition>(
@@ -184,9 +184,9 @@ namespace AWS.Deploy.CLI.UnitTests
             recipeDefinition.SupportedArchitectures = archList;
             var recommendation = new Recommendation(recipeDefinition, project, 0, new Dictionary<string, object>());
 
-            var typeHintCommand = new EnvironmentArchitectureCommand(null, _optionSettingHandler);
+            var typeHintCommand = new EnvironmentArchitectureCommand(null!, _optionSettingHandler);
 
-            var resources = await typeHintCommand.GetResources(recommendation, null);
+            var resources = await typeHintCommand.GetResources(recommendation, null!);
 
             if (archList is null)
             {
@@ -197,7 +197,7 @@ namespace AWS.Deploy.CLI.UnitTests
             }
             else
             {
-                Assert.Equal(architectures.Length, resources.Rows.Count);
+                Assert.Equal(architectures?.Length, resources.Rows.Count);
                 foreach (var row in resources.Rows)
                 {
                     Assert.Contains(archList, x => x.ToString().Equals(row.DisplayName));
@@ -238,8 +238,8 @@ namespace AWS.Deploy.CLI.UnitTests
             awsResourceQueryer
                 .Setup(x => x.GetElasticBeanstalkPlatformArns(It.IsAny<string>(), BeanstalkPlatformType.Linux))
                 .ReturnsAsync(platformSummaries);
-            var typeHintCommand = new DotnetBeanstalkPlatformArnCommand(awsResourceQueryer.Object, null, _optionSettingHandler);
-            var resources = await typeHintCommand.GetResources(recommendation, null);
+            var typeHintCommand = new DotnetBeanstalkPlatformArnCommand(awsResourceQueryer.Object, null!, _optionSettingHandler);
+            var resources = await typeHintCommand.GetResources(recommendation, null!);
 
             var row = Assert.Single(resources.Rows);
             Assert.Equal(".NET 8 running on 64bit Amazon Linux 2023 v3.1.3", row.DisplayName);
@@ -281,8 +281,8 @@ namespace AWS.Deploy.CLI.UnitTests
             awsResourceQueryer
                 .Setup(x => x.GetElasticBeanstalkPlatformArns(It.IsAny<string>(), BeanstalkPlatformType.Windows))
                 .ReturnsAsync(platformSummaries);
-            var typeHintCommand = new DotnetWindowsBeanstalkPlatformArnCommand(awsResourceQueryer.Object, null, _optionSettingHandler);
-            var resources = await typeHintCommand.GetResources(recommendation, null);
+            var typeHintCommand = new DotnetWindowsBeanstalkPlatformArnCommand(awsResourceQueryer.Object, null!, _optionSettingHandler);
+            var resources = await typeHintCommand.GetResources(recommendation, null!);
 
             var row = Assert.Single(resources.Rows);
             Assert.Equal("IIS 10.0 running on 64bit Windows Server 2016 v2.0.0", row.DisplayName);

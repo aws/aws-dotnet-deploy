@@ -795,7 +795,8 @@ namespace AWS.Deploy.CLI.ServerMode.Controllers
                                     serviceProvider.GetRequiredService<IDirectoryManager>(),
                                     serviceProvider.GetRequiredService<IAWSServiceHandler>(),
                                     serviceProvider.GetRequiredService<IOptionSettingHandler>(),
-                                    serviceProvider.GetRequiredService<IDeployToolWorkspaceMetadata>()
+                                    serviceProvider.GetRequiredService<IDeployToolWorkspaceMetadata>(),
+                                    serviceProvider.GetRequiredService<ISystemCapabilityEvaluator>()
                                 );
         }
     }

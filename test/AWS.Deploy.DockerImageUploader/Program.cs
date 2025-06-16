@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using AWS.Deploy.CLI.Extensions;
 using System.Threading.Tasks;
 using System;
+using AWS.Deploy.CLI.Utilities;
 
 namespace AWS.Deploy.DockerImageUploader
 {

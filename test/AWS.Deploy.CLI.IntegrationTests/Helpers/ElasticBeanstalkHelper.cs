@@ -128,24 +128,24 @@ namespace AWS.Deploy.CLI.IntegrationTests.Helpers
                 var responseEnvironments = await _client.DescribeEnvironmentsAsync(requestEnvironment);
                 environment = responseEnvironments.Environments[0];
 
-                requestEvents.StartTimeUtc = lastEventDate;
+                requestEvents.StartTime = lastEventDate;
                 var responseEvents = await _client.DescribeEventsAsync(requestEvents);
                 if (responseEvents.Events.Any())
                 {
                     for (var i = responseEvents.Events.Count - 1; i >= 0; i--)
                     {
                         var evnt = responseEvents.Events[i];
-                        if (evnt.EventDate <= lastEventDate)
+                        if (evnt.EventDate == null || evnt.EventDate <= lastEventDate)
                             continue;
 
-                        _interactiveService.WriteLine(evnt.EventDate.ToLocalTime() + "    " + evnt.Severity + "    " + evnt.Message);
+                        _interactiveService.WriteLine(evnt.EventDate.Value.ToLocalTime() + "    " + evnt.Severity + "    " + evnt.Message);
                         if (evnt.Severity == EventSeverity.ERROR || evnt.Severity == EventSeverity.FATAL)
                         {
                             success = false;
                         }
                     }
 
-                    lastEventDate = responseEvents.Events[0].EventDate;
+                    lastEventDate = responseEvents.Events[0].EventDate ?? lastEventDate;
                 }
             } while (environment.Status == EnvironmentStatus.Launching || environment.Status == EnvironmentStatus.Updating);
 

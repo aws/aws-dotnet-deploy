@@ -9,7 +9,7 @@ namespace AWS.Deploy.Common
 {
     public interface IAWSClientFactory
     {
-        T GetAWSClient<T>(string? awsRegion = null) where T : IAmazonService;
+        T GetAWSClient<T>(string? awsRegion = null) where T : class, IAmazonService;
         void ConfigureAWSOptions(Action<AWSOptions> awsOptionsAction);
     }
 }

@@ -14,10 +14,10 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
             var testsPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             while (testsPath != null && !string.Equals(new DirectoryInfo(testsPath).Name, "test", StringComparison.OrdinalIgnoreCase))
             {
-                testsPath = Directory.GetParent(testsPath).FullName;
+                testsPath = Directory.GetParent(testsPath)!.FullName;
             }
 
-            return Path.Combine(testsPath, "..", "testapps", projectName);
+            return Path.Combine(testsPath!, "..", "testapps", projectName);
         }
 
         public static string ResolvePathToSolution()
@@ -25,10 +25,10 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
             var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             while (path != null && !string.Equals(new DirectoryInfo(path).Name, "aws-dotnet-deploy", StringComparison.OrdinalIgnoreCase))
             {
-                path = Directory.GetParent(path).FullName;
+                path = Directory.GetParent(path)!.FullName;
             }
 
-            return new DirectoryInfo(Path.Combine(path, "AWS.Deploy.sln")).FullName;
+            return new DirectoryInfo(Path.Combine(path!, "AWS.Deploy.sln")).FullName;
         }
 
     }

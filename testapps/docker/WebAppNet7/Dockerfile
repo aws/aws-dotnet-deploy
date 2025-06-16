@@ -13,13 +13,7 @@ WORKDIR "/src/"
 RUN dotnet build "WebAppNet7.csproj" -c Release -o /app/build -a $TARGETARCH
 
 FROM build AS publish
-RUN apt-get update -yq \
-    && apt-get install -yq ca-certificates curl gnupg \
-    && mkdir -p /etc/apt/keyrings \
-    && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
-    && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_22.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list \
-    && apt-get update -yq \
-    && apt-get install nodejs -yq
+ARG TARGETARCH
 RUN dotnet publish "WebAppNet7.csproj" -c Release -o /app/publish -a $TARGETARCH
 
 FROM base AS final

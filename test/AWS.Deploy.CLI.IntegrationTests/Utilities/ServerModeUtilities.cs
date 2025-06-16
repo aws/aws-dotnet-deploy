@@ -48,7 +48,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.Utilities
             Assert.NotEmpty(getRecommendationOutput.Recommendations);
 
             var beanstalkRecommendation =
-                getRecommendationOutput.Recommendations.FirstOrDefault(x => string.Equals(x.RecipeId, recipeId));
+                getRecommendationOutput.Recommendations.First(x => string.Equals(x.RecipeId, recipeId));
             Assert.NotNull(beanstalkRecommendation);
 
             await restClient.SetDeploymentTargetAsync(sessionId,
@@ -81,7 +81,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.Utilities
             // Do an initial delay to avoid a race condition of the status being checked before the deployment has kicked off.
             await Task.Delay(TimeSpan.FromSeconds(3));
 
-            GetDeploymentStatusOutput output = null;
+            GetDeploymentStatusOutput output = null!;
 
             await Orchestration.Utilities.Helpers.WaitUntil(async () =>
             {

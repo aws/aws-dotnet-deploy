@@ -12,7 +12,7 @@ dotnet-aws ...
 #### Step 1: Create the ASP.NET Web application
 
 ```
-dotnet new web -n HelloWorld -f net6.0
+dotnet new web -n HelloWorld -f net8.0
 ```
 
 #### Step 2: cd to the project folder

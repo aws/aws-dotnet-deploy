@@ -1,7 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>Latest</LangVersion>
     <Product>AWS .NET deployment tool CDK Utilities</Product>
     <Description>Utility code used in CDK recipes used by the AWS .NET deployment tool. This package is not intended for direct usage.</Description>
     <PackageId>AWS.Deploy.Recipes.CDK.Common</PackageId>
@@ -14,7 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Amazon.CDK.Lib" Version="2.171.1" />
+    <PackageReference Include="Amazon.CDK.Lib" Version="2.194.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.1" />
   </ItemGroup>
 

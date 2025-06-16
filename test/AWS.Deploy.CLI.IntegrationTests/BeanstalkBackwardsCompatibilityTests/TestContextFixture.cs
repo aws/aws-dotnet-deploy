@@ -15,7 +15,6 @@ using AWS.Deploy.CLI.IntegrationTests.Services;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.IO;
-using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -28,7 +27,6 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests
     /// </summary>
     public class TestContextFixture : IAsyncLifetime
     {
-        public readonly App App;
         public readonly HttpHelper HttpHelper;
         public readonly IAWSResourceQueryer AWSResourceQueryer;
         public readonly TestAppManager TestAppManager;
@@ -39,46 +37,43 @@ namespace AWS.Deploy.CLI.IntegrationTests.BeanstalkBackwardsCompatibilityTests
         public readonly InMemoryInteractiveService InteractiveService;
         public readonly ElasticBeanstalkHelper EBHelper;
         public readonly IAMHelper IAMHelper;
+        public readonly IServiceCollection ServiceCollection;
 
         public readonly string ApplicationName;
         public readonly string EnvironmentName;
         public readonly string VersionLabel;
         public readonly string RoleName;
-        public string EnvironmentId;
+        public string? EnvironmentId;
 
         public TestContextFixture()
         {
-            var serviceCollection = new ServiceCollection();
+            ServiceCollection = new ServiceCollection();
 
-            serviceCollection.AddCustomServices();
-            serviceCollection.AddTestServices();
+            ServiceCollection.AddCustomServices();
+            ServiceCollection.AddTestServices();
 
-            var serviceProvider = serviceCollection.BuildServiceProvider();
-
-            var awsClientFactory = serviceProvider.GetService<IAWSClientFactory>();
+            var serviceProvider = ServiceCollection.BuildServiceProvider();
+            var awsClientFactory = serviceProvider.GetRequiredService<IAWSClientFactory>();
             awsClientFactory.ConfigureAWSOptions((options) =>
             {
                 options.Region = Amazon.RegionEndpoint.USWest2;
             });
 
-            App = serviceProvider.GetService<App>();
-            Assert.NotNull(App);
-
-            InteractiveService = serviceProvider.GetService<InMemoryInteractiveService>();
+            InteractiveService = serviceProvider.GetRequiredService<InMemoryInteractiveService>();
             Assert.NotNull(InteractiveService);
 
-            ToolInteractiveService = serviceProvider.GetService<IToolInteractiveService>();
+            ToolInteractiveService = serviceProvider.GetRequiredService<IToolInteractiveService>();
 
-            AWSResourceQueryer = serviceProvider.GetService<IAWSResourceQueryer>();
+            AWSResourceQueryer = serviceProvider.GetRequiredService<IAWSResourceQueryer>();
             Assert.NotNull(AWSResourceQueryer);
 
-            CommandLineWrapper = serviceProvider.GetService<ICommandLineWrapper>();
+            CommandLineWrapper = serviceProvider.GetRequiredService<ICommandLineWrapper>();
             Assert.NotNull(CommandLineWrapper);
 
-            ZipFileManager = serviceProvider.GetService<IZipFileManager>();
+            ZipFileManager = serviceProvider.GetRequiredService<IZipFileManager>();
             Assert.NotNull(ZipFileManager);
 
-            DirectoryManager = serviceProvider.GetService<IDirectoryManager>();
+            DirectoryManager = serviceProvider.GetRequiredService<IDirectoryManager>();
             Assert.NotNull(DirectoryManager);
 
             HttpHelper = new HttpHelper(InteractiveService);

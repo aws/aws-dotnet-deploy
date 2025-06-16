@@ -28,7 +28,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
         private async Task<List<string>> GetData()
         {
-            return await _awsResourceQueryer.ListOfDyanmoDBTables();
+            return await _awsResourceQueryer.ListOfDyanmoDBTables() ?? new List<string>();
         }
 
         public async Task<TypeHintResourceTable> GetResources(Recommendation recommendation, OptionSettingItem optionSetting)

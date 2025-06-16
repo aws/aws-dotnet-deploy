@@ -181,7 +181,8 @@ namespace ConsoleAppEcsFargateService
                 Cluster = EcsCluster,
                 TaskDefinition = AppTaskDefinition,
                 AssignPublicIp = settings.Vpc.IsDefault,
-                DesiredCount = settings.DesiredCount
+                DesiredCount = settings.DesiredCount,
+                MinHealthyPercent = settings.MinHealthyPercent
             };
 
 

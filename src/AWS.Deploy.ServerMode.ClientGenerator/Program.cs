@@ -6,67 +6,65 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using AWS.Deploy.CLI.Commands.Settings;
 
-namespace AWS.Deploy.ServerMode.ClientGenerator
+// Start up the server mode to make the swagger.json file available.
+var portNumber = 5678;
+var serverCommandSettings = new ServerModeCommandSettings
 {
-    class Program
+    Port = portNumber,
+    ParentPid = null,
+    UnsecureMode = true
+};
+var serverCommand = new ServerModeCommand(new ConsoleInteractiveServiceImpl());
+var cancelSource = new CancellationTokenSource();
+_ = serverCommand.ExecuteAsync(null!, serverCommandSettings, cancelSource);
+try
+{
+    // Wait till server mode is started.
+    await Task.Delay(3000);
+
+    // Grab the swagger.json from the running instances of server mode
+    var document = await OpenApiDocument.FromUrlAsync($"http://localhost:{portNumber}/swagger/v1/swagger.json");
+
+    var settings = new CSharpClientGeneratorSettings
     {
-        static async Task Main(string[] args)
+        ClassName = "RestAPIClient",
+        GenerateClientInterfaces = true,
+        CSharpGeneratorSettings =
         {
-            // Start up the server mode to make the swagger.json file available.
-            var portNumber = 5678;
-            var serverCommand = new ServerModeCommand(new ConsoleInteractiveServiceImpl(), portNumber, null, true);
-            var cancelSource = new CancellationTokenSource();
-            _ = serverCommand.ExecuteAsync(cancelSource.Token);
-            try
-            {
-                // Wait till server mode is started.
-                await Task.Delay(3000);
+            Namespace = "AWS.Deploy.ServerMode.Client",
+        },
+        HttpClientType = "ServerModeHttpClient"
+    };
 
-                // Grab the swagger.json from the running instances of server mode
-                var document = await OpenApiDocument.FromUrlAsync($"http://localhost:{portNumber}/swagger/v1/swagger.json");
+    var generator = new CSharpClientGenerator(document, settings);
+    var code = generator.GenerateFile();
 
-                var settings = new CSharpClientGeneratorSettings
-                {
-                    ClassName = "RestAPIClient",
-                    GenerateClientInterfaces = true,
-                    CSharpGeneratorSettings =
-                    {
-                        Namespace = "AWS.Deploy.ServerMode.Client",
-                    },
-                    HttpClientType = "ServerModeHttpClient"
-                };
+    // Save the generated client to the AWS.Deploy.ServerMode.Client project
+    var fullPath = DetermineFullFilePath("RestAPI.cs");
+    File.WriteAllText(fullPath, code);
+}
+finally
+{
+    // terminate running server mode.
+    cancelSource.Cancel();
+}
 
-                var generator = new CSharpClientGenerator(document, settings);
-                var code = generator.GenerateFile();
+static string DetermineFullFilePath(string codeFile)
+{
+    var dir = new DirectoryInfo(Directory.GetCurrentDirectory());
 
-                // Save the generated client to the AWS.Deploy.ServerMode.Client project
-                var fullPath = DetermineFullFilePath("RestAPI.cs");
-                File.WriteAllText(fullPath, code);
-            }
-            finally
-            {
-                // terminate running server mode.
-                cancelSource.Cancel();
-            }
-        }
+    while (!string.Equals(dir?.Name, "src"))
+    {
+        if (dir == null)
+            break;
 
-        static string DetermineFullFilePath(string codeFile)
-        {
-            var dir = new DirectoryInfo(Directory.GetCurrentDirectory());
-
-            while (!string.Equals(dir?.Name, "src"))
-            {
-                if (dir == null)
-                    break;
-
-                dir = dir.Parent;
-            }
-
-            if (dir == null)
-                throw new Exception("Could not determine file path of current directory.");
-
-            return Path.Combine(dir.FullName, "AWS.Deploy.ServerMode.Client", codeFile);
-        }
+        dir = dir.Parent;
     }
+
+    if (dir == null)
+        throw new Exception("Could not determine file path of current directory.");
+
+    return Path.Combine(dir.FullName, "AWS.Deploy.ServerMode.Client", codeFile);
 }

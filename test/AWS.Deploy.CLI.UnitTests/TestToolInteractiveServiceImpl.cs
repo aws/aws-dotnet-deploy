@@ -8,9 +8,9 @@ namespace AWS.Deploy.CLI.UnitTests
 {
     public class TestToolInteractiveServiceImpl : IToolInteractiveService
     {
-        public IList<string> DebugMessages { get; } = new List<string>();
-        public IList<string> OutputMessages { get; } = new List<string>();
-        public IList<string> ErrorMessages { get; } = new List<string>();
+        public IList<string?> DebugMessages { get; } = new List<string?>();
+        public IList<string?> OutputMessages { get; } = new List<string?>();
+        public IList<string?> ErrorMessages { get; } = new List<string?>();
 
         private IList<string> InputCommands { get; set; }
 
@@ -23,17 +23,17 @@ namespace AWS.Deploy.CLI.UnitTests
             InputCommands = inputCommands;
         }
 
-        public void WriteLine(string message)
+        public void WriteLine(string? message)
         {
             OutputMessages.Add(message);
         }
 
-        public void WriteDebugLine(string message)
+        public void WriteDebugLine(string? message)
         {
             DebugMessages.Add(message);
         }
 
-        public void WriteErrorLine(string message)
+        public void WriteErrorLine(string? message)
         {
             ErrorMessages.Add(message);
         }
@@ -58,7 +58,7 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             foreach (var message in OutputMessages)
             {
-                if (message.Contains(subString))
+                if (message?.Contains(subString) ?? false)
                 {
                     return true;
                 }
@@ -67,7 +67,7 @@ namespace AWS.Deploy.CLI.UnitTests
             return false;
         }
 
-        public void Write(string message)
+        public void Write(string? message)
         {
             OutputMessages.Add(message);
         }

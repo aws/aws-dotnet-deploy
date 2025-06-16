@@ -76,7 +76,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
             _toolInteractiveService.WriteLine();
             if (createNewVPCConnector)
             {
-                var availableVpcs = await _awsResourceQueryer.GetListOfVpcs();
+                var availableVpcs = await _awsResourceQueryer.GetListOfVpcs() ?? new List<Vpc>();
                 if (!availableVpcs.Any())
                 {
                     _toolInteractiveService.WriteLine("Your account does not contain a VPC, so we will create one for you and assign its Subnets and Security Groups to the VPC Connector.");
@@ -108,7 +108,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 var userInputConfigurationVPCs = new UserInputConfiguration<Vpc>(
                     idSelector: vpc => vpc.VpcId,
                     displaySelector: vpc => vpc.VpcId,
-                    defaultSelector: vpc => !string.IsNullOrEmpty(currentVpcValue) ? vpc.VpcId.Equals(currentVpcValue) : vpc.IsDefault)
+                    defaultSelector: vpc => !string.IsNullOrEmpty(currentVpcValue) ? vpc.VpcId.Equals(currentVpcValue) : vpc.IsDefault ?? false)
                 {
                     CanBeEmpty = false,
                     CreateNew = false
@@ -121,7 +121,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                         UseVPCConnector = false
                     };
 
-                var availableSubnets = (await _awsResourceQueryer.DescribeSubnets(vpc.SelectedOption.VpcId)).OrderBy(x => x.SubnetId).ToList();
+                var availableSubnets = (await _awsResourceQueryer.DescribeSubnets(vpc.SelectedOption.VpcId) ?? new List<Subnet>()).OrderBy(x => x.SubnetId).ToList();
                 var userInputConfigurationSubnets = new UserInputConfiguration<Subnet>(
                     idSelector: subnet => subnet.SubnetId,
                     displaySelector: subnet => $"{subnet.SubnetId.PadRight(24)} | {subnet.VpcId.PadRight(21)} | {subnet.AvailabilityZone}",
@@ -135,7 +135,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
                 _toolInteractiveService.WriteLine(subnetsOptionSetting.Description);
                 var subnets = _consoleUtilities.AskUserForList<Subnet>(userInputConfigurationSubnets, availableSubnets, subnetsOptionSetting, recommendation);
 
-                var availableSecurityGroups = (await _awsResourceQueryer.DescribeSecurityGroups(vpc.SelectedOption.VpcId)).OrderBy(x => x.VpcId).ToList();
+                var availableSecurityGroups = (await _awsResourceQueryer.DescribeSecurityGroups(vpc.SelectedOption.VpcId) ?? new List<SecurityGroup>()).OrderBy(x => x.VpcId).ToList();
                 var groupNamePadding = 0;
                 availableSecurityGroups.ForEach(x =>
                 {

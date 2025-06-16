@@ -99,10 +99,10 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
 
         private async Task Validate<T>(OptionSettingItem optionSettingItem, T value, bool isValid)
         {
-            ValidationFailedException exception = null;
+            ValidationFailedException? exception = null;
             try
             {
-                await _optionSettingHandler.SetOptionSettingValue(null, optionSettingItem, value);
+                await _optionSettingHandler.SetOptionSettingValue(null!, optionSettingItem, value!);
             }
             catch (ValidationFailedException e)
             {

@@ -3,8 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Amazon.EC2.Model;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.Extensions;
@@ -42,6 +44,7 @@ namespace AWS.Deploy.Orchestration
         internal readonly IAWSServiceHandler? _awsServiceHandler;
         private readonly IOptionSettingHandler? _optionSettingHandler;
         internal readonly IDeployToolWorkspaceMetadata? _workspaceMetadata;
+        internal readonly ISystemCapabilityEvaluator? _systemCapabilityEvaluator;
 
         public Orchestrator(
             OrchestratorSession session,
@@ -58,7 +61,8 @@ namespace AWS.Deploy.Orchestration
             IDirectoryManager directoryManager,
             IAWSServiceHandler awsServiceHandler,
             IOptionSettingHandler optionSettingHandler,
-            IDeployToolWorkspaceMetadata deployToolWorkspaceMetadata)
+            IDeployToolWorkspaceMetadata deployToolWorkspaceMetadata,
+            ISystemCapabilityEvaluator systemCapabilityEvaluator)
         {
             _session = session;
             _interactiveService = interactiveService;
@@ -75,6 +79,7 @@ namespace AWS.Deploy.Orchestration
             _awsServiceHandler = awsServiceHandler;
             _optionSettingHandler = optionSettingHandler;
             _workspaceMetadata = deployToolWorkspaceMetadata;
+            _systemCapabilityEvaluator = systemCapabilityEvaluator;
         }
 
         public Orchestrator(OrchestratorSession session, IRecipeHandler recipeHandler)
@@ -232,8 +237,8 @@ namespace AWS.Deploy.Orchestration
                 if (_awsResourceQueryer == null)
                     throw new InvalidOperationException($"{nameof(_awsResourceQueryer)} is null as part of the Orchestrator object");
 
-                var vpcs = await _awsResourceQueryer.GetListOfVpcs();
-                recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_HAS_NOT_VPCS, !vpcs.Any());
+                var vpcs = await _awsResourceQueryer.GetListOfVpcs() ?? new List<Vpc>();
+                recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_HAS_NOT_VPCS, vpcs.Any());
             }
             if (recommendation.ReplacementTokens.ContainsKey(Constants.RecipeIdentifier.REPLACE_TOKEN_DEFAULT_CONTAINER_PORT))
             {
@@ -260,11 +265,18 @@ namespace AWS.Deploy.Orchestration
         {
             if (_interactiveService == null)
                 throw new InvalidOperationException($"{nameof(_interactiveService)} is null as part of the orchestrator object");
+            if (_systemCapabilityEvaluator == null)
+                throw new InvalidOperationException($"{nameof(_systemCapabilityEvaluator)} is null as part of the orchestrator object");
 
             if (recommendation.Recipe.DeploymentBundle == DeploymentBundleTypes.Container)
             {
+                var installedContainerAppInfo = await _systemCapabilityEvaluator.GetInstalledContainerAppInfo(recommendation);
+                var commandName = installedContainerAppInfo?.AppName?.ToLower();
+                if (string.IsNullOrEmpty(commandName))
+                    throw new ContainerBuildFailedException(DeployToolErrorCode.ContainerBuildFailed, "No container app (Docker or Podman) is currently installed/running on your system.", -1);
+
                 _interactiveService.LogSectionStart("Creating deployment image",
-                    "Using the docker CLI to perform a docker build to create a container image.");
+                    $"Using the {CultureInfo.CurrentCulture.TextInfo.ToTitleCase(commandName)} CLI to create a container image.");
                 try
                 {
                     await CreateContainerDeploymentBundle(cloudApplication, recommendation);
@@ -335,7 +347,7 @@ namespace AWS.Deploy.Orchestration
                 imageTag = $"{respositoryName}:{DateTime.UtcNow.Ticks}";
             }
 
-            await _deploymentBundleHandler.BuildDockerImage(cloudApplication, recommendation, imageTag);
+            await _deploymentBundleHandler.BuildContainerImage(cloudApplication, recommendation, imageTag);
 
             // These option settings need to be persisted back as they are not always provided by the user and we have custom logic to determine their values
             await _optionSettingHandler.SetOptionSettingValue(recommendation, Constants.Docker.DockerExecutionDirectoryOptionId, recommendation.DeploymentBundle.DockerExecutionDirectory);
@@ -345,7 +357,7 @@ namespace AWS.Deploy.Orchestration
             // If we run into issues doing so, we can proceed without throwing a terminating exception.
             try
             {
-                var environmentVariables = await _deploymentBundleHandler.InspectDockerImageEnvironmentVariables(recommendation, imageTag);
+                var environmentVariables = await _deploymentBundleHandler.InspectContainerImageEnvironmentVariables(recommendation, imageTag);
 
                 if (environmentVariables.ContainsKey(Constants.Docker.DotnetHttpPortEnvironmentVariable))
                 {
@@ -364,13 +376,13 @@ namespace AWS.Deploy.Orchestration
                     }
                 }
             }
-            catch (DockerInspectFailedException ex)
+            catch (ContainerInspectFailedException ex)
             {
                 _interactiveService.LogDebugMessage($"Unable to inspect the docker container to retrieve the HTTP port used by .NET due to the following error: {ex.Message}");
             }
 
             _interactiveService.LogSectionStart("Pushing container image to Elastic Container Registry (ECR)", "Using the docker CLI to log on to ECR and push the local image to ECR.");
-            await _deploymentBundleHandler.PushDockerImageToECR(recommendation, respositoryName, imageTag);
+            await _deploymentBundleHandler.PushContainerImageToECR(recommendation, respositoryName, imageTag);
         }
 
         private async Task CreateDotnetPublishDeploymentBundle(Recommendation recommendation)

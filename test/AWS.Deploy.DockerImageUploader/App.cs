@@ -10,6 +10,7 @@ using System;
 using System.Threading.Tasks;
 using System.IO;
 using System.Linq;
+using AWS.Deploy.CLI.Utilities;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.Docker;
@@ -26,7 +27,6 @@ namespace AWS.Deploy.DockerImageUploader
         private readonly IDirectoryManager _directoryManager;
         private readonly IProjectDefinitionParser _projectDefinitionParser;
         private readonly IRecipeHandler _recipeHandler;
-        private readonly CLI.App _deployToolCli;
 
         private readonly List<string> _testApps = new() { "WebApiNET6", "ConsoleAppTask" };
 
@@ -36,7 +36,6 @@ namespace AWS.Deploy.DockerImageUploader
             _fileManager = serviceProvider.GetRequiredService<IFileManager>();
             _directoryManager = serviceProvider.GetRequiredService<IDirectoryManager>();
             _recipeHandler = serviceProvider.GetRequiredService<IRecipeHandler>();
-            _deployToolCli = serviceProvider.GetRequiredService<CLI.App>();
         }
 
         /// <summary>
@@ -64,7 +63,13 @@ namespace AWS.Deploy.DockerImageUploader
 
             var configFilePath = Path.Combine(projectPath, "DockerImageUploaderConfigFile.json");
             var deployArgs = new[] { "deploy", "--project-path", projectPath, "--diagnostics", "--apply", configFilePath, "--silent" };
-            await _deployToolCli.Run(deployArgs);
+            var serviceCollection = new ServiceCollection();
+
+            var registrar = new TypeRegistrar(serviceCollection);
+
+            var app = CLI.App.ConfigureServices(registrar);
+
+            await CLI.App.RunAsync(deployArgs, app, registrar);
         }
 
         private string ResolvePath(string projectName)

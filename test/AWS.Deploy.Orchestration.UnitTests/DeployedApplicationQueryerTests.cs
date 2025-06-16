@@ -116,7 +116,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
 
             var recommendations = new List<Recommendation>
             {
-                new Recommendation(new RecipeDefinition("AspNetAppEcsFargate", "0.2.0",  "ASP.NET Core ECS", DeploymentTypes.CdkProject, DeploymentBundleTypes.Container, "", "", "", "", "" ), null, 100, new Dictionary<string, object>())
+                new Recommendation(new RecipeDefinition("AspNetAppEcsFargate", "0.2.0",  "ASP.NET Core ECS", DeploymentTypes.CdkProject, DeploymentBundleTypes.Container, "", "", "", "", "" ), null!, 100, new Dictionary<string, object>())
                 {
 
                 }
@@ -186,7 +186,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
                                                                 PersistedDeploymentProject = true,
                                                                 BaseRecipeId = "AspNetAppEcsFargate"
                                                             },
-                                                            null, 100, new Dictionary<string, object>())
+                                                            null!, 100, new Dictionary<string, object>())
                 {
 
                 }
@@ -459,7 +459,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
                 _mockOrchestratorInteractiveService.Object,
                 _fileManager);
 
-            var projectDefinition = new ProjectDefinition(null, "testPath", "", "net6.0");
+            var projectDefinition = new ProjectDefinition(null!, "testPath", "", "net6.0");
             var recipeDefinitiion = new RecipeDefinition("AspNetAppExistingBeanstalkEnvironment", "", "", DeploymentTypes.BeanstalkEnvironment, DeploymentBundleTypes.DotnetPublishZipFile, "", "", "", "", "");
             var recommendation =  new Recommendation(recipeDefinitiion, projectDefinition, 100, new Dictionary<string, object>());
 
@@ -538,7 +538,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
                 _fileManager);
 
             _fileManager.InMemoryStore.Add(Path.Combine("testPath", "aws-windows-deployment-manifest.json"), manifestJson);
-            var projectDefinition = new ProjectDefinition(null, Path.Combine("testPath", "project.csproj"), "", "net6.0");
+            var projectDefinition = new ProjectDefinition(null!, Path.Combine("testPath", "project.csproj"), "", "net6.0");
             var recipeDefinitiion = new RecipeDefinition("AspNetAppExistingBeanstalkWindowsEnvironment", "", "", DeploymentTypes.BeanstalkEnvironment, DeploymentBundleTypes.DotnetPublishZipFile, "", "", "", "", "");
             var recommendation = new Recommendation(recipeDefinitiion, projectDefinition, 100, new Dictionary<string, object>());
 

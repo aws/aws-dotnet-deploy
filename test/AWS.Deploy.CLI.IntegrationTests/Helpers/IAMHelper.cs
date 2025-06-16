@@ -99,7 +99,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.Helpers
                 });
             }
 
-            InstanceProfile instanceProfile = null;
+            InstanceProfile? instanceProfile = null;
             try
             {
                 instanceProfile = (await _client.GetInstanceProfileAsync(new GetInstanceProfileRequest()

@@ -19,7 +19,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.Extensions
         {
             var lines = new List<string>();
 
-            string line;
+            string? line;
             while ((line = reader.ReadLine()) != null)
             {
                 lines.Add(line);

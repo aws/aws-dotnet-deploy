@@ -176,7 +176,7 @@ To support IDEs using the AWS .NET Deploy tool the CLI can be launched in server
 ```json
 {
    "DeployServer":{
-      "AlternateCliPath":"C:\\code\\aws-dotnet-deploy\\src\\AWS.Deploy.CLI\\bin\\Release\\net6.0\\AWS.Deploy.CLI.exe",
+      "AlternateCliPath":"C:\\code\\aws-dotnet-deploy\\src\\AWS.Deploy.CLI\\bin\\Release\\net8.0\\AWS.Deploy.CLI.exe",
       "PortRange":{
          "Start":10000,
          "End":10100

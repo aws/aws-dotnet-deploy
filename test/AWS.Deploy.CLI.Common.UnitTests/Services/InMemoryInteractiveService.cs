@@ -40,7 +40,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.Services
             StdInWriter = new StreamWriter(stdIn);
         }
 
-        public void Write(string message)
+        public void Write(string? message)
         {
             lock (_writeLocker)
             {
@@ -63,7 +63,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.Services
             }
         }
 
-        public void WriteLine(string message)
+        public void WriteLine(string? message)
         {
             lock (_writeLocker)
             {
@@ -86,12 +86,12 @@ namespace AWS.Deploy.CLI.IntegrationTests.Services
             }
         }
 
-        public void WriteDebugLine(string message)
+        public void WriteDebugLine(string? message)
         {
             WriteLine(message);
         }
 
-        public void WriteErrorLine(string message)
+        public void WriteErrorLine(string? message)
         {
             WriteLine(message);
         }
@@ -169,22 +169,22 @@ namespace AWS.Deploy.CLI.IntegrationTests.Services
             }
         }
 
-        public void LogSectionStart(string message, string description)
+        public void LogSectionStart(string message, string? description)
         {
             WriteLine(message);
         }
 
-        public void LogErrorMessage(string message)
+        public void LogErrorMessage(string? message)
         {
             WriteLine(message);
         }
 
-        public void LogInfoMessage(string message)
+        public void LogInfoMessage(string? message)
         {
             WriteLine(message);
         }
 
-        public void LogDebugMessage(string message)
+        public void LogDebugMessage(string? message)
         {
             WriteLine(message);
         }

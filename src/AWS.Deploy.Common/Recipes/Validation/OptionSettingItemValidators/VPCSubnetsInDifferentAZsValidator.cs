@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Amazon.EC2.Model;
 using AWS.Deploy.Common.Data;
 
 namespace AWS.Deploy.Common.Recipes.Validation
@@ -28,7 +29,7 @@ namespace AWS.Deploy.Common.Recipes.Validation
             if (string.IsNullOrEmpty(vpcId))
                 return ValidationResult.Failed("A VPC ID is not specified. Please select a valid VPC ID.");
 
-            var subnets = await _awsResourceQueryer.DescribeSubnets(vpcId);
+            var subnets = await _awsResourceQueryer.DescribeSubnets(vpcId) ?? new List<Subnet>();
             var availabilityZones = new HashSet<string>();
             foreach (var subnet in subnets)
                 availabilityZones.Add(subnet.AvailabilityZoneId);

@@ -20,13 +20,12 @@ namespace AWS.Deploy.CLI.IntegrationTests
 {
     public class ConsoleAppTests : IDisposable
     {
+        private readonly IServiceCollection _serviceCollection;
         private readonly CloudFormationHelper _cloudFormationHelper;
         private readonly ECSHelper _ecsHelper;
         private readonly CloudWatchLogsHelper _cloudWatchLogsHelper;
-        private readonly App _app;
-        private readonly InMemoryInteractiveService _interactiveService;
         private bool _isDisposed;
-        private string _stackName;
+        private string? _stackName;
         private readonly TestAppManager _testAppManager;
 
         public ConsoleAppTests()
@@ -37,18 +36,10 @@ namespace AWS.Deploy.CLI.IntegrationTests
             var cloudWatchLogsClient = new AmazonCloudWatchLogsClient();
             _cloudWatchLogsHelper = new CloudWatchLogsHelper(cloudWatchLogsClient);
 
-            var serviceCollection = new ServiceCollection();
+            _serviceCollection = new ServiceCollection();
 
-            serviceCollection.AddCustomServices();
-            serviceCollection.AddTestServices();
-
-            var serviceProvider = serviceCollection.BuildServiceProvider();
-
-            _app = serviceProvider.GetService<App>();
-            Assert.NotNull(_app);
-
-            _interactiveService = serviceProvider.GetService<InMemoryInteractiveService>();
-            Assert.NotNull(_interactiveService);
+            _serviceCollection.AddCustomServices();
+            _serviceCollection.AddTestServices();
 
             var cloudFormationClient = new AmazonCloudFormationClient();
             _cloudFormationHelper = new CloudFormationHelper(cloudFormationClient);
@@ -63,59 +54,105 @@ namespace AWS.Deploy.CLI.IntegrationTests
         {
             _stackName = $"{components[1]}{Guid.NewGuid().ToString().Split('-').Last()}";
 
-            // Arrange input for deploy
-            await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Select default recommendation
-            await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Select default option settings
-            await _interactiveService.StdInWriter.FlushAsync();
+            InMemoryInteractiveService interactiveService = null!;
+            try
+            {
+                // Deploy
+                var deployArgs = new[] { "deploy", "--project-path", _testAppManager.GetProjectPath(Path.Combine(components)), "--application-name", _stackName, "--diagnostics" };
+                Assert.Equal(CommandReturnCodes.SUCCESS, await _serviceCollection.RunDeployToolAsync(deployArgs,
+                    provider =>
+                    {
+                        interactiveService = provider.GetRequiredService<InMemoryInteractiveService>();
 
-            // Deploy
-            var deployArgs = new[] { "deploy", "--project-path", _testAppManager.GetProjectPath(Path.Combine(components)), "--application-name", _stackName, "--diagnostics" };
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
+                        // Arrange input for deploy
+                        interactiveService.StdInWriter.Write(Environment.NewLine); // Select default recommendation
+                        interactiveService.StdInWriter.Write(Environment.NewLine); // Select default option settings
+                        interactiveService.StdInWriter.Flush();
+                    }));
 
-            // Verify application is deployed and running
-            Assert.Equal(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
+                // Verify application is deployed and running
+                Assert.Equal(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
 
-            var cluster = await _ecsHelper.GetCluster(_stackName);
-            Assert.Equal("ACTIVE", cluster.Status);
+                var cluster = await _ecsHelper.GetCluster(_stackName);
+                Assert.Equal("ACTIVE", cluster.Status);
 
-            // Verify CloudWatch logs
-            var logGroup = await _ecsHelper.GetLogGroup(_stackName);
-            var logMessages = await _cloudWatchLogsHelper.GetLogMessages(logGroup);
-            Assert.Contains("Hello World!", logMessages);
+                // Verify CloudWatch logs
+                var logGroup = await _ecsHelper.GetLogGroup(_stackName);
+                var logMessages = await _cloudWatchLogsHelper.GetLogMessages(logGroup);
+                Assert.Contains("Hello World!", logMessages);
 
-            var deployStdOut = _interactiveService.StdOutReader.ReadAllLines();
+                var deployStdOut = interactiveService.StdOutReader.ReadAllLines();
 
-            var tempCdkProjectLine = deployStdOut.First(line => line.StartsWith("Saving AWS CDK deployment project to: "));
-            var tempCdkProject = tempCdkProjectLine.Split(": ")[1].Trim();
-            Assert.False(Directory.Exists(tempCdkProject), $"{tempCdkProject} must not exist.");
+                var tempCdkProjectLine = deployStdOut.First(line => line.StartsWith("Saving AWS CDK deployment project to: "));
+                var tempCdkProject = tempCdkProjectLine.Split(": ")[1].Trim();
+                Assert.False(Directory.Exists(tempCdkProject), $"{tempCdkProject} must not exist.");
 
-            // list
-            var listArgs = new[] { "list-deployments", "--diagnostics" };
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(listArgs));;
+            }
+            finally
+            {
+                interactiveService?.ReadStdOutStartToEnd();
+            }
 
-            // Verify stack exists in list of deployments
-            var listStdOut = _interactiveService.StdOutReader.ReadAllLines().Select(x => x.Split()[0]).ToList();
-            Assert.Contains(listStdOut, (deployment) => _stackName.Equals(deployment));
+            try
+            {
+                // list
+                var listArgs = new[] { "list-deployments", "--diagnostics" };
+                Assert.Equal(CommandReturnCodes.SUCCESS, await _serviceCollection.RunDeployToolAsync(listArgs,
+                    provider =>
+                    {
+                        interactiveService = provider.GetRequiredService<InMemoryInteractiveService>();
+                    }));
 
-            // Arrange input for re-deployment
-            await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Select default option settings
-            await _interactiveService.StdInWriter.FlushAsync();
+                // Verify stack exists in list of deployments
+                var listStdOut = interactiveService.StdOutReader.ReadAllLines().Select(x => x.Split()[0]).ToList();
+                Assert.Contains(listStdOut, (deployment) => _stackName.Equals(deployment));
+            }
+            finally
+            {
+                interactiveService?.ReadStdOutStartToEnd();
+            }
 
-            // Perform re-deployment
-            deployArgs = new[] { "deploy", "--project-path", _testAppManager.GetProjectPath(Path.Combine(components)), "--application-name", _stackName, "--diagnostics" };
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
-            Assert.Equal(StackStatus.UPDATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
+            try
+            {
+                // Perform re-deployment
+                var deployArgs = new[] { "deploy", "--project-path", _testAppManager.GetProjectPath(Path.Combine(components)), "--application-name", _stackName, "--diagnostics" };
+                Assert.Equal(CommandReturnCodes.SUCCESS, await _serviceCollection.RunDeployToolAsync(deployArgs,
+                    provider =>
+                    {
+                        interactiveService = provider.GetRequiredService<InMemoryInteractiveService>();
 
-            // Arrange input for delete
-            await _interactiveService.StdInWriter.WriteAsync("y"); // Confirm delete
-            await _interactiveService.StdInWriter.FlushAsync();
-            var deleteArgs = new[] { "delete-deployment", _stackName, "--diagnostics" };
+                        // Arrange input for re-deployment
+                        interactiveService.StdInWriter.Write(Environment.NewLine); // Select default option settings
+                        interactiveService.StdInWriter.Flush();
+                    }));
+                Assert.Equal(StackStatus.UPDATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
+            }
+            finally
+            {
+                interactiveService?.ReadStdOutStartToEnd();
+            }
 
-            // Delete
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deleteArgs));;
+            try
+            {
+                // Delete
+                var deleteArgs = new[] { "delete-deployment", _stackName, "--diagnostics" };
+                Assert.Equal(CommandReturnCodes.SUCCESS, await _serviceCollection.RunDeployToolAsync(deleteArgs,
+                    provider =>
+                    {
+                        interactiveService = provider.GetRequiredService<InMemoryInteractiveService>();
 
-            // Verify application is deleted
-            Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName), $"{_stackName} still exists.");
+                        // Arrange input for delete
+                        interactiveService.StdInWriter.Write("y"); // Select default option settings
+                        interactiveService.StdInWriter.Flush();
+                    }));
+
+                // Verify application is deleted
+                Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName), $"{_stackName} still exists.");
+            }
+            finally
+            {
+                interactiveService?.ReadStdOutStartToEnd();
+            }
         }
 
         [Theory]
@@ -124,61 +161,106 @@ namespace AWS.Deploy.CLI.IntegrationTests
         {
             _stackName = $"{components[1]}Arm{Guid.NewGuid().ToString().Split('-').Last()}";
 
-            // Arrange input for deploy
-            await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Select default recommendation
-            await _interactiveService.StdInWriter.WriteLineAsync("7"); // Select "Environment Architecture"
-            await _interactiveService.StdInWriter.WriteLineAsync("2"); // Select "Arm64"
-            await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Confirm selection and deploy
-            await _interactiveService.StdInWriter.FlushAsync();
+            InMemoryInteractiveService interactiveService = null!;
+            try
+            {
+                // Deploy
+                var deployArgs = new[] { "deploy", "--project-path", _testAppManager.GetProjectPath(Path.Combine(components)), "--application-name", _stackName, "--diagnostics" };
+                Assert.Equal(CommandReturnCodes.SUCCESS, await _serviceCollection.RunDeployToolAsync(deployArgs,
+                    provider =>
+                    {
+                        interactiveService = provider.GetRequiredService<InMemoryInteractiveService>();
 
-            // Deploy
-            var deployArgs = new[] { "deploy", "--project-path", _testAppManager.GetProjectPath(Path.Combine(components)), "--application-name", _stackName, "--diagnostics" };
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
+                        // Arrange input for deploy
+                        interactiveService.StdInWriter.Write(Environment.NewLine); // Select default recommendation
+                        interactiveService.StdInWriter.WriteLine("7"); // Select "Environment Architecture"
+                        interactiveService.StdInWriter.WriteLine("2"); // Select "Arm64"
+                        interactiveService.StdInWriter.Write(Environment.NewLine); // Confirm selection and deploy
+                        interactiveService.StdInWriter.Flush();
+                    }));
 
-            // Verify application is deployed and running
-            Assert.Equal(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
+                // Verify application is deployed and running
+                Assert.Equal(StackStatus.CREATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
 
-            var cluster = await _ecsHelper.GetCluster(_stackName);
-            Assert.Equal("ACTIVE", cluster.Status);
+                var cluster = await _ecsHelper.GetCluster(_stackName);
+                Assert.Equal("ACTIVE", cluster.Status);
 
-            // Verify CloudWatch logs
-            var logGroup = await _ecsHelper.GetLogGroup(_stackName);
-            var logMessages = await _cloudWatchLogsHelper.GetLogMessages(logGroup);
-            Assert.Contains("Hello World!", logMessages);
+                // Verify CloudWatch logs
+                var logGroup = await _ecsHelper.GetLogGroup(_stackName);
+                var logMessages = await _cloudWatchLogsHelper.GetLogMessages(logGroup);
+                Assert.Contains("Hello World!", logMessages);
 
-            var deployStdOut = _interactiveService.StdOutReader.ReadAllLines();
+                var deployStdOut = interactiveService.StdOutReader.ReadAllLines();
 
-            var tempCdkProjectLine = deployStdOut.First(line => line.StartsWith("Saving AWS CDK deployment project to: "));
-            var tempCdkProject = tempCdkProjectLine.Split(": ")[1].Trim();
-            Assert.False(Directory.Exists(tempCdkProject), $"{tempCdkProject} must not exist.");
+                var tempCdkProjectLine = deployStdOut.First(line => line.StartsWith("Saving AWS CDK deployment project to: "));
+                var tempCdkProject = tempCdkProjectLine.Split(": ")[1].Trim();
+                Assert.False(Directory.Exists(tempCdkProject), $"{tempCdkProject} must not exist.");
+            }
+            finally
+            {
+                interactiveService?.ReadStdOutStartToEnd();
+            }
 
-            // list
-            var listArgs = new[] { "list-deployments", "--diagnostics" };
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(listArgs));;
+            try
+            {
+                // list
+                var listArgs = new[] { "list-deployments", "--diagnostics" };
+                Assert.Equal(CommandReturnCodes.SUCCESS, await _serviceCollection.RunDeployToolAsync(listArgs,
+                    provider =>
+                    {
+                        interactiveService = provider.GetRequiredService<InMemoryInteractiveService>();
+                    }));
 
-            // Verify stack exists in list of deployments
-            var listStdOut = _interactiveService.StdOutReader.ReadAllLines().Select(x => x.Split()[0]).ToList();
-            Assert.Contains(listStdOut, (deployment) => _stackName.Equals(deployment));
+                // Verify stack exists in list of deployments
+                var listStdOut = interactiveService.StdOutReader.ReadAllLines().Select(x => x.Split()[0]).ToList();
+                Assert.Contains(listStdOut, (deployment) => _stackName.Equals(deployment));
+            }
+            finally
+            {
+                interactiveService?.ReadStdOutStartToEnd();
+            }
 
-            // Arrange input for re-deployment
-            await _interactiveService.StdInWriter.WriteAsync(Environment.NewLine); // Select default option settings
-            await _interactiveService.StdInWriter.FlushAsync();
+            try
+            {
+                // Perform re-deployment
+                var deployArgs = new[] { "deploy", "--project-path", _testAppManager.GetProjectPath(Path.Combine(components)), "--application-name", _stackName, "--diagnostics" };
+                Assert.Equal(CommandReturnCodes.SUCCESS, await _serviceCollection.RunDeployToolAsync(deployArgs,
+                    provider =>
+                    {
+                        interactiveService = provider.GetRequiredService<InMemoryInteractiveService>();
 
-            // Perform re-deployment
-            deployArgs = new[] { "deploy", "--project-path", _testAppManager.GetProjectPath(Path.Combine(components)), "--application-name", _stackName, "--diagnostics" };
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deployArgs));
-            Assert.Equal(StackStatus.UPDATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
+                        // Arrange input for re-deployment
+                        interactiveService.StdInWriter.Write(Environment.NewLine); // Select default option settings
+                        interactiveService.StdInWriter.Flush();
+                    }));
+                Assert.Equal(StackStatus.UPDATE_COMPLETE, await _cloudFormationHelper.GetStackStatus(_stackName));
+            }
+            finally
+            {
+                interactiveService?.ReadStdOutStartToEnd();
+            }
 
-            // Arrange input for delete
-            await _interactiveService.StdInWriter.WriteAsync("y"); // Confirm delete
-            await _interactiveService.StdInWriter.FlushAsync();
-            var deleteArgs = new[] { "delete-deployment", _stackName, "--diagnostics" };
+            try
+            {
+                // Delete
+                var deleteArgs = new[] { "delete-deployment", _stackName, "--diagnostics" };
+                Assert.Equal(CommandReturnCodes.SUCCESS, await _serviceCollection.RunDeployToolAsync(deleteArgs,
+                    provider =>
+                    {
+                        interactiveService = provider.GetRequiredService<InMemoryInteractiveService>();
 
-            // Delete
-            Assert.Equal(CommandReturnCodes.SUCCESS, await _app.Run(deleteArgs));;
+                        // Arrange input for delete
+                        interactiveService.StdInWriter.Write("y"); // Select default option settings
+                        interactiveService.StdInWriter.Flush();
+                    }));
 
-            // Verify application is deleted
-            Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName), $"{_stackName} still exists.");
+                // Verify application is deleted
+                Assert.True(await _cloudFormationHelper.IsStackDeleted(_stackName), $"{_stackName} still exists.");
+            }
+            finally
+            {
+                interactiveService?.ReadStdOutStartToEnd();
+            }
         }
 
         public void Dispose()
@@ -191,15 +273,13 @@ namespace AWS.Deploy.CLI.IntegrationTests
         {
             if (_isDisposed) return;
 
-            if (disposing)
+            if (disposing && !string.IsNullOrEmpty(_stackName))
             {
                 var isStackDeleted = _cloudFormationHelper.IsStackDeleted(_stackName).GetAwaiter().GetResult();
                 if (!isStackDeleted)
                 {
                     _cloudFormationHelper.DeleteStack(_stackName).GetAwaiter().GetResult();
                 }
-
-                _interactiveService.ReadStdOutStartToEnd();
             }
 
             _isDisposed = true;
