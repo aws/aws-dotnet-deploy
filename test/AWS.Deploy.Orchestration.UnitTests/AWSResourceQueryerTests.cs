@@ -373,7 +373,7 @@ namespace AWS.Deploy.Orchestration.UnitTests
             _mockECRClient.Verify(x => x.CreateRepositoryAsync(
                 It.Is<CreateRepositoryRequest>(request =>
                     request.RepositoryName == "myRepository" &&
-                    request.Tags.Count == 0),
+                    (request.Tags == null || request.Tags.Count == 0)),
                 It.IsAny<CancellationToken>()), Times.Once());
             _mockECRClient.VerifyNoOtherCalls();
         }

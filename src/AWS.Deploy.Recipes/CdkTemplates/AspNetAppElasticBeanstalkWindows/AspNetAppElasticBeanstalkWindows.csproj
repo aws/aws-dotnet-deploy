@@ -1,10 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <RollForward>Major</RollForward>
     <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>Latest</LangVersion>
     <AWSProjectType>DeploymentProject</AWSProjectType>
     <!-- The value "AWSDeployRecipesCDKCommonVersion" is replaced by the project template system. -->
     <RecipeCDKCommonVersion>AWSDeployRecipesCDKCommonVersion</RecipeCDKCommonVersion>
@@ -24,9 +26,7 @@
 
   <ItemGroup>
     <!-- CDK Construct Library dependencies -->
-    <PackageReference Include="Amazon.CDK.Lib" Version="2.171.1" />
-
-    <PackageReference Include="AWSSDK.ElasticBeanstalk" Version="3.7.200.42" />
+    <PackageReference Include="Amazon.CDK.Lib" Version="2.194.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.1" />
 
     <!-- jsii Roslyn analyzers (un-comment to obtain compile-time checks for missing required props

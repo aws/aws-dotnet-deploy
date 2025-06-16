@@ -5,6 +5,7 @@ using Amazon.CDK;
 using AWS.Deploy.Recipes.CDK.Common;
 using AspNetAppElasticBeanstalkWindows.Configurations;
 using Microsoft.Extensions.Configuration;
+using Environment = Amazon.CDK.Environment;
 
 namespace AspNetAppElasticBeanstalkWindows
 {

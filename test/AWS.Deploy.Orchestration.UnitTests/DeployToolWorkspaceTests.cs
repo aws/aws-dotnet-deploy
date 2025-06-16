@@ -118,14 +118,14 @@ namespace AWS.Deploy.Orchestration.UnitTests
 
     public class TestEnvironmentVariableManager : IEnvironmentVariableManager
     {
-        public readonly Dictionary<string, string> store = new();
+        public readonly Dictionary<string, string?> store = new();
 
-        public string GetEnvironmentVariable(string variable)
+        public string? GetEnvironmentVariable(string variable)
         {
             return store.ContainsKey(variable) ? store[variable] : null;
         }
 
-        public void SetEnvironmentVariable(string variable, string value)
+        public void SetEnvironmentVariable(string variable, string? value)
         {
             store[variable] = value;
         }

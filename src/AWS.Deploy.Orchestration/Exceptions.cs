@@ -40,9 +40,9 @@ namespace AWS.Deploy.Orchestration
     /// <summary>
     /// Exception is thrown if docker build attempt failed
     /// </summary>
-    public class DockerBuildFailedException : DeployToolException
+    public class ContainerBuildFailedException : DeployToolException
     {
-        public DockerBuildFailedException(DeployToolErrorCode errorCode, string message, int processExitCode, Exception? innerException = null) : base(errorCode, message, innerException, processExitCode) { }
+        public ContainerBuildFailedException(DeployToolErrorCode errorCode, string message, int processExitCode, Exception? innerException = null) : base(errorCode, message, innerException, processExitCode) { }
     }
 
     /// <summary>
@@ -80,17 +80,17 @@ namespace AWS.Deploy.Orchestration
     /// <summary>
     /// Exception is thrown if docker push attempt failed
     /// </summary>
-    public class DockerPushFailedException : DeployToolException
+    public class ContainerPushFailedException : DeployToolException
     {
-        public DockerPushFailedException(DeployToolErrorCode errorCode, string message, int processExitCode, Exception? innerException = null) : base(errorCode, message, innerException, processExitCode) { }
+        public ContainerPushFailedException(DeployToolErrorCode errorCode, string message, int processExitCode, Exception? innerException = null) : base(errorCode, message, innerException, processExitCode) { }
     }
 
     /// <summary>
     /// Exception is thrown if docker inspect attempt failed
     /// </summary>
-    public class DockerInspectFailedException : DeployToolException
+    public class ContainerInspectFailedException : DeployToolException
     {
-        public DockerInspectFailedException(DeployToolErrorCode errorCode, string message, int processExitCode, Exception? innerException = null) : base(errorCode, message, innerException, processExitCode) { }
+        public ContainerInspectFailedException(DeployToolErrorCode errorCode, string message, int processExitCode, Exception? innerException = null) : base(errorCode, message, innerException, processExitCode) { }
     }
 
     /// <summary>

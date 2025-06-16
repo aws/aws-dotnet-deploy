@@ -7,6 +7,7 @@ using AWS.Deploy.CLI;
 using System.Threading;
 using AWS.Deploy.ServerMode.Client;
 using AWS.Deploy.CLI.Commands;
+using AWS.Deploy.CLI.Commands.Settings;
 using AWS.Deploy.ServerMode.Client.Utilities;
 
 namespace AWS.Deploy.DocGenerator
@@ -24,9 +25,14 @@ namespace AWS.Deploy.DocGenerator
             {
                 var interactiveService = serviceProvider.GetRequiredService<IToolInteractiveService>();
                 var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ServerModeUtilities.ResolveDefaultCredentials);
-                var serverCommand = new ServerModeCommand(interactiveService, 4152, null, true);
-
-                _ = serverCommand.ExecuteAsync(new CancellationTokenSource().Token);
+                var serverCommandSettings = new ServerModeCommandSettings
+                {
+                    Port = 4152,
+                    ParentPid = null,
+                    UnsecureMode = true
+                };
+                var serverCommand = new ServerModeCommand(interactiveService);
+                _ = serverCommand.ExecuteAsync(null!, serverCommandSettings, new CancellationTokenSource());
 
                 var baseUrl = $"http://localhost:{4152}/";
 

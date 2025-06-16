@@ -1,96 +1,96 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-using System;
-using System.CommandLine;
-using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using AWS.Deploy.CLI.Commands;
+using AWS.Deploy.CLI.Utilities;
+using AWS.Deploy.Common;
+using Microsoft.Extensions.DependencyInjection;
+using Spectre.Console.Cli;
 
-namespace AWS.Deploy.CLI
+namespace AWS.Deploy.CLI;
+
+public class App
 {
-    public class App
+    public static CommandApp<RootCommand> ConfigureServices(TypeRegistrar registrar)
     {
-        private readonly ICommandFactory _commandFactory;
-        private readonly IToolInteractiveService _toolInteractiveService;
+        var app = new CommandApp<RootCommand>(registrar);
 
-        public App(ICommandFactory commandFactory, IToolInteractiveService toolInteractiveService)
+        app.Configure(config =>
         {
-            _commandFactory = commandFactory;
-            _toolInteractiveService = toolInteractiveService;
+            config.SetApplicationName(Constants.CLI.TOOL_NAME);
+            config.AddCommand<DeployCommand>("deploy")
+                .WithDescription("Inspect, build, and deploy the .NET project to AWS using the recommended AWS service.");
+            config.AddCommand<ListDeploymentsCommand>("list-deployments")
+                .WithDescription("List existing deployments.");
+            config.AddCommand<DeleteDeploymentCommand>("delete-deployment")
+                .WithDescription("Delete an existing deployment.");
+            config.AddBranch("deployment-project", deploymentProject =>
+            {
+                deploymentProject.SetDescription("Save the deployment project inside a user provided directory path.");
+                deploymentProject.AddCommand<GenerateDeploymentProjectCommand>("generate")
+                    .WithDescription("Save the deployment project inside a user provided directory path without proceeding with a deployment");
+            });
+            config.AddCommand<ServerModeCommand>("server-mode")
+                .WithDescription("Launches the tool in a server mode for IDEs like Visual Studio to integrate with.");
+
+            config.SetExceptionHandler((exception, _) =>
+            {
+                var serviceProvider = registrar.GetServiceProvider();;
+                var toolInteractiveService = serviceProvider.GetRequiredService<IToolInteractiveService>();
+
+                if (exception.IsAWSDeploymentExpectedException())
+                {
+                    if (toolInteractiveService.Diagnostics)
+                        toolInteractiveService.WriteErrorLine(exception.PrettyPrint());
+                    else
+                    {
+                        toolInteractiveService.WriteErrorLine(string.Empty);
+                        toolInteractiveService.WriteErrorLine(exception.Message);
+                    }
+
+                    toolInteractiveService.WriteErrorLine(string.Empty);
+                    toolInteractiveService.WriteErrorLine("For more information, please visit our troubleshooting guide https://aws.github.io/aws-dotnet-deploy/troubleshooting-guide/.");
+                    toolInteractiveService.WriteErrorLine("If you are still unable to solve this issue and believe this is an issue with the tooling, please cut a ticket https://github.com/aws/aws-dotnet-deploy/issues/new/choose.");
+
+                    if (exception is TcpPortInUseException)
+                    {
+                        return CommandReturnCodes.TCP_PORT_ERROR;
+                    }
+
+                    // bail out with an non-zero return code.
+                    return CommandReturnCodes.USER_ERROR;
+                }
+                else
+                {
+                    // This is a bug
+                    toolInteractiveService.WriteErrorLine(
+                        "Unhandled exception.  This is a bug.  Please copy the stack trace below and file a bug at https://github.com/aws/aws-dotnet-deploy. " +
+                        exception.PrettyPrint());
+
+                    return CommandReturnCodes.UNHANDLED_EXCEPTION;
+                }
+            });
+        });
+
+        return app;
+    }
+
+    public static async Task<int> RunAsync(string[] args, CommandApp<RootCommand> app, TypeRegistrar registrar)
+    {
+        var serviceProvider = registrar.GetServiceProvider();;
+        var toolInteractiveService = serviceProvider.GetRequiredService<IToolInteractiveService>();
+
+        toolInteractiveService.WriteLine("AWS .NET deployment tool for deploying .NET Core applications to AWS.");
+        toolInteractiveService.WriteLine("Project Home: https://github.com/aws/aws-dotnet-deploy");
+        toolInteractiveService.WriteLine(string.Empty);
+
+        // if user didn't specify a command, default to help
+        if (args.Length == 0)
+        {
+            args = ["-h"];
         }
 
-        public async Task<int> Run(string[] args)
-        {
-            Console.OutputEncoding = Encoding.UTF8;
-
-            SetExecutionEnvironment(args);
-
-            _toolInteractiveService.WriteLine("AWS .NET deployment tool for deploying .NET Core applications to AWS.");
-            _toolInteractiveService.WriteLine("Project Home: https://github.com/aws/aws-dotnet-deploy");
-            _toolInteractiveService.WriteLine(string.Empty);
-
-            // if user didn't specify a command, default to help
-            if (args.Length == 0)
-            {
-                args = new[] { "-h" };
-            }
-
-            return await _commandFactory.BuildRootCommand().InvokeAsync(args);
-        }
-
-        /// <summary>
-        /// Set up the execution environment variable picked up by the AWS .NET SDK. This can be useful for identify calls
-        /// made by this tool in AWS CloudTrail.
-        /// </summary>
-        private static void SetExecutionEnvironment(string[] args)
-        {
-            const string envName = "AWS_EXECUTION_ENV";
-
-            var toolVersion = GetToolVersion();
-
-            // The leading and trailing whitespaces are intentional
-            var userAgent = $" lib/aws-dotnet-deploy-cli#{toolVersion} ";
-            if (args?.Length > 0)
-            {
-                // The trailing whitespace is intentional
-                userAgent = $"{userAgent}md/cli-args#{args[0]} ";
-            }
-
-
-            var envValue = new StringBuilder();
-            var existingValue = Environment.GetEnvironmentVariable(envName);
-
-            // If there is an existing execution environment variable add this tool as a suffix.
-            if (!string.IsNullOrEmpty(existingValue))
-            {
-                envValue.Append(existingValue);
-            }
-
-            envValue.Append(userAgent);
-
-            Environment.SetEnvironmentVariable(envName, envValue.ToString());
-        }
-
-        internal static string GetToolVersion()
-        {
-            var assembly = typeof(App).GetTypeInfo().Assembly;
-            var version = assembly.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version;
-            if (version is null)
-            {
-                return string.Empty;
-            }
-
-            var versionParts = version.Split('.');
-            if (versionParts.Length == 4)
-            {
-                // The revision part of the version number is intentionally set to 0 since package versioning on
-                // NuGet follows semantic versioning consisting only of Major.Minor.Patch versions.
-                versionParts[3] = "0";
-            }
-
-            return string.Join(".", versionParts);
-        }
+        return await app.RunAsync(args);
     }
 }

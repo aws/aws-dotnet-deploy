@@ -34,10 +34,10 @@ To take advantage of this library you’ll need:
   * The local credential profile can be configured by a variety of tools. For example, the credential profile can be configured with the [AWS Toolkit for Visual Studio](https://docs.aws.amazon.com/toolkit-for-visual-studio/latest/user-guide/credentials.html) or the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html), among others.
   * Note: You need to make sure to add the appropriate CloudFormation permissions to your credentials's profile / assumed role.
   * For SSO, please visit the [.NET SDK Reference Guide](https://docs.aws.amazon.com/sdkref/latest/guide/access-sso.html).
-* [.NET 6](https://dotnet.microsoft.com/download) or later
-* [Node.js 14](https://nodejs.org/en/download/) or later
+* [.NET 8](https://dotnet.microsoft.com/download) or later
+* [Node.js 18](https://nodejs.org/en/download/) or later
   * The [AWS Cloud Development Kit (CDK)](https://aws.amazon.com/cdk/) is used by this tool to create the AWS infrastructure to run applications. The CDK requires Node.js to function. This dependency is needed for deployments that are CDK based. If you will be using deployments that are not CDK based, you are not required to have this dependency.
-* (optional) [Docker](https://docs.docker.com/get-docker/)
+* (optional) [Docker](https://docs.docker.com/get-docker/) or [Podman](https://podman.io/docs/installation)
   * Used when deploying to a container based service like Amazon Elastic Container Service (Amazon ECS)
 * (optional) The zip cli tool
    *   Mac / Linux only. Used when creating zip packages for deployment bundles. The zip cli is used to maintain Linux file permissions.

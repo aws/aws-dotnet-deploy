@@ -23,7 +23,7 @@ namespace AWS.Deploy.Orchestration.DeploymentCommands
 
             var deploymentPackage = recommendation.DeploymentBundle.DotnetPublishZipPath;
             var environmentName = cloudApplication.Name;
-            var applicationName = (await orchestrator._awsResourceQueryer.ListOfElasticBeanstalkEnvironments())
+            var applicationName = (await orchestrator._awsResourceQueryer.ListOfElasticBeanstalkEnvironments())?
                 .Where(x => string.Equals(x.EnvironmentId, cloudApplication.UniqueIdentifier))
                 .FirstOrDefault()?
                 .ApplicationName;
@@ -62,7 +62,7 @@ namespace AWS.Deploy.Orchestration.DeploymentCommands
             if (success)
             {
                 orchestrator._interactiveService.LogInfoMessage($"The Elastic Beanstalk Environment {environmentName} has been successfully updated to the application version {versionLabel}" + Environment.NewLine);
-            } 
+            }
             else
             {
                 throw new ElasticBeanstalkException(DeployToolErrorCode.FailedToUpdateElasticBeanstalkEnvironment, "Failed to update the Elastic Beanstalk environment");

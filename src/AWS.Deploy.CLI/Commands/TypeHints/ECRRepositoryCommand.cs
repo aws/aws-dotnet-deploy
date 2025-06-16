@@ -68,7 +68,7 @@ namespace AWS.Deploy.CLI.Commands.TypeHints
 
         private async Task<List<Repository>> GetData()
         {
-            return await _awsResourceQueryer.GetECRRepositories();
+            return await _awsResourceQueryer.GetECRRepositories() ?? new List<Repository>();
         }
     }
 }

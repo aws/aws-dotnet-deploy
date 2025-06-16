@@ -1,19 +1,14 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 using Amazon.CloudFormation;
+using Amazon.CloudFormation.Model;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.Data;
-using AWS.Deploy.Common.Extensions;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
-using AWS.Deploy.Orchestration.CDK;
-using AWS.Deploy.Orchestration.Data;
 using AWS.Deploy.Orchestration.Utilities;
+using InvalidOperationException = System.InvalidOperationException;
 using Stack = Amazon.CloudFormation.Model.Stack;
 
 namespace AWS.Deploy.Orchestration
@@ -21,7 +16,7 @@ namespace AWS.Deploy.Orchestration
     public interface ICdkProjectHandler
     {
         Task<string> ConfigureCdkProject(OrchestratorSession session, CloudApplication cloudApplication, Recommendation recommendation);
-        string CreateCdkProject(Recommendation recommendation, OrchestratorSession session, string? saveDirectoryPath = null);
+        Task<string> CreateCdkProject(Recommendation recommendation, OrchestratorSession session, string? saveDirectoryPath = null);
         Task DeployCdkProject(OrchestratorSession session, CloudApplication cloudApplication, string cdkProjectPath, Recommendation recommendation);
         void DeleteTemporaryCdkProject(string cdkProjectPath);
         Task<string> PerformCdkDiff(string cdkProjectPath, CloudApplication cloudApplication);
@@ -76,7 +71,7 @@ namespace AWS.Deploy.Orchestration
             {
                 // Create a new temporary CDK project for a new deployment
                 _interactiveService.LogInfoMessage("Generating AWS Cloud Development Kit (AWS CDK) deployment project");
-                cdkProjectPath = CreateCdkProject(recommendation, session);
+                cdkProjectPath = await CreateCdkProject(recommendation, session);
             }
 
             // Write required configuration in appsettings.json
@@ -234,10 +229,10 @@ namespace AWS.Deploy.Orchestration
         {
             try
             {
-                var stackEvents = await _awsResourceQueryer.GetCloudFormationStackEvents(stackId);
+                var stackEvents = await _awsResourceQueryer.GetCloudFormationStackEvents(stackId) ?? new List<StackEvent>();
 
                 var failedEvents = stackEvents
-                    .Where(x => x.Timestamp.ToUniversalTime() >= deploymentStartDate)
+                    .Where(x => x.Timestamp != null && x.Timestamp.Value.ToUniversalTime() >= deploymentStartDate)
                     .Where(x =>
                         x.ResourceStatus.Equals(ResourceStatus.CREATE_FAILED) ||
                         x.ResourceStatus.Equals(ResourceStatus.DELETE_FAILED) ||
@@ -260,7 +255,7 @@ namespace AWS.Deploy.Orchestration
             }
         }
 
-        public string CreateCdkProject(Recommendation recommendation, OrchestratorSession session, string? saveCdkDirectoryPath = null)
+        public async Task<string> CreateCdkProject(Recommendation recommendation, OrchestratorSession session, string? saveCdkDirectoryPath = null)
         {
             string? assemblyName;
             if (string.IsNullOrEmpty(saveCdkDirectoryPath))
@@ -283,7 +278,7 @@ namespace AWS.Deploy.Orchestration
             _directoryManager.CreateDirectory(saveCdkDirectoryPath);
 
             var templateEngine = new TemplateEngine();
-            templateEngine.GenerateCDKProjectFromTemplate(recommendation, session, saveCdkDirectoryPath, assemblyName);
+            await templateEngine.GenerateCdkProjectFromTemplateAsync(recommendation, session, saveCdkDirectoryPath, assemblyName);
 
             _interactiveService.LogDebugMessage($"Saving AWS CDK deployment project to: {saveCdkDirectoryPath}");
             return saveCdkDirectoryPath;

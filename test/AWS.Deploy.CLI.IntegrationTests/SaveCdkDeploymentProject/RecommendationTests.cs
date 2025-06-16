@@ -263,14 +263,15 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
                 directoryManager,
                 new Mock<IAWSServiceHandler>().Object,
                 new OptionSettingHandler(new Mock<IValidatorFactory>().Object),
-                deployToolWorkspaceMetadata);
+                deployToolWorkspaceMetadata,
+                new Mock<ISystemCapabilityEvaluator>().Object);
         }
 
         private async Task<string> GetCustomRecipeId(string recipeFilePath)
         {
             var recipeBody = await File.ReadAllTextAsync(recipeFilePath);
             var recipe = JsonConvert.DeserializeObject<RecipeDefinition>(recipeBody);
-            return recipe.Id;
+            return recipe!.Id;
         }
 
         protected virtual void Dispose(bool disposing)

@@ -207,10 +207,10 @@ namespace AWS.Deploy.Orchestration.UnitTests
             {
                 using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
                 {
-                    ZipArchiveEntry readmeEntry = archive.GetEntry("aws-windows-deployment-manifest.json");
-                    var manifestFile = JsonSerializer.Deserialize<ElasticBeanstalkWindowsManifest>(readmeEntry.Open());
+                    ZipArchiveEntry? readmeEntry = archive.GetEntry("aws-windows-deployment-manifest.json");
+                    var manifestFile = JsonSerializer.Deserialize<ElasticBeanstalkWindowsManifest>(readmeEntry!.Open());
                     Assert.NotNull(manifestFile);
-                    var aspNetCoreWebEntry = Assert.Single(manifestFile.Deployments.AspNetCoreWeb);
+                    var aspNetCoreWebEntry = Assert.Single(manifestFile!.Deployments.AspNetCoreWeb);
                     Assert.Equal("website", aspNetCoreWebEntry.Parameters.IISWebSite);
                     Assert.Equal("apppath", aspNetCoreWebEntry.Parameters.IISPath);
                 }
@@ -261,11 +261,11 @@ namespace AWS.Deploy.Orchestration.UnitTests
             {
                 using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Read))
                 {
-                    ZipArchiveEntry readmeEntry = archive.GetEntry("aws-windows-deployment-manifest.json");
-                    var manifestFileJson = readmeEntry.Open(); 
+                    ZipArchiveEntry? readmeEntry = archive.GetEntry("aws-windows-deployment-manifest.json");
+                    var manifestFileJson = readmeEntry!.Open();
                     var manifestFile = JsonSerializer.Deserialize<ElasticBeanstalkWindowsManifest>(manifestFileJson);
                     Assert.NotNull(manifestFile);
-                    var aspNetCoreWebEntry = Assert.Single(manifestFile.Deployments.AspNetCoreWeb);
+                    var aspNetCoreWebEntry = Assert.Single(manifestFile!.Deployments.AspNetCoreWeb);
                     Assert.Equal("website", aspNetCoreWebEntry.Parameters.IISWebSite);
                     Assert.Equal("apppath", aspNetCoreWebEntry.Parameters.IISPath);
                 }

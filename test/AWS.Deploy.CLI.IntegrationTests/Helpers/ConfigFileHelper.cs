@@ -41,16 +41,16 @@ namespace AWS.Deploy.CLI.IntegrationTests.Helpers
         /// <param name="configFilePath">The absolute JSON file path where the deployment settings are persisted</param>
         public static async Task CreateConfigFile(IServiceProvider serviceProvider, string applicationName, string recipeId, Dictionary<string, object> optionSettings, string projectPath, string configFilePath, SaveSettingsType saveSettingsType)
         {
-            var parser = serviceProvider.GetService<IProjectDefinitionParser>();
+            var parser = serviceProvider.GetRequiredService<IProjectDefinitionParser>();
             var optionSettingHandler = serviceProvider.GetRequiredService<IOptionSettingHandler>();
             var deploymentSettingHandler = serviceProvider.GetRequiredService<IDeploymentSettingsHandler>();
 
             var orchestratorSession = new OrchestratorSession(parser.Parse(projectPath).Result);
             var cloudApplication = new CloudApplication(applicationName, "", CloudApplicationResourceType.CloudFormationStack, recipeId);
 
-            var recommendationEngine = new RecommendationEngine(orchestratorSession, serviceProvider.GetService<IRecipeHandler>());
+            var recommendationEngine = new RecommendationEngine(orchestratorSession, serviceProvider.GetRequiredService<IRecipeHandler>());
             var recommendations = await recommendationEngine.ComputeRecommendations();
-            var selectedRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, recipeId));
+            var selectedRecommendation = recommendations.First(x => string.Equals(x.Recipe.Id, recipeId));
 
             foreach (var item in optionSettings)
             {

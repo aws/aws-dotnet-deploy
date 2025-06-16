@@ -20,6 +20,7 @@ using AWS.Deploy.CLI.Commands;
 using AWS.Deploy.CLI.UnitTests.Utilities;
 using System.Threading;
 using System.Globalization;
+using AWS.Deploy.CLI.Commands.Settings;
 using AWS.Deploy.CLI.IntegrationTests.Services;
 
 namespace AWS.Deploy.CLI.UnitTests
@@ -37,8 +38,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
 
-            var awsCredentials = claimsPrincipal.ToAWSCredentials();
-            Assert.IsType<Amazon.Runtime.BasicAWSCredentials>(awsCredentials);
+            var awsCredentials = Assert.IsType<Amazon.Runtime.BasicAWSCredentials>(claimsPrincipal.ToAWSCredentials());
 
             var imutCreds = await awsCredentials.GetCredentialsAsync();
             Assert.Equal("accessKeyId", imutCreds.AccessKey);
@@ -57,8 +57,7 @@ namespace AWS.Deploy.CLI.UnitTests
 
             var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
 
-            var awsCredentials = claimsPrincipal.ToAWSCredentials();
-            Assert.IsType<Amazon.Runtime.SessionAWSCredentials>(awsCredentials);
+            var awsCredentials = Assert.IsType<Amazon.Runtime.SessionAWSCredentials>(claimsPrincipal.ToAWSCredentials());
 
             var imutCreds = await awsCredentials.GetCredentialsAsync();
             Assert.Equal("accessKeyId", imutCreds.AccessKey);
@@ -92,7 +91,7 @@ namespace AWS.Deploy.CLI.UnitTests
                 throw new Exception("Missing Authorization header");
             }
 
-            var authResults = AwsCredentialsAuthenticationHandler.ProcessAuthorizationHeader(value.FirstOrDefault(), new NoEncryptionProvider());
+            var authResults = AwsCredentialsAuthenticationHandler.ProcessAuthorizationHeader(value.First(), new NoEncryptionProvider());
             Assert.True(authResults.Succeeded);
         }
 
@@ -101,7 +100,7 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var authResults = AwsCredentialsAuthenticationHandler.ProcessAuthorizationHeader("no-schema-value", new NoEncryptionProvider());
             Assert.False(authResults.Succeeded);
-            Assert.Contains("Incorrect format Authorization header", authResults.Failure.Message);
+            Assert.Contains("Incorrect format Authorization header", authResults.Failure!.Message);
         }
 
         [Fact]
@@ -109,7 +108,7 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var authResults = AwsCredentialsAuthenticationHandler.ProcessAuthorizationHeader("wrong-schema value", new NoEncryptionProvider());
             Assert.False(authResults.Succeeded);
-            Assert.Contains("Unsupported authorization schema", authResults.Failure.Message);
+            Assert.Contains("Unsupported authorization schema", authResults.Failure!.Message);
         }
 
         [Fact]
@@ -118,7 +117,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var base64BadJson = Convert.ToBase64String(UTF8Encoding.UTF8.GetBytes("you are not json"));
             var authResults = AwsCredentialsAuthenticationHandler.ProcessAuthorizationHeader($"aws-deploy-tool-server-mode {base64BadJson}", new NoEncryptionProvider());
             Assert.False(authResults.Succeeded);
-            Assert.Equal("Error decoding authorization value", authResults.Failure.Message);
+            Assert.Equal("Error decoding authorization value", authResults.Failure?.Message);
         }
 
         [Fact]
@@ -131,64 +130,71 @@ namespace AWS.Deploy.CLI.UnitTests
 
             ServerModeHttpClientAuthorizationHandler.AddAuthorizationHeader(request, creds, aes);
 
-            if (!request.Headers.TryGetValues("Authorization", out var value))
+            if (!request.Headers.TryGetValues("Authorization", out var headerValues))
             {
                 throw new Exception("Missing Authorization header");
             }
 
-            var authPayloadBase64 = value.FirstOrDefault().Split(' ')[1];
+            var values = headerValues as string[] ?? headerValues.ToArray();
+            var authHeader = values.FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(authHeader))
+            {
+                throw new Exception("Authorization header is empty");
+            }
+
+            var authPayloadBase64 = authHeader.Split(' ')[1];
             var authPayload = Encoding.UTF8.GetString(Convert.FromBase64String(authPayloadBase64));
 
             // This should fail because the payload is encrypted.
             Assert.Throws<JsonReaderException>(() => JsonConvert.DeserializeObject(authPayload));
 
-            var authResults = AwsCredentialsAuthenticationHandler.ProcessAuthorizationHeader(value.FirstOrDefault(), new AesEncryptionProvider(aes));
+            var authResults = AwsCredentialsAuthenticationHandler.ProcessAuthorizationHeader(authHeader, new AesEncryptionProvider(aes));
             Assert.True(authResults.Succeeded);
 
-            var accessKeyId = authResults.Principal.Claims.FirstOrDefault(x => string.Equals(AwsCredentialsAuthenticationHandler.ClaimAwsAccessKeyId, x.Type))?.Value;
+            var accessKeyId = authResults.Principal?.Claims.FirstOrDefault(x => string.Equals(AwsCredentialsAuthenticationHandler.ClaimAwsAccessKeyId, x.Type))?.Value;
             Assert.Equal(creds.AccessKey, accessKeyId);
 
-            var secretKey = authResults.Principal.Claims.FirstOrDefault(x => string.Equals(AwsCredentialsAuthenticationHandler.ClaimAwsSecretKey, x.Type))?.Value;
+            var secretKey = authResults.Principal?.Claims.FirstOrDefault(x => string.Equals(AwsCredentialsAuthenticationHandler.ClaimAwsSecretKey, x.Type))?.Value;
             Assert.Equal(creds.SecretKey, secretKey);
 
-            var token = authResults.Principal.Claims.FirstOrDefault(x => string.Equals(AwsCredentialsAuthenticationHandler.ClaimAwsSessionToken, x.Type))?.Value;
+            var token = authResults.Principal?.Claims.FirstOrDefault(x => string.Equals(AwsCredentialsAuthenticationHandler.ClaimAwsSessionToken, x.Type))?.Value;
             Assert.Equal(creds.Token, token);
         }
 
         [Fact]
         public void AuthMissingIssueDate()
         {
-            var authValue = MockAuthorizationHeaderValue("access", "secret", null, null);
+            var authValue = MockAuthorizationHeaderValue("access", "secret", null!, null);
             var authResults = AwsCredentialsAuthenticationHandler.ProcessAuthorizationHeader(authValue, new NoEncryptionProvider());
             Assert.False(authResults.Succeeded);
-            Assert.Equal($"Authorization header missing {AwsCredentialsAuthenticationHandler.ClaimAwsIssueDate} property", authResults.Failure.Message);
+            Assert.Equal($"Authorization header missing {AwsCredentialsAuthenticationHandler.ClaimAwsIssueDate} property", authResults.Failure?.Message);
         }
 
         [Fact]
         public void AuthExpiredIssueDate()
         {
-            var authValue = MockAuthorizationHeaderValue("access", "secret", null, DateTime.UtcNow.AddMinutes(-5));
+            var authValue = MockAuthorizationHeaderValue("access", "secret", null!, DateTime.UtcNow.AddMinutes(-5));
             var authResults = AwsCredentialsAuthenticationHandler.ProcessAuthorizationHeader(authValue, new NoEncryptionProvider());
             Assert.False(authResults.Succeeded);
-            Assert.Equal("Issue date has expired", authResults.Failure.Message);
+            Assert.Equal("Issue date has expired", authResults.Failure?.Message);
         }
 
         [Fact]
         public void AuthFutureIssueDate()
         {
-            var authValue = MockAuthorizationHeaderValue("access", "secret", null, DateTime.UtcNow.AddMinutes(5));
+            var authValue = MockAuthorizationHeaderValue("access", "secret", null!, DateTime.UtcNow.AddMinutes(5));
             var authResults = AwsCredentialsAuthenticationHandler.ProcessAuthorizationHeader(authValue, new NoEncryptionProvider());
             Assert.False(authResults.Succeeded);
-            Assert.Equal("Issue date invalid set in the future", authResults.Failure.Message);
+            Assert.Equal("Issue date invalid set in the future", authResults.Failure?.Message);
         }
 
         [Fact]
         public void AuthInvalidFormatForIssueDate()
         {
-            var authValue = MockAuthorizationHeaderValue("access", "secret", null, "not a date");
+            var authValue = MockAuthorizationHeaderValue("access", "secret", null!, "not a date");
             var authResults = AwsCredentialsAuthenticationHandler.ProcessAuthorizationHeader(authValue, new NoEncryptionProvider());
             Assert.False(authResults.Succeeded);
-            Assert.Equal("Failed to parse issue date", authResults.Failure.Message);
+            Assert.Equal("Failed to parse issue date", authResults.Failure?.Message);
         }
 
         [Fact]
@@ -211,14 +217,20 @@ namespace AWS.Deploy.CLI.UnitTests
             await interactiveService.StdInWriter.WriteAsync(keyInfoStdin);
             await interactiveService.StdInWriter.FlushAsync();
 
-            var serverCommand = new ServerModeCommand(interactiveService, portNumber, null, false);
+            var serverCommandSettings = new ServerModeCommandSettings
+            {
+                Port = portNumber,
+                ParentPid = null,
+                UnsecureMode = false
+            };
+            var serverCommand = new ServerModeCommand(interactiveService);
 
 
             var cancelSource = new CancellationTokenSource();
-            Exception actualException = null;
+            Exception? actualException = null;
             try
             {
-                await serverCommand.ExecuteAsync(cancelSource.Token);
+                await serverCommand.ExecuteAsync(null!, serverCommandSettings, cancelSource);
             }
             catch(InvalidEncryptionKeyInfoException e)
             {
@@ -230,7 +242,7 @@ namespace AWS.Deploy.CLI.UnitTests
             }
 
             Assert.NotNull(actualException);
-            Assert.Equal("Missing required \"Version\" property in the symmetric key", actualException.Message);
+            Assert.Equal("Missing required \"Version\" property in the symmetric key", actualException?.Message);
         }
 
         [Fact]
@@ -254,12 +266,18 @@ namespace AWS.Deploy.CLI.UnitTests
             await interactiveService.StdInWriter.WriteAsync(keyInfoStdin);
             await interactiveService.StdInWriter.FlushAsync();
 
-            var serverCommand = new ServerModeCommand(interactiveService, portNumber, null, false);
+            var serverCommandSettings = new ServerModeCommandSettings
+            {
+                Port = portNumber,
+                ParentPid = null,
+                UnsecureMode = false
+            };
+            var serverCommand = new ServerModeCommand(interactiveService);
             var cancelSource = new CancellationTokenSource();
-            Exception actualException = null;
+            Exception? actualException = null;
             try
             {
-                await serverCommand.ExecuteAsync(cancelSource.Token);
+                await serverCommand.ExecuteAsync(null!, serverCommandSettings, cancelSource);
             }
             catch (InvalidEncryptionKeyInfoException e)
             {
@@ -271,7 +289,7 @@ namespace AWS.Deploy.CLI.UnitTests
             }
 
             Assert.NotNull(actualException);
-            Assert.Equal("Unsupported symmetric key not-valid", actualException.Message);
+            Assert.Equal("Unsupported symmetric key not-valid", actualException?.Message);
         }
 
         [Fact]
@@ -285,8 +303,8 @@ namespace AWS.Deploy.CLI.UnitTests
             };
 
             var results = AwsCredentialsAuthenticationHandler.ValidateAuthParameters(authParameters);
-            Assert.False(results.Succeeded);
-            Assert.Equal($"Authorization header missing {AwsCredentialsAuthenticationHandler.ClaimAwsRequestId} property", results.Failure.Message);
+            Assert.False(results?.Succeeded);
+            Assert.Equal($"Authorization header missing {AwsCredentialsAuthenticationHandler.ClaimAwsRequestId} property", results?.Failure?.Message);
         }
 
         [Fact]
@@ -304,8 +322,8 @@ namespace AWS.Deploy.CLI.UnitTests
             Assert.Null(results);
 
             results = AwsCredentialsAuthenticationHandler.ValidateAuthParameters(authParameters);
-            Assert.False(results.Succeeded);
-            Assert.Equal($"Value for authorization header has already been used", results.Failure.Message);
+            Assert.False(results?.Succeeded);
+            Assert.Equal($"Value for authorization header has already been used", results?.Failure?.Message);
         }
 
         [Fact]
@@ -340,7 +358,7 @@ namespace AWS.Deploy.CLI.UnitTests
             Assert.Contains(request3["requestId"], AwsCredentialsAuthenticationHandler.ProcessRequestIds);
         }
 
-        private string MockAuthorizationHeaderValue(string accessKey, string secretKey, string sessionToken, object issueDate)
+        private string MockAuthorizationHeaderValue(string accessKey, string secretKey, string sessionToken, object? issueDate)
         {
             var authParameters = new Dictionary<string, string>
             {
@@ -362,7 +380,7 @@ namespace AWS.Deploy.CLI.UnitTests
                 }
                 else
                 {
-                    authParameters[AwsCredentialsAuthenticationHandler.ClaimAwsIssueDate] = issueDate.ToString();
+                    authParameters[AwsCredentialsAuthenticationHandler.ClaimAwsIssueDate] = issueDate.ToString() ?? string.Empty;
                 }
             }
 

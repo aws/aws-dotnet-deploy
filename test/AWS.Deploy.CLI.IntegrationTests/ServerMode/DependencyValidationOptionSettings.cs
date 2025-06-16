@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Amazon.Runtime;
 using AWS.Deploy.CLI.Commands;
+using AWS.Deploy.CLI.Commands.Settings;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.CLI.Extensions;
 using AWS.Deploy.CLI.IntegrationTests.Extensions;
@@ -24,7 +25,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
     public class DependencyValidationOptionSettings : IDisposable
     {
         private bool _isDisposed;
-        private string _stackName;
+        private string? _stackName;
         private readonly IServiceProvider _serviceProvider;
 
         private readonly string _awsRegion;
@@ -53,10 +54,16 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
             var portNumber = 4022;
             using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ServerModeUtilities.ResolveDefaultCredentials);
 
-            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
+            var serverCommandSettings = new ServerModeCommandSettings
+            {
+                Port = portNumber,
+                ParentPid = null,
+                UnsecureMode = true
+            };
+            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>());
             var cancelSource = new CancellationTokenSource();
 
-            var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
+            _ = serverCommand.ExecuteAsync(null!, serverCommandSettings, cancelSource);
             try
             {
                 var baseUrl = $"http://localhost:{portNumber}/";
@@ -144,10 +151,16 @@ namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
             var portNumber = 4022;
             using var httpClient = ServerModeHttpClientFactory.ConstructHttpClient(ServerModeUtilities.ResolveDefaultCredentials);
 
-            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>(), portNumber, null, true);
+            var serverCommandSettings = new ServerModeCommandSettings
+            {
+                Port = portNumber,
+                ParentPid = null,
+                UnsecureMode = true
+            };
+            var serverCommand = new ServerModeCommand(_serviceProvider.GetRequiredService<IToolInteractiveService>());
             var cancelSource = new CancellationTokenSource();
 
-            var serverTask = serverCommand.ExecuteAsync(cancelSource.Token);
+            _ = serverCommand.ExecuteAsync(null!, serverCommandSettings, cancelSource);
             try
             {
                 var baseUrl = $"http://localhost:{portNumber}/";

@@ -23,6 +23,7 @@ using System.IO;
 using AWS.Deploy.Common.Recipes;
 using DeploymentTypes = AWS.Deploy.CLI.ServerMode.Models.DeploymentTypes;
 using System;
+using AWS.Deploy.CLI.Commands.Settings;
 using AWS.Deploy.Common.Recipes.Validation;
 using AWS.Deploy.Recipes;
 
@@ -39,7 +40,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public void EnsureMinimumSystemTextJsonVersion()
         {
             var assembly = typeof(ServerModeCommand).Assembly;
-            var jsonAssemblyName = assembly.GetReferencedAssemblies().FirstOrDefault(x => string.Equals("System.Text.Json", x.Name, StringComparison.OrdinalIgnoreCase));
+            var jsonAssemblyName = assembly.GetReferencedAssemblies().First(x => string.Equals("System.Text.Json", x.Name, StringComparison.OrdinalIgnoreCase));
             Assert.True(jsonAssemblyName.Version >= Version.Parse("5.0.0"));
         }
 
@@ -47,11 +48,23 @@ namespace AWS.Deploy.CLI.UnitTests
         [Fact]
         public async Task TcpPortIsInUseTest()
         {
-            var serverModeCommand1 = new ServerModeCommand(new TestToolInteractiveServiceImpl(), 1234, null, true);
-            var serverModeCommand2 = new ServerModeCommand(new TestToolInteractiveServiceImpl(), 1234, null, true);
+            var serverCommandSettings1 = new ServerModeCommandSettings
+            {
+                Port = 1234,
+                ParentPid = null,
+                UnsecureMode = true
+            };
+            var serverModeCommand1 = new ServerModeCommand(new TestToolInteractiveServiceImpl());
+            var serverCommandSettings2 = new ServerModeCommandSettings
+            {
+                Port = 1234,
+                ParentPid = null,
+                UnsecureMode = true
+            };
+            var serverModeCommand2 = new ServerModeCommand(new TestToolInteractiveServiceImpl());
 
-            var serverModeTask1 = serverModeCommand1.ExecuteAsync();
-            var serverModeTask2 = serverModeCommand2.ExecuteAsync();
+            var serverModeTask1 = serverModeCommand1.ExecuteAsync(null!, serverCommandSettings1);
+            var serverModeTask2 = serverModeCommand2.ExecuteAsync(null!, serverCommandSettings2);
 
             await Task.WhenAny(serverModeTask1, serverModeTask2);
 
@@ -61,7 +74,7 @@ namespace AWS.Deploy.CLI.UnitTests
             Assert.True(serverModeTask2.IsFaulted);
 
             Assert.NotNull(serverModeTask2.Exception);
-            Assert.Single(serverModeTask2.Exception.InnerExceptions);
+            Assert.Single(serverModeTask2.Exception!.InnerExceptions);
 
             Assert.IsType<TcpPortInUseException>(serverModeTask2.Exception.InnerException);
         }
@@ -132,7 +145,7 @@ namespace AWS.Deploy.CLI.UnitTests
                 .Callback<string>((csProjectPath) =>
                 {
                     customLocatorCalls++;
-                    Assert.Equal(new DirectoryInfo(sourceProjectDirectory).FullName, Directory.GetParent(csProjectPath).FullName);
+                    Assert.Equal(new DirectoryInfo(sourceProjectDirectory).FullName, Directory.GetParent(csProjectPath)!.FullName);
                 })
                 .ReturnsAsync(new List<string>());
             var orchestratorInteractiveService = new TestToolOrchestratorInteractiveService();

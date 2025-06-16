@@ -34,7 +34,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.DeploymentManifestFile
             _testAppManager = new TestAppManager();
             var targetApplicationPath = _testAppManager.GetProjectPath(Path.Combine("testapps", "WebAppWithDockerFile", "WebAppWithDockerFile.csproj"));;
             _targetApplicationFullPath = _directoryManager.GetDirectoryInfo(targetApplicationPath).FullName;
-            _targetApplicationDirectoryFullPath = _directoryManager.GetDirectoryInfo(targetApplicationPath).Parent.FullName;
+            _targetApplicationDirectoryFullPath = _directoryManager.GetDirectoryInfo(targetApplicationPath).Parent?.FullName ?? string.Empty;
             _deploymentManifestEngine = new DeploymentManifestEngine(_testDirectoryManager, _fileManager);
         }
 
@@ -121,7 +121,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.DeploymentManifestFile
             var manifestFilejsonString = await _fileManager.ReadAllTextAsync(deploymentManifestFilePath);
             var deploymentManifestModel = JsonConvert.DeserializeObject<DeploymentManifestModel>(manifestFilejsonString);
 
-            foreach (var entry in deploymentManifestModel.DeploymentProjects)
+            foreach (var entry in deploymentManifestModel?.DeploymentProjects ?? new())
             {
                 deploymentProjectPaths.Add(entry.SaveCdkDirectoryRelativePath);
             }

@@ -46,7 +46,7 @@ namespace AWS.Deploy.CLI.UnitTests
                 "default"
             );
             var recommendations = await engine.ComputeRecommendations();
-            var selectedRecommendation = recommendations.FirstOrDefault(x => string.Equals(x.Recipe.Id, "AspNetAppAppRunner"));
+            var selectedRecommendation = recommendations.First(x => string.Equals(x.Recipe.Id, "AspNetAppAppRunner"));
 
             // ARRANGE - get project definition
             var projectPath = SystemIOUtilities.ResolvePath("WebAppWithDockerFile");

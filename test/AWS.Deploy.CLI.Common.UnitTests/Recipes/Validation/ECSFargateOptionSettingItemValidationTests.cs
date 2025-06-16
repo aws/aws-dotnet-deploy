@@ -43,7 +43,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
             _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider));
 
             _recipe = new RecipeDefinition("Fargate", "0.1", "Fargate", DeploymentTypes.CdkProject, DeploymentBundleTypes.Container, "", "", "", "", "");
-            _recommendation = new Recommendation(_recipe, null, 100, new Dictionary<string, object>());
+            _recommendation = new Recommendation(_recipe, null!, 100, new Dictionary<string, object>());
         }
 
         [Theory]
@@ -63,7 +63,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
         [Theory]
         [InlineData("abcdef1234", true)]
         [InlineData("abc123def45", true)]
-        [InlineData("abc12-34-56-XZ", true)] 
+        [InlineData("abc12-34-56-XZ", true)]
         [InlineData("abc_@1323", false)] //invalid characters
         [InlineData("123*&$abc", false)] //invalid characters
         public async Task NewClusterNameValidationTests(string value, bool isValid)
@@ -415,10 +415,10 @@ namespace AWS.Deploy.CLI.Common.UnitTests.Recipes.Validation
 
         private async Task Validate<T>(OptionSettingItem optionSettingItem, T value, bool isValid)
         {
-            ValidationFailedException exception = null;
+            ValidationFailedException? exception = null;
             try
             {
-                await _optionSettingHandler.SetOptionSettingValue(_recommendation, optionSettingItem, value);
+                await _optionSettingHandler.SetOptionSettingValue(_recommendation, optionSettingItem, value!);
             }
             catch (ValidationFailedException e)
             {

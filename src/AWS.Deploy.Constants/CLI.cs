@@ -22,5 +22,7 @@ namespace AWS.Deploy.Constants
 
         public const string CLI_APP_NAME = "AWS .NET Deployment Tool";
         public const string WORKSPACE_ENV_VARIABLE = "AWS_DOTNET_DEPLOYTOOL_WORKSPACE";
+
+        public const string TOOL_NAME = "dotnet-aws";
     }
 }

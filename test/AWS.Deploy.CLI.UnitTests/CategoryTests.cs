@@ -31,23 +31,24 @@ namespace AWS.Deploy.CLI.UnitTests
             {
                 _output.WriteLine($"Validating recipe: {recipe}");
                 var root = JsonConvert.DeserializeObject(File.ReadAllText(recipe)) as JObject;
-
+                if (root is null)
+                    throw new Exception("Could not deserialize recipe.");
                 _output.WriteLine("\tCategories");
                 var categoryIds = new HashSet<string>();
                 var categoryOrders = new HashSet<int>();
-                foreach(JObject category in root["Categories"])
+                foreach(var category in root["Categories"]!)
                 {
                     _output.WriteLine($"\t\t{category["Id"]}");
-                    categoryIds.Add(category["Id"].ToString());
+                    categoryIds.Add(category["Id"]!.ToString());
 
                     // Make sure all order ids are unique in recipe
-                    var order = (int)category["Order"];
+                    var order = (int)category["Order"]!;
                     Assert.DoesNotContain(order, categoryOrders);
                     categoryOrders.Add(order);
                 }
 
                 _output.WriteLine("\tSettings");
-                foreach (JObject setting in root["OptionSettings"])
+                foreach (var setting in root["OptionSettings"]!)
                 {
                     var settingCategoryId = setting["Category"]?.ToString();
                     _output.WriteLine($"\t\t{settingCategoryId}");
