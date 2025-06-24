@@ -94,6 +94,10 @@ namespace AWS.Deploy.CLI.UnitTests.Utilities
         public Task<List<SecurityGroup>> DescribeSecurityGroups(string? vpcID = null) => throw new NotImplementedException();
         public Task<string?> GetParameterStoreTextValue(string parameterName) => throw new NotImplementedException();
         public Task<ResourceDescription> GetCloudControlApiResource(string type, string identifier) => throw new NotImplementedException();
+        public Task<List<Stack>> DescribeStacks(string stackName) => throw new NotImplementedException();
+
+        public Task<DeleteStackResponse> DeleteStack(string stackName) => throw new NotImplementedException();
+
         public Task<Vpc?> GetDefaultVpc() => throw new NotImplementedException();
         public Task<List<ConfigurationSettingsDescription>> DescribeElasticBeanstalkConfigurationSettings(string applicationName, string environmentName) => throw new NotImplementedException();
     }
