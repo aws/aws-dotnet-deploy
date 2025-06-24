@@ -28,12 +28,12 @@ public class DeleteDeploymentCommand : CancellableAsyncCommand<DeleteDeploymentC
 
     private readonly IAWSClientFactory _awsClientFactory;
     private readonly IToolInteractiveService _interactiveService;
-    private readonly IAmazonCloudFormation _cloudFormationClient;
     private readonly IConsoleUtilities _consoleUtilities;
     private readonly ILocalUserSettingsEngine _localUserSettingsEngine;
     private readonly IAWSUtilities _awsUtilities;
     private readonly IProjectParserUtility _projectParserUtility;
     private readonly IAWSResourceQueryer _awsResourceQueryer;
+    private IAmazonCloudFormation? _cloudFormationClient;
     private const int MAX_RETRIES = 4;
 
     /// <summary>
@@ -51,7 +51,6 @@ public class DeleteDeploymentCommand : CancellableAsyncCommand<DeleteDeploymentC
         _awsClientFactory = awsClientFactory;
         _interactiveService = interactiveService;
         _consoleUtilities = consoleUtilities;
-        _cloudFormationClient = _awsClientFactory.GetAWSClient<IAmazonCloudFormation>();
         _localUserSettingsEngine = localUserSettingsEngine;
         _awsUtilities = awsUtilities;
         _projectParserUtility = projectParserUtility;
@@ -79,6 +78,9 @@ public class DeleteDeploymentCommand : CancellableAsyncCommand<DeleteDeploymentC
             awsOption.Credentials = awsCredentials;
             awsOption.Region = RegionEndpoint.GetBySystemName(awsRegion);
         });
+
+        // Create CloudFormation client after credentials are configured
+        _cloudFormationClient = _awsClientFactory.GetAWSClient<IAmazonCloudFormation>();
 
         if (string.IsNullOrEmpty(settings.DeploymentName))
         {
@@ -123,7 +125,7 @@ public class DeleteDeploymentCommand : CancellableAsyncCommand<DeleteDeploymentC
 
         try
         {
-            await _cloudFormationClient.DeleteStackAsync(new DeleteStackRequest
+            await _cloudFormationClient!.DeleteStackAsync(new DeleteStackRequest
             {
                 StackName = settings.DeploymentName
             });
@@ -218,7 +220,7 @@ public class DeleteDeploymentCommand : CancellableAsyncCommand<DeleteDeploymentC
             {
                 await Task.Delay(waitTime);
 
-                var response = await _cloudFormationClient.DescribeStacksAsync(new DescribeStacksRequest
+                var response = await _cloudFormationClient!.DescribeStacksAsync(new DescribeStacksRequest
                 {
                     StackName = stackName
                 });

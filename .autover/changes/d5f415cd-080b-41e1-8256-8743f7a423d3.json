@@ -1,0 +1,11 @@
+{
+  "Projects": [
+    {
+      "Name": "AWS.Deploy.CLI",
+      "Type": "Patch",
+      "ChangelogMessages": [
+        "Fixed intermittent IAM permission failures in delete-deployment command by ensuring CloudFormation client is created after AWS credentials are configured"
+      ]
+    }
+  ]
+}
