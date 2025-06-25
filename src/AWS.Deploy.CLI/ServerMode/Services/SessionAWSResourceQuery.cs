@@ -243,6 +243,16 @@ namespace AWS.Deploy.CLI.ServerMode.Services
             return (await GetAndCache(async () => await _awsResourceQueryer.GetCloudFrontDistribution(distributionId), new object[] { distributionId }))!;
         }
 
+        public async Task<List<Stack>> DescribeStacks(string stackName)
+        {
+            return (await GetAndCache(async () => await _awsResourceQueryer.DescribeStacks(stackName), new object[] { stackName }))!;
+        }
+
+        public async Task<DeleteStackResponse> DeleteStack(string stackName)
+        {
+            return (await GetAndCache(async () => await _awsResourceQueryer.DeleteStack(stackName), new object[] { stackName }))!;
+        }
+
         /// <inheritdoc/>
         public async Task<Vpc?> GetDefaultVpc()
         {

@@ -51,6 +51,34 @@ namespace AWS.Deploy.Orchestration.Data
 {
     public class AWSResourceQueryer(IAWSClientFactory awsClientFactory) : IAWSResourceQueryer
     {
+        public async Task<List<Stack>> DescribeStacks(string stackName)
+        {
+            var cfClient = awsClientFactory.GetAWSClient<IAmazonCloudFormation>();
+            var request = new DescribeStacksRequest
+            {
+                StackName = stackName
+            };
+
+            return await HandleException(async () => await cfClient.Paginators
+                    .DescribeStacks(request)
+                    .Stacks
+                    .ToListAsync(),
+                $"Error attempting to describe available CloudFormation stacks using stack name '{stackName}'");
+        }
+
+        public async Task<DeleteStackResponse> DeleteStack(string stackName)
+        {
+            var cfClient = awsClientFactory.GetAWSClient<IAmazonCloudFormation>();
+            var request = new DeleteStackRequest
+            {
+                StackName = stackName
+            };
+
+            return await HandleException(async () => await cfClient
+                    .DeleteStackAsync(request),
+                $"Error attempting to delete the CloudFormation stack '{stackName}'.");
+        }
+
         public async Task<ResourceDescription> GetCloudControlApiResource(string type, string identifier)
         {
             var cloudControlApiClient = awsClientFactory.GetAWSClient<IAmazonCloudControlApi>();
