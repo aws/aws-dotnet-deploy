@@ -1,3 +1,10 @@
+## Release 2025-06-25
+
+### AWS.Deploy.CLI (2.0.1)
+* Fixed intermittent IAM permission failures in delete-deployment command by ensuring CloudFormation client is created after AWS credentials are configured
+### AWS.Deploy.Recipes.CDK.Common (2.0.1)
+### AWS.Deploy.ServerMode.Client (2.0.1)
+
 ## Release 2025-06-16
 
 ### AWS.Deploy.CLI (2.0.0)

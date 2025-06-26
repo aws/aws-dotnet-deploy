@@ -1,10 +1,6 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Amazon;
 using Amazon.CloudFormation;
 using Amazon.CloudFormation.Model;
@@ -28,7 +24,6 @@ public class DeleteDeploymentCommand : CancellableAsyncCommand<DeleteDeploymentC
 
     private readonly IAWSClientFactory _awsClientFactory;
     private readonly IToolInteractiveService _interactiveService;
-    private readonly IAmazonCloudFormation _cloudFormationClient;
     private readonly IConsoleUtilities _consoleUtilities;
     private readonly ILocalUserSettingsEngine _localUserSettingsEngine;
     private readonly IAWSUtilities _awsUtilities;
@@ -51,7 +46,6 @@ public class DeleteDeploymentCommand : CancellableAsyncCommand<DeleteDeploymentC
         _awsClientFactory = awsClientFactory;
         _interactiveService = interactiveService;
         _consoleUtilities = consoleUtilities;
-        _cloudFormationClient = _awsClientFactory.GetAWSClient<IAmazonCloudFormation>();
         _localUserSettingsEngine = localUserSettingsEngine;
         _awsUtilities = awsUtilities;
         _projectParserUtility = projectParserUtility;
@@ -123,10 +117,7 @@ public class DeleteDeploymentCommand : CancellableAsyncCommand<DeleteDeploymentC
 
         try
         {
-            await _cloudFormationClient.DeleteStackAsync(new DeleteStackRequest
-            {
-                StackName = settings.DeploymentName
-            });
+            await _awsResourceQueryer.DeleteStack(settings.DeploymentName);
 
             // Fire and forget the monitor
             // Monitor updates the stdout with current status of the CloudFormation stack
@@ -218,20 +209,17 @@ public class DeleteDeploymentCommand : CancellableAsyncCommand<DeleteDeploymentC
             {
                 await Task.Delay(waitTime);
 
-                var response = await _cloudFormationClient.DescribeStacksAsync(new DescribeStacksRequest
-                {
-                    StackName = stackName
-                });
+                var response = await _awsResourceQueryer.DescribeStacks(stackName);
 
-                stack = response.Stacks == null || response.Stacks.Count == 0 ? null : response.Stacks[0];
+                stack = response.Count == 0 ? null : response[0];
                 shouldRetry = false;
             }
-            catch (AmazonCloudFormationException exception) when (exception.ErrorCode.Equals("ValidationError") && exception.Message.Equals($"Stack with id {stackName} does not exist"))
+            catch (ResourceQueryException exception) when (exception.InnerException is AmazonCloudFormationException amazonCloudFormationException && amazonCloudFormationException.ErrorCode.Equals("ValidationError") && amazonCloudFormationException.Message.Equals($"Stack with id {stackName} does not exist"))
             {
                 _interactiveService.WriteDebugLine(exception.PrettyPrint());
                 shouldRetry = false;
             }
-            catch (AmazonCloudFormationException exception) when (exception.ErrorCode.Equals("Throttling"))
+            catch (ResourceQueryException exception) when (exception.InnerException is AmazonCloudFormationException amazonCloudFormationException && amazonCloudFormationException.ErrorCode.Equals("Throttling"))
             {
                 _interactiveService.WriteDebugLine(exception.PrettyPrint());
                 shouldRetry = true;
