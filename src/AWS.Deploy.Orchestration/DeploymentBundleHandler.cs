@@ -66,7 +66,7 @@ namespace AWS.Deploy.Orchestration
             if (currentArchitecture != recommendation.DeploymentBundle.EnvironmentArchitecture)
             {
                 var platform = recommendation.DeploymentBundle.EnvironmentArchitecture == SupportedArchitecture.Arm64 ? "linux/arm64" : "linux/amd64";
-                buildCommand = $"{commandName} buildx build --platform {platform} -t {imageTag} -f \"{dockerFile}\"{buildArgs} .";
+                buildCommand = $"{commandName} buildx build --load --platform {platform} -t {imageTag} -f \"{dockerFile}\"{buildArgs} .";
             }
 
             interactiveService.LogInfoMessage($"Container Execution Directory: {Path.GetFullPath(containerExecutionDirectory)}");
