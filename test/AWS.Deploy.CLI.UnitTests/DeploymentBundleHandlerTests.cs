@@ -98,7 +98,7 @@ namespace AWS.Deploy.CLI.UnitTests
             }
             else
             {
-                Assert.Equal($"docker buildx build --platform linux/amd64 -t {imageTag} -f \"{dockerFilePath}\" .",
+                Assert.Equal($"docker buildx build --load --platform linux/amd64 -t {imageTag} -f \"{dockerFilePath}\" .",
                     _commandLineWrapper.CommandsToExecute.First().Command);
             }
         }
@@ -129,7 +129,7 @@ namespace AWS.Deploy.CLI.UnitTests
             else
             {
                 var dockerPlatform = recommendation.DeploymentBundle.EnvironmentArchitecture == SupportedArchitecture.Arm64 ? "linux/arm64" : "linux/amd64";
-                Assert.Equal($"docker buildx build --platform {dockerPlatform} -t {imageTag} -f \"{dockerFilePath}\" .",
+                Assert.Equal($"docker buildx build --load --platform {dockerPlatform} -t {imageTag} -f \"{dockerFilePath}\" .",
                     _commandLineWrapper.CommandsToExecute.First().Command);
             }
         }
@@ -159,7 +159,7 @@ namespace AWS.Deploy.CLI.UnitTests
             }
             else
             {
-                Assert.Equal($"docker buildx build --platform linux/amd64 -t {imageTag} -f \"{expectedDockerFile}\" .",
+                Assert.Equal($"docker buildx build --load --platform linux/amd64 -t {imageTag} -f \"{expectedDockerFile}\" .",
                     _commandLineWrapper.CommandsToExecute.First().Command);
             }
             Assert.Equal(dockerExecutionDirectory.FullName,
@@ -192,7 +192,7 @@ namespace AWS.Deploy.CLI.UnitTests
             }
             else
             {
-                Assert.Equal($"docker buildx build --platform linux/amd64 -t {imageTag} -f \"{expectedDockerFile}\" .",
+                Assert.Equal($"docker buildx build --load --platform linux/amd64 -t {imageTag} -f \"{expectedDockerFile}\" .",
                     _commandLineWrapper.CommandsToExecute.First().Command);
             }
             Assert.Equal(projectPath,
@@ -228,7 +228,7 @@ namespace AWS.Deploy.CLI.UnitTests
             }
             else
             {
-                Assert.Equal($"docker buildx build --platform linux/amd64 -t {imageTag} -f \"{dockerfilePath}\" .",
+                Assert.Equal($"docker buildx build --load --platform linux/amd64 -t {imageTag} -f \"{dockerfilePath}\" .",
                     _commandLineWrapper.CommandsToExecute.First().Command);
             }
             Assert.Equal(expectedDockerExecutionDirectory.FullName,
