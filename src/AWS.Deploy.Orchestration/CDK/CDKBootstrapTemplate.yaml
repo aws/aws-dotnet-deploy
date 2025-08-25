@@ -51,6 +51,13 @@ Parameters:
     Type: String
     Default: "AWS CDK: Default Resources"
     Description: Describe the provenance of the resources in this bootstrap stack. Change this when you customize the template. To prevent accidents, the CDK CLI will not overwrite bootstrap stacks with a different variant.
+  DenyExternalId:
+    Type: String
+    Default: "true"
+    AllowedValues:
+      - "true"
+      - "false"
+    Description: Whether to deny AssumeRole calls with an ExternalId. This prevents calls that are intended to be deputized from accidentally assuming CDK Roles.
 Conditions:
   HasTrustedAccounts:
     Fn::Not:
@@ -104,6 +111,10 @@ Conditions:
     Fn::Equals:
       - "true"
       - Ref: PublicAccessBlockConfiguration
+  ShouldDenyExternalId:
+    Fn::Equals:
+      - "true"
+      - Ref: DenyExternalId
 Resources:
   FileAssetsBucketEncryptionKey:
     Type: AWS::KMS::Key
@@ -288,19 +299,41 @@ Resources:
     Properties:
       AssumeRolePolicyDocument:
         Statement:
-          - Action: sts:TagSession
+          - Action: sts:AssumeRole
             Effect: Allow
             Principal:
               AWS:
                 Ref: AWS::AccountId
-          - Action: sts:AssumeRole
+            Condition:
+              Fn::If:
+                - ShouldDenyExternalId
+                - "Null":
+                    sts:ExternalId: "true"
+                - Ref: AWS::NoValue
+          - Action: sts:TagSession
             Effect: Allow
             Principal:
               AWS:
                 Ref: AWS::AccountId
           - Fn::If:
               - HasTrustedAccounts
-              - Action: sts:AssumeRole
+              - Action:
+                  - sts:AssumeRole
+                Effect: Allow
+                Principal:
+                  AWS:
+                    Ref: TrustedAccounts
+                Condition:
+                  Fn::If:
+                    - ShouldDenyExternalId
+                    - "Null":
+                        sts:ExternalId: "true"
+                    - Ref: AWS::NoValue
+              - Ref: AWS::NoValue
+          - Fn::If:
+              - HasTrustedAccounts
+              - Action:
+                  - sts:TagSession
                 Effect: Allow
                 Principal:
                   AWS:
@@ -316,19 +349,41 @@ Resources:
     Properties:
       AssumeRolePolicyDocument:
         Statement:
-          - Action: sts:TagSession
+          - Action: sts:AssumeRole
             Effect: Allow
             Principal:
               AWS:
                 Ref: AWS::AccountId
-          - Action: sts:AssumeRole
+            Condition:
+              Fn::If:
+                - ShouldDenyExternalId
+                - "Null":
+                    sts:ExternalId: "true"
+                - Ref: AWS::NoValue
+          - Action: sts:TagSession
             Effect: Allow
             Principal:
               AWS:
                 Ref: AWS::AccountId
           - Fn::If:
               - HasTrustedAccounts
-              - Action: sts:AssumeRole
+              - Action:
+                  - sts:AssumeRole
+                Effect: Allow
+                Principal:
+                  AWS:
+                    Ref: TrustedAccounts
+                Condition:
+                  Fn::If:
+                    - ShouldDenyExternalId
+                    - "Null":
+                        sts:ExternalId: "true"
+                    - Ref: AWS::NoValue
+              - Ref: AWS::NoValue
+          - Fn::If:
+              - HasTrustedAccounts
+              - Action:
+                  - sts:TagSession
                 Effect: Allow
                 Principal:
                   AWS:
@@ -344,19 +399,41 @@ Resources:
     Properties:
       AssumeRolePolicyDocument:
         Statement:
-          - Action: sts:TagSession
+          - Action: sts:AssumeRole
             Effect: Allow
             Principal:
               AWS:
                 Ref: AWS::AccountId
-          - Action: sts:AssumeRole
+            Condition:
+              Fn::If:
+                - ShouldDenyExternalId
+                - "Null":
+                    sts:ExternalId: "true"
+                - Ref: AWS::NoValue
+          - Action: sts:TagSession
             Effect: Allow
             Principal:
               AWS:
                 Ref: AWS::AccountId
           - Fn::If:
               - HasTrustedAccountsForLookup
-              - Action: sts:AssumeRole
+              - Action:
+                  - sts:AssumeRole
+                Effect: Allow
+                Principal:
+                  AWS:
+                    Ref: TrustedAccountsForLookup
+                Condition:
+                  Fn::If:
+                    - ShouldDenyExternalId
+                    - "Null":
+                        sts:ExternalId: "true"
+                    - Ref: AWS::NoValue
+              - Ref: AWS::NoValue
+          - Fn::If:
+              - HasTrustedAccountsForLookup
+              - Action:
+                  - sts:TagSession
                 Effect: Allow
                 Principal:
                   AWS:
@@ -364,7 +441,23 @@ Resources:
               - Ref: AWS::NoValue
           - Fn::If:
               - HasTrustedAccounts
-              - Action: sts:AssumeRole
+              - Action:
+                  - sts:AssumeRole
+                Effect: Allow
+                Principal:
+                  AWS:
+                    Ref: TrustedAccounts
+                Condition:
+                  Fn::If:
+                    - ShouldDenyExternalId
+                    - "Null":
+                        sts:ExternalId: "true"
+                    - Ref: AWS::NoValue
+              - Ref: AWS::NoValue
+          - Fn::If:
+              - HasTrustedAccounts
+              - Action:
+                  - sts:TagSession
                 Effect: Allow
                 Principal:
                   AWS:
@@ -457,19 +550,41 @@ Resources:
     Properties:
       AssumeRolePolicyDocument:
         Statement:
-          - Action: sts:TagSession
+          - Action: sts:AssumeRole
             Effect: Allow
             Principal:
               AWS:
                 Ref: AWS::AccountId
-          - Action: sts:AssumeRole
+            Condition:
+              Fn::If:
+                - ShouldDenyExternalId
+                - "Null":
+                    sts:ExternalId: "true"
+                - Ref: AWS::NoValue
+          - Action: sts:TagSession
             Effect: Allow
             Principal:
               AWS:
                 Ref: AWS::AccountId
           - Fn::If:
               - HasTrustedAccounts
-              - Action: sts:AssumeRole
+              - Action:
+                  - sts:AssumeRole
+                Effect: Allow
+                Principal:
+                  AWS:
+                    Ref: TrustedAccounts
+                Condition:
+                  Fn::If:
+                    - ShouldDenyExternalId
+                    - "Null":
+                        sts:ExternalId: "true"
+                    - Ref: AWS::NoValue
+              - Ref: AWS::NoValue
+          - Fn::If:
+              - HasTrustedAccounts
+              - Action:
+                  - sts:TagSession
                 Effect: Allow
                 Principal:
                   AWS:
@@ -639,7 +754,7 @@ Resources:
       Type: String
       Name:
         Fn::Sub: /cdk-bootstrap/${Qualifier}/version
-      Value: "28"
+      Value: "29"
 Outputs:
   BucketName:
     Description: The name of the S3 bucket owned by the CDK toolkit stack
