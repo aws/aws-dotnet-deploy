@@ -1,3 +1,12 @@
+## Release 2025-09-08
+
+### AWS.Deploy.CLI (2.0.3)
+* Update the version of Amazon.CDK.Lib to 2.214.0
+* Update CDK Bootstrap template to version 29
+### AWS.Deploy.Recipes.CDK.Common (2.0.3)
+* Update the version of Amazon.CDK.Lib to 2.214.0
+### AWS.Deploy.ServerMode.Client (2.0.3)
+
 ## Release 2025-07-15
 
 ### AWS.Deploy.CLI (2.0.2)
