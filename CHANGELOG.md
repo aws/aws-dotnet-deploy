@@ -1,3 +1,10 @@
+## Release 2025-09-24
+
+### AWS.Deploy.ServerMode.Client (2.0.4)
+* Revert Microsoft.AspNetCore.SignalR.Client to 8.0.0 down from 8.0.15 to maintain support for older Visual Studio versions. Visual Studio 17.13 and older support up to 8.0.0.
+### AWS.Deploy.CLI (2.0.4)
+### AWS.Deploy.Recipes.CDK.Common (2.0.4)
+
 ## Release 2025-09-08
 
 ### AWS.Deploy.CLI (2.0.3)
