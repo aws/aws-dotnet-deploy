@@ -17,7 +17,9 @@
 
   <ItemGroup>
     <PackageReference Include="AWSSDK.Core" Version="4.0.0.2" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.15" />
+    <!-- We are pining Microsoft.AspNetCore.SignalR.Client to 8.0.0 to support VS versions prior to 17.14.
+    Currently, versions above 8.0.0 are only supported in VS 17.14 -->
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.0" />
     <!-- We are pining Newtonsoft.Json to 13.0.1 to maintain compatibility with the VS Toolkit.
     https://devblogs.microsoft.com/visualstudio/using-newtonsoft-json-in-a-visual-studio-extension/-->
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
