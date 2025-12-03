@@ -1,3 +1,11 @@
+## Release 2025-12-03
+
+### AWS.Deploy.CLI (2.0.5)
+* Updated the version of Amazon.CDK.Lib to 2.231.0
+### AWS.Deploy.Recipes.CDK.Common (2.0.5)
+* Updated the version of Amazon.CDK.Lib to 2.231.0
+### AWS.Deploy.ServerMode.Client (2.0.5)
+
 ## Release 2025-09-24
 
 ### AWS.Deploy.ServerMode.Client (2.0.4)
