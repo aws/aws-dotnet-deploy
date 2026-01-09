@@ -16,7 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.Core" Version="4.0.0.2" />
+    <PackageReference Include="AWSSDK.Core" Version="4.0.3.3" />
     <!-- We are pining Microsoft.AspNetCore.SignalR.Client to 8.0.0 to support VS versions prior to 17.14.
     Currently, versions above 8.0.0 are only supported in VS 17.14 -->
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.0" />
