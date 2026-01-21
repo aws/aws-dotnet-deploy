@@ -6,6 +6,13 @@
       "ChangelogMessages": [
         "Bumped AWSSDK.Core version to 4.0.3.3"
       ]
+    },
+    {
+      "Name": "AWS.Deploy.CLI",
+      "Type": "Patch",
+      "ChangelogMessages": [
+        "Update CDK Bootstrap template to version 30"
+      ]
     }
   ]
 }
