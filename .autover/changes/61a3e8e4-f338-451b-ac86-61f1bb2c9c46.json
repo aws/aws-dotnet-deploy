@@ -1,0 +1,11 @@
+{
+  "Projects": [
+    {
+      "Name": "AWS.Deploy.ServerMode.Client",
+      "Type": "Patch",
+      "ChangelogMessages": [
+        "Bumped AWSSDK.Core version to 4.0.3.3"
+      ]
+    }
+  ]
+}
