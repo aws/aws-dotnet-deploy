@@ -600,6 +600,7 @@ Resources:
                   - cloudformation:DeleteChangeSet
                   - cloudformation:DescribeChangeSet
                   - cloudformation:DescribeStacks
+                  - cloudformation:DescribeEvents
                   - cloudformation:ExecuteChangeSet
                   - cloudformation:CreateStack
                   - cloudformation:UpdateStack
@@ -754,7 +755,7 @@ Resources:
       Type: String
       Name:
         Fn::Sub: /cdk-bootstrap/${Qualifier}/version
-      Value: "29"
+      Value: "30"
 Outputs:
   BucketName:
     Description: The name of the S3 bucket owned by the CDK toolkit stack
@@ -780,7 +781,4 @@ Outputs:
       Fn::Sub: ${ContainerAssetsRepository}
   BootstrapVersion:
     Description: The version of the bootstrap resources that are currently mastered in this stack
-    Value:
-      Fn::GetAtt:
-        - CdkBootstrapVersion
-        - Value
+    Value: "30"

@@ -10,25 +10,25 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.CloudControlApi" Version="4.0.0.1" />
-    <PackageReference Include="AWSSDK.CloudWatchEvents" Version="4.0.0.1" />
-    <PackageReference Include="AWSSDK.EC2" Version="4.0.2" />
-    <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.0" />
-    <PackageReference Include="AWSSDK.SecurityToken" Version="4.0.0.1" />
-    <PackageReference Include="AWSSDK.AppRunner" Version="4.0.0.1" />
-    <PackageReference Include="AWSSDK.CloudFormation" Version="4.0.0.1" />
-    <PackageReference Include="AWSSDK.CloudFront" Version="4.0.0.1" />
-    <PackageReference Include="AWSSDK.DynamoDBv2" Version="4.0.0.2" />
-    <PackageReference Include="AWSSDK.ECR" Version="4.0.1" />
-    <PackageReference Include="AWSSDK.ECS" Version="4.0.0.2" />
-    <PackageReference Include="AWSSDK.IdentityManagement" Version="4.0.0.1" />
-    <PackageReference Include="AWSSDK.S3" Version="4.0.0.1" />
-    <PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="4.0.1.1" />
-    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="4.0.0.1" />
-    <PackageReference Include="AWSSDK.SQS" Version="4.0.0.1" />
+    <PackageReference Include="AWSSDK.CloudControlApi" Version="4.0.1.16" />
+    <PackageReference Include="AWSSDK.CloudWatchEvents" Version="4.0.1.16" />
+    <PackageReference Include="AWSSDK.EC2" Version="4.0.80.2" />
+    <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.3.25" />
+    <PackageReference Include="AWSSDK.SecurityToken" Version="4.0.5.12" />
+    <PackageReference Include="AWSSDK.AppRunner" Version="4.0.2.18" />
+    <PackageReference Include="AWSSDK.CloudFormation" Version="4.0.8.11" />
+    <PackageReference Include="AWSSDK.CloudFront" Version="4.0.12.3" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="4.0.15.2" />
+    <PackageReference Include="AWSSDK.ECR" Version="4.0.12" />
+    <PackageReference Include="AWSSDK.ECS" Version="4.0.15" />
+    <PackageReference Include="AWSSDK.IdentityManagement" Version="4.0.9.10" />
+    <PackageReference Include="AWSSDK.S3" Version="4.0.19" />
+    <PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="4.0.7.3" />
+    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="4.0.2.19" />
+    <PackageReference Include="AWSSDK.SQS" Version="4.0.2.17" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="AWSSDK.ElasticBeanstalk" Version="4.0.0.1" />
-    <PackageReference Include="AWSSDK.ElasticLoadBalancingV2" Version="4.0.0.1" />
+    <PackageReference Include="AWSSDK.ElasticBeanstalk" Version="4.0.3.2" />
+    <PackageReference Include="AWSSDK.ElasticLoadBalancingV2" Version="4.0.6.12" />
   </ItemGroup>
 
   <ItemGroup>

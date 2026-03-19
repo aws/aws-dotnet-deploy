@@ -10,6 +10,7 @@ using System;
 using System.Threading.Tasks;
 using System.IO;
 using System.Linq;
+using AWS.Deploy.CLI.Extensions;
 using AWS.Deploy.CLI.Utilities;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Orchestration;
@@ -64,6 +65,7 @@ namespace AWS.Deploy.DockerImageUploader
             var configFilePath = Path.Combine(projectPath, "DockerImageUploaderConfigFile.json");
             var deployArgs = new[] { "deploy", "--project-path", projectPath, "--diagnostics", "--apply", configFilePath, "--silent" };
             var serviceCollection = new ServiceCollection();
+            serviceCollection.AddCustomServices();
 
             var registrar = new TypeRegistrar(serviceCollection);
 
