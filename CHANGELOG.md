@@ -1,3 +1,12 @@
+## Release 2026-03-19
+
+### AWS.Deploy.CLI (2.0.6)
+* Update CDK Bootstrap template to version 30
+* Update AWS .NET SDK dependencies
+### AWS.Deploy.ServerMode.Client (2.0.6)
+* Bumped AWSSDK.Core version to 4.0.3.3
+### AWS.Deploy.Recipes.CDK.Common (2.0.6)
+
 ## Release 2025-12-03
 
 ### AWS.Deploy.CLI (2.0.5)
