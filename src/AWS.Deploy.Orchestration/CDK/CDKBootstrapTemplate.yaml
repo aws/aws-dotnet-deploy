@@ -646,6 +646,7 @@ Resources:
                   - cloudformation:UpdateTerminationProtection
                   - sts:GetCallerIdentity
                   - cloudformation:GetTemplateSummary
+                  - cloudformation:GetHookResult
                 Resource: "*"
                 Effect: Allow
               - Sid: CliStagingBucket
@@ -755,7 +756,7 @@ Resources:
       Type: String
       Name:
         Fn::Sub: /cdk-bootstrap/${Qualifier}/version
-      Value: "30"
+      Value: "31"
 Outputs:
   BucketName:
     Description: The name of the S3 bucket owned by the CDK toolkit stack
@@ -781,4 +782,4 @@ Outputs:
       Fn::Sub: ${ContainerAssetsRepository}
   BootstrapVersion:
     Description: The version of the bootstrap resources that are currently mastered in this stack
-    Value: "30"
+    Value: "31"
