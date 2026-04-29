@@ -15,14 +15,29 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Configure AWS Credentials
+      # Assume the release-workflow role first to read the per-repo deploy key from Secrets Manager.
+      # The deploy key authorizes the post-doc-gen `git push` back to main under the new automation-bypass ruleset
+      # (DeployKey is the sole bypass; default GITHUB_TOKEN would be blocked).
+      - name: Configure AWS Credentials (release-workflow role for SM lookup)
+        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 #v6.0.0
+        with:
+          role-to-assume: ${{ secrets.RELEASE_WORKFLOW_ACCESS_TOKEN_ROLE_ARN }}
+          aws-region: us-west-2
+      - name: Retrieve per-repo deploy key from AWS Secrets Manager
+        uses: aws-actions/aws-secretsmanager-get-secrets@3a411b6ec5cace3d626412dd917e7bfeac242cfa #v3.0.0
+        with:
+          secret-ids: |
+            DEPLOY_KEY, prod/devops/aws-dotnet-deploy-deploy-key
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+        with:
+          fetch-depth: '0'
+          ssh-key: ${{ env.DEPLOY_KEY }}
+      # Re-assume the CI testing-account role; the doc generator calls AWS APIs under this role.
+      - name: Configure AWS Credentials (CI testing role for doc generation)
         uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 #v6.0.0
         with:
           role-to-assume: ${{ secrets.CI_MAIN_TESTING_ACCOUNT_ROLE_ARN }}
           aws-region: us-west-2
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
-        with:
-          fetch-depth: '0'
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 #v6.2.0
         with:
           python-version: 3.x

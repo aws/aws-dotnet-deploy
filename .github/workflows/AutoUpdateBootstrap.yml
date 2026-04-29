@@ -21,18 +21,18 @@ jobs:
         role-to-assume: ${{ secrets.RELEASE_WORKFLOW_ACCESS_TOKEN_ROLE_ARN }}
         aws-region: us-west-2
 
-    - name: Retrieve secret from AWS Secrets Manager
+    - name: Retrieve per-repo deploy key + FG PAT from AWS Secrets Manager
       uses: aws-actions/aws-secretsmanager-get-secrets@3a411b6ec5cace3d626412dd917e7bfeac242cfa #v3.0.0
       with:
         secret-ids: |
-          AWS_SECRET, ${{ secrets.RELEASE_WORKFLOW_ACCESS_TOKEN_NAME }}
-        parse-json-secrets: true
+          DEPLOY_KEY, prod/devops/aws-dotnet-deploy-deploy-key
+          FG_PAT, prod/devops/aws-dotnet-deploy-fg-pat
 
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
       with:
         fetch-depth: '0'
         ref: dev
-        token: ${{ env.AWS_SECRET_TOKEN }}
+        ssh-key: ${{ env.DEPLOY_KEY }}
 
     - name: Setup .NET
       uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 #v5.2.0
@@ -94,7 +94,7 @@ jobs:
     - name: Delete existing branch if it exists
       if: steps.check_version.outputs.version_changed == 'true'
       env:
-        GITHUB_TOKEN: ${{ env.AWS_SECRET_TOKEN }}
+        GITHUB_TOKEN: ${{ env.FG_PAT }}
       run: |
         # Check if branch exists and delete it if it does
         if git ls-remote --heads origin update-cdk-bootstrap-template | grep -q update-cdk-bootstrap-template; then
@@ -104,7 +104,7 @@ jobs:
     - name: Create Pull Request
       if: steps.check_version.outputs.version_changed == 'true'
       env:
-        GITHUB_TOKEN: ${{ env.AWS_SECRET_TOKEN }}
+        GITHUB_TOKEN: ${{ env.FG_PAT }}
       run: |
         git checkout -b update-cdk-bootstrap-template
         git add src/AWS.Deploy.Orchestration/CDK/CDKBootstrapTemplate.yaml .autover/
