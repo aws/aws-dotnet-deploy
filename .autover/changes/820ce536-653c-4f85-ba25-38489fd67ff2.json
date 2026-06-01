@@ -1,0 +1,11 @@
+{
+  "Projects": [
+    {
+      "Name": "AWS.Deploy.CLI",
+      "Type": "Patch",
+      "ChangelogMessages": [
+        "Added AWSSDK.Signin dependency to resolve AWS credentials when authenticated using the AWS CLI v2 'aws login' SSO flow"
+      ]
+    }
+  ]
+}
