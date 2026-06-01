@@ -29,6 +29,7 @@
     <PackageReference Include="AWSSDK.IdentityManagement" Version="4.0.9.10" />
     <PackageReference Include="AWSSDK.CloudFormation" Version="4.0.8.11" />
     <PackageReference Include="AWSSDK.SecurityToken" Version="4.0.5.12" />
+    <PackageReference Include="AWSSDK.Signin" Version="4.0.1.1" />
     <PackageReference Include="AWSSDK.SSO" Version="4.0.2.16" />
     <PackageReference Include="AWSSDK.SSOOIDC" Version="4.0.3.17" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
