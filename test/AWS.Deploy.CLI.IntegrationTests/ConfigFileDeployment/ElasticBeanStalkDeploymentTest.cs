@@ -18,6 +18,7 @@ using Xunit;
 
 namespace AWS.Deploy.CLI.IntegrationTests.ConfigFileDeployment
 {
+    [Collection(nameof(ElasticBeanstalkTestCollection))]
     public class ElasticBeanStalkDeploymentTest : IDisposable
     {
         private readonly IServiceCollection _serviceCollection;
