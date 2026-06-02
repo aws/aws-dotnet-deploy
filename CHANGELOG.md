@@ -1,3 +1,12 @@
+## Release 2026-06-02
+
+### AWS.Deploy.CLI (2.0.7)
+* Added AWSSDK.Signin dependency to resolve AWS credentials when authenticated using the AWS CLI v2 'aws login' SSO flow
+* Update CDK Bootstrap template to version 31
+* Update CDK Bootstrap template to version 32
+### AWS.Deploy.Recipes.CDK.Common (2.0.7)
+### AWS.Deploy.ServerMode.Client (2.0.7)
+
 ## Release 2026-03-19
 
 ### AWS.Deploy.CLI (2.0.6)
