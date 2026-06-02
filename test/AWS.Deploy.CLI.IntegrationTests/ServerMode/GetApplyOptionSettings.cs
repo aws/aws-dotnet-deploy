@@ -30,6 +30,7 @@ using AWS.Deploy.ServerMode.Client.Utilities;
 
 namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
 {
+    [Collection(nameof(ElasticBeanstalkTestCollection))]
     public class GetApplyOptionSettings : IDisposable
     {
         private bool _isDisposed;

@@ -16,26 +16,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 #v5.1.1
+      uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 #v6.0.0
       with:
         role-to-assume: ${{ secrets.RELEASE_WORKFLOW_ACCESS_TOKEN_ROLE_ARN }}
         aws-region: us-west-2
 
-    - name: Retrieve secret from AWS Secrets Manager
-      uses: aws-actions/aws-secretsmanager-get-secrets@a9a7eb4e2f2871d30dc5b892576fde60a2ecc802 #v2.0.10
+    - name: Retrieve per-repo deploy key + FG PAT from AWS Secrets Manager
+      uses: aws-actions/aws-secretsmanager-get-secrets@3a411b6ec5cace3d626412dd917e7bfeac242cfa #v3.0.0
       with:
         secret-ids: |
-          AWS_SECRET, ${{ secrets.RELEASE_WORKFLOW_ACCESS_TOKEN_NAME }}
-        parse-json-secrets: true
+          DEPLOY_KEY, prod/devops/aws-dotnet-deploy-deploy-key
+          FG_PAT, prod/devops/aws-dotnet-deploy-fg-pat
 
-    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 #v6.0.1
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
       with:
         fetch-depth: '0'
         ref: dev
-        token: ${{ env.AWS_SECRET_TOKEN }}
+        ssh-key: ${{ env.DEPLOY_KEY }}
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309 #v5.1.0
+      uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 #v5.2.0
       with:
         dotnet-version: '8.0.x'
 
@@ -94,7 +94,7 @@ jobs:
     - name: Delete existing branch if it exists
       if: steps.check_version.outputs.version_changed == 'true'
       env:
-        GITHUB_TOKEN: ${{ env.AWS_SECRET_TOKEN }}
+        GITHUB_TOKEN: ${{ env.FG_PAT }}
       run: |
         # Check if branch exists and delete it if it does
         if git ls-remote --heads origin update-cdk-bootstrap-template | grep -q update-cdk-bootstrap-template; then
@@ -104,7 +104,7 @@ jobs:
     - name: Create Pull Request
       if: steps.check_version.outputs.version_changed == 'true'
       env:
-        GITHUB_TOKEN: ${{ env.AWS_SECRET_TOKEN }}
+        GITHUB_TOKEN: ${{ env.FG_PAT }}
       run: |
         git checkout -b update-cdk-bootstrap-template
         git add src/AWS.Deploy.Orchestration/CDK/CDKBootstrapTemplate.yaml .autover/

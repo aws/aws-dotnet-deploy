@@ -593,14 +593,11 @@ Resources:
       Policies:
         - PolicyDocument:
             Statement:
-              - Sid: CloudFormationPermissions
+              - Sid: DeployPermissions
                 Effect: Allow
                 Action:
                   - cloudformation:CreateChangeSet
                   - cloudformation:DeleteChangeSet
-                  - cloudformation:DescribeChangeSet
-                  - cloudformation:DescribeStacks
-                  - cloudformation:DescribeEvents
                   - cloudformation:ExecuteChangeSet
                   - cloudformation:CreateStack
                   - cloudformation:UpdateStack
@@ -640,12 +637,9 @@ Resources:
                 Effect: Allow
               - Sid: CliPermissions
                 Action:
-                  - cloudformation:DescribeStackEvents
-                  - cloudformation:GetTemplate
                   - cloudformation:DeleteStack
                   - cloudformation:UpdateTerminationProtection
                   - sts:GetCallerIdentity
-                  - cloudformation:GetTemplateSummary
                 Resource: "*"
                 Effect: Allow
               - Sid: CliStagingBucket
@@ -668,14 +662,12 @@ Resources:
                 Effect: Allow
                 Action:
                   - cloudformation:CreateStackRefactor
-                  - cloudformation:DescribeStackRefactor
                   - cloudformation:ExecuteStackRefactor
-                  - cloudformation:ListStackRefactorActions
-                  - cloudformation:ListStackRefactors
-                  - cloudformation:ListStacks
                 Resource: "*"
             Version: "2012-10-17"
           PolicyName: default
+      ManagedPolicyArns:
+        - Fn::Sub: arn:${AWS::Partition}:iam::aws:policy/AWSCloudFormationReadOnlyAccess
       RoleName:
         Fn::Sub: cdk-${Qualifier}-deploy-role-${AWS::AccountId}-${AWS::Region}
       Tags:
@@ -755,7 +747,7 @@ Resources:
       Type: String
       Name:
         Fn::Sub: /cdk-bootstrap/${Qualifier}/version
-      Value: "30"
+      Value: "32"
 Outputs:
   BucketName:
     Description: The name of the S3 bucket owned by the CDK toolkit stack
@@ -781,4 +773,4 @@ Outputs:
       Fn::Sub: ${ContainerAssetsRepository}
   BootstrapVersion:
     Description: The version of the bootstrap resources that are currently mastered in this stack
-    Value: "30"
+    Value: "32"

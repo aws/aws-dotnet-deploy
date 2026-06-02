@@ -22,6 +22,7 @@ using Xunit;
 
 namespace AWS.Deploy.CLI.IntegrationTests.ServerMode
 {
+    [Collection(nameof(ElasticBeanstalkTestCollection))]
     public class DependencyValidationOptionSettings : IDisposable
     {
         private bool _isDisposed;
