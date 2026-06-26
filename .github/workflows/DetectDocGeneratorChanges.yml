@@ -2,12 +2,19 @@ name: Detect Doc Generator Changes
 
 on: [pull_request]
 
-permissions:
-  id-token: write
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
   detect-documentation-changes:
+    name: Detect doc generator changes
     runs-on: ubuntu-latest
+    permissions:
+      contents: read # to check out the PR code
+      id-token: write # to assume the AWS role via OIDC
     steps:
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df #v4.2.1
@@ -18,6 +25,7 @@ jobs:
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
       with:
         fetch-depth: '0'
+        persist-credentials: false
     - name: Setup .NET 8.0
       uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 #v4.3.1
       with:

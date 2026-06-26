@@ -7,13 +7,19 @@ on:
   # Allow the workflow to be triggered also manually.
   workflow_dispatch:
   
-permissions:
-  id-token: write
-  contents: write
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
 
 jobs:
   deploy:
+    name: Publish docs
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # to push generated docs back to main and gh-pages
+      id-token: write # to assume the AWS role via OIDC
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df #v4.2.1
