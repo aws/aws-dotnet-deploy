@@ -8,27 +8,34 @@ on:
     branches:
       - main
 
-permissions:
-  id-token: write
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
 
 jobs:
   upload-docker-images:
+    name: Upload Docker images
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write # to assume the AWS role via OIDC for ECR upload
     steps:
     - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 #v6.0.0
+      uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0
       with:
         aws-region: us-west-2
         role-to-assume: ${{ secrets.DOCKER_IMAGE_UPLOADER_ROLE }}
         role-duration-seconds: 1800
 
     - name: Checkout Repository
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         fetch-depth: 0
-     
+        persist-credentials: false
+
     - name: Setup .NET 8
-      uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 #v5.2.0
+      uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
       with:
         dotnet-version: 8.0.x
 
