@@ -2,13 +2,23 @@ name: Detect CDK Bootstrap Version Changes
 
 on: [pull_request]
 
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   detect-cdk-bootstrap-changes:
+    name: Detect CDK bootstrap version changes
     runs-on: ubuntu-latest
+    permissions:
+      contents: read # to check out the PR code
     steps:
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
       with:
         fetch-depth: '0'
+        persist-credentials: false
     - name: Install AWS CDK
       run: |
         npm install -g aws-cdk
