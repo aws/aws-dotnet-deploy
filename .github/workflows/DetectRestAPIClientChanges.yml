@@ -2,15 +2,25 @@ name: Detect Rest API Client Changes
 
 on: [pull_request]
 
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   detect-restapi-client-changes:
+    name: Detect REST API client changes
     runs-on: ubuntu-latest
+    permissions:
+      contents: read # to check out the PR code
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
       with:
         fetch-depth: '0'
+        persist-credentials: false
     - name: Setup .NET Core 6.0
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@55ec9447dda3d1cf6bd587150f3262f30ee10815 # v3.4.2
       with:
         dotnet-version: 6.0.x
     - name: Restore dependencies
@@ -22,7 +32,7 @@ jobs:
         cd ./src/AWS.Deploy.ServerMode.ClientGenerator
         dotnet run --project ./AWS.Deploy.ServerMode.ClientGenerator.csproj
     - name: Verify Changed files
-      uses: tj-actions/verify-changed-files@6ed7632824d235029086612d4330d659005af687
+      uses: tj-actions/verify-changed-files@6ed7632824d235029086612d4330d659005af687 # v20.0.1
       id: verify-changed-files
       with:
         files: |

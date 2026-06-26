@@ -2,24 +2,32 @@ name: Detect Doc Generator Changes
 
 on: [pull_request]
 
-permissions:
-  id-token: write
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
   detect-documentation-changes:
+    name: Detect doc generator changes
     runs-on: ubuntu-latest
+    permissions:
+      contents: read # to check out the PR code
+      id-token: write # to assume the AWS role via OIDC
     steps:
     - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@8c3f20df09ac63af7b3ae3d7c91f105f857d8497 #v4
+      uses: aws-actions/configure-aws-credentials@8c3f20df09ac63af7b3ae3d7c91f105f857d8497 # v4.0.0
       with:
         role-to-assume: ${{ secrets.CI_MAIN_TESTING_ACCOUNT_ROLE_ARN }}
         role-duration-seconds: 7200
         aws-region: us-west-2
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
       with:
         fetch-depth: '0'
+        persist-credentials: false
     - name: Setup .NET Core 6.0
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@55ec9447dda3d1cf6bd587150f3262f30ee10815 # v3.4.2
       with:
         dotnet-version: 6.0.x
     - name: Restore dependencies
