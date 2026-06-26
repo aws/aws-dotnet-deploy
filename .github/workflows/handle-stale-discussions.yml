@@ -5,14 +5,20 @@ on:
   discussion_comment:
     types: [created]
 
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 jobs:
   handle-stale-discussions:
     name: Handle stale discussions
     runs-on: ubuntu-latest
     permissions:
-      discussions: write
+      discussions: write # to mark, comment on, and close stale discussions
     steps:
       - name: Stale discussions action
-        uses: aws-github-ops/handle-stale-discussions@v1
+        uses: aws-github-ops/handle-stale-discussions@711a9813957be17629fc6933afcd8bd132c57254 # v1.6
         env:
           GITHUB_TOKEN:  ${{secrets.GITHUB_TOKEN}}
