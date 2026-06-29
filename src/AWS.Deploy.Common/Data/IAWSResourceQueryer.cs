@@ -56,6 +56,12 @@ namespace AWS.Deploy.Common.Data
         Task<InstanceTypeInfo?> DescribeInstanceType(string instanceType);
 
         Task<Amazon.AppRunner.Model.Service> DescribeAppRunnerService(string serviceArn);
+
+        /// <summary>
+        /// Gets the details of an Amazon Bedrock AgentCore Runtime by runtime ID.
+        /// </summary>
+        Task<Amazon.BedrockAgentCoreControl.Model.GetAgentRuntimeResponse> DescribeBedrockAgentCoreRuntime(string runtimeId);
+
         Task<List<StackResource>> DescribeCloudFormationResources(string stackName);
 
         /// <summary>
@@ -88,7 +94,7 @@ namespace AWS.Deploy.Common.Data
         Task<List<Vpc>> GetListOfVpcs();
         Task<List<PlatformSummary>> GetElasticBeanstalkPlatformArns(string? targetFramework, params BeanstalkPlatformType[]? platformTypes);
         Task<PlatformSummary> GetLatestElasticBeanstalkPlatformArn(string? targetFramework, BeanstalkPlatformType platformType);
-        Task<List<AuthorizationData>> GetECRAuthorizationToken();
+        Task<List<Amazon.ECR.Model.AuthorizationData>> GetECRAuthorizationToken();
         Task<List<Repository>> GetECRRepositories(List<string>? repositoryNames = null);
 
         /// <summary>

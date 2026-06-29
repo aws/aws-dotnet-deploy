@@ -1,0 +1,22 @@
+{
+    "$schema": "http://json.schemastore.org/template",
+    "author": "AWS",
+    "classifications": ["AWS", ".NET Deployment Tool"],
+    "name": "ASP.NET Core Template CDK Project for Amazon Bedrock AgentCore",
+    "identity": "AWS.Deploy.Recipes.AspNetAppBedrockAgentCore",
+    "shortName": "netdeploy.AspNetAppBedrockAgentCore",
+    "tags": {
+        "language": "C#",
+        "type": "project"
+    },
+    "sourceName": "AspNetAppBedrockAgentCore",
+    "preferNameDirectory": true,
+    "symbols": {
+        "AWSDeployRecipesCDKCommonVersion": {
+            "type": "parameter",
+            "description": "The version number of AWS.Deploy.Recipes.CDK.Common to use",
+            "replaces": "AWSDeployRecipesCDKCommonVersion",
+            "datatype": "string"
+        }
+    }
+}

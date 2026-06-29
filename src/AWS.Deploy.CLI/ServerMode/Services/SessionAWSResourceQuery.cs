@@ -136,6 +136,12 @@ namespace AWS.Deploy.CLI.ServerMode.Services
         }
 
         /// <inheritdoc/>
+        public async Task<Amazon.BedrockAgentCoreControl.Model.GetAgentRuntimeResponse> DescribeBedrockAgentCoreRuntime(string runtimeId)
+        {
+            return (await GetAndCache(async () => await _awsResourceQueryer.DescribeBedrockAgentCoreRuntime(runtimeId), new object[] { runtimeId }))!;
+        }
+
+        /// <inheritdoc/>
         public async Task<List<VpcConnector>> DescribeAppRunnerVpcConnectors()
         {
             return (await GetAndCache(async () => await _awsResourceQueryer.DescribeAppRunnerVpcConnectors()))!;

@@ -16,6 +16,7 @@
     <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.3.25" />
     <PackageReference Include="AWSSDK.SecurityToken" Version="4.0.5.12" />
     <PackageReference Include="AWSSDK.AppRunner" Version="4.0.2.18" />
+    <PackageReference Include="AWSSDK.BedrockAgentCoreControl" Version="4.0.43.2" />
     <PackageReference Include="AWSSDK.CloudFormation" Version="4.0.8.11" />
     <PackageReference Include="AWSSDK.CloudFront" Version="4.0.12.3" />
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="4.0.15.2" />

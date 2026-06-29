@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Amazon;
 using Amazon.AppRunner.Model;
+using Amazon.BedrockAgentCoreControl;
 using Amazon.CloudControlApi;
 using Amazon.CloudControlApi.Model;
 using Amazon.CloudFormation;
@@ -243,6 +244,32 @@ namespace AWS.Deploy.Orchestration.Data
                 return service;
             },
             $"Error attempting to describe App Runner service '{serviceArn}'");
+        }
+
+        public async Task<Amazon.BedrockAgentCoreControl.Model.GetAgentRuntimeResponse> DescribeBedrockAgentCoreRuntime(string runtimeId)
+        {
+            var agentCoreClient = awsClientFactory.GetAWSClient<IAmazonBedrockAgentCoreControl>();
+
+            return await HandleException(async () =>
+            {
+                Amazon.BedrockAgentCoreControl.Model.GetAgentRuntimeResponse response;
+                try
+                {
+                    response = await agentCoreClient.GetAgentRuntimeAsync(new Amazon.BedrockAgentCoreControl.Model.GetAgentRuntimeRequest
+                    {
+                        AgentRuntimeId = runtimeId
+                    });
+                }
+                catch (Amazon.BedrockAgentCoreControl.Model.ResourceNotFoundException)
+                {
+                    throw new AWSResourceNotFoundException(
+                        DeployToolErrorCode.BedrockAgentCoreRuntimeDoesNotExist,
+                        $"The Bedrock AgentCore runtime '{runtimeId}' does not exist.");
+                }
+
+                return response;
+            },
+            $"Error attempting to describe Bedrock AgentCore runtime '{runtimeId}'");
         }
 
         public async Task<List<StackResource>> DescribeCloudFormationResources(string stackName)
@@ -805,7 +832,7 @@ namespace AWS.Deploy.Orchestration.Data
             });
         }
 
-        public async Task<List<AuthorizationData>> GetECRAuthorizationToken()
+        public async Task<List<Amazon.ECR.Model.AuthorizationData>> GetECRAuthorizationToken()
         {
             var ecrClient = awsClientFactory.GetAWSClient<IAmazonECR>();
 
