@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="AWS.AgentCore.Hosting" Version="1.0.0" />
+        <PackageReference Include="AWS.AgentCore.Hosting" Version="0.1.0-preview" />
     </ItemGroup>
 
 </Project>
