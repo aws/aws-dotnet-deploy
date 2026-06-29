@@ -19,6 +19,11 @@ namespace AspNetAppBedrockAgentCore.Configurations
         public string RuntimeName { get; set; }
 
         /// <summary>
+        /// AgentCore Memory configuration.
+        /// </summary>
+        public MemoryConfiguration AgentCoreMemory { get; set; }
+
+        /// <summary>
         /// IAM role configuration for the AgentCore Runtime.
         /// </summary>
         public IAMRoleConfiguration RuntimeIAMRole { get; set; }

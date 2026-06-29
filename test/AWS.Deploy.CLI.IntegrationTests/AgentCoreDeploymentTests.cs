@@ -57,15 +57,15 @@ namespace AWS.Deploy.CLI.IntegrationTests
             InMemoryInteractiveService interactiveService = null!;
             try
             {
-                // Deploy using the AgentCore recipe with default settings (silent mode)
-                var deployArgs = new[] { "deploy", "--project-path", projectPath, "--application-name", _stackName, "--diagnostics", "--silent" };
+                // Deploy using the AgentCore recipe with default settings
+                var deployArgs = new[] { "deploy", "--project-path", projectPath, "--application-name", _stackName, "--diagnostics" };
                 Assert.Equal(CommandReturnCodes.SUCCESS, await _serviceCollection.RunDeployToolAsync(deployArgs,
                     provider =>
                     {
                         interactiveService = provider.GetRequiredService<InMemoryInteractiveService>();
 
                         interactiveService.StdInWriter.Write(Environment.NewLine); // Select default recommendation (AgentCore)
-                        interactiveService.StdInWriter.Write(Environment.NewLine); // Accept default settings
+                        interactiveService.StdInWriter.Write(Environment.NewLine); // Accept default settings and deploy
                         interactiveService.StdInWriter.Flush();
                     }));
 

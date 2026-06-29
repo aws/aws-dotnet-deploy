@@ -97,14 +97,19 @@
             "Order": 20
         },
         {
+            "Id": "Memory",
+            "DisplayName": "Memory",
+            "Order": 30
+        },
+        {
             "Id": "Permissions",
             "DisplayName": "Permissions",
-            "Order": 30
+            "Order": 40
         },
         {
             "Id": "EnvVariables",
             "DisplayName": "Environment Variables",
-            "Order": 40
+            "Order": 50
         }
     ],
 
@@ -136,6 +141,41 @@
             "Type": "List",
             "AdvancedSetting": false,
             "Updatable": true
+        },
+        {
+            "Id": "AgentCoreMemory",
+            "Name": "AgentCore Memory",
+            "Category": "Memory",
+            "Description": "Configure AgentCore Memory for persistent conversation history. When enabled, a Memory resource is provisioned and wired to the agent via the AWS_AGENTCORE_MEMORY_ID environment variable.",
+            "Type": "Object",
+            "AdvancedSetting": false,
+            "Updatable": true,
+            "ChildOptionSettings": [
+                {
+                    "Id": "CreateNew",
+                    "Name": "Create New Memory",
+                    "Description": "Do you want to create a new AgentCore Memory resource?",
+                    "Type": "Bool",
+                    "DefaultValue": false,
+                    "AdvancedSetting": false,
+                    "Updatable": true
+                },
+                {
+                    "Id": "MemoryId",
+                    "Name": "Existing Memory ID",
+                    "Description": "The ID of an existing AgentCore Memory resource to use. The agent will read/write conversation history to this memory.",
+                    "Type": "String",
+                    "DefaultValue": "",
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "AgentCoreMemory.CreateNew",
+                            "Value": false
+                        }
+                    ]
+                }
+            ]
         },
         {
             "Id": "RuntimeIAMRole",

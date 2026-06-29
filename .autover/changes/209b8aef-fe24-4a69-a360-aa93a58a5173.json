@@ -2,7 +2,7 @@
   "Projects": [
     {
       "Name": "AWS.Deploy.CLI",
-      "Type": "Patch",
+      "Type": "Minor",
       "ChangelogMessages": [
         "Add support for deploying .NET AI Agents built with AWS.AgentCore.Hosting to Amazon Bedrock AgentCore runtime"
       ]

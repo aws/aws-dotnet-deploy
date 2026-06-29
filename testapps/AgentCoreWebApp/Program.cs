@@ -4,7 +4,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddAgentCore(options =>
 {
-    options.ModelId = "global.anthropic.claude-sonnet-4-6";
+    options.ModelId = "global.anthropic.claude-opus-4-7";
 });
 
 var app = builder.Build();

@@ -1,6 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -37,6 +38,11 @@ namespace AspNetAppBedrockAgentCore
         public string? RuntimeRoleArn { get; private set; }
 
         /// <summary>
+        /// The AgentCore Memory resource (null when not configured or using existing).
+        /// </summary>
+        public CfnMemory? Memory { get; private set; }
+
+        /// <summary>
         /// The Bedrock AgentCore Runtime.
         /// </summary>
         public BedrockRuntime? AgentCoreRuntime { get; private set; }
@@ -47,6 +53,7 @@ namespace AspNetAppBedrockAgentCore
             var settings = props.Settings;
 
             ConfigureRuntimeIAMRole(settings);
+            ConfigureMemory(settings);
             ConfigureAgentCoreRuntime(props, settings);
         }
 
@@ -115,6 +122,65 @@ namespace AspNetAppBedrockAgentCore
         }
 
         /// <summary>
+        /// Creates or references the AgentCore Memory resource.
+        /// When CreateNew is true, provisions a new CfnMemory with a default episodic strategy.
+        /// When an existing MemoryId is provided, it will be injected as an env var on the runtime.
+        /// </summary>
+        private void ConfigureMemory(Configuration settings)
+        {
+            var memoryConfig = settings.AgentCoreMemory;
+            if (memoryConfig == null || (!memoryConfig.CreateNew && string.IsNullOrEmpty(memoryConfig.MemoryId)))
+                return;
+
+            if (memoryConfig.CreateNew)
+            {
+                Memory = new CfnMemory(this, nameof(Memory), InvokeCustomizeCDKPropsEvent(nameof(Memory), this, new CfnMemoryProps
+                {
+                    Name = $"{SanitizeResourceName(settings.RuntimeName, 41)}_memory",
+                    EventExpiryDuration = 90
+                }));
+
+                new CfnOutput(this, "MemoryId", new CfnOutputProps
+                {
+                    Value = Memory.AttrMemoryId,
+                    Description = "The ID of the AgentCore Memory resource"
+                });
+            }
+        }
+
+        /// <summary>
+        /// Gets the effective Memory ID — from the newly created resource or the user-provided value.
+        /// Returns null when memory is not configured.
+        /// </summary>
+        private string? GetEffectiveMemoryId(Configuration settings)
+        {
+            if (Memory != null)
+                return Memory.AttrMemoryId;
+
+            if (!string.IsNullOrEmpty(settings.AgentCoreMemory?.MemoryId))
+                return settings.AgentCoreMemory.MemoryId;
+
+            return null;
+        }
+
+        /// <summary>
+        /// Sanitizes a resource name to match AgentCore naming rules: starts with a letter,
+        /// contains only alphanumeric characters and underscores, truncated to maxLength.
+        /// </summary>
+        private static string SanitizeResourceName(string name, int maxLength)
+        {
+            var sanitized = new string(name.Where(c => char.IsLetterOrDigit(c) || c == '_').ToArray());
+
+            if (sanitized.Length == 0 || !char.IsLetter(sanitized[0]))
+                sanitized = "m" + sanitized;
+
+            if (sanitized.Length > maxLength)
+                sanitized = sanitized.Substring(0, maxLength);
+
+            return sanitized;
+        }
+
+        /// <summary>
         /// Creates the Bedrock AgentCore Runtime using the CDK L2 construct.
         /// The runtime hosts your ASP.NET Core agent application as a managed container
         /// deployed from an ECR image.
@@ -136,6 +202,13 @@ namespace AspNetAppBedrockAgentCore
 
             // Build environment variables dictionary
             var environmentVariables = new Dictionary<string, string>(settings.AgentCoreEnvironmentVariables);
+
+            // Inject Memory ID if configured
+            var memoryId = GetEffectiveMemoryId(settings);
+            if (memoryId != null && !environmentVariables.ContainsKey("AWS_AGENTCORE_MEMORY_ID"))
+            {
+                environmentVariables["AWS_AGENTCORE_MEMORY_ID"] = memoryId;
+            }
 
             // Configure network mode
             var networkConfiguration = RuntimeNetworkConfiguration.UsingPublicNetwork();
