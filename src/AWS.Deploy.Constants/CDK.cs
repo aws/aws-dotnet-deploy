@@ -10,7 +10,7 @@ namespace AWS.Deploy.Constants
         /// <summary>
         /// Default version of CDK CLI
         /// </summary>
-        public static readonly Version DefaultCDKVersion = Version.Parse("2.1033.0");
+        public static readonly Version DefaultCDKVersion = Version.Parse("2.1128.0");
 
         /// <summary>
         /// The name of the CDK bootstrap CloudFormation stack

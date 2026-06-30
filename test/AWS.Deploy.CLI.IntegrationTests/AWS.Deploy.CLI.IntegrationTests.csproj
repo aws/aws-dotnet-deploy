@@ -9,6 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AWSSDK.BedrockAgentCore" Version="4.0.23" />
+    <PackageReference Include="AWSSDK.BedrockAgentCoreControl" Version="4.0.43.2" />
     <PackageReference Include="AWSSDK.CloudWatchLogs" Version="4.0.15.2" />
     <PackageReference Include="AWSSDK.ECS" Version="4.0.15" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />

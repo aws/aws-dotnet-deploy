@@ -34,7 +34,7 @@ node --version
 
    > ***Note:***
 
->*If the AWS CDK isn't installed on your machine or if the AWS CDK that's installed is earlier than the required minimum version (2.13.0), the deployment tool will install a **temporary and "private" copy of the CDK** that will be used only by the tool, leaving the global configuration of your machine untouched.*
+>*If the AWS CDK isn't installed on your machine or if the AWS CDK that's installed is earlier than the required minimum version (2.1128.0), the deployment tool will install a **temporary and "private" copy of the CDK** that will be used only by the tool, leaving the global configuration of your machine untouched.*
 
 >*If instead you want to install the AWS CDK, see [Install the AWS CDK](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html#getting_started_install) in the [AWS Cloud Development Kit (CDK) Developer Guide](https://docs.aws.amazon.com/cdk/latest/guide/)*
 

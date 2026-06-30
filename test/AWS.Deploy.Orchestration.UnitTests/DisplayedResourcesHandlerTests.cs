@@ -232,5 +232,36 @@ namespace AWS.Deploy.Orchestration.UnitTests
             Assert.Equal("UnknownType", resource.Type);
             Assert.Empty(resource.Data);
         }
+
+        [Fact]
+        public async Task GetDeploymentOutputs_BedrockAgentCoreRuntime()
+        {
+            var engine = await BuildRecommendationEngine("AgentCoreWebApp");
+            var recommendations = await engine.ComputeRecommendations();
+            var recommendation = recommendations.First(r => r.Recipe.Id.Equals("AspNetAppBedrockAgentCore"));
+
+            _stackResource.LogicalResourceId = "RecipeAgentCoreRuntime05BEE1FF";
+            _stackResource.PhysicalResourceId = "Agent1-uW0TMCDBkP";
+            _stackResource.ResourceType = "AWS::BedrockAgentCore::Runtime";
+
+            var mockResponse = new Amazon.BedrockAgentCoreControl.Model.GetAgentRuntimeResponse
+            {
+                AgentRuntimeArn = "arn:aws:bedrock-agentcore:us-west-2:123456789012:runtime/Agent1-uW0TMCDBkP"
+            };
+
+            _mockAWSResourceQueryer.Setup(x => x.DescribeCloudFormationResources(It.IsAny<string>())).Returns(Task.FromResult(_stackResources));
+            _mockAWSResourceQueryer.Setup(x => x.DescribeBedrockAgentCoreRuntime(It.IsAny<string>())).Returns(Task.FromResult(mockResponse));
+            var displayedResourcesHandler = new DisplayedResourcesHandler(_mockAWSResourceQueryer.Object, _displayedResourcesFactory);
+
+            var outputs = await displayedResourcesHandler.GetDeploymentOutputs(_cloudApplication, recommendation);
+
+            Assert.Single(outputs);
+            var resource = outputs.First();
+            Assert.Equal("Agent1-uW0TMCDBkP", resource.Id);
+            Assert.Equal("AWS::BedrockAgentCore::Runtime", resource.Type);
+            Assert.Single(resource.Data);
+            Assert.True(resource.Data.ContainsKey("ARN"));
+            Assert.Equal("arn:aws:bedrock-agentcore:us-west-2:123456789012:runtime/Agent1-uW0TMCDBkP", resource.Data["ARN"]);
+        }
     }
 }

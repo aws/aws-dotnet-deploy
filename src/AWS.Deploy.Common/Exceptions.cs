@@ -128,7 +128,8 @@ namespace AWS.Deploy.Common
         FailedToSaveDeploymentSettings = 10010600,
         InvalidWindowsManifestFile = 10010700,
         UserDeploymentFileNotFound = 10010800,
-        ContainerInspectFailed = 10004200
+        ContainerInspectFailed = 10004200,
+        BedrockAgentCoreRuntimeDoesNotExist = 10010900
     }
 
     public class ProjectFileNotFoundException : DeployToolException
