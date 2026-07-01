@@ -50,7 +50,7 @@ public class EvaluatedPackageReference
 
     /// <summary>
     /// The resolved version (may come from the csproj, Directory.Packages.props, or SDK).
-    /// Null when the version couldn't be resolved (e.g. CPM without a matching entry).
+    /// Empty when the version metadata is not present in the evaluation output.
     /// </summary>
-    public string? Version { get; set; }
+    public string Version { get; set; } = string.Empty;
 }

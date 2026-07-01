@@ -134,12 +134,12 @@ public class MSBuildEvaluator : IMSBuildEvaluator
                 if (string.IsNullOrEmpty(identity))
                     continue;
 
-                var version = item.TryGetProperty("Version", out var ver) ? ver.GetString() : null;
+                var version = item.TryGetProperty("Version", out var ver) ? ver.GetString() ?? string.Empty : string.Empty;
 
                 result.PackageReferences.Add(new EvaluatedPackageReference
                 {
                     Identity = identity!,
-                    Version = string.IsNullOrEmpty(version) ? null : version
+                    Version = version
                 });
             }
         }
