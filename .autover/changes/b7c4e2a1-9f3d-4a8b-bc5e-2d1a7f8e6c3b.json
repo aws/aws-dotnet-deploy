@@ -1,0 +1,11 @@
+{
+  "Projects": [
+    {
+      "Name": "AWS.Deploy.CLI",
+      "Type": "Minor",
+      "ChangelogMessages": [
+        "Add MSBuild evaluation for accurate project property and package reference resolution. Supports Central Package Management, Directory.Build.props, and conditional properties."
+      ]
+    }
+  ]
+}

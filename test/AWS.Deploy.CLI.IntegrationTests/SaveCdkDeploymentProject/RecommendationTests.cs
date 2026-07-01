@@ -26,6 +26,7 @@ using AWS.Deploy.Orchestration.LocalUserSettings;
 using AWS.Deploy.Orchestration.Utilities;
 using AWS.Deploy.Orchestration.ServiceHandlers;
 using AWS.Deploy.Common.Recipes.Validation;
+using AWS.Deploy.Common.ProjectEvaluation;
 using AWS.Deploy.Orchestration.Docker;
 
 namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
@@ -246,7 +247,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.SaveCdkDeploymentProject
             var validatorFactory = new ValidatorFactory(serviceProvider.Object);
             var optionSettingHandler = new OptionSettingHandler(validatorFactory);
             var recipeHandler = new RecipeHandler(deploymentManifestEngine, _inMemoryInteractiveService, directoryManager, fileManager, optionSettingHandler, validatorFactory);
-            var projectDefinition = await new ProjectDefinitionParser(fileManager, directoryManager).Parse(targetApplicationProjectPath);
+            var projectDefinition = await new ProjectDefinitionParser(fileManager, directoryManager, new MSBuildEvaluator()).Parse(targetApplicationProjectPath);
             var session = new OrchestratorSession(projectDefinition);
 
             return new Orchestrator(session,

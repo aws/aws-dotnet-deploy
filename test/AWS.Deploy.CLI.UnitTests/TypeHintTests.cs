@@ -27,6 +27,7 @@ using Moq;
 using Xunit;
 using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.IO;
+using AWS.Deploy.Common.ProjectEvaluation;
 using Should;
 
 namespace AWS.Deploy.CLI.UnitTests
@@ -178,7 +179,7 @@ namespace AWS.Deploy.CLI.UnitTests
                 It.IsAny<string>(),
                 It.IsAny<string>(),
                 It.IsAny<string>()).Object;
-            var projectDefinitionParser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
+            var projectDefinitionParser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager(), new MSBuildEvaluator());
             var projectPath = SystemIOUtilities.ResolvePath("ConsoleAppTask");
             var project = await projectDefinitionParser.Parse(projectPath);
             recipeDefinition.SupportedArchitectures = archList;
@@ -220,7 +221,7 @@ namespace AWS.Deploy.CLI.UnitTests
                 It.IsAny<string>(),
                 It.IsAny<string>(),
                 It.IsAny<string>()).Object;
-            var projectDefinitionParser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
+            var projectDefinitionParser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager(), new MSBuildEvaluator());
             var projectPath = SystemIOUtilities.ResolvePath("ConsoleAppTask");
             var project = await projectDefinitionParser.Parse(projectPath);
             var recommendation = new Recommendation(recipeDefinition, project, 0, new Dictionary<string, object>());
@@ -263,7 +264,7 @@ namespace AWS.Deploy.CLI.UnitTests
                 It.IsAny<string>(),
                 It.IsAny<string>(),
                 It.IsAny<string>()).Object;
-            var projectDefinitionParser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
+            var projectDefinitionParser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager(), new MSBuildEvaluator());
             var projectPath = SystemIOUtilities.ResolvePath("ConsoleAppTask");
             var project = await projectDefinitionParser.Parse(projectPath);
             var recommendation = new Recommendation(recipeDefinition, project, 0, new Dictionary<string, object>());

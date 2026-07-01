@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
+using AWS.Deploy.Common.ProjectEvaluation;
 using AWS.Deploy.Orchestration.Utilities;
 using Moq;
 using Should;
@@ -28,7 +29,7 @@ namespace AWS.Deploy.Orchestration.UnitTests.Utilities
             _fakeFileManager = new TestFileManager();
             _mockDirectoryManager = new Mock<IDirectoryManager>();
 
-            _projectDefinitionParser = new ProjectDefinitionParser(_fakeFileManager, _mockDirectoryManager.Object);
+            _projectDefinitionParser = new ProjectDefinitionParser(_fakeFileManager, _mockDirectoryManager.Object, new MSBuildEvaluator());
 
             _cloudApplicationNameGenerator = new CloudApplicationNameGenerator(_fakeFileManager, _mockDirectoryManager.Object);
         }

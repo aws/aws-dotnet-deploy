@@ -10,6 +10,7 @@ using AWS.Deploy.Common.DeploymentManifest;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Recipes.Validation;
+using AWS.Deploy.Common.ProjectEvaluation;
 using AWS.Deploy.Orchestration.UnitTests.Utilities;
 using Moq;
 using Xunit;
@@ -41,7 +42,7 @@ public class OrchestratorTests
     {
         var fullPath = SystemIOUtilities.ResolvePath(testProjectName);
 
-        var parser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
+        var parser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager(), new MSBuildEvaluator());
         var awsCredentials = new Mock<AWSCredentials>();
         _session = new OrchestratorSession(
             await parser.Parse(fullPath),
