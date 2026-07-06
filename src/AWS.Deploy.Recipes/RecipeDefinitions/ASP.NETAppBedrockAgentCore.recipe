@@ -102,6 +102,11 @@
             "Order": 30
         },
         {
+            "Id": "VPC",
+            "DisplayName": "VPC",
+            "Order": 35
+        },
+        {
             "Id": "Permissions",
             "DisplayName": "Permissions",
             "Order": 40
@@ -171,6 +176,61 @@
                     "DependsOn": [
                         {
                             "Id": "AgentCoreMemory.CreateNew",
+                            "Value": false
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Id": "VPC",
+            "Name": "Virtual Private Cloud (VPC)",
+            "Category": "VPC",
+            "Description": "A VPC enables you to place the AgentCore Runtime into a virtual network for access to private resources. Not required for most deployments.",
+            "Type": "Object",
+            "TypeHint": "AgentCoreVpc",
+            "AdvancedSetting": true,
+            "Updatable": false,
+            "ChildOptionSettings": [
+                {
+                    "Id": "UseVPC",
+                    "Name": "Use a VPC",
+                    "Description": "Do you want to place the AgentCore Runtime in a VPC?",
+                    "Type": "Bool",
+                    "DefaultValue": false,
+                    "AdvancedSetting": true,
+                    "Updatable": false
+                },
+                {
+                    "Id": "CreateNew",
+                    "Name": "Create New VPC",
+                    "Description": "Do you want to create a new VPC?",
+                    "Type": "Bool",
+                    "DefaultValue": false,
+                    "AdvancedSetting": true,
+                    "Updatable": false,
+                    "DependsOn": [
+                        {
+                            "Id": "VPC.UseVPC",
+                            "Value": true
+                        }
+                    ]
+                },
+                {
+                    "Id": "VpcId",
+                    "Name": "VPC ID",
+                    "Description": "The ID of the VPC to use.",
+                    "Type": "String",
+                    "DefaultValue": "",
+                    "AdvancedSetting": true,
+                    "Updatable": false,
+                    "DependsOn": [
+                        {
+                            "Id": "VPC.UseVPC",
+                            "Value": true
+                        },
+                        {
+                            "Id": "VPC.CreateNew",
                             "Value": false
                         }
                     ]

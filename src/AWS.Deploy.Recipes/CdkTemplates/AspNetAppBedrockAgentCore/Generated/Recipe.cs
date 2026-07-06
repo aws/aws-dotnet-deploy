@@ -7,6 +7,7 @@ using System.Linq;
 
 using Amazon.CDK;
 using Amazon.CDK.AWS.BedrockAgentCore;
+using Amazon.CDK.AWS.EC2;
 using Amazon.CDK.AWS.ECR;
 using Amazon.CDK.AWS.IAM;
 
@@ -114,7 +115,18 @@ namespace AspNetAppBedrockAgentCore
             RuntimeRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
             {
                 Effect = Effect.ALLOW,
-                Actions = new[] { "bedrock-agentcore:ListEvents", "bedrock-agentcore:CreateEvent" },
+                Actions = new[]
+                {
+                    "bedrock-agentcore:CreateEvent",
+                    "bedrock-agentcore:GetEvent",
+                    "bedrock-agentcore:ListEvents",
+                    "bedrock-agentcore:DeleteEvent",
+                    "bedrock-agentcore:ListActors",
+                    "bedrock-agentcore:ListSessions",
+                    "bedrock-agentcore:RetrieveMemoryRecords",
+                    "bedrock-agentcore:GetMemoryRecord",
+                    "bedrock-agentcore:ListMemoryRecords"
+                },
                 Resources = new[] { $"arn:{partition}:bedrock-agentcore:*:{account}:memory/*" }
             }));
 
@@ -161,6 +173,45 @@ namespace AspNetAppBedrockAgentCore
                 return settings.AgentCoreMemory.MemoryId;
 
             return null;
+        }
+
+        /// <summary>
+        /// Configures VPC networking for the AgentCore Runtime.
+        /// Uses public networking by default; switches to VPC mode when a VPC is configured.
+        /// </summary>
+        private RuntimeNetworkConfiguration ConfigureVpc(Configuration settings)
+        {
+            if (settings.VPC == null || !settings.VPC.UseVPC)
+                return RuntimeNetworkConfiguration.UsingPublicNetwork();
+
+            IVpc vpc;
+            if (settings.VPC.CreateNew)
+            {
+                // Create a new VPC limited to 2 AZs to avoid unsupported AZ issues
+                vpc = new Vpc(this, "RuntimeVpc", InvokeCustomizeCDKPropsEvent("RuntimeVpc", this, new VpcProps
+                {
+                    MaxAzs = 2
+                }));
+            }
+            else if (!string.IsNullOrEmpty(settings.VPC.VpcId))
+            {
+                vpc = Vpc.FromLookup(this, "RuntimeVpc", new VpcLookupOptions
+                {
+                    VpcId = settings.VPC.VpcId
+                });
+            }
+            else
+            {
+                return RuntimeNetworkConfiguration.UsingPublicNetwork();
+            }
+
+            return RuntimeNetworkConfiguration.UsingVpc(this, new VpcConfigProps
+            {
+                Vpc = vpc,
+                // Limit to 2 AZs to avoid unsupported AZs. AgentCore doesn't support all
+                // availability zones in every region (e.g. us-west-2d is unsupported).
+                VpcSubnets = new SubnetSelection { AvailabilityZones = vpc.AvailabilityZones.Take(2).ToArray() }
+            });
         }
 
         /// <summary>
@@ -211,7 +262,7 @@ namespace AspNetAppBedrockAgentCore
             }
 
             // Configure network mode
-            var networkConfiguration = RuntimeNetworkConfiguration.UsingPublicNetwork();
+            var networkConfiguration = ConfigureVpc(settings);
 
             var runtimeProps = new RuntimeProps
             {
