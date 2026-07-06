@@ -86,7 +86,7 @@ public class MSBuildEvaluator : IMSBuildEvaluator
         var exited = await Task.Run(() => process.WaitForExit((int)ProcessTimeout.TotalMilliseconds));
         if (!exited)
         {
-            try { process.Kill(); } catch { }
+            try { process.Kill(entireProcessTree: true); } catch { }
             return null;
         }
 
@@ -99,13 +99,16 @@ public class MSBuildEvaluator : IMSBuildEvaluator
         return output;
     }
 
-    private static EvaluatedProject? ParseOutput(string json)
+    private static EvaluatedProject? ParseOutput(string output)
     {
-        var trimmed = json.TrimStart();
-        if (!trimmed.StartsWith("{"))
+        // MSBuild/dotnet may emit leading text (banners, workload notices, warnings)
+        // before the JSON object. Find the first '{' to locate the start of JSON.
+        var jsonStart = output.IndexOf('{');
+        if (jsonStart < 0)
             return null;
 
-        using var doc = JsonDocument.Parse(trimmed);
+        var json = output.Substring(jsonStart);
+        using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
 
         var result = new EvaluatedProject();

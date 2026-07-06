@@ -80,14 +80,17 @@ namespace AWS.Deploy.Common
                 return null;
 
             // Prefer MSBuild-evaluated value (handles Directory.Build.props, conditions, etc.)
+            // If the key exists in the evaluation dictionary, trust the result — even if empty.
+            // An empty evaluated value means MSBuild resolved it to empty (e.g. conditional property
+            // that didn't apply), which is the correct answer. Only fall back to XML when the
+            // property wasn't part of the evaluation request at all.
             if (Evaluation?.Properties != null &&
-                Evaluation.Properties.TryGetValue(propertyName, out var evaluatedValue) &&
-                !string.IsNullOrEmpty(evaluatedValue))
+                Evaluation.Properties.TryGetValue(propertyName, out var evaluatedValue))
             {
-                return evaluatedValue;
+                return string.IsNullOrEmpty(evaluatedValue) ? null : evaluatedValue;
             }
 
-            // Fallback to raw XML
+            // Fallback to raw XML for properties not included in the evaluation request
             var propertyValue = Contents.SelectSingleNode($"//PropertyGroup/{propertyName}")?.InnerText;
             return propertyValue;
         }
