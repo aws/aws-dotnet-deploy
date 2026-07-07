@@ -234,6 +234,48 @@
                             "Value": false
                         }
                     ]
+                },
+                {
+                    "Id": "SecurityGroups",
+                    "Name": "Security Groups",
+                    "Description": "A list of EC2 security groups to assign to the AgentCore Runtime. This is commonly used to provide access to resources like Amazon RDS or ElastiCache running in their own security groups.",
+                    "Type": "List",
+                    "TypeHint": "ExistingSecurityGroups",
+                    "ParentSettingId": "VPC.VpcId",
+                    "AdvancedSetting": true,
+                    "Updatable": false,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Required"
+                        },
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": {
+                                "Regex": "^sg-([0-9a-f]{8}|[0-9a-f]{17})$",
+                                "ValidationFailedMessage": "Invalid Security Group ID. The Security Group ID must start with the \"sg-\" prefix, followed by either 8 or 17 characters consisting of digits and letters(lower-case) from a to f. For example sg-abc88de9 is a valid Security Group ID."
+                            }
+                        },
+                        {
+                            "ValidatorType": "SecurityGroupsInVpc",
+                            "Configuration": {
+                                "VpcId": "VPC.VpcId"
+                            }
+                        }
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "VPC.UseVPC",
+                            "Value": true
+                        },
+                        {
+                            "Id": "VPC.CreateNew",
+                            "Value": false
+                        },
+                        {
+                            "Id": "VPC.VpcId",
+                            "Operation": "NotEmpty"
+                        }
+                    ]
                 }
             ]
         },

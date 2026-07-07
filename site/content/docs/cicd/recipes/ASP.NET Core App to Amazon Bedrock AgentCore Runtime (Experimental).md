@@ -25,6 +25,27 @@
             * ID: MemoryId
             * Description: The ID of an existing AgentCore Memory resource to use. The agent will read/write conversation history to this memory.
             * Type: String
+* **Virtual Private Cloud (VPC)**
+    * ID: VPC
+    * Description: A VPC enables you to place the AgentCore Runtime into a virtual network for access to private resources. Not required for most deployments.
+    * Type: Object
+    * Settings:
+        * **Use a VPC**
+            * ID: UseVPC
+            * Description: Do you want to place the AgentCore Runtime in a VPC?
+            * Type: Bool
+        * **Create New VPC**
+            * ID: CreateNew
+            * Description: Do you want to create a new VPC?
+            * Type: Bool
+        * **VPC ID**
+            * ID: VpcId
+            * Description: The ID of the VPC to use.
+            * Type: String
+        * **Security Groups**
+            * ID: SecurityGroups
+            * Description: A list of EC2 security groups to assign to the AgentCore Runtime. This is commonly used to provide access to resources like Amazon RDS or ElastiCache running in their own security groups.
+            * Type: List
 * **Runtime IAM Role**
     * ID: RuntimeIAMRole
     * Description: The Identity and Access Management (IAM) role that provides AWS credentials to the AgentCore Runtime. When creating a new role, it includes permissions for ECR pull, CloudWatch Logs, Bedrock model invocation (cross-region), and AgentCore Memory access.

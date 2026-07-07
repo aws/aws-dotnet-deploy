@@ -1,6 +1,8 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Collections.Generic;
+
 namespace AWS.Deploy.CLI.TypeHintResponses
 {
     public class AgentCoreVpcTypeHintResponse : IDisplayable
@@ -8,6 +10,7 @@ namespace AWS.Deploy.CLI.TypeHintResponses
         public bool UseVPC { get; set; }
         public bool CreateNew { get; set; }
         public string? VpcId { get; set; }
+        public SortedSet<string> SecurityGroups { get; set; } = new SortedSet<string>();
 
         public string? ToDisplayString()
         {
@@ -15,7 +18,7 @@ namespace AWS.Deploy.CLI.TypeHintResponses
                 return "*** Not using VPC ***";
             if (CreateNew)
                 return "*** Create new VPC ***";
-            return VpcId ?? "*** Not using VPC ***";
+            return string.IsNullOrEmpty(VpcId) ? "*** Not using VPC ***" : VpcId;
         }
     }
 }
