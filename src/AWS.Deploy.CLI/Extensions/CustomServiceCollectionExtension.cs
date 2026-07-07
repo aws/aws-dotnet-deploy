@@ -8,6 +8,7 @@ using AWS.Deploy.Common.Data;
 using AWS.Deploy.Common.DeploymentManifest;
 using AWS.Deploy.Common.Extensions;
 using AWS.Deploy.Common.IO;
+using AWS.Deploy.Common.ProjectEvaluation;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Recipes.Validation;
 using AWS.Deploy.Orchestration;
@@ -49,6 +50,7 @@ namespace AWS.Deploy.CLI.Extensions
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IFileManager), typeof(FileManager), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(INPMPackageInitializer), typeof(NPMPackageInitializer), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IOrchestratorInteractiveService), typeof(ConsoleOrchestratorLogger), lifetime));
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(IMSBuildEvaluator), typeof(MSBuildEvaluator), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IProjectDefinitionParser), typeof(ProjectDefinitionParser), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(IProjectParserUtility), typeof(ProjectParserUtility), lifetime));
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(ISystemCapabilityEvaluator), typeof(SystemCapabilityEvaluator), lifetime));

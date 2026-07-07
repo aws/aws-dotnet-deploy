@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
 using AWS.Deploy.Common.IO;
+using AWS.Deploy.Common.ProjectEvaluation;
 
 namespace AWS.Deploy.Common
 {
@@ -26,11 +27,13 @@ namespace AWS.Deploy.Common
     {
         private readonly IFileManager _fileManager;
         private readonly IDirectoryManager _directoryManager;
+        private readonly IMSBuildEvaluator _msBuildEvaluator;
 
-        public ProjectDefinitionParser(IFileManager fileManager, IDirectoryManager directoryManager)
+        public ProjectDefinitionParser(IFileManager fileManager, IDirectoryManager directoryManager, IMSBuildEvaluator msBuildEvaluator)
         {
             _fileManager = fileManager;
             _directoryManager = directoryManager;
+            _msBuildEvaluator = msBuildEvaluator;
         }
 
         /// <summary>
@@ -84,20 +87,27 @@ namespace AWS.Deploy.Common
                         "The project file that is being referenced does not contain and 'Sdk' attribute.")
                 );
 
-            var targetFramework = xmlProjectFile.GetElementsByTagName("TargetFramework");
-            if (targetFramework.Count > 0)
-            {
-                projectDefinition.TargetFramework = targetFramework[0]?.InnerText;
-            }
+            // Run MSBuild evaluation for accurate property/item resolution.
+            // This handles Directory.Build.props, Central Package Management, conditions, etc.
+            // Falls back gracefully to raw XML when evaluation is unavailable.
+            projectDefinition.Evaluation = await _msBuildEvaluator.EvaluateAsync(projectPath);
 
-            var assemblyName = xmlProjectFile.GetElementsByTagName("AssemblyName");
-            if (assemblyName.Count > 0)
+            // Populate TargetFramework — prefer evaluated value over raw XML
+            projectDefinition.TargetFramework = projectDefinition.GetMSPropertyValue("TargetFramework")
+                ?? xmlProjectFile.GetElementsByTagName("TargetFramework")[0]?.InnerText;
+
+            // Populate AssemblyName — prefer evaluated value over raw XML
+            var evaluatedAssemblyName = projectDefinition.GetMSPropertyValue("AssemblyName");
+            if (!string.IsNullOrWhiteSpace(evaluatedAssemblyName))
             {
-                projectDefinition.AssemblyName = (string.IsNullOrWhiteSpace(assemblyName[0]?.InnerText) ? Path.GetFileNameWithoutExtension(projectPath) : assemblyName[0]?.InnerText);
+                projectDefinition.AssemblyName = evaluatedAssemblyName;
             }
             else
             {
-                projectDefinition.AssemblyName = Path.GetFileNameWithoutExtension(projectPath);
+                var assemblyName = xmlProjectFile.GetElementsByTagName("AssemblyName");
+                projectDefinition.AssemblyName = assemblyName.Count > 0 && !string.IsNullOrWhiteSpace(assemblyName[0]?.InnerText)
+                    ? assemblyName[0]!.InnerText
+                    : Path.GetFileNameWithoutExtension(projectPath);
             }
 
             return projectDefinition;

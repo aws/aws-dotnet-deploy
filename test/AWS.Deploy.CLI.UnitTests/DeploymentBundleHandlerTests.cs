@@ -16,6 +16,7 @@ using AWS.Deploy.Common.DeploymentManifest;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Recipes.Validation;
+using AWS.Deploy.Common.ProjectEvaluation;
 using AWS.Deploy.Constants;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.RecommendationEngine;
@@ -57,7 +58,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var validatorFactory = new ValidatorFactory(serviceProvider);
             var optionSettingHandler = new OptionSettingHandler(validatorFactory);
             _recipeHandler = new RecipeHandler(_deploymentManifestEngine, _orchestratorInteractiveService, _directoryManager, _fileManager, optionSettingHandler, validatorFactory);
-            _projectDefinitionParser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
+            _projectDefinitionParser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager(), new MSBuildEvaluator());
             var systemCapabilityEvaluatorMock = new Mock<ISystemCapabilityEvaluator>();
             systemCapabilityEvaluatorMock.Setup(x => x.GetInstalledContainerAppInfo(It.IsAny<Recommendation>())).ReturnsAsync(new ContainerAppInfo("Docker", "", true, ""));
             _systemCapabilityEvaluator = systemCapabilityEvaluatorMock.Object;
@@ -444,7 +445,7 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var fullPath = SystemIOUtilities.ResolvePath(testProjectName);
 
-            var parser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
+            var parser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager(), new MSBuildEvaluator());
             var awsCredentials = new Mock<AWSCredentials>();
             var session =  new OrchestratorSession(
                 await parser.Parse(fullPath),

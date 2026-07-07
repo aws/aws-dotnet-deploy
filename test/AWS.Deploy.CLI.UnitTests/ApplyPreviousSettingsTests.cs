@@ -23,6 +23,7 @@ using AWS.Deploy.Common.Data;
 using Amazon.CloudControlApi.Model;
 using Amazon.ElasticBeanstalk.Model;
 using AWS.Deploy.Common.DeploymentManifest;
+using AWS.Deploy.Common.ProjectEvaluation;
 
 namespace AWS.Deploy.CLI.UnitTests
 {
@@ -62,7 +63,7 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var fullPath = SystemIOUtilities.ResolvePath(testProjectName);
 
-            var parser = new ProjectDefinitionParser(_fileManager, _directoryManager);
+            var parser = new ProjectDefinitionParser(_fileManager, _directoryManager, new MSBuildEvaluator());
             var awsCredentials = new Mock<AWSCredentials>();
             var session =  new OrchestratorSession(
                 await parser.Parse(fullPath),

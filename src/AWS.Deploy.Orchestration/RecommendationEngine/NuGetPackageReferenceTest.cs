@@ -11,7 +11,7 @@ namespace AWS.Deploy.Orchestration.RecommendationEngine
 
         public override Task<bool> Execute(RecommendationTestInput input)
         {
-            var result = !string.IsNullOrEmpty(input.ProjectDefinition.GetPackageReferenceVersion(input.Test.Condition.NuGetPackageName));
+            var result = input.ProjectDefinition.HasPackageReference(input.Test.Condition.NuGetPackageName);
             return Task.FromResult(result);
         }
     }

@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using AWS.Deploy.CLI.UnitTests.Utilities;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
+using AWS.Deploy.Common.ProjectEvaluation;
 using Xunit;
 using Should;
 using AWS.Deploy.CLI.Utilities;
@@ -36,7 +37,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var absoluteProjectPath = Path.Combine(absoluteProjectDirectoryPath, csprojName);
             var relativeProjectDirectoryPath = Path.GetRelativePath(currrentWorkingDirectory!, absoluteProjectDirectoryPath);
             var projectSolutionPath = SystemIOUtilities.ResolvePathToSolution();
-            var projectDefinitionParser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
+            var projectDefinitionParser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager(), new MSBuildEvaluator());
             var projectParserUtility = new ProjectParserUtility(projectDefinitionParser, new DirectoryManager());
 
             // Act
@@ -64,7 +65,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var absoluteProjectDirectoryPath = new DirectoryInfo(projectDirectoryPath).FullName;
             var absoluteProjectPath = Path.Combine(absoluteProjectDirectoryPath, csprojName);
             var projectSolutionPath = SystemIOUtilities.ResolvePathToSolution();
-            var projectDefinitionParser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
+            var projectDefinitionParser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager(), new MSBuildEvaluator());
             var projectParserUtility = new ProjectParserUtility(projectDefinitionParser, new DirectoryManager());
 
             // Act
@@ -82,7 +83,7 @@ namespace AWS.Deploy.CLI.UnitTests
         public async Task Throws_FailedToFindDeployableTargetException_WithInvalidProjectPaths(string projectPath)
         {
             // Arrange
-            var projectDefinitionParser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
+            var projectDefinitionParser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager(), new MSBuildEvaluator());
             var projectParserUtility = new ProjectParserUtility(projectDefinitionParser, new DirectoryManager());
 
             // Act and Assert

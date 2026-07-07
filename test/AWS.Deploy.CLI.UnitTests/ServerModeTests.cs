@@ -25,6 +25,7 @@ using DeploymentTypes = AWS.Deploy.CLI.ServerMode.Models.DeploymentTypes;
 using System;
 using AWS.Deploy.CLI.Commands.Settings;
 using AWS.Deploy.Common.Recipes.Validation;
+using AWS.Deploy.Common.ProjectEvaluation;
 using AWS.Deploy.Recipes;
 
 namespace AWS.Deploy.CLI.UnitTests
@@ -93,7 +94,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var validatorFactory = new ValidatorFactory(serviceProvider.Object);
             var optionSettingHandler = new OptionSettingHandler(validatorFactory);
             var recipeHandler = new RecipeHandler(deploymentManifestEngine, consoleOrchestratorLogger, directoryManager, fileManager, optionSettingHandler, validatorFactory);
-            var projectDefinitionParser = new ProjectDefinitionParser(fileManager, directoryManager);
+            var projectDefinitionParser = new ProjectDefinitionParser(fileManager, directoryManager, new MSBuildEvaluator());
 
             var recipeController = new RecipeController(recipeHandler, projectDefinitionParser);
             var response = await recipeController.GetRecipe(recipeId);
@@ -109,7 +110,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var deploymentManifestEngine = new DeploymentManifestEngine(directoryManager, fileManager);
             var consoleInteractiveServiceImpl = new ConsoleInteractiveServiceImpl();
             var consoleOrchestratorLogger = new ConsoleOrchestratorLogger(consoleInteractiveServiceImpl);
-            var projectDefinitionParser = new ProjectDefinitionParser(fileManager, directoryManager);
+            var projectDefinitionParser = new ProjectDefinitionParser(fileManager, directoryManager, new MSBuildEvaluator());
             var serviceProvider = new Mock<IServiceProvider>();
             var validatorFactory = new ValidatorFactory(serviceProvider.Object);
             var optionSettingHandler = new OptionSettingHandler(validatorFactory);
@@ -131,7 +132,7 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var directoryManager = new DirectoryManager();
             var fileManager = new FileManager();
-            var projectDefinitionParser = new ProjectDefinitionParser(fileManager, directoryManager);
+            var projectDefinitionParser = new ProjectDefinitionParser(fileManager, directoryManager, new MSBuildEvaluator());
 
             var deploymentManifestEngine = new Mock<IDeploymentManifestEngine>();
             var serviceProvider = new Mock<IServiceProvider>();
