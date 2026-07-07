@@ -202,16 +202,48 @@ namespace AspNetAppBedrockAgentCore
             }
             else
             {
-                return RuntimeNetworkConfiguration.UsingPublicNetwork();
+                throw new InvalidOrMissingConfigurationException(
+                    "VPC mode is enabled but no VPC was specified. Either set CreateNew to true or provide a VpcId.");
             }
 
-            return RuntimeNetworkConfiguration.UsingVpc(this, new VpcConfigProps
+            // Prefer private subnets with egress (NAT) to ensure the runtime can reach AWS
+            // service endpoints. Fall back to private isolated, then public as last resort.
+            // AgentCore runtimes in public subnets are NOT assigned a public IP, so they
+            // won't have internet access without a NAT — but we allow it rather than failing.
+            // Limited to 2 AZs to avoid unsupported availability zones.
+            SubnetSelection subnetSelection;
+            if (vpc.PrivateSubnets.Length > 0)
+            {
+                subnetSelection = new SubnetSelection
+                {
+                    SubnetType = SubnetType.PRIVATE_WITH_EGRESS,
+                    AvailabilityZones = vpc.AvailabilityZones.Take(2).ToArray()
+                };
+            }
+            else
+            {
+                subnetSelection = new SubnetSelection
+                {
+                    SubnetType = SubnetType.PUBLIC,
+                    AvailabilityZones = vpc.AvailabilityZones.Take(2).ToArray()
+                };
+            }
+
+            var vpcConfigProps = new VpcConfigProps
             {
                 Vpc = vpc,
-                // Limit to 2 AZs to avoid unsupported AZs. AgentCore doesn't support all
-                // availability zones in every region (e.g. us-west-2d is unsupported).
-                VpcSubnets = new SubnetSelection { AvailabilityZones = vpc.AvailabilityZones.Take(2).ToArray() }
-            });
+                VpcSubnets = subnetSelection
+            };
+
+            if (settings.VPC.SecurityGroups.Count > 0)
+            {
+                vpcConfigProps.SecurityGroups = settings.VPC.SecurityGroups
+                    .Select((sgId, i) => SecurityGroup.FromSecurityGroupId(this, $"RuntimeSG{i}", sgId))
+                    .Cast<ISecurityGroup>()
+                    .ToArray();
+            }
+
+            return RuntimeNetworkConfiguration.UsingVpc(this, vpcConfigProps);
         }
 
         /// <summary>
