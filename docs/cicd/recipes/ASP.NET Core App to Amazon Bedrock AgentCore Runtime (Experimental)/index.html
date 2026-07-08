@@ -10,21 +10,21 @@
       
       
       
-        <link rel="canonical" href="https://aws.github.io/aws-dotnet-deploy/docs/commands/project/">
+        <link rel="canonical" href="https://aws.github.io/aws-dotnet-deploy/docs/cicd/recipes/ASP.NET%20Core%20App%20to%20Amazon%20Bedrock%20AgentCore%20Runtime%20%28Experimental%29/">
       
-      <link rel="icon" href="../../../assets/images/aws-logo-light.svg">
+      <link rel="icon" href="../../../../assets/images/aws-logo-light.svg">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-8.2.9">
     
     
       
-        <title>deployment-project generate command - AWS .NET deployment tool</title>
+        <title>ASP.NET Core App to Amazon Bedrock AgentCore Runtime (Experimental) - AWS .NET deployment tool</title>
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.120efc48.min.css">
+      <link rel="stylesheet" href="../../../../assets/stylesheets/main.120efc48.min.css">
       
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.9647289d.min.css">
+        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.9647289d.min.css">
         
           
           
@@ -37,7 +37,7 @@
       
     
     
-    <script>__md_scope=new URL("../../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -60,11 +60,6 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
-        
-        <a href="#deployment-project-generate-command" class="md-skip">
-          Skip to content
-        </a>
-      
     </div>
     <div data-md-component="announce">
       
@@ -75,7 +70,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../.." title="AWS .NET deployment tool" class="md-header__button md-logo" aria-label="AWS .NET deployment tool" data-md-component="logo">
+    <a href="../../../.." title="AWS .NET deployment tool" class="md-header__button md-logo" aria-label="AWS .NET deployment tool" data-md-component="logo">
       
   
   <?xml version="1.0" encoding="utf-8"?>
@@ -131,7 +126,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              deployment-project generate command
+              ASP.NET Core App to Amazon Bedrock AgentCore Runtime (Experimental)
             
           </span>
         </div>
@@ -210,7 +205,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../.." title="AWS .NET deployment tool" class="md-nav__button md-logo" aria-label="AWS .NET deployment tool" data-md-component="logo">
+    <a href="../../../.." title="AWS .NET deployment tool" class="md-nav__button md-logo" aria-label="AWS .NET deployment tool" data-md-component="logo">
       
   
   <?xml version="1.0" encoding="utf-8"?>
@@ -278,7 +273,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../.." class="md-nav__link">
+      <a href="../../../.." class="md-nav__link">
         About the AWS Deploy Tool for .NET
       </a>
     </li>
@@ -347,7 +342,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting-started/pre-requisites/" class="md-nav__link">
+      <a href="../../../getting-started/pre-requisites/" class="md-nav__link">
         Setting up your environment
       </a>
     </li>
@@ -361,7 +356,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting-started/installation/" class="md-nav__link">
+      <a href="../../../getting-started/installation/" class="md-nav__link">
         Installing the deployment tool
       </a>
     </li>
@@ -375,7 +370,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting-started/setup-creds/" class="md-nav__link">
+      <a href="../../../getting-started/setup-creds/" class="md-nav__link">
         Set up credentials
       </a>
     </li>
@@ -389,7 +384,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting-started/custom-workspace/" class="md-nav__link">
+      <a href="../../../getting-started/custom-workspace/" class="md-nav__link">
         Set up a custom workspace
       </a>
     </li>
@@ -403,7 +398,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting-started/run-tool/" class="md-nav__link">
+      <a href="../../../getting-started/run-tool/" class="md-nav__link">
         Deploying a sample application
       </a>
     </li>
@@ -424,7 +419,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../support/" class="md-nav__link">
+      <a href="../../../support/" class="md-nav__link">
         Support Matrix
       </a>
     </li>
@@ -436,14 +431,12 @@
               
   
   
-    
-  
   
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_3" type="checkbox" id="__nav_2_3" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_3" type="checkbox" id="__nav_2_3" >
       
       
       
@@ -466,7 +459,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../deploy/" class="md-nav__link">
+      <a href="../../../commands/deploy/" class="md-nav__link">
         deploy command
       </a>
     </li>
@@ -480,7 +473,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../list/" class="md-nav__link">
+      <a href="../../../commands/list/" class="md-nav__link">
         list-deployments command
       </a>
     </li>
@@ -494,7 +487,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../delete/" class="md-nav__link">
+      <a href="../../../commands/delete/" class="md-nav__link">
         delete-deployment command
       </a>
     </li>
@@ -506,73 +499,11 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          deployment-project generate command
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../../commands/project/" class="md-nav__link">
         deployment-project generate command
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#usage" class="md-nav__link">
-    Usage
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#synopsis" class="md-nav__link">
-    Synopsis
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#description" class="md-nav__link">
-    Description
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#examples" class="md-nav__link">
-    Examples
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -584,7 +515,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../server-mode/" class="md-nav__link">
+      <a href="../../../commands/server-mode/" class="md-nav__link">
         server-mode command
       </a>
     </li>
@@ -631,7 +562,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../docker/docker-generation/" class="md-nav__link">
+      <a href="../../../docker/docker-generation/" class="md-nav__link">
         Dockerfile Generation
       </a>
     </li>
@@ -645,7 +576,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../docker/publish-image/" class="md-nav__link">
+      <a href="../../../docker/publish-image/" class="md-nav__link">
         Pushing a Docker image to Amazon ECR repository
       </a>
     </li>
@@ -692,7 +623,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../deployment-projects/" class="md-nav__link">
+      <a href="../../../deployment-projects/" class="md-nav__link">
         Deployment Projects
       </a>
     </li>
@@ -706,7 +637,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../deployment-projects/recipe-file/" class="md-nav__link">
+      <a href="../../../deployment-projects/recipe-file/" class="md-nav__link">
         Recipe file schema
       </a>
     </li>
@@ -720,7 +651,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../deployment-projects/cdk-project/" class="md-nav__link">
+      <a href="../../../deployment-projects/cdk-project/" class="md-nav__link">
         CDK Project
       </a>
     </li>
@@ -739,12 +670,14 @@
               
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_6" type="checkbox" id="__nav_2_6" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_6" type="checkbox" id="__nav_2_6" checked>
       
       
       
@@ -767,7 +700,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cicd/cicd/" class="md-nav__link">
+      <a href="../../cicd/" class="md-nav__link">
         Integrating with CI/CD
       </a>
     </li>
@@ -781,7 +714,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cicd/deployment-settings-file/" class="md-nav__link">
+      <a href="../../deployment-settings-file/" class="md-nav__link">
         Creating a deployment settings file
       </a>
     </li>
@@ -793,12 +726,14 @@
               
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_6_3" type="checkbox" id="__nav_2_6_3" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_6_3" type="checkbox" id="__nav_2_6_3" checked>
       
       
       
@@ -821,7 +756,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cicd/recipes/ASP.NET%20Core%20App%20to%20AWS%20App%20Runner/" class="md-nav__link">
+      <a href="../ASP.NET%20Core%20App%20to%20AWS%20App%20Runner/" class="md-nav__link">
         ASP.NET Core App to AWS App Runner
       </a>
     </li>
@@ -835,7 +770,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cicd/recipes/ASP.NET%20Core%20App%20to%20AWS%20Elastic%20Beanstalk%20on%20Linux/" class="md-nav__link">
+      <a href="../ASP.NET%20Core%20App%20to%20AWS%20Elastic%20Beanstalk%20on%20Linux/" class="md-nav__link">
         ASP.NET Core App to AWS Elastic Beanstalk on Linux
       </a>
     </li>
@@ -849,7 +784,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cicd/recipes/ASP.NET%20Core%20App%20to%20AWS%20Elastic%20Beanstalk%20on%20Windows/" class="md-nav__link">
+      <a href="../ASP.NET%20Core%20App%20to%20AWS%20Elastic%20Beanstalk%20on%20Windows/" class="md-nav__link">
         ASP.NET Core App to AWS Elastic Beanstalk on Windows
       </a>
     </li>
@@ -861,11 +796,19 @@
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../../cicd/recipes/ASP.NET%20Core%20App%20to%20Amazon%20Bedrock%20AgentCore%20Runtime%20%28Experimental%29/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         ASP.NET Core App to Amazon Bedrock AgentCore Runtime (Experimental)
       </a>
+      
     </li>
   
 
@@ -877,7 +820,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cicd/recipes/ASP.NET%20Core%20App%20to%20Amazon%20ECS%20using%20AWS%20Fargate/" class="md-nav__link">
+      <a href="../ASP.NET%20Core%20App%20to%20Amazon%20ECS%20using%20AWS%20Fargate/" class="md-nav__link">
         ASP.NET Core App to Amazon ECS using AWS Fargate
       </a>
     </li>
@@ -891,7 +834,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cicd/recipes/ASP.NET%20Core%20App%20to%20Existing%20AWS%20Elastic%20Beanstalk%20Environment/" class="md-nav__link">
+      <a href="../ASP.NET%20Core%20App%20to%20Existing%20AWS%20Elastic%20Beanstalk%20Environment/" class="md-nav__link">
         ASP.NET Core App to Existing AWS Elastic Beanstalk Environment
       </a>
     </li>
@@ -905,7 +848,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cicd/recipes/ASP.NET%20Core%20App%20to%20Existing%20AWS%20Elastic%20Beanstalk%20Windows%20Environment/" class="md-nav__link">
+      <a href="../ASP.NET%20Core%20App%20to%20Existing%20AWS%20Elastic%20Beanstalk%20Windows%20Environment/" class="md-nav__link">
         ASP.NET Core App to Existing AWS Elastic Beanstalk Windows Environment
       </a>
     </li>
@@ -919,7 +862,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cicd/recipes/Blazor%20WebAssembly%20App/" class="md-nav__link">
+      <a href="../Blazor%20WebAssembly%20App/" class="md-nav__link">
         Blazor WebAssembly App
       </a>
     </li>
@@ -933,7 +876,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cicd/recipes/Container%20Image%20to%20Amazon%20Elastic%20Container%20Registry%20%28ECR%29/" class="md-nav__link">
+      <a href="../Container%20Image%20to%20Amazon%20Elastic%20Container%20Registry%20%28ECR%29/" class="md-nav__link">
         Container Image to Amazon Elastic Container Registry (ECR)
       </a>
     </li>
@@ -947,7 +890,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cicd/recipes/Scheduled%20Task%20on%20Amazon%20Elastic%20Container%20Service%20%28ECS%29%20using%20AWS%20Fargate/" class="md-nav__link">
+      <a href="../Scheduled%20Task%20on%20Amazon%20Elastic%20Container%20Service%20%28ECS%29%20using%20AWS%20Fargate/" class="md-nav__link">
         Scheduled Task on Amazon Elastic Container Service (ECS) using AWS Fargate
       </a>
     </li>
@@ -961,7 +904,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cicd/recipes/Service%20on%20Amazon%20Elastic%20Container%20Service%20%28ECS%29%20using%20AWS%20Fargate/" class="md-nav__link">
+      <a href="../Service%20on%20Amazon%20Elastic%20Container%20Service%20%28ECS%29%20using%20AWS%20Fargate/" class="md-nav__link">
         Service on Amazon Elastic Container Service (ECS) using AWS Fargate
       </a>
     </li>
@@ -1023,7 +966,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../tutorials/custom-project/" class="md-nav__link">
+      <a href="../../../../tutorials/custom-project/" class="md-nav__link">
         Adding an Amazon DynamoDB table to your deployment project
       </a>
     </li>
@@ -1071,7 +1014,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../troubleshooting-guide/" class="md-nav__link">
+      <a href="../../../../troubleshooting-guide/" class="md-nav__link">
         General Issues
       </a>
     </li>
@@ -1085,7 +1028,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../troubleshooting-guide/missing-dependencies/" class="md-nav__link">
+      <a href="../../../../troubleshooting-guide/missing-dependencies/" class="md-nav__link">
         Missing Dependencies
       </a>
     </li>
@@ -1099,7 +1042,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../troubleshooting-guide/docker-issues/" class="md-nav__link">
+      <a href="../../../../troubleshooting-guide/docker-issues/" class="md-nav__link">
         Docker Issues
       </a>
     </li>
@@ -1121,7 +1064,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../contributing/" class="md-nav__link">
+      <a href="../../../../contributing/" class="md-nav__link">
         Contributing
       </a>
     </li>
@@ -1136,7 +1079,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../faq/" class="md-nav__link">
+      <a href="../../../../faq/" class="md-nav__link">
         Frequently Asked Questions
       </a>
     </li>
@@ -1160,44 +1103,6 @@
   
   
   
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#usage" class="md-nav__link">
-    Usage
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#synopsis" class="md-nav__link">
-    Synopsis
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#description" class="md-nav__link">
-    Description
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#examples" class="md-nav__link">
-    Examples
-  </a>
-  
-</li>
-      
-    </ul>
   
 </nav>
                   </div>
@@ -1209,29 +1114,142 @@
             <article class="md-content__inner md-typeset">
               
                 
-  <a href="https://github.com/aws/aws-dotnet-deploy/edit/main/site/content/docs/commands/project.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/aws/aws-dotnet-deploy/edit/main/site/content/docs/cicd/recipes/ASP.NET Core App to Amazon Bedrock AgentCore Runtime (Experimental).md" title="Edit this page" class="md-content__button md-icon">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
 
-<h1 id="deployment-project-generate-command">deployment-project generate command</h1>
-<h3 id="usage">Usage</h3>
-<p><code>dotnet aws deployment-project</code> - Generates and saves the deployment CDK project in the user provided location.</p>
-<h3 id="synopsis">Synopsis</h3>
-<pre><code>dotnet aws deployment-project generate [-o|--output &lt;OUTPUT-PATH&gt;] [-d|--diagnostics] [--project-path &lt;PROJECT-PATH&gt;] [--project-display-name &lt;DISPLAY-NAME&gt;]
-</code></pre>
-<h3 id="description">Description</h3>
-<p>Generates and saves the <a href="../../deployment-projects/">deployment CDK project</a> in a user-provided directory without proceeding with a deployment. This allows the user to customize the CDK project before deploying the application.</p>
+  <h1>ASP.NET Core App to Amazon Bedrock AgentCore Runtime (Experimental)</h1>
+
+<p><strong>Recipe ID:</strong> AspNetAppBedrockAgentCore</p>
+<p><strong>Recipe Description:</strong> [Experimental] This ASP.NET Core application will be built as a container image and deployed to Amazon Bedrock AgentCore Runtime, a fully managed service for hosting AI agent applications. The recipe provisions an AgentCore Runtime to run your agent and the required IAM roles. If your project does not contain a Dockerfile, it will be automatically generated. Recommended for ASP.NET Core projects that reference AWS.AgentCore.Hosting.</p>
+<p><strong>Settings:</strong></p>
 <ul>
-<li>The <code>--output</code> switch sets the directory where the CDK deployment project will be saved.</li>
-<li>The <code>--project-path</code> switch sets the path to the project to generate a deployment project for.</li>
-<li>The <code>--project-display-name</code> switch sets the name of the deployment project that will be displayed in the list of available deployment options.</li>
+<li><strong>Runtime Name</strong><ul>
+<li>ID: RuntimeName</li>
+<li>Description: The name of the Bedrock AgentCore Runtime.</li>
+<li>Type: String</li>
 </ul>
-<h3 id="examples">Examples</h3>
-<p>This example creates a deployment project from the .NET project in the current directory. The deployment project will be saved to a sibling directory called CustomDeploymentProject. The name <em>"Team custom deployment project"</em> will be displayed in the list of the available deployment options.</p>
-<pre><code>dotnet aws deployment-project generate --output ../CustomDeploymentProject --project-display-name &quot;Team custom deployment project&quot;
-</code></pre>
+</li>
+<li><strong>Request Headers</strong><ul>
+<li>ID: RequestHeaders</li>
+<li>Description: HTTP request header names to pass through to the agent container. Headers not in this list are stripped by the AgentCore Runtime.</li>
+<li>Type: List</li>
+</ul>
+</li>
+<li><strong>AgentCore Memory</strong><ul>
+<li>ID: AgentCoreMemory</li>
+<li>Description: Configure AgentCore Memory for persistent conversation history. When enabled, a Memory resource is provisioned and wired to the agent via the AWS_AGENTCORE_MEMORY_ID environment variable.</li>
+<li>Type: Object</li>
+<li>Settings:<ul>
+<li><strong>Create New Memory</strong><ul>
+<li>ID: CreateNew</li>
+<li>Description: Do you want to create a new AgentCore Memory resource?</li>
+<li>Type: Bool</li>
+</ul>
+</li>
+<li><strong>Existing Memory ID</strong><ul>
+<li>ID: MemoryId</li>
+<li>Description: The ID of an existing AgentCore Memory resource to use. The agent will read/write conversation history to this memory.</li>
+<li>Type: String</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Virtual Private Cloud (VPC)</strong><ul>
+<li>ID: VPC</li>
+<li>Description: A VPC enables you to place the AgentCore Runtime into a virtual network for access to private resources. Not required for most deployments.</li>
+<li>Type: Object</li>
+<li>Settings:<ul>
+<li><strong>Use a VPC</strong><ul>
+<li>ID: UseVPC</li>
+<li>Description: Do you want to place the AgentCore Runtime in a VPC?</li>
+<li>Type: Bool</li>
+</ul>
+</li>
+<li><strong>Create New VPC</strong><ul>
+<li>ID: CreateNew</li>
+<li>Description: Do you want to create a new VPC?</li>
+<li>Type: Bool</li>
+</ul>
+</li>
+<li><strong>VPC ID</strong><ul>
+<li>ID: VpcId</li>
+<li>Description: The ID of the VPC to use.</li>
+<li>Type: String</li>
+</ul>
+</li>
+<li><strong>Security Groups</strong><ul>
+<li>ID: SecurityGroups</li>
+<li>Description: A list of EC2 security groups to assign to the AgentCore Runtime. This is commonly used to provide access to resources like Amazon RDS or ElastiCache running in their own security groups.</li>
+<li>Type: List</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Runtime IAM Role</strong><ul>
+<li>ID: RuntimeIAMRole</li>
+<li>Description: The Identity and Access Management (IAM) role that provides AWS credentials to the AgentCore Runtime. When creating a new role, it includes permissions for ECR pull, CloudWatch Logs, Bedrock model invocation (cross-region), and AgentCore Memory access.</li>
+<li>Type: Object</li>
+<li>Settings:<ul>
+<li><strong>Create New Role</strong><ul>
+<li>ID: CreateNew</li>
+<li>Description: Do you want to create a new role?</li>
+<li>Type: Bool</li>
+</ul>
+</li>
+<li><strong>Existing Role ARN</strong><ul>
+<li>ID: RoleArn</li>
+<li>Description: The ARN of the existing IAM role to use for the AgentCore Runtime.</li>
+<li>Type: String</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Environment Variables</strong><ul>
+<li>ID: AgentCoreEnvironmentVariables</li>
+<li>Description: Configure environment variables that will be set for the AgentCore Runtime container.</li>
+<li>Type: KeyValue</li>
+</ul>
+</li>
+<li><strong>Environment Architecture</strong><ul>
+<li>ID: EnvironmentArchitecture</li>
+<li>Description: The CPU architecture of the environment to create.</li>
+<li>Type: String</li>
+</ul>
+</li>
+<li><strong>Docker Build Args</strong><ul>
+<li>ID: DockerBuildArgs</li>
+<li>Description: The list of additional options to append to the <code>docker build</code> command.</li>
+<li>Type: String</li>
+</ul>
+</li>
+<li><strong>Dockerfile Path</strong><ul>
+<li>ID: DockerfilePath</li>
+<li>Description: Specify a path to a Dockerfile as either an absolute path or a path relative to the project.</li>
+<li>Type: String</li>
+</ul>
+</li>
+<li><strong>Docker Execution Directory</strong><ul>
+<li>ID: DockerExecutionDirectory</li>
+<li>Description: Specifies the docker execution directory where the docker build command will be executed from.</li>
+<li>Type: String</li>
+</ul>
+</li>
+<li><strong>ECR Repository Name</strong><ul>
+<li>ID: ECRRepositoryName</li>
+<li>Description: Specifies the ECR repository where the Docker images will be stored</li>
+<li>Type: String</li>
+</ul>
+</li>
+</ul>
 
               
             </article>
@@ -1245,7 +1263,7 @@
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../delete/" class="md-footer__link md-footer__link--prev" aria-label="Previous: delete-deployment command" rel="prev">
+        <a href="../ASP.NET%20Core%20App%20to%20AWS%20Elastic%20Beanstalk%20on%20Windows/" class="md-footer__link md-footer__link--prev" aria-label="Previous: ASP.NET Core App to AWS Elastic Beanstalk on Windows" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -1254,20 +1272,20 @@
               <span class="md-footer__direction">
                 Previous
               </span>
-              delete-deployment command
+              ASP.NET Core App to AWS Elastic Beanstalk on Windows
             </div>
           </div>
         </a>
       
       
         
-        <a href="../server-mode/" class="md-footer__link md-footer__link--next" aria-label="Next: server-mode command" rel="next">
+        <a href="../ASP.NET%20Core%20App%20to%20Amazon%20ECS%20using%20AWS%20Fargate/" class="md-footer__link md-footer__link--next" aria-label="Next: ASP.NET Core App to Amazon ECS using AWS Fargate" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              server-mode command
+              ASP.NET Core App to Amazon ECS using AWS Fargate
             </div>
           </div>
           <div class="md-footer__button md-icon">
@@ -1301,12 +1319,12 @@
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "../../..", "features": ["tabs", "instant"], "search": "../../../assets/javascripts/workers/search.2a1c317c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../../../..", "features": ["tabs", "instant"], "search": "../../../../assets/javascripts/workers/search.2a1c317c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.6e54b5cd.min.js"></script>
+      <script src="../../../../assets/javascripts/bundle.6e54b5cd.min.js"></script>
       
-        <script src="../../../assets/js/beacon_scode.js"></script>
+        <script src="../../../../assets/js/beacon_scode.js"></script>
       
     
   </body>
