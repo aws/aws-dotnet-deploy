@@ -13,6 +13,7 @@ using AWS.Deploy.Common.DeploymentManifest;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Recipes.Validation;
+using AWS.Deploy.Common.ProjectEvaluation;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.RecommendationEngine;
 using AWS.Deploy.Recipes;
@@ -46,7 +47,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var optionSettingHandler = new OptionSettingHandler(validatorFactory);
             _recipeHandler = new RecipeHandler(_deploymentManifestEngine, _orchestratorInteractiveService, _directoryManager, _fileManager, optionSettingHandler, validatorFactory);
 
-            var parser = new ProjectDefinitionParser(new FileManager(), _directoryManager);
+            var parser = new ProjectDefinitionParser(new FileManager(), _directoryManager, new MSBuildEvaluator());
             var awsCredentials = new Mock<AWSCredentials>();
             var session =  new OrchestratorSession(
                 parser.Parse(projectPath).Result,

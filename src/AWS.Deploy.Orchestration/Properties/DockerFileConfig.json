@@ -4,8 +4,8 @@
         "ImageMapping": [
             {
                 "TargetFramework": "net10.0",
-                "BaseImage": "mcr.microsoft.com/dotnet/aspnet:10.0-preview",
-                "BuildImage": "mcr.microsoft.com/dotnet/sdk:10.0-preview"
+                "BaseImage": "mcr.microsoft.com/dotnet/aspnet:10.0",
+                "BuildImage": "mcr.microsoft.com/dotnet/sdk:10.0"
             },
             {
                 "TargetFramework": "net9.0",
@@ -44,8 +44,8 @@
         "ImageMapping": [
             {
                 "TargetFramework": "net10.0",
-                "BaseImage": "mcr.microsoft.com/dotnet/runtime:10.0-preview",
-                "BuildImage": "mcr.microsoft.com/dotnet/sdk:10.0-preview"
+                "BaseImage": "mcr.microsoft.com/dotnet/runtime:10.0",
+                "BuildImage": "mcr.microsoft.com/dotnet/sdk:10.0"
             },
             {
                 "TargetFramework": "net9.0",

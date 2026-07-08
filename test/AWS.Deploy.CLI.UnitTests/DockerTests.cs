@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using AWS.Deploy.CLI.Common.UnitTests.IO;
 using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
+using AWS.Deploy.Common.ProjectEvaluation;
 using Should;
 using Xunit;
 using AWS.Deploy.CLI.UnitTests.Utilities;
@@ -98,7 +99,7 @@ namespace AWS.Deploy.CLI.UnitTests
             var recommendations = await recommendationEngine.ComputeRecommendations();
             var selectedRecommendation = recommendations.First();
 
-            var projectDefinition = await new ProjectDefinitionParser(fileManager, new DirectoryManager()).Parse(projectPath);
+            var projectDefinition = await new ProjectDefinitionParser(fileManager, new DirectoryManager(), new MSBuildEvaluator()).Parse(projectPath);
 
             var engine = new DockerEngine(projectDefinition, fileManager, new TestDirectoryManager());
 

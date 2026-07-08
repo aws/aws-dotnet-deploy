@@ -10,6 +10,7 @@ using AWS.Deploy.Common.DeploymentManifest;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Recipes.Validation;
+using AWS.Deploy.Common.ProjectEvaluation;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.RecommendationEngine;
 using Moq;
@@ -44,7 +45,7 @@ namespace AWS.Deploy.CLI.Common.UnitTests.ConfigFileDeployment
             _deploymentManifestEngine = new DeploymentManifestEngine(_directoryManager, _fileManager);
             _orchestratorInteractiveService = new Mock<IOrchestratorInteractiveService>().Object;
 
-            var parser = new ProjectDefinitionParser(_fileManager, _directoryManager);
+            var parser = new ProjectDefinitionParser(_fileManager, _directoryManager, new MSBuildEvaluator());
             var awsCredentials = new Mock<AWSCredentials>();
             _orchestratorSession = new OrchestratorSession(
                 parser.Parse(_projectPath).Result,

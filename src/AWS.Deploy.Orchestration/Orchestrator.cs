@@ -251,7 +251,14 @@ namespace AWS.Deploy.Orchestration
             }
             if (recommendation.ReplacementTokens.ContainsKey(Constants.RecipeIdentifier.REPLACE_TOKEN_DEFAULT_ENVIRONMENT_ARCHITECTURE))
             {
-                recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_DEFAULT_ENVIRONMENT_ARCHITECTURE, Constants.Recipe.DefaultSupportedArchitecture);
+                // Use the recipe's only supported architecture when the recipe constrains to one;
+                // otherwise fall back to the global default (X86_64).
+                var defaultArch = recommendation.Recipe.SupportedArchitectures is { Count: 1 }
+                    ? recommendation.Recipe.SupportedArchitectures[0].ToString()
+                    : Constants.Recipe.DefaultSupportedArchitecture;
+
+                recommendation.AddReplacementToken(Constants.RecipeIdentifier.REPLACE_TOKEN_DEFAULT_ENVIRONMENT_ARCHITECTURE, defaultArch);
+                recommendation.DeploymentBundle.EnvironmentArchitecture = Enum.Parse<SupportedArchitecture>(defaultArch);
             }
         }
 

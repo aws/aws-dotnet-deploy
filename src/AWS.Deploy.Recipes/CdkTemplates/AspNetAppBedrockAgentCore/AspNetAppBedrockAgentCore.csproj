@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <RollForward>Major</RollForward>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>Latest</LangVersion>
+    <AWSProjectType>DeploymentProject</AWSProjectType>
+    <RecipeCDKCommonVersion>AWSDeployRecipesCDKCommonVersion</RecipeCDKCommonVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="cdk.out\**" />
+    <EmbeddedResource Remove="cdk.out\**" />
+    <None Remove="cdk.out\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="node_modules\**" />
+    <EmbeddedResource Remove="node_modules\**" />
+    <None Remove="node_modules\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Amazon.CDK.Lib" Version="2.260.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.1" />
+  </ItemGroup>
+
+  <!-- When compiled as a template source, use ProjectReference -->
+  <ItemGroup Condition=" '$(RecipeCDKCommonVersion.ToUpper())' == 'AWSDEPLOYRECIPESCDKCOMMONVERSION' ">
+    <ProjectReference Include="..\..\..\AWS.Deploy.Recipes.CDK.Common\AWS.Deploy.Recipes.CDK.Common.csproj" />
+  </ItemGroup>
+  <!-- When instantiated via dotnet new, use PackageReference -->
+  <ItemGroup Condition=" '$(RecipeCDKCommonVersion.ToUpper())' != 'AWSDEPLOYRECIPESCDKCOMMONVERSION' ">
+    <PackageReference Include="AWS.Deploy.Recipes.CDK.Common" Version="AWSDeployRecipesCDKCommonVersion" />
+  </ItemGroup>
+
+</Project>

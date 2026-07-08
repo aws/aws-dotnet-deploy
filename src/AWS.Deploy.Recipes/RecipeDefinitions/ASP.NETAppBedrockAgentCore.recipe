@@ -1,0 +1,343 @@
+{
+    "$schema": "./aws-deploy-recipe-schema.json",
+    "Id": "AspNetAppBedrockAgentCore",
+    "Version": "1.0.0",
+    "Name": "ASP.NET Core App to Amazon Bedrock AgentCore Runtime (Experimental)",
+    "DeploymentType": "CdkProject",
+    "DeploymentBundle": "Container",
+    "CdkProjectTemplate": "../CdkTemplates/AspNetAppBedrockAgentCore",
+    "CdkProjectTemplateId": "netdeploy.AspNetAppBedrockAgentCore",
+    "ShortDescription": "[Experimental] Deploys as a container to Amazon Bedrock AgentCore Runtime for AI agent workloads. Dockerfile will be automatically generated if needed.",
+    "Description": "[Experimental] This ASP.NET Core application will be built as a container image and deployed to Amazon Bedrock AgentCore Runtime, a fully managed service for hosting AI agent applications. The recipe provisions an AgentCore Runtime to run your agent and the required IAM roles. If your project does not contain a Dockerfile, it will be automatically generated. Recommended for ASP.NET Core projects that reference AWS.AgentCore.Hosting.",
+    "TargetService": "Amazon Bedrock AgentCore",
+    "TargetPlatform": "Linux",
+    "SupportedArchitectures": [ "arm64" ],
+
+    "DisplayedResources": [
+        {
+            "LogicalId": "RecipeAgentCoreRuntime05BEE1FF",
+            "Description": "Bedrock AgentCore Runtime"
+        }
+    ],
+
+    "RecipePriority": 50,
+
+    "RecommendationRules": [
+        {
+            "Tests": [
+                {
+                    "Type": "MSProjectSdkAttribute",
+                    "Condition": {
+                        "Value": "Microsoft.NET.Sdk.Web"
+                    }
+                },
+                {
+                    "Type": "MSProperty",
+                    "Condition": {
+                        "PropertyName": "TargetFramework",
+                        "AllowedValues": [ "net10.0" ]
+                    }
+                }
+            ],
+            "Effect": {
+                "Pass": { "Include": true },
+                "Fail": { "Include": false }
+            }
+        },
+        {
+            "Tests": [
+                {
+                    "Type": "NuGetPackageReference",
+                    "Condition": {
+                        "NuGetPackageName": "AWS.AgentCore.Hosting"
+                    }
+                }
+            ],
+            "Effect": {
+                "Pass": {
+                    "Include": true,
+                    "PriorityAdjustment": 200
+                },
+                "Fail": {
+                    "Include": true
+                }
+            }
+        },
+        {
+            "Tests": [
+                {
+                    "Type": "MSPropertyExists",
+                    "Condition": {
+                        "PropertyName": "AWSProjectType"
+                    }
+                }
+            ],
+            "Effect": {
+                "Pass": { "Include": false },
+                "Fail": { "Include": true }
+            }
+        }
+    ],
+
+    "Validators": [
+        {
+            "ValidatorType": "ValidDockerfilePath"
+        }
+    ],
+
+    "Categories": [
+        {
+            "Id": "General",
+            "DisplayName": "General",
+            "Order": 10
+        },
+        {
+            "Id": "AgentCoreRuntime",
+            "DisplayName": "AgentCore Runtime",
+            "Order": 20
+        },
+        {
+            "Id": "Memory",
+            "DisplayName": "Memory",
+            "Order": 30
+        },
+        {
+            "Id": "VPC",
+            "DisplayName": "VPC",
+            "Order": 35
+        },
+        {
+            "Id": "Permissions",
+            "DisplayName": "Permissions",
+            "Order": 40
+        },
+        {
+            "Id": "EnvVariables",
+            "DisplayName": "Environment Variables",
+            "Order": 50
+        }
+    ],
+
+    "OptionSettings": [
+        {
+            "Id": "RuntimeName",
+            "Name": "Runtime Name",
+            "Category": "General",
+            "Description": "The name of the Bedrock AgentCore Runtime.",
+            "Type": "String",
+            "DefaultValue": "{StackName}",
+            "AdvancedSetting": false,
+            "Updatable": false,
+            "Validators": [
+                {
+                    "ValidatorType": "Regex",
+                    "Configuration": {
+                        "Regex": "^[a-zA-Z][a-zA-Z0-9_]{0,63}$",
+                        "ValidationFailedMessage": "Invalid AgentCore Runtime name. The name must start with a letter and can only contain alphanumeric characters and underscores, with a maximum of 64 characters."
+                    }
+                }
+            ]
+        },
+        {
+            "Id": "RequestHeaders",
+            "Name": "Request Headers",
+            "Category": "AgentCoreRuntime",
+            "Description": "HTTP request header names to pass through to the agent container. Headers not in this list are stripped by the AgentCore Runtime.",
+            "Type": "List",
+            "AdvancedSetting": false,
+            "Updatable": true
+        },
+        {
+            "Id": "AgentCoreMemory",
+            "Name": "AgentCore Memory",
+            "Category": "Memory",
+            "Description": "Configure AgentCore Memory for persistent conversation history. When enabled, a Memory resource is provisioned and wired to the agent via the AWS_AGENTCORE_MEMORY_ID environment variable.",
+            "Type": "Object",
+            "AdvancedSetting": false,
+            "Updatable": true,
+            "ChildOptionSettings": [
+                {
+                    "Id": "CreateNew",
+                    "Name": "Create New Memory",
+                    "Description": "Do you want to create a new AgentCore Memory resource?",
+                    "Type": "Bool",
+                    "DefaultValue": false,
+                    "AdvancedSetting": false,
+                    "Updatable": true
+                },
+                {
+                    "Id": "MemoryId",
+                    "Name": "Existing Memory ID",
+                    "Description": "The ID of an existing AgentCore Memory resource to use. The agent will read/write conversation history to this memory.",
+                    "Type": "String",
+                    "DefaultValue": "",
+                    "AdvancedSetting": false,
+                    "Updatable": true,
+                    "DependsOn": [
+                        {
+                            "Id": "AgentCoreMemory.CreateNew",
+                            "Value": false
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Id": "VPC",
+            "Name": "Virtual Private Cloud (VPC)",
+            "Category": "VPC",
+            "Description": "A VPC enables you to place the AgentCore Runtime into a virtual network for access to private resources. Not required for most deployments.",
+            "Type": "Object",
+            "TypeHint": "AgentCoreVpc",
+            "AdvancedSetting": true,
+            "Updatable": false,
+            "ChildOptionSettings": [
+                {
+                    "Id": "UseVPC",
+                    "Name": "Use a VPC",
+                    "Description": "Do you want to place the AgentCore Runtime in a VPC?",
+                    "Type": "Bool",
+                    "DefaultValue": false,
+                    "AdvancedSetting": true,
+                    "Updatable": false
+                },
+                {
+                    "Id": "CreateNew",
+                    "Name": "Create New VPC",
+                    "Description": "Do you want to create a new VPC?",
+                    "Type": "Bool",
+                    "DefaultValue": false,
+                    "AdvancedSetting": true,
+                    "Updatable": false,
+                    "DependsOn": [
+                        {
+                            "Id": "VPC.UseVPC",
+                            "Value": true
+                        }
+                    ]
+                },
+                {
+                    "Id": "VpcId",
+                    "Name": "VPC ID",
+                    "Description": "The ID of the VPC to use.",
+                    "Type": "String",
+                    "DefaultValue": "",
+                    "AdvancedSetting": true,
+                    "Updatable": false,
+                    "DependsOn": [
+                        {
+                            "Id": "VPC.UseVPC",
+                            "Value": true
+                        },
+                        {
+                            "Id": "VPC.CreateNew",
+                            "Value": false
+                        }
+                    ]
+                },
+                {
+                    "Id": "SecurityGroups",
+                    "Name": "Security Groups",
+                    "Description": "A list of EC2 security groups to assign to the AgentCore Runtime. This is commonly used to provide access to resources like Amazon RDS or ElastiCache running in their own security groups.",
+                    "Type": "List",
+                    "TypeHint": "ExistingSecurityGroups",
+                    "ParentSettingId": "VPC.VpcId",
+                    "AdvancedSetting": true,
+                    "Updatable": false,
+                    "Validators": [
+                        {
+                            "ValidatorType": "Required"
+                        },
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": {
+                                "Regex": "^sg-([0-9a-f]{8}|[0-9a-f]{17})$",
+                                "ValidationFailedMessage": "Invalid Security Group ID. The Security Group ID must start with the \"sg-\" prefix, followed by either 8 or 17 characters consisting of digits and letters(lower-case) from a to f. For example sg-abc88de9 is a valid Security Group ID."
+                            }
+                        },
+                        {
+                            "ValidatorType": "SecurityGroupsInVpc",
+                            "Configuration": {
+                                "VpcId": "VPC.VpcId"
+                            }
+                        }
+                    ],
+                    "DependsOn": [
+                        {
+                            "Id": "VPC.UseVPC",
+                            "Value": true
+                        },
+                        {
+                            "Id": "VPC.CreateNew",
+                            "Value": false
+                        },
+                        {
+                            "Id": "VPC.VpcId",
+                            "Operation": "NotEmpty"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Id": "RuntimeIAMRole",
+            "Name": "Runtime IAM Role",
+            "Category": "Permissions",
+            "Description": "The Identity and Access Management (IAM) role that provides AWS credentials to the AgentCore Runtime. When creating a new role, it includes permissions for ECR pull, CloudWatch Logs, Bedrock model invocation (cross-region), and AgentCore Memory access.",
+            "Type": "Object",
+            "TypeHint": "IAMRole",
+            "TypeHintData": {
+                "ServicePrincipal": "bedrock-agentcore.amazonaws.com"
+            },
+            "AdvancedSetting": false,
+            "Updatable": false,
+            "ChildOptionSettings": [
+                {
+                    "Id": "CreateNew",
+                    "Name": "Create New Role",
+                    "Description": "Do you want to create a new role?",
+                    "Type": "Bool",
+                    "DefaultValue": true,
+                    "AdvancedSetting": false,
+                    "Updatable": false
+                },
+                {
+                    "Id": "RoleArn",
+                    "Name": "Existing Role ARN",
+                    "Description": "The ARN of the existing IAM role to use for the AgentCore Runtime.",
+                    "Type": "String",
+                    "TypeHint": "ExistingIAMRole",
+                    "TypeHintData": {
+                        "ServicePrincipal": "bedrock-agentcore.amazonaws.com"
+                    },
+                    "AdvancedSetting": false,
+                    "Updatable": false,
+                    "DependsOn": [
+                        {
+                            "Id": "RuntimeIAMRole.CreateNew",
+                            "Value": false
+                        }
+                    ],
+                    "Validators": [
+                        {
+                            "ValidatorType": "Regex",
+                            "Configuration": {
+                                "Regex": "arn:.+:iam::[0-9]{12}:.+",
+                                "ValidationFailedMessage": "Invalid IAM Role ARN. The ARN should contain the account ID and be in the format: arn:{partition}:iam::{account}:role/{role-name}"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Id": "AgentCoreEnvironmentVariables",
+            "Name": "Environment Variables",
+            "Category": "EnvVariables",
+            "Description": "Configure environment variables that will be set for the AgentCore Runtime container.",
+            "Type": "KeyValue",
+            "AdvancedSetting": false,
+            "Updatable": true
+        }
+    ]
+}

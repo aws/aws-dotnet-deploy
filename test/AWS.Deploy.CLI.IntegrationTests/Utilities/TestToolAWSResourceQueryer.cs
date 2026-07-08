@@ -51,6 +51,7 @@ namespace AWS.Deploy.CLI.IntegrationTests.Utilities
         public Task<List<EnvironmentDescription>> ListOfElasticBeanstalkEnvironments(string? applicationName, string? environmentName) => throw new NotImplementedException();
         public Task<List<Role>> ListOfIAMRoles(string? servicePrincipal) => throw new NotImplementedException();
         public Task<Amazon.AppRunner.Model.Service> DescribeAppRunnerService(string serviceArn) => throw new NotImplementedException();
+        public Task<Amazon.BedrockAgentCoreControl.Model.GetAgentRuntimeResponse> DescribeBedrockAgentCoreRuntime(string runtimeId) => throw new NotImplementedException();
         public Task<List<Amazon.ElasticLoadBalancingV2.Model.LoadBalancer>> ListOfLoadBalancers(LoadBalancerTypeEnum loadBalancerType) => throw new NotImplementedException();
         public Task<Distribution> GetCloudFrontDistribution(string distributionId) => throw new NotImplementedException();
         public Task<List<string>> ListOfDyanmoDBTables() => throw new NotImplementedException();

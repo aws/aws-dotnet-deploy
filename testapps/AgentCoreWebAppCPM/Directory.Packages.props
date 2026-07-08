@@ -1,0 +1,8 @@
+<Project>
+    <PropertyGroup>
+        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageVersion Include="AWS.AgentCore.Hosting" Version="0.1.0-preview" />
+    </ItemGroup>
+</Project>

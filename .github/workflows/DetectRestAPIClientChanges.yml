@@ -2,15 +2,25 @@ name: Detect Rest API Client Changes
 
 on: [pull_request]
 
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   detect-restapi-client-changes:
+    name: Detect REST API client changes
     runs-on: ubuntu-latest
+    permissions:
+      contents: read # to check out the PR code
     steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         fetch-depth: '0'
+        persist-credentials: false
     - name: Setup .NET 10.0
-      uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 #v5.2.0
+      uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
       with:
         dotnet-version: 10.0.x
     - name: Restore dependencies
@@ -22,7 +32,7 @@ jobs:
         cd ./src/AWS.Deploy.ServerMode.ClientGenerator
         dotnet run --project ./AWS.Deploy.ServerMode.ClientGenerator.csproj
     - name: Verify Changed files
-      uses: tj-actions/verify-changed-files@a1c6acee9df209257a246f2cc6ae8cb6581c1edf #v20.0.4
+      uses: tj-actions/verify-changed-files@a1c6acee9df209257a246f2cc6ae8cb6581c1edf # v20.0.4
       id: verify-changed-files
       with:
         files: |

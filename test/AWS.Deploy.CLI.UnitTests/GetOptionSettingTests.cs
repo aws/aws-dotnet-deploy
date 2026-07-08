@@ -14,6 +14,7 @@ using AWS.Deploy.Common.DeploymentManifest;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Recipes.Validation;
+using AWS.Deploy.Common.ProjectEvaluation;
 using AWS.Deploy.Orchestration;
 using AWS.Deploy.Orchestration.RecommendationEngine;
 using AWS.Deploy.Recipes;
@@ -58,7 +59,7 @@ namespace AWS.Deploy.CLI.UnitTests
         {
             var fullPath = SystemIOUtilities.ResolvePath(testProjectName);
 
-            var parser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager());
+            var parser = new ProjectDefinitionParser(new FileManager(), new DirectoryManager(), new MSBuildEvaluator());
             var awsCredentials = new Mock<AWSCredentials>();
             var session =  new OrchestratorSession(
                 await parser.Parse(fullPath),

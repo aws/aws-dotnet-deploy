@@ -10,6 +10,7 @@ using AWS.Deploy.Common;
 using AWS.Deploy.Common.IO;
 using AWS.Deploy.Common.Recipes;
 using AWS.Deploy.Common.Recipes.Validation;
+using AWS.Deploy.Common.ProjectEvaluation;
 using AWS.Deploy.Orchestration;
 using Moq;
 using Xunit;
@@ -30,7 +31,7 @@ namespace AWS.Deploy.CLI.UnitTests
             _optionSettingHandler = new OptionSettingHandler(new ValidatorFactory(_serviceProvider.Object));
             _directoryManager = new DirectoryManager();
             _fileManager = new FileManager();
-            _projectDefinitionParser = new ProjectDefinitionParser(_fileManager, _directoryManager);
+            _projectDefinitionParser = new ProjectDefinitionParser(_fileManager, _directoryManager, new MSBuildEvaluator());
         }
 
         [Fact]
