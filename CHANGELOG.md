@@ -1,3 +1,12 @@
+## Release 2026-07-08
+
+### AWS.Deploy.CLI (2.1.0)
+* Add support for deploying .NET AI Agents built with AWS.AgentCore.Hosting to Amazon Bedrock AgentCore runtime
+* Add MSBuild evaluation for accurate project property and package reference resolution. Supports Central Package Management, Directory.Build.props, and conditional properties.
+* Add VPC configuration support for the AgentCore deployment recipe. Users can opt-in to place the runtime in a VPC for access to private resources.
+### AWS.Deploy.Recipes.CDK.Common (2.1.0)
+### AWS.Deploy.ServerMode.Client (2.1.0)
+
 ## Release 2026-06-02
 
 ### AWS.Deploy.CLI (2.0.7)
