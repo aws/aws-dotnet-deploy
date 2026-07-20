@@ -1,3 +1,10 @@
+## Release 2026-07-20
+
+### AWS.Deploy.CLI (2.1.1)
+* Improve error display when there are invalid command line parameters
+### AWS.Deploy.Recipes.CDK.Common (2.1.1)
+### AWS.Deploy.ServerMode.Client (2.1.1)
+
 ## Release 2026-07-08
 
 ### AWS.Deploy.CLI (2.1.0)
