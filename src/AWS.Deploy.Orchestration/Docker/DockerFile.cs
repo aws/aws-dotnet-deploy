@@ -121,8 +121,7 @@ namespace AWS.Deploy.Orchestration.Docker
 
             // ProjectDefinitionParser will have transformed projectDirectory to an absolute path,
             // and DockerFileName is static so traversal should not be possible here.
-            // nosemgrep: csharp.lang.security.filesystem.unsafe-path-combine.unsafe-path-combine
-            File.WriteAllText(Path.Combine(projectDirectory, Constants.Docker.DefaultDockerfileName), dockerFile);
+            File.WriteAllText(Path.Combine(projectDirectory, Constants.Docker.DefaultDockerfileName), dockerFile); // nosemgrep: csharp.lang.security.filesystem.unsafe-path-combine.unsafe-path-combine
         }
     }
 }
