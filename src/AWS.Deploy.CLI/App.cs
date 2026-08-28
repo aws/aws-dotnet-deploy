@@ -61,6 +61,11 @@ public class App
                     // bail out with an non-zero return code.
                     return CommandReturnCodes.USER_ERROR;
                 }
+                else if (exception is CommandParseException parseException)
+                {
+                    toolInteractiveService.WriteErrorLine(parseException.Message);
+                    return CommandReturnCodes.USER_ERROR;
+                }
                 else
                 {
                     // This is a bug
