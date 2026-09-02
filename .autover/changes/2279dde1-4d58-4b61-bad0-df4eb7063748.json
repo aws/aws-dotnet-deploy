@@ -1,0 +1,11 @@
+{
+  "Projects": [
+    {
+      "Name": "AWS.Deploy.CLI",
+      "Type": "Patch",
+      "ChangelogMessages": [
+        "Explicitly suppress the internal Elastic Beanstalk \u0027Create new application\u0027 toggle on server-mode redeployment to an existing application."
+      ]
+    }
+  ]
+}

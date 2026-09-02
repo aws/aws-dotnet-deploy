@@ -147,7 +147,8 @@
                     "Type": "Bool",
                     "DefaultValue": true,
                     "AdvancedSetting": false,
-                    "Updatable": false
+                    "Updatable": false,
+                    "VisibleOnRedeployment": false
                 },
                 {
                     "Id": "ApplicationName",

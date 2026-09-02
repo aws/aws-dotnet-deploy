@@ -225,6 +225,52 @@ namespace AWS.Deploy.CLI.UnitTests
             Assert.NotNull(vpcConnectorChildren.First(x => x.Id.Equals(SETTING_ID_USEVPCCONNECTOR)));
         }
 
+        /// <summary>
+        /// Regression test for https://github.com/aws/aws-dotnet-deploy/issues/834
+        ///
+        /// On a server-mode redeployment to an existing Elastic Beanstalk application, the internal
+        /// BeanstalkApplication.CreateNew toggle must NOT be surfaced as a read-only, visible checkbox.
+        /// Server-mode redeploy visibility for non-updatable settings is governed by
+        /// DeploymentController.ListOptionSettingSummary (see DeploymentController.cs):
+        ///   Visible = IsOptionSettingDisplayable
+        ///             &amp;&amp; !(IsExistingCloudApplication &amp;&amp; !Updatable &amp;&amp; !VisibleOnRedeployment)
+        ///
+        /// This asserts the *effective* visibility (behavior), not just the deserialized model property,
+        /// so a regression that re-introduces the bug by omitting VisibleOnRedeployment is caught.
+        /// </summary>
+        [Fact]
+        public async Task GetOptionSettingTests_BeanstalkCreateNew_NotVisibleOnRedeployment()
+        {
+            var engine = await BuildRecommendationEngine("WebAppNoDockerFile");
+
+            var recommendations = await engine.ComputeRecommendations();
+
+            var beanstalkRecommendation = recommendations.First(r => r.Recipe.Id == Constants.ASPNET_CORE_BEANSTALK_LINUX_RECIPE_ID);
+
+            var createNew = _optionSettingHandler.GetOptionSetting(beanstalkRecommendation, "BeanstalkApplication.CreateNew");
+            Assert.NotNull(createNew);
+
+            // The internal toggle is a non-updatable Bool that must be suppressed on redeployment.
+            Assert.False(createNew.Updatable);
+            Assert.False(createNew.VisibleOnRedeployment);
+
+            // Fresh deployment: CreateNew is displayable and therefore effectively visible.
+            beanstalkRecommendation.IsExistingCloudApplication = false;
+            Assert.True(ComputeServerModeVisible(beanstalkRecommendation, createNew));
+
+            // Redeployment to an existing application: CreateNew must NOT be visible.
+            beanstalkRecommendation.IsExistingCloudApplication = true;
+            Assert.False(ComputeServerModeVisible(beanstalkRecommendation, createNew));
+        }
+
+        /// <summary>
+        /// Mirrors the server-mode visibility computation performed by
+        /// DeploymentController.ListOptionSettingSummary when building OptionSettingItemSummary.Visible.
+        /// </summary>
+        private bool ComputeServerModeVisible(Recommendation recommendation, OptionSettingItem setting) =>
+            _optionSettingHandler.IsOptionSettingDisplayable(recommendation, setting) &&
+            !(recommendation.IsExistingCloudApplication && !setting.Updatable && !setting.VisibleOnRedeployment);
+
         [Fact]
         public async Task GetOptionSettingTests_ListType()
         {
