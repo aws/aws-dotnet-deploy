@@ -441,6 +441,45 @@ namespace AWS.Deploy.CLI.UnitTests
             Assert.Equal(expectedCommand, _commandLineWrapper.CommandsToExecute.First().Command);
         }
 
+        /// <summary>
+        /// Elastic Beanstalk now supports .NET 10 on its 64bit Amazon Linux 2023 platform, so when the target
+        /// framework is net10.0 we should perform a framework-dependent publish instead of forcing a self-contained build.
+        /// </summary>
+        [Fact]
+        public async Task CreateDotnetPublishZip_Net10_FrameworkDependent()
+        {
+            var projectPath = SystemIOUtilities.ResolvePath("WebApiNET10");
+            var project = await _projectDefinitionParser.Parse(projectPath);
+            _recipeDefinition.TargetService = RecipeIdentifier.TARGET_SERVICE_ELASTIC_BEANSTALK;
+            _recipeDefinition.OptionSettings.Add(
+                new OptionSettingItem(
+                    "ElasticBeanstalkPlatformArn",
+                    "ElasticBeanstalkPlatformArn",
+                    "Beanstalk Platform",
+                    "The name of the Elastic Beanstalk platform to use with the environment.")
+                { DefaultValue = "arn:aws:elasticbeanstalk:us-west-2::platform/.NET 10 running on 64bit Amazon Linux 2023/4.0.0" });
+            var recommendation = new Recommendation(_recipeDefinition, project, 100, new Dictionary<string, object>());
+
+            recommendation.DeploymentBundle.DotnetPublishBuildConfiguration = "Release";
+            recommendation.DeploymentBundle.DotnetPublishAdditionalBuildArguments = "--nologo";
+
+            Assert.False(recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild);
+
+            await _deploymentBundleHandler.CreateDotnetPublishZip(recommendation);
+
+            // net10.0 is a supported framework, so the build must remain framework-dependent (not self-contained).
+            Assert.False(recommendation.DeploymentBundle.DotnetPublishSelfContainedBuild);
+
+            var expectedCommand =
+                $"dotnet publish \"{project.ProjectPath}\"" +
+                $" -o \"{_directoryManager.CreatedDirectories.First()}\"" +
+                " -c Release" +
+                " " +
+                " --nologo";
+
+            Assert.Equal(expectedCommand, _commandLineWrapper.CommandsToExecute.First().Command);
+        }
+
         private async Task<RecommendationEngine> BuildRecommendationEngine(string testProjectName)
         {
             var fullPath = SystemIOUtilities.ResolvePath(testProjectName);
