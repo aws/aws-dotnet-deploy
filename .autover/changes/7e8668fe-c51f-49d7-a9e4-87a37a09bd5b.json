@@ -1,0 +1,11 @@
+{
+  "Projects": [
+    {
+      "Name": "AWS.Deploy.CLI",
+      "Type": "Patch",
+      "ChangelogMessages": [
+        "Fixed an issue where no deployment recommendations were generated when a project's TargetFramework was set through an MSBuild property variable (e.g. $(TargetFrameworkVersion)) and MSBuild evaluation was unavailable."
+      ]
+    }
+  ]
+}

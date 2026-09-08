@@ -1,9 +1,11 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Xml;
 using AWS.Deploy.Common.ProjectEvaluation;
 
@@ -92,7 +94,44 @@ namespace AWS.Deploy.Common
 
             // Fallback to raw XML for properties not included in the evaluation request
             var propertyValue = Contents.SelectSingleNode($"//PropertyGroup/{propertyName}")?.InnerText;
-            return propertyValue;
+
+            // The raw XML value may reference other MSBuild properties defined in the same
+            // project file, e.g. <TargetFramework>$(TargetFrameworkVersion)</TargetFramework>.
+            // When MSBuild evaluation is unavailable we resolve those $(...) references here so
+            // downstream consumers (e.g. recommendation matching) see the concrete value instead
+            // of an unresolved token.
+            return ResolveMSBuildPropertyReferences(propertyValue, new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+        }
+
+        private static readonly Regex MSBuildPropertyReference = new(@"\$\(([^)]+)\)", RegexOptions.Compiled);
+
+        /// <summary>
+        /// Resolves MSBuild property references of the form <c>$(PropertyName)</c> against other
+        /// properties defined in the project file. Unknown references are left untouched, and
+        /// cyclic references (e.g. A -&gt; B -&gt; A) are guarded against via <paramref name="visited"/>.
+        /// </summary>
+        private string? ResolveMSBuildPropertyReferences(string? value, HashSet<string> visited)
+        {
+            if (string.IsNullOrEmpty(value) || value.IndexOf("$(", StringComparison.Ordinal) < 0)
+                return value;
+
+            return MSBuildPropertyReference.Replace(value, match =>
+            {
+                var referencedName = match.Groups[1].Value.Trim();
+
+                // Leave the token as-is if it is empty or would introduce a cycle.
+                if (string.IsNullOrEmpty(referencedName) || visited.Contains(referencedName))
+                    return match.Value;
+
+                var referencedValue = Contents.SelectSingleNode($"//PropertyGroup/{referencedName}")?.InnerText;
+                if (referencedValue == null)
+                    return match.Value;
+
+                // Track the resolution path per-branch so sibling references to the same property
+                // still resolve while true cycles are broken.
+                var nextVisited = new HashSet<string>(visited, StringComparer.OrdinalIgnoreCase) { referencedName };
+                return ResolveMSBuildPropertyReferences(referencedValue, nextVisited) ?? string.Empty;
+            });
         }
 
         public bool HasPackageReference(string? packageName)
