@@ -181,6 +181,63 @@ namespace AWS.Deploy.CLI.UnitTests.ProjectEvaluation
         }
 
         [Fact]
+        public void ProjectDefinition_GetMSPropertyValue_UsesLastDeclarationInDocumentOrder()
+        {
+            // MSBuild applies last-definition-wins for unconditioned properties, so a reference
+            // must resolve against the last declared value, not the first.
+            var xml = new XmlDocument();
+            xml.LoadXml("<Project Sdk=\"Microsoft.NET.Sdk\"><PropertyGroup>" +
+                        "<Version>5.0</Version>" +
+                        "<Version>6.0</Version>" +
+                        "<TargetFramework>net$(Version)</TargetFramework>" +
+                        "</PropertyGroup></Project>");
+
+            var projectDef = new ProjectDefinition(xml, "/fake/path.csproj", "", "Microsoft.NET.Sdk")
+            {
+                Evaluation = null
+            };
+
+            Assert.Equal("net6.0", projectDef.GetMSPropertyValue("TargetFramework"));
+        }
+
+        [Fact]
+        public void ProjectDefinition_GetMSPropertyValue_ResolvesVariableCaseInsensitively()
+        {
+            // MSBuild property names are case-insensitive.
+            var xml = new XmlDocument();
+            xml.LoadXml("<Project Sdk=\"Microsoft.NET.Sdk\"><PropertyGroup>" +
+                        "<TargetFrameworkVersion>net5.0</TargetFrameworkVersion>" +
+                        "<TargetFramework>$(targetframeworkversion)</TargetFramework>" +
+                        "</PropertyGroup></Project>");
+
+            var projectDef = new ProjectDefinition(xml, "/fake/path.csproj", "", "Microsoft.NET.Sdk")
+            {
+                Evaluation = null
+            };
+
+            Assert.Equal("net5.0", projectDef.GetMSPropertyValue("TargetFramework"));
+        }
+
+        [Fact]
+        public void ProjectDefinition_GetMSPropertyValue_LeavesPropertyFunctionUntouched()
+        {
+            // Property functions (and any non-plain-name expression) must be left as-is rather
+            // than crashing or being misinterpreted as a property name.
+            var xml = new XmlDocument();
+            xml.LoadXml("<Project Sdk=\"Microsoft.NET.Sdk\"><PropertyGroup>" +
+                        "<Version>5.0</Version>" +
+                        "<TargetFramework>net$(Version.Trim())</TargetFramework>" +
+                        "</PropertyGroup></Project>");
+
+            var projectDef = new ProjectDefinition(xml, "/fake/path.csproj", "", "Microsoft.NET.Sdk")
+            {
+                Evaluation = null
+            };
+
+            Assert.Equal("net$(Version.Trim())", projectDef.GetMSPropertyValue("TargetFramework"));
+        }
+
+        [Fact]
         public void ProjectDefinition_GetMSPropertyValue_LeavesUnknownVariableUnresolved()
         {
             var xml = new XmlDocument();
