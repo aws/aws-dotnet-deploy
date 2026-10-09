@@ -1,0 +1,11 @@
+{
+  "Projects": [
+    {
+      "Name": "AWS.Deploy.CLI",
+      "Type": "Patch",
+      "ChangelogMessages": [
+        "Add support for framework-dependent .NET 10 deployments to AWS Elastic Beanstalk instead of forcing a self-contained build."
+      ]
+    }
+  ]
+}
