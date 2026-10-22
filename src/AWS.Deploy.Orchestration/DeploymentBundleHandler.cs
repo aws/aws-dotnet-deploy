@@ -128,8 +128,8 @@ namespace AWS.Deploy.Orchestration
                 if (string.IsNullOrEmpty(targetFramework))
                     return;
 
-                // Elastic Beanstalk currently has .NET 8 and 9 supported on their platforms.
-                var supportedFrameworks = new List<string> { "net8.0", "net9.0" };
+                // Elastic Beanstalk currently has .NET 8, 9, and 10 supported on their platforms.
+                var supportedFrameworks = new List<string> { "net8.0", "net9.0", "net10.0" };
                 var retiredFrameworks = new List<string> { "netcoreapp3.1", "net5.0", "net6.0", "net7.0" };
                 if (!supportedFrameworks.Contains(targetFramework))
                 {
