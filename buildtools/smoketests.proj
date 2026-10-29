@@ -6,6 +6,11 @@
         <ShouldRunDockerTests>false</ShouldRunDockerTests>
         <ShouldRunDockerTests Condition="'$(OS)' != 'Windows_NT' OR '$(CODEBUILD_BUILD_ID)' == ''">true</ShouldRunDockerTests>
 
+        <!-- AWS App Runner no longer accepts new services for accounts that were not already using it
+             ("Account ... can't create new App Runner services"), so the App Runner canary is skipped by default.
+             Pass -p:ShouldRunAppRunnerTests=true to opt back in. -->
+        <ShouldRunAppRunnerTests Condition="'$(ShouldRunAppRunnerTests)' == ''">false</ShouldRunAppRunnerTests>
+
         <!-- Generate a suffix for CloudFormation stack names, in case multiple smoke tests are running at once -->
         <SafeOperatingSystem>$(OS)</SafeOperatingSystem>
         <SafeOperatingSystem Condition="'$(OS)' == 'Windows_NT'">Windows</SafeOperatingSystem> <!-- need to remove _ for CloudFormation-->
@@ -46,12 +51,12 @@
         <Exec Command="dotnet aws delete-deployment $(ECSFargateAppName) --profile test-runner --silent" />
     </Target>
 
-    <Target Name="run-apprunner" Condition="'$(ShouldRunDockerTests)' == 'true'" DependsOnTargets="initialize">
+    <Target Name="run-apprunner" Condition="'$(ShouldRunDockerTests)' == 'true' AND '$(ShouldRunAppRunnerTests)' == 'true'" DependsOnTargets="initialize">
         <Exec WorkingDirectory="../testapps/WebAppWithDockerFile" Command="dotnet aws deploy --apply ../../buildtools/canarysettings/AppRunnerCanary.json --application-name $(AppRunnerAppName) --profile test-runner --silent" />
         <OnError ExecuteTargets="cleanup-apprunner" />
     </Target>
 
-    <Target Name="cleanup-apprunner" Condition="'$(ShouldRunDockerTests)' == 'true'" AfterTargets="run-apprunner">
+    <Target Name="cleanup-apprunner" Condition="'$(ShouldRunDockerTests)' == 'true' AND '$(ShouldRunAppRunnerTests)' == 'true'" AfterTargets="run-apprunner">
         <Exec Command="dotnet aws delete-deployment $(AppRunnerAppName) --profile test-runner --silent" />
     </Target>
 
