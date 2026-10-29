@@ -143,6 +143,137 @@ namespace AWS.Deploy.CLI.UnitTests.ProjectEvaluation
         }
 
         [Fact]
+        public void ProjectDefinition_GetMSPropertyValue_ResolvesVariableInXmlFallback()
+        {
+            // Regression test for https://github.com/aws/aws-dotnet-deploy/issues/550
+            // When TargetFramework is defined via an MSBuild property variable and MSBuild
+            // evaluation is unavailable, the raw-XML fallback must resolve the $(...) reference
+            // so recommendation matching sees the concrete framework (e.g. "net5.0").
+            var xml = new XmlDocument();
+            xml.LoadXml("<Project Sdk=\"Microsoft.NET.Sdk\"><PropertyGroup>" +
+                        "<TargetFrameworkVersion>net5.0</TargetFrameworkVersion>" +
+                        "<TargetFramework>$(TargetFrameworkVersion)</TargetFramework>" +
+                        "</PropertyGroup></Project>");
+
+            var projectDef = new ProjectDefinition(xml, "/fake/path.csproj", "", "Microsoft.NET.Sdk")
+            {
+                Evaluation = null
+            };
+
+            Assert.Equal("net5.0", projectDef.GetMSPropertyValue("TargetFramework"));
+        }
+
+        [Fact]
+        public void ProjectDefinition_GetMSPropertyValue_ResolvesEmbeddedVariableInXmlFallback()
+        {
+            var xml = new XmlDocument();
+            xml.LoadXml("<Project Sdk=\"Microsoft.NET.Sdk\"><PropertyGroup>" +
+                        "<Version>5.0</Version>" +
+                        "<TargetFramework>net$(Version)</TargetFramework>" +
+                        "</PropertyGroup></Project>");
+
+            var projectDef = new ProjectDefinition(xml, "/fake/path.csproj", "", "Microsoft.NET.Sdk")
+            {
+                Evaluation = null
+            };
+
+            Assert.Equal("net5.0", projectDef.GetMSPropertyValue("TargetFramework"));
+        }
+
+        [Fact]
+        public void ProjectDefinition_GetMSPropertyValue_UsesLastDeclarationInDocumentOrder()
+        {
+            // MSBuild applies last-definition-wins for unconditioned properties, so a reference
+            // must resolve against the last declared value, not the first.
+            var xml = new XmlDocument();
+            xml.LoadXml("<Project Sdk=\"Microsoft.NET.Sdk\"><PropertyGroup>" +
+                        "<Version>5.0</Version>" +
+                        "<Version>6.0</Version>" +
+                        "<TargetFramework>net$(Version)</TargetFramework>" +
+                        "</PropertyGroup></Project>");
+
+            var projectDef = new ProjectDefinition(xml, "/fake/path.csproj", "", "Microsoft.NET.Sdk")
+            {
+                Evaluation = null
+            };
+
+            Assert.Equal("net6.0", projectDef.GetMSPropertyValue("TargetFramework"));
+        }
+
+        [Fact]
+        public void ProjectDefinition_GetMSPropertyValue_ResolvesVariableCaseInsensitively()
+        {
+            // MSBuild property names are case-insensitive.
+            var xml = new XmlDocument();
+            xml.LoadXml("<Project Sdk=\"Microsoft.NET.Sdk\"><PropertyGroup>" +
+                        "<TargetFrameworkVersion>net5.0</TargetFrameworkVersion>" +
+                        "<TargetFramework>$(targetframeworkversion)</TargetFramework>" +
+                        "</PropertyGroup></Project>");
+
+            var projectDef = new ProjectDefinition(xml, "/fake/path.csproj", "", "Microsoft.NET.Sdk")
+            {
+                Evaluation = null
+            };
+
+            Assert.Equal("net5.0", projectDef.GetMSPropertyValue("TargetFramework"));
+        }
+
+        [Fact]
+        public void ProjectDefinition_GetMSPropertyValue_LeavesPropertyFunctionUntouched()
+        {
+            // Property functions (and any non-plain-name expression) must be left as-is rather
+            // than crashing or being misinterpreted as a property name.
+            var xml = new XmlDocument();
+            xml.LoadXml("<Project Sdk=\"Microsoft.NET.Sdk\"><PropertyGroup>" +
+                        "<Version>5.0</Version>" +
+                        "<TargetFramework>net$(Version.Trim())</TargetFramework>" +
+                        "</PropertyGroup></Project>");
+
+            var projectDef = new ProjectDefinition(xml, "/fake/path.csproj", "", "Microsoft.NET.Sdk")
+            {
+                Evaluation = null
+            };
+
+            Assert.Equal("net$(Version.Trim())", projectDef.GetMSPropertyValue("TargetFramework"));
+        }
+
+        [Fact]
+        public void ProjectDefinition_GetMSPropertyValue_LeavesUnknownVariableUnresolved()
+        {
+            var xml = new XmlDocument();
+            xml.LoadXml("<Project Sdk=\"Microsoft.NET.Sdk\"><PropertyGroup>" +
+                        "<TargetFramework>$(DoesNotExist)</TargetFramework>" +
+                        "</PropertyGroup></Project>");
+
+            var projectDef = new ProjectDefinition(xml, "/fake/path.csproj", "", "Microsoft.NET.Sdk")
+            {
+                Evaluation = null
+            };
+
+            // Unknown reference is left untouched rather than turned into an empty string.
+            Assert.Equal("$(DoesNotExist)", projectDef.GetMSPropertyValue("TargetFramework"));
+        }
+
+        [Fact]
+        public void ProjectDefinition_GetMSPropertyValue_HandlesCyclicVariableReferences()
+        {
+            var xml = new XmlDocument();
+            xml.LoadXml("<Project Sdk=\"Microsoft.NET.Sdk\"><PropertyGroup>" +
+                        "<A>$(B)</A>" +
+                        "<B>$(A)</B>" +
+                        "</PropertyGroup></Project>");
+
+            var projectDef = new ProjectDefinition(xml, "/fake/path.csproj", "", "Microsoft.NET.Sdk")
+            {
+                Evaluation = null
+            };
+
+            // Cycle is broken instead of recursing infinitely: A -> B -> A detects the repeat
+            // and leaves the token that would close the loop ($(B)) unresolved.
+            Assert.Equal("$(B)", projectDef.GetMSPropertyValue("A"));
+        }
+
+        [Fact]
         public void ProjectDefinition_HasPackageReference_PrefersEvaluation()
         {
             var xml = new XmlDocument();
