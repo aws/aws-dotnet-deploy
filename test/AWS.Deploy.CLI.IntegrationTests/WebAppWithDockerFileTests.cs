@@ -258,7 +258,7 @@ namespace AWS.Deploy.CLI.IntegrationTests
             }
         }
 
-        [Fact]
+        [Fact(Skip = "AWS App Runner no longer allows new service creation in the test account.")]
         public async Task AppRunnerDeployment()
         {
             var stackNamePlaceholder = "{StackName}";
