@@ -278,7 +278,15 @@ namespace AWS.Deploy.Orchestration
             _directoryManager.CreateDirectory(saveCdkDirectoryPath);
 
             var templateEngine = new TemplateEngine();
-            await templateEngine.GenerateCdkProjectFromTemplateAsync(recommendation, session, saveCdkDirectoryPath, assemblyName);
+            try
+            {
+                await templateEngine.GenerateCdkProjectFromTemplateAsync(recommendation, session, saveCdkDirectoryPath, assemblyName);
+            }
+            catch
+            {
+                DeleteTemporaryCdkProject(saveCdkDirectoryPath);
+                throw;
+            }
 
             _interactiveService.LogDebugMessage($"Saving AWS CDK deployment project to: {saveCdkDirectoryPath}");
             return saveCdkDirectoryPath;

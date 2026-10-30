@@ -101,7 +101,16 @@ public class GenerateDeploymentProjectCommand(
             }
         }
 
-        await cdkProjectHandler.CreateCdkProject(selectedRecommendation, session, saveDirectory);
+        try
+        {
+            await cdkProjectHandler.CreateCdkProject(selectedRecommendation, session, saveDirectory);
+        }
+        catch
+        {
+            if (newDirectoryCreated)
+                directoryManager.Delete(saveDirectory, true);
+            throw;
+        }
         await GenerateDeploymentRecipeSnapShot(selectedRecommendation, saveDirectory, projectDisplayName, targetApplicationFullPath);
 
         var saveCdkDirectoryFullPath = directoryManager.GetDirectoryInfo(saveDirectory).FullName;
