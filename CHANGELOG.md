@@ -1,3 +1,11 @@
+## Release 2026-10-30 #2
+
+### AWS.Deploy.CLI (2.1.3)
+* Allow up to 30 seconds for MSBuild project evaluation, so slow machines no longer fall back to reading the project file directly.
+* Fix incomplete CDK deployment projects when several are generated at the same time, and report template generation failures instead of ignoring them.
+### AWS.Deploy.Recipes.CDK.Common (2.1.3)
+### AWS.Deploy.ServerMode.Client (2.1.3)
+
 ## Release 2026-10-30
 
 ### AWS.Deploy.CLI (2.1.2)
