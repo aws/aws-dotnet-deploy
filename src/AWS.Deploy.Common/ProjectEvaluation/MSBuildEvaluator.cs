@@ -56,7 +56,7 @@ public class MSBuildEvaluator : IMSBuildEvaluator
         return string.Join(" ", parts);
     }
 
-    private static readonly TimeSpan ProcessTimeout = TimeSpan.FromSeconds(5);
+    private static readonly TimeSpan ProcessTimeout = TimeSpan.FromSeconds(30);
 
     private static async Task<string?> RunDotnetMSBuildAsync(string arguments)
     {
