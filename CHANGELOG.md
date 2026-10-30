@@ -1,3 +1,11 @@
+## Release 2026-10-30
+
+### AWS.Deploy.CLI (2.1.2)
+* Explicitly suppress the internal Elastic Beanstalk 'Create new application' toggle on server-mode redeployment to an existing application.
+* Add support for framework-dependent .NET 10 deployments to AWS Elastic Beanstalk instead of forcing a self-contained build.
+### AWS.Deploy.Recipes.CDK.Common (2.1.2)
+### AWS.Deploy.ServerMode.Client (2.1.2)
+
 ## Release 2026-08-31
 
 ### AWS.Deploy.CLI (2.1.1)
