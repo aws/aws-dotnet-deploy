@@ -6,6 +6,7 @@ using AWS.Deploy.Common;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Installer;
 using Microsoft.TemplateEngine.Edge.Installers.Folder;
+using Microsoft.TemplateEngine.Edge.Template;
 using Microsoft.TemplateEngine.IDE;
 using Microsoft.TemplateEngine.Orchestrator.RunnableProjects;
 using DefaultTemplateEngineHost = Microsoft.TemplateEngine.Edge.DefaultTemplateEngineHost;
@@ -17,6 +18,8 @@ namespace AWS.Deploy.Orchestration
     {
         private const string HOST_IDENTIFIER = "aws-net-deploy-template-generator";
         private const string HOST_VERSION = "v2.0.0";
+        // The template engine isn't thread-safe: parallel generations in one process can fail partway.
+        private static readonly SemaphoreSlim GenerationLock = new(1, 1);
         private readonly Bootstrapper _bootstrapper;
 
         public TemplateEngine()
@@ -41,35 +44,50 @@ namespace AWS.Deploy.Orchestration
                     throw new InvalidRecipePathException(DeployToolErrorCode.BaseTemplatesInvalidPath, $"The following RecipePath is invalid as we could not retrieve the parent directory: {recommendation.Recipe.RecipePath}"),
                 recommendation.Recipe.CdkProjectTemplate);
 
-            //Installing the base template into the templating engine to make it available for generation
-            await InstallTemplates(cdkProjectTemplateDirectory);
-
-            //Looking up the installed template in the templating engine
-            var templates = await
-                _bootstrapper
-                    .GetTemplatesAsync(
-                        new[] { WellKnownSearchFilters.NameFilter(recommendation.Recipe.CdkProjectTemplateId) });
-            var template = templates.FirstOrDefault()?.Info;
-
-            //If the template is not found, throw an exception
-            if (template == null)
-                throw new Exception($"Failed to find a Template for [{recommendation.Recipe.CdkProjectTemplateId}]");
-
-            var templateParameters = new Dictionary<string, string?> {
-                // CDK Template projects can parameterize the version number of the AWS.Deploy.Recipes.CDK.Common package. This avoids
-                // projects having to be modified every time the package version is bumped.
-                { "AWSDeployRecipesCDKCommonVersion", FileVersionInfo.GetVersionInfo(typeof(AWS.Deploy.Recipes.CDK.Common.CDKRecipeSetup).Assembly.Location).ProductVersion
-                                                      ?? throw new InvalidAWSDeployRecipesCDKCommonVersionException(DeployToolErrorCode.InvalidAWSDeployRecipesCDKCommonVersion, "The version number of the AWS.Deploy.Recipes.CDK.Common package is invalid.") }
-            };
-
+            ITemplateCreationResult result;
+            await GenerationLock.WaitAsync();
             try
             {
-                //Generate the CDK project using the installed template into the output directory
-                await _bootstrapper.CreateAsync(template, assemblyName, outputDirectory, templateParameters);
+                //Installing the base template into the templating engine to make it available for generation
+                await InstallTemplates(cdkProjectTemplateDirectory);
+
+                //Looking up the installed template in the templating engine
+                var templates = await
+                    _bootstrapper
+                        .GetTemplatesAsync(
+                            new[] { WellKnownSearchFilters.NameFilter(recommendation.Recipe.CdkProjectTemplateId) });
+                var template = templates.FirstOrDefault()?.Info;
+
+                //If the template is not found, throw an exception
+                if (template == null)
+                    throw new Exception($"Failed to find a Template for [{recommendation.Recipe.CdkProjectTemplateId}]");
+
+                var templateParameters = new Dictionary<string, string?> {
+                    // CDK Template projects can parameterize the version number of the AWS.Deploy.Recipes.CDK.Common package. This avoids
+                    // projects having to be modified every time the package version is bumped.
+                    { "AWSDeployRecipesCDKCommonVersion", FileVersionInfo.GetVersionInfo(typeof(AWS.Deploy.Recipes.CDK.Common.CDKRecipeSetup).Assembly.Location).ProductVersion
+                                                          ?? throw new InvalidAWSDeployRecipesCDKCommonVersionException(DeployToolErrorCode.InvalidAWSDeployRecipesCDKCommonVersion, "The version number of the AWS.Deploy.Recipes.CDK.Common package is invalid.") }
+                };
+
+                try
+                {
+                    //Generate the CDK project using the installed template into the output directory
+                    result = await _bootstrapper.CreateAsync(template, assemblyName, outputDirectory, templateParameters);
+                }
+                catch
+                {
+                    throw new TemplateGenerationFailedException(DeployToolErrorCode.FailedToGenerateCDKProjectFromTemplate, "Failed to generate CDK project from template");
+                }
             }
-            catch
+            finally
             {
-                throw new TemplateGenerationFailedException(DeployToolErrorCode.FailedToGenerateCDKProjectFromTemplate, "Failed to generate CDK project from template");
+                GenerationLock.Release();
+            }
+
+            // Most template engine failures are returned in the result, often after some files were written.
+            if (result.Status != CreationResultStatus.Success)
+            {
+                throw new TemplateGenerationFailedException(DeployToolErrorCode.FailedToGenerateCDKProjectFromTemplate, $"Failed to generate CDK project from template: {result.ErrorMessage}");
             }
         }
 
